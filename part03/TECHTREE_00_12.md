@@ -68,12 +68,15 @@ bash part03/mini_npu/scripts/run_demo.sh
 
 # 5. 00~12장 원본 01~10장 포함 전체 회귀
 bash part03/mini_npu/scripts/run_batch_00_12.sh
+
+# 6. UART FIFO·명령 경계 시험
+bash part03/mini_npu/scripts/run_adversarial.sh
 ```
 
 ## 5. 필수 후속 검증
 
-- 지금 작성한 RTL의 실제 Icarus 시뮬레이션과 의도한 기대값 비교는 **VS Code 실행 후 증거 확보 필요**.
+- 2026-11-17 로컬 Icarus 12.0에서 00~12장 회귀 13단계와 UART FIFO·명령 경계 시험 19항목 PASS. 기록: `part03/validation/P3_00_12_LOCAL_RTL_SIM_20261117_v01.md`.
 - 실물 FPGA에서 UART B18/A18, CLK W5, btnC U18, LED/FND XDC 핀 검증. 대상 합성/타이밍 미실행.
 - 11장 현재 바이너리 페이로드의 ACK를 수신하고 다음 명령을 보내는 stop-and-wait 프로토콜. 대용량 패킷 CRC/HMAC은 31장 별도 범위.
-- UART Core에는 RX/TX 각각 **16바이트 FIFO**가 추가되어 있다. 단, 동시 Push/Pop·Full/Empty·Overrun·장시간 연속 전송 등 실제 경계 시뮬레이션은 **미검증**이다.
+- UART Core에는 RX/TX 각각 **16바이트 FIFO**가 있다(RX 최대 17바이트 보관 후 overrun 래치). 동시 Push/Pop·Full/Empty·Overrun·연속 전송 경계 시험은 RTL 시뮬레이션 PASS. 명령 Timeout은 없어 중단된 명령은 Reset으로 복구한다.
 - 원본의 모든 기능을 새 통합 경로에 모듈 인스턴스별로 재연결한 상태는 아니다. 실제 12장에서는 02 DSP, 04 BRAM 패턴, 4PE 및 11장 명령 처리 기능을 독립 재구성·재사용한다.

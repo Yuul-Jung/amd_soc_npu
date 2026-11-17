@@ -40,7 +40,9 @@ CPU 없이 PC UART에서 전송한다. 실습용 **단일 바이트 opcode + 고
 - signed41 결과는 11자리 대문자 16진수 4개를 콤마로 구분. 음수는 44비트로 부호 확장한 표시값.
 - 예: `0`의 결과는 CLASS0, 원점수 `+2,0,0,-2`. 화면 표시 점수에는 4부류 예시의 ReLU를 적용하지 않으며 **signed raw 점수**를 반환한다.
 - PC는 각 응답 LF까지 기다린 다음 다음 명령을 전송한다. 초당 115200bps UART는 바이트별 10bit 전송 오버헤드.
-- UART Core에는 RX/TX 각각 **16바이트 FIFO**가 구현되어 있지만 Full/Empty, 동시 Push/Pop, Overrun 및 긴 연속 입력의 내구성은 **새 경계 시뮬레이션 미검증**이다. CRC/인증, 전체 패킷 재전송·모델 버전 관리는 구현되어 있지 않다. 31장의 보안 프로토콜과 혼동하지 않는다.
+- UART Core에는 RX/TX 각각 **16바이트 FIFO**가 구현되어 있다. RX는 FIFO 16 + PHY 1 = 17바이트까지 보관하고 18번째에서 overrun이 래치된다. Full/Empty, 동시 Push/Pop, Overrun, 연속 입력은 `run_adversarial.sh`로 RTL 시뮬레이션 PASS(2026-11-17). 응답 전송 중 들어온 명령은 순서대로 처리되지만 정상 사용은 stop-and-wait이다.
+- 명령 Timeout은 없다. 페이로드가 덜 온 채 멈추면 Controller가 다음 바이트를 페이로드로 소비하므로 btnC Reset으로 복구한다.
+- CRC/인증, 전체 패킷 재전송·모델 버전 관리는 구현되어 있지 않다. 31장의 보안 프로토콜과 혼동하지 않는다.
 - Output error LED15는 UART overrun/framing/명령 오류/NPU error가 발생한 경우 latched 상태.
 
 ## 3. VS Code / Ubuntu 실행
@@ -63,7 +65,12 @@ bash part03/mini_npu/scripts/run_demo.sh
 
 # 00~12장 원본 10장 회귀 + 통합 전체 검사
 bash part03/mini_npu/scripts/run_batch_00_12.sh
+
+# UART FIFO 단위 경계(11항목) + 통합 명령 적대적 시험(8항목)
+bash part03/mini_npu/scripts/run_adversarial.sh
 ```
+
+- ch04 단독 실행기는 ripgrep(`rg`)을 사용한다(`sudo apt install ripgrep`). 전체 회귀는 미설치 시 `grep -E` 대체를 자동 사용한다.
 
 - `outputs/predictions.csv`, `outputs/demo_result.txt`는 **실제로 run_demo를 실행할 때** 생성된다.
 - 회귀 결과는 `validation/local_runs/`에 실행 시각별 보관. 실패 시 빠져나가며 PASS 보고 금지.
@@ -74,5 +81,6 @@ bash part03/mini_npu/scripts/run_batch_00_12.sh
 
 - 01 MAC, 02 DSP, 03 Pipeline, 04 BRAM, 05 Fixed, 06 INT8/16, 07 Dot, 08 PE4, 09 Dense4, 10 NPU4는 **원본 독립 소스**와 과거 독립 시뮬레이션 기록이 있다.
 - 00 UART, 11 Write, 12 Integration은 이번 신규 구현이다.
-- 기존 03 Pipeline 원본을 통합 회로에 직접 편입시키는 일, 16바이트 RX/TX FIFO 경계 시험·stop-and-wait 위반 에러 처리, 합성 BRAM/DSP 매핑·Timing 등은 **후속 게이트**로 남긴다.
+- 2026-11-17 로컬 Icarus 시뮬레이션 결과는 `part03/validation/P3_00_12_LOCAL_RTL_SIM_20261117_v01.md` 참조(RTL 시뮬레이션만, 합성·보드 아님).
+- 기존 03 Pipeline 원본을 통합 회로에 직접 편입시키는 일, 명령 Timeout, 합성 BRAM/DSP 매핑·Timing 등은 **후속 게이트**로 남긴다.
 - 13~19장 MNIST/멀티레이어, 20장 이후 AXI/MicroBlaze V는 이 디렉터리의 범위 밖이다.
