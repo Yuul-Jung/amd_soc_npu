@@ -23,7 +23,14 @@ def check(condition: bool, message: str):
 
 course = json.loads((P3 / "course.json").read_text(encoding="utf-8"))
 chapters = course["chapters"]
-check(len(chapters) == 13, "00~12장: 13개 차시가 필요합니다.")
+# (변경) 정규 범위는 준비 00장 + 01~31장이다. ch32 이상은 별도 확장이다.
+check(len(chapters) == 32, "제3부 00~31장: 32개 페이지가 필요합니다.")
+check([x["number"] for x in chapters] == list(range(32)),
+      "장 번호가 00~31 연속이어야 합니다.")
+check([x["id"] for x in chapters] == [f"ch{i:02d}" for i in range(32)],
+      "차시 ID가 ch00~ch31 연속이어야 합니다.")
+check(all(not x["file"].startswith("ch32") for x in chapters),
+      "32장 이후 확장 자료는 정규 제3부 범위 밖입니다.")
 for chapter in chapters:
     page = P3 / chapter["file"]
     check(page.is_file(), "HTML missing " + str(page))
@@ -39,6 +46,11 @@ for chapter in chapters:
               "좌측 탐색 JS 누락 " + chapter["file"])
 
 check((P3 / "index.html").is_file(), "index.html missing")
+if (P3 / "index.html").is_file():
+    index_html = (P3 / "index.html").read_text(encoding="utf-8")
+    for chapter in chapters:
+        check(chapter["file"] in index_html,
+              "INDEX navigation missing: " + chapter["file"])
 
 # (추가) href/src의 실제 상대경로 및 페이지 내 앵커를 검사한다.
 # HTML 내 CSS 이미지 URL은 속성 링크가 아니므로 비공개 원본 주소도 별도로 거부한다.
