@@ -1,57 +1,24 @@
 <!doctype html>
-<html lang="ko">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="Basys3 MicroBlaze V SoC 제1부 01–11장 핵심 실습 교재 및 제2부 교육과정">
-<title>Basys3 · MicroBlaze V SoC 교육과정</title>
-<style>
-:root{color-scheme:light;--ink:#202a39;--muted:#536273;--line:#dbe2e9;--blue:#263f72}
-*{box-sizing:border-box}body{margin:0;background:#f7f8fa;color:var(--ink);font:16px/1.6 system-ui,"Noto Sans KR",sans-serif}
-header{background:#23375a;color:#fff;padding:34px 22px}main,.inner{max-width:1024px;margin:auto}
-h1{font-size:clamp(1.5rem,3vw,2.1rem);margin:6px 0}header p{margin:7px 0;color:#dce6f5}
-main{padding:20px 22px 60px}h2{font-size:1.35rem;margin:12px 0}h3{font-size:1.08rem;margin:0 0 8px}
-.primary{background:#fff;border:1px solid var(--line);border-radius:12px;padding:22px;margin:12px 0 23px}
-.lead{color:var(--muted);margin:5px 0 18px}
-ol{padding-left:24px;margin:0;columns:2;column-gap:36px}li{break-inside:avoid;padding:5px 0}
-a{color:#214b8b;text-underline-offset:3px}a:focus-visible{outline:3px solid #639df4;outline-offset:3px}
-.controls{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}
-.controls a{display:inline-block;background:var(--blue);color:white;padding:9px 14px;text-decoration:none;border-radius:7px}
-.sections{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
-section.secondary{background:#fff;border:1px solid var(--line);border-radius:10px;padding:20px}
-section.secondary p{color:var(--muted);margin:6px 0 12px}
-footer{margin-top:22px;padding-top:13px;border-top:1px solid var(--line);color:var(--muted);font-size:.88rem}
-@media(max-width:650px){ol{columns:1}.primary{padding:17px}header{padding:27px 20px}}
-</style>
-</head>
-<body>
-<header><div class="inner"><h1>Basys3 · MicroBlaze V SoC 교육과정</h1><p>제1부 기본 SoC 구축 → 제2부 사용자 AXI IP 및 주변장치 확장</p></div></header>
-<main>
-<section class="primary" aria-labelledby="p1">
-<h2 id="p1">제1부 · 기본 SoC 구축 (01~11장)</h2>
-<p class="lead">기존에 제작한 핵심 HTML 학습안내서 01~10장과 C 코드 해설을 원본 순서대로 연결했습니다.</p>
-<ol>
-<li><a href="part01/legacy/pages/soc/01_microblaze_bram_minimal_soc.html">MicroBlaze V + BRAM 최소 SoC</a></li>
-<li><a href="part01/legacy/pages/soc/02_clock_reset_processor_system_reset.html">Clock / Reset 구조와 Processor System Reset</a></li>
-<li><a href="part01/legacy/pages/soc/03_microblaze_bram_program_execution.html">MicroBlaze V 실행 구조와 BRAM 프로그램 실행</a></li>
-<li><a href="part01/legacy/pages/soc/04_memory_map_memory_mapped_io.html">Local BRAM Memory Map과 주소 기반 읽기·쓰기</a></li>
-<li><a href="part01/legacy/pages/soc/05_axi4_axi4lite_axi4stream.html">AXI4 / AXI4-Lite / AXI4-Stream 구조</a></li>
-<li><a href="part01/legacy/pages/soc/06_axi_gpio.html">AXI GPIO — Switch 입력을 LED 출력으로</a></li>
-<li><a href="part01/legacy/pages/soc/07_axi_uart_lite.html">AXI UART Lite — PC 터미널 Echo 통신</a></li>
-<li><a href="part01/legacy/pages/soc/07_1_uart_echo_c_code_guide.html">07.1 · UART Echo C 코드 쉽게 이해하기</a></li>
-<li><a href="part01/legacy/pages/soc/08_axi_timer.html">AXI Timer — 0.5초 Polling과 LED Blink</a></li>
-<li><a href="part01/legacy/pages/soc/08_1_axi_timer_c_code_guide.html">08.1 · AXI Timer C 코드 쉽게 이해하기</a></li>
-<li><a href="part01/legacy/pages/soc/09_axi_interrupt_controller.html">AXI Interrupt Controller — Timer Interrupt와 ISR</a></li>
-<li><a href="part01/legacy/pages/soc/09_1_axi_interrupt_c_code_guide.html">09.1 · Timer Interrupt C 코드 쉽게 이해하기</a></li>
-<li><a href="part01/legacy/pages/soc/10_microblaze_gpio_uart_timer_integration.html">MicroBlaze V + GPIO + UART + Timer 통합</a></li>
-<li><a href="part01/legacy/pages/soc/10_1_integration_c_code_guide.html">10.1 · GPIO·UART·Timer 통합 C 코드 쉽게 이해하기</a></li>
-<li><a href="part01/chapters/11_user_top_io_remap.html">11장 · 사용자 Top 및 GPIO 연결</a> — <a href="part01/files/p1_11/verification_record.md">검증 기록</a></li>
-</ol>
-<div class="controls"><a href="part01/index.html">제1부 기존 장별 목차</a><a href="part01/legacy/pages/soc/01_microblaze_bram_minimal_soc.html">01장 교재 바로 열기</a></div>
-</section>
-<div class="sections">
-<section class="secondary"><h3>제2부 전반 · 01~10장</h3><p>사용자 AXI IP, LED·FND·PWM·모터·센서 제어</p><a href="part02_1/index.html">학습안내서 목차</a></section>
-<section class="secondary"><h3>제2부 후반 · 11~20장</h3><p>서보·스테핑 모터, SPI, I²C, 센서·인터럽트, 통합 SoC</p><a href="part02_2/guide/index.html">학습안내서 목차</a></section>
-</div>
-<footer>문서 원본은 보존합니다. 제1부 일부 이미지·스타일·참조 파일은 아직 새 저장소로 전부 이관되지 않았으며, 교재 복사가 새로운 Vivado·Vitis·실물 검증을 뜻하지 않습니다. <a href="README.md">자료 현황</a></footer>
-</main></body></html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="제1부 CPU·BRAM·AXI 기본 SoC부터 제1부 11장 사용자 Top, 제2부 사용자 AXI IP·센서 응용까지 단계적으로 학습합니다."><title>Basys3 · MicroBlaze V SoC 교육과정</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/education/site.css">
+<link rel="stylesheet" href="assets/education/site-theme.css">
+</head><body>
+<a class="skip-link" href="#main-content">본문 바로가기</a>
+<button type="button" class="mobile-menu" id="mobile-menu" aria-controls="course-nav" aria-expanded="false">☰ 장·목차</button>
+<div class="shade" id="shade"></div>
+<header class="hero"><div class="hero-inner"><p class="kicker">BASYS3 · MICROBLAZE V · SoC</p><h1>Basys3 · MicroBlaze V SoC 교육과정</h1><p>제1부 CPU·BRAM·AXI 기본 SoC부터 제1부 11장 사용자 Top, 제2부 사용자 AXI IP·센서 응용까지 단계적으로 학습합니다.</p><div class="chips"><span class="chip">제1부 01~11장</span><span class="chip">제2부 01~20장</span><span class="chip">Vivado · Vitis</span></div></div></header>
+<div class="wrap"><nav class="toc" id="course-nav" aria-label="장과 절 탐색"></nav>
+<main class="content" id="main-content"><section class="section" id="intro"><h2><span class="num">00</span>교육과정 개요</h2><p>제1부에서는 AMD 제공 IP와 MicroBlaze V를 조합하여 프로그램이 실행되는 SoC를 구성합니다. 11장에서 사용자 Top을 연결한 뒤 제2부에서는 그 SoC를 기반으로 AXI 주변장치와 기능별 RTL을 확장합니다.</p></section>
+<section class="section" id="flow"><h2><span class="num">01</span>전체 학습 테크트리</h2><div class="flow"><div class="step"><strong>제1부 01~05장</strong> · CPU, BRAM, Clock/Reset, Memory Map, AXI</div><div class="down">↓</div><div class="step"><strong>제1부 06~10장</strong> · GPIO, UART, Timer, Interrupt, 통합</div><div class="down">↓</div><div class="step"><strong>제1부 11장</strong> · 사용자 Top 추가 및 SW0 → LED0</div><div class="down">↓</div><div class="step"><strong>제2부 01~10장</strong> · 사용자 AXI IP, FND, PWM, 모터, 센서 통합</div><div class="down">↓</div><div class="step"><strong>제2부 11~20장</strong> · 통신·센서·모터·종합 SoC</div></div></section>
+<section class="section" id="entries"><h2><span class="num">02</span>장별 학습 목차</h2><div class="chapter-grid"><a class="chapter-card" href="part01/index.html"><span>ROOT1</span><b>제1부 · 기본 SoC</b><span>기본 SoC와 사용자 Top</span></a>
+<a class="chapter-card" href="part02_1/index.html"><span>ROOT2A</span><b>제2부 전반 · 01~10장</b><span>AXI 주변장치 설계 및 확장</span></a>
+<a class="chapter-card" href="part02_2/index.html"><span>ROOT2B</span><b>제2부 후반 · 11~20장</b><span>통신·센서 응용과 통합</span></a></div></section>
+<section class="section" id="first"><h2><span class="num">03</span>제1부 시작하기</h2><p>기존 완성 교재의 01~10장 HTML과 실습 코드를 동일하게 보존하고, 신규 제1부 11장으로 연결합니다.</p><ul class="support-links"><li><a href="part01/legacy/pages/soc/01_microblaze_bram_minimal_soc.html">01장 · MicroBlaze V + BRAM</a></li><li><a href="part01/legacy/pages/soc/10_microblaze_gpio_uart_timer_integration.html">10장 · 주변장치 통합</a></li><li><a href="part01/chapters/11_user_top_io_remap.html">11장 · 사용자 Top</a></li></ul></section>
+<section class="section" id="verify"><h2><span class="num">04</span>학습과 검증</h2><p>각 장의 하드웨어 설정·소스·테스트를 실제 자료와 대조하며, 시뮬레이션·합성·실물 확인 결과를 구분합니다. 새 프로젝트는 기존 성공 프로젝트를 보존한 상태에서 분리하여 구성합니다.</p></section><div class="chapter-links" id="chapter-links"></div></main></div>
+<footer class="footer">Basys3 · MicroBlaze V SoC 교육과정</footer>
+<script>window.COURSE={"title":"Basys3 · MicroBlaze V SoC 교육과정","chapters":[{"id":"root1","number":1,"title":"제1부 · 기본 SoC","file":"part01/index.html"},{"id":"root2a","number":2,"title":"제2부 전반 · 01~10장","file":"part02_1/index.html"},{"id":"root2b","number":3,"title":"제2부 후반 · 11~20장","file":"part02_2/index.html"}]};</script>
+<script src="assets/education/site.js" defer></script>
+</body></html>

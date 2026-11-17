@@ -1,26 +1,30 @@
 <!doctype html>
-<html lang="ko">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Basys3 + MicroBlaze V · 제2부 실습안내서</title>
-<style>*{box-sizing:border-box}body{margin:0;background:#f3f5f8;color:#253449;font:15px/1.65 system-ui,"Noto Sans KR",sans-serif}main{max-width:980px;margin:28px auto;background:#fff;padding:38px 46px}h1{font-size:28px;margin-bottom:6px}p.lead{color:#536879;margin:4px 0 24px}.entry{display:grid;grid-template-columns:58px 1fr auto;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid #e0e7ef}.num{font-size:21px;font-weight:700;color:#466c96}.name{font-size:16px;font-weight:700}.desc{font-size:13px;color:#697a8c}.entry a{color:#315b84;text-decoration:none;border:1px solid #cbd8e6;padding:6px 10px;border-radius:4px}.entry a:hover{text-decoration:underline}footer{border-top:1px solid #e0e7ef;margin-top:32px;padding-top:18px;font-size:13px;color:#5b6e7e}@media(max-width:700px){main{padding:18px;margin:0}.entry{grid-template-columns:38px 1fr}.entry a{grid-column:2;justify-self:start}}</style>
-</head>
-<body>
-<main>
-<h1>제2부 · 사용자 AXI IP와 주변장치</h1>
-<p class="lead">Basys3 + MicroBlaze V SoC · 01~10장 누적 실습 · RTL·C 전체 코드와 편집 가능한 SVG 구조도</p>
-<div class="entry"><div class="num">01</div><div><div class="name">사용자 AXI LED IP</div><div class="desc">UART 명령으로 LED0 제어 · AXI 기본 레지스터</div></div><a href="P2_01_AXI_LED_Guide.html">교재 열기</a></div>
-<div class="entry"><div class="num">02</div><div><div class="name">사용자 AXI FND IP</div><div class="desc">BCD 4자리 표시 · RTL 자동 스캔</div></div><a href="P2_02_AXI_FND_Guide.html">교재 열기</a></div>
-<div class="entry"><div class="num">03</div><div><div class="name">방향 버튼 Short/Long · IRQ</div><div class="desc">디바운스 · 5초 길게 누르기 · 이벤트 W1C</div></div><a href="P2_03_Guide.html">교재 열기</a></div>
-<div class="entry"><div class="num">04</div><div><div class="name">사용자 AXI PWM IP</div><div class="desc">PWM LED1 밝기 · Duty/Period/Apply</div></div><a href="P2_04_Guide.html">교재 열기</a></div>
-<div class="entry"><div class="num">05</div><div><div class="name">CdS 디지털 자동 조명</div><div class="desc">센서 DO 필터 · PWM 자동/수동 게이트</div></div><a href="P2_05_Guide.html">교재 열기</a></div>
-<div class="entry"><div class="num">06</div><div><div class="name">HC-SR04 거리·근접 경고</div><div class="desc">ECHO 폭 측정 · FND · LED2 경고</div></div><a href="P2_06_Guide.html">교재 열기</a></div>
-<div class="entry"><div class="num">07</div><div><div class="name">DC 모터 제어·안전 정지</div><div class="desc">L298N 정·역 제어 · 초음파 위험 인터록</div></div><a href="P2_07_Guide.html">교재 열기</a></div>
-<div class="entry"><div class="num">08</div><div><div class="name">XADC 아날로그 입력</div><div class="desc">VAUX6 측정 · PWM 갱신</div></div><a href="P2_08_Guide.html">교재 열기</a></div>
-<div class="entry"><div class="num">09</div><div><div class="name">UART·인터럽트·모드 통합</div><div class="desc">AUTO/MANUAL · 버튼·타이머 IRQ</div></div><a href="P2_09_Guide.html">교재 열기</a></div>
-<div class="entry"><div class="num">10</div><div><div class="name">사용자 IP 라이브러리 구축</div><div class="desc">IP 사양서 · 패키징 · 독립 재사용 · 배포</div></div><a href="P2_10_Guide.html">교재 열기</a></div>
-<footer><a href="P2_10_IP_LIBRARY_SPEC.html">10장 IP 기술 사양서</a> · <a href="P2_10_RELEASE_CHECKLIST.md">배포 점검표</a></footer>
-</main>
-</body>
-</html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="제1부 11장의 SoC 구조를 기반으로 AXI LED에서 사용자 IP 통합까지 진행합니다."><title>제2부 전반 · 사용자 AXI IP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/education/site.css">
+<link rel="stylesheet" href="../assets/education/site-theme.css">
+</head><body>
+<a class="skip-link" href="#main-content">본문 바로가기</a>
+<button type="button" class="mobile-menu" id="mobile-menu" aria-controls="course-nav" aria-expanded="false">☰ 장·목차</button>
+<div class="shade" id="shade"></div>
+<header class="hero"><div class="hero-inner"><p class="kicker">PART 02 · CHAPTER 01–10</p><h1>제2부 전반 · 사용자 AXI IP</h1><p>제1부 11장의 SoC 구조를 기반으로 AXI LED에서 사용자 IP 통합까지 진행합니다.</p><div class="chips"><span class="chip">AXI4-Lite</span><span class="chip">제어 RTL</span><span class="chip">01~10장</span></div></div></header>
+<div class="wrap"><nav class="toc" id="course-nav" aria-label="장과 절 탐색"></nav>
+<main class="content" id="main-content"><section class="section" id="start"><h2><span class="num">00</span>선수학습 · 제1부 11장</h2><p>CPU·BRAM·AXI·사용자 Top을 포함한 제1부 11장 프로젝트를 보존하고, 별도 프로젝트에서 사용자 IP를 추가합니다.</p><ul class="support-links"><li><a href="../part01/chapters/11_user_top_io_remap.html">제1부 11장 교재</a></li><li><a href="../part02/index.html">제2부 전체 목차</a></li></ul></section>
+<section class="section" id="list"><h2><span class="num">01</span>제2부 01~10장 학습안내서</h2><div class="chapter-grid"><a class="chapter-card" href="P2_01_AXI_LED_Guide.html"><span>P2-01</span><b>사용자 AXI LED IP</b><span>제1부 11장 SoC를 복제하여 AXI LED 추가</span></a>
+<a class="chapter-card" href="P2_02_AXI_FND_Guide.html"><span>P2-02</span><b>FND 4자리 표시</b><span>7-Segment 표시 IP</span></a>
+<a class="chapter-card" href="P2_03_Guide.html"><span>P2-03</span><b>방향 버튼 · IRQ</b><span>Short/Long 입력과 이벤트</span></a>
+<a class="chapter-card" href="P2_04_Guide.html"><span>P2-04</span><b>범용 PWM</b><span>주기·듀티·밝기</span></a>
+<a class="chapter-card" href="P2_05_Guide.html"><span>P2-05</span><b>디지털 CdS 자동 조명</b><span>광센서 입력과 LED 제어</span></a>
+<a class="chapter-card" href="P2_06_Guide.html"><span>P2-06</span><b>HC-SR04 거리 측정</b><span>초음파 트리거·에코</span></a>
+<a class="chapter-card" href="P2_07_Guide.html"><span>P2-07</span><b>DC 모터 보호·제어</b><span>모터 드라이버와 PWM</span></a>
+<a class="chapter-card" href="P2_08_Guide.html"><span>P2-08</span><b>XADC 측정·PWM</b><span>ADC 기반 제어</span></a>
+<a class="chapter-card" href="P2_09_Guide.html"><span>P2-09</span><b>UART · IRQ · 운전 모드 통합</b><span>명령·상태·이벤트</span></a>
+<a class="chapter-card" href="P2_10_Guide.html"><span>P2-10</span><b>사용자 AXI IP 라이브러리</b><span>공통 IP 재사용과 종합</span></a></div></section>
+<section class="section" id="extra"><h2><span class="num">02</span>10장 종합 자료</h2><ul class="support-links"><li><a href="P2_10_IP_LIBRARY_SPEC.html">사용자 AXI IP 라이브러리 명세</a></li><li><a href="P2_10_RELEASE_CHECKLIST.md">10장 검토 체크리스트</a></li></ul></section>
+<section class="section" id="next"><h2><span class="num">03</span>후속 과정</h2><ul class="support-links"><li><a href="../part02_2/index.html">제2부 11~20장 · 통신과 센서</a></li><li><a href="../index.html">통합 학습 목차</a></li></ul></section><div class="chapter-links" id="chapter-links"></div></main></div>
+<footer class="footer">Basys3 · MicroBlaze V SoC 교육과정</footer>
+<script>window.COURSE={"title":"제2부 전반 · 사용자 AXI IP","chapters":[{"id":"p2-01","number":1,"title":"사용자 AXI LED IP","file":"P2_01_AXI_LED_Guide.html"},{"id":"p2-02","number":2,"title":"FND 4자리 표시","file":"P2_02_AXI_FND_Guide.html"},{"id":"p2-03","number":3,"title":"방향 버튼 · IRQ","file":"P2_03_Guide.html"},{"id":"p2-04","number":4,"title":"범용 PWM","file":"P2_04_Guide.html"},{"id":"p2-05","number":5,"title":"디지털 CdS 자동 조명","file":"P2_05_Guide.html"},{"id":"p2-06","number":6,"title":"HC-SR04 거리 측정","file":"P2_06_Guide.html"},{"id":"p2-07","number":7,"title":"DC 모터 보호·제어","file":"P2_07_Guide.html"},{"id":"p2-08","number":8,"title":"XADC 측정·PWM","file":"P2_08_Guide.html"},{"id":"p2-09","number":9,"title":"UART · IRQ · 운전 모드 통합","file":"P2_09_Guide.html"},{"id":"p2-10","number":10,"title":"사용자 AXI IP 라이브러리","file":"P2_10_Guide.html"}]};</script>
+<script src="../assets/education/site.js" defer></script>
+</body></html>
