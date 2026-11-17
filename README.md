@@ -32,3 +32,11 @@
 
 - [제1부 01~10장 전체 복원·11장 연계 교정 대장](docs/PART01_SOURCE_RECOVERY_20261117.md)
 - [제1부 HTML 링크 감사 스크립트](tools/check_part01_assets.py)
+
+## 공통 HTML 교육자료 제작 규칙 (2026-11-17 적용)
+
+- [저장소 AI 작업 규칙](AGENTS.md) — 새 교재 제작·수정 모두 적용
+- [제1부·제2부 재편집 및 검증 계획](docs/HTML_REBUILD_PLAN.md)
+- [중앙 HTML 고정 표준](https://github.com/Yuul-Jung/rule_md/blob/d1b8278d41fca8f5e3960736f3ac9d377e462fda/web/education-html/STANDARD.md)
+
+제1부·제2부 원본 교재/소스는 보존하고, 규칙에 맞춘 장별 새 HTML을 별도 버전으로 생성하여 검증 후 목차를 전환합니다.
