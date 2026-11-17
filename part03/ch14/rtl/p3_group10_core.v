@@ -5,7 +5,11 @@
 // 가중치는 lane별 bank(bank l = class l, l+4, l+8)에 저장해 매 클록 4개를 병렬로 읽는다.
 // score[c] = sum_i x[i]*W[c][i] + bias[c] (signed 25비트, 정수 기준모델 linear_64x10과 동일)
 // class_o = 최대 점수 class, 동점이면 낮은 번호(argmax_lowest)
-module p3_group10_core(
+// (변경) 15장 Dense 계층 재사용을 위해 입력 길이·출력 수를 파라미터로 둔다. 기본값 64→10이 14장 동작이다.
+module p3_group10_core #(
+    parameter integer IN_LEN = 64,
+    parameter integer OUT_N = 10
+)(
     input wire clk,
     input wire resetn,
     input wire start_i,
@@ -24,7 +28,7 @@ module p3_group10_core(
     output reg done_o,
     output reg error_o,
     output reg [3:0] class_o,
-    output wire [249:0] scores_o
+    output wire [OUT_N*25-1:0] scores_o
 );
     localparam [2:0] IDLE=3'd0, CLEAR=3'd1, RUN=3'd2, DRAIN=3'd3, CAPT=3'd4, FINISH=3'd5;
     reg [2:0] state;
@@ -39,15 +43,18 @@ module p3_group10_core(
     reg signed [7:0] bank2 [0:191];
     reg signed [7:0] bank3 [0:191];
     reg signed [7:0] w_q0, w_q1, w_q2, w_q3;
-    reg signed [23:0] bias [0:9];
-    reg signed [24:0] score_q [0:9];
+    reg signed [23:0] bias [0:OUT_N-1];
+    reg signed [24:0] score_q [0:OUT_N-1];
+    // (변경) 마지막 그룹 번호: 출력 수를 4개 차선으로 나눈 그룹 수 - 1
+    localparam [1:0] LAST_GROUP = (OUT_N - 1) / 4;
 
     assign load_ready_o = resetn && !busy_o;
     assign x_rd_en_o = (state == RUN);
     assign x_rd_addr_o = idx_q;
 
-    // group 2(class 8,9)에서는 lane 0·1만 유효
-    wire [3:0] lane_en = (group_q == 2'd2) ? 4'b0011 : 4'b1111;
+    // (변경) class = 4*group + lane < OUT_N 인 차선만 유효(10분류: group 2는 lane 0·1만)
+    wire [3:0] lane_en = {({group_q, 2'd3} < OUT_N), ({group_q, 2'd2} < OUT_N),
+                          ({group_q, 2'd1} < OUT_N), ({group_q, 2'd0} < OUT_N)};
     wire lane_clear = (state == CLEAR);
     wire signed [23:0] acc0, acc1, acc2, acc3;
     npu_dsp_mac_lane #(.DATA_WIDTH(8), .ACC_WIDTH(24)) lane0(.clk(clk), .resetn(resetn),
@@ -65,7 +72,7 @@ module p3_group10_core(
 
     // 쓰기 수락: Busy가 아니고 class 0..9일 때만
     wire wr_any = w_wr_en_i || b_wr_en_i;
-    wire wr_ok = load_ready_o && (wr_class_i < 4'd10);
+    wire wr_ok = load_ready_o && (wr_class_i < OUT_N);
     wire [7:0] wr_bank_addr = {wr_class_i[3:2], wr_addr_i};
     wire [7:0] rd_bank_addr = {group_q, idx_q};
 
@@ -94,7 +101,7 @@ module p3_group10_core(
     always @* begin
         best_class = 4'd0;
         best_score = score_q[0];
-        for (k = 1; k < 10; k = k + 1)
+        for (k = 1; k < OUT_N; k = k + 1)
             if (score_q[k] > best_score) begin
                 best_score = score_q[k];
                 best_class = k[3:0];
@@ -103,7 +110,7 @@ module p3_group10_core(
 
     genvar g;
     generate
-        for (g = 0; g < 10; g = g + 1) begin : pack
+        for (g = 0; g < OUT_N; g = g + 1) begin : pack
             assign scores_o[g*25 +: 25] = score_q[g];
         end
     endgenerate
@@ -124,7 +131,7 @@ module p3_group10_core(
             done_o <= 1'b0;
             error_o <= 1'b0;
             class_o <= 4'd0;
-            for (k = 0; k < 10; k = k + 1) begin
+            for (k = 0; k < OUT_N; k = k + 1) begin
                 bias[k] <= 24'sd0;
                 score_q[k] <= 25'sd0;
             end
@@ -152,7 +159,7 @@ module p3_group10_core(
                     state <= RUN;
                 end
                 RUN: begin
-                    if (idx_q == 6'd63) begin
+                    if (idx_q == IN_LEN - 1) begin
                         drain_q <= 1'b0;
                         state <= DRAIN;
                     end
@@ -169,7 +176,7 @@ module p3_group10_core(
                     if (lane_en[1]) score_q[{group_q, 2'd1}] <= add_bias(acc1, bias[{group_q, 2'd1}]);
                     if (lane_en[2]) score_q[{group_q, 2'd2}] <= add_bias(acc2, bias[{group_q, 2'd2}]);
                     if (lane_en[3]) score_q[{group_q, 2'd3}] <= add_bias(acc3, bias[{group_q, 2'd3}]);
-                    if (group_q == 2'd2) begin
+                    if (group_q == LAST_GROUP) begin
                         state <= FINISH;
                     end else begin
                         group_q <= group_q + 2'd1;
@@ -192,4 +199,10 @@ module p3_group10_core(
                 error_o <= 1'b1;
         end
     end
+    // synthesis translate_off
+    initial begin
+        if (IN_LEN < 1 || IN_LEN > 64 || OUT_N < 1 || OUT_N > 12)
+            $fatal(1, "Require 1<=IN_LEN<=64 and 1<=OUT_N<=12");
+    end
+    // synthesis translate_on
 endmodule
