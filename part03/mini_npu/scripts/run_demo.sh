@@ -2,8 +2,8 @@
 # 12장: 실제 UART RX/TX 비트파형을 TB가 검증하고 CSV를 생성.
 set -euo pipefail
 here="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
-root="$(cd -- "$here/.." && pwd)"
-cd "$root/.."
+root="$here"
+cd "$root/../.."
 out="$root/outputs"
 mkdir -p "$out"
 tmp="$(mktemp -d "${TMPDIR:-/tmp}/p3-uart-npu.XXXXXXXX")"
