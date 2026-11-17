@@ -5,6 +5,7 @@ import hashlib
 import json
 import re
 from html.parser import HTMLParser
+from urllib.parse import urlsplit, unquote
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -38,6 +39,52 @@ for chapter in chapters:
               "좌측 탐색 JS 누락 " + chapter["file"])
 
 check((P3 / "index.html").is_file(), "index.html missing")
+
+# (추가) href/src의 실제 상대경로 및 페이지 내 앵커를 검사한다.
+# HTML 내 CSS 이미지 URL은 속성 링크가 아니므로 비공개 원본 주소도 별도로 거부한다.
+class LocalLinks(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.urls = []
+        self.ids = set()
+
+    def handle_starttag(self, tag, attrs):
+        for name, value in attrs:
+            if name == "id" and value:
+                self.ids.add(value)
+            if name in ("href", "src") and value:
+                self.urls.append(value)
+
+
+link_checks = 0
+for page in [P3 / "index.html", *(P3 / ch["file"] for ch in chapters)]:
+    if not page.is_file():
+        continue
+    body = page.read_text(encoding="utf-8")
+    parser = LocalLinks()
+    parser.feed(body)
+    check(
+        "https://raw.githubusercontent.com/Yuul-Jung/amd_soc/main/part03/assets/hero-bookshelf.jpg"
+        not in body,
+        "Private hero image URL: " + str(page)
+    )
+    for raw in parser.urls:
+        if raw.startswith("//"):
+            continue
+        url = urlsplit(raw)
+        if url.scheme:
+            continue
+        if not url.path:
+            if url.fragment:
+                link_checks += 1
+                check(unquote(url.fragment) in parser.ids,
+                      f"Broken in-page anchor: {page} -> {raw}")
+            continue
+        link_checks += 1
+        target = (page.parent / unquote(url.path)).resolve()
+        check(target.is_relative_to(ROOT) and target.is_file(),
+              f"Broken relative link: {page} -> {raw}")
+
 for n in range(1, 11):
     chapter = P3 / f"ch{n:02d}"
     manifest = chapter / "validation/source_sha256.txt"
@@ -103,6 +150,7 @@ out.parent.mkdir(parents=True, exist_ok=True)
 out.write_text(json.dumps({
     "kind": "STATIC_AUDIT_ONLY",
     "checks": verified,
+    "link_checks": link_checks,
     "errors": issues,
     "rtl_simulation": "NOT_EXECUTED_BY_THIS_SCRIPT",
     "synthesis": "NOT_RUN",
@@ -112,5 +160,5 @@ if issues:
     for message in issues:
         print("STATIC_FAIL", message)
     raise SystemExit(1)
-print(f"STATIC_AUDIT_PASS checks={verified} chapters={len(chapters)} "
+print(f"STATIC_AUDIT_PASS checks={verified} links={link_checks} chapters={len(chapters)} "
       "scope=files,hashes,links,hierarchy,XDC")
