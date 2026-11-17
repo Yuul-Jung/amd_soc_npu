@@ -1,0 +1,16 @@
+PYTHON_SELF_TEST_PASS reset_retention,collision,uninitialized
+PYTHON_VECTORS width=16 depth=256 cycles=1016 seed=304
+RTL_SIM_PASS BRAM W=16 A=8 cycles=1016
+tb/tb_bram_sync_buffer.sv:62: $finish called at 10166000 (1ps)
+PYTHON_SELF_TEST_PASS reset_retention,collision,uninitialized
+PYTHON_RTL_COMPARE_PASS cycles=1016
+EXPECTED_REJECTION COLLISION
+EXPECTED_REJECTION UNINITIALIZED
+PYTHON_SELF_TEST_PASS reset_retention,collision,uninitialized
+PYTHON_VECTORS width=8 depth=8 cycles=520 seed=304
+RTL_SIM_PASS BRAM W=8 A=3 cycles=520
+tb/tb_bram_sync_buffer.sv:62: $finish called at 5206000 (1ps)
+PYTHON_SELF_TEST_PASS reset_retention,collision,uninitialized
+PYTHON_RTL_COMPARE_PASS cycles=520
+EXPECTED_REJECTION COLLISION
+EXPECTED_REJECTION UNINITIALIZED
