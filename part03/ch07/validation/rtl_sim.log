@@ -1,0 +1,8 @@
+PYTHON_DOT_SELF_TEST_PASS cases=78 INT16/40 seed=307
+RTL_SIM_PASS DOT INT16/40 cases=78
+tb/tb_vector_dot.sv:53: $finish called at 113896000 (1ps)
+PYTHON_RTL_COMPARE_PASS cycles=78
+PYTHON_DOT_SELF_TEST_PASS cases=78 INT8/32 seed=307
+RTL_SIM_PASS DOT INT8/32 cases=78
+tb/tb_vector_dot.sv:53: $finish called at 113896000 (1ps)
+PYTHON_RTL_COMPARE_PASS cycles=78
