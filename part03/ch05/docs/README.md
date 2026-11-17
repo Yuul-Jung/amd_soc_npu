@@ -1,26 +1,18 @@
-# 제3부 05장 · 고정소수점
+# P3-05 고정소수점 축소 계약
 
-## 1. 이번 장에서 실제 만드는 기능
-
-- 실제 RTL: `part03/ch05/rtl/fixed_quantizer.v`
-- 기능: signed Shift/round/saturate.
-- 기존 정상 소스·테스트벤치·검증 기록은 보존하고 신규 누적 NPU와 혼동하지 않는다.
-
-## 2. VS Code 따라하기
-
-1. 저장소 루트에서 `part03/ch05/rtl/fixed_quantizer.v`와 같은 장의 `tb/`를 열어 포트·신호를 확인한다.
-2. 아래 명령을 실행한다.
+`fixed_quantizer(IN_WIDTH=32, OUT_WIDTH=8, SHIFT=8, ROUND=1, SATURATE=1)`.
+포트: clk/resetn/valid_i, signed x_i, signed q_o, valid_o, overflow_o.
+기본 Q 입력은 소수부 8비트이며 출력은 정수(Q*.0)다. 일반적으로 출력 소수부는
+입력 소수부-SHIFT다. SHIFT>=0, ROUND=0은 산술 우시프트(음수도 -무한대로 절삭),
+ROUND=1은 최근접·정확히 절반이면 0에서 멀어지는 반올림이다.
+SATURATE=1은 출력 min/max로 포화, 0은 하위 비트 순환. overflow_o는 축소 전 범위 초과다.
+SHIFT=0도 지원한다. 지원 폭 IN=2..48, OUT=2..32, SHIFT=0..30.
+출력은 수락 상승 에지 직후 유효. 동기식 Active-Low Reset 우선이며 idle은 값/overflow 유지·Valid=0.
+동일 입력에 절삭/반올림 × 포화/순환 네 구성을 병렬 비교한다. 기존 MAC은 수정하지 않는다.
 
 ```bash
-# 05장 원본 RTL과 Python 참조 모델의 독립 시뮬레이션 실행
 bash part03/ch05/scripts/run_sim.sh
 ```
 
-3. 검증 포인트: 음수 반올림·오버플로·valid.
-4. RTL 값과 예상 출력의 차이를 확인하고, 실패하면 소스·테스트벤치·로그를 함께 보존한다.
-
-## 3. 완료 기준과 검증 경계
-
-- `part03/ch05/validation/rtl_sim.log`는 기존 과거 독립 실행 기록이며 이 문서 작성으로 새로 실행한 것은 아니다.
-- 실제 UART→BRAM→DSP 등록 곱→4PE→Argmax·TX 연결은 제11~12장 별도 신규 통합 경로에서 검증한다.
-- 실제 Vivado 합성/타이밍 및 Basys3 실물은 증거 확보 전 NOT_RUN.
+RTL은 64비트 부호 확장 중간값을 사용하여 음수 논리 시프트와 산술 시프트를 혼동하지 않는다.
+이는 기능 표현이며 합성·자원·타이밍·보드는 미검증이다.

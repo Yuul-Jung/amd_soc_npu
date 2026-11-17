@@ -1,26 +1,17 @@
-# 제3부 06장 · INT8·INT16
+# P3-06 동일 실수 입력의 INT8/INT16 비교
 
-## 1. 이번 장에서 실제 만드는 기능
-
-- 실제 RTL: `part03/ch06/rtl/precision_compare.v`
-- 기능: 정밀도별 연산값 비교.
-- 기존 정상 소스·테스트벤치·검증 기록은 보존하고 신규 누적 NPU와 혼동하지 않는다.
-
-## 2. VS Code 따라하기
-
-1. 저장소 루트에서 `part03/ch06/rtl/precision_compare.v`와 같은 장의 `tb/`를 열어 포트·신호를 확인한다.
-2. 아래 명령을 실행한다.
+`precision_compare(SATURATE=1)`는 32비트 signed Q*.12 원본 `x_i`를
+INT8 소수부4비트와 INT16 소수부8비트로 각각 tie-away 반올림한다.
+같은 05장 fixed_quantizer를 SHIFT8/SHIFT4로 재사용한다.
+포트: clk/resetn/valid_i/x_i → q8_o/q16_o/overflow8_o/overflow16_o/valid_o.
+상승 에지 수락 직후 결과 유효, idle 유지/Valid=0, 동기 Reset 우선.
+SATURATE=0 비교 인스턴스는 동일 반올림 후 각 출력 폭으로 순환한다.
+공통 Q12 기준 오차는 `q8*256-x`, `q16*16-x`이며 단위는 1/4096이다.
+정확히 표현 가능한 입력, 반올림 오차가 다른 입력, 범위 초과 입력을 구분한다.
+CSV는 실제 RTL trace 비교가 통과한 모델 결과이며 자원/타이밍 비교가 아니다.
 
 ```bash
-# 06장 원본 RTL과 Python 참조 모델의 독립 시뮬레이션 실행
 bash part03/ch06/scripts/run_sim.sh
 ```
 
-3. 검증 포인트: 부호·스케일·오차·포화.
-4. RTL 값과 예상 출력의 차이를 확인하고, 실패하면 소스·테스트벤치·로그를 함께 보존한다.
-
-## 3. 완료 기준과 검증 경계
-
-- `part03/ch06/validation/rtl_sim.log`는 기존 과거 독립 실행 기록이며 이 문서 작성으로 새로 실행한 것은 아니다.
-- 실제 UART→BRAM→DSP 등록 곱→4PE→Argmax·TX 연결은 제11~12장 별도 신규 통합 경로에서 검증한다.
-- 실제 Vivado 합성/타이밍 및 Basys3 실물은 증거 확보 전 NOT_RUN.
+validation/precision_comparison.csv와 배치 요약을 확인한다. 합성·보드 미수행.

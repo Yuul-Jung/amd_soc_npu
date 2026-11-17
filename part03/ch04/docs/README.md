@@ -1,26 +1,17 @@
-# 제3부 04장 · 동기 BRAM
+# P3-04 동기 메모리 계약
 
-## 1. 이번 장에서 실제 만드는 기능
-
-- 실제 RTL: `part03/ch04/rtl/bram_sync_buffer.v`
-- 기능: 동기식 읽기·쓰기와 rd_valid.
-- 기존 정상 소스·테스트벤치·검증 기록은 보존하고 신규 누적 NPU와 혼동하지 않는다.
-
-## 2. VS Code 따라하기
-
-1. 저장소 루트에서 `part03/ch04/rtl/bram_sync_buffer.v`와 같은 장의 `tb/`를 열어 포트·신호를 확인한다.
-2. 아래 명령을 실행한다.
+Issue #9 기준. `bram_sync_buffer(DATA_WIDTH=16, ADDR_WIDTH=8)`는 256단어 버퍼다.
+포트는 `clk, resetn, wr_en, wr_addr, wr_data, rd_en, rd_addr, rd_data, rd_valid`다.
+상승 에지 k의 요청은 k 직후 출력되며 에지 전 조합 출력은 없다.
+Reset은 읽기 출력/Valid만 0으로 만들고 저장 배열은 보존한다. Reset 중 쓰기는 무시한다.
+rd_en=0이면 rd_data 유지, rd_valid=0. 입력/가중치는 같은 RTL의 독립 인스턴스다.
+동일 주소 동시 읽기/쓰기는 금지한다. 미기록 주소 읽기도 금지하며 Python/TB가 탐지한다.
+서로 다른 주소 동시 읽기/쓰기는 허용한다. 메모리 초기값은 X이며 0으로 가정하지 않는다.
+`ram_style`은 합성 의도다. 합성·타이밍·보드·Vitis는 미수행이다.
 
 ```bash
-# 04장 원본 RTL과 Python 참조 모델의 독립 시뮬레이션 실행
 bash part03/ch04/scripts/run_sim.sh
 ```
 
-3. 검증 포인트: read/write 동시 접근·초기화 없는 주소·Reset.
-4. RTL 값과 예상 출력의 차이를 확인하고, 실패하면 소스·테스트벤치·로그를 함께 보존한다.
-
-## 3. 완료 기준과 검증 경계
-
-- `part03/ch04/validation/rtl_sim.log`는 기존 과거 독립 실행 기록이며 이 문서 작성으로 새로 실행한 것은 아니다.
-- 실제 UART→BRAM→DSP 등록 곱→4PE→Argmax·TX 연결은 제11~12장 별도 신규 통합 경로에서 검증한다.
-- 실제 Vivado 합성/타이밍 및 Basys3 실물은 증거 확보 전 NOT_RUN.
+기본 16비트/256단어와 비교 8비트/8단어를 고정 seed 304로 실행한다.
+01~03장 회귀 로그는 validation에 별도로 보존한다.
