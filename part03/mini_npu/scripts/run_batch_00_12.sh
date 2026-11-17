@@ -12,6 +12,16 @@ if ! command -v iverilog >/dev/null || ! command -v vvp >/dev/null ||
     printf '\n필수 Icarus Verilog/Python 미설치: NOT_RUN\n' >> "$summary"
     cat "$summary";exit 2
 fi
+# (변경) 보존 원본 ch04/scripts/run_sim.sh가 ripgrep(rg)을 호출하므로, rg 미설치 환경에서는
+# (변경) 원본 해시를 바꾸지 않고 이 회귀 실행에 한해 동등한 grep -E 대체 명령을 PATH에 둔다.
+if ! command -v rg >/dev/null; then
+    rg_shim="$(mktemp -d "${TMPDIR:-/tmp}/p3-rg.XXXXXXXX")"
+    trap 'rm -rf "$rg_shim"' EXIT
+    printf '#!/usr/bin/env bash\nexec grep -E "$@"\n' > "$rg_shim/rg"
+    chmod +x "$rg_shim/rg"
+    export PATH="$rg_shim:$PATH"
+    printf 'NOTE ripgrep 미설치: ch04 원본 스크립트용 grep -E 대체 사용\n'
+fi
 check() {
     local name="$1" match="$2";shift 2
     local log="$logdir/$name.log"
