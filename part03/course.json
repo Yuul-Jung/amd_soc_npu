@@ -1,0 +1,91 @@
+{
+  "site": "amd_soc_rtl/part03",
+  "title": "제3부 · 소형 NPU",
+  "version": "v01",
+  "chapters": [
+    {
+      "id": "ch00",
+      "number": 0,
+      "title": "UART Echo",
+      "file": "ch00_uart_echo_v01.html"
+    },
+    {
+      "id": "ch01",
+      "number": 1,
+      "title": "MAC",
+      "file": "ch01_mac_v01.html"
+    },
+    {
+      "id": "ch02",
+      "number": 2,
+      "title": "DSP48E1",
+      "file": "ch02_dsp_v01.html"
+    },
+    {
+      "id": "ch03",
+      "number": 3,
+      "title": "MAC Pipeline",
+      "file": "ch03_mac_pipeline_v01.html"
+    },
+    {
+      "id": "ch04",
+      "number": 4,
+      "title": "BRAM",
+      "file": "ch04_bram_v01.html"
+    },
+    {
+      "id": "ch05",
+      "number": 5,
+      "title": "Fixed Quantizer",
+      "file": "ch05_fixed_v01.html"
+    },
+    {
+      "id": "ch06",
+      "number": 6,
+      "title": "INT8·INT16",
+      "file": "ch06_precision_v01.html"
+    },
+    {
+      "id": "ch07",
+      "number": 7,
+      "title": "Vector Dot",
+      "file": "ch07_vector_dot_v01.html"
+    },
+    {
+      "id": "ch08",
+      "number": 8,
+      "title": "4PE",
+      "file": "ch08_pe4_v01.html"
+    },
+    {
+      "id": "ch09",
+      "number": 9,
+      "title": "Dense",
+      "file": "ch09_dense_v01.html"
+    },
+    {
+      "id": "ch10",
+      "number": 10,
+      "title": "NPU",
+      "file": "ch10_npu_core_v01.html"
+    },
+    {
+      "id": "ch11",
+      "number": 11,
+      "title": "UART Register",
+      "file": "ch11_uart_register_v01.html"
+    },
+    {
+      "id": "ch12",
+      "number": 12,
+      "title": "통합 NPU",
+      "file": "ch12_integrated_npu_v01.html"
+    }
+  ],
+  "validation": {
+    "original_ch01_ch10": "historical_logs_only",
+    "new_ch00_ch11_ch12": "simulation_not_run",
+    "vivado": "not_run",
+    "board": "not_run"
+  }
+}
