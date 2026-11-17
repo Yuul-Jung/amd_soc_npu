@@ -20,14 +20,14 @@ def git(repo, *args):
     return subprocess.check_output(["git", "-C", str(repo), *args])
 
 def git_sha(data):
-    return hashlib.sha1(b"blob " + str(len(data)).encode() + b"\\0" + data).hexdigest()
+    return hashlib.sha1(b"blob " + str(len(data)).encode() + b"\0" + data).hexdigest()
 
 def source_entries(repo, revision):
     raw = git(repo, "ls-tree", "-r", "-z", revision)
-    for record in raw.split(b"\\0"):
+    for record in raw.split(b"\0"):
         if not record:
             continue
-        metadata, filename = record.split(b"\\t", 1)
+        metadata, filename = record.split(b"\t", 1)
         mode, kind, sha = metadata.decode().split()
         if kind == "blob":
             yield (mode, sha, filename.decode("utf-8"))
@@ -35,7 +35,7 @@ def source_entries(repo, revision):
 def map_main(path):
     if path.startswith("part02_v2/"):
         return "part02_1/" + path[len("part02_v2/"):]
-    match = re.match(r"part02/chapters/P2_(0[1-9])_Lesson_\\d+/(.*)", path)
+    match = re.match(r"part02/chapters/P2_(0[1-9])_Lesson_\d+/(.*)", path)
     if match:
         return "part02_1/ch" + match.group(1) + "/" + match.group(2)
     if path.startswith("part02/P2_10_Lesson_20261106/"):
@@ -97,7 +97,7 @@ def main():
             manifest.append(dict(source_revision=revision, source_path=old_path,
                                  destination_path=new_path, blob_sha=sha, status=status))
     if conflicts:
-        print("Refusing to overwrite differing files:", *conflicts, sep="\\n", file=sys.stderr)
+        print("Refusing to overwrite differing files:", *conflicts, sep="\n", file=sys.stderr)
         return 2
     if args.apply:
         for target, data, mode in pending:
@@ -111,7 +111,7 @@ def main():
                 raise RuntimeError("destination verification failure: " + str(target))
         manifest_path = dest / "migration" / "SOURCE_MANIFEST.json"
         manifest_path.parent.mkdir(parents=True, exist_ok=True)
-        manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\\n",
+        manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
                                  encoding="utf-8")
         if args.commit:
             git(dest, "add", "-A", "--", "part02_1", "part02_2", "rule_md", "migration")
