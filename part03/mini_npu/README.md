@@ -40,7 +40,7 @@ CPU 없이 PC UART에서 전송한다. 실습용 **단일 바이트 opcode + 고
 - signed41 결과는 11자리 대문자 16진수 4개를 콤마로 구분. 음수는 44비트로 부호 확장한 표시값.
 - 예: `0`의 결과는 CLASS0, 원점수 `+2,0,0,-2`. 화면 표시 점수에는 4부류 예시의 ReLU를 적용하지 않으며 **signed raw 점수**를 반환한다.
 - PC는 각 응답 LF까지 기다린 다음 다음 명령을 전송한다. 초당 115200bps UART는 바이트별 10bit 전송 오버헤드.
-- 아직 일반 UART RX 쪽 깊은 FIFO, CRC/인증, 전체 패킷 재전송·모델 버전 관리를 구현한 상태가 아니다. 31장의 보안 프로토콜로 혼동하지 않음.
+- UART Core에는 RX/TX 각각 **16바이트 FIFO**가 구현되어 있지만 Full/Empty, 동시 Push/Pop, Overrun 및 긴 연속 입력의 내구성은 **새 경계 시뮬레이션 미검증**이다. CRC/인증, 전체 패킷 재전송·모델 버전 관리는 구현되어 있지 않다. 31장의 보안 프로토콜과 혼동하지 않는다.
 - Output error LED15는 UART overrun/framing/명령 오류/NPU error가 발생한 경우 latched 상태.
 
 ## 3. VS Code / Ubuntu 실행
@@ -74,5 +74,5 @@ bash part03/mini_npu/scripts/run_batch_00_12.sh
 
 - 01 MAC, 02 DSP, 03 Pipeline, 04 BRAM, 05 Fixed, 06 INT8/16, 07 Dot, 08 PE4, 09 Dense4, 10 NPU4는 **원본 독립 소스**와 과거 독립 시뮬레이션 기록이 있다.
 - 00 UART, 11 Write, 12 Integration은 이번 신규 구현이다.
-- 기존 03 Pipeline를 통합 회로에 직접 편입시키는 일, RX FIFO·stop-and-wait 위반 에러 처리, 합성 BRAM/DSP 매핑·Timing 등은 **후속 게이트**로 남기며 미완료 항목을 숨기지 않는다.
+- 기존 03 Pipeline 원본을 통합 회로에 직접 편입시키는 일, 16바이트 RX/TX FIFO 경계 시험·stop-and-wait 위반 에러 처리, 합성 BRAM/DSP 매핑·Timing 등은 **후속 게이트**로 남긴다.
 - 13~19장 MNIST/멀티레이어, 20장 이후 AXI/MicroBlaze V는 이 디렉터리의 범위 밖이다.
