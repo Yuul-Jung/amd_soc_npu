@@ -33,3 +33,14 @@
 - E. 전 장 통합 링크·이미지·코드·공개 안전 점검과 실제 웹 배포 확인.
 
 완료 기준: 코드를 재작성한 사실이 아닌, 전 장 교재의 시각·내용·링크·탐색 동작을 원본과 대조하고 검사한 증거.
+
+## 이번 변경 단계별 확인 기록 (2026-11-17)
+
+- 기본 정책·작성 규칙: `AGENTS.md`, `rule_md` 기준 커밋 고정.
+- 공통 교육형 CSS·JS: `assets/education/site.css`, `site.js`, `site-theme.css`. 상단 책장 사진은 중앙 `rule_md`의 공개 원본 URL 참조이며 브라우저 로드 검증 미완료.
+- 학습 목차 5개: `index.html`, `part01/index.html`, `part02/index.html`, `part02_1/index.html`, `part02_2/index.html`.
+- 다섯 목차에 대해 GitHub 파일 존재 기준 내부 링크 **78/78개** 확인. 브라우저 UI/모바일/코드복사는 미실행.
+- 제1부 01장 시범 재편집: `part01/legacy/pages/soc/ch01_microblaze_bram_v01.html`; 원본 HTML은 그대로 보존. 본문 section 14개·pre 1개 보존, 정적 상대 링크 17/17개 파일 존재 확인.
+- 제2부 01장 시범 재편집: `part02_1/ch01_axi_led_v01.html`; 원본 HTML은 그대로 보존. 원본 section 20개 + 선수학습 section 1개, pre 7개 보존, 정적 상대 링크 6/6개 파일 존재 확인.
+- 원본 01~10장 교재·11장·제2부 전체 장별 신규 버전 제작은 **미완료**. 시범 페이지는 실브라우저 레이아웃·기능 검증이 끝날 때까지 INDEX 정본 링크로 전환하지 않는다.
+- Vivado/Vitis 합성·소프트웨어 빌드·보드 실물 검증은 새로 실행하지 않았다.
