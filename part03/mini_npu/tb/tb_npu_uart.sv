@@ -54,6 +54,26 @@ module tb_npu_uart;
             gold_hex=hexchar((ext>>((10-pos)*4))&4'hf);
         end
     endfunction
+    // (추가) 실제 TX 라인에서 복조한 ASCII HEX를 signed 41-bit 값으로 변환.
+    // CSV에 골든값을 복사하면 UART 검증 증거가 되지 않으므로 디코딩값을 기록.
+    function automatic signed [40:0] decoded_score(input integer lane);
+        integer p;
+        reg [7:0] ch;
+        reg [3:0] hex;
+        reg [43:0] packed_hex;
+        begin
+            packed_hex=44'd0;
+            for(p=0;p<11;p=p+1)begin
+                ch=chars[3+lane*12+p];
+                if(ch>="0" && ch<="9")hex=ch-"0";
+                else if(ch>="A" && ch<="F")hex=ch-"A"+10;
+                else $fatal(1,"Non-hex RTL UART output");
+                packed_hex=(packed_hex<<4)|hex;
+            end
+            decoded_score=$signed(packed_hex[40:0]);
+        end
+    endfunction
+
     integer scenario,exp_cls;
     reg signed [40:0] exp_score;
     always @(posedge clk)if(byte_valid)begin
@@ -73,9 +93,10 @@ module tb_npu_uart;
                             $fatal(1,"UART SCORE mismatch case=%0d lane=%0d hex=%0d",c_count,i,j);
                 end
                 if(led[exp_cls]!==1'b1)$fatal(1,"LED class mismatch");
+                // (변경) 예상값이 아니라 TX 비트파형에서 실제 수신한 4개 점수 기록.
                 $fdisplay(csv_file,"%0d,%0d,%0d,%0d,%0d,%0d",c_count,exp_cls,
-                    golden(scenario,0),golden(scenario,1),
-                    golden(scenario,2),golden(scenario,3));
+                    decoded_score(0),decoded_score(1),
+                    decoded_score(2),decoded_score(3));
                 c_count=c_count+1;
             end else if(nbytes==3 && chars[0]=="O" && chars[1]=="K")begin
                 ack_count=ack_count+1;
