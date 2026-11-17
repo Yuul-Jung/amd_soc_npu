@@ -59,7 +59,7 @@ module uart_npu_command_controller(
         wr_addr_o=0;neuron_o=0;wr_data_o=0;bias_data_o=0;
         if(state==PRESET)begin
             if(preset_index<2)begin
-                wr_addr_o=preset_index[5:0];
+                wr_addr_o={2'b00,preset_index};
                 // X0=(+1,+1), X1=(+1,-1), X2=(-1,+1), X3=(-1,-1)
                 wr_data_o=((preset_index==0 && sample_id[1]) ||
                     (preset_index==1 && sample_id[0])) ? -16'sd1 : 16'sd1;
