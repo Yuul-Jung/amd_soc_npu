@@ -86,6 +86,9 @@ module tb_npu_uart;
                 exp_cls=(c_count==5)?3:scenario;
                 if(chars[1]!==("0"+exp_cls))$fatal(1,"UART CLASS mismatch");
                 if(chars[2]!==":")$fatal(1,"Bad UART result header");
+                // (추가) 응답 점수 구분자와 CR도 실제 비트 복조값으로 검증.
+                if(chars[14]!=="," || chars[26]!=="," || chars[38]!=="," ||
+                   chars[50]!==8'h0d)$fatal(1,"UART score separators or CR mismatch");
                 for(i=0;i<4;i=i+1)begin
                     exp_score=golden(scenario,i);
                     for(j=0;j<11;j=j+1)
