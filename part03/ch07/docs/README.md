@@ -1,26 +1,19 @@
-# 제3부 07장 · 벡터 내적
+# P3-07 스트리밍 벡터 내적 계약
 
-## 1. 이번 장에서 실제 만드는 기능
-
-- 실제 RTL: `part03/ch07/rtl/vector_dot_core.v`
-- 기능: 연속 MAC + ready/valid.
-- 기존 정상 소스·테스트벤치·검증 기록은 보존하고 신규 누적 NPU와 혼동하지 않는다.
-
-## 2. VS Code 따라하기
-
-1. 저장소 루트에서 `part03/ch07/rtl/vector_dot_core.v`와 같은 장의 `tb/`를 열어 포트·신호를 확인한다.
-2. 아래 명령을 실행한다.
+`vector_dot_core(DATA_WIDTH=16, ACC_WIDTH=40, MAX_LEN=256)`.
+clk/resetn, start_i, length_i[8:0], valid_i, signed a_i/b_i 입력.
+ready_o/busy_o/done_o/error_o와 signed result_o 출력.
+idle에서 start 수락. 길이0은 즉시 done/result0. 길이>MAX_LEN은 error 펄스로 거부.
+busy 중 start는 무시. 데이터 수락은 valid_i && ready_o일 때만 한다.
+수락 입력 N개 이후 마지막 입력 에지 k+1 직후 result/done을 출력한다.
+done/error는 한 에지 펄스이며 결과는 다음 완료까지 유지한다.
+Reset은 계산을 취소한다. 누산은 01장 mac_core와 같은 signed 순환 연산이다.
+길이 신호는 0..256 범위 표현이며 MAX_LEN은 1..256으로 제한한다.
+이 장에는 메모리 전송을 넣지 않는다. 상위 계층이 입력·가중치를 순서대로 공급한다.
 
 ```bash
-# 07장 원본 RTL과 Python 참조 모델의 독립 시뮬레이션 실행
 bash part03/ch07/scripts/run_sim.sh
 ```
 
-3. 검증 포인트: 길이 0·1·2·최대, 마지막 done.
-4. RTL 값과 예상 출력의 차이를 확인하고, 실패하면 소스·테스트벤치·로그를 함께 보존한다.
-
-## 3. 완료 기준과 검증 경계
-
-- `part03/ch07/validation/rtl_sim.log`는 기존 과거 독립 실행 기록이며 이 문서 작성으로 새로 실행한 것은 아니다.
-- 실제 UART→BRAM→DSP 등록 곱→4PE→Argmax·TX 연결은 제11~12장 별도 신규 통합 경로에서 검증한다.
-- 실제 Vivado 합성/타이밍 및 Basys3 실물은 증거 확보 전 NOT_RUN.
+INT16/40 및 INT8/32, 길이0/1/2/4/16/256, extrema·랜덤·버블·busy 중 start·Reset/재시작을 검증한다.
+합성·타이밍·보드 미수행.
