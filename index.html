@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Basys3 MicroBlaze V SoC · 제1부와 제2부 RTL 교육과정 통합 학습 목차">
+<title>Basys3 · MicroBlaze V SoC | 통합 학습안내서</title>
+<style>
+:root{color-scheme:light}*{box-sizing:border-box}
+body{margin:0;background:#f3f5f9;color:#1b2a40;font:16px/1.65 system-ui,"Noto Sans KR",sans-serif}
+header{padding:58px 20px;background:linear-gradient(120deg,#182e55,#343a7c);color:white}
+.wrap{max-width:1080px;margin:auto}.eyebrow{font-size:.8rem;letter-spacing:.14em;color:#bdd4ff}
+h1{font-size:clamp(1.7rem,4vw,2.55rem);line-height:1.25;margin:12px 0}
+header p{max-width:760px;color:#e5e9fa}main{padding:32px 20px 70px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
+article{background:white;border:1px solid #d8e1ea;border-radius:14px;padding:26px;box-shadow:0 3px 12px #2639560b}
+article h2{font-size:1.23rem;margin:9px 0}article p{margin:8px 0 18px;color:#536277}
+.kicker{font-size:.82rem;font-weight:700;color:#4356aa}
+a.go{display:inline-block;background:#314b89;color:white;padding:9px 14px;border-radius:8px;text-decoration:none;font-weight:650}
+a.go:focus-visible,a.go:hover{background:#213669;outline-offset:3px}
+.note{border-left:4px solid #7994c1;padding:14px 18px;background:#e9eff7;margin:24px 0}
+small{color:#566580}footer{border-top:1px solid #d6dce6;margin-top:32px;padding-top:18px}
+</style></head>
+<body><header><div class="wrap"><span class="eyebrow">BASYS3 · MICROBLAZE V · SoC RTL COURSE</span>
+<h1>Basys3 · MicroBlaze V SoC 실습 교재</h1>
+<p>제1부 기본 SoC에서 시작하여 제2부 사용자 AXI IP·주변장치 및 확장 실습으로 이어지는 교육자료입니다.</p>
+</div></header><main class="wrap">
+<section aria-label="학습과정"><div class="grid">
+<article><span class="kicker">PART 01 · 01–11장</span><h2>제1부 · 기본 SoC 및 사용자 Top</h2>
+<p>MicroBlaze V, BRAM, AXI GPIO, UART, Timer, 인터럽트, 사용자 Top 연결</p>
+<a class="go" href="part01/index.html">제1부 학습 목차</a></article>
+<article><span class="kicker">PART 02-1 · 01–10장</span><h2>제2부 전반 · 사용자 AXI IP</h2>
+<p>LED, FND, 버튼·IRQ, PWM, CdS, 초음파, 모터, XADC, 통합 제어</p>
+<a class="go" href="part02_1/index.html">01–10장 학습안내서</a></article>
+<article><span class="kicker">PART 02-2 · 11–20장</span><h2>제2부 후반 · 센서·통신·확장</h2>
+<p>서보·스테핑 모터, SPI, I²C, 1-Wire, DHT22, PIR 및 통합 SoC</p>
+<a class="go" href="part02_2/guide/index.html">11–20장 학습안내서</a></article>
+</div></section>
+<div class="note"><strong>자료 보존 상태:</strong> 제1부 01–10장 원본 교재는 기존 <code>soc</code> 저장소에서 연결하며, 11장 자료는 이 저장소에 복사되어 있습니다. 제2부 HTML 교재는 복사했고, 01–10장 개발 소스 일부는 이관 중입니다. 교재 존재는 합성·보드 검증 완료를 뜻하지 않습니다.</div>
+<footer><small>기술 자료 정본·검증 상태: <a href="README.md">저장소 안내</a> · <a href="part02/index.html">제2부 전체 목록</a> · <a href="rule_md/">공통 문서 규칙</a></small></footer>
+</main></body></html>
