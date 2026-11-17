@@ -1,0 +1,29 @@
+name: P2-13 MFRC522 SPI RTL Simulation
+on:
+  push:
+    branches: ['work/part02-second-half-20261110']
+    paths:
+      - 'part02/chapters/P2_13_Lesson/**'
+      - '.github/workflows/p2-13-spi-verification.yml'
+  pull_request:
+    paths:
+      - 'part02/chapters/P2_13_Lesson/**'
+      - '.github/workflows/p2-13-spi-verification.yml'
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  spi-rtl:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Icarus Verilog
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y iverilog
+      - name: Run 4-byte UID protocol mock C tests
+        run: bash part02/chapters/P2_13_Lesson/tests/run_host_tests.sh
+      - name: Run SPI register transaction TB
+        run: bash part02/chapters/P2_13_Lesson/tests/run_rtl_tests.sh
+      - name: Scope boundary
+        run: echo "SPI RTL and C fake chip model only. Real RFID, AXI/Vivado/Vitis/BOARD NOT_RUN."

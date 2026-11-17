@@ -1,0 +1,29 @@
+name: P2-16 DS3231 RTC Host and RTL Verification
+on:
+  push:
+    branches: ['work/part02-second-half-20261110']
+    paths:
+      - 'part02/chapters/P2_16_Lesson/**'
+      - '.github/workflows/p2-16-ds3231-verification.yml'
+  pull_request:
+    paths:
+      - 'part02/chapters/P2_16_Lesson/**'
+      - '.github/workflows/p2-16-ds3231-verification.yml'
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  rtc-host-rtl:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Icarus Verilog
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y iverilog
+      - name: C host tests — BCD, 12/24h, leap date, OSF
+        run: bash part02/chapters/P2_16_Lesson/tests/run_host_tests.sh
+      - name: RTL I2C repeated-start burst command test
+        run: bash part02/chapters/P2_16_Lesson/tests/run_rtl_tests.sh
+      - name: Test boundary
+        run: echo "HOST_C and RTL command-sequencer only. Physical I2C engine, AXI, Vivado/Vitis/BOARD NOT_RUN."

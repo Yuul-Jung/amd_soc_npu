@@ -1,0 +1,27 @@
+name: P2-15 DS18B20 1-Wire RTL Verification
+on:
+  push:
+    branches: ['work/part02-second-half-20261110']
+    paths:
+      - 'part02/chapters/P2_15_Lesson/**'
+      - '.github/workflows/p2-15-ds18b20-verification.yml'
+  pull_request:
+    paths:
+      - 'part02/chapters/P2_15_Lesson/**'
+      - '.github/workflows/p2-15-ds18b20-verification.yml'
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  onewire-rtl:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Icarus Verilog
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y iverilog
+      - name: Run DS18B20 RTL simulation
+        run: bash part02/chapters/P2_15_Lesson/tests/run_rtl_tests.sh
+      - name: Explicit validation boundary
+        run: echo "RTL_SIM only; Vivado/Vitis/physical sensor/UVM NOT_RUN."

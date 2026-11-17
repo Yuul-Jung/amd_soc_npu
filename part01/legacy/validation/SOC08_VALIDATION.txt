@@ -1,0 +1,15 @@
+SoC 08 · AXI Timer Polling
+
+## 실제 확인
+- 기존 GPIO·UART Lite 유지, AXI Timer Base Address 0x41C00000 추가.
+- 100 MHz Clock, TLR0=49,999,998 (0x02FAF07E), Down Count/Auto Reload; PG079 공식식 (TLRx+2)×Clock Period에 따른 목표 주기 약 0.5초.
+- Vivado Validate Design 정상, Bitstream/XSA 및 Vitis Application ELF Build 성공.
+- 구현 Timing: WNS +0.675 ns / WHS +0.035 ns / TNS 0 / THS 0.
+- Basys3 LED0 반복 점멸과 Debug WATCH의 Timer 계수 변화 확인.
+
+## 판정 경계
+- Polling 방식. Interrupt Controller는 SoC 09에서 연결.
+- 약 0.5초 간격은 카운터 설정에 근거하며 별도 정밀 시간계측 결과는 아님.
+
+## 판정
+해당 장의 실습 검증 완료. 확인하지 않은 별도 검사는 판정 경계에 표시.

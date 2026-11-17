@@ -1,0 +1,27 @@
+name: P2-17 DHT22 Pulse Timing RTL Verification
+on:
+  push:
+    branches: ['work/part02-second-half-20261110']
+    paths:
+      - 'part02/chapters/P2_17_Lesson/**'
+      - '.github/workflows/p2-17-dht22-verification.yml'
+  pull_request:
+    paths:
+      - 'part02/chapters/P2_17_Lesson/**'
+      - '.github/workflows/p2-17-dht22-verification.yml'
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  dht22-rtl:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Icarus Verilog
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y iverilog
+      - name: Run DHT22 MSB-first pulse-width self-checking TB
+        run: bash part02/chapters/P2_17_Lesson/tests/run_rtl_tests.sh
+      - name: Validation boundary
+        run: echo "P2-17 portable RTL_SIM only; Vivado/Vitis/BOARD/AXI/UVM NOT_RUN."

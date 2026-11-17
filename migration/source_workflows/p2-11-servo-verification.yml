@@ -1,0 +1,45 @@
+name: P2-11 Servo Host and RTL Verification
+
+on:
+  push:
+    branches:
+      - work/part02-second-half-20261110
+    paths:
+      - 'part02/chapters/P2_11_Lesson/**'
+      - 'part02/chapters/P2_04_Lesson_20261106/rtl/**'
+      - '.github/workflows/p2-11-servo-verification.yml'
+  pull_request:
+    paths:
+      - 'part02/chapters/P2_11_Lesson/**'
+      - 'part02/chapters/P2_04_Lesson_20261106/rtl/**'
+      - '.github/workflows/p2-11-servo-verification.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  p2-11-host-and-rtl:
+    name: C Host + Icarus RTL simulation
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@v4
+      - name: Install Icarus Verilog
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y iverilog
+          iverilog -V | head -n 3
+      - name: Run host C tests
+        run: |
+          bash part02/chapters/P2_11_Lesson/tests/run_host_tests.sh
+      - name: Run PWM Core RTL simulation
+        run: |
+          bash part02/chapters/P2_11_Lesson/tests/run_rtl_tests.sh
+      - name: Run prior P2-04 RTL regression
+        run: |
+          bash part02/chapters/P2_04_Lesson_20261106/tests/run_rtl_tests.sh
+      - name: Validation boundary
+        run: |
+          echo "HOST_C/RTL_SIM only. AXI P2-11 SoC integration, Vivado, Vitis, Basys3 remain NOT_RUN."

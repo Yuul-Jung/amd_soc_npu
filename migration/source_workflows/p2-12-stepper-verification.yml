@@ -1,0 +1,36 @@
+name: P2-12 28BYJ-48 Stepper RTL Verification
+
+on:
+  push:
+    branches: ['work/part02-second-half-20261110']
+    paths:
+      - 'part02/chapters/P2_12_Lesson/**'
+      - '.github/workflows/p2-12-stepper-verification.yml'
+  pull_request:
+    paths:
+      - 'part02/chapters/P2_12_Lesson/**'
+      - '.github/workflows/p2-12-stepper-verification.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  stepper-rtl:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Icarus Verilog
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y iverilog
+      - name: Run host C configuration tests
+        run: |
+          bash part02/chapters/P2_12_Lesson/tests/run_host_tests.sh
+      - name: Run self-checking stepper TB
+        run: |
+          bash part02/chapters/P2_12_Lesson/tests/run_rtl_tests.sh
+      - name: Verify gate boundary
+        run: |
+          echo "P2-12 RTL core simulation only; AXI/Vivado/Vitis/real board NOT_RUN."

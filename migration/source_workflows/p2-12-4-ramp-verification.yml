@@ -1,0 +1,38 @@
+name: P2-12.4 Stepper Ramp RTL Verification
+on:
+  push:
+    branches: ['work/part02-second-half-20261110']
+    paths:
+      - 'part02/chapters/P2_12_Lesson/rtl/stepper_ramp_core.v'
+      - 'part02/chapters/P2_12_Lesson/rtl/p2_12_axi_stepper_v1_1.v'
+      - 'part02/chapters/P2_12_Lesson/tests/tb_p2_12_4_axi_ramp.v'
+      - 'part02/chapters/P2_12_Lesson/sw/stepper_ramp_logic*'
+      - 'part02/chapters/P2_12_Lesson/tests/test_stepper_ramp_logic.c'
+      - 'part02/chapters/P2_12_Lesson/tests/run_ramp_host_tests.sh'
+      - 'part02/chapters/P2_12_Lesson/tests/tb_stepper_ramp_core.v'
+      - 'part02/chapters/P2_12_Lesson/tests/run_ramp_tests.sh'
+      - '.github/workflows/p2-12-4-ramp-verification.yml'
+  pull_request:
+    paths:
+      - 'part02/chapters/P2_12_Lesson/rtl/stepper_ramp_core.v'
+      - 'part02/chapters/P2_12_Lesson/tests/tb_stepper_ramp_core.v'
+      - 'part02/chapters/P2_12_Lesson/tests/run_ramp_tests.sh'
+      - '.github/workflows/p2-12-4-ramp-verification.yml'
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  ramp-core:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Icarus Verilog
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y iverilog
+      - name: Validate P2-12.4 host configuration
+        run: bash part02/chapters/P2_12_Lesson/tests/run_ramp_host_tests.sh
+      - name: Simulate P2-12.4 ramp core
+        run: bash part02/chapters/P2_12_Lesson/tests/run_ramp_tests.sh
+      - name: Evidence boundary
+        run: echo "Only ramp RTL test. Vivado, Vitis, BOARD NOT_RUN."

@@ -1,0 +1,27 @@
+name: P2-20 Capstone Integrated RTL Regression
+on:
+  push:
+    branches: ['work/part02-second-half-20261110']
+    paths:
+      - 'part02/chapters/P2_20_Lesson/**'
+      - '.github/workflows/p2-20-capstone-verification.yml'
+  pull_request:
+    paths:
+      - 'part02/chapters/P2_20_Lesson/**'
+      - '.github/workflows/p2-20-capstone-verification.yml'
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  integrated-rtl:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Icarus Verilog
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y iverilog
+      - name: Check existing P2-12.4, P2-18, P2-19 RTL integrated with P2-20 safety gate
+        run: bash part02/chapters/P2_20_Lesson/tests/run_rtl_tests.sh
+      - name: Explicit scope
+        run: echo "Core integration RTL_SIM only, no physical AXI BD, SPI/I2C/UART, Vivado/Vitis/BOARD/UVM"

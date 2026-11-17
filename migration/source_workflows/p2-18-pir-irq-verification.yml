@@ -1,0 +1,27 @@
+name: P2-18 HC-SR501 PIR IRQ RTL Verification
+on:
+  push:
+    branches: ['work/part02-second-half-20261110']
+    paths:
+      - 'part02/chapters/P2_18_Lesson/**'
+      - '.github/workflows/p2-18-pir-irq-verification.yml'
+  pull_request:
+    paths:
+      - 'part02/chapters/P2_18_Lesson/**'
+      - '.github/workflows/p2-18-pir-irq-verification.yml'
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  pir-rtl:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Icarus Verilog
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y iverilog
+      - name: Run self-checking HC-SR501 PIR IRQ simulation
+        run: bash part02/chapters/P2_18_Lesson/tests/run_rtl_tests.sh
+      - name: Boundary
+        run: echo "RTL_SIM only; AXI/Vivado/Vitis/physical HC-SR501/UVM NOT_RUN."

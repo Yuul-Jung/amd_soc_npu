@@ -1,0 +1,27 @@
+name: P2-14 I2C PCF8574 LCD RTL Verification
+on:
+  push:
+    branches: ['work/part02-second-half-20261110']
+    paths:
+      - 'part02/chapters/P2_14_Lesson/**'
+      - '.github/workflows/p2-14-lcd-i2c-verification.yml'
+  pull_request:
+    paths:
+      - 'part02/chapters/P2_14_Lesson/**'
+      - '.github/workflows/p2-14-lcd-i2c-verification.yml'
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  lcd-i2c:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Icarus Verilog
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y iverilog
+      - name: Run self-checking I2C LCD simulation
+        run: bash part02/chapters/P2_14_Lesson/tests/run_rtl_tests.sh
+      - name: Boundary
+        run: echo "RTL simulation only. AXI/Vivado/Vitis/real LCD NOT_RUN."

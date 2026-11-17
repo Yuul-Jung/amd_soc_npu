@@ -1,0 +1,25 @@
+name: P2 11-20 HTML Distribution Static Audit
+on:
+  pull_request:
+    paths:
+      - 'part02/chapters/P2_11_20_Guide/**'
+      - '.github/workflows/p2-11-20-guide-verification.yml'
+  workflow_dispatch:
+permissions: {contents: read}
+concurrency:
+  group: p2-course-html-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  audit-distribution:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate static auditor Python syntax
+        run: python3 -m py_compile part02/chapters/P2_11_20_Guide/tests/check_html.py
+      - name: Check all chapter/lab links, source fidelity and private data
+        run: python3 part02/chapters/P2_11_20_Guide/tests/check_html.py
+      - name: Validate site JavaScript
+        run: node --check part02/chapters/P2_11_20_Guide/assets/site.js
+      - name: Separate browser and FPGA gates
+        run: echo "Static HTML only. Real browser interaction, GitHub Pages, RTL synthesis and board NOT_RUN."
