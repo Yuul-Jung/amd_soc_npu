@@ -1,0 +1,65 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "P3: 00 UART Echo (Icarus)",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "part03/ch00/scripts/run_sim.sh"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "P3: 01-10 기존 RTL 회귀",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "part03/mini_npu/scripts/run_batch_00_12.sh"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "P3: 11-12 DSP 4PE 엔진",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "part03/mini_npu/scripts/run_engine.sh"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "P3: 12 UART-NPU 비트 전체 데모",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "part03/mini_npu/scripts/run_demo.sh"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "P3: 00-12 전체 회귀",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "part03/mini_npu/scripts/run_batch_00_12.sh"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    }
+  ]
+}
