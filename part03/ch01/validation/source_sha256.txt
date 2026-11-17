@@ -1,0 +1,4 @@
+32e11915722acf1028e2bf3cccc5b10d8f525a85b1731f92f821d73122a09857  part03/ch01/rtl/mac_core.v
+0a3b8c564d1df43de073d21ba58fd2d2698da2cf251c8003b3c2f8a4bb174196  part03/ch01/tb/tb_mac_core.sv
+1e5441118704d7f23276d382145d607a66c312f6cc5113944dd6cae94d86c4a0  part03/ch01/reference/mac_reference.py
+6ff4dab0ff6642fce17e1e46278f561aa9e49c4b34a8b1631ccf811e8fe53ba2  part03/ch01/scripts/run_sim.sh
