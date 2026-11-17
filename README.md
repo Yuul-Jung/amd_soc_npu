@@ -23,3 +23,7 @@
 - 제2부 11~20장의 PR #2는 원본 저장소에서 Draft/충돌 상태였음
 - `part02_1/ch01`~`ch10`의 RTL·C·테스트·PNG 원본 전체는 아직 복사되지 않음
 - `tools/import_remaining.py`로 원본 커밋에서 이관과 Git Blob SHA 확인 가능. 실제 실행 여부는 별도 확인
+
+## 관리 및 브랜치 정리
+
+- [GitHub 브랜치 정리 대장](docs/BRANCH_CLEANUP_20261117.md): 브랜치별 보존·삭제 후보 및 검증 게이트
