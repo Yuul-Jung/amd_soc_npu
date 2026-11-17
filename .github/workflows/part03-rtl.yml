@@ -1,0 +1,37 @@
+name: P3 00-12 RTL Regression
+on:
+  push:
+    paths:
+      - "part03/**"
+      - ".github/workflows/part03-rtl.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  iverilog:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Icarus Verilog
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y iverilog
+          iverilog -V | head -2 || true
+          python3 --version
+      - name: Static source and HTML audit
+        run: python3 part03/validation/check_static.py
+      - name: Simulate original 01-10 and integrated 00-12
+        run: bash part03/mini_npu/scripts/run_batch_00_12.sh
+      - name: Preserve logs on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p3-rtl-regression-logs
+          path: |
+            part03/mini_npu/validation/local_runs/
+            part03/mini_npu/outputs/
+            part03/validation/static_audit.json
+          if-no-files-found: warn
