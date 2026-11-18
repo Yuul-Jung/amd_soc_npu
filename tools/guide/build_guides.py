@@ -361,13 +361,15 @@ def gates(c, e):
     else:
         g.append(("na", "HOST_MODEL_PASS", "해당 없음 (Python 기준 모델 없음)"))
     table = [ln for ln in e.rtl_pass if ln.startswith("|")]
-    if c.get("evidence", {}).get("kind") == "static":
-        # RTL이 아닌 장(블록 설계 Tcl 등): RTL 게이트는 해당 없음, 정적 검사 결과만 적는다.
-        lp = latest(c["evidence"]["rtl_log"])
-        hits = [ln.strip() for ln in (rd(lp).splitlines() if lp else []) if re.search(r"STATIC_CHECK_(PASS|FAIL)", ln)]
-        ok = hits and all("_PASS" in h for h in hits)
-        g.append(("na", "RTL_SIM_PASS", ("해당 없음 (RTL 시뮬레이션 대상 아님) · 정적 검사: " + short(hits[-1], 60) + f" · {file_date(lp)}")
-                  if ok else "해당 없음 · ⚠ 정적 검사 기록 없음"))
+    if c.get("evidence", {}).get("kind") in ("static", "host"):
+        # RTL이 아닌 장(블록 설계 Tcl, PC 측정 프로그램 등): RTL 게이트는 해당 없음, 대신 한 검사 결과만 적는다.
+        ev = c["evidence"]; lp = latest(ev["rtl_log"])
+        pat = ev.get("gate_pattern", r"STATIC_CHECK_(PASS|FAIL)")
+        hits = [ln.strip() for ln in (rd(lp).splitlines() if lp else []) if re.search(pat, ln)]
+        ok = hits and all("_FAIL" not in h for h in hits)
+        what = "정적 검사" if ev["kind"] == "static" else "PC 시험"
+        g.append(("na", "RTL_SIM_PASS", (f"해당 없음 (RTL 시뮬레이션 대상 아님) · {what}: " + short(hits[-1], 60) + f" · {file_date(lp)}")
+                  if ok else f"해당 없음 · ⚠ {what} 기록 없음"))
     elif e.rtl_pass and not e.rtl_fail:
         if table:
             head = f"회귀 결과 표 {len(table)}단계 모두 RTL_SIM_PASS"
@@ -670,9 +672,13 @@ def update_index(text, chs):
         cells[3] = f'<span class="badge badge-ok">{c["version"]} 완료</span>'
         if num >= 13:  # 신규 구현 장: RTL 칸을 실제 실행 로그로 판정 (00~12장은 원본에서 이전한 RTL)
             lp = latest(c["evidence"]["rtl_log"])
-            if c["evidence"].get("kind") == "static":
-                ok = bool(lp) and "STATIC_CHECK_PASS" in rd(lp)
-                cells[4] = '<span class="badge badge-ok">정적 검사 통과</span>' if ok else '<span class="badge badge-todo">정적 검사 대기</span>'
+            kind = c["evidence"].get("kind")
+            if kind in ("static", "host"):
+                pat = c["evidence"].get("gate_pattern", r"STATIC_CHECK_(PASS|FAIL)")
+                hits = re.findall(pat, rd(lp)) if lp else []
+                ok = bool(hits) and "FAIL" not in hits
+                what = "정적 검사" if kind == "static" else "PC 시험"
+                cells[4] = f'<span class="badge badge-ok">{what} 통과</span>' if ok else f'<span class="badge badge-todo">{what} 대기</span>'
             else:
                 ok = bool(lp) and "RTL_SIM_PASS" in rd(lp)
                 cells[4] = '<span class="badge badge-ok">RTL 시뮬 통과</span>' if ok else '<span class="badge badge-todo">RTL 시뮬 대기</span>'
