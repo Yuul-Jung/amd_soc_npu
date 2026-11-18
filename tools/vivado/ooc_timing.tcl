@@ -31,6 +31,7 @@ set designs {
     {ch15 npu_dense {ch01/rtl/mac_core.v ch04/rtl/bram_sync_buffer.v ch07/rtl/vector_dot_core.v ch08/rtl/pe_array4.v ch15/rtl/npu_dense_core.v ch15/rtl/npu_dense_store.v ch15/rtl/npu_dense.v}}
     {ch16 npu_mlp_64_8_10 {ch01/rtl/mac_core.v ch04/rtl/bram_sync_buffer.v ch05/rtl/fixed_quantizer.v ch07/rtl/vector_dot_core.v ch08/rtl/pe_array4.v ch15/rtl/npu_dense_core.v ch15/rtl/npu_dense_store.v ch15/rtl/npu_dense.v ch16/rtl/npu_argmax.v ch16/rtl/npu_mlp_64_8_10.v}}
     {ch17 npu_tiled_784 {ch01/rtl/mac_core.v ch04/rtl/bram_sync_buffer.v ch07/rtl/vector_dot_core.v ch08/rtl/pe_array4.v ch15/rtl/npu_dense_core.v ch16/rtl/npu_argmax.v ch17/rtl/npu_tiled_784.v}}
+    {ch18 npu_tiled_784_p {ch01/rtl/mac_core.v ch04/rtl/bram_sync_buffer.v ch07/rtl/vector_dot_core.v ch08/rtl/pe_array4.v ch15/rtl/npu_dense_core.v ch16/rtl/npu_argmax.v ch17/rtl/npu_tiled_784.v ch18/rtl/npu_tiled_784_p.v}}
 }
 
 proc worst_slack {kind} {
