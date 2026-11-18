@@ -1,0 +1,6 @@
+Icarus Verilog version 12.0 (stable) ()
+PYTHON_TILED784_SELF_TEST_PASS cases=6 tiles=13 lens=64x12+16
+RTL_SIM_PASS TILED784 cases=6 tiles=13 len_sum=784
+tb/tb_npu_tiled_784.sv:53: $finish called at 955710000 (1ps)
+PYTHON_TILED784_SELF_TEST_PASS cases=6 tiles=13 lens=64x12+16
+PYTHON_RTL_COMPARE_PASS cases=6 tile_prefix=780 scores=60
