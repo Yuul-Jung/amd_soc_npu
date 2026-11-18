@@ -50,6 +50,7 @@ chNN/
 - `fsm`: Top 파일에 상태 `localparam`이 있으면 `case(state)` 기준 전이표를 쓴다. 상태명 불일치·누락은 생성 실패. 구조도는 상태 목록만 보여 주며 전이는 이 표가 담당한다.
 - `run_note`: 실행 명령의 기능 설명(STANDARD 5.2).
 - 상태도: `fsm.diagram`에 `chNN/diagrams/<이름>`(확장자 없음)을 쓰고, [svg-flow-editor](https://yuul-jung.github.io/svg-flow-editor/)에서 **작업 불러오기 → 편집 → 작업 저장**한 JSON을 그 경로에 둔 뒤 `python3 tools/diagram/export_svg.py`로 SVG를 만든다(편집기 품질 검사 0건일 때만 저장). 상태 노드 제목 = `localparam` 이름, 간선 = 전이표의 상태 간 전이(자기 유지·`default`·`(모든 상태)` 제외)여야 하며, 생성기가 대조한다. JSON을 고치고 SVG를 다시 만들지 않으면 생성이 실패한다.
+- 00~12장 RTL의 모듈·인스턴스 관계를 바꾸면 `diagrams/module_techtree_00_12.json`도 편집기에서 같이 고쳐야 한다(모듈 노드·간선·×N을 생성기가 RTL과 대조). 13장 이후 테크트리는 해당 장 코드가 들어온 뒤 별도 도면으로 추가한다.
 - Vivado 대상이면 `vivado.mode`를 `ooc`로 하고 `tools/vivado/ooc_timing.tcl`의 `designs` 표에 한 줄을 추가한다. 보드 Top이면 `top`, 다른 장 Top에 포함되면 `via` + `ref`.
 - 커밋 전에 반드시 실행한다:
 

@@ -41,7 +41,9 @@
 - [MBV SoC 전용 규칙](rule_md/fpga-soc/MBV_SOC_rules.md) · [구조도 규칙](rule_md/common/flowchart-rules.md) · [코드 스타일](rule_md/common/code-style-rules.md)
 
 ## 도면
-- FSM 상태도: [svg-flow-editor](https://yuul-jung.github.io/svg-flow-editor/)로 편집하는 JSON(`ch10/diagrams/`, `ch11/diagrams/`) → `python3 tools/diagram/export_svg.py`로 SVG 생성
+- [svg-flow-editor](https://yuul-jung.github.io/svg-flow-editor/)로 편집하는 JSON이 원본, `python3 tools/diagram/export_svg.py`로 SVG 생성
+  - 과정 흐름·모듈 테크트리: `diagrams/` (INDEX 01절)
+  - FSM 상태도: `ch10/diagrams/`, `ch11/diagrams/` (각 장 01절)
 
 ## 검증 현황
 - 장별 게이트(HOST·RTL_SIM·SYNTH_TIMING·TIMING_SIM·BOARD): [`docs/GUIDE_STATUS.md`](docs/GUIDE_STATUS.md) — `validation/` 증거로 자동 생성

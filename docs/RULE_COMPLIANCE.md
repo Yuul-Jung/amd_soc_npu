@@ -35,6 +35,11 @@
 | code-style 10.2 | 코드 박스 파일명·언어·원본/검증 상태 | 통과 | 예: `ch01/rtl/mac_core.v · verilog · 원본 · RTL_SIM 통과 2026-11-18`, Vivado 스크립트는 `⚠ 미검증` |
 | MBV 6 · code-dev 5 | 호스트·RTL 시뮬·Vivado·보드 구분, 미실행은 미검증 | 통과 | 게이트 6종 분리, SYNTH_TIMING·TIMING_SIM 실행 대기, BOARD 미실시 |
 | methodology ① | 원자 커밋·Co-Authored-By | 통과 | 커밋 이력 |
+| part03 AGENTS 1 · 체계화 | 이전 기준선·변경 범위·입출력·Gate·인계 파일 | 통과 | 00절 유지/작성 파일, 01절 포트 표, 09절 게이트·인계 표 |
+| part03 AGENTS 1 · 순서화 | 준비 → RTL/TB → Python 정답 → 통합 → Vivado → 보드 → 회귀 | 통과 | 02~08절 순서 고정 (Vivado·보드 실행은 대기·미실시) |
+| part03 AGENTS 1 · 구조화 | 실제 모듈명 기반 계층, Top 순수 Shell | 통과 | 구조도·테크트리 모두 RTL 선언에서 대조 |
+| part03 AGENTS 1 · 시각화 | 이전 블록/추가 블록/출력 간 화살표 | 통과 | INDEX 00~12장 모듈 테크트리(svg-flow-editor, ×N = 인스턴스 수, RTL 대조), 장별 구조도의 재사용/신규 구분 |
+| part03 AGENTS 5 | 장마다 이전 결과 → 추가 RTL → 시험 벡터 → 시뮬레이션 → 합성/보드 → 인계 표 | 통과 | 09절 누적 보고 표 (게이트 증거에서 자동) |
 
 ## 남은 실패·미검증
 
