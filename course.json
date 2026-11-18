@@ -177,8 +177,8 @@
       "id": "ch21",
       "number": 21,
       "title": "MicroBlaze V·NPU 통합",
-      "file": "ch21_mbv_npu_v02.html",
-      "html_status": "TODO",
+      "file": "ch21_soc_bd_v02.html",
+      "html_status": "DONE",
       "rtl_status": "TODO"
     },
     {
