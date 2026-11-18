@@ -6,36 +6,88 @@
   "nav_title": "MicroBlaze V + NPU 블록 설계",
   "name": "MicroBlaze V SoC에 NPU 연결 (독립 Vivado 프로젝트)",
   "goal": "제1부 11장에서 보드로 확인한 MicroBlaze V SoC를 새 프로젝트로 복제하고, 20장 AXI NPU를 모듈 참조로 넣어 0x44A0_0000(64KB)에 배정합니다. Vivado 없이 할 수 있는 확인(파일·모듈 계층, 주소 겹침, Top 포트와 XDC)은 Tcl 정적 검사로 먼저 끝냅니다.",
-  "top": {"file": "ch21/rtl/soc_npu_top.v", "module": "soc_npu_top"},
-  "keep": ["ch01/rtl/mac_core.v", "ch04/rtl/bram_sync_buffer.v", "ch07/rtl/vector_dot_core.v", "ch16/rtl/npu_argmax.v",
-           "ch19/rtl/npu_tiled_784_npe.v", "ch20/rtl/npu_axi_lite.v"],
-  "new": ["ch21/rtl/soc_npu_top.v", "ch21/constraints/soc_npu.xdc", "ch21/vivado/add_npu.tcl"],
-  "tb": ["ch21/scripts/check_bd.tcl"],
+  "top": {
+    "file": "ch21/rtl/soc_npu_top.v",
+    "module": "soc_npu_top"
+  },
+  "keep": [
+    "ch01/rtl/mac_core.v",
+    "ch04/rtl/bram_sync_buffer.v",
+    "ch07/rtl/vector_dot_core.v",
+    "ch16/rtl/npu_argmax.v",
+    "ch19/rtl/npu_tiled_784_npe.v",
+    "ch20/rtl/npu_axi_lite.v"
+  ],
+  "new": [
+    "ch21/rtl/soc_npu_top.v",
+    "ch21/constraints/soc_npu.xdc",
+    "ch21/vivado/add_npu.tcl"
+  ],
+  "tb": [
+    "ch21/scripts/check_bd.tcl"
+  ],
   "ref": [],
   "prep_note": "제1부 11장 SoC 프로젝트(<code>soc11_integration</code>, 보드 동작 확인 2026-11-02)가 필요합니다. 05절 정적 검사는 <code>tclsh</code>만 있으면 됩니다(<code>sudo apt install tcl</code>)",
   "tb_note": "RTL 시뮬레이션 대신 Tcl 정적 검사입니다. <code>check_bd.tcl</code>이 Vivado 명령을 기록만 하는 가짜 함수로 바꾼 뒤 <code>add_npu.tcl</code>을 그대로 실행하고, 더한 파일·모듈 계층·주소·핀을 확인합니다. Vivado의 Validate Design·합성을 대신하지 않습니다.",
   "run": "bash ch21/scripts/run_check.sh",
   "run_note": "add_npu.tcl 모의 실행 → 파일·계층·주소·핀 정적 검사",
-  "evidence": {"rtl_log": "ch21/validation/rtl_sim_*.log", "pattern": "ok |FAIL|STATIC_CHECK|tclsh", "kind": "static"},
+  "evidence": {
+    "rtl_log": "ch21/validation/rtl_sim_*.log",
+    "pattern": "ok |FAIL|STATIC_CHECK|tclsh",
+    "kind": "static"
+  },
   "checks": [
-    ["BD_STATIC_CHECK_PASS tcl_steps=17 files=8 npu=0x44A00000/64KB ports=36", "NPU RTL 6개와 Top·제약이 있고, 하위 모듈 5개가 모두 정의되며, 주소가 기존 4개 주변장치와 겹치지 않고, Top 포트 36개와 XDC 핀 36개가 같음"],
-    ["(일부러 틀리게) XDC에서 led[15] 줄 삭제", "<code>빠진 핀: {led[15]}</code>와 <code>BD_STATIC_CHECK_FAIL</code> — 검사가 실제로 잡는지 한 번 해 보고 되돌립니다"]
+    [
+      "BD_STATIC_CHECK_PASS tcl_steps=17 files=8 npu=0x44A00000/64KB ports=36",
+      "NPU RTL 6개와 Top·제약이 있고, 하위 모듈 5개가 모두 정의되며, 주소가 기존 4개 주변장치와 겹치지 않고, Top 포트 36개와 XDC 핀 36개가 같음"
+    ],
+    [
+      "(일부러 틀리게) XDC에서 led[15] 줄 삭제",
+      "<code>빠진 핀: {led[15]}</code>와 <code>BD_STATIC_CHECK_FAIL</code> — 검사가 실제로 잡는지 한 번 해 보고 되돌립니다"
+    ]
   ],
   "read_points": [
-    ["원본 보존", "제1부 11장 프로젝트는 Save As로 복제한 사본만 바꿉니다. NPU RTL도 복사하지 않고 원래 장 폴더 파일을 <code>add_files</code>로 참조합니다."],
-    ["모듈 참조", "<code>create_bd_cell -type module -reference npu_axi_lite</code>는 20장 RTL을 IP로 포장하지 않고 블록 설계에 넣습니다. 포트 이름 <code>s_axi_*</code>·<code>s_axi_aclk</code>·<code>s_axi_aresetn</code>으로 AXI4-Lite 인터페이스와 클록·리셋이 잡힙니다(⚠ 화면 확인 필요)."],
-    ["주소 0x44A0_0000", "기존 GPIO 0x4000_0000·INTC 0x4120_0000(제1부 11장 <code>xparameters.h</code> 확인값)과 UART·Timer 기본 주소(⚠ 미확인)를 피합니다. 레지스터는 0x00~0x67만 쓰지만 64KB 단위로 배정합니다."],
-    ["Top은 연결만", "<code>soc_npu_top</code>은 Wrapper 포트를 보드 핀에 잇기만 합니다. Wrapper 포트 이름은 제1부 11장과 같다고 가정했으므로, Vivado가 만든 <code>soc_npu_wrapper</code> 선언과 꼭 대조합니다."],
-    ["인터럽트", "<code>irq_o</code>는 이번 장에서 연결하지 않습니다. 22장 드라이버는 STATUS를 시간 제한과 함께 폴링합니다."]
+    [
+      "원본 보존",
+      "제1부 11장 프로젝트는 Save As로 복제한 사본만 바꿉니다. NPU RTL도 복사하지 않고 원래 장 폴더 파일을 <code>add_files</code>로 참조합니다."
+    ],
+    [
+      "모듈 참조",
+      "<code>create_bd_cell -type module -reference npu_axi_lite</code>는 20장 RTL을 IP로 포장하지 않고 블록 설계에 넣습니다. 포트 이름 <code>s_axi_*</code>·<code>s_axi_aclk</code>·<code>s_axi_aresetn</code>으로 AXI4-Lite 인터페이스와 클록·리셋이 잡힙니다(⚠ 화면 확인 필요)."
+    ],
+    [
+      "주소 0x44A0_0000",
+      "기존 GPIO 0x4000_0000·INTC 0x4120_0000(제1부 11장 <code>xparameters.h</code> 확인값)과 UART·Timer 기본 주소(⚠ 미확인)를 피합니다. 레지스터는 0x00~0x67만 쓰지만 64KB 단위로 배정합니다."
+    ],
+    [
+      "Top은 연결만",
+      "<code>soc_npu_top</code>은 Wrapper 포트를 보드 핀에 잇기만 합니다. Wrapper 포트 이름은 제1부 11장과 같다고 가정했으므로, Vivado가 만든 <code>soc_npu_wrapper</code> 선언과 꼭 대조합니다."
+    ],
+    [
+      "인터럽트",
+      "<code>irq_o</code>는 이번 장에서 연결하지 않습니다. 22장 드라이버는 STATUS를 시간 제한과 함께 폴링합니다."
+    ]
   ],
-  "vivado": {"mode": "top", "board_fragment": "ch21/docs/guide_vivado.html"},
+  "vivado": {
+    "mode": "top",
+    "board_fragment": "ch21/docs/guide_vivado.html"
+  },
   "handoff": [
-    ["soc_npu_top.xsa", "22장 Vitis 플랫폼 (NPU 기준 주소 매크로는 xparameters.h에서 확인)"],
-    ["ch21/rtl/soc_npu_top.v · soc_npu.xdc", "27장 통합 Top이 7세그먼트 핀을 더해 확장"]
+    [
+      "soc_npu_top.xsa",
+      "22장 Vitis 플랫폼 (NPU 기준 주소 매크로는 xparameters.h에서 확인, 드라이버 기본값 0x44A0_0000)"
+    ],
+    [
+      "ch21/rtl/soc_npu_top.v · soc_npu.xdc",
+      "27장 통합 Top이 7세그먼트 핀을 더해 확장"
+    ]
   ],
   "port_notes": {
-    "clk": "W5 · 100 MHz 외부 클록", "btnC": "U18 · 리셋 버튼 (블록 설계 리셋, Active-High)",
-    "sw": "슬라이드 스위치 16개 → GPIO 입력", "led": "LED 16개 ← GPIO 출력",
-    "RsRx": "B18 · USB-UART 수신 (PC → FPGA)", "RsTx": "A18 · USB-UART 송신 (FPGA → PC)"
+    "clk": "W5 · 100 MHz 외부 클록",
+    "btnC": "U18 · 리셋 버튼 (블록 설계 리셋, Active-High)",
+    "sw": "슬라이드 스위치 16개 → GPIO 입력",
+    "led": "LED 16개 ← GPIO 출력",
+    "RsRx": "B18 · USB-UART 수신 (PC → FPGA)",
+    "RsTx": "A18 · USB-UART 송신 (FPGA → PC)"
   }
 }
