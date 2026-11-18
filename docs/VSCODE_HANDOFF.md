@@ -46,11 +46,20 @@ chNN/
 - `run_sim.sh` 출력 규칙: 통과 줄은 `RTL_SIM_PASS …`(또는 `…_SIM_PASS`), Python 기준 모델은 `PYTHON_…_SELF_TEST_PASS`, 실패는 `$fatal` 또는 `…_FAIL`. 로그 첫 줄 근처에 `Icarus Verilog version …`이 찍히게 한다(`iverilog -V | head -1`).
 - 이전 장 파일은 수정하지 않고 `keep`에 적는다. 이번 장에서 만든 파일만 `new`에 적는다. 모듈 출처(구조도의 "NN장 재사용")는 `new` 목록으로 자동 판정된다.
 - `version`은 13~31장 `v02`. `top.file`·`top.module`은 실제 선언과 일치해야 한다(생성기가 포트를 파싱).
+- `port_notes`: Top 모듈의 **모든 포트**에 한글 설명(실제 코드명 + 쉬운 설명, flowchart-rules 5절). 빠지면 생성 실패.
+- `fsm`: Top 파일에 상태 `localparam`이 있으면 `case(state)` 기준 전이표를 쓴다. 상태명 불일치·누락은 생성 실패. 구조도는 상태 목록만 보여 주며 전이는 이 표가 담당한다.
+- `run_note`: 실행 명령의 기능 설명(STANDARD 5.2).
 - Vivado 대상이면 `vivado.mode`를 `ooc`로 하고 `tools/vivado/ooc_timing.tcl`의 `designs` 표에 한 줄을 추가한다. 보드 Top이면 `top`, 다른 장 Top에 포함되면 `via` + `ref`.
 - 커밋 전에 반드시 실행한다:
 
 ```bash
 python3 tools/guide/build_guides.py && python3 tools/guide/build_guides.py --check && python3 tools/check_static.py
+```
+
+화면을 바꿨거나 새 장을 넣었으면 화면 점검도 실행한다(Playwright 필요):
+
+```bash
+python3 tools/guide/audit_render.py      # → docs/RENDER_AUDIT.md, 마지막 줄 RENDER_AUDIT_PASS
 ```
 
 CI는 `--check`가 실패하면(코드·증거와 안내서가 어긋나면) 빨간불이 된다.

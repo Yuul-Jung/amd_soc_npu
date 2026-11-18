@@ -48,6 +48,7 @@ amd_soc_npu/
 - **안내서 HTML·`index.html`·`docs/GUIDE_STATUS.md`는 직접 수정하지 않는다.** 내용은 `chNN/chapter.json`, 코드는 원본 파일, 게이트 배지는 `validation/` 증거에서 `python3 tools/guide/build_guides.py`가 만든다. CI가 `--check`로 어긋남을 막는다.
 - 역할 분담: 코드·실행·증거·`chapter.json`은 VS Code Claude, 생성기·안내서 관리는 웹 Claude. 상세는 [docs/VSCODE_HANDOFF.md](docs/VSCODE_HANDOFF.md).
 - `window.COURSE` 탐색에는 실제 존재하는 장 파일만 넣는다.
+- 구조도는 실제 RTL 선언에서 자동 생성하는 **구현 도식**이다. 포트 한글 설명(`port_notes`)과 FSM 전이표(`fsm`)는 `chapter.json`에 쓰고 생성기가 코드와 대조한다. 규칙별 판정은 [docs/RULE_COMPLIANCE.md](docs/RULE_COMPLIANCE.md), 화면 점검은 `tools/guide/audit_render.py`.
 - 원본에 없는 하드웨어 실행 결과·GUI 캡처를 성공 사례처럼 조작하지 않는다.
 - 미검증 항목은 `⚠ 미검증` 뱃지를 명시한다.
 

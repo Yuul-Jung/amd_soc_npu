@@ -25,13 +25,22 @@
 - RTL 원본: [`Yuul-Jung/amd_soc_rtl/part03/`](https://github.com/Yuul-Jung/amd_soc_rtl/tree/main/part03)
 - 규칙 기준: `rule_md` 커밋 `d1b8278d`
 
+## 📘 교육용 HTML 공통 제작 규칙
+
+이 저장소의 교육자료(웹페이지·강의 HTML)는 [Yuul-Jung 교육용 HTML 공통 표준](https://github.com/Yuul-Jung/rule_md/tree/d1b8278d41fca8f5e3960736f3ac9d377e462fda/web/education-html)을 적용합니다.
+
+- [제작 규칙](https://github.com/Yuul-Jung/rule_md/blob/d1b8278d41fca8f5e3960736f3ac9d377e462fda/web/education-html/STANDARD.md)
+- [다른 저장소 적용 안내](https://github.com/Yuul-Jung/rule_md/blob/d1b8278d41fca8f5e3960736f3ac9d377e462fda/web/education-html/INTEGRATION.md)
+- [기준 디자인 사례](https://github.com/Yuul-Jung/ai-agent-engineering)
+
+공통 책장 이미지, 컴팩트한 상단 배너, 좌측 전체 장/절 탐색, 모바일 메뉴, 파일 버전 및 검증 기준을 따릅니다. 기준 커밋은 `d1b8278d`로 고정하며 로컬 사본은 [`rule_md/`](rule_md/)에 있습니다.
+
 ## 작업 규칙
 - [`AGENTS.md`](AGENTS.md) — AI 에이전트 필수 확인
-- [교육 HTML 표준](https://github.com/Yuul-Jung/rule_md/blob/d1b8278d41fca8f5e3960736f3ac9d377e462fda/web/education-html/STANDARD.md)
-- [MBV SoC 전용 규칙](rule_md/fpga-soc/MBV_SOC_rules.md)
+- [`docs/VSCODE_HANDOFF.md`](docs/VSCODE_HANDOFF.md) — 코드·실행(VS Code)과 안내서 관리 분담
+- [MBV SoC 전용 규칙](rule_md/fpga-soc/MBV_SOC_rules.md) · [구조도 규칙](rule_md/common/flowchart-rules.md) · [코드 스타일](rule_md/common/code-style-rules.md)
 
-## 검증 현황 (2026-11-18)
-- HTML 정적 검사: 미실시
-- RTL 시뮬레이션 ch00~12: 원본 로그 이전 완료 후 재실행 예정
-- RTL 시뮬레이션 ch13~31: 신규 구현 후 실행 예정
-- Vivado 합성·보드: 미실시
+## 검증 현황
+- 장별 게이트(HOST·RTL_SIM·SYNTH_TIMING·TIMING_SIM·BOARD): [`docs/GUIDE_STATUS.md`](docs/GUIDE_STATUS.md) — `validation/` 증거로 자동 생성
+- 화면 점검(폭 6종·탐색·복사·SVG): [`docs/RENDER_AUDIT.md`](docs/RENDER_AUDIT.md), 배포본 [`docs/RENDER_AUDIT_PAGES.md`](docs/RENDER_AUDIT_PAGES.md)
+- 안내서: <https://yuul-jung.github.io/amd_soc_npu/>
