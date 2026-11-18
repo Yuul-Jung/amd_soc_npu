@@ -2,10 +2,11 @@
 # (추가) 13~19장 신규 RTL 회귀. 구현된 장만 실행하고, 실행 스크립트가 없는 장은 NOT_IMPLEMENTED로 표시한다.
 # (변경) 20장 AXI4-Lite NPU IP, 22장 C 드라이버 협동 시뮬레이션을 회귀에 포함한다(파일 이름은 기존 호출 경로 보존).
 # 21장은 Vivado BD·Bitstream 빌드 장(ch21/scripts/build_soc.sh)이라 RTL 회귀에 넣지 않는다.
+# 23~25장(SoC xsim·Vivado 분석)도 도구 실행 장이라 제외, 26장 합성곱 RTL은 포함한다.
 set -euo pipefail
 part03="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 status=0
-for n in 13 14 15 16 17 18 19 20 22; do
+for n in 13 14 15 16 17 18 19 20 22 26; do
   script="$part03/ch$n/scripts/run_sim.sh"
   if [[ ! -f "$script" ]]; then
     echo "NOT_IMPLEMENTED ch$n"
