@@ -204,7 +204,8 @@
     "ch18_pc_eval": "pc_eval_mnist_t10k_float9260_int8_9256_int16_9260_2026_11_18",
     "ch21_soc_build": "vivado_2024_2_soc_bitstream_xsa_2026_11_18_route_wns_0_219_board_not_run",
     "ch22_vitis": "c_driver_icarus_cosim_pass_and_vitis_elf_build_2026_11_18_board_not_run",
-    "ch23_ch31": "education_guides_written_implementation_and_fpga_validation_not_run",
+    "ch23_soc_sim": "xsim_full_soc_mbv_elf_pass_2026_11_18_cpu_1816547_npu_e2e_1080161_cycles_board_not_run",
+    "ch24_ch31": "education_guides_written_implementation_and_fpga_validation_not_run",
     "vivado": "ch19_ch20_ooc_synth_route_ch21_full_soc_bitstream_xsa_2026_11_18_all_wns_positive_100mhz",
     "board": "not_run",
     "web": "not_run"

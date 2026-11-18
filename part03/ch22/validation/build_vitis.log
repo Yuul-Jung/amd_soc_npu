@@ -1,5 +1,5 @@
 MODEL_HEADER_DONE samples=4 classes=[7, 2, 4, 4] labels=[7, 2, 9, 9]
-VITIS_BUILD_DONE
+VITIS_BUILD_DONE npu_app
 #define XPAR_P3_NPU_0_BASEADDR 0x44a00000
 #define XPAR_P3_NPU_0_HIGHADDR 0x44a00fff
    text	   data	    bss	    dec	    hex	filename

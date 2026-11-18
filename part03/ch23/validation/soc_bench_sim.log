@@ -1,0 +1,5 @@
+MODEL_HEADER_DONE samples=4 classes=[7, 2, 4, 4] labels=[7, 2, 9, 9]
+ELF bench_board text=26892 data=204 bss=3508 sha256=201d9d84c349a200
+ELF bench_sim text=19592 data=204 bss=3508 sha256=4c6a8cc219b9f8f4
+SOC_BENCH cpu_cycles=1816547 npu_bias_cycles=3076 npu_cycles=1080161 cpu_class=7 npu_class=7 scores_match=1 rc=0 sim_time_ns=29039155000
+SOC_RTL_SIM_PASS

@@ -18,7 +18,9 @@ build="$chapter_dir/build"
 rm -rf "$build"; mkdir -p "$build"
 export PYTHONDONTWRITEBYTECODE=1
 python3 "$chapter_dir/reference/gen_model.py" --out "$build/model_data.h"
-(cd "$build" && vitis -s "$chapter_dir/vitis/vitis_build.py" "$build/ws" "$xsa" "$chapter_dir/sw" \
+sw="$chapter_dir/sw"
+(cd "$build" && vitis -s "$chapter_dir/vitis/vitis_build.py" "$build/ws" "$xsa" npu_app \
+  "$sw/npu_driver.h" "$sw/npu_driver.c" "$sw/app.h" "$sw/app.c" "$sw/npu_io_xil.c" "$sw/main.c" \
   "$build/model_data.h" > "$build/vitis.log" 2>&1) || true
 grep -E "VITIS_BUILD_DONE|[Ee]rror|ERROR" "$build/vitis.log" | sed "s#$build#build#g" | head -20
 grep -q VITIS_BUILD_DONE "$build/vitis.log"
