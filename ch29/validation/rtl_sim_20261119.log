@@ -1,0 +1,18 @@
+Icarus Verilog version 12.0 (stable) ()
+PYTHON_SENSOR_SELF_TEST_PASS cases=12 states=NORMAL/HOT/VIBRATION/DRIFT/UNKNOWN/FAULT
+RTL_SIM_PASS SENSOR_GUARD cases=12
+tb/tb_sensor_guard_ai.sv:34: $finish called at 30220000 (1ps)
+PYTHON_SENSOR_SELF_TEST_PASS cases=12 states=NORMAL/HOT/VIBRATION/DRIFT/UNKNOWN/FAULT
+STATE NORMAL_0     → NORMAL margin=26733
+STATE NORMAL_1     → NORMAL margin=26340
+STATE HOT_0        → HOT margin=30237
+STATE HOT_1        → HOT margin=28789
+STATE VIBRATION_0  → VIBRATION margin=29513
+STATE VIBRATION_1  → VIBRATION margin=29233
+STATE DRIFT_0      → DRIFT margin=31944
+STATE DRIFT_1      → DRIFT margin=31382
+STATE ambiguous    → UNKNOWN margin=2800
+STATE range_low    → FAULT fault=0b001
+STATE stuck_ch3    → FAULT fault=0b010
+STATE order        → FAULT fault=0b100
+PYTHON_RTL_COMPARE_PASS cases=12
