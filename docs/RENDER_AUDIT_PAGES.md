@@ -20,5 +20,6 @@
 | ch10_npu_core_v05.html | 통과 | 헤더 214px · 코드 박스 7 |
 | ch11_uart_register_v05.html | 통과 | 헤더 214px · 코드 박스 8 |
 | ch12_integrated_npu_v05.html | 통과 | 헤더 214px · 코드 박스 20 |
+| ch13_mnist_8x8_v02.html | 통과 | 헤더 214px · 코드 박스 7 |
 
 다른 브라우저 결과: `docs/RENDER_AUDIT*_firefox.md`·`*_webkit.md`. 인쇄·접근성: `docs/A11Y_PRINT_AUDIT.md`.
