@@ -1,0 +1,22 @@
+      <h3>8-1. 보고서 뽑기 (Vivado 2024.2)</h3>
+      <p>⚠ 미검증 — Vivado에서 실행하지 않았습니다. 23장에서 시간을 잰 것과 <b>같은 비트스트림</b>의 구현 결과로 뽑아야 숫자를 서로 비교할 수 있습니다.</p>
+      <table>
+        <thead><tr><th>순서</th><th>조작</th><th>성공 기준</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>21장 프로젝트 열기 (구현 완료 상태)</td><td>Design Runs의 impl_1이 Complete</td></tr>
+          <tr><td>2</td><td>Tcl Console: <code>source &lt;저장소&gt;/ch24/vivado/report_soc.tcl</code></td><td><code>REPORT_SOC_DONE …/build/ch24</code></td></tr>
+          <tr><td>3</td><td>터미널: <code>bash ch24/scripts/run_check.sh</code></td><td>마지막 줄 <code>REPORT_PARSE_PASS timing=met</code></td></tr>
+          <tr><td>4</td><td>출력 전체를 <code>ch24/validation/vivado_reports_YYYYMMDD.txt</code>로 저장 (경로의 사용자 이름은 지움)</td><td>UTIL·TIMING·CRITICAL·BUILD 줄</td></tr>
+        </tbody>
+      </table>
+      <h3>8-2. 채울 표</h3>
+      <table>
+        <thead><tr><th>항목</th><th>SoC 전체</th><th>NPU (npu_0)</th><th>비고</th></tr></thead>
+        <tbody>
+          <tr><td>LUT · FF</td><td>⚠ 미측정</td><td>⚠ 미측정</td><td>XC7A35T: LUT 20,800 · FF 41,600</td></tr>
+          <tr><td>RAMB36 · RAMB18</td><td>⚠ 미측정</td><td>⚠ 미측정</td><td>50개(36Kb 기준). NPU 가중치 RAM 4개 + 입력 1개</td></tr>
+          <tr><td>DSP</td><td>⚠ 미측정</td><td>⚠ 미측정</td><td>90개. NPU 기대 4개 (NPE=4)</td></tr>
+          <tr><td>WNS · TNS · WHS</td><td colspan="2">⚠ 미측정</td><td>WNS ≥ 0, TNS = 0, WHS ≥ 0</td></tr>
+          <tr><td>임계 경로</td><td colspan="2">⚠ 미측정</td><td>시작·끝 레지스터, 논리 단수</td></tr>
+        </tbody>
+      </table>

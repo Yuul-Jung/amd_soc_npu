@@ -1,0 +1,4 @@
+repo_commit 0000000
+vivado 2024.2
+part xc7a35tcpg236-1
+bitstream_sha256 NONE

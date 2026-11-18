@@ -1,0 +1,9 @@
+tclsh 8.6.14
+TCL_SYNTAX_STATIC_CHECK_PASS reports=5
+[견본·실측 아님] UTIL TOTAL LUT=3000 FF=3500 RAMB36=20 RAMB18=2 DSP=7
+[견본·실측 아님] UTIL NPU   LUT=1200 FF=1100 RAMB36=10 RAMB18=1 DSP=4  (LUT 40%, FF 31%, RAMB36 50%, RAMB18 50%, DSP 57%)
+[견본·실측 아님] TIMING WNS=+1.234 TNS=+0.000 WHS=+0.045 THS=+0.000
+[견본·실측 아님] CRITICAL slack=1.234 levels=9 from=u_soc/soc_npu_i/npu_0/inst/core/lane[0].dot/acc_reg[3]/C to=u_soc/soc_npu_i/npu_0/inst/core/lane[0].dot/acc_reg[31]/D
+[견본·실측 아님] BUILD repo_commit=0000000 vivado=2024.2 part=xc7a35tcpg236-1 bitstream_sha256=NONE
+PARSER_STATIC_CHECK_PASS fixture timing=met
+REAL_REPORTS NOT_RUN (Vivado 미실행)

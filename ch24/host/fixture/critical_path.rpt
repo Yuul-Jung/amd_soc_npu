@@ -1,0 +1,5 @@
+견본 (작성한 시험용 입력 — 실제 Vivado 출력 아님)
+Slack (MET) :             1.234ns  (required time - arrival time)
+  Source:                 u_soc/soc_npu_i/npu_0/inst/core/lane[0].dot/acc_reg[3]/C
+  Destination:            u_soc/soc_npu_i/npu_0/inst/core/lane[0].dot/acc_reg[31]/D
+  Logic Levels:           9  (CARRY4=8 LUT2=1)
