@@ -257,8 +257,8 @@
       "id": "ch31",
       "number": 31,
       "title": "AES-128·HMAC 보안 UART",
-      "file": "ch31_capstone_secure_uart_v02.html",
-      "html_status": "TODO",
+      "file": "ch31_secure_frame_v02.html",
+      "html_status": "DONE",
       "rtl_status": "TODO"
     }
   ],
