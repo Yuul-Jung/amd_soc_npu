@@ -31,11 +31,19 @@ git commit -m "test: 00~12장 Vivado 합성·타이밍·타이밍 시뮬레이�
 
 같은 종류가 여러 개면 날짜가 가장 늦은 파일을 쓴다. 로그에는 개인 경로를 넣지 않는다(`<repo>`로 치환).
 
-## 2-1. 13장 — 웹 Claude가 작성 완료 (사용자 권한 위임, 2026-11-18)
+## 2-1. 13~31장 — 웹 Claude가 작성 완료 (사용자 권한 위임, 2026-11-18~19)
 
-- `ch13/` 코드·TB·기준 모델·`chapter.json`·상태도는 웹 Claude가 작성했고 Icarus RTL 시뮬레이션까지 통과했다 (`ch13/validation/rtl_sim_20261118.log`).
-- VS Code 쪽에서 13장을 따로 만들고 있었다면 **`git pull` 후 이 버전과 비교**하고, 바꿀 때는 위 계약을 지킨다. 14장은 `npu10_input_loader`의 `loaded_o`·`rd_addr_i`·`rd_data_o`를 입력으로 쓴다.
-- Vivado: `tools/vivado/ooc_timing.tcl`의 `designs`에 `ch13` 줄을 추가했다. `bash tools/run_vivado_all.sh ooc`를 실행하면 `ch13/validation/vivado_ooc_YYYYMMDD.txt`가 생긴다 (⚠ 미검증).
+코드·TB·기준 모델·`chapter.json`·안내서는 모두 저장소에 있다. VS Code에서 따로 만들던 판이 있으면 `git pull` 후 이 판과 비교하고, 바꿀 때는 아래 3절 계약을 지킨다.
+
+| 장 | 확인한 것 | VS Code(Vivado·Vitis·보드)에서 남은 일 |
+|---|---|---|
+| 13~20, 26, 29, 30 | Icarus RTL 시뮬레이션 + Python 비교 | `bash tools/run_vivado_all.sh ooc` (19장은 NPE=1·4·8 세 줄, `-generic`) |
+| 21 | `add_npu.tcl` 모의 실행 정적 검사 | 제1부 11장 프로젝트 Save As → `add_npu.tcl` → Validate → 비트스트림·XSA (21장 8절) |
+| 22, 23, 27, 28, 31 | RV32IMC 교차 컴파일, PC 시험, 펌웨어 레지스터 접근 기록을 20장 RTL에서 재생 | Vitis 빌드·보드 실행. 기준 주소(NPU 0x44A0_0000, Timer·UART는 xparameters.h 확인) |
+| 24, 25 | Tcl 문법·해석기(견본 보고서) | 21장 구현 결과로 `report_soc.tcl`·`report_power.tcl` 실행 → `run_check.sh` 출력 저장 |
+| 27 | 표시기 RTL, Top·XDC 정적 검사, 기대 화면(DEMO 줄) | 27장 8절 (Top·제약 교체 → 비트스트림 → `npu_system`) |
+
+증거 파일 이름은 각 장 8절 표를 따른다. 보드 결과가 들어오면 BOARD 게이트를 갱신한다.
 
 ## 3. 13~31장 새 장 추가 계약
 
