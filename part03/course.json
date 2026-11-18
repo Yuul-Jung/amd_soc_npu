@@ -200,10 +200,10 @@
     "original_ch01_ch10": "rtl_sim_pass_local_rerun_2026_11_17_at_66521a3",
     "new_ch00_ch11_ch12": "rtl_sim_pass_local_rerun_2026_11_17_at_66521a3_incl_uart_fifo_19_boundary_tests",
     "host_integer_reference": "host_selftest_pass_2026_11_17",
-    "ch13_ch18": "rtl_sim_pass_local_2026_11_18_python_bit_exact_branch_work_part03_ch13_19",
+    "ch13_ch19": "rtl_sim_pass_local_2026_11_18_python_bit_exact_branch_work_part03_ch13_19",
     "ch18_pc_eval": "pc_eval_mnist_t10k_float9260_int8_9256_int16_9260_2026_11_18",
-    "ch19_ch31": "education_guides_written_implementation_and_fpga_validation_not_run",
-    "vivado": "not_run",
+    "ch20_ch31": "education_guides_written_implementation_and_fpga_validation_not_run",
+    "vivado": "ch19_ooc_synth_only_2026_11_18_wns_negative_argmax_path_impl_not_run",
     "board": "not_run",
     "web": "not_run"
   }
