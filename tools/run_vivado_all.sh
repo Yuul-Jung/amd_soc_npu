@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# VS Code(Vivado 설치 PC)에서 00~12장 합성·타이밍·타이밍 시뮬레이션을 한 번에 실행하고
+# VS Code(Vivado 설치 PC)에서 00~13장 합성·타이밍·타이밍 시뮬레이션을 한 번에 실행하고
 # 각 장 validation/ 에 증거 로그를 남긴다. 보드 확인(BOARD_PASS)과는 별개다.
 #   source /tools/Xilinx/Vivado/<버전>/settings64.sh
 #   bash tools/run_vivado_all.sh            # 전체
-#   bash tools/run_vivado_all.sh ooc        # 00~10장 OOC만
+#   bash tools/run_vivado_all.sh ooc        # 00~10·13장 OOC만
 #   bash tools/run_vivado_all.sh impl       # 12장 구현 + 타이밍 시뮬레이션만
 set -Eeuo pipefail
 root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
