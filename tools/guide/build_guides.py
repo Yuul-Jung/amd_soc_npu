@@ -488,13 +488,16 @@ def code_status(path, e):
         if e.synth:
             return "원본 · Vivado 실행 " + ("통과" if e.synth.startswith("SYNTH_TIMING_PASS") else "실패")
         return "원본 · ⚠ 미검증 (Vivado 미실행)"
+    if path.endswith((".c", ".h")):           # 보드 소프트웨어: PC 컴파일·시험까지만 확인
+        ok = e.rtl_pass and not e.rtl_fail
+        return (f"원본 · PC 시험 통과 {file_date(e.rtl_path)} · 보드 ⚠ 미검증" if ok else "원본 · ⚠ 미검증")
     if e.rtl_pass and not e.rtl_fail:
         return f"원본 · RTL_SIM 통과 {file_date(e.rtl_path)}"
     return "원본 · ⚠ 미검증"
 
 
 def code(path, e=None):
-    lang = {"v": "verilog", "sv": "systemverilog", "py": "python", "sh": "bash", "tcl": "tcl", "xdc": "xdc"}[path.rsplit(".", 1)[1]]
+    lang = {"v": "verilog", "sv": "systemverilog", "py": "python", "sh": "bash", "tcl": "tcl", "xdc": "xdc", "c": "c", "h": "c", "html": "html", "txt": "text"}.get(path.rsplit(".", 1)[1], "text")
     return (f'      <div class="codeblock">\n        <div class="codebar"><span>{path} · {lang} · {code_status(path, e)}</span></div>\n'
             f'        <pre><code class="language-{lang}">{esc(rd(path).rstrip(chr(10)))}</code></pre>\n      </div>')
 
@@ -511,6 +514,8 @@ def s08_unit(c, chs, e):
     if v["mode"] == "via":
         ref = v["ref"]
         s = f"      <p>{v['note']} → {link_to(chs, ref, 's08', f'{int(ref[2:]):02d}장 · 08')}</p>"
+        if v.get("board_fragment"):          # via 장에도 보드·Vitis 절차 조각을 붙일 수 있다 (22장 이후)
+            s += "\n" + rd(v["board_fragment"]).rstrip("\n")
     else:
         k, top = c["id"], c["top"]["module"]
         res = v.get("resources")
