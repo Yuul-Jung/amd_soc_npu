@@ -4,55 +4,154 @@
   "version": "v02",
   "slug": "sensor_ai",
   "nav_title": "센서 유효성 + AI 상태 분류",
-  "name": "응용 2: 센서 유효성 검사와 AI 상태 분류 (가상 센서)",
-  "goal": "센서 4채널 × 16샘플 창을 받아 범위·고착·순서를 먼저 검사하고, 고장이 없을 때만 15장 Dense로 NORMAL·HOT·VIBRATION·DRIFT를 분류합니다. 점수 차가 작으면 UNKNOWN, 고장이면 FAULT가 AI보다 우선합니다. 실제 센서를 연결하기 전에 가상 센서 벡터로 판정을 확인합니다.",
-  "top": {"file": "ch29/rtl/sensor_guard_ai.v", "module": "sensor_guard_ai"},
-  "keep": ["ch01/rtl/mac_core.v", "ch04/rtl/bram_sync_buffer.v", "ch07/rtl/vector_dot_core.v", "ch08/rtl/pe_array4.v",
-           "ch15/rtl/npu_dense_core.v", "ch15/rtl/npu_dense_store.v", "ch15/rtl/npu_dense.v", "host_tools/p3_integer_reference.py"],
-  "new": ["ch29/rtl/sensor_guard_ai.v"],
-  "tb": ["ch29/tb/tb_sensor_guard_ai.sv"],
-  "ref": ["ch29/reference/sensor_model.py"],
+  "name": "응용 2: 센서 검사 + AI 상태 분류",
+  "goal": "센서 4채널 창의 범위·고착·순서를 먼저 검사하고, 고장이 없을 때만 Dense로 상태를 분류합니다(가상 센서).",
+  "top": {
+    "file": "ch29/rtl/sensor_guard_ai.v",
+    "module": "sensor_guard_ai"
+  },
+  "keep": [
+    "ch01/rtl/mac_core.v",
+    "ch04/rtl/bram_sync_buffer.v",
+    "ch07/rtl/vector_dot_core.v",
+    "ch08/rtl/pe_array4.v",
+    "ch15/rtl/npu_dense_core.v",
+    "ch15/rtl/npu_dense_store.v",
+    "ch15/rtl/npu_dense.v",
+    "host_tools/p3_integer_reference.py"
+  ],
+  "new": [
+    "ch29/rtl/sensor_guard_ai.v"
+  ],
+  "tb": [
+    "ch29/tb/tb_sensor_guard_ai.sv"
+  ],
+  "ref": [
+    "ch29/reference/sensor_model.py"
+  ],
   "prep_note": "모델(<code>ch29/model/sensor_int8.txt</code>)은 <code>sensor_model.py --train</code>(numpy)이 이 파일이 만든 합성 센서 값 2,000개로 학습한 것이며 실제 센서 데이터가 아닙니다. 05절은 저장된 모델만 읽습니다. <b>실제 센서는 3.3 V 입력 범위·전원·보호 회로를 검토하기 전에 FPGA 핀에 직접 연결하지 않습니다</b>",
   "tb_note": "가상 센서 창 12개: 상태별 2개씩, 점수 차가 작은 섞인 경우 1개, 범위 밖 값(50), 채널 3이 같은 값 9번(고착), 채널 순서 뒤바뀜. 샘플 사이에 빈 클록을 섞습니다. 합성 시험 400개 정확도는 100%였는데, 합성 데이터가 쉬워서이며 실제 센서 성능을 뜻하지 않습니다.",
   "run": "bash ch29/scripts/run_sim.sh",
   "run_note": "기준 모델 → RTL 시뮬레이션 (12창) → 상태·고장 비트·점수 비교",
-  "evidence": {"rtl_log": "ch29/validation/rtl_sim_*.log", "pattern": "_PASS|STATE|Icarus"},
+  "evidence": {
+    "rtl_log": "ch29/validation/rtl_sim_*.log",
+    "pattern": "_PASS|STATE|Icarus"
+  },
   "checks": [
-    ["PYTHON_SENSOR_SELF_TEST_PASS cases=12 states=NORMAL/HOT/VIBRATION/DRIFT/UNKNOWN/FAULT", "시험 창 12개가 여섯 상태를 모두 덮음"],
-    ["STATE ambiguous → UNKNOWN margin=2800", "1·2위 점수 차 2,800 < 3,000 → 분류를 내지 않음"],
-    ["STATE range_low/stuck_ch3/order → FAULT fault=0b001/010/100", "고장 종류마다 비트 하나, 고장이면 Dense를 돌리지 않음"],
-    ["PYTHON_RTL_COMPARE_PASS cases=12", "상태·고장 비트·점수 4개가 Python과 같음"]
+    [
+      "PYTHON_SENSOR_SELF_TEST_PASS cases=12 states=NORMAL/HOT/VIBRATION/DRIFT/UNKNOWN/FAULT",
+      "시험 창 12개가 여섯 상태를 모두 덮음"
+    ],
+    [
+      "STATE ambiguous → UNKNOWN margin=2800",
+      "1·2위 점수 차 2,800 < 3,000 → 분류를 내지 않음"
+    ],
+    [
+      "STATE range_low/stuck_ch3/order → FAULT fault=0b001/010/100",
+      "고장 종류마다 비트 하나, 고장이면 Dense를 돌리지 않음"
+    ],
+    [
+      "PYTHON_RTL_COMPARE_PASS cases=12",
+      "상태·고장 비트·점수 4개가 Python과 같음"
+    ]
   ],
   "read_points": [
-    ["고장이 먼저", "범위(100~4000), 고착(같은 채널 같은 값 8번 연속), 순서(채널 0·1·2·3 반복)를 샘플마다 보고, 하나라도 있으면 FAULT입니다. 고장 난 값으로 AI를 돌리면 그럴듯한 오답이 나오기 때문입니다."],
-    ["위치 기준 비교", "고착은 '와야 할' 채널(<code>idx[1:0]</code>) 기준으로 셉니다. 순서가 틀려도 같은 위치끼리 비교하므로 Python 기준 모델과 결과가 같습니다."],
-    ["스케일", "<code>(raw − 2048) >> 4</code>를 −128~127로 포화합니다. 12비트 가운데(2048)를 0으로 두는 부호 있는 INT8입니다."],
-    ["UNKNOWN", "1·2위 차가 <code>MARGIN</code>(3,000)보다 작으면 분류하지 않습니다. 경보 장치에서 애매한 답을 확정처럼 보이지 않게 하는 장치입니다."],
-    ["보드 연결은 다음 단계", "이 장은 RTL과 가상 벡터까지입니다. SoC에 붙이려면 20장처럼 AXI 래퍼를 두고 27장 LED·7세그먼트로 상태를 보이게 합니다(⚠ 미작성·미검증)."]
+    [
+      "고장이 먼저",
+      "범위(100~4000), 고착(같은 채널 같은 값 8번 연속), 순서(채널 0·1·2·3 반복)를 샘플마다 보고, 하나라도 있으면 FAULT입니다. 고장 난 값으로 AI를 돌리면 그럴듯한 오답이 나오기 때문입니다."
+    ],
+    [
+      "위치 기준 비교",
+      "고착은 '와야 할' 채널(<code>idx[1:0]</code>) 기준으로 셉니다. 순서가 틀려도 같은 위치끼리 비교하므로 Python 기준 모델과 결과가 같습니다."
+    ],
+    [
+      "스케일",
+      "<code>(raw − 2048) >> 4</code>를 −128~127로 포화합니다. 12비트 가운데(2048)를 0으로 두는 부호 있는 INT8입니다."
+    ],
+    [
+      "UNKNOWN",
+      "1·2위 차가 <code>MARGIN</code>(3,000)보다 작으면 분류하지 않습니다. 경보 장치에서 애매한 답을 확정처럼 보이지 않게 하는 장치입니다."
+    ],
+    [
+      "보드 연결은 다음 단계",
+      "이 장은 RTL과 가상 벡터까지입니다. SoC에 붙이려면 20장처럼 AXI 래퍼를 두고 27장 LED·7세그먼트로 상태를 보이게 합니다(⚠ 미작성·미검증)."
+    ]
   ],
-  "vivado": {"mode": "ooc", "resources": "DSP48E1 ≥ 4 (15장 Dense) · 창 버퍼 64바이트", "note": "<code>tools/vivado/ooc_timing.tcl</code>의 <code>ch29</code> 줄로 실행합니다. ⚠ 미검증 (Vivado 미실행)."},
+  "vivado": {
+    "mode": "ooc",
+    "resources": "DSP48E1 ≥ 4 (15장 Dense) · 창 버퍼 64바이트",
+    "note": "<code>tools/vivado/ooc_timing.tcl</code>의 <code>ch29</code> 줄로 실행합니다. ⚠ 미검증 (Vivado 미실행)."
+  },
   "handoff": [
-    ["ch29/rtl/sensor_guard_ai.v", "30장 모터 인터록의 '안전 상태' 입력 (FAULT·UNKNOWN이면 정지)"]
+    [
+      "ch29/rtl/sensor_guard_ai.v",
+      "30장 모터 인터록의 '안전 상태' 입력 (FAULT·UNKNOWN이면 정지)"
+    ]
   ],
   "port_notes": {
-    "clk": "시스템 클록", "resetn": "동기 리셋 (Active-Low)",
-    "s_valid_i": "센서 샘플 하나 있음", "s_ch_i": "샘플 채널 0~3 (0·1·2·3 순서여야 함)", "s_raw_i": "샘플 원시값 (12비트, 0~4095)",
-    "w_wr_en_i": "Dense 가중치 쓰기", "w_neuron_i": "상태 0~3 (가중치·Bias 공통)", "w_addr_i": "입력 번호 0~63 (t*4 + 채널)", "w_data_i": "가중치 (INT8)",
-    "b_wr_en_i": "Dense Bias 쓰기", "b_data_i": "Bias (signed 32비트)",
-    "state_o": "판정 0 NORMAL·1 HOT·2 VIBRATION·3 DRIFT·4 UNKNOWN·5 FAULT", "fault_o": "고장 비트 (bit0 범위, bit1 고착, bit2 순서)",
-    "scores_o": "상태 점수 4개 (FAULT면 이전 값, 쓰지 않음)", "done_o": "창 하나 판정 끝 1클록 펄스", "busy_o": "분류 중 (이때 온 샘플은 버림)"
+    "clk": "시스템 클록",
+    "resetn": "동기 리셋 (Active-Low)",
+    "s_valid_i": "센서 샘플 하나 있음",
+    "s_ch_i": "샘플 채널 0~3 (0·1·2·3 순서여야 함)",
+    "s_raw_i": "샘플 원시값 (12비트, 0~4095)",
+    "w_wr_en_i": "Dense 가중치 쓰기",
+    "w_neuron_i": "상태 0~3 (가중치·Bias 공통)",
+    "w_addr_i": "입력 번호 0~63 (t*4 + 채널)",
+    "w_data_i": "가중치 (INT8)",
+    "b_wr_en_i": "Dense Bias 쓰기",
+    "b_data_i": "Bias (signed 32비트)",
+    "state_o": "판정 0 NORMAL·1 HOT·2 VIBRATION·3 DRIFT·4 UNKNOWN·5 FAULT",
+    "fault_o": "고장 비트 (bit0 범위, bit1 고착, bit2 순서)",
+    "scores_o": "상태 점수 4개 (FAULT면 이전 값, 쓰지 않음)",
+    "done_o": "창 하나 판정 끝 1클록 펄스",
+    "busy_o": "분류 중 (이때 온 샘플은 버림)"
   },
   "fsm": {
     "file": "ch29/rtl/sensor_guard_ai.v",
     "reset": "COLLECT",
     "rows": [
-      ["COLLECT", "s_valid_i && idx<63", "COLLECT", "샘플 검사·스케일·저장, idx+1"],
-      ["COLLECT", "s_valid_i && idx==63", "CLASSIFY", "마지막 샘플 저장"],
-      ["CLASSIFY", "fault_o≠0", "COLLECT", "state_o=FAULT, done_o"],
-      ["CLASSIFY", "d_err", "COLLECT", "state_o=FAULT, fault_o=순서, done_o"],
-      ["CLASSIFY", "d_done", "DECIDE", "Dense 64→4 점수 확정"],
-      ["DECIDE", "항상", "COLLECT", "1·2위 차 ≥ MARGIN이면 1위 상태, 아니면 UNKNOWN, done_o"],
-      ["default", "유효하지 않은 상태", "COLLECT", ""]
+      [
+        "COLLECT",
+        "s_valid_i && idx<63",
+        "COLLECT",
+        "샘플 검사·스케일·저장, idx+1"
+      ],
+      [
+        "COLLECT",
+        "s_valid_i && idx==63",
+        "CLASSIFY",
+        "마지막 샘플 저장"
+      ],
+      [
+        "CLASSIFY",
+        "fault_o≠0",
+        "COLLECT",
+        "state_o=FAULT, done_o"
+      ],
+      [
+        "CLASSIFY",
+        "d_err",
+        "COLLECT",
+        "state_o=FAULT, fault_o=순서, done_o"
+      ],
+      [
+        "CLASSIFY",
+        "d_done",
+        "DECIDE",
+        "Dense 64→4 점수 확정"
+      ],
+      [
+        "DECIDE",
+        "항상",
+        "COLLECT",
+        "1·2위 차 ≥ MARGIN이면 1위 상태, 아니면 UNKNOWN, done_o"
+      ],
+      [
+        "default",
+        "유효하지 않은 상태",
+        "COLLECT",
+        ""
+      ]
     ],
     "diagram": "ch29/diagrams/ch29_sensor_fsm"
   }

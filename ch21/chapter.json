@@ -4,8 +4,8 @@
   "version": "v02",
   "slug": "soc_bd",
   "nav_title": "MicroBlaze V + NPU 블록 설계",
-  "name": "MicroBlaze V SoC에 NPU 연결 (독립 Vivado 프로젝트)",
-  "goal": "제1부 11장에서 보드로 확인한 MicroBlaze V SoC를 새 프로젝트로 복제하고, 20장 AXI NPU를 모듈 참조로 넣어 0x44A0_0000(64KB)에 배정합니다. Vivado 없이 할 수 있는 확인(파일·모듈 계층, 주소 겹침, Top 포트와 XDC)은 Tcl 정적 검사로 먼저 끝냅니다.",
+  "name": "MicroBlaze V SoC에 NPU 연결",
+  "goal": "제1부 11장 MicroBlaze V SoC를 복제해 20장 NPU를 0x44A0_0000에 붙이고, Vivado 없이 가능한 확인을 먼저 합니다.",
   "top": {
     "file": "ch21/rtl/soc_npu_top.v",
     "module": "soc_npu_top"

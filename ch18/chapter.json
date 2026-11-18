@@ -4,8 +4,8 @@
   "version": "v02",
   "slug": "precision",
   "nav_title": "Float32 · INT8 · INT16 정밀도",
-  "name": "정밀도 비교 (Float32 · INT8 · INT16, 실제 MNIST)",
-  "goal": "실제 MNIST로 학습한 같은 784→10 모델을 Float32, INT8, INT16으로 평가해 정확도와 혼동행렬을 PC에서 비교합니다. 데이터 폭을 매개변수로 둔 RTL로 INT8·INT16 정수 점수를 Python과 비트 단위로 맞추고, 누산 폭이 모자라면 결과가 틀어지는 것을 확인합니다.",
+  "name": "정밀도 비교 Float32 · INT8 · INT16",
+  "goal": "실제 MNIST로 학습한 784→10 모델을 Float32·INT8·INT16으로 비교하고, 폭 매개변수 RTL로 정수 점수를 맞춥니다.",
   "top": {
     "file": "ch18/rtl/npu_tiled_784_p.v",
     "module": "npu_tiled_784_p"

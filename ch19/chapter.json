@@ -5,7 +5,7 @@
   "slug": "pe_compare",
   "nav_title": "1·4·8PE 사이클 비교",
   "name": "PE 수 비교 (1·2·4·8PE, 사이클 식)",
-  "goal": "784→10 INT8 추론을 PE 1·2·4·8개로 돌려 결과가 모두 같은지 확인하고, 측정 사이클을 한 줄짜리 식으로 설명합니다. 자원(DSP·BRAM·LUT·FF) 숫자는 Vivado 보고서로만 기록합니다.",
+  "goal": "784→10 추론을 PE 1·2·4·8개로 돌려 결과가 같음을 확인하고, 측정 사이클을 식 하나로 설명합니다.",
   "top": {
     "file": "ch19/rtl/npu_tiled_784_npe.v",
     "module": "npu_tiled_784_npe"

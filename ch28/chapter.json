@@ -5,40 +5,106 @@
   "slug": "handwriting",
   "nav_title": "PC 손글씨 → 보드 분류",
   "name": "응용 1: PC 손글씨를 UART로 보내 보드에서 분류",
-  "goal": "PC에서 그린 손글씨를 MNIST 모양(20×20 상자, 무게중심 가운데, 784 INT8)으로 전처리해 UART 틀로 보내고, 보드는 27장 NPU로 분류해 점수·클래스를 돌려주며 7세그먼트에 표시합니다. 보드 응답은 PC 정수 계산과 같아야 합니다.",
-  "top": {"file": "ch27/rtl/soc_npu27_top.v", "module": "soc_npu27_top"},
-  "keep": ["ch27/rtl/soc_npu27_top.v", "ch27/sw/board_io.h", "ch27/reference/gen_demo_header.py", "ch22/sw/npu_drv.c",
-           "ch22/host/npu_hal_trace.c", "ch22/tb/tb_driver_replay.sv", "ch18/reference/precision_rtl.py", "host_tools/mnist_idx.py"],
-  "new": ["ch28/reference/preprocess.py", "ch28/sw/proto.h", "ch28/sw/proto.c", "ch28/sw/uart_io.h", "ch28/sw/uart_io_mbv.c", "ch28/sw/main.c",
-          "ch28/host/digit_client.py"],
-  "tb": ["ch28/host/uart_io_host.c", "ch28/host/board_io_null.c"],
-  "ref": ["ch28/reference/check_replay.py"],
+  "goal": "PC 손글씨를 MNIST 모양으로 전처리해 UART로 보내고, 보드가 분류한 결과가 PC 정수 계산과 같은지 봅니다.",
+  "top": {
+    "file": "ch27/rtl/soc_npu27_top.v",
+    "module": "soc_npu27_top"
+  },
+  "keep": [
+    "ch27/rtl/soc_npu27_top.v",
+    "ch27/sw/board_io.h",
+    "ch27/reference/gen_demo_header.py",
+    "ch22/sw/npu_drv.c",
+    "ch22/host/npu_hal_trace.c",
+    "ch22/tb/tb_driver_replay.sv",
+    "ch18/reference/precision_rtl.py",
+    "host_tools/mnist_idx.py"
+  ],
+  "new": [
+    "ch28/reference/preprocess.py",
+    "ch28/sw/proto.h",
+    "ch28/sw/proto.c",
+    "ch28/sw/uart_io.h",
+    "ch28/sw/uart_io_mbv.c",
+    "ch28/sw/main.c",
+    "ch28/host/digit_client.py"
+  ],
+  "tb": [
+    "ch28/host/uart_io_host.c",
+    "ch28/host/board_io_null.c"
+  ],
+  "ref": [
+    "ch28/reference/check_replay.py"
+  ],
   "prep_note": "시험 그림 3장(<code>ch28/host/samples/*.pgm</code>)은 실제 MNIST 시험 그림(112·102·110번)을 1.5배로 키워 흰 바탕 60×50에 옮긴 것으로, 한 번 만들어 저장소에 넣었습니다. 전처리 검사(선택)는 MNIST를 내려받습니다",
   "tb_note": "PC 프로그램이 그림 3장을 전처리해 틀 6개(정상 3, 검사합 틀림, 범위 밖 값, 잡음 뒤 정상)를 만들고, 같은 <code>main.c</code>를 PC에서 표준 입출력 UART로 돌려 NPU 접근을 기록합니다. 기록을 20장 RTL에서 재생해 보드가 보낼 응답 줄을 만들고 PC 기대 줄과 한 줄씩 비교합니다.",
   "run": "bash ch28/scripts/run_sim.sh",
   "run_note": "교차 컴파일 → 전처리·틀 만들기 → 펌웨어 PC 실행·기록 → RTL 재생 → 응답 비교",
-  "evidence": {"rtl_log": "ch28/validation/rtl_sim_*.log", "pattern": "_PASS|REPLY|CLIENT|Icarus|gcc|clang"},
+  "evidence": {
+    "rtl_log": "ch28/validation/rtl_sim_*.log",
+    "pattern": "_PASS|REPLY|CLIENT|Icarus|gcc|clang"
+  },
   "extra_runs": [
-    {"title": "전처리 검사 (실제 MNIST 1,000장을 옮기고 키운 뒤 되돌리기)", "cmd": "python3 ch28/reference/preprocess.py --selftest 1000", "pattern": "PREPROCESS", "log": "ch28/validation/preprocess_check_*.log"}
+    {
+      "title": "전처리 검사 (실제 MNIST 1,000장을 옮기고 키운 뒤 되돌리기)",
+      "cmd": "python3 ch28/reference/preprocess.py --selftest 1000",
+      "pattern": "PREPROCESS",
+      "log": "ch28/validation/preprocess_check_*.log"
+    }
   ],
   "checks": [
-    ["PREPROCESS_CHECK original=90.8% moved_scaled_then_preprocessed=86.7%", "64×64 캔버스 아무 곳에 두 배 크기로 놓은 그림을 전처리로 되돌리면 정확도가 원래의 95% 수준 (선택 실행)"],
-    ["RTL_SIM_PASS DRIVER_REPLAY … polls=4", "정상 틀 4개만 추론하고, 틀린 틀 2개는 NPU를 건드리지 않음"],
-    ["PROTOCOL_RTL_COMPARE_PASS replies=6 inferences=4", "응답 6줄(CLASS 3·5·8, ERR SUM, ERR RANGE, CLASS 8)이 PC 계산과 같음"]
+    [
+      "PREPROCESS_CHECK original=90.8% moved_scaled_then_preprocessed=86.7%",
+      "64×64 캔버스 아무 곳에 두 배 크기로 놓은 그림을 전처리로 되돌리면 정확도가 원래의 95% 수준 (선택 실행)"
+    ],
+    [
+      "RTL_SIM_PASS DRIVER_REPLAY … polls=4",
+      "정상 틀 4개만 추론하고, 틀린 틀 2개는 NPU를 건드리지 않음"
+    ],
+    [
+      "PROTOCOL_RTL_COMPARE_PASS replies=6 inferences=4",
+      "응답 6줄(CLASS 3·5·8, ERR SUM, ERR RANGE, CLASS 8)이 PC 계산과 같음"
+    ]
   ],
   "read_points": [
-    ["MNIST 모양 맞추기", "학습 그림과 같은 모양이어야 정확도가 유지됩니다. 글씨 상자를 잘라 긴 변을 20화소로 줄이고, 무게중심을 28×28의 (14,14)에 놓습니다. 흰 바탕이면 먼저 뒤집습니다."],
-    ["UART 틀", "<code>'N'</code> + 784바이트 + 검사합(합의 하위 8비트). <code>'N'</code> 앞의 바이트(줄바꿈·잡음)는 버리므로 틀이 어긋나도 다음 <code>'N'</code>에서 다시 맞춰집니다. 값이 127을 넘으면 13장 계약 위반으로 <code>ERR RANGE</code>를 보냅니다."],
-    ["보드 = PC", "보드 응답은 PC 정수 계산과 글자 하나까지 같아야 합니다. 다르면 전처리가 아니라 전송·하드웨어 문제입니다."],
-    ["printf 없이", "응답 줄은 작은 정수 변환 함수로 직접 만들어 <code>xil_printf</code> 없이 UART Lite로 보냅니다. 같은 코드가 PC에서는 표준 출력으로 갑니다."]
+    [
+      "MNIST 모양 맞추기",
+      "학습 그림과 같은 모양이어야 정확도가 유지됩니다. 글씨 상자를 잘라 긴 변을 20화소로 줄이고, 무게중심을 28×28의 (14,14)에 놓습니다. 흰 바탕이면 먼저 뒤집습니다."
+    ],
+    [
+      "UART 틀",
+      "<code>'N'</code> + 784바이트 + 검사합(합의 하위 8비트). <code>'N'</code> 앞의 바이트(줄바꿈·잡음)는 버리므로 틀이 어긋나도 다음 <code>'N'</code>에서 다시 맞춰집니다. 값이 127을 넘으면 13장 계약 위반으로 <code>ERR RANGE</code>를 보냅니다."
+    ],
+    [
+      "보드 = PC",
+      "보드 응답은 PC 정수 계산과 글자 하나까지 같아야 합니다. 다르면 전처리가 아니라 전송·하드웨어 문제입니다."
+    ],
+    [
+      "printf 없이",
+      "응답 줄은 작은 정수 변환 함수로 직접 만들어 <code>xil_printf</code> 없이 UART Lite로 보냅니다. 같은 코드가 PC에서는 표준 출력으로 갑니다."
+    ]
   ],
-  "vivado": {"mode": "via", "ref": "ch27", "note": "이 장은 하드웨어를 바꾸지 않습니다. 27장 비트스트림을 씁니다", "board_fragment": "ch28/docs/guide_board.html"},
+  "vivado": {
+    "mode": "via",
+    "ref": "ch27",
+    "note": "이 장은 하드웨어를 바꾸지 않습니다. 27장 비트스트림을 씁니다",
+    "board_fragment": "ch28/docs/guide_board.html"
+  },
   "handoff": [
-    ["ch28/sw/proto.c · uart_io*.c", "31장 인증 틀(같은 바이트 단위 해석 방식)"]
+    [
+      "ch28/sw/proto.c · uart_io*.c",
+      "31장 인증 틀(같은 바이트 단위 해석 방식)"
+    ]
   ],
   "port_notes": {
-    "clk": "W5 · 100 MHz", "btnC": "U18 · 리셋", "sw": "스위치 (이 장에서 쓰지 않음)", "led": "LED 워드 (클래스 표시)",
-    "RsRx": "USB-UART 수신 (PC → 보드 그림 틀)", "RsTx": "USB-UART 송신 (보드 → PC 응답)",
-    "seg": "7세그먼트 (클래스)", "an": "자리 선택", "dp": "소수점 (꺼짐)"
+    "clk": "W5 · 100 MHz",
+    "btnC": "U18 · 리셋",
+    "sw": "스위치 (이 장에서 쓰지 않음)",
+    "led": "LED 워드 (클래스 표시)",
+    "RsRx": "USB-UART 수신 (PC → 보드 그림 틀)",
+    "RsTx": "USB-UART 송신 (보드 → PC 응답)",
+    "seg": "7세그먼트 (클래스)",
+    "an": "자리 선택",
+    "dp": "소수점 (꺼짐)"
   }
 }
