@@ -1,0 +1,25 @@
+# 25장 SoC 전력·추론당 에너지 추정 (Vivado 2024.2 report_power, 실제 실행)
+
+> 21장 배선 완료 설계. SAIF는 23장과 같은 SoC 행동 시뮬레이션의 구간별 토글률. **추정치이며 보드 전력 측정이 아니다.**
+
+| 활동률 | 전체(W) | 동적(W) | 정적(W) | p3_npu_0(W) | microblaze_riscv_0(W) | 신뢰도 |
+|---|---:|---:|---:|---:|---:|---|
+| 기본 토글률(vectorless) | 0.224 | 0.151 | 0.073 | 0.020 | 0.012 | Low |
+| CPU 추론 구간 SAIF | 0.250 | 0.177 | 0.073 | 0.011 | 0.021 | Medium |
+| NPU 추론 구간 SAIF | 0.253 | 0.180 | 0.073 | 0.012 | 0.020 | Medium |
+
+| 추론 경로 | 시간(23장, 100 MHz) | 전체 전력(W) | 추론당 에너지(mJ) | 동적만(mJ) |
+|---|---:|---:|---:|---:|
+| CPU 정수 추론 | 18.165 ms | 0.250 | 4.541 | 3.215 |
+| NPU 종단간 | 10.802 ms | 0.253 | 2.733 | 1.944 |
+
+- 추론당 에너지 비(CPU/NPU): 전체 1.66배, 동적 1.65배
+
+SAIF 매칭(Vivado 로그):
+
+- `INFO: [Power 33-167] Parsing SAIF file cpu.saif`
+- `INFO: [Power 33-177] SAIF annotation done from file cpu.saif`
+- `INFO: [Power 33-26] Design nets matched = 1793 of 13890`
+- `INFO: [Power 33-167] Parsing SAIF file npu.saif`
+- `INFO: [Power 33-177] SAIF annotation done from file npu.saif`
+- `INFO: [Power 33-26] Design nets matched = 1810 of 13890`
