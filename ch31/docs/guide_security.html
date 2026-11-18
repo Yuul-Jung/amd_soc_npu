@@ -1,0 +1,12 @@
+      <h3>8-1. 이 장에서 하지 않은 것 (보드 암호 성공을 주장하지 않음)</h3>
+      <table>
+        <thead><tr><th>항목</th><th>상태</th><th>다음에 할 일</th></tr></thead>
+        <tbody>
+          <tr><td>FPGA 암호 RTL (AES·HMAC 하드웨어)</td><td>만들지 않음</td><td>CPU 소프트웨어(<code>crypto_min.c</code>)로만 수신·검증</td></tr>
+          <tr><td>보드에서 틀 수신·검증</td><td>⚠ 미실행</td><td>28장 UART 틀 해석 방식으로 바이트를 모아 <code>srx_frame()</code>에 넣는 <code>main.c</code>를 만들고, 통과한 그림만 22장 드라이버로 NPU에 보냄</td></tr>
+          <tr><td>키 보관</td><td>시연용 공개 키가 소스에 있음 (<code>demo_keys.h</code>)</td><td>실제 키는 소스·ELF·비트스트림에 평문으로 두지 않는다. 7시리즈의 비트스트림 암호화(BBRAM·eFUSE 키)로 비트스트림을 보호하는 방법을 검토 (⚠ 미검증, 설정은 AMD 문서 확인)</td></tr>
+          <tr><td>Nonce 관리</td><td>세션 Nonce 고정 + 카운터</td><td>전원을 다시 켤 때 카운터가 0으로 돌아가므로, 실제로는 부팅마다 새 세션 Nonce(또는 비휘발 카운터)가 필요</td></tr>
+          <tr><td>부채널</td><td>대책 없음</td><td>태그 비교만 시간 일정(<code>ct_equal</code>). AES 표 조회 시간 차 등은 다루지 않음</td></tr>
+        </tbody>
+      </table>
+      <p>05절 결과는 "PC에서 만든 틀을 같은 C 수신기가 바르게 받아들이거나 거부한다"까지입니다. RV32IMC 교차 컴파일은 보드에서 돌 수 있는 코드인지만 보입니다.</p>
