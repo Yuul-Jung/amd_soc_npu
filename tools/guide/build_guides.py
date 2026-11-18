@@ -648,6 +648,10 @@ def update_index(text, chs):
         title = re.sub(r"<[^>]+>", "", cells[1])
         cells[1] = f'<a href="{fname(c)}">{title}</a>'
         cells[3] = f'<span class="badge badge-ok">{c["version"]} 완료</span>'
+        if num >= 13:  # 신규 구현 장: RTL 칸을 실제 실행 로그로 판정 (00~12장은 원본에서 이전한 RTL)
+            lp = latest(c["evidence"]["rtl_log"])
+            ok = bool(lp) and "RTL_SIM_PASS" in rd(lp)
+            cells[4] = '<span class="badge badge-ok">RTL 시뮬 통과</span>' if ok else '<span class="badge badge-todo">RTL 시뮬 대기</span>'
         return "<tr>" + "".join(f"<td>{x}</td>" for x in cells) + "</tr>"
 
     text = re.sub(r"<tr><td>(\d\d)</td>.*?</tr>", row, text)
