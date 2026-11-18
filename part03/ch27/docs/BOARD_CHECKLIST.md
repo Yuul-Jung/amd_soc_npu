@@ -28,6 +28,18 @@
 | B7 | 실행 중 btnC(Reset) 누른 뒤 다시 실행 | 처음부터 같은 출력 | |
 | B8 | (선택) Vivado Hardware Manager에서 전력 확인은 Basys3에 측정 회로가 없어 **하지 않는다** | 25장 값은 Vivado 추정치로만 남긴다 | — |
 
+## 1-28. 28장 숫자 인식 시스템 (같은 USB 케이블, 비트스트림이 다르다)
+
+준비: `part03/ch28/build/out/basys3_soc28_top.bit`(SHA-256 0bce5489…772c), `soc28_digit.xsa`, ELF `part03/ch28/build/ws/digit_app/build/digit_app.elf`(SHA-256 9179c509c9e7dbaa). 호스트 도구가 시리얼 포트를 쓰므로 Vitis 터미널은 닫는다.
+
+| # | 절차 | 기대 결과 (협동 시뮬레이션·SoC xsim 근거) | 판정 |
+|---|---|---|---|
+| B9 | 28장 비트스트림 다운로드, `digit_app.elf` 실행 | FND `F16C`(모델 ID 상위), LED 모두 꺼짐 | |
+| B10 | `python3 part03/ch28/host/p3_digit_host.py --port <포트> --error-suite --csv b28.csv --log b28_uart.log` | `MODEL_ID host=f16c4f12 device=f16c4f12`, 22장 `scores_match=1 display_ok=1`, `error_suite=11/11`, `DIGIT_HOST_PASS` (`ch28/validation/rtl_cosim.csv`와 같은 class) | |
+| B11 | 마지막 정상 결과 뒤 FND·LED를 눈으로 확인 | FND `07 _7`(img 7, Class 7), LED7·LED15 켜짐. 오류 시험 중에는 `E`+코드·LED14 | |
+| B12 | (선택) `--mnist-dir <MNIST raw> --limit 200` | 장치 class = 골든 class 200/200, 정확도는 골든·장치를 따로 기록 | |
+| B13 | (선택) 직접 그린 28×28 PNG `--images a.png [--invert]` | 응답·표시가 오는지 확인(정확도 주장은 하지 않음) | |
+
 ## 2. 기록할 것
 
 - 각 항목의 UART 원문(사진 또는 터미널 로그), Vivado·Vitis 버전, 보드 리비전.
@@ -35,5 +47,5 @@
 
 ## 3. 이번 점검 범위 밖
 
-- 제3부 28~31장 응용 과제의 센서·모터·보안 UART 실물 검증.
+- 제3부 29~31장 응용 과제의 센서·모터·보안 UART 실물 검증.
 - 클록을 100 MHz 위로 올리는 시험(24장 Fmax는 OOC 추정).
