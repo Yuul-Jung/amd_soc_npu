@@ -1,0 +1,19 @@
+Icarus Verilog version 12.0 (stable) ()
+PYTHON_INTERLOCK_PROPERTY_PASS cycles=3660 max_speed=200 reversals=1
+SCENE t=   0~  49 무장 전: AI가 명령해도 정지 → 끝에서 en=0 speed=0 dir=0 block=0b10010
+SCENE t=  50~  89 무장 전 AI 명령 200 → 끝에서 en=0 speed=0 dir=0 block=0b00010
+SCENE t=  90~  94 무장 → 끝에서 en=1 speed=0 dir=0 block=0b00000
+SCENE t=  95~ 994 가속 (TICK마다 +8, 200까지) → 끝에서 en=1 speed=200 dir=0 block=0b00000
+SCENE t= 995~1594 반대 방향 요청: 0까지 감속 → 방향 전환 → 120을 향해 가속 → 끝에서 en=1 speed=88 dir=1 block=0b00000
+SCENE t=1595~1694 센서 UNKNOWN → 즉시 정지 → 끝에서 en=0 speed=0 dir=1 block=0b01000
+SCENE t=1695~1994 센서 정상 복귀: 0부터 다시 가속 → 끝에서 en=1 speed=120 dir=1 block=0b00000
+SCENE t=1995~2054 비상정지 눌림 → 끝에서 en=0 speed=0 dir=1 block=0b00011
+SCENE t=2055~2254 비상정지 풀림: 무장이 풀려 계속 정지 → 끝에서 en=0 speed=0 dir=1 block=0b00010
+SCENE t=2255~2259 다시 무장 → 끝에서 en=1 speed=0 dir=1 block=0b00000
+SCENE t=2260~2559 다시 가속 → 끝에서 en=1 speed=120 dir=1 block=0b00000
+SCENE t=2560~3259 AI 명령 끊김 → 400클록 뒤 정지 → 끝에서 en=0 speed=0 dir=1 block=0b10000
+SCENE t=3260~3459 AI 복귀 → 끝에서 en=1 speed=60 dir=1 block=0b00000
+SCENE t=3460~3559 사용 스위치 끔 → 끝에서 en=0 speed=0 dir=1 block=0b00100
+SCENE t=3560~3659 센서 FAULT → 끝에서 en=0 speed=0 dir=1 block=0b01000
+RTL_SIM_PASS MOTOR_INTERLOCK cycles=3660
+PYTHON_RTL_COMPARE_PASS cycles=3660 outputs=en,pwm,dir,speed,block (클록 단위 동일)
