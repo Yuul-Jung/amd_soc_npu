@@ -1,0 +1,67 @@
+{
+  "id": "ch19",
+  "number": 19,
+  "version": "v02",
+  "slug": "pe_compare",
+  "nav_title": "1·4·8PE 사이클 비교",
+  "name": "PE 수 비교 (1·2·4·8PE, 사이클 식)",
+  "goal": "784→10 INT8 추론을 PE 1·2·4·8개로 돌려 결과가 모두 같은지 확인하고, 측정 사이클을 한 줄짜리 식으로 설명합니다. 자원(DSP·BRAM·LUT·FF) 숫자는 Vivado 보고서로만 기록합니다.",
+  "top": {"file": "ch19/rtl/npu_tiled_784_npe.v", "module": "npu_tiled_784_npe"},
+  "keep": ["ch01/rtl/mac_core.v", "ch04/rtl/bram_sync_buffer.v", "ch07/rtl/vector_dot_core.v", "ch08/rtl/pe_array4.v",
+           "ch16/rtl/npu_argmax.v", "ch18/rtl/npu_tiled_784_p.v", "ch18/reference/precision_rtl.py", "ch18/model/model_int8.txt",
+           "host_tools/p3_integer_reference.py"],
+  "new": ["ch19/rtl/npu_tiled_784_npe.v"],
+  "tb": ["ch19/tb/tb_npu_npe.sv"],
+  "ref": ["ch19/reference/pe_compare.py"],
+  "prep_note": "18장 <code>ch18/model/</code>의 실제 MNIST INT8 모델과 시험 앞 5장을 씁니다 (내려받기 없음)",
+  "tb_note": "같은 TB를 <code>-P tb_npu_npe.NPE=1·2·4·8</code>로 네 번 컴파일합니다. NPE=4에서는 18장 모듈을 함께 돌려 점수가 같은지 보고 18장 사이클도 출력합니다. 마지막에 측정 사이클 네 개를 사이클 식과 맞춰 봅니다.",
+  "run": "bash ch19/scripts/run_sim.sh",
+  "run_note": "NPE 1·2·4·8 각각 RTL 시뮬레이션·Python 비교 → 사이클 식 확인",
+  "evidence": {"rtl_log": "ch19/validation/rtl_sim_*.log", "pattern": "_PASS|CYCLES|CH18_DW8|Icarus"},
+  "checks": [
+    ["RTL_SIM_PASS NPE=1/2/4/8 cases=5", "PE 수와 관계없이 점수·클래스가 같음 (NPE=4는 18장과 점수 일치 5/5)"],
+    ["CYCLES npe=1 23922 · 2 11967 · 4 7185 · 8 4794", "1PE 대비 2.00·3.33·4.99배 (8PE는 그룹 2개라 5배에 못 미침)"],
+    ["CYCLE_MODEL_PASS A=3 B=12 element=3clk", "4·8PE로 구한 식이 1·2PE 측정값을 정확히 예측"]
+  ],
+  "read_points": [
+    ["사이클 식", "<code>cycles = G · Σ(3·len + 3) + 12</code>, G = ceil(10/NPE), len = 64×12 + 16. 원소 1개에 READ·WAIT_READ·SEND 3클록, 타일·그룹마다 LAUNCH 등 3클록, 끝에 Bias·argmax 12클록입니다. 파형에서 상태 길이를 세면 같은 식이 나옵니다."],
+    ["8PE가 5배인 이유", "클래스 10개를 8개씩 나누면 그룹이 2개(8 + 2)이고, 둘째 그룹은 8차선 중 2개만 씁니다. 사이클은 그룹 수에 비례하므로 10/2 = 5배가 한계입니다. 10PE면 그룹 1개가 됩니다."],
+    ["원소당 3클록", "BRAM 읽기 지연 1클록을 기다린 뒤 보내므로 원소마다 3클록이 듭니다. 읽기를 미리 내는 파이프라인으로 1클록에 가깝게 줄일 수 있지만, 이 장은 PE 수의 효과만 봅니다."],
+    ["18장과의 차이", "NPE=4는 18장과 점수가 같지만 그룹마다 2클록 빠릅니다(7185 vs 7263, 차이 78 = 39그룹 × 2). 08장 <code>pe_array4</code>의 완료 레지스터 단계를 거치지 않고 07장 코어를 직접 쓰기 때문입니다."],
+    ["BRAM 포트·자원", "차선마다 가중치 RAM 1개(읽기 포트 1개)를 둡니다. PE를 늘리면 DSP와 RAM 수가 함께 늘어납니다. 실제 DSP·BRAM·LUT·FF 숫자는 Vivado OOC 보고서(<code>NPE=1·4·8</code> 세 줄)로만 기록합니다 — 미실행."]
+  ],
+  "vivado": {"mode": "ooc", "resources": "NPE=1·4·8 세 줄 (<code>-generic NPE=…</code>)", "note": "<code>tools/vivado/ooc_timing.tcl</code>의 <code>ch19</code> 세 줄이 NPE별로 합성합니다. ⚠ 미검증 (Vivado 미실행) — 자원 비교표는 보고서가 들어온 뒤 채웁니다."},
+  "handoff": [
+    ["ch19/rtl/npu_tiled_784_npe.v", "20장 AXI4-Lite 래퍼가 감싸는 연산 코어 (NPE=4, 수정 금지)"],
+    ["ch19/reference/pe_compare.py", "23장 CPU·NPU 시간 비교에서 NPU 사이클 식"]
+  ],
+  "port_notes": {
+    "clk": "시스템 클록", "resetn": "동기 리셋 (Active-Low)",
+    "x_wr_en_i": "입력 쓰기 (busy_o 동안 무시)", "x_addr_i": "입력 주소 0~783", "x_data_i": "입력 값 (INT8, 0~127)",
+    "w_wr_en_i": "가중치 쓰기 (busy_o 동안 무시)", "w_neuron_i": "클래스 0~9", "w_addr_i": "원소 번호 0~783", "w_data_i": "가중치 (INT8, signed)",
+    "b_wr_en_i": "Bias 쓰기 (busy_o 동안 무시)", "b_neuron_i": "클래스 0~9", "b_data_i": "Bias (signed)",
+    "start_i": "추론 시작 (IDLE에서만)", "busy_o": "추론 중", "scores_o": "점수 10개 (signed)",
+    "done_o": "추론 완료 1클록 펄스", "error_o": "오류 1클록 펄스 (RAM 응답 없음)", "class_o": "결과 클래스 0~9",
+    "cycles_o": "마지막 추론에 걸린 클록 수"
+  },
+  "fsm": {
+    "file": "ch19/rtl/npu_tiled_784_npe.v",
+    "reset": "IDLE",
+    "rows": [
+      ["IDLE", "start_i", "LAUNCH", "tile_q=0, group_q=0, 누계 0, cycles_o=0"],
+      ["LAUNCH", "항상", "READ", "NPE개 내적 코어 시작, finished=0"],
+      ["READ", "항상", "WAIT_READ", "입력·가중치 RAM 읽기 요청"],
+      ["WAIT_READ", "x_rv && &w_rv", "SEND", ""],
+      ["WAIT_READ", "그 외", "IDLE", "error_o 펄스"],
+      ["SEND", "&ready && idx_q==len-1", "WAIT_PE", ""],
+      ["SEND", "&ready && idx_q<len-1", "READ", "idx_q+1"],
+      ["WAIT_PE", "모든 차선 완료 && 다음 그룹·타일 있음", "LAUNCH", "누계 += 내적, group_q 또는 tile_q 증가"],
+      ["WAIT_PE", "모든 차선 완료 && 마지막 그룹·타일", "BIAS", "누계 += 내적"],
+      ["BIAS", "항상", "AM_GO", "점수 = 누계 + Bias"],
+      ["AM_GO", "항상", "AM_WAIT", "argmax 시작"],
+      ["AM_WAIT", "am_done", "IDLE", "done_o 펄스"],
+      ["default", "유효하지 않은 상태", "IDLE", "error_o 펄스"]
+    ],
+    "diagram": "ch19/diagrams/ch19_npe_fsm"
+  }
+}
