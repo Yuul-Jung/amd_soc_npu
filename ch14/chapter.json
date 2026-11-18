@@ -80,11 +80,11 @@
   "handoff": [
     [
       "ch14/rtl/npu10_group_scheduler.v",
-      "15장 Dense 64→10이 가중치·Bias 적재 경로와 점수 10개를 그대로 사용 (수정 금지)"
+      "15장 <code>npu_dense</code>가 이 그룹 실행(4+4+2, 마지막 차선 무효)을 입력·가중치 읽기 포트 구조로 나눠 다시 씀. 4PE·MAC·BRAM은 같은 파일 재사용"
     ],
     [
       "ch14/reference/group10_reference.py",
-      "15장 기준 모델이 사례 생성 방식(형판·무작위·동점)을 재사용"
+      "15장 기준 모델이 같은 정수 함수(<code>linear_64x10</code>)로 점수를 계산"
     ]
   ],
   "port_notes": {
@@ -116,19 +116,84 @@
     "file": "ch14/rtl/npu10_group_scheduler.v",
     "reset": "IDLE",
     "rows": [
-      ["IDLE", "start_i && !x_loaded_o", "IDLE", "error_o 펄스"],
-      ["IDLE", "start_i && x_loaded_o", "LAUNCH", "busy_o=1, group_q=0, idx_q=0, cycles_o=0"],
-      ["LAUNCH", "항상", "READ", "4PE 시작 (길이 64)"],
-      ["READ", "항상", "WAIT_READ", "입력·가중치 BRAM 읽기 요청 (주소 idx_q, {group_q, idx_q})"],
-      ["WAIT_READ", "x_valid && &w_valid", "SEND", ""],
-      ["WAIT_READ", "그 외", "IDLE", "busy_o=0, error_o 펄스"],
-      ["SEND", "&pe_ready && idx_q==63", "WAIT_PE", "마지막 원소 전달"],
-      ["SEND", "&pe_ready && idx_q<63", "READ", "idx_q+1"],
-      ["WAIT_PE", "pe_done && group_q<2", "LAUNCH", "점수 4개 = 내적 + Bias, group_q+1"],
-      ["WAIT_PE", "pe_done && group_q==2", "ARGMAX", "점수 8·9 저장, class_o=0, k_q=1"],
-      ["ARGMAX", "k_q<9", "ARGMAX", "score_q[k_q] > score_q[class_o]이면 class_o=k_q, k_q+1"],
-      ["ARGMAX", "k_q==9", "IDLE", "마지막 비교, busy_o=0, done_o 펄스"],
-      ["default", "유효하지 않은 상태", "IDLE", "error_o 펄스"]
+      [
+        "IDLE",
+        "start_i && !x_loaded_o",
+        "IDLE",
+        "error_o 펄스"
+      ],
+      [
+        "IDLE",
+        "start_i && x_loaded_o",
+        "LAUNCH",
+        "busy_o=1, group_q=0, idx_q=0, cycles_o=0"
+      ],
+      [
+        "LAUNCH",
+        "항상",
+        "READ",
+        "4PE 시작 (길이 64)"
+      ],
+      [
+        "READ",
+        "항상",
+        "WAIT_READ",
+        "입력·가중치 BRAM 읽기 요청 (주소 idx_q, {group_q, idx_q})"
+      ],
+      [
+        "WAIT_READ",
+        "x_valid && &w_valid",
+        "SEND",
+        ""
+      ],
+      [
+        "WAIT_READ",
+        "그 외",
+        "IDLE",
+        "busy_o=0, error_o 펄스"
+      ],
+      [
+        "SEND",
+        "&pe_ready && idx_q==63",
+        "WAIT_PE",
+        "마지막 원소 전달"
+      ],
+      [
+        "SEND",
+        "&pe_ready && idx_q<63",
+        "READ",
+        "idx_q+1"
+      ],
+      [
+        "WAIT_PE",
+        "pe_done && group_q<2",
+        "LAUNCH",
+        "점수 4개 = 내적 + Bias, group_q+1"
+      ],
+      [
+        "WAIT_PE",
+        "pe_done && group_q==2",
+        "ARGMAX",
+        "점수 8·9 저장, class_o=0, k_q=1"
+      ],
+      [
+        "ARGMAX",
+        "k_q<9",
+        "ARGMAX",
+        "score_q[k_q] > score_q[class_o]이면 class_o=k_q, k_q+1"
+      ],
+      [
+        "ARGMAX",
+        "k_q==9",
+        "IDLE",
+        "마지막 비교, busy_o=0, done_o 펄스"
+      ],
+      [
+        "default",
+        "유효하지 않은 상태",
+        "IDLE",
+        "error_o 펄스"
+      ]
     ],
     "diagram": "ch14/diagrams/ch14_group_scheduler_fsm"
   }
