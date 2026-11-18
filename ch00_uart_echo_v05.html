@@ -56,6 +56,7 @@
           <tr><td>이번 장 작성</td><td><ul><li><code>common/rtl/uart_rx.v</code></li><li><code>common/rtl/uart_tx.v</code></li><li><code>common/rtl/uart_core.v</code></li><li><code>common/rtl/uart_echo_controller.v</code></li><li><code>ch00/rtl/basys3_uart_echo_top.v</code></li></ul></td></tr>
         </tbody>
       </table></div>
+      <p>전체 누적 관계: <a href="index.html#techtree">INDEX · 01 전체 테크트리</a> (00~31장 흐름 · 00~12장 모듈 재사용 도면)</p>
       <p>실습 순서: 01 구조 확인 → 02 준비 → 03 RTL 작성 → 04 테스트벤치·기준 모델 작성 → 05 시뮬레이션 → 06 결과 판정 → 08 합성·타이밍(Vivado) → 09 인계.</p>
     </section>
     <section class="section" id="s01">
@@ -542,6 +543,11 @@ exit $status</code></pre>
     </section>
     <section class="section" id="s09">
       <h2><span class="num">09</span>검증 현황·인계</h2>
+      <p>누적 보고 (이전 결과 → 추가 RTL → 시험 벡터 → 시뮬레이션 → 합성/보드 → 인계):</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>이전 결과</th><th>추가 RTL</th><th>시험 벡터</th><th>시뮬레이션</th><th>합성 / 보드</th><th>인계</th></tr></thead>
+        <tbody><tr><td>없음 (첫 장)</td><td><code>uart_rx.v</code><br><code>uart_tx.v</code><br><code>uart_core.v</code><br><code>uart_echo_controller.v</code><br><code>basys3_uart_echo_top.v</code></td><td><code>tb_uart_echo.sv</code></td><td>통과</td><td>⚠ 대기 / 미실시</td><td>2건 (아래 표)</td></tr></tbody>
+      </table></div>
       <div class="table-wrap"><table>
         <thead><tr><th>다음 장으로 넘기는 파일</th><th>사용처</th></tr></thead>
         <tbody><tr><td><code>common/rtl/uart_rx.v · uart_tx.v · uart_core.v</code></td><td>11·12장 통합 Top의 UART 계층 (수정 금지)</td></tr><tr><td><code>common/rtl/uart_echo_controller.v · ch00/rtl/basys3_uart_echo_top.v</code></td><td>이 장 전용 (후속 장 미사용)</td></tr></tbody>

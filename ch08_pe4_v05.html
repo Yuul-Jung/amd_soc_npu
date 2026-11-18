@@ -56,6 +56,7 @@
           <tr><td>이번 장 작성</td><td><ul><li><code>ch08/rtl/pe_array4.v</code></li></ul></td></tr>
         </tbody>
       </table></div>
+      <p>전체 누적 관계: <a href="index.html#techtree">INDEX · 01 전체 테크트리</a> (00~31장 흐름 · 00~12장 모듈 재사용 도면)</p>
       <p>실습 순서: 01 구조 확인 → 02 준비 → 03 RTL 작성 → 04 테스트벤치·기준 모델 작성 → 05 시뮬레이션 → 06 결과 판정 → 08 합성·타이밍(Vivado) → 09 인계.</p>
     </section>
     <section class="section" id="s01">
@@ -315,6 +316,11 @@ vivado -mode batch -nojournal -source tools/vivado/ooc_timing.tcl -tclargs ch08
     </section>
     <section class="section" id="s09">
       <h2><span class="num">09</span>검증 현황·인계</h2>
+      <p>누적 보고 (이전 결과 → 추가 RTL → 시험 벡터 → 시뮬레이션 → 합성/보드 → 인계):</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>이전 결과</th><th>추가 RTL</th><th>시험 벡터</th><th>시뮬레이션</th><th>합성 / 보드</th><th>인계</th></tr></thead>
+        <tbody><tr><td>01장 · 07장</td><td><code>pe_array4.v</code></td><td><code>tb_pe_array4.sv</code><br><code>pe_reference.py</code></td><td>통과</td><td>⚠ 대기 / 미실시</td><td>1건 (아래 표)</td></tr></tbody>
+      </table></div>
       <div class="table-wrap"><table>
         <thead><tr><th>다음 장으로 넘기는 파일</th><th>사용처</th></tr></thead>
         <tbody><tr><td><code>ch08/rtl/pe_array4.v</code></td><td>09장 dense_layer4 (수정 금지)</td></tr></tbody>

@@ -56,6 +56,7 @@
           <tr><td>이번 장 작성</td><td><ul><li><code>mini_npu/rtl/npu_dsp_mac_lane.v</code></li><li><code>mini_npu/rtl/npu_engine4.v</code></li><li><code>mini_npu/rtl/npu_display_controller.v</code></li><li><code>mini_npu/rtl/npu_reset_controller.v</code></li><li><code>mini_npu/rtl/basys3_npu_top.v</code></li><li><code>mini_npu/constraints/basys3_npu.xdc</code></li><li><code>mini_npu/scripts/vivado_impl.tcl</code></li><li><code>mini_npu/scripts/run_timing_sim.sh</code></li></ul></td></tr>
         </tbody>
       </table></div>
+      <p>전체 누적 관계: <a href="index.html#techtree">INDEX · 01 전체 테크트리</a> (00~31장 흐름 · 00~12장 모듈 재사용 도면)</p>
       <p>실습 순서: 01 구조 확인 → 02 준비 → 03 RTL 작성 → 04 테스트벤치·기준 모델 작성 → 05 시뮬레이션 → 06 결과 판정 → 08 합성·타이밍(Vivado) → 09 인계.</p>
     </section>
     <section class="section" id="s01">
@@ -1251,6 +1252,11 @@ picocom -b 115200 -d 8 -p n -y n -f n /dev/ttyUSB1   # n은 실제 번호로 변
     </section>
     <section class="section" id="s09">
       <h2><span class="num">09</span>검증 현황·인계</h2>
+      <p>누적 보고 (이전 결과 → 추가 RTL → 시험 벡터 → 시뮬레이션 → 합성/보드 → 인계):</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>이전 결과</th><th>추가 RTL</th><th>시험 벡터</th><th>시뮬레이션</th><th>합성 / 보드</th><th>인계</th></tr></thead>
+        <tbody><tr><td>00장 · 02장 · 11장</td><td><code>npu_dsp_mac_lane.v</code><br><code>npu_engine4.v</code><br><code>npu_display_controller.v</code><br><code>npu_reset_controller.v</code><br><code>basys3_npu_top.v</code></td><td><code>tb_npu_engine4.sv</code><br><code>tb_uart_core_fifo.sv</code><br><code>tb_npu_uart_adversarial.sv</code></td><td>통과</td><td>⚠ 대기 · 타이밍 시뮬 ⚠ 대기 / 미실시</td><td>2건 (아래 표)</td></tr></tbody>
+      </table></div>
       <div class="table-wrap"><table>
         <thead><tr><th>다음 장으로 넘기는 파일</th><th>사용처</th></tr></thead>
         <tbody><tr><td><code>mini_npu/ 전체 + common/rtl/ + ch02/rtl/dsp_multiplier.v</code></td><td>4분류 원형 기준선 — 13장 이후 10분류 NPU는 별도 폴더에서 개발하고 이 폴더는 수정하지 않음</td></tr><tr><td><code>mini_npu/build/impl/basys3_npu_top.bit</code></td><td>8-1 구현 결과 비트스트림 — Git에 넣지 않고 SHA-256을 ch12/validation/vivado_impl_timesim_*.txt에 기록</td></tr></tbody>

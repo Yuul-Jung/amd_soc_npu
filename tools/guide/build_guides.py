@@ -207,6 +207,52 @@ def fsm_table(c):
 
 
 EDITOR_URL = "https://yuul-jung.github.io/svg-flow-editor/"
+FLOW = "diagrams/course_flow_00_31"
+TREE = "diagrams/module_techtree_00_12"
+
+
+def diagram_page(stem):
+    doc = json.loads(rd(stem + ".json"))
+    return doc["pages"][doc.get("activePage", 0)] if isinstance(doc.get("pages"), list) else doc
+
+
+def diagram_svg(stem, uid, label):
+    """내보낸 SVG가 현재 JSON에서 만들어졌는지 해시로 확인하고, 한 페이지에 여러 장 넣어도 id가 겹치지 않게 바꾼다."""
+    svg = rd(stem + ".svg")
+    m = re.search(r"json-sha256: ([0-9a-f]{64})", svg)
+    digest = hashlib.sha256(open(os.path.join(ROOT, stem + ".json"), "rb").read()).hexdigest()
+    if not m or m.group(1) != digest:
+        raise SystemExit(f"{stem}.svg 가 JSON보다 오래되었습니다 — python3 tools/diagram/export_svg.py 실행")
+    svg = svg.replace('id="canvas"', f'id="{uid}"', 1).replace("arrowhead-", f"{uid}-arrowhead-")
+    w = re.search(r'viewBox="0 0 ([\d.]+) ', svg)
+    if w:   # 큰 도면은 원본 폭의 70% 아래로 줄이지 않고 틀 안에서 가로 스크롤 (STANDARD 10.1)
+        svg = svg.replace("<svg ", f'<svg style="min-width:{int(float(w.group(1)) * 0.7)}px" ', 1)
+    return re.sub(r'aria-label="[^"]*"', f'aria-label="{label}" role="img"', svg, count=1).strip()
+
+
+def check_techtree(stem, chs, origin):
+    """테크트리 도면의 모듈·간선·×N이 실제 RTL 인스턴스 관계와 같은지 대조한다."""
+    page = diagram_page(stem)
+    files = {}
+    for c in chs:
+        if c["number"] <= 12:
+            for p in c["new"]:
+                if p.endswith(".v"):
+                    for m in re.findall(r"^\s*module\s+(\w+)", strip_comments(rd(p)), re.M):
+                        files[m] = p
+    want = {}
+    for m, p in files.items():
+        for child, lst in parse_instances(p, origin).items():
+            n = sum(x for _, x in lst)
+            want[(child, m)] = f"×{n}" if n > 1 else ""
+    title = {n["id"]: n["title"] for n in page["nodes"]}
+    mods = {t for i, t in title.items() if not i.startswith("note")}
+    if mods != set(files):
+        raise SystemExit(f"{stem}.json 모듈 노드가 00~12장 RTL과 다릅니다 {sorted(mods ^ set(files))}")
+    got = {(title[e["from"]], title[e["to"]]): e.get("label", "") for e in page["edges"]}
+    if got != want:
+        diff = sorted(set(got.items()) ^ set(want.items()))
+        raise SystemExit(f"{stem}.json 간선이 RTL 인스턴스 관계와 다릅니다 {diff}")
 
 
 def fsm_diagram(c, names, f):
@@ -222,14 +268,7 @@ def fsm_diagram(c, names, f):
     table = {(a, d) for a, _, d, _ in f["rows"] if a not in ("default", "(모든 상태)") and a != d}
     if drawn != table:
         raise SystemExit(f"{c['id']}: 상태도 간선과 전이표가 다릅니다 — 도면에만 {sorted(drawn - table)}, 표에만 {sorted(table - drawn)}")
-    svg = rd(stem + ".svg")
-    m = re.search(r"json-sha256: ([0-9a-f]{64})", svg)
-    digest = hashlib.sha256(open(os.path.join(ROOT, stem + ".json"), "rb").read()).hexdigest()
-    if not m or m.group(1) != digest:
-        raise SystemExit(f"{c['id']}: {stem}.svg 가 JSON보다 오래되었습니다 — python3 tools/diagram/export_svg.py 실행")
-    k = c["id"]
-    svg = svg.replace('id="canvas"', f'id="{k}-fsm"', 1).replace("arrowhead-", f"{k}-arrowhead-")
-    svg = re.sub(r'aria-label="[^"]*"', f'aria-label="{c["top"]["module"]} FSM 상태도" role="img"', svg, count=1)
+    svg = diagram_svg(stem, f"{c['id']}-fsm", f"{c['top']['module']} FSM 상태도")
     return f"""
       <p>상태도 (원본 <a href="{stem}.json"><code>{stem}.json</code></a> · <a href="{EDITOR_URL}">svg-flow-editor</a>에서 <b>작업 불러오기</b>로 열어 편집 → <b>작업 저장</b> → <code>python3 tools/diagram/export_svg.py</code>):</p>
       <div class="figure-wrap">{svg.strip()}</div>"""
@@ -515,6 +554,7 @@ def build(c, chs, origin, by_id):
           <tr><td>이번 장 작성</td><td><ul>{new_rows}</ul></td></tr>
         </tbody>
       </table>
+      <p>전체 누적 관계: <a href="index.html#techtree">INDEX · 01 전체 테크트리</a> (00~31장 흐름 · 00~12장 모듈 재사용 도면)</p>
       <p>실습 순서: 01 구조 확인 → 02 준비 → 03 RTL 작성 → 04 테스트벤치·기준 모델 작성 → 05 시뮬레이션 → 06 결과 판정 → 08 합성·타이밍(Vivado) → 09 인계.</p>"""
     board = c.get("vivado", {}).get("mode") == "top"
     s01 = '      <div class="figure-wrap">' + svg_block(k, c["top"]["file"], c["top"]["module"], origin, board).replace("\n", "\n      ") + "</div>"
@@ -560,7 +600,19 @@ python3 --version</code></pre></div>
       </table>"""
     s08 = s08_unit(c, chs, e)
     hand = "".join(f"<tr><td><code>{a}</code></td><td>{b}</td></tr>" for a, b in c["handoff"])
-    s09 = f"""      <table>
+    gs = {name: (cls, note) for cls, name, note in gates(c, e)}
+    word = {"pass": "통과", "fail": "✗ 실패", "todo": "⚠ 대기", "na": "해당 없음"}
+    prev = sorted({org(p) for p in c["keep"]} - {""}) or ["없음 (첫 장)"]
+    newv = [os.path.basename(p) for p in c["new"] if p.endswith((".v", ".sv"))] or ["없음 (스크립트·제약만)"]
+    vec = [os.path.basename(p) for p in c["tb"] + c["ref"]]
+    synth = word[gs["SYNTH_TIMING_PASS"][0]] + (" · 타이밍 시뮬 " + word[gs["TIMING_SIM_PASS"][0]] if "TIMING_SIM_PASS" in gs else "")
+    report = f"""      <p>누적 보고 (이전 결과 → 추가 RTL → 시험 벡터 → 시뮬레이션 → 합성/보드 → 인계):</p>
+      <table>
+        <thead><tr><th>이전 결과</th><th>추가 RTL</th><th>시험 벡터</th><th>시뮬레이션</th><th>합성 / 보드</th><th>인계</th></tr></thead>
+        <tbody><tr><td>{" · ".join(prev)}</td><td>{"<br>".join(f"<code>{x}</code>" for x in newv)}</td><td>{"<br>".join(f"<code>{x}</code>" for x in vec)}</td><td>{word[gs["RTL_SIM_PASS"][0]]}</td><td>{synth} / {word[gs["BOARD_PASS"][0]] if gs["BOARD_PASS"][0] != "todo" else "미실시"}</td><td>{len(c["handoff"])}건 (아래 표)</td></tr></tbody>
+      </table>"""
+    s09 = report + f"""
+      <table>
         <thead><tr><th>다음 장으로 넘기는 파일</th><th>사용처</th></tr></thead>
         <tbody>{hand}</tbody>
       </table>
@@ -591,6 +643,16 @@ def update_index(text, chs):
         return "<tr>" + "".join(f"<td>{x}</td>" for x in cells) + "</tr>"
 
     text = re.sub(r"<tr><td>(\d\d)</td>.*?</tr>", row, text)
+    # 01 전체 테크트리 절 맨 위에 과정 도면 (svg-flow-editor 원본)
+    figs = f"""<!-- diagrams:start -->
+      <p>과정 도면 (원본 <a href="{FLOW}.json"><code>{FLOW}.json</code></a>, <a href="{TREE}.json"><code>{TREE}.json</code></a> · <a href="{EDITOR_URL}">svg-flow-editor</a>에서 편집 후 <code>python3 tools/diagram/export_svg.py</code>):</p>
+      <div class="figure-wrap">{diagram_svg(FLOW, "course-flow", "제3부 00~31장 전체 흐름")}</div>
+      <div class="figure-wrap">{diagram_svg(TREE, "module-tree", "00~12장 모듈 테크트리")}</div>
+      <!-- diagrams:end -->"""
+    text = re.sub(r"\n?\s*<!-- diagrams:start -->.*?<!-- diagrams:end -->", "", text, flags=re.S)
+    text = re.sub(r'(<section class="section" id="techtree">\s*<h2>.*?</h2>)', lambda m: m.group(1) + "\n      " + figs, text, count=1, flags=re.S)
+    if ".figure-wrap{" not in text:
+        text = text.replace("</style>", ".figure-wrap{overflow-x:auto}\n.figure-wrap svg{width:100%;height:auto;min-width:860px}\n</style>", 1)
     # 장식용 칩 제거 (STANDARD 3절, 헤더 높이 160~220px)
     text = re.sub(r'\n\s*<div class="chips">.*?</div>', "", text, count=1, flags=re.S)
     if ".table-wrap{" not in text:
@@ -637,6 +699,7 @@ def main(check):
     chs = load_chapters()
     by_id = {c["id"]: c for c in chs}
     origin = module_origin(chs)
+    check_techtree(TREE, chs, origin)
     outputs, all_gates = {}, {}
     for c in chs:
         h, g = build(c, chs, origin, by_id)
