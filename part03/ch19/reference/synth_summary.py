@@ -39,9 +39,13 @@ def main():
     p.add_argument("--rpt", type=Path, required=True)
     p.add_argument("--out", type=Path, required=True)
     p.add_argument("--version", default="?")
+    p.add_argument("--config", nargs=3, action="append", metavar=("KEY", "NAME", "RTL"),
+                   help="(20장~) 요약할 구성. 없으면 19장 기본 7개")
+    p.add_argument("--title", default="19장 Vivado OOC 합성 요약 (실제 실행)")
     a = p.parse_args()
+    configs = [tuple(c) for c in a.config] if a.config else CONFIGS
     rows, paths, routed, n_fail, n_route_fail = [], [], [], 0, 0
-    for key, name, desc in CONFIGS:
+    for key, name, desc in configs:
         u = (a.rpt / f"{key}_utilization.rpt").read_text()
         (wns, tns, fail), src, dst, dly, lvl = timing((a.rpt / f"{key}_timing.rpt").read_text())
         n_fail += wns.startswith("-")
@@ -58,13 +62,14 @@ def main():
                     f"{wns} | {tns} | {fail} |")
         paths.append(f"| {name} | `{src}` | `{dst}` | {dly} | {lvl} |")
     lines = [
-        "# 19장 Vivado OOC 합성 요약 (실제 실행)", "",
+        f"# {a.title}", "",
         f"> Vivado {a.version}, `synth_design -mode out_of_context`, xc7a35tcpg236-1, `create_clock -period 10.000 clk`.",
         "> 첫 표는 **합성 직후 추정치**, 배선 후 결과는 아래 별도 표. 비트스트림·실물은 하지 않았다.", "",
         "| 구성 | RTL | DSP48E1 | BRAM Tile | LUT | LUTRAM | FF | WNS(ns) | TNS(ns) | 실패 끝점 |",
         "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|", *rows, "",
-        "- PE8 = 코어 A + 코어 B (각각 따로 합성한 값의 합으로 읽는다. 공유 x 포트 배선은 포함되지 않음).",
-        "- BRAM Tile 0.5 = RAMB18 1개. 14장 코어의 lane별 가중치 bank가 RAMB18로 추론되었다.", "",
+        *([] if a.config else [
+            "- PE8 = 코어 A + 코어 B (각각 따로 합성한 값의 합으로 읽는다. 공유 x 포트 배선은 포함되지 않음).",
+            "- BRAM Tile 0.5 = RAMB18 1개. 14장 코어의 lane별 가중치 bank가 RAMB18로 추론되었다."]), "",
         "## 임계 경로 (합성 추정)", "",
         "| 구성 | 시작 | 끝 | Data Path(ns) | Logic Levels |", "|---|---|---|---:|---:|", *paths, "",
     ]
@@ -75,7 +80,7 @@ def main():
                   "|---|---:|---:|---:|---:|---:|---:|---:|---|---:|", *routed, ""]
     a.out.write_text("\n".join(lines) + "\n", encoding="utf-8")
     tail = f" routed={len(routed)} route_wns_negative={n_route_fail}" if routed else ""
-    print(f"SYNTH_OOC_SUMMARY configs={len(CONFIGS)} wns_negative={n_fail}{tail} out={a.out.name}")
+    print(f"SYNTH_OOC_SUMMARY configs={len(configs)} wns_negative={n_fail}{tail} out={a.out.name}")
 
 
 if __name__ == "__main__":
