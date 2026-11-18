@@ -5,3 +5,4 @@ mini_npu/build/
 *.jou
 vivado*.log
 xsim.dir/
+__pycache__/
