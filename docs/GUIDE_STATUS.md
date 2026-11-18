@@ -36,5 +36,5 @@
 | 27 | 최종 NPU SoC | [ch27_npu_system_v02.html](../ch27_npu_system_v02.html) | — | ✅ | ⏳ | ⏳ | ⏳ |
 | 28 | PC 손글씨 → 보드 분류 | [ch28_handwriting_v02.html](../ch28_handwriting_v02.html) | — | ✅ | ⏳ | — | ⏳ |
 | 29 | 센서 유효성 + AI 상태 분류 | [ch29_sensor_ai_v02.html](../ch29_sensor_ai_v02.html) | ✅ | ✅ | ⏳ | — | ⏳ |
-| 30 | NPU·모터 안전 제어 | chapter.json 대기 | | | | | |
+| 30 | AI 제안 · 모터 인터록 분리 | [ch30_motor_interlock_v02.html](../ch30_motor_interlock_v02.html) | — | ✅ | ⏳ | — | ⏳ |
 | 31 | AES-128·HMAC 보안 UART | chapter.json 대기 | | | | | |

@@ -249,8 +249,8 @@
       "id": "ch30",
       "number": 30,
       "title": "NPU·모터 안전 제어",
-      "file": "ch30_capstone_motor_v02.html",
-      "html_status": "TODO",
+      "file": "ch30_motor_interlock_v02.html",
+      "html_status": "DONE",
       "rtl_status": "TODO"
     },
     {
