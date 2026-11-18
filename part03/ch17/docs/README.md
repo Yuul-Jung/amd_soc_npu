@@ -46,6 +46,7 @@
 | **INT16×INT16 계약** | 2³⁶ → signed **38** | max 841,813,590,016 → signed **41** (signed40 한계 549,755,813,887 초과) | + Bias40 → 1,391,569,403,903 → signed **42** |
 
 - 기본 폭 41/40/42는 INT16 계약을 담도록 잡았다. 18장 정밀도 비교에서 같은 외부 누산 구조를 재사용할 수 있다.
+- (변경) 19장: 42비트 argmax를 4단 토너먼트 트리로 바꾸고 두 클록에 나눔(마지막 ACK에서 점수 확정, SCORE에서 1·2단 저장, FINISH에서 3·4단). done 시점 불변
 - 17장 시험은 INT8(DATA_W 8)이다. INT16 최악값의 RTL 실행은 18장에서 DATA_W=16 파라미터로 수행한다(`ch18/docs/README.md`).
 - (변경) 18장: `DATA_W`·`CORE_ACC_W`·`PART_W` 파라미터 추가. 기본값 8/24/25가 이 장의 동작이다.
 - RTL 폭 시험: `ACC_W=25`(INT8 최소 안전 폭)은 극값에서도 overflow 없음, `ACC_W=24`는 극값 2건에서 `ovf_o=1`과 Python 순환값이 비트 단위로 일치.
@@ -60,8 +61,8 @@ bash part03/ch17/scripts/run_sim.sh
 
 ```text
 == config full acc_w=41 bias_w=40
-RTL_SIM_PASS TILE784 cases=22 tiles=13 tile_go_to_accept_cycles=207 acc_w=41 bias_w=40 score_w=42 errors_checked=14
-PYTHON_RTL_COMPARE_PASS cases=22 tile_partials=2860 scores=10 class=1 overflow=1 bit_exact=1
+RTL_SIM_PASS TILE784 cases=26 tiles=13 tile_go_to_accept_cycles=207 acc_w=41 bias_w=40 score_w=42 errors_checked=14
+PYTHON_RTL_COMPARE_PASS cases=26 tile_partials=3380 scores=10 class=1 overflow=1 bit_exact=1
 == config w25 acc_w=25 bias_w=24
 PYTHON_RTL_COMPARE_PASS cases=4 tile_partials=520 scores=10 class=1 overflow=1 bit_exact=1
 == config w24 acc_w=24 bias_w=24
@@ -73,11 +74,11 @@ PYTHON_RTL_COMPARE_PASS cases=4 tile_partials=520 scores=10 class=1 overflow=1 b
 
 - 기준모델 `reference/tile784_reference.py`: 타일 부분합 `dot_signed`, 784 전체 `dot_tiled_64` = `dot_signed` 교차 확인, `argmax_lowest`(host_tools 함수 재사용, 신규 내적 함수 없음)
 - 타일별 부분합 13×10과 최종 점수 10·Class·overflow를 RTL과 **비트 단위** 비교
-- 시험 벡터: 무작위 15건, 누산 극값(±) + Bias 극값 ±2³⁹, 마지막 타일만 유효 데이터, 타일 위치 판별(class c ↔ 타일 12−c), 전 점수 음수·class 3·7 동점, x=0(점수 = Bias), 작은 Bias
+- 시험 벡터: 무작위 15건, 누산 극값(±) + Bias 극값 ±2³⁹, 마지막 타일만 유효 데이터, 타일 위치 판별(class c ↔ 타일 12−c), 전 점수 음수·class 3·7 동점, x=0(점수 = Bias), 작은 Bias, argmax 트리 단별 동점 4건(0·1, 2·3, 1·2, 5·6)
 - 모든 추론에서 마지막 타일 x 패딩 48개는 0이 아닌 값, 가중치 48주소는 타일 11 값이 남은 상태
 - 오류·순서: IDLE의 tile_go/abort, 타일 중복(0)·누락(2)·범위 밖(13), 프레임 없는 tile_go, LOAD 중 Bias 쓰기·class 10·start, RUN 중 W(class 9·주소 63)/Bias 쓰기·start·tile_go·abort — 14건 모두 코드까지 확인, 결과 불변
 - Reset: 코어 RUN 중(타일 5)·LOAD 중(타일 8) Reset 후 처음부터 재실행 결과 일치. LOAD 중 취소(타일 7) 후 프레임 해제·재실행 일치
 - 상시 화이트박스: 코어 Bias 10개 항상 0, 코어 계산 중 가중치 쓰기·다음 프레임 수신 없음, 프레임 해제는 결과 수락 클록 또는 취소만, done·tile_done 1클록, 타일 처리 클록 수 일정
-- 변이 시험 16종 모두 검출: 마스크 제거·경계 off-by-one, 코어 Bias 포트 연결(중복), Bias 미적용, 타일마다 Bias, start 시 누산 미Clear, 부분합 0 확장, 타일 중복·누락·프레임 검사 제거, RUN 중 W 쓰기·상시 Bias 쓰기 허용, overflow 미검출, 마지막 타일 번호 11, 조기 frame_ack, 동점 높은 번호
+- 변이 시험 16종 모두 검출: 마스크 제거·경계 off-by-one, 코어 Bias 포트 연결(중복), Bias 미적용, 타일마다 Bias, start 시 누산 미Clear, 부분합 0 확장, 타일 중복·누락·프레임 검사 제거, RUN 중 W 쓰기·상시 Bias 쓰기 허용, overflow 미검출, 마지막 타일 번호 11, 조기 frame_ack, 동점 높은 번호. (추가) 19장 argmax 트리 동점 변이 5종 검출
 
 **미검증:** Vivado 합성(DSP·BRAM 추론, 10×42비트 가산기 타이밍)·자원, Basys3 실물, UART 경로 연결. (INT16 RTL·학습 MNIST 모델은 18장)

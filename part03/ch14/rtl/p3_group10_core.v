@@ -101,19 +101,30 @@ module p3_group10_core #(
         end
     end
 
-    // 10개 점수 중 최대값, 동점은 낮은 번호 유지(엄격한 > 비교)
+    // (변경) 19장 타이밍 결함 수정: 10개 점수를 한 클록에 직렬 비교(9단)하던 argmax를 누적형으로 바꾼다.
+    //   CAPT에서 lane 쌍(0·1, 2·3)의 승자를 레지스터에 저장하고(1단), 다음 CLEAR에서 두 승자와
+    //   누적 최대값(best_s_q)을 비교해 합친다(2단). 마지막 그룹은 FINISH에서 합친다.
+    //   class_o·done 시점과 동점 규칙(낮은 번호)은 그대로.
     integer k;
-    reg [3:0] best_class;
-    reg signed [SCORE_W-1:0] best_score;
-    always @* begin
-        best_class = 4'd0;
-        best_score = score_q[0];
-        for (k = 1; k < OUT_N; k = k + 1)
-            if (score_q[k] > best_score) begin
-                best_score = score_q[k];
-                best_class = k[3:0];
-            end
-    end
+    reg have_best_q;
+    reg [3:0] best_c_q;
+    reg signed [SCORE_W-1:0] best_s_q;
+    reg signed [SCORE_W-1:0] s01, s23;   // 직전 CAPT 그룹의 lane 쌍 승자
+    reg [3:0] c01, c23;
+    reg v23_q;                           // lane 2 유효(lane 0은 항상 유효)
+    // lane 쌍 비교(CAPT): 높은 번호는 엄격히 클 때만 이긴다(동점 = 낮은 번호)
+    wire signed [SCORE_W-1:0] ns0 = add_bias(acc0, bias[{group_q, 2'd0}]);
+    wire signed [SCORE_W-1:0] ns1 = add_bias(acc1, bias[{group_q, 2'd1}]);
+    wire signed [SCORE_W-1:0] ns2 = add_bias(acc2, bias[{group_q, 2'd2}]);
+    wire signed [SCORE_W-1:0] ns3 = add_bias(acc3, bias[{group_q, 2'd3}]);
+    wire take1 = lane_en[1] && (ns1 > ns0);
+    wire take3 = lane_en[3] && (ns3 > ns2);
+    wire take23 = v23_q && (s23 > s01);
+    wire signed [SCORE_W-1:0] grp_s = take23 ? s23 : s01;
+    wire [3:0] grp_c = take23 ? c23 : c01;
+    // 누적값은 앞 그룹(낮은 번호)이므로 그룹 최대가 엄격히 클 때만 바꾼다
+    wire take_grp = !have_best_q || (grp_s > best_s_q);
+    wire [3:0] best_class = take_grp ? grp_c : best_c_q;
 
     genvar g;
     generate
@@ -158,10 +169,19 @@ module p3_group10_core #(
                     end else begin
                         busy_o <= 1'b1;
                         group_q <= 2'd0;
+                        have_best_q <= 1'b0;
                         state <= CLEAR;
                     end
                 end
                 CLEAR: begin
+                    // 직전 그룹(group_q - 1) 점수를 누적 최대값에 합친다
+                    if (group_q != 2'd0) begin
+                        have_best_q <= 1'b1;
+                        if (take_grp) begin
+                            best_s_q <= grp_s;
+                            best_c_q <= grp_c;
+                        end
+                    end
                     idx_q <= 6'd0;
                     state <= RUN;
                 end
@@ -183,6 +203,12 @@ module p3_group10_core #(
                     if (lane_en[1]) score_q[{group_q, 2'd1}] <= add_bias(acc1, bias[{group_q, 2'd1}]);
                     if (lane_en[2]) score_q[{group_q, 2'd2}] <= add_bias(acc2, bias[{group_q, 2'd2}]);
                     if (lane_en[3]) score_q[{group_q, 2'd3}] <= add_bias(acc3, bias[{group_q, 2'd3}]);
+                    // argmax 1단: lane 쌍 승자. 무효 lane은 lane_en으로 제외되므로 값은 상관없다
+                    s01 <= take1 ? ns1 : ns0;
+                    c01 <= take1 ? {group_q, 2'd1} : {group_q, 2'd0};
+                    s23 <= take3 ? ns3 : ns2;
+                    c23 <= take3 ? {group_q, 2'd3} : {group_q, 2'd2};
+                    v23_q <= lane_en[2];
                     if (group_q == LAST_GROUP) begin
                         state <= FINISH;
                     end else begin

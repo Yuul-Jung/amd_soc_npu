@@ -42,31 +42,35 @@ x 타일 ───┼ PE4 : p3_group10_core #(64,10) 4+4+2 그룹 (14장 기본)
 
 → 포트가 4개뿐이면 8PE도 4PE와 같은 192클록. PE 수만 늘리고 BRAM 포트를 늘리지 않으면 효과가 없다.
 
-## 3. 합성 결과 (Vivado OOC, 합성만) — `validation/synth_ooc_summary.md`
+## 3. Vivado 결과 (OOC, 100 MHz) — `validation/synth_ooc_summary.md`
 
-| 구성 | DSP | BRAM Tile | LUT | FF | WNS @100 MHz (합성 추정) |
-|---|---:|---:|---:|---:|---:|
-| PE1 INT8 | 1 | 0.5 | 51 | 66 | +4.919 |
-| PE4 INT8 (14장) | 4 | 2 | 558 | 512 | **−7.962** |
-| PE8 = A + B INT8 | 4 + 4 | 2 + 2 | 319 + 229 | 315 + 215 | **−2.710** / +0.503 |
-| PE4 INT16 | 4 | 2 | 822 | 652 | **−9.441** |
-| 17장 Tile INT8 | 4 | 2 | 1650 | 1289 | **−9.441** |
-| 18장 Tile INT16 | 4 | 2 | 1821 | 1659 | **−9.429** |
+argmax 수정 후 7개 구성 모두 **OOC 배치·배선 후 WNS 양수**(Vivado 2024.2, xc7a35tcpg236-1, `create_clock -period 10`).
+
+| 구성 | DSP | BRAM Tile | LUT | FF | WNS 배선 후 (ns) | 수정 전 WNS (합성 추정) |
+|---|---:|---:|---:|---:|---:|---:|
+| PE1 INT8 | 1 | 0.5 | 69 | 123 | +4.560 | +4.919 |
+| PE4 INT8 (14장) | 4 | 2 | 290 | 597 | +1.096 | −7.962 |
+| PE8 = A + B INT8 | 4 + 4 | 2 + 2 | 285 + 276 | 401 + 302 | +1.488 / +0.901 | −2.710 / +0.503 |
+| PE4 INT16 | 4 | 2 | 443 | 779 | +1.144 | −9.441 |
+| 17장 Tile INT8 | 4 | 2 | 1496 | 1411 | +0.712 | −9.441 |
+| 18장 Tile INT16 | 4 | 2 | 1661 | 1790 | +0.625 | −9.429 |
 
 - DSP는 lane 수만큼 추론(INT8·INT16 모두 lane당 DSP48E1 1개). 가중치 bank는 lane당 RAMB18 1개.
-- INT16은 INT8보다 LUT +47%(822 vs 558), FF +27%. DSP·BRAM 수는 같다(16비트도 DSP 25×18 한 개, bank 192×16이 RAMB18 하나에 들어감).
+- INT16 PE4는 INT8보다 LUT +53%(443 vs 290), FF +30%. DSP·BRAM 수는 같다(16비트도 DSP 25×18 한 개, bank 192×16이 RAMB18 하나).
+- OOC는 최상위 포트를 FPGA 핀에 묶지 않는다. 칩 전체 Top·I/O 제약·비트스트림·실물은 별도(실물은 사용자와 함께).
 
-### 발견한 타이밍 결함 (미수정, 24장으로 인계)
+### 타이밍 결함과 수정
 
-- **임계 경로 = 조합 argmax**: 모든 실패 구성에서 `score_q_reg → class_o_reg`. 10개 점수를 `always @*`에서 차례로 비교하는 9단 직렬 비교기(PE4 INT8 37 logic level, 17.9 ns). 17·18장 Tile은 컨트롤러의 42비트 argmax가 같은 구조라 −9.4 ns.
-- 기능 결함이 아니라 100 MHz 타이밍 결함이며, **합성 추정**이다(배치·배선 전).
-- 수정 방향(24장): argmax를 비교 트리 + 레지스터 단계로 나누거나 FINISH에서 여러 클록에 걸쳐 순차 비교. done 시점이 바뀌므로 14~18장 사이클 계약과 회귀 로그가 함께 바뀐다 → 검증된 코어를 이 장에서 고치지 않았다.
+- **발견:** 수정 전 임계 경로는 조합 argmax(`score_q_reg → class_o_reg`) — 10개 점수를 `always @*`에서 차례로 비교하는 9단 직렬 비교(PE4 INT8 37 logic level, 17.9 ns). 17·18장 Tile은 컨트롤러 42비트 argmax가 같은 구조.
+- **수정(14장 코어):** CAPT에서 lane 쌍(0·1, 2·3) 승자를 레지스터에 저장, 다음 CLEAR에서 두 승자와 누적 최대값을 비교(2단), 마지막 그룹은 FINISH에서 합침.
+- **수정(17장 컨트롤러):** 4단 토너먼트 트리를 두 클록으로 분할 — 마지막 ACK에서 점수 확정(종전 SCORE 작업), SCORE에서 1·2단 저장, FINISH에서 3·4단.
+- **불변 확인:** class_o·done 시점·동점 규칙(낮은 번호) 그대로. 14~19장 로그의 PASS 줄·사이클·시뮬레이션 종료 시각이 수정 전과 동일. 이어서 각 비교 단 동점 시험(14장 5건, 17장 4건)을 추가해 동점 변이 10종 모두 검출.
 
 ## 4. 실행
 
 ```bash
 bash part03/ch19/scripts/run_sim.sh                                   # RTL·모델 비교
-VIVADO_SETTINGS=<Vivado>/settings64.sh bash part03/ch19/scripts/run_synth.sh   # OOC 합성 요약
+VIVADO_SETTINGS=<Vivado>/settings64.sh bash part03/ch19/scripts/run_synth.sh   # OOC 합성·배선 요약 (IMPL=0이면 합성만)
 ```
 
 기대 출력(요약):
@@ -75,7 +79,7 @@ VIVADO_SETTINGS=<Vivado>/settings64.sh bash part03/ch19/scripts/run_synth.sh   #
 PYTHON_ARCH_SELF_TEST_PASS samples=4 tile_runs=52 cycles PE1=700 PE4=206 PE8=138 load_w=640
 RTL_SIM_PASS PE_SCALE tile_runs=52 PE1=70x10 PE4=206 PE8=138(A 138, B 70) load_w=640
 PYTHON_RTL_COMPARE_PASS tile_runs=52 configs=PE1,PE4,PE8 partials_bit_exact=1 cycles_match_model=1 mnist_samples=4 class_match_ch18_int8=1
-SYNTH_OOC_SUMMARY configs=7 wns_negative=5 out=synth_ooc_summary.md
+SYNTH_OOC_SUMMARY configs=7 wns_negative=0 routed=7 route_wns_negative=0 out=synth_ooc_summary.md
 ```
 
 ## 5. 검증 범위
@@ -86,4 +90,4 @@ SYNTH_OOC_SUMMARY configs=7 wns_negative=5 out=synth_ooc_summary.md
 - 변이 시험 4종 검출: 코어 DRAIN 1클록, PE8 코어 B 1클록 늦은 시작(공유 포트 충돌), 모델 그룹 지연 3, PE8 class 매핑 교환
 - 회귀: ch13~18 PASS
 
-**미검증:** 배치·배선 후 Timing·자원(합성 추정만), 실제 클록 주파수와 시간(초), 공유 x 포트를 포함한 PE8 단일 Top 합성, Basys3 실물, 전력.
+**미검증:** 칩 전체 Top(I/O 핀 포함) 구현·비트스트림, 공유 x 포트를 포함한 PE8 단일 Top 구현, Basys3 실물(사용자와 함께), 전력.

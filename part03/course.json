@@ -203,7 +203,7 @@
     "ch13_ch19": "rtl_sim_pass_local_2026_11_18_python_bit_exact_branch_work_part03_ch13_19",
     "ch18_pc_eval": "pc_eval_mnist_t10k_float9260_int8_9256_int16_9260_2026_11_18",
     "ch20_ch31": "education_guides_written_implementation_and_fpga_validation_not_run",
-    "vivado": "ch19_ooc_synth_only_2026_11_18_wns_negative_argmax_path_impl_not_run",
+    "vivado": "ch19_ooc_synth_and_route_2026_11_18_all_7_configs_wns_positive_100mhz_full_top_bitstream_not_run",
     "board": "not_run",
     "web": "not_run"
   }

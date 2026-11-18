@@ -103,18 +103,28 @@ module p3_tile784_10 #(
     endgenerate
 
     // 10개 점수 최대값, 동점은 낮은 번호(14장 코어와 같은 규칙)
+    // (변경) 19장 타이밍 결함 수정: 9단 직렬 비교 → 4단 토너먼트 트리를 두 클록으로 나눈다.
+    //   마지막 타일 ACK에서 score_q 확정, SCORE에서 1·2단 결과를 레지스터에, FINISH에서 3·4단.
+    //   왼쪽(낮은 번호)은 오른쪽이 엄격히 클 때만 진다. done 시점은 그대로.
     integer k;
-    reg [3:0] best_class;
-    reg signed [SCORE_W-1:0] best_score;
-    always @* begin
-        best_class = 4'd0;
-        best_score = score_q[0];
-        for (k = 1; k < N_CLASS; k = k + 1)
-            if (score_q[k] > best_score) begin
-                best_score = score_q[k];
-                best_class = k[3:0];
-            end
-    end
+    reg signed [SCORE_W-1:0] a2s0_q, a2s1_q, a2s2_q;
+    reg [3:0] a2c0_q, a2c1_q, a2c2_q;
+    wire signed [SCORE_W-1:0] t1s [0:4];
+    wire [3:0] t1c [0:4];
+    generate
+        for (g = 0; g < 5; g = g + 1) begin : arg1
+            wire r = score_q[2*g+1] > score_q[2*g];
+            assign t1s[g] = r ? score_q[2*g+1] : score_q[2*g];
+            assign t1c[g] = r ? 2*g+1 : 2*g;
+        end
+    endgenerate
+    wire r2a = t1s[1] > t1s[0], r2b = t1s[3] > t1s[2];
+    wire signed [SCORE_W-1:0] t2s0 = r2a ? t1s[1] : t1s[0], t2s1 = r2b ? t1s[3] : t1s[2];
+    wire [3:0] t2c0 = r2a ? t1c[1] : t1c[0], t2c1 = r2b ? t1c[3] : t1c[2];
+    wire r3 = a2s1_q > a2s0_q;
+    wire signed [SCORE_W-1:0] t3s = r3 ? a2s1_q : a2s0_q;
+    wire [3:0] t3c = r3 ? a2c1_q : a2c0_q;
+    wire [3:0] best_class = (a2s2_q > t3s) ? a2c2_q : t3c;
 
     always @(posedge clk) begin
         if (!resetn) begin
@@ -187,15 +197,20 @@ module p3_tile784_10 #(
                     state <= ACK;
                 end
                 // frame_ack_o = 1: 현재 타일 프레임 해제 → 다음 타일 프레임 수신 가능
+                // 마지막 타일: 외부 누산이 직전 에지에서 끝났으므로 여기서 Bias를 더해 점수 확정
                 ACK: if (tile_q == LAST_TILE) begin
+                    for (k = 0; k < N_CLASS; k = k + 1)
+                        score_q[k] <= final_w[k];
                     state <= SCORE;
                 end else begin
                     tile_q <= tile_q + 4'd1;
                     state <= LOAD;
                 end
+                // argmax 1·2단 결과 저장
                 SCORE: begin
-                    for (k = 0; k < N_CLASS; k = k + 1)
-                        score_q[k] <= final_w[k];
+                    a2s0_q <= t2s0; a2c0_q <= t2c0;
+                    a2s1_q <= t2s1; a2c1_q <= t2c1;
+                    a2s2_q <= t1s[4]; a2c2_q <= t1c[4];
                     state <= FINISH;
                 end
                 FINISH: begin

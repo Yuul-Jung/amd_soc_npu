@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""19장: Vivado OOC 합성 보고서(utilization·timing_summary)를 요약표로 만든다(표준 라이브러리).
+"""19장: Vivado OOC 합성·배선 보고서(utilization·timing_summary)를 요약표로 만든다(표준 라이브러리).
 
 원본 보고서에는 호스트 이름·경로가 있어 저장소에 넣지 않고, 수치와 임계 경로 끝점만 기록한다.
 """
@@ -40,11 +40,19 @@ def main():
     p.add_argument("--out", type=Path, required=True)
     p.add_argument("--version", default="?")
     a = p.parse_args()
-    rows, paths, n_fail = [], [], 0
+    rows, paths, routed, n_fail, n_route_fail = [], [], [], 0, 0
     for key, name, desc in CONFIGS:
         u = (a.rpt / f"{key}_utilization.rpt").read_text()
         (wns, tns, fail), src, dst, dly, lvl = timing((a.rpt / f"{key}_timing.rpt").read_text())
         n_fail += wns.startswith("-")
+        rt = a.rpt / f"{key}_route_timing.rpt"
+        if rt.exists():
+            ru = (a.rpt / f"{key}_route_utilization.rpt").read_text()
+            (rw, rtn, rf), rs, rd, rdl, rl = timing(rt.read_text())
+            n_route_fail += rw.startswith("-")
+            routed.append(f"| {name} | {util(ru, 'DSPs')} | {util(ru, 'Block RAM Tile')} | "
+                          f"{util(ru, 'Slice LUTs')} | {util(ru, 'Slice Registers')} | {rw} | {rtn} | {rf} | "
+                          f"`{rs}` → `{rd}` | {rdl} |")
         rows.append(f"| {name} | `{desc}` | {util(u, 'DSPs')} | {util(u, 'Block RAM Tile')} | "
                     f"{util(u, 'Slice LUTs')} | {util(u, 'LUT as Memory')} | {util(u, 'Slice Registers')} | "
                     f"{wns} | {tns} | {fail} |")
@@ -52,7 +60,7 @@ def main():
     lines = [
         "# 19장 Vivado OOC 합성 요약 (실제 실행)", "",
         f"> Vivado {a.version}, `synth_design -mode out_of_context`, xc7a35tcpg236-1, `create_clock -period 10.000 clk`.",
-        "> **합성 직후 추정치**다. 배치·배선·Timing closure·비트스트림·실물은 하지 않았다(24장·후반 일괄).", "",
+        "> 첫 표는 **합성 직후 추정치**, 배선 후 결과는 아래 별도 표. 비트스트림·실물은 하지 않았다.", "",
         "| 구성 | RTL | DSP48E1 | BRAM Tile | LUT | LUTRAM | FF | WNS(ns) | TNS(ns) | 실패 끝점 |",
         "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|", *rows, "",
         "- PE8 = 코어 A + 코어 B (각각 따로 합성한 값의 합으로 읽는다. 공유 x 포트 배선은 포함되지 않음).",
@@ -60,8 +68,14 @@ def main():
         "## 임계 경로 (합성 추정)", "",
         "| 구성 | 시작 | 끝 | Data Path(ns) | Logic Levels |", "|---|---|---|---:|---:|", *paths, "",
     ]
+    if routed:
+        lines += ["## OOC 배치·배선 후 (opt_design → place_design → route_design)", "",
+                  "> 최상위 포트를 FPGA 핀에 묶지 않은 OOC 구현이다. 칩 전체 Top·I/O·비트스트림·실물은 별도.", "",
+                  "| 구성 | DSP | BRAM Tile | LUT | FF | WNS(ns) | TNS(ns) | 실패 끝점 | 임계 경로 | Data Path(ns) |",
+                  "|---|---:|---:|---:|---:|---:|---:|---:|---|---:|", *routed, ""]
     a.out.write_text("\n".join(lines) + "\n", encoding="utf-8")
-    print(f"SYNTH_OOC_SUMMARY configs={len(CONFIGS)} wns_negative={n_fail} out={a.out.name}")
+    tail = f" routed={len(routed)} route_wns_negative={n_route_fail}" if routed else ""
+    print(f"SYNTH_OOC_SUMMARY configs={len(CONFIGS)} wns_negative={n_fail}{tail} out={a.out.name}")
 
 
 if __name__ == "__main__":

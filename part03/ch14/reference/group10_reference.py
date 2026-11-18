@@ -64,6 +64,12 @@ def build_cases():
         w = [[rng.randint(-128, 127) for _ in range(64)] for _ in range(10)]
         b = [rng.randint(BIAS_MIN, BIAS_MAX) for _ in range(10)]
         cases.append((x, w, b))
+    # (추가) 19장 argmax 트리: 각 비교 단의 동점(lane 쌍 0·1, 2·3, 그룹 1의 4·5, 6·7, 그룹 2의 8·9) → 낮은 번호
+    z = [[0] * 64 for _ in range(10)]
+    for pair in ((0, 1), (2, 3), (4, 5), (6, 7), (8, 9)):
+        b = [-100 - c for c in range(10)]
+        b[pair[0]] = b[pair[1]] = 77
+        cases.append(([0] * 64, z, b))
     return cases
 
 

@@ -1,8 +1,10 @@
 # (추가) 19장: 14장 코어·17장 Tile Controller 구성별 Out-of-Context 합성(Basys3 XC7A35T, 100 MHz 제약).
-# 합성(synth_design)만 수행한다. 배치·배선·Timing closure·비트스트림은 하지 않는다.
-# 사용: vivado -mode batch -source synth_ooc.tcl -tclargs <part03 경로> <출력 폴더>
+# (변경) 세 번째 인자 impl이면 OOC 배치·배선(opt/place/route)까지 수행하고 배선 후 Timing을 기록한다.
+# 비트스트림·I/O 핀·실물은 하지 않는다(OOC는 최상위 포트를 FPGA 핀에 묶지 않음).
+# 사용: vivado -mode batch -source synth_ooc.tcl -tclargs <part03 경로> <출력 폴더> [impl]
 set part03 [lindex $argv 0]
 set out [lindex $argv 1]
+set impl [expr {[llength $argv] > 2 && [lindex $argv 2] eq "impl"}]
 file mkdir $out
 set part xc7a35tcpg236-1
 set srcs [list \
@@ -30,5 +32,12 @@ foreach {name top generics} $configs {
   report_utilization -file $out/${name}_utilization.rpt
   report_utilization -hierarchical -file $out/${name}_utilization_hier.rpt
   report_timing_summary -max_paths 1 -file $out/${name}_timing.rpt
+  if {$impl} {
+    opt_design
+    place_design
+    route_design
+    report_utilization -file $out/${name}_route_utilization.rpt
+    report_timing_summary -max_paths 1 -file $out/${name}_route_timing.rpt
+  }
   close_design
 }

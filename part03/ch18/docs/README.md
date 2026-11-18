@@ -61,8 +61,8 @@ python3 part03/ch18/reference/train_mnist_linear.py --mnist-dir <MNIST raw 폴�
 
 ```text
 == config i16_full data_w=16 acc_w=41 bias_w=40
-RTL_SIM_PASS TILE784 cases=22 ... errors_checked=14 data_w=16 part_w=39
-PYTHON_RTL_COMPARE_PASS cases=22 tile_partials=2860 scores=10 class=1 overflow=1 bit_exact=1
+RTL_SIM_PASS TILE784 cases=26 ... errors_checked=14 data_w=16 part_w=39
+PYTHON_RTL_COMPARE_PASS cases=26 tile_partials=3380 scores=10 class=1 overflow=1 bit_exact=1
 == config i16_w40 ... overflow_cases=2 ...  → PYTHON_RTL_COMPARE_PASS
 == config mnist8  → PYTHON_PRECISION_VECTORS_PASS data_w=8 samples=16 class_differs_from_float=4 / PYTHON_RTL_COMPARE_PASS cases=16
 == config mnist16 → PYTHON_PRECISION_VECTORS_PASS data_w=16 samples=16 class_differs_from_float=0 / PYTHON_RTL_COMPARE_PASS cases=16
@@ -71,7 +71,7 @@ PC_EVAL_PASS samples=10000 float=9260 int8=9256 int16=9260 torch_f32=9260 agree_
 
 ## 5. 검증 범위
 
-- **INT16 RTL**(17장 미검증 항목 해소): 17장 전체 시험(무작위·극값·마지막 타일·Bias·오류 14건·Reset·취소)을 DATA_W=16으로 실행, 2,860개 부분합 비트 단위 일치. INT16 극값 784·(−32768)² = 841,813,590,016: 외부 누산 41비트 무넘침, 40비트 넘침 검출·순환값 일치
+- **INT16 RTL**(17장 미검증 항목 해소): 17장 전체 시험(무작위·극값·마지막 타일·Bias·오류 14건·Reset·취소)을 DATA_W=16으로 실행, 3,380개 부분합 비트 단위 일치. INT16 극값 784·(−32768)² = 841,813,590,016: 외부 누산 41비트 무넘침, 40비트 넘침 검출·순환값 일치
 - **MNIST 실제 모델 RTL**: 고정 표본 16개(앞 8개, INT8≠Float 4개, Float 오답 4개; INT16≠Float 표본은 시험셋에 없음)를 INT8·INT16 RTL로 추론 → 타일 부분합·Logit·Class가 Python과 일치하고, Class가 시험셋 평가 결과와 일치(INT8 경로는 Float와 다른 4건 재현)
 - 기준모델 자체 시험: 절반값 ±0.5·±1.5·±2.5 반올림 대칭, Python `round()`와의 차이, 정수 나눗셈 반올림, `sat_signed(·,8)` = host `sat_int8`, INT16 포화 경계, 0/255 입력 경계
 - 회귀: ch13~17 PASS, ch14~17 로그는 경고 줄 번호 외 동일

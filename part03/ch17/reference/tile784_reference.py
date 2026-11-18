@@ -127,6 +127,12 @@ def build_cases(suite, bias_w, rng, data_w=8):
     w = [[rng.randint(-2, 2) for _ in range(N_IN)] for _ in range(N_CLASS)]
     cases.append((x, w, [1000 * (c + 1) for c in range(N_CLASS)]))
     cases += [rand_case() for _ in range(12)]
+    # (추가) 19장 argmax 트리: 1단 쌍(0·1, 2·3)·2단(1 vs 2, 5 vs 6) 동점 → 낮은 번호. x=0이라 점수 = Bias
+    z = [[0] * N_IN for _ in range(N_CLASS)]
+    for tie in ((0, 1), (2, 3), (1, 2), (5, 6)):
+        b = [-100 - c for c in range(N_CLASS)]
+        b[tie[0]] = b[tie[1]] = 77
+        cases.append(([0] * N_IN, z, b))
     return cases
 
 
