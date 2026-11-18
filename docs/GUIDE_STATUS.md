@@ -34,7 +34,7 @@
 | 25 | 추정 전력 · 에너지 | [ch25_power_energy_v02.html](../ch25_power_energy_v02.html) | — | — | ⏳ | — | ⏳ |
 | 26 | 3×3 소형 CNN | [ch26_tiny_cnn_v02.html](../ch26_tiny_cnn_v02.html) | ✅ | ✅ | ⏳ | — | ⏳ |
 | 27 | 최종 NPU SoC | [ch27_npu_system_v02.html](../ch27_npu_system_v02.html) | — | ✅ | ⏳ | ⏳ | ⏳ |
-| 28 | 손글씨 숫자 인식 종합 | chapter.json 대기 | | | | | |
+| 28 | PC 손글씨 → 보드 분류 | [ch28_handwriting_v02.html](../ch28_handwriting_v02.html) | — | ✅ | ⏳ | — | ⏳ |
 | 29 | 센서 융합 산업안전 감시 | chapter.json 대기 | | | | | |
 | 30 | NPU·모터 안전 제어 | chapter.json 대기 | | | | | |
 | 31 | AES-128·HMAC 보안 UART | chapter.json 대기 | | | | | |

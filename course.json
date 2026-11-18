@@ -233,8 +233,8 @@
       "id": "ch28",
       "number": 28,
       "title": "손글씨 숫자 인식 종합",
-      "file": "ch28_capstone_mnist_v02.html",
-      "html_status": "TODO",
+      "file": "ch28_handwriting_v02.html",
+      "html_status": "DONE",
       "rtl_status": "TODO"
     },
     {

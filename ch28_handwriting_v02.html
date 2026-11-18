@@ -1,0 +1,745 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Basys3 NPU 28장 실습 · 응용 1: PC 손글씨를 UART로 보내 보드에서 분류">
+<meta name="generator" content="tools/guide/build_guides.py — 직접 수정 금지, chapter.json을 고친 뒤 재생성">
+<title>28장 · 응용 1: PC 손글씨를 UART로 보내 보드에서 분류 (v02)</title>
+<link rel="stylesheet" href="assets/education/site.css">
+<style>
+.codeblock pre{max-height:780px;white-space:pre}
+.section svg{width:100%;height:auto}
+.vbadge{display:inline-block;padding:.15em .6em;border-radius:4px;font-size:.78em;font-weight:700;background:#d4edda;color:#155724;vertical-align:middle}
+.gate-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:10px}
+.gate{border:1px solid var(--line,#e0e0e0);border-radius:6px;padding:10px 14px;overflow-wrap:anywhere}
+.gate b{display:block;font:600 11px var(--mono,monospace);letter-spacing:.04em;margin-bottom:4px}
+.gate span{font-size:13px}
+.gate.pass{border-color:#2d8a52;background:#f0fbf4}
+.gate.todo{border-color:#b08900;background:#fffbe6}
+.gate.fail{border-color:#b3261e;background:#fdeceb}
+.gate.na{border-color:#c8c8c8;background:#f6f6f6;color:#666}
+.table-wrap{overflow-x:auto}
+.table-wrap>table{min-width:620px}
+.figure-wrap{overflow-x:auto}
+.figure-wrap svg{min-width:860px}
+.section :not(pre)>code{overflow-wrap:anywhere}
+.codebar{gap:8px}
+.codebar span{min-width:0;overflow-wrap:anywhere}
+.hero p{max-width:none}
+.access-skip{position:absolute;left:-9999px;top:0}
+.access-skip:focus{left:12px;top:12px;z-index:1003;background:#fff;color:#15171c;padding:6px 10px}
+.nw code{white-space:nowrap;overflow-wrap:normal}
+</style>
+</head>
+<body data-chapter="ch28">
+<a class="access-skip" href="#main-content">본문 바로가기</a>
+<button type="button" class="mobile-menu" id="mobile-menu" aria-controls="course-nav" aria-expanded="false">☰ 장·목차</button>
+<div class="shade" id="shade"></div>
+<header class="hero">
+  <div class="hero-inner">
+    <p class="kicker">BASYS3 · NPU 고도화판 · 28장 실습 <span class="vbadge">v02</span></p>
+    <h1>제28장 · 응용 1: PC 손글씨를 UART로 보내 보드에서 분류</h1>
+    <p>PC에서 그린 손글씨를 MNIST 모양(20×20 상자, 무게중심 가운데, 784 INT8)으로 전처리해 UART 틀로 보내고, 보드는 27장 NPU로 분류해 점수·클래스를 돌려주며 7세그먼트에 표시합니다. 보드 응답은 PC 정수 계산과 같아야 합니다.</p>
+  </div>
+</header>
+<div class="wrap">
+  <nav class="toc" id="course-nav" aria-label="전체 장과 절 탐색"></nav>
+  <main class="content" id="main-content">
+    <section class="section" id="s00">
+      <h2><span class="num">00</span>이 장의 위치</h2>
+      <p><b>목표:</b> PC에서 그린 손글씨를 MNIST 모양(20×20 상자, 무게중심 가운데, 784 INT8)으로 전처리해 UART 틀로 보내고, 보드는 27장 NPU로 분류해 점수·클래스를 돌려주며 7세그먼트에 표시합니다. 보드 응답은 PC 정수 계산과 같아야 합니다.</p>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>구분</th><th>파일</th></tr></thead>
+        <tbody>
+          <tr><td>유지 (이전 장, 수정 없음)</td><td><ul><li><code>ch27/rtl/soc_npu27_top.v</code> <small>(27장)</small></li><li><code>ch27/sw/board_io.h</code> <small>(27장)</small></li><li><code>ch27/reference/gen_demo_header.py</code> <small>(27장)</small></li><li><code>ch22/sw/npu_drv.c</code> <small>(22장)</small></li><li><code>ch22/host/npu_hal_trace.c</code> <small>(22장)</small></li><li><code>ch22/tb/tb_driver_replay.sv</code> <small>(22장)</small></li><li><code>ch18/reference/precision_rtl.py</code> <small>(18장)</small></li><li><code>host_tools/mnist_idx.py</code> <small>()</small></li></ul></td></tr>
+          <tr><td>이번 장 작성</td><td><ul><li><code>ch28/reference/preprocess.py</code></li><li><code>ch28/sw/proto.h</code></li><li><code>ch28/sw/proto.c</code></li><li><code>ch28/sw/uart_io.h</code></li><li><code>ch28/sw/uart_io_mbv.c</code></li><li><code>ch28/sw/main.c</code></li><li><code>ch28/host/digit_client.py</code></li></ul></td></tr>
+        </tbody>
+      </table></div>
+      <p>전체 누적 관계: <a href="index.html#techtree">INDEX · 01 전체 테크트리</a> (00~31장 흐름 · 00~12장 모듈 재사용 도면)</p>
+      <p>실습 순서: 01 구조 확인 → 02 준비 → 03 RTL 작성 → 04 테스트벤치·기준 모델 작성 → 05 시뮬레이션 → 06 결과 판정 → 08 합성·타이밍(Vivado) → 09 인계.</p>
+    </section>
+    <section class="section" id="s01">
+      <h2><span class="num">01</span>구조도</h2>
+      <div class="figure-wrap" tabindex="0" role="region" aria-label="도면 (가로 스크롤 가능)"><svg viewBox="0 0 980 225" role="img" aria-label="soc_npu27_top 실제 포트와 하위 모듈 구조">
+      <rect x="250" y="30" width="480" height="155" rx="10" fill="#fff" stroke="#4635b1" stroke-width="2"/>
+      <text x="490" y="54" font-size="18" font-weight="700" text-anchor="middle">soc_npu27_top</text>
+      <text x="490" y="72" font-size="13" text-anchor="middle" fill="#555">ch27/rtl/soc_npu27_top.v · 구현 도식</text>
+      <text x="222" y="64" font-size="14" font-family="monospace" text-anchor="end">clk</text>
+      <path d="M226 60 H250" stroke="#4635b1" stroke-width="1.5" stroke-dasharray="4 3"/><path d="M250 60 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="87" font-size="14" font-family="monospace" text-anchor="end">btnC</text>
+      <path d="M226 83 H250" stroke="#4635b1" stroke-width="1.5" stroke-dasharray="4 3"/><path d="M250 83 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="110" font-size="14" font-family="monospace" text-anchor="end">sw[15:0]</text>
+      <path d="M226 106 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 106 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="133" font-size="14" font-family="monospace" text-anchor="end">RsRx</text>
+      <path d="M226 129 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 129 l-7 -4 v8 z" fill="#4635b1"/>
+      <path d="M730 60 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 60 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="758" y="65" font-size="14" font-family="monospace">led[15:0]</text>
+      <path d="M730 83 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 83 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="758" y="88" font-size="14" font-family="monospace">RsTx</text>
+      <path d="M730 106 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 106 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="758" y="111" font-size="14" font-family="monospace">seg[6:0]</text>
+      <path d="M730 129 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 129 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="758" y="134" font-size="14" font-family="monospace">an[3:0]</text>
+      <path d="M730 152 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 152 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="758" y="157" font-size="14" font-family="monospace">dp</text>
+      <rect x="270" y="88" width="440" height="28" rx="5" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="5 3"/>
+      <text x="282" y="107" font-size="14" font-family="monospace">fnd_class_display  (u_fnd)</text>
+      <text x="698" y="107" font-size="12" text-anchor="end" fill="#4635b1">ch27 재사용</text>
+      <rect x="250" y="200" width="16" height="12" fill="#edeafa" stroke="#4635b1"/><text x="272" y="211" font-size="13">이번 장 신규</text>
+      <rect x="370" y="200" width="16" height="12" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="4 2"/><text x="392" y="211" font-size="13">이전 장 파일 재사용(수정 없음)</text>
+      <text x="600" y="211" font-size="13">왼쪽 input · 오른쪽 output · 점선 = 클록·리셋</text>
+      </svg></div>
+      <p>구현 도식: 포트 이름·폭과 하위 인스턴스는 <code>ch27/rtl/soc_npu27_top.v</code> 선언에서 자동으로 가져왔습니다.</p>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>방향</th><th>포트</th><th>폭</th><th>구분</th><th>설명</th></tr></thead>
+        <tbody><tr><td>input</td><td class="nw"><code>clk</code></td><td class="nw"><code>1</code></td><td class="nw">클록</td><td>W5 · 100 MHz</td></tr><tr><td>input</td><td class="nw"><code>btnC</code></td><td class="nw"><code>1</code></td><td class="nw">리셋</td><td>U18 · 리셋</td></tr><tr><td>input</td><td class="nw"><code>sw</code></td><td class="nw"><code>[15:0]</code></td><td class="nw">데이터·제어</td><td>스위치 (이 장에서 쓰지 않음)</td></tr><tr><td>input</td><td class="nw"><code>RsRx</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>USB-UART 수신 (PC → 보드 그림 틀)</td></tr><tr><td>output</td><td class="nw"><code>led</code></td><td class="nw"><code>[15:0]</code></td><td class="nw">데이터·제어</td><td>LED 워드 (클래스 표시)</td></tr><tr><td>output</td><td class="nw"><code>RsTx</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>USB-UART 송신 (보드 → PC 응답)</td></tr><tr><td>output</td><td class="nw"><code>seg</code></td><td class="nw"><code>[6:0]</code></td><td class="nw">데이터·제어</td><td>7세그먼트 (클래스)</td></tr><tr><td>output</td><td class="nw"><code>an</code></td><td class="nw"><code>[3:0]</code></td><td class="nw">데이터·제어</td><td>자리 선택</td></tr><tr><td>output</td><td class="nw"><code>dp</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>소수점 (꺼짐)</td></tr></tbody>
+      </table></div>
+    </section>
+    <section class="section" id="s02">
+      <h2><span class="num">02</span>준비</h2>
+      <ol>
+        <li>VS Code에서 저장소 루트(<code>amd_soc_npu/</code>)를 엽니다.</li>
+        <li>도구를 확인합니다.</li>
+      </ol>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 도구 확인</span></div>
+        <pre tabindex="0"><code>sudo apt install -y iverilog python3 ripgrep   # 처음 한 번
+iverilog -V 2&gt;&amp;1 | head -1      # Icarus Verilog version 12.0 이상
+python3 --version</code></pre></div>
+      <ol start="3"><li>00절 '유지' 파일이 이전 장 결과 그대로 있는지 확인합니다 (시험 그림 3장(<code>ch28/host/samples/*.pgm</code>)은 실제 MNIST 시험 그림(112·102·110번)을 1.5배로 키워 흰 바탕 60×50에 옮긴 것으로, 한 번 만들어 저장소에 넣었습니다. 전처리 검사(선택)는 MNIST를 내려받습니다).</li></ol>
+    </section>
+    <section class="section" id="s03">
+      <h2><span class="num">03</span>RTL 작성</h2>
+      <p>아래 파일을 경로 그대로 만들고 전체 코드를 입력합니다.</p>
+      <div class="codeblock">
+        <div class="codebar"><span>ch28/reference/preprocess.py · python · 원본 · RTL_SIM 통과 2026-11-19</span></div>
+        <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
+"""28장 PC 전처리: 손글씨 영상(PGM 또는 28×28 숫자 표) → MNIST와 같은 모양(20×20 상자에 맞추고 무게중심을 28×28 가운데로)
+→ 784 INT8(13·18장 계약) 또는 8×8 64 INT8(13장). 표준 라이브러리만 쓴다.
+
+검사(--selftest): 실제 MNIST 시험 그림을 일부러 옮기고 키운 뒤(바깥 64×64 캔버스) 전처리로 되돌려
+18장 INT8 모델 정확도가 원래 그림과 얼마나 같은지 본다."""
+from __future__ import annotations
+import argparse
+import random
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+sys.path[:0] = [str(ROOT / "host_tools"), str(ROOT / "ch13" / "reference"), str(ROOT / "ch18" / "reference")]
+
+
+def read_pgm(path):
+    data = Path(path).read_bytes()
+    tok, i = [], 0
+    while len(tok) &lt; 4:                                  # P2/P5, 너비, 높이, 최대값 (주석 # 무시)
+        while data[i:i + 1].isspace(): i += 1
+        if data[i:i + 1] == b"#":
+            while data[i:i + 1] not in (b"\n", b""): i += 1
+            continue
+        j = i
+        while not data[j:j + 1].isspace(): j += 1
+        tok.append(data[i:j].decode()); i = j
+    kind, w, h, mx = tok[0], int(tok[1]), int(tok[2]), int(tok[3])
+    vals = list(data[i + 1:i + 1 + w * h]) if kind == "P5" else list(map(int, data[i:].split()))[:w * h]
+    img = [[vals[r * w + c] * 255 // mx for c in range(w)] for r in range(h)]
+    if sum(map(sum, img)) &gt; 127 * w * h:                 # 흰 바탕에 검은 글씨면 뒤집는다 (MNIST는 검은 바탕·흰 글씨)
+        img = [[255 - v for v in row] for row in img]
+    return img
+
+
+def resize(img, nw, nh):
+    """면적 평균 축소·확대 (정수 좌표, 단순 박스 필터)."""
+    h, w = len(img), len(img[0])
+    out = []
+    for r in range(nh):
+        y0, y1 = r * h // nh, max(r * h // nh + 1, (r + 1) * h // nh)
+        row = []
+        for c in range(nw):
+            x0, x1 = c * w // nw, max(c * w // nw + 1, (c + 1) * w // nw)
+            vals = [img[y][x] for y in range(y0, y1) for x in range(x0, x1)]
+            row.append(sum(vals) // len(vals))
+        out.append(row)
+    return out
+
+
+def mnist_like(img):
+    """글씨 상자를 잘라 긴 변 20화소로 맞추고, 무게중심이 28×28 가운데(14,14)에 오게 놓는다."""
+    ys = [y for y, row in enumerate(img) if any(v &gt; 30 for v in row)]
+    xs = [x for x in range(len(img[0])) if any(img[y][x] &gt; 30 for y in range(len(img)))]
+    if not ys:
+        return [[0] * 28 for _ in range(28)]
+    crop = [row[xs[0]:xs[-1] + 1] for row in img[ys[0]:ys[-1] + 1]]
+    h, w = len(crop), len(crop[0])
+    s = 20 / max(h, w)
+    nh, nw = max(1, round(h * s)), max(1, round(w * s))
+    small = resize(crop, nw, nh)
+    tot = sum(map(sum, small)) or 1
+    cy = sum(y * v for y, row in enumerate(small) for v in row) / tot
+    cx = sum(x * v for row in small for x, v in enumerate(row)) / tot
+    oy, ox = round(14 - cy - 0.5), round(14 - cx - 0.5)
+    out = [[0] * 28 for _ in range(28)]
+    for y, row in enumerate(small):
+        for x, v in enumerate(row):
+            if 0 &lt;= y + oy &lt; 28 and 0 &lt;= x + ox &lt; 28:
+                out[y + oy][x + ox] = v
+    return out
+
+
+def to_x784(img28):
+    return [min(127, (p + 1) &gt;&gt; 1) for row in img28 for p in row]
+
+
+def selftest(n):
+    from mnist_idx import images, labels
+    from precision_rtl import load, scores
+    from p3_integer_reference import argmax_lowest
+    w, b, _ = load(8)
+    imgs, labs = images("test"), labels("test")
+    rng = random.Random(28)
+    base = moved = 0
+    for k in range(n):
+        img = [list(imgs[k][r * 28:(r + 1) * 28]) for r in range(28)]
+        base += argmax_lowest(scores(to_x784(img), w, b)) == labs[k]
+        big = resize(img, 28 * 2, 28 * 2)                # 두 배로 키워
+        canvas = [[0] * 64 for _ in range(64)]
+        oy, ox = rng.randint(0, 8), rng.randint(0, 8)    # 아무 데나 놓는다
+        for y in range(56):
+            for x in range(56):
+                canvas[y + oy][x + ox] = big[y][x]
+        moved += argmax_lowest(scores(to_x784(mnist_like(canvas)), w, b)) == labs[k]
+    print(f"PREPROCESS_CHECK original={100 * base / n:.1f}% moved_scaled_then_preprocessed={100 * moved / n:.1f}% images={n}")
+    ok = moved &gt;= base * 0.9
+    print("PREPROCESS_HOST_PASS" if ok else "PREPROCESS_HOST_FAIL")
+    return ok
+
+
+if __name__ == "__main__":
+    ap = argparse.ArgumentParser(); ap.add_argument("--selftest", type=int); ap.add_argument("pgm", nargs="?")
+    a = ap.parse_args()
+    if a.selftest:
+        sys.exit(0 if selftest(a.selftest) else 1)
+    x = to_x784(mnist_like(read_pgm(a.pgm)))
+    print(" ".join(map(str, x)))</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>ch28/sw/proto.h · c · 원본 · PC 시험 통과 2026-11-19 · 보드 ⚠ 미검증</span></div>
+        <pre tabindex="0"><code class="language-c">/* 28장 UART 그림 틀: 'N' + 784바이트(INT8 0~127) + 검사합(784바이트 합의 하위 8비트) = 786바이트 */
+#ifndef PROTO_H
+#define PROTO_H
+#include &lt;stdint.h&gt;
+
+#define PROTO_N 784
+typedef enum { PROTO_BUSY = 0, PROTO_FRAME = 1, PROTO_ERR_SUM = -1, PROTO_ERR_RANGE = -2 } proto_ev_t;
+
+typedef struct {
+    uint32_t pos;          /* 0: 'N' 기다림, 1~784: 받은 화소 수 + 1 */
+    uint8_t  sum, bad;
+    uint8_t  x[PROTO_N];
+} proto_t;
+
+void       proto_reset(proto_t *p);
+proto_ev_t proto_feed(proto_t *p, uint8_t c);
+
+#endif</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>ch28/sw/proto.c · c · 원본 · PC 시험 통과 2026-11-19 · 보드 ⚠ 미검증</span></div>
+        <pre tabindex="0"><code class="language-c">/* 28장 틀 해석: 바이트 하나씩 넣는다. 'N' 전의 바이트는 버리고(잡음·줄바꿈), 틀이 끝나면 검사합·범위를 판정한다. */
+#include "proto.h"
+
+void proto_reset(proto_t *p) { p-&gt;pos = 0; p-&gt;sum = 0; p-&gt;bad = 0; }
+
+proto_ev_t proto_feed(proto_t *p, uint8_t c)
+{
+    if (p-&gt;pos == 0) {
+        if (c == 'N') { p-&gt;pos = 1; p-&gt;sum = 0; p-&gt;bad = 0; }
+        return PROTO_BUSY;
+    }
+    if (p-&gt;pos &lt;= PROTO_N) {
+        p-&gt;x[p-&gt;pos - 1] = c;
+        p-&gt;sum = (uint8_t)(p-&gt;sum + c);
+        if (c &gt; 127) p-&gt;bad = 1;
+        p-&gt;pos++;
+        return PROTO_BUSY;
+    }
+    p-&gt;pos = 0;                                     /* 검사합 바이트 */
+    if (c != p-&gt;sum) return PROTO_ERR_SUM;
+    if (p-&gt;bad) return PROTO_ERR_RANGE;
+    return PROTO_FRAME;
+}</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>ch28/sw/uart_io.h · c · 원본 · PC 시험 통과 2026-11-19 · 보드 ⚠ 미검증</span></div>
+        <pre tabindex="0"><code class="language-c">/* 28장 UART 한 바이트 입출력 (보드: AXI UART Lite 레지스터, PC: 표준 입출력) */
+#ifndef UART_IO_H
+#define UART_IO_H
+#include &lt;stdint.h&gt;
+int  uart_getc(void);          /* 받은 바이트 0~255, 없으면 -1 (PC: 입력 끝이면 -2) */
+void uart_puts(const char *s);
+#endif</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>ch28/sw/uart_io_mbv.c · c · 원본 · PC 시험 통과 2026-11-19 · 보드 ⚠ 미검증</span></div>
+        <pre tabindex="0"><code class="language-c">/* 28장 AXI UART Lite 직접 접근 (PG142: RX FIFO 0x00, TX FIFO 0x04, STAT 0x08 — bit0 RX 있음, bit3 TX 가득) */
+#include "uart_io.h"
+#include "xil_io.h"
+
+#ifndef UART_BASE
+#define UART_BASE 0x40600000u   /* ⚠ Vivado 기본값. xparameters.h의 UART Lite 기준 주소로 바꾼다 */
+#endif
+
+int uart_getc(void)
+{
+    if ((Xil_In32(UART_BASE + 0x08u) &amp; 0x01u) == 0u) return -1;
+    return (int)(Xil_In32(UART_BASE + 0x00u) &amp; 0xFFu);
+}
+
+void uart_puts(const char *s)
+{
+    while (*s) {
+        while (Xil_In32(UART_BASE + 0x08u) &amp; 0x08u) { }
+        Xil_Out32(UART_BASE + 0x04u, (uint8_t)*s++);
+    }
+}</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>ch28/sw/main.c · c · 원본 · PC 시험 통과 2026-11-19 · 보드 ⚠ 미검증</span></div>
+        <pre tabindex="0"><code class="language-c">/* 28장 손글씨 분류기: PC가 보낸 784화소 틀을 받아 NPU로 분류하고, UART로 한 줄 응답 + LED·7세그먼트 표시.
+ * 응답: "CLASS c S s0 s1 … s9" / "ERR SUM" / "ERR RANGE" / "ERR NPU n" */
+#include "npu_drv.h"
+#include "board_io.h"
+#include "proto.h"
+#include "uart_io.h"
+#include "model_int8.h"
+
+static char *put_int(char *p, int32_t v)
+{
+    char t[12]; int n = 0; uint32_t u = v &lt; 0 ? (uint32_t)(-(int64_t)v) : (uint32_t)v;
+    if (v &lt; 0) *p++ = '-';
+    do { t[n++] = (char)('0' + u % 10u); u /= 10u; } while (u);
+    while (n) *p++ = t[--n];
+    return p;
+}
+
+static void answer(const uint8_t x[PROTO_N])
+{
+    npu_result_t r; char line[160], *p = line;
+    npu_status_t s = npu_load_input(x);
+    if (s == NPU_OK) s = npu_run(&amp;r, 100000u);
+    if (s != NPU_OK) {
+        led_write(led_word(0, 1));
+        p = put_int(line + 8, (int32_t)s); *p = 0;
+        for (int i = 0; i &lt; 8; i++) line[i] = "ERR NPU "[i];
+        uart_puts(line); uart_puts("\r\n"); return;
+    }
+    led_write(led_word(r.cls, 0));
+    *p++ = 'C'; *p++ = 'L'; *p++ = 'A'; *p++ = 'S'; *p++ = 'S'; *p++ = ' ';
+    p = put_int(p, (int32_t)r.cls); *p++ = ' '; *p++ = 'S';
+    for (int k = 0; k &lt; NPU_N_OUT; k++) { *p++ = ' '; p = put_int(p, r.score[k]); }
+    *p++ = '\r'; *p++ = '\n'; *p = 0;
+    uart_puts(line);
+}
+
+int main(void)
+{
+    static proto_t pr;
+    uart_puts("=== ch28 digit classifier: send 'N' + 784 bytes + sum ===\r\n");
+    if (npu_init() != NPU_OK) { led_write(led_word(0, 1)); uart_puts("ERR NPU ID\r\n"); return 1; }
+    npu_load_model(MODEL_W, MODEL_B);
+    led_write(0);
+    proto_reset(&amp;pr);
+    for (;;) {
+        int c = uart_getc();
+        if (c == -2) return 0;                      /* PC 시험: 입력 끝 */
+        if (c &lt; 0) continue;
+        proto_ev_t ev = proto_feed(&amp;pr, (uint8_t)c);
+        if (ev == PROTO_FRAME) answer(pr.x);
+        else if (ev == PROTO_ERR_SUM) { led_write(led_word(0, 1)); uart_puts("ERR SUM\r\n"); }
+        else if (ev == PROTO_ERR_RANGE) { led_write(led_word(0, 1)); uart_puts("ERR RANGE\r\n"); }
+    }
+}</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>ch28/host/digit_client.py · python · 원본 · RTL_SIM 통과 2026-11-19</span></div>
+        <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
+"""28장 PC 쪽 프로그램: 손글씨 PGM을 전처리해 보드로 보내고 응답을 PC 정수 계산과 비교한다.
+  보드:  python3 ch28/host/digit_client.py --port /dev/ttyUSB1 그림.pgm   (pyserial 필요)
+  시험:  --frames 파일  : 보낼 바이트를 파일로 쓴다 (05절 시뮬레이션 입력)
+         --check 응답파일 : 응답 줄을 PC 계산과 비교한다"""
+from __future__ import annotations
+import argparse
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+sys.path[:0] = [str(ROOT / "ch28" / "reference"), str(ROOT / "ch18" / "reference")]
+from preprocess import mnist_like, read_pgm, to_x784     # noqa: E402
+from precision_rtl import load, scores                    # noqa: E402
+from p3_integer_reference import argmax_lowest            # noqa: E402
+
+
+def frame(x):
+    assert len(x) == 784
+    return b"N" + bytes(x) + bytes([sum(x) &amp; 0xFF])
+
+
+def expect(x):
+    w, b, _ = load(8)
+    s = scores(x, w, b)
+    return f"CLASS {argmax_lowest(s)} S " + " ".join(map(str, s))
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("pgm", nargs="*"); ap.add_argument("--port"); ap.add_argument("--frames"); ap.add_argument("--check")
+    a = ap.parse_args()
+    xs = [to_x784(mnist_like(read_pgm(p))) for p in a.pgm]
+    if a.frames:                                          # 05절 시험 틀: 정상 틀들, 검사합 틀림, 범위 밖, 잡음 뒤 정상
+        bad_sum = bytearray(frame(xs[0])); bad_sum[-1] ^= 0xFF
+        bad_rng = bytearray(frame(xs[1])); bad_rng[5] = 200; bad_rng[-1] = (sum(bad_rng[1:-1])) &amp; 0xFF
+        data = b"".join(frame(x) for x in xs) + bytes(bad_sum) + bytes(bad_rng) + b"\r\n?junk" + frame(xs[-1])
+        Path(a.frames).write_bytes(data)
+        Path(a.frames + ".expect").write_text("\n".join([expect(x) for x in xs] + ["ERR SUM", "ERR RANGE", expect(xs[-1])]) + "\n")
+        print(f"CLIENT_FRAMES bytes={len(data)} frames={len(xs) + 3} (정상 {len(xs)}, 검사합 틀림 1, 범위 밖 1, 잡음 뒤 정상 1)")
+    if a.port:
+        import serial                                     # pyserial (보드 실행 때만)
+        with serial.Serial(a.port, 115200, timeout=5) as s:
+            for p, x in zip(a.pgm, xs):
+                s.write(frame(x))
+                got = s.readline().decode().strip()
+                print(f"{p}: board='{got[:40]}…' pc='{expect(x)[:40]}…' {'SAME' if got == expect(x) else 'DIFF'}")
+
+
+if __name__ == "__main__":
+    main()</code></pre>
+      </div>
+    </section>
+    <section class="section" id="s04">
+      <h2><span class="num">04</span>테스트벤치·기준 모델 작성</h2>
+      <p>테스트벤치는 출력을 자동 판정합니다. PC 프로그램이 그림 3장을 전처리해 틀 6개(정상 3, 검사합 틀림, 범위 밖 값, 잡음 뒤 정상)를 만들고, 같은 <code>main.c</code>를 PC에서 표준 입출력 UART로 돌려 NPU 접근을 기록합니다. 기록을 20장 RTL에서 재생해 보드가 보낼 응답 줄을 만들고 PC 기대 줄과 한 줄씩 비교합니다.</p>
+      <div class="codeblock">
+        <div class="codebar"><span>ch28/host/uart_io_host.c · c · 원본 · PC 시험 통과 2026-11-19 · 보드 ⚠ 미검증</span></div>
+        <pre tabindex="0"><code class="language-c">/* 28장 PC 시험용 UART: 받는 바이트는 표준 입력, 보내는 글자는 표준 출력 */
+#include &lt;stdio.h&gt;
+#include "uart_io.h"
+int uart_getc(void) { int c = getchar(); return c == EOF ? -2 : c; }
+void uart_puts(const char *s) { fputs(s, stdout); }</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>ch28/host/board_io_null.c · c · 원본 · PC 시험 통과 2026-11-19 · 보드 ⚠ 미검증</span></div>
+        <pre tabindex="0"><code class="language-c">/* 28장 PC 시험용 GPIO: LED 쓰기는 버린다 (표시 확인은 27장) */
+#include "board_io.h"
+void led_write(uint32_t v) { (void)v; }
+uint32_t sw_read(void) { return 0; }</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>ch28/reference/check_replay.py · python · 원본 · RTL_SIM 통과 2026-11-19</span></div>
+        <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
+"""28장: 펌웨어 응답(PC 실행) + RTL 재생 읽기 값으로 실제 보드가 보낼 응답 줄을 만들어 PC 기대 줄과 비교한다."""
+import sys
+
+actual, host_out, expect = sys.argv[1:4]
+runs, cur = [], None
+for op, off, val in (l.split() for l in open(actual)):
+    off, val = int(off), int(val)
+    if op == "P":
+        cur = {"s": []}; runs.append(cur)
+    elif cur is not None and 0x40 &lt;= off &lt;= 0x64:
+        cur["s"].append(val - (1 &lt;&lt; 32) if val &gt;= 1 &lt;&lt; 31 else val)
+    elif cur is not None and off == 0x08:
+        cur["c"] = val
+lines = [l.strip() for l in open(host_out) if l.strip() and not l.startswith("===")]
+it = iter(runs)
+board = [(lambda r: f"CLASS {r['c']} S " + " ".join(map(str, r["s"])))(next(it)) if l.startswith("CLASS") else l for l in lines]
+want = [l.strip() for l in open(expect) if l.strip()]
+for k, (g, w) in enumerate(zip(board, want)):
+    print(f"REPLY {k}: {g[:60]}{'…' if len(g) &gt; 60 else ''} {'OK' if g == w else 'DIFF'}")
+ok = board == want
+print(f"{'PROTOCOL_RTL_COMPARE_PASS' if ok else 'PROTOCOL_RTL_COMPARE_FAIL'} replies={len(board)} inferences={len(runs)}")
+sys.exit(0 if ok else 1)</code></pre>
+      </div>
+    </section>
+    <section class="section" id="s05">
+      <h2><span class="num">05</span>시뮬레이션 실행</h2>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 저장소 루트에서 실행</span></div>
+        <pre tabindex="0"><code>bash ch28/scripts/run_sim.sh   # 교차 컴파일 → 전처리·틀 만들기 → 펌웨어 PC 실행·기록 → RTL 재생 → 응답 비교</code></pre></div>
+      <p>기대 출력 (Icarus Verilog 12.0 · 2026-11-19 실제 실행 로그 발췌, 출처 <code>ch28/validation/rtl_sim_20261119.log</code>):</p>
+      <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
+        <pre tabindex="0"><code>Icarus Verilog version 12.0 (stable) ()
+gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+Ubuntu clang version 18.1.3 (1ubuntu1)
+RV32IMC_COMPILE_PASS files=3
+CLIENT_FRAMES bytes=4723 frames=6 (정상 3, 검사합 틀림 1, 범위 밖 1, 잡음 뒤 정상 1)
+RTL_SIM_PASS DRIVER_REPLAY writes=11010 reads=57 polls=4 axi_violations=0
+REPLY 0: CLASS 3 S -15004 -22665 33591 73559 -47299 44583 -9240 -8653… OK
+REPLY 1: CLASS 5 S -22213 -104988 -84768 22225 -2033 145648 -67420 13… OK
+REPLY 2: CLASS 8 S -6758 20459 47663 35263 -28546 57532 -62039 -12647… OK
+REPLY 3: ERR SUM OK
+REPLY 4: ERR RANGE OK
+REPLY 5: CLASS 8 S -6758 20459 47663 35263 -28546 57532 -62039 -12647… OK
+PROTOCOL_RTL_COMPARE_PASS replies=6 inferences=4</code></pre></div>
+      <p>전처리 검사 (실제 MNIST 1,000장을 옮기고 키운 뒤 되돌리기):</p>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal</span></div>
+        <pre tabindex="0"><code>python3 ch28/reference/preprocess.py --selftest 1000   # 전처리 검사 (실제 MNIST 1,000장을 옮기고 키운 뒤 되돌리기)</code></pre></div>
+      <div class="codeblock"><div class="codebar"><span>기대 출력 (출처 ch28/validation/preprocess_check_20261119.log)</span></div>
+        <pre tabindex="0"><code>PREPROCESS_CHECK original=90.8% moved_scaled_then_preprocessed=86.7% images=1000
+PREPROCESS_HOST_PASS</code></pre></div>
+    </section>
+    <section class="section" id="s06">
+      <h2><span class="num">06</span>결과 판정</h2>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
+        <tbody><tr><td><code>PREPROCESS_CHECK original=90.8% moved_scaled_then_preprocessed=86.7%</code></td><td>64×64 캔버스 아무 곳에 두 배 크기로 놓은 그림을 전처리로 되돌리면 정확도가 원래의 95% 수준 (선택 실행)</td></tr><tr><td><code>RTL_SIM_PASS DRIVER_REPLAY … polls=4</code></td><td>정상 틀 4개만 추론하고, 틀린 틀 2개는 NPU를 건드리지 않음</td></tr><tr><td><code>PROTOCOL_RTL_COMPARE_PASS replies=6 inferences=4</code></td><td>응답 6줄(CLASS 3·5·8, ERR SUM, ERR RANGE, CLASS 8)이 PC 계산과 같음</td></tr></tbody>
+      </table></div>
+      <p><b>실패 시:</b> TB의 <code>$fatal</code> 메시지에 표시된 cycle 번호와 기대값/실제값을 확인하고, 03절 코드와 한 줄씩 대조합니다. 하나라도 실패하면 다음 장으로 넘어가지 않습니다.</p>
+    </section>
+    <section class="section" id="s07">
+      <h2><span class="num">07</span>코드 읽기 포인트</h2>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>위치</th><th>내용</th></tr></thead>
+        <tbody><tr><td>MNIST 모양 맞추기</td><td>학습 그림과 같은 모양이어야 정확도가 유지됩니다. 글씨 상자를 잘라 긴 변을 20화소로 줄이고, 무게중심을 28×28의 (14,14)에 놓습니다. 흰 바탕이면 먼저 뒤집습니다.</td></tr>
+<tr><td>UART 틀</td><td><code>'N'</code> + 784바이트 + 검사합(합의 하위 8비트). <code>'N'</code> 앞의 바이트(줄바꿈·잡음)는 버리므로 틀이 어긋나도 다음 <code>'N'</code>에서 다시 맞춰집니다. 값이 127을 넘으면 13장 계약 위반으로 <code>ERR RANGE</code>를 보냅니다.</td></tr>
+<tr><td>보드 = PC</td><td>보드 응답은 PC 정수 계산과 글자 하나까지 같아야 합니다. 다르면 전처리가 아니라 전송·하드웨어 문제입니다.</td></tr>
+<tr><td>printf 없이</td><td>응답 줄은 작은 정수 변환 함수로 직접 만들어 <code>xil_printf</code> 없이 UART Lite로 보냅니다. 같은 코드가 PC에서는 표준 출력으로 갑니다.</td></tr></tbody>
+      </table></div>
+    </section>
+    <section class="section" id="s08">
+      <h2><span class="num">08</span>합성·타이밍·보드</h2>
+      <p>이 장은 하드웨어를 바꾸지 않습니다. 27장 비트스트림을 씁니다 → <a href="ch27_npu_system_v02.html#s08">27장 · 08</a></p>
+      <h3>8-1. 보드에서 손글씨 분류 (27장 하드웨어 그대로)</h3>
+      <p>⚠ 미검증 — 보드에서 실행하지 않았습니다. 하드웨어는 27장 비트스트림을 그대로 쓰고 펌웨어만 바꿉니다.</p>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>순서</th><th>조작</th><th>성공 기준</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>27장 플랫폼에 애플리케이션 <code>digit_app</code> → <code>src</code>에 22장 드라이버 5개, 27장 <code>board_io.h</code>·<code>board_io_mbv.c</code>, 이 장 <code>sw/</code> 6개, 27장 모델 헤더</td><td>빌드 성공</td></tr>
+          <tr><td>2</td><td><code>xparameters.h</code>에서 UART Lite 기준 주소 확인 → 다르면 <code>uart_io_mbv.c</code>의 <code>UART_BASE</code></td><td>—</td></tr>
+          <tr><td>3</td><td>Run → 터미널 프로그램은 <b>닫는다</b> (PC 프로그램이 같은 포트를 씀)</td><td>LED 모두 꺼짐</td></tr>
+          <tr><td>4</td><td>PC: <code>pip install pyserial</code> → <code>python3 ch28/host/digit_client.py --port /dev/ttyUSB1 ch28/host/samples/*.pgm</code></td><td>세 줄 모두 <code>SAME</code>, 7세그먼트에 마지막 클래스</td></tr>
+          <tr><td>5</td><td>그림판 등으로 28×28보다 큰 흑백 손글씨를 그려 PGM으로 저장해 같은 명령</td><td><code>SAME</code> (보드 = PC 정수 계산)</td></tr>
+        </tbody>
+      </table></div>
+      <p>포트 이름은 PC마다 다릅니다(리눅스 <code>/dev/ttyUSB*</code>, 윈도 <code>COM*</code>). Basys3는 USB 포트 두 개 중 번호가 큰 쪽이 UART인 경우가 많습니다(⚠ 미확인).</p>
+    </section>
+    <section class="section" id="s09">
+      <h2><span class="num">09</span>검증 현황·인계</h2>
+      <p>누적 보고 (이전 결과 → 추가 RTL → 시험 벡터 → 시뮬레이션 → 합성/보드 → 인계):</p>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>이전 결과</th><th>추가 RTL</th><th>시험 벡터</th><th>시뮬레이션</th><th>합성 / 보드</th><th>인계</th></tr></thead>
+        <tbody><tr><td>18장 · 22장 · 27장</td><td><code>없음 (스크립트·제약만)</code></td><td><code>uart_io_host.c</code><br><code>board_io_null.c</code><br><code>check_replay.py</code></td><td>통과</td><td>⚠ 대기 / 미실시</td><td>1건 (아래 표)</td></tr></tbody>
+      </table></div>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>다음 장으로 넘기는 파일</th><th>사용처</th></tr></thead>
+        <tbody><tr><td><code>ch28/sw/proto.c · uart_io*.c</code></td><td>31장 인증 틀(같은 바이트 단위 해석 방식)</td></tr></tbody>
+      </table></div>
+      <p>검증 게이트 (<code>ch28/validation/</code> 증거 파일 기준으로 자동 표시):</p>
+      <div class="gate-row">
+        <div class="gate pass">
+          <b>HTML_PASS</b>
+          <span>v02 · 생성기·정적 검사</span>
+        </div>
+        <div class="gate na">
+          <b>HOST_MODEL_PASS</b>
+          <span>해당 없음 (Python 기준 모델 없음)</span>
+        </div>
+        <div class="gate pass">
+          <b>RTL_SIM_PASS</b>
+          <span>RTL_SIM_PASS DRIVER_REPLAY writes=11010 reads=57 polls=4 axi… · Icarus Verilog 12.0 · 2026-11-19</span>
+        </div>
+        <div class="gate todo">
+          <b>SYNTH_TIMING_PASS</b>
+          <span>⚠ 미검증 · VS Code Vivado 실행 대기 (08절)</span>
+        </div>
+        <div class="gate todo">
+          <b>BOARD_PASS</b>
+          <span>⚠ 미실시 · 현재 실물 보드 확인 불가</span>
+        </div>
+      </div>
+    </section>
+    <div class="chapter-links" id="chapter-links"></div>
+  </main>
+</div>
+<script>
+window.COURSE={
+ "title": "Basys3 소형 NPU 실습 (고도화판)",
+ "chapters": [
+  {
+   "id": "ch00",
+   "number": 0,
+   "title": "UART Echo",
+   "file": "ch00_uart_echo_v05.html"
+  },
+  {
+   "id": "ch01",
+   "number": 1,
+   "title": "DSP 추론 MAC 누산",
+   "file": "ch01_mac_v05.html"
+  },
+  {
+   "id": "ch02",
+   "number": 2,
+   "title": "DSP48E1 타깃 곱셈",
+   "file": "ch02_dsp_v05.html"
+  },
+  {
+   "id": "ch03",
+   "number": 3,
+   "title": "MAC 2단계 파이프라인",
+   "file": "ch03_mac_pipeline_v05.html"
+  },
+  {
+   "id": "ch04",
+   "number": 4,
+   "title": "BRAM 동기 버퍼",
+   "file": "ch04_bram_v05.html"
+  },
+  {
+   "id": "ch05",
+   "number": 5,
+   "title": "Fixed-Point Quantizer",
+   "file": "ch05_fixed_v05.html"
+  },
+  {
+   "id": "ch06",
+   "number": 6,
+   "title": "INT8·INT16 정밀도 비교",
+   "file": "ch06_precision_v05.html"
+  },
+  {
+   "id": "ch07",
+   "number": 7,
+   "title": "벡터 내적",
+   "file": "ch07_vector_dot_v05.html"
+  },
+  {
+   "id": "ch08",
+   "number": 8,
+   "title": "4PE 병렬 어레이",
+   "file": "ch08_pe4_v05.html"
+  },
+  {
+   "id": "ch09",
+   "number": 9,
+   "title": "Dense 4뉴런 레이어",
+   "file": "ch09_dense_v05.html"
+  },
+  {
+   "id": "ch10",
+   "number": 10,
+   "title": "4뉴런 NPU Core",
+   "file": "ch10_npu_core_v05.html"
+  },
+  {
+   "id": "ch11",
+   "number": 11,
+   "title": "UART 모델 적재 컨트롤러",
+   "file": "ch11_uart_register_v05.html"
+  },
+  {
+   "id": "ch12",
+   "number": 12,
+   "title": "통합 NPU Top",
+   "file": "ch12_integrated_npu_v05.html"
+  },
+  {
+   "id": "ch13",
+   "number": 13,
+   "title": "8×8 손글씨·10분류 준비",
+   "file": "ch13_mnist_8x8_v02.html"
+  },
+  {
+   "id": "ch14",
+   "number": 14,
+   "title": "4PE 그룹·10개 출력",
+   "file": "ch14_group10_v02.html"
+  },
+  {
+   "id": "ch15",
+   "number": 15,
+   "title": "Dense 64→10 공통 블록",
+   "file": "ch15_dense_64x10_v02.html"
+  },
+  {
+   "id": "ch16",
+   "number": 16,
+   "title": "2층 신경망 64→8→10",
+   "file": "ch16_mlp_64_8_10_v02.html"
+  },
+  {
+   "id": "ch17",
+   "number": 17,
+   "title": "784원소 타일 실행",
+   "file": "ch17_tiled_784_v02.html"
+  },
+  {
+   "id": "ch18",
+   "number": 18,
+   "title": "Float32 · INT8 · INT16 정밀도",
+   "file": "ch18_precision_v02.html"
+  },
+  {
+   "id": "ch19",
+   "number": 19,
+   "title": "1·4·8PE 사이클 비교",
+   "file": "ch19_pe_compare_v02.html"
+  },
+  {
+   "id": "ch20",
+   "number": 20,
+   "title": "AXI4-Lite 레지스터",
+   "file": "ch20_axi_lite_v02.html"
+  },
+  {
+   "id": "ch21",
+   "number": 21,
+   "title": "MicroBlaze V + NPU 블록 설계",
+   "file": "ch21_soc_bd_v02.html"
+  },
+  {
+   "id": "ch22",
+   "number": 22,
+   "title": "Vitis C 드라이버",
+   "file": "ch22_vitis_driver_v02.html"
+  },
+  {
+   "id": "ch23",
+   "number": 23,
+   "title": "CPU · NPU 시간 비교",
+   "file": "ch23_cpu_vs_npu_v02.html"
+  },
+  {
+   "id": "ch24",
+   "number": 24,
+   "title": "자원 · 타이밍 · 임계 경로",
+   "file": "ch24_resource_timing_v02.html"
+  },
+  {
+   "id": "ch25",
+   "number": 25,
+   "title": "추정 전력 · 에너지",
+   "file": "ch25_power_energy_v02.html"
+  },
+  {
+   "id": "ch26",
+   "number": 26,
+   "title": "3×3 소형 CNN",
+   "file": "ch26_tiny_cnn_v02.html"
+  },
+  {
+   "id": "ch27",
+   "number": 27,
+   "title": "최종 NPU SoC",
+   "file": "ch27_npu_system_v02.html"
+  },
+  {
+   "id": "ch28",
+   "number": 28,
+   "title": "PC 손글씨 → 보드 분류",
+   "file": "ch28_handwriting_v02.html"
+  }
+ ]
+};
+</script>
+<script defer src="assets/education/site.js"></script>
+</body>
+</html>
