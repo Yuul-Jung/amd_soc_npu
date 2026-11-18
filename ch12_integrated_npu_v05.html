@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="description" content="Basys3 NPU 12장 실습 · 통합 NPU Top · Basys3">
+<meta name="generator" content="tools/guide/build_guides.py — 직접 수정 금지, chapter.json을 고친 뒤 재생성">
 <title>12장 · 통합 NPU Top · Basys3 (v05)</title>
 <link rel="stylesheet" href="assets/education/site.css">
 <style>
@@ -12,11 +13,13 @@
 .section svg{width:100%;height:auto}
 .vbadge{display:inline-block;padding:.15em .6em;border-radius:4px;font-size:.78em;font-weight:700;background:#d4edda;color:#155724;vertical-align:middle}
 .gate-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:10px}
-.gate{border:1px solid var(--line,#e0e0e0);border-radius:6px;padding:10px 14px}
+.gate{border:1px solid var(--line,#e0e0e0);border-radius:6px;padding:10px 14px;overflow-wrap:anywhere}
 .gate b{display:block;font:600 11px var(--mono,monospace);letter-spacing:.04em;margin-bottom:4px}
 .gate span{font-size:13px}
 .gate.pass{border-color:#2d8a52;background:#f0fbf4}
 .gate.todo{border-color:#b08900;background:#fffbe6}
+.gate.fail{border-color:#b3261e;background:#fdeceb}
+.gate.na{border-color:#c8c8c8;background:#f6f6f6;color:#666}
 </style>
 </head>
 <body data-chapter="ch12">
@@ -1117,7 +1120,7 @@ endmodule</code></pre>
       <h2><span class="num">05</span>시뮬레이션 실행</h2>
       <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 저장소 루트에서 실행</span></div>
         <pre><code>bash ch12/scripts/run_sim.sh</code></pre></div>
-      <p>기대 출력 (Icarus Verilog 12.0 · 2026-11-18 실제 실행 로그 발췌):</p>
+      <p>기대 출력 (Icarus Verilog 12.0 · 2026-11-18 실제 실행 로그 발췌, 출처 <code>ch12/validation/rtl_sim_20261118.log</code>):</p>
       <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
         <pre><code>| 단계 | 실제 결과 | 로그 |
 |---|---|---|
@@ -1138,7 +1141,7 @@ endmodule</code></pre>
       <p>적대적 시험:</p>
       <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal</span></div>
         <pre><code>bash mini_npu/scripts/run_adversarial.sh</code></pre></div>
-      <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
+      <div class="codeblock"><div class="codebar"><span>기대 출력 (출처 ch12/validation/rtl_sim_20261118.log)</span></div>
         <pre><code>UART_FIFO_ADVERSARIAL_SIM_PASS tests=11
 NPU_UART_ADVERSARIAL_SIM_PASS tests=8 responses=43</code></pre></div>
     </section>
@@ -1237,19 +1240,19 @@ picocom -b 115200 -d 8 -p n -y n -f n /dev/ttyUSB1   # n은 실제 번호로 변
         <thead><tr><th>다음 장으로 넘기는 파일</th><th>사용처</th></tr></thead>
         <tbody><tr><td><code>mini_npu/ 전체 + common/rtl/ + ch02/rtl/dsp_multiplier.v</code></td><td>4분류 원형 기준선 — 13장 이후 10분류 NPU는 별도 폴더에서 개발하고 이 폴더는 수정하지 않음</td></tr><tr><td><code>mini_npu/build/impl/basys3_npu_top.bit</code></td><td>8-1 구현 결과 비트스트림 — Git에 넣지 않고 SHA-256을 ch12/validation/vivado_impl_timesim_*.txt에 기록</td></tr></tbody>
       </table>
-      <p>검증 게이트 (RTL 시뮬레이션 결과는 Icarus Verilog 12.0 · 2026-11-18 실행, 증거 <code>ch12/validation/</code>):</p>
+      <p>검증 게이트 (<code>ch12/validation/</code> 증거 파일 기준으로 자동 표시):</p>
       <div class="gate-row">
         <div class="gate pass">
           <b>HTML_PASS</b>
-          <span>v05 · 정적 검사</span>
+          <span>v05 · 생성기·정적 검사</span>
         </div>
         <div class="gate pass">
           <b>HOST_MODEL_PASS</b>
-          <span>PC_GOLDEN_COMPARE_PASS (11장과 공유)</span>
+          <span>PC_GOLDEN_COMPARE_PASS predictions=6 model_edit=1 (11장 증거)</span>
         </div>
         <div class="gate pass">
           <b>RTL_SIM_PASS</b>
-          <span>run_batch_00_12 13단계 · 적대적 시험 19항목</span>
+          <span>회귀 결과 표 13단계 모두 RTL_SIM_PASS · Icarus Verilog 12.0 · 2026-11-18</span>
         </div>
         <div class="gate todo">
           <b>SYNTH_TIMING_PASS</b>

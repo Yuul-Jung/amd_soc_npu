@@ -1,0 +1,68 @@
+{
+  "id": "ch08",
+  "number": 8,
+  "version": "v05",
+  "slug": "pe4",
+  "nav_title": "4PE 병렬 어레이",
+  "name": "4PE 병렬 어레이",
+  "goal": "07장 vector_dot_core 4개를 병렬로 묶고, 완료 시점이 다른 4개 결과를 모아 합산합니다.",
+  "top": {
+    "file": "ch08/rtl/pe_array4.v",
+    "module": "pe_array4"
+  },
+  "keep": [
+    "ch01/rtl/mac_core.v",
+    "ch07/rtl/vector_dot_core.v"
+  ],
+  "new": [
+    "ch08/rtl/pe_array4.v"
+  ],
+  "tb": [
+    "ch08/tb/tb_pe_array4.sv"
+  ],
+  "ref": [
+    "ch08/reference/pe_reference.py"
+  ],
+  "run": "bash ch08/scripts/run_sim.sh",
+  "evidence": {
+    "rtl_log": "ch08/validation/rtl_sim_*.log"
+  },
+  "checks": [
+    [
+      "RTL_SIM_PASS PE4 INT16/40 cases=26",
+      "4개 PE 결과·합산 26건 통과"
+    ],
+    [
+      "RTL_SIM_PASS PE4 INT8/32 cases=26",
+      "INT8 설정 통과"
+    ],
+    [
+      "PYTHON_RTL_COMPARE_PASS",
+      "RTL 출력 파일과 Python 기준값이 모든 사이클에서 일치"
+    ]
+  ],
+  "read_points": [
+    [
+      "generate 블록",
+      "4개 <code>vector_dot_core</code>를 <code>genvar g</code>로 반복 생성합니다. 슬라이스 인덱스 <code>a_i[g*DATA_WIDTH+:DATA_WIDTH]</code>로 비트 필드를 추출합니다."
+    ],
+    [
+      "비동기 완료 처리",
+      "4개 PE는 같은 길이를 처리하더라도 valid 타이밍이 달라 done이 다른 클록에 올 수 있습니다. <code>saved[g]</code>에 각 결과를 보관하고 <code>finished[g]</code>를 세팅합니다. <code>&amp;finished</code>에서 sum을 등록합니다."
+    ],
+    [
+      "2비트 확장 합산",
+      "<code>extended[g] = {{2{saved[g][ACC_WIDTH-1]}}, saved[g]}</code>으로 (ACC_WIDTH+2)비트로 확장한 뒤 더합니다. 4개 값을 더하면 올림이 최대 2비트까지 생기므로 보호 비트 2개를 둡니다."
+    ]
+  ],
+  "vivado": {
+    "mode": "ooc",
+    "resources": "DSP48E1 ≥ 4 (PE 4개)"
+  },
+  "handoff": [
+    [
+      "ch08/rtl/pe_array4.v",
+      "09장 dense_layer4 (수정 금지)"
+    ]
+  ]
+}

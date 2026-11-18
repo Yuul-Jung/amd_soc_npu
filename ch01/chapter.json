@@ -1,0 +1,69 @@
+{
+  "id": "ch01",
+  "number": 1,
+  "version": "v05",
+  "slug": "mac",
+  "nav_title": "DSP 추론 MAC 누산",
+  "name": "DSP 추론 MAC 누산",
+  "goal": "signed 16×16 곱을 40비트로 누산하는 mac_core를 작성하고, Python 기준 모델과 사이클 단위로 대조합니다.",
+  "top": {
+    "file": "ch01/rtl/mac_core.v",
+    "module": "mac_core"
+  },
+  "keep": [],
+  "new": [
+    "ch01/rtl/mac_core.v"
+  ],
+  "tb": [
+    "ch01/tb/tb_mac_core.sv"
+  ],
+  "ref": [
+    "ch01/reference/mac_reference.py"
+  ],
+  "run": "bash ch01/scripts/run_sim.sh",
+  "evidence": {
+    "rtl_log": "ch01/validation/rtl_sim_*.log"
+  },
+  "checks": [
+    [
+      "RTL_SIM_PASS INT16/40 cycles=35304",
+      "INT16·40비트 누산 설정 통과"
+    ],
+    [
+      "RTL_SIM_PASS INT8/32 cycles=133224",
+      "INT8·32비트 설정 통과"
+    ],
+    [
+      "PYTHON_RTL_COMPARE_PASS",
+      "RTL 출력 파일과 Python 기준값이 모든 사이클에서 일치"
+    ]
+  ],
+  "read_points": [
+    [
+      "부호 확장",
+      "<code>product_ext_w = {{(ACC_WIDTH-PRODUCT_WIDTH){product_w[PRODUCT_WIDTH-1]}}, product_w}</code>은 32비트 곱의 부호 비트를 40비트까지 복제합니다. 음수 곱도 올바르게 누산됩니다."
+    ],
+    [
+      "Reset &gt; Clear &gt; Valid 우선순위",
+      "<code>!resetn</code>이 최우선, 그 다음 <code>clear_i</code>, 마지막으로 <code>valid_i</code>를 처리합니다. 이 계약은 02·03·07장도 그대로 따릅니다."
+    ],
+    [
+      "2의 보수 순환",
+      "<code>ACC_WIDTH</code>가 초과되면 상위 비트를 버리는 wrap-around가 발생합니다. 테스트벤치 SV 모델에서 <code>$signed(model_acc[ACC_WIDTH-1:0])</code>으로 명시적으로 동일하게 처리합니다."
+    ],
+    [
+      "DSP 추론",
+      "<code>(* use_dsp = \"yes\" *)</code>는 합성 힌트입니다. 시뮬레이션에서는 무시되며 Vivado 합성 후 Resource 탭에서 DSP48E1 사용 여부를 확인합니다."
+    ]
+  ],
+  "vivado": {
+    "mode": "ooc",
+    "resources": "DSP48E1 ≥ 1 (<code>use_dsp</code> 추론 확인)"
+  },
+  "handoff": [
+    [
+      "ch01/rtl/mac_core.v",
+      "02장 TB 교차 검증 · 07장 vector_dot_core 내부 (수정 금지)"
+    ]
+  ]
+}

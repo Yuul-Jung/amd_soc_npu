@@ -1,0 +1,67 @@
+{
+  "id": "ch02",
+  "number": 2,
+  "version": "v05",
+  "slug": "dsp",
+  "nav_title": "DSP48E1 타깃 곱셈",
+  "name": "DSP48E1 타깃 곱셈",
+  "goal": "DSP48E1의 25×18 입력 범위에 맞춘 곱셈 레지스터를 작성하고, 01장 mac_core와 같은 입력으로 교차 검증합니다.",
+  "top": {
+    "file": "ch02/rtl/dsp_multiplier.v",
+    "module": "dsp_multiplier"
+  },
+  "keep": [
+    "ch01/rtl/mac_core.v"
+  ],
+  "new": [
+    "ch02/rtl/dsp_multiplier.v"
+  ],
+  "tb": [
+    "ch02/tb/tb_dsp_multiplier.sv"
+  ],
+  "ref": [
+    "ch02/reference/dsp_reference.py"
+  ],
+  "run": "bash ch02/scripts/run_sim.sh",
+  "evidence": {
+    "rtl_log": "ch02/validation/rtl_sim_*.log"
+  },
+  "checks": [
+    [
+      "RTL_SIM_PASS A=16 B=16 ACC=40 cycles=37360",
+      "INT16 곱·누산 교차 검증 통과"
+    ],
+    [
+      "RTL_SIM_PASS A=8 B=8 ACC=32 cycles=200816",
+      "INT8 설정 통과"
+    ],
+    [
+      "PYTHON_RTL_COMPARE_PASS",
+      "RTL 출력 파일과 Python 기준값이 모든 사이클에서 일치"
+    ]
+  ],
+  "read_points": [
+    [
+      "DSP48E1 25×18 범위",
+      "XC7A35T의 DSP48E1 A 포트는 25비트, B 포트는 18비트 signed 입력을 받습니다. INT16(<code>±32768</code>)은 두 포트 모두에 들어가므로 추론이 성공합니다."
+    ],
+    [
+      "상위 비트 버리기",
+      "43비트 전체 곱 중 하위 <code>A_WIDTH+B_WIDTH</code>비트만 등록합니다. 버려지는 비트는 부호 확장 중복분으로 INT16×INT16에서 의미 있는 값이 없습니다."
+    ],
+    [
+      "교차 검증 전략",
+      "테스트벤치가 <code>mac_core</code>를 같은 입력에 연결하고 누산 결과까지 비교합니다. 이를 통해 <code>dsp_multiplier</code> 단독으로 중복 모델 없이 완전한 검증이 가능합니다."
+    ]
+  ],
+  "vivado": {
+    "mode": "ooc",
+    "resources": "DSP48E1 ≥ 1"
+  },
+  "handoff": [
+    [
+      "ch02/rtl/dsp_multiplier.v",
+      "12장 npu_dsp_mac_lane 내부 곱셈기 (수정 금지)"
+    ]
+  ]
+}

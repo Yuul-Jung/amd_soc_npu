@@ -1,0 +1,88 @@
+{
+  "id": "ch11",
+  "number": 11,
+  "version": "v05",
+  "slug": "uart_register",
+  "nav_title": "UART 모델 적재 컨트롤러",
+  "name": "UART 모델 적재 컨트롤러",
+  "goal": "UART로 받은 X·W·B·R 바이너리 명령을 해석해 NPU 메모리에 모델을 적재하고, 추론 점수를 UART로 돌려주는 컨트롤러를 만듭니다.",
+  "top": {
+    "file": "mini_npu/rtl/uart_npu_command_controller.v",
+    "module": "uart_npu_command_controller"
+  },
+  "keep": [
+    "common/rtl/uart_rx.v",
+    "common/rtl/uart_tx.v",
+    "common/rtl/uart_core.v",
+    "ch02/rtl/dsp_multiplier.v",
+    "mini_npu/rtl/npu_dsp_mac_lane.v",
+    "mini_npu/rtl/npu_engine4.v",
+    "mini_npu/rtl/npu_display_controller.v",
+    "mini_npu/rtl/npu_reset_controller.v",
+    "mini_npu/rtl/basys3_npu_top.v"
+  ],
+  "new": [
+    "mini_npu/rtl/uart_npu_command_controller.v"
+  ],
+  "tb": [
+    "mini_npu/tb/tb_npu_uart.sv"
+  ],
+  "ref": [
+    "mini_npu/reference/check_results.py"
+  ],
+  "prep_note": "이 장의 통합 TB는 실제 UART 핀 파형으로 시험하므로 12장 Top과 NPU 엔진 파일이 함께 필요합니다. 아래 '유지' 목록의 12장 파일을 먼저 받아 둡니다(작성 설명은 12장).",
+  "tb_note": "실제 UART 비트파형을 TB가 만들고 TX를 다시 복조해 판정합니다. <code>check_results.py</code>는 결과 CSV를 PC 기준값과 비교합니다.",
+  "run": "bash ch11/scripts/run_sim.sh",
+  "evidence": {
+    "rtl_log": "ch11/validation/rtl_sim_*.log",
+    "host_model_pattern": "PC_GOLDEN_COMPARE_PASS"
+  },
+  "extra_runs": [
+    {
+      "title": "명령 프로토콜 경계 시험(선택)",
+      "cmd": "bash mini_npu/scripts/run_adversarial.sh",
+      "pattern": "NPU_UART_ADVERSARIAL_SIM_PASS|_ERR_PASS|_RESPONSE_PASS|_STATUS_",
+      "log": "ch12/validation/rtl_sim_*.log",
+      "section": "run_adversarial.sh"
+    }
+  ],
+  "checks": [
+    [
+      "INTEGRATED_UART_RTL_SIM_PASS classes=6 model_edit=1 invalid_length=1",
+      "6개 표본 분류 · Bias 변경 후 분류 변화 · 잘못된 길이 거부"
+    ],
+    [
+      "PC_GOLDEN_COMPARE_PASS predictions=6 model_edit=1",
+      "mini_npu/outputs/predictions.csv가 PC 기준 모델과 일치"
+    ]
+  ],
+  "read_points": [
+    [
+      "stop-and-wait",
+      "<code>rx_ready_o = state==IDLE || state==RECV</code>이므로 APPLY·RUN·WAIT_NPU·SEND 동안 들어온 바이트는 UART RX FIFO에 머뭅니다. PC는 응답 줄바꿈을 받은 뒤 다음 명령을 보냅니다."
+    ],
+    [
+      "필드 검사",
+      "<code>accepted_fields</code>가 주소 0~63, 뉴런 0~3, 길이 1~64를 조합 논리로 검사합니다. 기록 Enable(<code>x_wr_en_o</code> 등)은 APPLY 상태 + 필드 통과 + <code>npu_load_ready_i</code>일 때만 1이 되므로 추론 중 덮어쓰기가 불가능합니다."
+    ],
+    [
+      "점수 직렬화",
+      "4개 41비트 signed 점수를 각각 44비트로 부호 확장해 11자리 16진수로 보냅니다. 응답은 <code>C</code>+클래스+<code>:</code>+(11자×4)+쉼표 3개+CRLF = 52바이트입니다."
+    ],
+    [
+      "프리셋",
+      "<code>'0'~'3'</code>은 PRESET 상태에서 14단계(X 2개·W 8개·B 4개)를 자동 기록한 뒤 RUN으로 넘어갑니다. 표본 X0=(+1,+1)…X3=(−1,−1)의 부호 패턴입니다."
+    ]
+  ],
+  "vivado": {
+    "mode": "via",
+    "ref": "ch12",
+    "note": "이 컨트롤러는 단독 Top이 아니므로 별도 합성하지 않습니다. 12장 통합 Top 안에서 합성·타이밍·타이밍 시뮬레이션을 함께 확인합니다."
+  },
+  "handoff": [
+    [
+      "mini_npu/rtl/uart_npu_command_controller.v",
+      "12장 basys3_npu_top의 명령 계층 (수정 금지)"
+    ]
+  ]
+}

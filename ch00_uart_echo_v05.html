@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="description" content="Basys3 NPU 00장 실습 · 물리 UART 8N1·Echo">
+<meta name="generator" content="tools/guide/build_guides.py — 직접 수정 금지, chapter.json을 고친 뒤 재생성">
 <title>00장 · 물리 UART 8N1·Echo (v05)</title>
 <link rel="stylesheet" href="assets/education/site.css">
 <style>
@@ -12,11 +13,13 @@
 .section svg{width:100%;height:auto}
 .vbadge{display:inline-block;padding:.15em .6em;border-radius:4px;font-size:.78em;font-weight:700;background:#d4edda;color:#155724;vertical-align:middle}
 .gate-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:10px}
-.gate{border:1px solid var(--line,#e0e0e0);border-radius:6px;padding:10px 14px}
+.gate{border:1px solid var(--line,#e0e0e0);border-radius:6px;padding:10px 14px;overflow-wrap:anywhere}
 .gate b{display:block;font:600 11px var(--mono,monospace);letter-spacing:.04em;margin-bottom:4px}
 .gate span{font-size:13px}
 .gate.pass{border-color:#2d8a52;background:#f0fbf4}
 .gate.todo{border-color:#b08900;background:#fffbe6}
+.gate.fail{border-color:#b3261e;background:#fdeceb}
+.gate.na{border-color:#c8c8c8;background:#f6f6f6;color:#666}
 </style>
 </head>
 <body data-chapter="ch00">
@@ -342,13 +345,13 @@ endmodule</code></pre>
       <h2><span class="num">05</span>시뮬레이션 실행</h2>
       <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 저장소 루트에서 실행</span></div>
         <pre><code>bash ch00/scripts/run_sim.sh</code></pre></div>
-      <p>기대 출력 (Icarus Verilog 12.0 · 2026-11-18 실제 실행 로그 발췌):</p>
+      <p>기대 출력 (Icarus Verilog 12.0 · 2026-11-18 실제 실행 로그 발췌, 출처 <code>ch00/validation/rtl_sim_20261118.log</code>):</p>
       <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
         <pre><code>UART_ECHO_RTL_SIM_PASS decoded=2</code></pre></div>
       <p>UART FIFO 경계 시험(선택):</p>
       <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal</span></div>
         <pre><code>bash mini_npu/scripts/run_adversarial.sh</code></pre></div>
-      <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
+      <div class="codeblock"><div class="codebar"><span>기대 출력 (출처 ch12/validation/rtl_sim_20261118.log)</span></div>
         <pre><code>UART_FIFO_ADVERSARIAL_SIM_PASS tests=11</code></pre></div>
     </section>
     <section class="section" id="s06">
@@ -385,7 +388,7 @@ vivado -mode batch -nojournal -source tools/vivado/ooc_timing.tcl -tclargs ch00
         </tbody>
       </table>
       <p>OOC 결과는 입출력 핀 지연을 포함하지 않으므로 보드 Top 타이밍을 대신하지 않습니다. 증거 저장은 <code>bash tools/run_vivado_all.sh ooc</code>(→ <code>ch00/validation/vivado_ooc_YYYYMMDD.txt</code>). 보드 확인은 <a href="ch12_integrated_npu_v05.html#s08">12장 · 08</a>에서 통합 Top으로 진행합니다.</p>
-      <p>OOC 스크립트 전체 (00~10장 공용):</p>
+      <p><code>tools/vivado/ooc_timing.tcl</code> 전체:</p>
       <div class="codeblock">
         <div class="codebar"><span>tools/vivado/ooc_timing.tcl · tcl</span></div>
         <pre><code class="language-tcl"># 00~10장 단위 모듈 Out-of-Context(OOC) 합성·배치·배선·타이밍 확인.
@@ -474,7 +477,7 @@ close $fh
 puts "OOC_SUMMARY: $summary"
 if {$fail &gt; 0} { error "OOC_TIMING_FAILED count=$fail" }</code></pre>
       </div>
-      <p>증거 저장 래퍼 전체:</p>
+      <p><code>tools/run_vivado_all.sh</code> 전체:</p>
       <div class="codeblock">
         <div class="codebar"><span>tools/run_vivado_all.sh · bash</span></div>
         <pre><code class="language-bash">#!/usr/bin/env bash
@@ -529,19 +532,19 @@ exit $status</code></pre>
         <thead><tr><th>다음 장으로 넘기는 파일</th><th>사용처</th></tr></thead>
         <tbody><tr><td><code>common/rtl/uart_rx.v · uart_tx.v · uart_core.v</code></td><td>11·12장 통합 Top의 UART 계층 (수정 금지)</td></tr><tr><td><code>common/rtl/uart_echo_controller.v · ch00/rtl/basys3_uart_echo_top.v</code></td><td>이 장 전용 (후속 장 미사용)</td></tr></tbody>
       </table>
-      <p>검증 게이트 (RTL 시뮬레이션 결과는 Icarus Verilog 12.0 · 2026-11-18 실행, 증거 <code>ch00/validation/</code>):</p>
+      <p>검증 게이트 (<code>ch00/validation/</code> 증거 파일 기준으로 자동 표시):</p>
       <div class="gate-row">
         <div class="gate pass">
           <b>HTML_PASS</b>
-          <span>v05 · 정적 검사</span>
+          <span>v05 · 생성기·정적 검사</span>
         </div>
-        <div class="gate pass">
+        <div class="gate na">
           <b>HOST_MODEL_PASS</b>
           <span>해당 없음 (Python 기준 모델 없음)</span>
         </div>
         <div class="gate pass">
           <b>RTL_SIM_PASS</b>
-          <span>UART_ECHO_RTL_SIM_PASS decoded=2 · UART_FIFO_ADVERSARIAL_SIM_PASS tests=11</span>
+          <span>UART_ECHO_RTL_SIM_PASS decoded=2 · Icarus Verilog 12.0 · 2026-11-18</span>
         </div>
         <div class="gate todo">
           <b>SYNTH_TIMING_PASS</b>

@@ -1,0 +1,68 @@
+      <p>먼저 05절 회귀 시뮬레이션이 모두 통과해야 합니다. Vivado가 설치된 PC의 VS Code 터미널에서 진행하며, 단계 하나라도 실패하면 다음 단계로 넘어가지 않습니다.</p>
+      <h3>8-1. 합성·구현·타이밍 (VS Code 터미널)</h3>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · Vivado 배치 (저장소 루트)</span></div>
+        <pre><code>source /tools/Xilinx/Vivado/&lt;버전&gt;/settings64.sh   # 설치 경로에 맞게 변경
+vivado -mode batch -nojournal -source mini_npu/scripts/vivado_impl.tcl
+# 마지막 줄 기대: SYNTH_TIMING_PASS ch12 basys3_npu_top WNS=… WHS=… DRC_ERRORS=0 LUT=… FF=… DSP48E1=… RAMB=…</code></pre></div>
+      <table>
+        <thead><tr><th>판정 항목</th><th>기준</th><th>확인 위치</th></tr></thead>
+        <tbody>
+          <tr><td>Setup</td><td><code>WNS ≥ 0</code> (TNS = 0)</td><td><code>mini_npu/build/impl/timing_route.rpt</code></td></tr>
+          <tr><td>Hold</td><td><code>WHS ≥ 0</code> (THS = 0)</td><td>같은 파일</td></tr>
+          <tr><td>DRC</td><td>Error 0</td><td><code>drc_route.rpt</code></td></tr>
+          <tr><td>자원</td><td>DSP48E1 ≥ 4 (MAC 레인 4개) — 기대값, 실행 전 ⚠ 미검증</td><td><code>util_route.rpt</code></td></tr>
+        </tbody>
+      </table>
+      <p>생성물(<code>mini_npu/build/impl/</code>): <code>basys3_npu_top.bit</code>, <code>post_route.dcp</code>(GUI 확인: File → Checkpoint → Open), 타이밍 시뮬레이션용 <code>basys3_npu_top_timesim.v</code>·<code>.sdf</code>. <code>SYNTH_TIMING_FAIL</code>이면 다음 단계로 넘어가지 않습니다.</p>
+      <h3>8-2. 배선 후 타이밍 시뮬레이션 (xsim + SDF)</h3>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 8-1 성공 후</span></div>
+        <pre><code>bash mini_npu/scripts/run_timing_sim.sh
+# 기대 마지막 3줄:
+# INTEGRATED_UART_RTL_SIM_PASS classes=6 model_edit=1 invalid_length=1
+# PC_GOLDEN_COMPARE_PASS predictions=6 model_edit=1
+# TIMING_SIM_PASS ch12 basys3_npu_top post-route SDF(slow) classes=6 model_edit=1 invalid_length=1</code></pre></div>
+      <p>05절과 같은 <code>tb_npu_uart.sv</code>를 배선 후 넷리스트(slow corner 지연)에 연결합니다. 넷리스트에도 <code>uart_rx</code>가 있으므로 스크립트가 TB의 UART 수신 모니터만 <code>tb_uart_rx_monitor</code>로 이름을 바꾼 사본(<code>mini_npu/build/timesim/</code>)을 씁니다. 원본 TB는 수정하지 않습니다. 약 30 ms 분량의 UART 통신을 게이트 수준으로 시뮬레이션하므로 RTL 시뮬레이션보다 훨씬 오래 걸립니다(소요 시간 ⚠ 미측정).</p>
+      <h3>8-3. 한 번에 실행하고 증거 저장</h3>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 00~10장 OOC + 12장 구현 + 타이밍 시뮬레이션</span></div>
+        <pre><code>bash tools/run_vivado_all.sh
+# 기대 마지막 줄: VIVADO_ALL_PASS (all)
+# 저장: ch00~ch10/validation/vivado_ooc_YYYYMMDD.txt
+#       ch12/validation/vivado_impl_timesim_YYYYMMDD.txt  (WNS/WHS · bit sha256 · 타이밍 시뮬레이션 결과)</code></pre></div>
+      <p>저장된 증거 파일을 커밋하면 각 장의 <code>SYNTH_TIMING_PASS</code>(12장은 <code>TIMING_SIM_PASS</code> 포함)가 확정됩니다. 아래 8-4 이후는 실물 보드가 준비된 경우에만 진행합니다(현재 ⚠ 미실시).</p>
+      <h3>8-4. 보드 프로그래밍 (보드 준비 시)</h3>
+      <ol>
+        <li>Basys3 점퍼 JP1을 <b>JTAG</b>로 두고, micro-USB(PROG/UART 겸용)를 PC에 연결한 뒤 전원 스위치를 ON합니다.</li>
+        <li>Vivado <b>Open Hardware Manager → Open Target → Auto Connect</b> → <code>xc7a35t_0</code> 확인.</li>
+        <li><b>Program Device</b> → Bitstream file에 <code>mini_npu/build/impl/basys3_npu_top.bit</code> 선택 → <b>Program</b>. DONE LED가 켜집니다.</li>
+      </ol>
+      <h3>8-5. UART 터미널 연결</h3>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 115200 8N1, 흐름 제어 없음</span></div>
+        <pre><code>ls -l /dev/serial/by-id/            # Digilent ...-if01-port0 → ttyUSBn 이 UART
+sudo apt install -y picocom
+picocom -b 115200 -d 8 -p n -y n -f n /dev/ttyUSB1   # n은 실제 번호로 변경 · 종료 Ctrl-A Ctrl-X</code></pre></div>
+      <h3>8-6. 시험 입력과 판정</h3>
+      <p>문자 키 하나를 누르면 1바이트가 전송됩니다. Enter의 CR/LF는 무시됩니다. 응답은 <code>C</code>+클래스+<code>:</code>+점수 4개(41비트 signed, 11자리 16진수)+CRLF입니다.</p>
+      <table>
+        <thead><tr><th>입력</th><th>기대 UART 응답</th><th>LED</th><th>FND</th></tr></thead>
+        <tbody>
+<tr><td><code>0</code></td><td><code>C0:00000000002,00000000000,00000000000,FFFFFFFFFFE</code></td><td>LED0 켜짐 · LED14 켜짐</td><td>오른쪽 끝 자리 <b>0</b> (나머지 세 자리 0)</td></tr>
+<tr><td><code>1</code></td><td><code>C1:00000000000,00000000002,FFFFFFFFFFE,00000000000</code></td><td>LED1 켜짐 · LED14 켜짐</td><td>오른쪽 끝 자리 <b>1</b> (나머지 세 자리 0)</td></tr>
+<tr><td><code>2</code></td><td><code>C2:00000000000,FFFFFFFFFFE,00000000002,00000000000</code></td><td>LED2 켜짐 · LED14 켜짐</td><td>오른쪽 끝 자리 <b>2</b> (나머지 세 자리 0)</td></tr>
+<tr><td><code>3</code></td><td><code>C3:FFFFFFFFFFE,00000000000,00000000000,00000000002</code></td><td>LED3 켜짐 · LED14 켜짐</td><td>오른쪽 끝 자리 <b>3</b> (나머지 세 자리 0)</td></tr>
+          <tr><td><code>S</code></td><td><code>I</code></td><td>변화 없음</td><td>변화 없음</td></tr>
+          <tr><td><code>Z</code></td><td><code>ERR</code></td><td>LED15 켜짐 (오류 래치)</td><td>변화 없음</td></tr>
+          <tr><td>BTNC</td><td>응답 없음</td><td>LED14·LED15 꺼짐, LED0 켜짐</td><td>오른쪽 끝 자리 0</td></tr>
+        </tbody>
+      </table>
+      <p>LED 할당(<code>npu_display_controller.v</code>): LED0~3 = 클래스 one-hot, LED13 = BUSY, LED14 = DONE 래치, LED15 = 오류 래치(NPU·명령·UART framing·overrun). LED4~12는 꺼져 있습니다. BTNC는 리셋입니다.</p>
+      <div class="tip"><span class="lbl">주의</span><code>X</code>·<code>W</code>·<code>B</code>·<code>R</code>은 뒤에 바이너리 바이트가 따라와야 하므로 터미널 키 입력으로 시험하지 않습니다. 잘못 눌러 응답이 멈추면 BTNC로 리셋합니다.</div>
+      <h3>8-7. 기록</h3>
+      <table>
+        <thead><tr><th>항목</th><th>기록 내용</th></tr></thead>
+        <tbody>
+          <tr><td>비트스트림</td><td>sha256 · Vivado 버전 · Git 커밋 SHA</td></tr>
+          <tr><td>타이밍</td><td>WNS · TNS · utilization (LUT/FF/BRAM/DSP)</td></tr>
+          <tr><td>입력별 관찰</td><td>위 표 7행 각각의 실제 UART 응답 · LED · FND</td></tr>
+        </tbody>
+      </table>
+      <p>7행이 모두 기대와 같을 때만 <code>BOARD_PASS</code>로 기록합니다. 기록 파일은 <code>ch12/validation/board_YYYYMMDD.md</code>로 저장합니다.</p>

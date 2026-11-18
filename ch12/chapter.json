@@ -1,0 +1,98 @@
+{
+  "id": "ch12",
+  "number": 12,
+  "version": "v05",
+  "slug": "integrated_npu",
+  "nav_title": "통합 NPU Top",
+  "name": "통합 NPU Top · Basys3",
+  "goal": "00~11장 결과를 하나의 Basys3 Top으로 묶어 전체 회귀 시뮬레이션 → Vivado 합성·구현 → 비트스트림 → 보드에서 UART·LED·FND를 확인합니다.",
+  "top": {
+    "file": "mini_npu/rtl/basys3_npu_top.v",
+    "module": "basys3_npu_top"
+  },
+  "keep": [
+    "common/rtl/uart_rx.v",
+    "common/rtl/uart_tx.v",
+    "common/rtl/uart_core.v",
+    "ch02/rtl/dsp_multiplier.v",
+    "mini_npu/rtl/uart_npu_command_controller.v"
+  ],
+  "new": [
+    "mini_npu/rtl/npu_dsp_mac_lane.v",
+    "mini_npu/rtl/npu_engine4.v",
+    "mini_npu/rtl/npu_display_controller.v",
+    "mini_npu/rtl/npu_reset_controller.v",
+    "mini_npu/rtl/basys3_npu_top.v",
+    "mini_npu/constraints/basys3_npu.xdc",
+    "mini_npu/scripts/vivado_impl.tcl",
+    "mini_npu/scripts/run_timing_sim.sh"
+  ],
+  "tb": [
+    "mini_npu/tb/tb_npu_engine4.sv",
+    "mini_npu/tb/tb_uart_core_fifo.sv",
+    "mini_npu/tb/tb_npu_uart_adversarial.sv"
+  ],
+  "ref": [],
+  "tb_note": "실제 UART 비트파형을 TB가 만들고 TX를 다시 복조해 판정합니다.",
+  "run": "bash ch12/scripts/run_sim.sh",
+  "evidence": {
+    "rtl_log": "ch12/validation/rtl_sim_*.log",
+    "section": "main",
+    "host_model_ref": "ch11"
+  },
+  "extra_runs": [
+    {
+      "title": "적대적 시험",
+      "cmd": "bash mini_npu/scripts/run_adversarial.sh",
+      "pattern": "ADVERSARIAL_SIM_PASS",
+      "log": "ch12/validation/rtl_sim_*.log",
+      "section": "run_adversarial.sh"
+    }
+  ],
+  "checks": [
+    [
+      "결과 표 13행이 모두 RTL_SIM_PASS",
+      "ch00~ch10 · dsp_engine · ch11_ch12"
+    ],
+    [
+      "UART_FIFO_ADVERSARIAL_SIM_PASS tests=11",
+      "FIFO Full·Reset·Framing·동시 Push/Pop"
+    ],
+    [
+      "NPU_UART_ADVERSARIAL_SIM_PASS tests=8",
+      "잘못된 명령·필드, 응답 중 명령, 응답 중 Reset"
+    ]
+  ],
+  "read_points": [
+    [
+      "연결 전용 Top",
+      "<code>basys3_npu_top</code>에는 로직이 없고 다섯 하위 모듈의 연결만 있습니다. 그래서 하위 모듈 단독 시험 결과가 Top에서도 그대로 유효합니다."
+    ],
+    [
+      "리셋",
+      "<code>npu_reset_controller</code>는 btnC(Active-High)를 동기화해 Active-Low <code>resetn</code>으로 바꿉니다. 세부 동작은 위 전체 소스를 기준으로 합니다."
+    ],
+    [
+      "npu_engine4",
+      "10장 <code>npu_core</code>와 달리 BRAM 배열을 직접 두고 <code>npu_dsp_mac_lane</code> 4개(02장 <code>dsp_multiplier</code> 재사용)로 누산합니다. 주소별 <code>x_seen</code>/<code>w*_seen</code> 비트로 기록되지 않은 주소가 길이 범위 안에 있으면 추론을 거부합니다. 41비트 점수(누산+Bias) 최댓값 비교로 클래스를 정하며, 동점이면 낮은 번호가 이깁니다."
+    ],
+    [
+      "표시",
+      "<code>npu_display_controller</code>가 클래스와 busy·done·error, UART framing·overrun·protocol 오류를 LED와 FND에 나타냅니다."
+    ]
+  ],
+  "vivado": {
+    "mode": "top",
+    "board_fragment": "ch12/docs/guide_board.html"
+  },
+  "handoff": [
+    [
+      "mini_npu/ 전체 + common/rtl/ + ch02/rtl/dsp_multiplier.v",
+      "4분류 원형 기준선 — 13장 이후 10분류 NPU는 별도 폴더에서 개발하고 이 폴더는 수정하지 않음"
+    ],
+    [
+      "mini_npu/build/impl/basys3_npu_top.bit",
+      "8-1 구현 결과 비트스트림 — Git에 넣지 않고 SHA-256을 ch12/validation/vivado_impl_timesim_*.txt에 기록"
+    ]
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "id": "ch10",
+  "number": 10,
+  "version": "v05",
+  "slug": "npu_core",
+  "nav_title": "4뉴런 NPU Core",
+  "name": "4뉴런 NPU Core",
+  "goal": "04장 BRAM 5개와 09장 Dense를 6상태 FSM으로 연결해, 메모리에 적재한 입력·가중치로 추론하는 NPU 코어를 만듭니다.",
+  "top": {
+    "file": "ch10/rtl/npu_core.v",
+    "module": "npu_core"
+  },
+  "keep": [
+    "ch01/rtl/mac_core.v",
+    "ch04/rtl/bram_sync_buffer.v",
+    "ch05/rtl/fixed_quantizer.v",
+    "ch07/rtl/vector_dot_core.v",
+    "ch08/rtl/pe_array4.v",
+    "ch09/rtl/dense_layer4.v"
+  ],
+  "new": [
+    "ch10/rtl/npu_core.v"
+  ],
+  "tb": [
+    "ch10/tb/tb_npu_core.sv"
+  ],
+  "ref": [
+    "ch10/reference/npu_reference.py"
+  ],
+  "run": "bash ch10/scripts/run_sim.sh",
+  "evidence": {
+    "rtl_log": "ch10/validation/rtl_sim_*.log"
+  },
+  "checks": [
+    [
+      "RTL_SIM_PASS NPU INT16/40 datasets=22 inferences=44",
+      "22개 데이터셋·44회 추론 통과"
+    ],
+    [
+      "RTL_SIM_PASS NPU INT8/32 datasets=22 inferences=44",
+      "INT8 설정 통과"
+    ],
+    [
+      "PYTHON_RTL_COMPARE_PASS",
+      "RTL 출력 파일과 Python 기준값이 모든 사이클에서 일치"
+    ]
+  ],
+  "read_points": [
+    [
+      "load_ready_o",
+      "<code>resetn &amp;&amp; !busy_o</code>. 추론 중에는 쓰기 요청이 거부됩니다. start와 쓰기가 겹쳐 들어오면 error_o를 발생합니다."
+    ],
+    [
+      "FSM 흐름",
+      "LAUNCH 상태에서 <code>length_q=0</code>이면 즉시 WAIT_DONE으로 건너뜁니다. WAIT_READ에서 BRAM Valid가 1이 아니면 에러로 복귀합니다."
+    ],
+    [
+      "BRAM 타이밍",
+      "READ→WAIT_READ로 이동할 때 BRAM 읽기 요청이 발생합니다. BRAM은 1클록 레이턴시이므로 WAIT_READ에서 Valid가 도착합니다. Valid 확인 후 SEND로 전환하면 그 에지에서 Dense가 데이터를 수락합니다."
+    ]
+  ],
+  "vivado": {
+    "mode": "ooc",
+    "resources": "DSP48E1 ≥ 4 · RAMB ≥ 1"
+  },
+  "handoff": [
+    [
+      "ch10/rtl/npu_core.v",
+      "직접 인스턴스 없음 — 12장 npu_engine4가 같은 BRAM·4뉴런 구조를 DSP 레인(02장)으로 다시 구성"
+    ]
+  ]
+}

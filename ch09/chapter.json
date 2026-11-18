@@ -1,0 +1,70 @@
+{
+  "id": "ch09",
+  "number": 9,
+  "version": "v05",
+  "slug": "dense",
+  "nav_title": "Dense 4뉴런 레이어",
+  "name": "Dense 4뉴런 레이어",
+  "goal": "08장 4PE 결과에 Bias 덧셈·ReLU·05장 양자화를 붙여 4뉴런 Dense 레이어를 완성합니다.",
+  "top": {
+    "file": "ch09/rtl/dense_layer4.v",
+    "module": "dense_layer4"
+  },
+  "keep": [
+    "ch01/rtl/mac_core.v",
+    "ch05/rtl/fixed_quantizer.v",
+    "ch07/rtl/vector_dot_core.v",
+    "ch08/rtl/pe_array4.v"
+  ],
+  "new": [
+    "ch09/rtl/dense_layer4.v"
+  ],
+  "tb": [
+    "ch09/tb/tb_dense_layer4.sv"
+  ],
+  "ref": [
+    "ch09/reference/dense_reference.py"
+  ],
+  "run": "bash ch09/scripts/run_sim.sh",
+  "evidence": {
+    "rtl_log": "ch09/validation/rtl_sim_*.log"
+  },
+  "checks": [
+    [
+      "RTL_SIM_PASS DENSE4 INT16/40 cases=46",
+      "Bias·ReLU·포화 포함 46건 통과"
+    ],
+    [
+      "RTL_SIM_PASS DENSE4 INT8/32 cases=46",
+      "INT8 설정 통과"
+    ],
+    [
+      "PYTHON_RTL_COMPARE_PASS",
+      "RTL 출력 파일과 Python 기준값이 모든 사이클에서 일치"
+    ]
+  ],
+  "read_points": [
+    [
+      "편향 등록",
+      "start 에지에서 <code>biases_i</code>를 <code>biases_q</code>에 등록합니다. PE 처리 중 외부 편향 값이 변해도 이 값이 보존됩니다."
+    ],
+    [
+      "ReLU",
+      "<code>activated = biased &lt; 0 ? 0 : biased</code>는 조합 로직입니다. 부호 확장된 (ACC_WIDTH+1)비트 덧셈 결과를 조건부로 클리핑합니다."
+    ],
+    [
+      "Quantizer 완료 추적",
+      "<code>fixed_quantizer</code>는 1클록 레이턴시입니다. 4개 모두의 <code>qv[g]</code>가 1이 되는 에지에서 <code>result_o</code>를 등록하고 done을 발생합니다."
+    ]
+  ],
+  "vivado": {
+    "mode": "ooc",
+    "resources": "DSP48E1 ≥ 4"
+  },
+  "handoff": [
+    [
+      "ch09/rtl/dense_layer4.v",
+      "10장 npu_core (수정 금지)"
+    ]
+  ]
+}

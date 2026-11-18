@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="description" content="Basys3 NPU 05장 실습 · Fixed-Point Quantizer">
+<meta name="generator" content="tools/guide/build_guides.py — 직접 수정 금지, chapter.json을 고친 뒤 재생성">
 <title>05장 · Fixed-Point Quantizer (v05)</title>
 <link rel="stylesheet" href="assets/education/site.css">
 <style>
@@ -12,11 +13,13 @@
 .section svg{width:100%;height:auto}
 .vbadge{display:inline-block;padding:.15em .6em;border-radius:4px;font-size:.78em;font-weight:700;background:#d4edda;color:#155724;vertical-align:middle}
 .gate-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:10px}
-.gate{border:1px solid var(--line,#e0e0e0);border-radius:6px;padding:10px 14px}
+.gate{border:1px solid var(--line,#e0e0e0);border-radius:6px;padding:10px 14px;overflow-wrap:anywhere}
 .gate b{display:block;font:600 11px var(--mono,monospace);letter-spacing:.04em;margin-bottom:4px}
 .gate span{font-size:13px}
 .gate.pass{border-color:#2d8a52;background:#f0fbf4}
 .gate.todo{border-color:#b08900;background:#fffbe6}
+.gate.fail{border-color:#b3261e;background:#fdeceb}
+.gate.na{border-color:#c8c8c8;background:#f6f6f6;color:#666}
 </style>
 </head>
 <body data-chapter="ch05">
@@ -240,7 +243,7 @@ if __name__=='__main__':
       <h2><span class="num">05</span>시뮬레이션 실행</h2>
       <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 저장소 루트에서 실행</span></div>
         <pre><code>bash ch05/scripts/run_sim.sh</code></pre></div>
-      <p>기대 출력 (Icarus Verilog 12.0 · 2026-11-18 실제 실행 로그 발췌):</p>
+      <p>기대 출력 (도구 버전 미기록 · 2026-11-18 실제 실행 로그 발췌, 출처 <code>ch05/validation/rtl_sim_20261118.log</code>):</p>
       <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
         <pre><code>PYTHON_FIXED_SELF_TEST_PASS
 PYTHON_VECTORS IN=32 OUT=8 SHIFT=8 cycles=2035 seed=305
@@ -297,11 +300,11 @@ vivado -mode batch -nojournal -source tools/vivado/ooc_timing.tcl -tclargs ch05
         <thead><tr><th>다음 장으로 넘기는 파일</th><th>사용처</th></tr></thead>
         <tbody><tr><td><code>ch05/rtl/fixed_quantizer.v</code></td><td>06장 precision_compare · 09장 dense_layer4 (수정 금지)</td></tr></tbody>
       </table>
-      <p>검증 게이트 (RTL 시뮬레이션 결과는 Icarus Verilog 12.0 · 2026-11-18 실행, 증거 <code>ch05/validation/</code>):</p>
+      <p>검증 게이트 (<code>ch05/validation/</code> 증거 파일 기준으로 자동 표시):</p>
       <div class="gate-row">
         <div class="gate pass">
           <b>HTML_PASS</b>
-          <span>v05 · 정적 검사</span>
+          <span>v05 · 생성기·정적 검사</span>
         </div>
         <div class="gate pass">
           <b>HOST_MODEL_PASS</b>
@@ -309,7 +312,7 @@ vivado -mode batch -nojournal -source tools/vivado/ooc_timing.tcl -tclargs ch05
         </div>
         <div class="gate pass">
           <b>RTL_SIM_PASS</b>
-          <span>RTL_SIM_PASS FIXED (다중 설정)</span>
+          <span>RTL_SIM_PASS FIXED IW=32 OW=8 SHIFT=8 cycles=2035 외 2건 · 도구 버전 미기록 · 2026-11-18</span>
         </div>
         <div class="gate todo">
           <b>SYNTH_TIMING_PASS</b>

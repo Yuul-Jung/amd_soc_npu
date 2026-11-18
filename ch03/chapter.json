@@ -1,0 +1,65 @@
+{
+  "id": "ch03",
+  "number": 3,
+  "version": "v05",
+  "slug": "mac_pipeline",
+  "nav_title": "MAC 2단계 파이프라인",
+  "name": "MAC 2단계 파이프라인",
+  "goal": "곱 레지스터와 누산 레지스터를 나눈 2단계 MAC을 작성하고, 01장 대비 1클록 늦은 출력을 확인합니다.",
+  "top": {
+    "file": "ch03/rtl/mac_pipeline_core.v",
+    "module": "mac_pipeline_core"
+  },
+  "keep": [],
+  "new": [
+    "ch03/rtl/mac_pipeline_core.v"
+  ],
+  "tb": [
+    "ch03/tb/tb_mac_pipeline_core.sv"
+  ],
+  "ref": [
+    "ch03/reference/mac_pipeline_reference.py"
+  ],
+  "run": "bash ch03/scripts/run_sim.sh",
+  "evidence": {
+    "rtl_log": "ch03/validation/rtl_sim_*.log"
+  },
+  "checks": [
+    [
+      "RTL_SIM_PASS INT16/40 cycles=2546",
+      "INT16 설정 통과"
+    ],
+    [
+      "RTL_SIM_PASS INT8/32 cycles=133106",
+      "INT8 설정 통과"
+    ],
+    [
+      "PYTHON_RTL_COMPARE_PASS",
+      "RTL 출력 파일과 Python 기준값이 모든 사이클에서 일치"
+    ]
+  ],
+  "read_points": [
+    [
+      "2단계 레이턴시",
+      "k개 valid 입력 → k+1 클록 후 출력. 마지막 valid_i=1 에지에서 곱이 <code>product_q</code>에 등록되고, 그 다음 에지에서 <code>acc_o</code>에 반영됩니다."
+    ],
+    [
+      "clear_i 대기 없음",
+      "<code>clear_i</code>가 1이면 두 파이프라인 단계가 동시에 0으로 초기화됩니다. 이미 <code>product_q</code>에 있던 값도 버려져 \"지연 Valid\"가 남지 않습니다."
+    ],
+    [
+      "DSP P 레지스터 활용",
+      "DSP48E1의 P 출력 레지스터가 <code>product_q</code>에 대응합니다. 합성기가 이 구조를 감지하면 외부 플립플롭 없이 DSP 내부 레지스터만으로 1단계가 구현됩니다."
+    ]
+  ],
+  "vivado": {
+    "mode": "ooc",
+    "resources": "DSP48E1 ≥ 1"
+  },
+  "handoff": [
+    [
+      "ch03/rtl/mac_pipeline_core.v",
+      "후속 장 직접 사용 없음 (01장 MAC과 지연 비교용)"
+    ]
+  ]
+}

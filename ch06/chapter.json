@@ -1,0 +1,62 @@
+{
+  "id": "ch06",
+  "number": 6,
+  "version": "v05",
+  "slug": "precision",
+  "nav_title": "INT8·INT16 정밀도 비교",
+  "name": "INT8·INT16 정밀도 비교",
+  "goal": "05장 양자화기 두 개로 같은 입력을 INT8·INT16으로 동시에 변환해 오차와 오버플로를 비교합니다.",
+  "top": {
+    "file": "ch06/rtl/precision_compare.v",
+    "module": "precision_compare"
+  },
+  "keep": [
+    "ch05/rtl/fixed_quantizer.v"
+  ],
+  "new": [
+    "ch06/rtl/precision_compare.v"
+  ],
+  "tb": [
+    "ch06/tb/tb_precision_compare.sv"
+  ],
+  "ref": [
+    "ch06/reference/precision_reference.py"
+  ],
+  "run": "bash ch06/scripts/run_sim.sh",
+  "evidence": {
+    "rtl_log": "ch06/validation/rtl_sim_*.log"
+  },
+  "checks": [
+    [
+      "RTL_SIM_PASS PRECISION cycles=2020",
+      "INT8·INT16 동시 출력 통과"
+    ],
+    [
+      "PYTHON_RTL_COMPARE_PASS",
+      "RTL 출력 파일과 Python 기준값이 모든 사이클에서 일치"
+    ]
+  ],
+  "read_points": [
+    [
+      "구조적 래퍼",
+      "05장 <code>fixed_quantizer</code>를 그대로 가져다 쓰는 순수 구조적 모듈입니다. 로직이 없으므로 별도 FSM·레지스터가 없습니다."
+    ],
+    [
+      "SHIFT 선택",
+      "INT8은 SHIFT=8(소수부 8비트 버림), INT16은 SHIFT=4(소수부 4비트 버림). 같은 입력에 대해 INT16이 더 넓은 가수를 보존해 오버플로가 적게 발생합니다."
+    ],
+    [
+      "valid_o 공유",
+      "INT8 인스턴스의 <code>valid_o</code>를 외부로 노출합니다. 두 인스턴스가 같은 <code>valid_i</code>를 받으므로 출력도 항상 같은 클록에 유효합니다."
+    ]
+  ],
+  "vivado": {
+    "mode": "ooc"
+  },
+  "handoff": [
+    [
+      "ch06/rtl/precision_compare.v",
+      "후속 장 직접 사용 없음 (18장 정밀도 비교의 기준 실험)"
+    ]
+  ]
+}
