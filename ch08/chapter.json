@@ -63,6 +63,10 @@
     [
       "ch08/rtl/pe_array4.v",
       "09장 dense_layer4 (수정 금지)"
+    ],
+    [
+      "ch08/rtl/pe_array4.v",
+      "14장 npu10_group_scheduler (INT8·32비트 누산, 그룹 3회 실행, 수정 금지)"
     ]
   ],
   "port_notes": {

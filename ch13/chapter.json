@@ -70,7 +70,7 @@
   "handoff": [
     [
       "ch13/rtl/npu10_input_loader.v",
-      "14장 4PE 그룹 제어가 <code>loaded_o</code>를 확인한 뒤 <code>rd_addr_i</code> 0~63으로 입력을 읽음 (수정 금지)"
+      "14장 npu10_group_scheduler가 <code>loaded_o</code>를 확인한 뒤 <code>rd_addr_i</code> 0~63으로 입력을 읽음 (수정 금지)"
     ],
     [
       "ch13/reference/mnist8x8_reference.py",

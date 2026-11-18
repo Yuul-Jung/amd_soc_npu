@@ -64,6 +64,10 @@
     [
       "ch04/rtl/bram_sync_buffer.v",
       "13장 npu10_input_loader의 입력 메모리 (8비트×64, 수정 금지)"
+    ],
+    [
+      "ch04/rtl/bram_sync_buffer.v",
+      "14장 가중치 메모리 4개 (차선별 8비트×256, 수정 금지)"
     ]
   ],
   "port_notes": {

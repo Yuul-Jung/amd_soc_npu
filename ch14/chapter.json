@@ -1,0 +1,135 @@
+{
+  "id": "ch14",
+  "number": 14,
+  "version": "v02",
+  "slug": "group10",
+  "nav_title": "4PE 그룹·10개 출력",
+  "name": "4PE 4+4+2 그룹 실행과 10분류 argmax",
+  "goal": "08장 4PE를 4+4+2 세 그룹으로 세 번 돌려 13장 입력 64원소에 대한 10개 점수(내적 + Bias)를 모으고, 동점이면 낮은 번호를 고르는 argmax로 클래스 0~9를 냅니다.",
+  "top": {
+    "file": "ch14/rtl/npu10_group_scheduler.v",
+    "module": "npu10_group_scheduler"
+  },
+  "keep": [
+    "ch01/rtl/mac_core.v",
+    "ch04/rtl/bram_sync_buffer.v",
+    "ch07/rtl/vector_dot_core.v",
+    "ch08/rtl/pe_array4.v",
+    "ch13/rtl/npu10_input_loader.v",
+    "ch13/reference/mnist8x8_reference.py",
+    "host_tools/p3_integer_reference.py"
+  ],
+  "new": [
+    "ch14/rtl/npu10_group_scheduler.v"
+  ],
+  "tb": [
+    "ch14/tb/tb_npu10_group_scheduler.sv"
+  ],
+  "ref": [
+    "ch14/reference/group10_reference.py"
+  ],
+  "prep_note": "기준 모델은 13장 <code>features()</code>와 <code>host_tools/p3_integer_reference.py</code>의 <code>linear_64x10</code>·<code>argmax_lowest</code>를 그대로 가져다 씁니다",
+  "tb_note": "기준 모델(Python)이 24개 사례를 만듭니다: 형판 가중치로 숫자 0~9를 한 번씩, 무작위 가중치·Bias 10개, 전부 동점, 8·9 동점, 점수 전부 음수, 9번 차선 승리. 형판 가중치는 숫자별 특징 그대로이고 Bias = −|특징|²/2인 최근접 형판 분류이며, 학습한 모델이 아닙니다.",
+  "run": "bash ch14/scripts/run_sim.sh",
+  "run_note": "기준 모델 자체 시험 → RTL 시뮬레이션 (24사례) → Python 점수·클래스 비교",
+  "evidence": {
+    "rtl_log": "ch14/validation/rtl_sim_*.log",
+    "pattern": "_PASS|Icarus"
+  },
+  "checks": [
+    [
+      "PYTHON_GROUP10_SELF_TEST_PASS cases=24 template_classes=0..9 ties=2",
+      "형판 사례에서 0~9가 한 번씩 나오고, 동점 사례 2개가 낮은 번호(0, 8)를 고름"
+    ],
+    [
+      "RTL_SIM_PASS GROUP10 cases=24 scores=240 guards=2",
+      "24사례 클래스 일치, 입력 없이 시작 → error_o, 실행 중 입력 재적재 → error_o 후 IDLE"
+    ],
+    [
+      "PYTHON_RTL_COMPARE_PASS cases=24 scores=240 cycles_per_inference=600",
+      "RTL 점수 240개가 Python과 모두 같음, 추론 1회 600클록 (시뮬레이션 측정, 19장 비교 기준)"
+    ]
+  ],
+  "read_points": [
+    [
+      "클래스 → 그룹·차선",
+      "클래스 c는 그룹 <code>c/4</code>, 차선 <code>c%4</code>입니다. 가중치 BRAM 주소는 <code>{w_class_i[3:2], w_addr_i}</code> = 그룹×64 + 원소입니다."
+    ],
+    [
+      "마지막 2차선 무효",
+      "그룹 2의 차선 2·3은 클래스 10·11이 없습니다. 가중치 0을 곱하고(<code>w_bus</code>), 점수 저장 루프의 <code>i / 4 == group_q</code> 조건(i < 10)으로 결과를 버립니다. 클래스 10·11 쓰기는 <code>w_class_i <= 9</code>로 막습니다."
+    ],
+    [
+      "점수 = 내적 + Bias",
+      "ReLU·양자화 없이 32비트 그대로 비교합니다. |내적| ≤ 64×127×128 ≈ 2<sup>20</sup>이고 기준 모델이 |Bias| < 2<sup>24</sup>로 제한하므로 32비트에서 넘치지 않습니다. 09장 <code>dense_layer4</code>는 ReLU가 음수 점수를 0으로 만들어 argmax에 쓰지 않습니다."
+    ],
+    [
+      "argmax 동점 규칙",
+      "ARGMAX 상태에서 1~9를 한 클록에 하나씩 <code>score_q[k_q] > score_q[class_o]</code>(엄격 비교)로 봅니다. 같으면 앞 번호가 남아 Python <code>argmax_lowest</code>와 일치합니다."
+    ],
+    [
+      "실행 중 쓰기 무시",
+      "<code>busy_o</code>인 동안 가중치·Bias 쓰기를 무시합니다. TB는 실행 중 클래스 8·9에 쓰기를 넣어 결과가 바뀌지 않는지 확인합니다."
+    ]
+  ],
+  "vivado": {
+    "mode": "ooc",
+    "resources": "DSP48E1 ≥ 4 (차선별 MAC) · RAMB 또는 LUTRAM (가중치 4개 + 입력 1개)",
+    "note": "<code>tools/vivado/ooc_timing.tcl</code>의 <code>ch14</code> 줄로 실행합니다. ⚠ 미검증 (Vivado 미실행)."
+  },
+  "handoff": [
+    [
+      "ch14/rtl/npu10_group_scheduler.v",
+      "15장 Dense 64→10이 가중치·Bias 적재 경로와 점수 10개를 그대로 사용 (수정 금지)"
+    ],
+    [
+      "ch14/reference/group10_reference.py",
+      "15장 기준 모델이 사례 생성 방식(형판·무작위·동점)을 재사용"
+    ]
+  ],
+  "port_notes": {
+    "clk": "시스템 클록 (상승 에지에서 모든 레지스터 갱신)",
+    "resetn": "동기 리셋, 0이면 IDLE·점수·Bias 0 (Active-Low)",
+    "load_start_i": "13장 적재기: 새 입력 적재 시작",
+    "in_valid_i": "13장 적재기: 입력 원소 있음",
+    "in_data_i": "13장 적재기: 입력 원소 (INT8, 0~127)",
+    "in_last_i": "13장 적재기: 64번째 원소 표시",
+    "x_loaded_o": "입력 64원소 적재 완료 (실행 가능)",
+    "x_len_err_o": "입력 길이 오류 (13장 len_err_o)",
+    "x_range_err_o": "입력 범위 오류 (13장 range_err_o)",
+    "w_wr_en_i": "가중치 쓰기 (busy_o 동안 무시)",
+    "w_class_i": "가중치 클래스 0~9 (10 이상 무시)",
+    "w_addr_i": "가중치 원소 번호 0~63",
+    "w_data_i": "가중치 값 (INT8, signed)",
+    "b_wr_en_i": "Bias 쓰기 (busy_o 동안 무시)",
+    "b_class_i": "Bias 클래스 0~9 (10 이상 무시)",
+    "b_data_i": "Bias 값 (signed, ACC_WIDTH비트)",
+    "start_i": "추론 시작 (IDLE에서만, 입력 미적재면 error_o)",
+    "busy_o": "추론 중",
+    "done_o": "추론 완료 1클록 펄스 (class_o·scores_o 확정)",
+    "error_o": "오류 1클록 펄스 (입력 미적재 시작, 실행 중 입력 읽기 실패)",
+    "class_o": "결과 클래스 0~9 (동점이면 낮은 번호)",
+    "scores_o": "10개 점수 (클래스 c = [c*ACC_WIDTH +: ACC_WIDTH], signed)",
+    "cycles_o": "마지막 추론에 걸린 클록 수"
+  },
+  "fsm": {
+    "file": "ch14/rtl/npu10_group_scheduler.v",
+    "reset": "IDLE",
+    "rows": [
+      ["IDLE", "start_i && !x_loaded_o", "IDLE", "error_o 펄스"],
+      ["IDLE", "start_i && x_loaded_o", "LAUNCH", "busy_o=1, group_q=0, idx_q=0, cycles_o=0"],
+      ["LAUNCH", "항상", "READ", "4PE 시작 (길이 64)"],
+      ["READ", "항상", "WAIT_READ", "입력·가중치 BRAM 읽기 요청 (주소 idx_q, {group_q, idx_q})"],
+      ["WAIT_READ", "x_valid && &w_valid", "SEND", ""],
+      ["WAIT_READ", "그 외", "IDLE", "busy_o=0, error_o 펄스"],
+      ["SEND", "&pe_ready && idx_q==63", "WAIT_PE", "마지막 원소 전달"],
+      ["SEND", "&pe_ready && idx_q<63", "READ", "idx_q+1"],
+      ["WAIT_PE", "pe_done && group_q<2", "LAUNCH", "점수 4개 = 내적 + Bias, group_q+1"],
+      ["WAIT_PE", "pe_done && group_q==2", "ARGMAX", "점수 8·9 저장, class_o=0, k_q=1"],
+      ["ARGMAX", "k_q<9", "ARGMAX", "score_q[k_q] > score_q[class_o]이면 class_o=k_q, k_q+1"],
+      ["ARGMAX", "k_q==9", "IDLE", "마지막 비교, busy_o=0, done_o 펄스"],
+      ["default", "유효하지 않은 상태", "IDLE", "error_o 펄스"]
+    ],
+    "diagram": "ch14/diagrams/ch14_group_scheduler_fsm"
+  }
+}
