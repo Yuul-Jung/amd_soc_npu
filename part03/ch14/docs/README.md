@@ -25,6 +25,7 @@
 
 - RTL: `rtl/p3_group10_core.v` + 재사용 `ch02/rtl/dsp_multiplier.v`, `mini_npu/rtl/npu_dsp_mac_lane.v`, `ch13/rtl/p3_frame64_buffer.v`
 - 기준모델: `reference/group10_reference.py` → `linear_64x10`, `argmax_lowest` (기존 규칙 변경 없음)
+- (변경) 18장: `DATA_W`·`ACC_W`·`BIAS_W`·`SCORE_W` 파라미터 추가. 기본값 8/24/24/25가 이 장의 동작이며 위 기대 출력은 그대로다.
 - 10개 점수를 4PE끼리 합산하지 않는다. 그룹이 바뀔 때 입력이 아니라 해당 class 가중치 bank 주소가 바뀐다.
 
 ## 2. 실행

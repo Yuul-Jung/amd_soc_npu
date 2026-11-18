@@ -18,7 +18,13 @@ from part03.host_tools.p3_integer_reference import (  # noqa: E402
 N_IN, TILE, N_CLASS = 784, 64, 10
 N_TILE = (N_IN + TILE - 1) // TILE          # 13
 LAST_LEN = N_IN - TILE * (N_TILE - 1)       # 16
-CORE_SCORE_W = 25                           # 14장 코어 점수 폭(코어 Bias=0이면 순수 부분합)
+CORE_BIAS_W = 24                            # 14장 코어 Bias 폭(17장에서는 0으로 고정)
+
+
+def core_part_w(data_w):
+    """14장 코어 점수(부분합) 폭: INT8은 기존 25비트, 그 밖은 lane 누산 2N+6비트 + 1."""
+    core_acc = 24 if data_w == 8 else 2 * data_w + 6
+    return max(core_acc, CORE_BIAS_W) + 1
 
 
 def tile_ranges():
@@ -57,12 +63,12 @@ def wrap(v, w):
     return v - (1 << w) if v >> (w - 1) else v
 
 
-def model(x, w, b, acc_w, bias_w):
+def model(x, w, b, acc_w, bias_w, data_w=8):
     """반환: 타일별 부분합[13][10], 최종 점수[10], class, overflow."""
     assert len(x) == N_IN and len(w) == N_CLASS and len(b) == N_CLASS
     for v in x + [e for row in w for e in row]:
-        if not -128 <= v <= 127:
-            raise ValueError("x/w must be INT8 (14장 코어 계약)")
+        if not fits(v, data_w):
+            raise ValueError(f"x/w must be signed {data_w}-bit (14장 코어 DATA_W 계약)")
     for v in b:
         if not fits(v, bias_w):
             raise ValueError(f"bias must be signed {bias_w}-bit")
@@ -70,7 +76,7 @@ def model(x, w, b, acc_w, bias_w):
              for s, n in tile_ranges()]
     for row in parts:
         for p in row:
-            assert fits(p, width_plan(8, 24)["tile"]) and fits(p, CORE_SCORE_W)
+            assert fits(p, width_plan(data_w, CORE_BIAS_W)["tile"]) and fits(p, core_part_w(data_w))
     acc, ovf = [0] * N_CLASS, False
     for row in parts:
         for c in range(N_CLASS):
@@ -85,25 +91,26 @@ def model(x, w, b, acc_w, bias_w):
     return parts, scores, argmax_lowest(scores), ovf
 
 
-def build_cases(suite, bias_w, rng):
+def build_cases(suite, bias_w, rng, data_w=8):
     b_lo, b_hi = -(1 << (bias_w - 1)), (1 << (bias_w - 1)) - 1
+    lo, hi = -(1 << (data_w - 1)), (1 << (data_w - 1)) - 1
 
     def rand_case():
-        return ([rng.randint(-128, 127) for _ in range(N_IN)],
-                [[rng.randint(-128, 127) for _ in range(N_IN)] for _ in range(N_CLASS)],
+        return ([rng.randint(lo, hi) for _ in range(N_IN)],
+                [[rng.randint(lo, hi) for _ in range(N_IN)] for _ in range(N_CLASS)],
                 [rng.randint(b_lo, b_hi) for _ in range(N_CLASS)])
 
     # 짝수 class = 최대 양수 방향, 홀수 class = 최대 음수 방향 누산
-    w_ext = [[-128] * N_IN if c % 2 == 0 else [127] * N_IN for c in range(N_CLASS)]
+    w_ext = [[lo] * N_IN if c % 2 == 0 else [hi] * N_IN for c in range(N_CLASS)]
     b_ext = [b_hi, b_lo, 0, 0, b_hi, b_lo, -1, 1, b_hi, b_lo]
-    extremes = [([-128] * N_IN, w_ext, b_ext), ([127] * N_IN, w_ext, b_ext)]
+    extremes = [([lo] * N_IN, w_ext, b_ext), ([hi] * N_IN, w_ext, b_ext)]
     if suite == "width":
         return extremes + [rand_case() for _ in range(2)]
 
     cases = [rand_case() for _ in range(3)]          # 0: 오류 주입, 1: Reset, 2: 취소
     cases += extremes                                # 3·4: 누산 극값 + Bias 극값
     # 5: 마지막 타일만 유효 데이터(앞 768개 x=0). 패딩·이전 타일 가중치가 섞이면 틀린다.
-    x = [0] * 768 + [rng.choice([-128, 127, rng.randint(-128, 127)]) for _ in range(LAST_LEN)]
+    x = [0] * 768 + [rng.choice([lo, hi, rng.randint(lo, hi)]) for _ in range(LAST_LEN)]
     cases.append((x, rand_case()[1], [0] * N_CLASS))
     # 6: 타일 위치 판별: class c는 타일 12-c에만 가중치 1, x = 타일번호+1
     x = [i // TILE + 1 for i in range(N_IN)]
@@ -113,7 +120,7 @@ def build_cases(suite, bias_w, rng):
     cases.append(([1] * N_IN, [[-1] * N_IN for _ in range(N_CLASS)],
                   [-9, -8, -7, -1, -6, -5, -4, -1, -3, -2]))
     # 8: x=0 → 점수 = Bias 그대로(13번 중복 적용이면 즉시 드러남)
-    cases.append(([0] * N_IN, [[rng.randint(-128, 127) for _ in range(N_IN)]
+    cases.append(([0] * N_IN, [[rng.randint(lo, hi) for _ in range(N_IN)]
                                for _ in range(N_CLASS)], b_ext))
     # 9: 작은 Bias 1000*(c+1): 타일마다 중복 적용되면 점수가 12000*(c+1)만큼 달라진다
     x = [rng.randint(-2, 2) for _ in range(N_IN)]
@@ -123,9 +130,10 @@ def build_cases(suite, bias_w, rng):
     return cases
 
 
-def padding(rng):
+def padding(rng, data_w=8):
     """마지막 타일 주소 16~63에 보내는 쓰레기 값(0이 아니어야 누락 검출 가능)."""
-    return [rng.choice([-128, 127, 55, -77]) for _ in range(TILE - LAST_LEN)]
+    lo, hi = -(1 << (data_w - 1)), (1 << (data_w - 1)) - 1
+    return [rng.choice([lo, hi, 55, -77]) for _ in range(TILE - LAST_LEN)]
 
 
 def selftest():
@@ -150,16 +158,13 @@ def selftest():
     return p8, p16
 
 
-def generate(out, suite, acc_w, bias_w):
-    p8, p16 = selftest()
-    rng = random.Random(1717)
-    cases = build_cases(suite, bias_w, rng)
+def write_vectors(out, cases, pads, acc_w, bias_w, data_w=8):
+    """TB 입력(vectors.txt)과 기대값(expected.txt)을 쓴다. 반환: overflow 사례 수."""
     n_ovf = 0
     with (out / "vectors.txt").open("w") as vf, (out / "expected.txt").open("w") as ef:
         vf.write(f"{len(cases)}\n")
-        for x, w, b in cases:
-            pad = padding(rng)
-            parts, scores, cls, ovf = model(x, w, b, acc_w, bias_w)
+        for (x, w, b), pad in zip(cases, pads):
+            parts, scores, cls, ovf = model(x, w, b, acc_w, bias_w, data_w)
             n_ovf += ovf
             vf.write(" ".join(map(str, x)) + "\n" + " ".join(map(str, pad)) + "\n")
             for row in w:
@@ -168,8 +173,18 @@ def generate(out, suite, acc_w, bias_w):
             for t, row in enumerate(parts):
                 ef.write(f"T{t} " + " ".join(map(str, row)) + "\n")
             ef.write("S " + " ".join(map(str, scores)) + f" C{cls} O{int(ovf)}\n")
+    return n_ovf
+
+
+def generate(out, suite, acc_w, bias_w, data_w=8):
+    p8, p16 = selftest()
+    rng = random.Random(1717)
+    cases = build_cases(suite, bias_w, rng, data_w)
+    pads = [padding(rng, data_w) for _ in cases]
+    n_ovf = write_vectors(out, cases, pads, acc_w, bias_w, data_w)
+    dw = "" if data_w == 8 else f" data_w={data_w}"
     print(f"PYTHON_TILE784_SELF_TEST_PASS suite={suite} cases={len(cases)} tiles=13 "
-          f"last_len={LAST_LEN} acc_w={acc_w} bias_w={bias_w} overflow_cases={n_ovf} seed=1717")
+          f"last_len={LAST_LEN} acc_w={acc_w} bias_w={bias_w} overflow_cases={n_ovf} seed=1717{dw}")
     print(f"WIDTH_PLAN INT8: tile={p8['tile']} acc={p8['acc']} score(+bias24)={p8['score']} | "
           f"INT16: tile={p16['tile']} acc={p16['acc']} score(+bias40)={p16['score']}")
 
@@ -196,8 +211,9 @@ if __name__ == "__main__":
     p.add_argument("--suite", choices=["full", "width"], default="full")
     p.add_argument("--acc-w", type=int, default=41)
     p.add_argument("--bias-w", type=int, default=40)
+    p.add_argument("--data-w", type=int, default=8, choices=[8, 16])
     a = p.parse_args()
     if a.actual:
         compare(a.out, a.actual)
     else:
-        generate(a.out, a.suite, a.acc_w, a.bias_w)
+        generate(a.out, a.suite, a.acc_w, a.bias_w, a.data_w)

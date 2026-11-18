@@ -10,10 +10,15 @@
 // 순서: start → [W 적재 + x 프레임 + tile_go(t)] × 13 → done.
 //   W 쓰기는 IDLE·LOAD에서만 받는다. 다음 타일 프레임은 이전 타일의 4+4+2 그룹 계산과
 //   결과 수락(외부 누산, frame_ack)이 끝나야 프레임 버퍼가 비워져 들어올 수 있다.
+// (변경) 18장: x·W 데이터 폭을 파라미터로 둔다. 기본 DATA_W 8 / CORE_ACC_W 24 / PART_W 25가 17장 INT8 동작이다.
+//   INT16: DATA_W 16 / CORE_ACC_W 38(64항 최악 2^36) / PART_W 39(코어 점수 = max(38, 코어 Bias 24) + 1).
 module p3_tile784_10 #(
     parameter integer ACC_W = 41,   // 외부 누산 폭. INT16 784항 최악 841,813,590,016 → signed 41
     parameter integer BIAS_W = 40,  // 외부 Bias 폭
-    parameter integer SCORE_W = 42  // 최종 점수 폭 ≥ max(ACC_W, BIAS_W) + 1
+    parameter integer SCORE_W = 42, // 최종 점수 폭 ≥ max(ACC_W, BIAS_W) + 1
+    parameter integer DATA_W = 8,   // x·W signed 폭
+    parameter integer CORE_ACC_W = 24, // 14장 코어 lane 누산 폭(타일 64항)
+    parameter integer PART_W = 25   // 14장 코어 점수(부분합) 폭
 )(
     input wire clk,
     input wire resetn,
@@ -24,13 +29,13 @@ module p3_tile784_10 #(
     input wire x_valid_i,               // 13장 프레임 버퍼 frame_valid
     output wire x_rd_en_o,
     output wire [5:0] x_rd_addr_o,
-    input wire signed [7:0] x_rd_data_i,
+    input wire signed [DATA_W-1:0] x_rd_data_i,
     output wire frame_ack_o,
     input wire w_wr_en_i,
     input wire b_wr_en_i,
     input wire [3:0] wr_class_i,
     input wire [5:0] wr_addr_i,
-    input wire signed [7:0] w_data_i,
+    input wire signed [DATA_W-1:0] w_data_i,
     input wire signed [BIAS_W-1:0] b_data_i,
     output wire load_ready_o,           // W 쓰기 가능(IDLE·LOAD)
     output reg busy_o,
@@ -40,12 +45,11 @@ module p3_tile784_10 #(
     output reg ovf_o,                   // 외부 누산 overflow(이번 추론 동안 유지)
     output wire [3:0] tile_idx_o,
     output reg tile_done_o,             // 타일 결과 수락 1클록. 이때 part_scores_o = 해당 타일 부분합
-    output wire [10*25-1:0] part_scores_o,
+    output wire [10*PART_W-1:0] part_scores_o,
     output reg [3:0] class_o,
     output wire [10*SCORE_W-1:0] scores_o
 );
     localparam integer N_CLASS = 10;
-    localparam integer PART_W = 25;
     localparam [3:0] LAST_TILE = 4'd12;
     localparam [5:0] LAST_LEN = 6'd16;
     localparam integer SUM_W = ((ACC_W > PART_W) ? ACC_W : PART_W) + 1;
@@ -74,10 +78,11 @@ module p3_tile784_10 #(
             mask_q <= (tile_q == LAST_TILE) && (x_rd_addr_o >= LAST_LEN);
 
     wire core_done, core_err;
-    p3_group10_core #(.IN_LEN(64), .OUT_N(10)) core(
+    p3_group10_core #(.IN_LEN(64), .OUT_N(10), .DATA_W(DATA_W), .ACC_W(CORE_ACC_W),
+                      .BIAS_W(24), .SCORE_W(PART_W)) core(
         .clk(clk), .resetn(resetn), .start_i(core_start_q), .x_valid_i(x_valid_i),
         .x_rd_en_o(x_rd_en_o), .x_rd_addr_o(x_rd_addr_o),
-        .x_rd_data_i(mask_q ? 8'sd0 : x_rd_data_i),
+        .x_rd_data_i(mask_q ? {DATA_W{1'b0}} : x_rd_data_i),
         .w_wr_en_i(w_wr_en_i && w_ok), .b_wr_en_i(1'b0), .wr_class_i(wr_class_i),
         .wr_addr_i(wr_addr_i), .w_data_i(w_data_i), .b_data_i(24'sd0), .load_ready_o(),
         .busy_o(), .done_o(core_done), .error_o(core_err), .class_o(), .scores_o(part_scores_o));

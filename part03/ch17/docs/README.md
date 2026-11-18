@@ -46,7 +46,8 @@
 | **INT16×INT16 계약** | 2³⁶ → signed **38** | max 841,813,590,016 → signed **41** (signed40 한계 549,755,813,887 초과) | + Bias40 → 1,391,569,403,903 → signed **42** |
 
 - 기본 폭 41/40/42는 INT16 계약을 담도록 잡았다. 18장 정밀도 비교에서 같은 외부 누산 구조를 재사용할 수 있다.
-- **주의:** 14장 코어의 x·W 포트는 INT8이다. INT16 최악값은 Python 폭 산정(`width_plan`)으로만 확인했고 RTL로 실행하지 않았다.
+- 17장 시험은 INT8(DATA_W 8)이다. INT16 최악값의 RTL 실행은 18장에서 DATA_W=16 파라미터로 수행한다(`ch18/docs/README.md`).
+- (변경) 18장: `DATA_W`·`CORE_ACC_W`·`PART_W` 파라미터 추가. 기본값 8/24/25가 이 장의 동작이다.
 - RTL 폭 시험: `ACC_W=25`(INT8 최소 안전 폭)은 극값에서도 overflow 없음, `ACC_W=24`는 극값 2건에서 `ovf_o=1`과 Python 순환값이 비트 단위로 일치.
 
 ## 3. 실행
@@ -79,4 +80,4 @@ PYTHON_RTL_COMPARE_PASS cases=4 tile_partials=520 scores=10 class=1 overflow=1 b
 - 상시 화이트박스: 코어 Bias 10개 항상 0, 코어 계산 중 가중치 쓰기·다음 프레임 수신 없음, 프레임 해제는 결과 수락 클록 또는 취소만, done·tile_done 1클록, 타일 처리 클록 수 일정
 - 변이 시험 16종 모두 검출: 마스크 제거·경계 off-by-one, 코어 Bias 포트 연결(중복), Bias 미적용, 타일마다 Bias, start 시 누산 미Clear, 부분합 0 확장, 타일 중복·누락·프레임 검사 제거, RUN 중 W 쓰기·상시 Bias 쓰기 허용, overflow 미검출, 마지막 타일 번호 11, 조기 frame_ack, 동점 높은 번호
 
-**미검증:** Vivado 합성(DSP·BRAM 추론, 10×42비트 가산기 타이밍)·자원, Basys3 실물, UART 경로 연결, 학습된 실제 MNIST 모델 정확도, INT16 데이터 경로의 RTL 실행.
+**미검증:** Vivado 합성(DSP·BRAM 추론, 10×42비트 가산기 타이밍)·자원, Basys3 실물, UART 경로 연결. (INT16 RTL·학습 MNIST 모델은 18장)

@@ -3,12 +3,12 @@ Icarus Verilog version 12.0 (stable) ()
 PYTHON_MLP_SELF_TEST_PASS ops=4933 frames=27 seed=1616
 part03/mini_npu/rtl/npu_dsp_mac_lane.v:2: warning: timescale for npu_dsp_mac_lane inherited from another file.
 part03/ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
-part03/ch14/rtl/p3_group10_core.v:103: warning: @* is sensitive to all 8 words in array 'score_q'.
-part03/ch14/rtl/p3_group10_core.v:105: warning: @* is sensitive to all 8 words in array 'score_q'.
-part03/ch14/rtl/p3_group10_core.v:106: warning: @* is sensitive to all 8 words in array 'score_q'.
-part03/ch14/rtl/p3_group10_core.v:103: warning: @* is sensitive to all 10 words in array 'score_q'.
-part03/ch14/rtl/p3_group10_core.v:105: warning: @* is sensitive to all 10 words in array 'score_q'.
-part03/ch14/rtl/p3_group10_core.v:106: warning: @* is sensitive to all 10 words in array 'score_q'.
+part03/ch14/rtl/p3_group10_core.v:110: warning: @* is sensitive to all 8 words in array 'score_q'.
+part03/ch14/rtl/p3_group10_core.v:112: warning: @* is sensitive to all 8 words in array 'score_q'.
+part03/ch14/rtl/p3_group10_core.v:113: warning: @* is sensitive to all 8 words in array 'score_q'.
+part03/ch14/rtl/p3_group10_core.v:110: warning: @* is sensitive to all 10 words in array 'score_q'.
+part03/ch14/rtl/p3_group10_core.v:112: warning: @* is sensitive to all 10 words in array 'score_q'.
+part03/ch14/rtl/p3_group10_core.v:113: warning: @* is sensitive to all 10 words in array 'score_q'.
 RTL_SIM_PASS MLP64_8_10 frames=27 start_to_done_cycles=180 errors_checked=5
 part03/ch16/tb/tb_p3_mlp_64_8_10.sv:164: $finish called at 164120000 (1ps)
 PYTHON_RTL_COMPARE_PASS frames=27 hidden=8 scores=10 class=1 bit_exact=1

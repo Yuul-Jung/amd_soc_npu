@@ -6,9 +6,16 @@
 // score[c] = sum_i x[i]*W[c][i] + bias[c] (signed 25비트, 정수 기준모델 linear_64x10과 동일)
 // class_o = 최대 점수 class, 동점이면 낮은 번호(argmax_lowest)
 // (변경) 15장 Dense 계층 재사용을 위해 입력 길이·출력 수를 파라미터로 둔다. 기본값 64→10이 14장 동작이다.
+// (변경) 18장 정밀도 비교를 위해 데이터·누산·Bias·점수 폭을 파라미터로 둔다.
+//   기본값 DATA_W 8 / ACC_W 24 / BIAS_W 24 / SCORE_W 25가 14장 INT8 동작이다.
+//   INT16 예: DATA_W 16 / ACC_W 38(64항 최악 2^36) / SCORE_W ≥ max(ACC_W, BIAS_W) + 1.
 module p3_group10_core #(
     parameter integer IN_LEN = 64,
-    parameter integer OUT_N = 10
+    parameter integer OUT_N = 10,
+    parameter integer DATA_W = 8,
+    parameter integer ACC_W = 24,
+    parameter integer BIAS_W = 24,
+    parameter integer SCORE_W = 25
 )(
     input wire clk,
     input wire resetn,
@@ -16,19 +23,19 @@ module p3_group10_core #(
     input wire x_valid_i,
     output wire x_rd_en_o,
     output wire [5:0] x_rd_addr_o,
-    input wire signed [7:0] x_rd_data_i,
+    input wire signed [DATA_W-1:0] x_rd_data_i,
     input wire w_wr_en_i,
     input wire b_wr_en_i,
     input wire [3:0] wr_class_i,
     input wire [5:0] wr_addr_i,
-    input wire signed [7:0] w_data_i,
-    input wire signed [23:0] b_data_i,
+    input wire signed [DATA_W-1:0] w_data_i,
+    input wire signed [BIAS_W-1:0] b_data_i,
     output wire load_ready_o,
     output reg busy_o,
     output reg done_o,
     output reg error_o,
     output reg [3:0] class_o,
-    output wire [OUT_N*25-1:0] scores_o
+    output wire [OUT_N*SCORE_W-1:0] scores_o
 );
     localparam [2:0] IDLE=3'd0, CLEAR=3'd1, RUN=3'd2, DRAIN=3'd3, CAPT=3'd4, FINISH=3'd5;
     reg [2:0] state;
@@ -38,13 +45,13 @@ module p3_group10_core #(
     reg issue_q;
 
     // lane별 가중치 bank: 주소 = group*64 + index
-    reg signed [7:0] bank0 [0:191];
-    reg signed [7:0] bank1 [0:191];
-    reg signed [7:0] bank2 [0:191];
-    reg signed [7:0] bank3 [0:191];
-    reg signed [7:0] w_q0, w_q1, w_q2, w_q3;
-    reg signed [23:0] bias [0:OUT_N-1];
-    reg signed [24:0] score_q [0:OUT_N-1];
+    reg signed [DATA_W-1:0] bank0 [0:191];
+    reg signed [DATA_W-1:0] bank1 [0:191];
+    reg signed [DATA_W-1:0] bank2 [0:191];
+    reg signed [DATA_W-1:0] bank3 [0:191];
+    reg signed [DATA_W-1:0] w_q0, w_q1, w_q2, w_q3;
+    reg signed [BIAS_W-1:0] bias [0:OUT_N-1];
+    reg signed [SCORE_W-1:0] score_q [0:OUT_N-1];
     // (변경) 마지막 그룹 번호: 출력 수를 4개 차선으로 나눈 그룹 수 - 1
     localparam [1:0] LAST_GROUP = (OUT_N - 1) / 4;
 
@@ -56,17 +63,17 @@ module p3_group10_core #(
     wire [3:0] lane_en = {({group_q, 2'd3} < OUT_N), ({group_q, 2'd2} < OUT_N),
                           ({group_q, 2'd1} < OUT_N), ({group_q, 2'd0} < OUT_N)};
     wire lane_clear = (state == CLEAR);
-    wire signed [23:0] acc0, acc1, acc2, acc3;
-    npu_dsp_mac_lane #(.DATA_WIDTH(8), .ACC_WIDTH(24)) lane0(.clk(clk), .resetn(resetn),
+    wire signed [ACC_W-1:0] acc0, acc1, acc2, acc3;
+    npu_dsp_mac_lane #(.DATA_WIDTH(DATA_W), .ACC_WIDTH(ACC_W)) lane0(.clk(clk), .resetn(resetn),
         .clear_i(lane_clear), .valid_i(issue_q && lane_en[0]),
         .x_i(x_rd_data_i), .w_i(w_q0), .acc_o(acc0));
-    npu_dsp_mac_lane #(.DATA_WIDTH(8), .ACC_WIDTH(24)) lane1(.clk(clk), .resetn(resetn),
+    npu_dsp_mac_lane #(.DATA_WIDTH(DATA_W), .ACC_WIDTH(ACC_W)) lane1(.clk(clk), .resetn(resetn),
         .clear_i(lane_clear), .valid_i(issue_q && lane_en[1]),
         .x_i(x_rd_data_i), .w_i(w_q1), .acc_o(acc1));
-    npu_dsp_mac_lane #(.DATA_WIDTH(8), .ACC_WIDTH(24)) lane2(.clk(clk), .resetn(resetn),
+    npu_dsp_mac_lane #(.DATA_WIDTH(DATA_W), .ACC_WIDTH(ACC_W)) lane2(.clk(clk), .resetn(resetn),
         .clear_i(lane_clear), .valid_i(issue_q && lane_en[2]),
         .x_i(x_rd_data_i), .w_i(w_q2), .acc_o(acc2));
-    npu_dsp_mac_lane #(.DATA_WIDTH(8), .ACC_WIDTH(24)) lane3(.clk(clk), .resetn(resetn),
+    npu_dsp_mac_lane #(.DATA_WIDTH(DATA_W), .ACC_WIDTH(ACC_W)) lane3(.clk(clk), .resetn(resetn),
         .clear_i(lane_clear), .valid_i(issue_q && lane_en[3]),
         .x_i(x_rd_data_i), .w_i(w_q3), .acc_o(acc3));
 
@@ -97,7 +104,7 @@ module p3_group10_core #(
     // 10개 점수 중 최대값, 동점은 낮은 번호 유지(엄격한 > 비교)
     integer k;
     reg [3:0] best_class;
-    reg signed [24:0] best_score;
+    reg signed [SCORE_W-1:0] best_score;
     always @* begin
         best_class = 4'd0;
         best_score = score_q[0];
@@ -111,13 +118,13 @@ module p3_group10_core #(
     genvar g;
     generate
         for (g = 0; g < OUT_N; g = g + 1) begin : pack
-            assign scores_o[g*25 +: 25] = score_q[g];
+            assign scores_o[g*SCORE_W +: SCORE_W] = score_q[g];
         end
     endgenerate
 
-    // 누산값(24비트)과 Bias(24비트)를 25비트로 부호 확장해 더한다.
-    function signed [24:0] add_bias(input signed [23:0] acc, input signed [23:0] b);
-        add_bias = $signed({acc[23], acc}) + $signed({b[23], b});
+    // 누산값(ACC_W)과 Bias(BIAS_W)를 SCORE_W로 부호 확장해 더한다(기본 24+24 → 25비트).
+    function signed [SCORE_W-1:0] add_bias(input signed [ACC_W-1:0] acc, input signed [BIAS_W-1:0] b);
+        add_bias = acc + b;
     endfunction
 
     always @(posedge clk) begin
@@ -132,8 +139,8 @@ module p3_group10_core #(
             error_o <= 1'b0;
             class_o <= 4'd0;
             for (k = 0; k < OUT_N; k = k + 1) begin
-                bias[k] <= 24'sd0;
-                score_q[k] <= 25'sd0;
+                bias[k] <= {BIAS_W{1'b0}};
+                score_q[k] <= {SCORE_W{1'b0}};
             end
         end else begin
             done_o <= 1'b0;
@@ -203,6 +210,8 @@ module p3_group10_core #(
     initial begin
         if (IN_LEN < 1 || IN_LEN > 64 || OUT_N < 1 || OUT_N > 12)
             $fatal(1, "Require 1<=IN_LEN<=64 and 1<=OUT_N<=12");
+        if (SCORE_W < ((ACC_W > BIAS_W) ? ACC_W : BIAS_W) + 1)
+            $fatal(1, "Require SCORE_W >= max(ACC_W, BIAS_W) + 1");
     end
     // synthesis translate_on
 endmodule

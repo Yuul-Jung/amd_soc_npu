@@ -4,11 +4,17 @@
 // 쓰레기 값을 보낸다. 타일별 부분합·최종 점수·Class·overflow를 actual에 기록하고 Python이 비트 단위 비교.
 // +FULL 추가 판정: 상태별 명령 거부, 타일 중복·누락, 프레임 없는 tile_go, 동작 중 W/Bias 쓰기 거부,
 // RUN·LOAD 중 Reset 후 재실행, LOAD 중 취소 후 재실행, 코어 Bias 0 유지(화이트박스).
+// (변경) 18장: DATA_W 파라미터. 8이면 위와 같이 13장 8비트 프레임 버퍼를 쓰고,
+// 16이면 04장 bram_sync_buffer(16비트×64)에 x 타일을 쓴 뒤 TB가 프레임 보관 플래그를 세운다
+// (frame_ack까지 다음 타일 쓰기 대기 = 13장 버퍼의 s_ready 계약과 같은 순서 규칙).
 `timescale 1ns/1ps
 module tb_p3_tile784_10;
     parameter integer ACC_W = 41;
     parameter integer BIAS_W = 40;
+    parameter integer DATA_W = 8;
     localparam integer SCORE_W = ((ACC_W > BIAS_W) ? ACC_W : BIAS_W) + 1;
+    localparam integer CORE_ACC_W = (DATA_W == 8) ? 24 : 2 * DATA_W + 6;
+    localparam integer PART_W = ((CORE_ACC_W > 24) ? CORE_ACC_W : 24) + 1;
     localparam [2:0] ERR_STATE=3'd1, ERR_TILE_DUP=3'd2, ERR_TILE_SKIP=3'd3,
                      ERR_NO_FRAME=3'd4, ERR_WRITE=3'd5;
     localparam integer MODE_CLEAN=0, MODE_ERRORS=1, MODE_RESET_RUN=2, MODE_RESET_LOAD=3,
@@ -22,25 +28,46 @@ module tb_p3_tile784_10;
     wire s_ready, frame_valid, frame_ack, x_rd_valid, err_short, err_long;
     wire x_rd_en;
     wire [5:0] x_rd_addr;
-    wire signed [7:0] x_rd_data;
+    wire signed [DATA_W-1:0] x_rd_data;
     reg start = 0, abort = 0, tile_go = 0, w_wr = 0, b_wr = 0;
     reg [3:0] tile_id = 0, wr_class = 0;
     reg [5:0] wr_addr = 0;
-    reg signed [7:0] w_data = 0;
+    reg signed [DATA_W-1:0] w_data = 0;
     reg signed [BIAS_W-1:0] b_data = 0;
     wire load_ready, busy, done, error, ovf, tile_done;
     wire [2:0] err_code;
     wire [3:0] tile_idx, cls;
-    wire [249:0] parts;
+    wire [10*PART_W-1:0] parts;
     wire [10*SCORE_W-1:0] scores;
+    // DATA_W > 8: 04장 버퍼 쓰기 포트와 TB 프레임 보관 플래그
+    reg x_wr = 0, x_commit = 0, x_held = 0;
+    reg [5:0] x_wr_addr = 0;
+    reg signed [DATA_W-1:0] x_wr_data = 0;
 
-    p3_frame64_buffer buffer(
-        .clk(clk), .resetn(resetn),
-        .s_data_i(s_data), .s_valid_i(s_valid), .s_last_i(s_last), .s_ready_o(s_ready),
-        .frame_valid_o(frame_valid), .frame_ack_i(frame_ack),
-        .rd_en_i(x_rd_en), .rd_addr_i(x_rd_addr), .rd_data_o(x_rd_data), .rd_valid_o(x_rd_valid),
-        .err_short_o(err_short), .err_long_o(err_long));
-    p3_tile784_10 #(.ACC_W(ACC_W), .BIAS_W(BIAS_W), .SCORE_W(SCORE_W)) dut(
+    generate
+        if (DATA_W == 8) begin : buf8
+            p3_frame64_buffer buffer(
+                .clk(clk), .resetn(resetn),
+                .s_data_i(s_data), .s_valid_i(s_valid), .s_last_i(s_last), .s_ready_o(s_ready),
+                .frame_valid_o(frame_valid), .frame_ack_i(frame_ack),
+                .rd_en_i(x_rd_en), .rd_addr_i(x_rd_addr), .rd_data_o(x_rd_data),
+                .rd_valid_o(x_rd_valid), .err_short_o(err_short), .err_long_o(err_long));
+        end else begin : bufw
+            bram_sync_buffer #(.DATA_WIDTH(DATA_W), .ADDR_WIDTH(6)) buffer(
+                .clk(clk), .resetn(resetn), .wr_en(x_wr), .rd_en(x_rd_en),
+                .wr_addr(x_wr_addr), .rd_addr(x_rd_addr), .wr_data(x_wr_data),
+                .rd_data(x_rd_data), .rd_valid(x_rd_valid));
+            always @(posedge clk)
+                if (!resetn || frame_ack) x_held <= 1'b0;
+                else if (x_commit) x_held <= 1'b1;
+            assign frame_valid = x_held;
+            assign s_ready = resetn && !x_held;
+            assign err_short = 1'b0;
+            assign err_long = 1'b0;
+        end
+    endgenerate
+    p3_tile784_10 #(.ACC_W(ACC_W), .BIAS_W(BIAS_W), .SCORE_W(SCORE_W), .DATA_W(DATA_W),
+                    .CORE_ACC_W(CORE_ACC_W), .PART_W(PART_W)) dut(
         .clk(clk), .resetn(resetn), .start_i(start), .abort_i(abort),
         .tile_go_i(tile_go), .tile_id_i(tile_id),
         .x_valid_i(frame_valid), .x_rd_en_o(x_rd_en), .x_rd_addr_o(x_rd_addr),
@@ -70,6 +97,7 @@ module tb_p3_tile784_10;
             // Bias 중복 방지: 코어 Bias는 항상 0
             for (k = 0; k < 10; k = k + 1)
                 if (dut.core.bias[k] !== 24'sd0) $fatal(1, "core bias[%0d] not zero", k);
+            if (x_wr && x_held) $fatal(1, "x tile overwritten while held");
             if (error) begin
                 n_error = n_error + 1;
                 last_code = err_code;
@@ -89,7 +117,7 @@ module tb_p3_tile784_10;
     integer PAD [0:47];
     integer W [0:9][0:783];
     reg signed [63:0] B [0:9];
-    integer P [0:12][0:9];  // 완주한 추론의 타일별 부분합
+    reg signed [63:0] P [0:12][0:9];  // 완주한 추론의 타일별 부분합
     reg signed [63:0] tmp64;
     integer tmp, vf, af, rc, ncase, cidx, i, c, err_before, full;
     reg [8*256-1:0] vpath, apath;
@@ -150,14 +178,27 @@ module tb_p3_tile784_10;
     task automatic send_tile_x(input integer t, input integer len);
         integer j;
         begin
-            for (j = 0; j < 64; j = j + 1) begin
+            if (DATA_W == 8) begin
+                for (j = 0; j < 64; j = j + 1) begin
+                    @(negedge clk);
+                    s_data = (j < len) ? X[64*t + j] : PAD[j - len];
+                    s_valid = 1; s_last = (j == 63);
+                    while (!s_ready) @(negedge clk);
+                end
                 @(negedge clk);
-                s_data = (j < len) ? X[64*t + j] : PAD[j - len];
-                s_valid = 1; s_last = (j == 63);
+                s_valid = 0; s_last = 0;
+            end else begin
                 while (!s_ready) @(negedge clk);
+                for (j = 0; j < 64; j = j + 1) begin
+                    @(negedge clk);
+                    x_wr = 1; x_wr_addr = j;
+                    x_wr_data = (j < len) ? X[64*t + j] : PAD[j - len];
+                end
+                @(negedge clk);
+                x_wr = 0; x_commit = 1;
+                @(negedge clk);
+                x_commit = 0;
             end
-            @(negedge clk);
-            s_valid = 0; s_last = 0;
             if (!frame_valid) $fatal(1, "tile %0d frame not held", t);
         end
     endtask
@@ -257,7 +298,7 @@ module tb_p3_tile784_10;
                         if (tile_idx != t) $fatal(1, "tile_done index %0d != %0d", tile_idx, t);
                         if (!busy || done) $fatal(1, "busy/done wrong after tile %0d", t);
                         for (c = 0; c < 10; c = c + 1)
-                            P[t][c] = $signed(parts[c*25 +: 25]);
+                            P[t][c] = $signed(parts[c*PART_W +: PART_W]);
                     end
                 end
             end
@@ -318,8 +359,12 @@ module tb_p3_tile784_10;
             run_inference((full && cidx == 0) ? MODE_ERRORS : MODE_CLEAN);
         end
         $fclose(af);
-        $display("RTL_SIM_PASS TILE784 cases=%0d tiles=13 tile_go_to_accept_cycles=%0d acc_w=%0d bias_w=%0d score_w=%0d errors_checked=%0d",
-            ncase, tile_cyc, ACC_W, BIAS_W, SCORE_W, n_error);
+        if (DATA_W == 8)
+            $display("RTL_SIM_PASS TILE784 cases=%0d tiles=13 tile_go_to_accept_cycles=%0d acc_w=%0d bias_w=%0d score_w=%0d errors_checked=%0d",
+                ncase, tile_cyc, ACC_W, BIAS_W, SCORE_W, n_error);
+        else
+            $display("RTL_SIM_PASS TILE784 cases=%0d tiles=13 tile_go_to_accept_cycles=%0d acc_w=%0d bias_w=%0d score_w=%0d errors_checked=%0d data_w=%0d part_w=%0d",
+                ncase, tile_cyc, ACC_W, BIAS_W, SCORE_W, n_error, DATA_W, PART_W);
         $finish;
     end
     initial begin #200000000; $fatal(1, "TB timeout"); end
