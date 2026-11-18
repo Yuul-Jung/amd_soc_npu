@@ -1,0 +1,6 @@
+Icarus Verilog version 12.0 (stable) ()
+PYTHON_GROUP10_SELF_TEST_PASS cases=24 template_classes=0..9 ties=2
+RTL_SIM_PASS GROUP10 cases=24 scores=240 guards=2 cycles_per_inference=600
+tb/tb_npu10_group_scheduler.sv:73: $finish called at 318730000 (1ps)
+PYTHON_GROUP10_SELF_TEST_PASS cases=24 template_classes=0..9 ties=2
+PYTHON_RTL_COMPARE_PASS cases=24 scores=240 cycles_per_inference=600
