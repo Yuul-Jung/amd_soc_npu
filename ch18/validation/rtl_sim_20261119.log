@@ -1,0 +1,10 @@
+Icarus Verilog version 12.0 (stable) ()
+PYTHON_PRECISION_VECTORS int8 cases=20
+RTL_SIM_PASS PRECISION int8 acc=32 cases=20 cross_ch17=20 cycles_per_inference=7263
+tb/tb_npu_precision.sv:53: $finish called at 1693550000 (1ps)
+PYTHON_RTL_COMPARE_PASS int8 cases=20 scores=200 correct=18/20
+PYTHON_PRECISION_VECTORS int16 cases=20
+RTL_SIM_PASS PRECISION int16 acc=48 cases=20 cross_ch17=0 cycles_per_inference=7263
+tb/tb_npu_precision.sv:53: $finish called at 1688350000 (1ps)
+PYTHON_RTL_COMPARE_PASS int16 cases=20 scores=200 correct=18/20
+ACC_WIDTH_CHECK_PASS int16_acc32_mismatch=case=0
