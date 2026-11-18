@@ -6,59 +6,171 @@
   "nav_title": "784원소 타일 실행",
   "name": "784원소 13타일 실행 (코어 밖 부분합 누산)",
   "goal": "28×28 입력 784원소를 64원소 타일 13개(64×12 + 16)로 나눠 15장 Dense 코어를 13번 실행합니다. 타일별 부분합은 코어 밖 누산기에서 더하고, Bias는 13타일이 모두 끝난 뒤 한 번만 더합니다.",
-  "top": {"file": "ch17/rtl/npu_tiled_784.v", "module": "npu_tiled_784"},
-  "keep": ["ch01/rtl/mac_core.v", "ch04/rtl/bram_sync_buffer.v", "ch07/rtl/vector_dot_core.v", "ch08/rtl/pe_array4.v",
-           "ch15/rtl/npu_dense_core.v", "ch16/rtl/npu_argmax.v",
-           "ch13/reference/mnist8x8_reference.py", "host_tools/p3_integer_reference.py"],
-  "new": ["ch17/rtl/npu_tiled_784.v"],
-  "tb": ["ch17/tb/tb_npu_tiled_784.sv"],
-  "ref": ["ch17/reference/tiled_reference.py"],
+  "top": {
+    "file": "ch17/rtl/npu_tiled_784.v",
+    "module": "npu_tiled_784"
+  },
+  "keep": [
+    "ch01/rtl/mac_core.v",
+    "ch04/rtl/bram_sync_buffer.v",
+    "ch07/rtl/vector_dot_core.v",
+    "ch08/rtl/pe_array4.v",
+    "ch15/rtl/npu_dense_core.v",
+    "ch16/rtl/npu_argmax.v",
+    "ch13/reference/mnist8x8_reference.py",
+    "host_tools/p3_integer_reference.py"
+  ],
+  "new": [
+    "ch17/rtl/npu_tiled_784.v"
+  ],
+  "tb": [
+    "ch17/tb/tb_npu_tiled_784.sv"
+  ],
+  "ref": [
+    "ch17/reference/tiled_reference.py"
+  ],
   "prep_note": "기준 모델은 <code>host_tools/p3_integer_reference.py</code>의 <code>dot_tiled_64</code>·<code>argmax_lowest</code>를 그대로 씁니다",
   "tb_note": "기준 모델(Python)이 6사례를 만듭니다: 28×28 형판 가중치로 숫자 0·4·9, 무작위 가중치 2개, 마지막 타일 16원소만 0이 아닌 사례. 입력 스케일은 13장과 같습니다(화소/2, 0~127). TB는 타일이 끝날 때마다 번호와 누계를 기록합니다.",
   "run": "bash ch17/scripts/run_sim.sh",
   "run_note": "기준 모델 자체 시험 → RTL 시뮬레이션 (6사례 × 13타일) → 타일별 누계·최종 점수·클래스 비교",
-  "evidence": {"rtl_log": "ch17/validation/rtl_sim_*.log", "pattern": "_PASS|Icarus"},
+  "evidence": {
+    "rtl_log": "ch17/validation/rtl_sim_*.log",
+    "pattern": "_PASS|Icarus"
+  },
   "checks": [
-    ["PYTHON_TILED784_SELF_TEST_PASS cases=6 tiles=13 lens=64x12+16", "타일 점수가 한 번에 계산한 내적과 같고, 형판 사례는 0·4·9, 마지막 타일 사례는 6을 고름"],
-    ["RTL_SIM_PASS TILED784 cases=6 tiles=13 len_sum=784", "사례마다 타일 0~12가 순서대로 한 번씩 끝나고, 코어가 받은 길이의 합이 784"],
-    ["PYTHON_RTL_COMPARE_PASS cases=6 tile_prefix=780 scores=60", "타일별 누계 780개(6×13×10)와 최종 점수 60개·클래스가 Python과 같음"]
+    [
+      "PYTHON_TILED784_SELF_TEST_PASS cases=6 tiles=13 lens=64x12+16",
+      "타일 점수가 한 번에 계산한 내적과 같고, 형판 사례는 0·4·9, 마지막 타일 사례는 6을 고름"
+    ],
+    [
+      "RTL_SIM_PASS TILED784 cases=6 tiles=13 len_sum=784",
+      "사례마다 타일 0~12가 순서대로 한 번씩 끝나고, 코어가 받은 길이의 합이 784"
+    ],
+    [
+      "PYTHON_RTL_COMPARE_PASS cases=6 tile_prefix=780 scores=60",
+      "타일별 누계 780개(6×13×10)와 최종 점수 60개·클래스가 Python과 같음"
+    ]
   ],
   "read_points": [
-    ["타일 주소", "코어는 타일 안 번호 0~63만 압니다. 상위가 <code>{tile_o, 6'd0} + idx</code>로 전체 주소를 만들어 입력·가중치 RAM에 줍니다."],
-    ["마지막 16원소", "<code>tile_len_o</code>는 타일 12에서 16입니다. 코어 <code>len_i</code>가 16이면 4PE가 16개만 누산하고 끝나므로 784를 넘는 주소를 읽지 않습니다."],
-    ["코어 밖 누산", "타일마다 코어는 내적을 처음부터 다시 계산하고, 상위 <code>acc_q</code>가 더해 갑니다. 코어 누산기를 이어 쓰지 않으므로 15장 코어를 바꾸지 않습니다."],
-    ["Bias 한 번", "BIAS 상태에서 <code>점수 = 누계 + Bias</code>를 한 번 만듭니다. 타일마다 Bias를 더하면 13배가 되며, TB가 이 실수를 타일 누계 비교로 잡습니다."],
-    ["누산 폭", "INT8 기준 |내적| ≤ 784×127×128 ≈ 1.27×10<sup>7</sup> < 2<sup>24</sup>이므로 32비트로 충분합니다. INT16과 40비트 Bias의 최악 범위는 18장에서 다룹니다."]
+    [
+      "타일 주소",
+      "코어는 타일 안 번호 0~63만 압니다. 상위가 <code>{tile_o, 6'd0} + idx</code>로 전체 주소를 만들어 입력·가중치 RAM에 줍니다."
+    ],
+    [
+      "마지막 16원소",
+      "<code>tile_len_o</code>는 타일 12에서 16입니다. 코어 <code>len_i</code>가 16이면 4PE가 16개만 누산하고 끝나므로 784를 넘는 주소를 읽지 않습니다."
+    ],
+    [
+      "코어 밖 누산",
+      "타일마다 코어는 내적을 처음부터 다시 계산하고, 상위 <code>acc_q</code>가 더해 갑니다. 코어 누산기를 이어 쓰지 않으므로 15장 코어를 바꾸지 않습니다."
+    ],
+    [
+      "Bias 한 번",
+      "BIAS 상태에서 <code>점수 = 누계 + Bias</code>를 한 번 만듭니다. 타일마다 Bias를 더하면 13배가 되며, TB가 이 실수를 타일 누계 비교로 잡습니다."
+    ],
+    [
+      "누산 폭",
+      "INT8 기준 |내적| ≤ 784×127×128 ≈ 1.27×10<sup>7</sup> < 2<sup>24</sup>이므로 32비트로 충분합니다. INT16과 40비트 Bias의 최악 범위는 18장에서 다룹니다."
+    ]
   ],
-  "vivado": {"mode": "ooc", "resources": "DSP48E1 ≥ 4 · 입력 RAM 1개(8×1024) · 가중치 RAM 4개(8×4096)", "note": "<code>tools/vivado/ooc_timing.tcl</code>의 <code>ch17</code> 줄로 실행합니다. ⚠ 미검증 (Vivado 미실행)."},
+  "vivado": {
+    "mode": "ooc",
+    "resources": "DSP48E1 ≥ 4 · 입력 RAM 1개(8×1024) · 가중치 RAM 4개(8×4096)",
+    "note": "<code>tools/vivado/ooc_timing.tcl</code>의 <code>ch17</code> 줄로 실행합니다. ⚠ 미검증 (Vivado 미실행)."
+  },
   "handoff": [
-    ["ch17/rtl/npu_tiled_784.v", "18장 정밀도 비교의 784원소 INT8 경로, 19장 사이클 비교 대상 (수정 금지)"],
-    ["ch17/reference/tiled_reference.py", "18장 기준 모델의 784원소 입력 변환·타일 계산"]
+    [
+      "ch17/rtl/npu_tiled_784.v",
+      "18장 정밀도 비교에서 DW=8 결과와 점수가 같은지 교차 확인하는 기준 (수정 금지)"
+    ],
+    [
+      "ch17/reference/tiled_reference.py",
+      "18장 기준 모델의 784원소 입력 변환·타일 계산"
+    ]
   ],
   "port_notes": {
-    "clk": "시스템 클록", "resetn": "동기 리셋 (Active-Low)",
-    "x_wr_en_i": "입력 쓰기 (busy_o 동안 무시)", "x_addr_i": "입력 주소 0~783 (행*28 + 열)", "x_data_i": "입력 값 (INT8, 0~127)",
-    "w_wr_en_i": "가중치 쓰기 (busy_o 동안 무시)", "w_neuron_i": "클래스 0~9", "w_addr_i": "가중치 원소 번호 0~783", "w_data_i": "가중치 (INT8, signed)",
-    "b_wr_en_i": "Bias 쓰기 (busy_o 동안 무시)", "b_neuron_i": "클래스 0~9", "b_data_i": "Bias 값 (signed)",
-    "start_i": "추론 시작 (IDLE에서만)", "busy_o": "추론 중",
-    "tile_done_o": "타일 하나 누산 완료 1클록 펄스", "tile_o": "지금 실행 중인 타일 번호 0~12",
-    "tile_done_num_o": "tile_done_o가 가리키는 (방금 끝난) 타일 번호", "tile_len_o": "지금 타일 원소 수 (0~11: 64, 12: 16)",
-    "acc_o": "타일 부분합 누계 10개 (Bias 없음)", "scores_o": "누계 + Bias 10개 (13타일 뒤)",
-    "done_o": "추론 완료 1클록 펄스", "error_o": "오류 1클록 펄스 (코어 입력·가중치 응답 없음)", "class_o": "결과 클래스 0~9"
+    "clk": "시스템 클록",
+    "resetn": "동기 리셋 (Active-Low)",
+    "x_wr_en_i": "입력 쓰기 (busy_o 동안 무시)",
+    "x_addr_i": "입력 주소 0~783 (행*28 + 열)",
+    "x_data_i": "입력 값 (INT8, 0~127)",
+    "w_wr_en_i": "가중치 쓰기 (busy_o 동안 무시)",
+    "w_neuron_i": "클래스 0~9",
+    "w_addr_i": "가중치 원소 번호 0~783",
+    "w_data_i": "가중치 (INT8, signed)",
+    "b_wr_en_i": "Bias 쓰기 (busy_o 동안 무시)",
+    "b_neuron_i": "클래스 0~9",
+    "b_data_i": "Bias 값 (signed)",
+    "start_i": "추론 시작 (IDLE에서만)",
+    "busy_o": "추론 중",
+    "tile_done_o": "타일 하나 누산 완료 1클록 펄스",
+    "tile_o": "지금 실행 중인 타일 번호 0~12",
+    "tile_done_num_o": "tile_done_o가 가리키는 (방금 끝난) 타일 번호",
+    "tile_len_o": "지금 타일 원소 수 (0~11: 64, 12: 16)",
+    "acc_o": "타일 부분합 누계 10개 (Bias 없음)",
+    "scores_o": "누계 + Bias 10개 (13타일 뒤)",
+    "done_o": "추론 완료 1클록 펄스",
+    "error_o": "오류 1클록 펄스 (코어 입력·가중치 응답 없음)",
+    "class_o": "결과 클래스 0~9"
   },
   "fsm": {
     "file": "ch17/rtl/npu_tiled_784.v",
     "reset": "IDLE",
     "rows": [
-      ["IDLE", "start_i", "TILE_START", "tile_o=0, 누계 0"],
-      ["TILE_START", "항상", "TILE_RUN", "코어 시작 (len_i = tile_len_o)"],
-      ["TILE_RUN", "core_err", "IDLE", "error_o 펄스"],
-      ["TILE_RUN", "core_done && tile_o<12", "TILE_START", "누계 += 내적, tile_done_o, tile_o+1"],
-      ["TILE_RUN", "core_done && tile_o==12", "BIAS", "누계 += 내적, tile_done_o"],
-      ["BIAS", "항상", "AM_GO", "점수 = 누계 + Bias (한 번)"],
-      ["AM_GO", "항상", "AM_WAIT", "argmax 시작"],
-      ["AM_WAIT", "am_done", "IDLE", "done_o 펄스"],
-      ["default", "유효하지 않은 상태", "IDLE", "error_o 펄스"]
+      [
+        "IDLE",
+        "start_i",
+        "TILE_START",
+        "tile_o=0, 누계 0"
+      ],
+      [
+        "TILE_START",
+        "항상",
+        "TILE_RUN",
+        "코어 시작 (len_i = tile_len_o)"
+      ],
+      [
+        "TILE_RUN",
+        "core_err",
+        "IDLE",
+        "error_o 펄스"
+      ],
+      [
+        "TILE_RUN",
+        "core_done && tile_o<12",
+        "TILE_START",
+        "누계 += 내적, tile_done_o, tile_o+1"
+      ],
+      [
+        "TILE_RUN",
+        "core_done && tile_o==12",
+        "BIAS",
+        "누계 += 내적, tile_done_o"
+      ],
+      [
+        "BIAS",
+        "항상",
+        "AM_GO",
+        "점수 = 누계 + Bias (한 번)"
+      ],
+      [
+        "AM_GO",
+        "항상",
+        "AM_WAIT",
+        "argmax 시작"
+      ],
+      [
+        "AM_WAIT",
+        "am_done",
+        "IDLE",
+        "done_o 펄스"
+      ],
+      [
+        "default",
+        "유효하지 않은 상태",
+        "IDLE",
+        "error_o 펄스"
+      ]
     ],
     "diagram": "ch17/diagrams/ch17_tiled_fsm"
   }
