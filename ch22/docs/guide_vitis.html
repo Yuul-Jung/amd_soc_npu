@@ -1,0 +1,27 @@
+      <h3>8-1. Vitis 플랫폼과 애플리케이션 (Vitis 2024.2 GUI)</h3>
+      <p>⚠ 미검증 — 이 절은 Vitis·보드에서 실행하지 않았습니다. 순서는 제1부 11장(<code>soc11_user_top_platform</code>, 도메인 <code>standalone_microblaze_riscv_0</code>)과 같습니다.</p>
+      <table>
+        <thead><tr><th>순서</th><th>조작</th><th>성공 기준</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>File → New Component → Platform → 21장 <code>soc_npu_top.xsa</code> → 이름 <code>soc_npu_platform</code></td><td>Build 후 <code>xparameters.h</code> 생성</td></tr>
+          <tr><td>2</td><td><code>xparameters.h</code>에서 <code>0x44A00000</code> 검색</td><td>NPU 기준 주소 매크로 1개 (이름을 기록)</td></tr>
+          <tr><td>3</td><td>New Component → Application → <code>npu_app</code> → 위 플랫폼 → Empty Application(C)</td><td><code>src</code> 폴더 생성</td></tr>
+          <tr><td>4</td><td><code>src</code>에 <code>sw/</code> 파일 6개 복사, 저장소 루트에서 <code>python3 ch22/reference/gen_model_header.py --n 5 --out model_int8.h</code>로 만든 헤더도 복사</td><td>파일 7개</td></tr>
+          <tr><td>5</td><td>2번 매크로 이름이 <code>0x44A00000</code>이 아니면 <code>npu_hal_mbv.c</code> 맨 위에 <code>#define NPU_BASE &lt;매크로&gt;</code></td><td>—</td></tr>
+          <tr><td>6</td><td>Build → 크기 확인 (로컬 메모리 안)</td><td>오류 0, 경고 0</td></tr>
+          <tr><td>7</td><td>터미널 115200 bps 연결 → Run (Program Device 포함)</td><td>아래 기대 출력</td></tr>
+        </tbody>
+      </table>
+      <div class="codeblock"><div class="codebar"><span>UART 기대 출력 (점수는 05절 RTL 재생과 같아야 함)</span></div>
+        <pre><code>=== ch22 NPU driver (MNIST INT8 784x10) ===
+image 0 label 7 class 7 cycles 7185 score …
+…
+[PASS] 5/5 correct   # 18장 시험 앞 5장의 PC 정수 결과 기준</code></pre></div>
+      <table>
+        <thead><tr><th>증상</th><th>원인</th><th>조치</th></tr></thead>
+        <tbody>
+          <tr><td><code>[FAIL] NPU ID mismatch</code></td><td>기준 주소가 다름, 비트스트림에 NPU 없음</td><td>2·5번, 21장 Address Editor</td></tr>
+          <tr><td><code>status -3</code> (시간 초과)</td><td>클록·리셋 미연결, START가 BUSY 중</td><td>21장 블록 설계의 <code>s_axi_aclk</code>·<code>s_axi_aresetn</code></td></tr>
+          <tr><td>점수가 05절과 다름</td><td>모델 헤더가 다른 판</td><td>헤더를 다시 만들고 18장 <code>model_int8.txt</code> 해시 확인</td></tr>
+        </tbody>
+      </table>
