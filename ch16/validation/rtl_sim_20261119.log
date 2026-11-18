@@ -1,0 +1,6 @@
+Icarus Verilog version 12.0 (stable) ()
+PYTHON_MLP_SELF_TEST_PASS cases=11 shift=10 saturate=1 relu_zero=1 round_half=1
+RTL_SIM_PASS MLP_64_8_10 cases=11 guards=1
+tb/tb_npu_mlp.sv:69: $finish called at 123520000 (1ps)
+PYTHON_MLP_SELF_TEST_PASS cases=11 shift=10 saturate=1 relu_zero=1 round_half=1
+PYTHON_RTL_COMPARE_PASS cases=11 hidden=88 scores=110 classes=11
