@@ -1,0 +1,14 @@
+Icarus Verilog version 12.0 (stable) ()
+PYTHON_MNIST8X8_SELF_TEST_PASS samples=10 elements=64 range=0..120
+  ..::::::::..  
+  ++######%%##  
+        ::++--  
+      ::++--    
+    ++++..      
+    ##++        
+    ++--        
+                
+RTL_SIM_PASS INPUT_LOADER samples=10 reads=640 error_cases=4
+tb/tb_npu10_input_loader.sv:80: $finish called at 26550000 (1ps)
+PYTHON_MNIST8X8_SELF_TEST_PASS samples=10 elements=64 range=0..120
+PYTHON_RTL_COMPARE_PASS samples=10 values=640
