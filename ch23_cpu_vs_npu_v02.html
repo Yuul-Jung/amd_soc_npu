@@ -1,0 +1,559 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Basys3 NPU 23장 실습 · CPU와 NPU 실행 시간 비교">
+<meta name="generator" content="tools/guide/build_guides.py — 직접 수정 금지, chapter.json을 고친 뒤 재생성">
+<title>23장 · CPU와 NPU 실행 시간 비교 (v02)</title>
+<link rel="stylesheet" href="assets/education/site.css">
+<style>
+.codeblock pre{max-height:780px;white-space:pre}
+.section svg{width:100%;height:auto}
+.vbadge{display:inline-block;padding:.15em .6em;border-radius:4px;font-size:.78em;font-weight:700;background:#d4edda;color:#155724;vertical-align:middle}
+.gate-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:10px}
+.gate{border:1px solid var(--line,#e0e0e0);border-radius:6px;padding:10px 14px;overflow-wrap:anywhere}
+.gate b{display:block;font:600 11px var(--mono,monospace);letter-spacing:.04em;margin-bottom:4px}
+.gate span{font-size:13px}
+.gate.pass{border-color:#2d8a52;background:#f0fbf4}
+.gate.todo{border-color:#b08900;background:#fffbe6}
+.gate.fail{border-color:#b3261e;background:#fdeceb}
+.gate.na{border-color:#c8c8c8;background:#f6f6f6;color:#666}
+.table-wrap{overflow-x:auto}
+.table-wrap>table{min-width:620px}
+.figure-wrap{overflow-x:auto}
+.figure-wrap svg{min-width:860px}
+.section :not(pre)>code{overflow-wrap:anywhere}
+.codebar{gap:8px}
+.codebar span{min-width:0;overflow-wrap:anywhere}
+.hero p{max-width:none}
+.access-skip{position:absolute;left:-9999px;top:0}
+.access-skip:focus{left:12px;top:12px;z-index:1003;background:#fff;color:#15171c;padding:6px 10px}
+.nw code{white-space:nowrap;overflow-wrap:normal}
+</style>
+</head>
+<body data-chapter="ch23">
+<a class="access-skip" href="#main-content">본문 바로가기</a>
+<button type="button" class="mobile-menu" id="mobile-menu" aria-controls="course-nav" aria-expanded="false">☰ 장·목차</button>
+<div class="shade" id="shade"></div>
+<header class="hero">
+  <div class="hero-inner">
+    <p class="kicker">BASYS3 · NPU 고도화판 · 23장 실습 <span class="vbadge">v02</span></p>
+    <h1>제23장 · CPU와 NPU 실행 시간 비교</h1>
+    <p>같은 실제 MNIST INT8 모델·같은 그림으로 MicroBlaze V CPU 추론과 NPU 추론(입력 적재·실행 따로)을 AXI Timer로 재는 프로그램을 만듭니다. 보드 측정 전에는 CPU 코드가 기준 모델과 같은 점수를 내는지 PC에서 확인하고, RV32IMC 명령 수로 CPU 클록을 추정합니다.</p>
+  </div>
+</header>
+<div class="wrap">
+  <nav class="toc" id="course-nav" aria-label="전체 장과 절 탐색"></nav>
+  <main class="content" id="main-content">
+    <section class="section" id="s00">
+      <h2><span class="num">00</span>이 장의 위치</h2>
+      <p><b>목표:</b> 같은 실제 MNIST INT8 모델·같은 그림으로 MicroBlaze V CPU 추론과 NPU 추론(입력 적재·실행 따로)을 AXI Timer로 재는 프로그램을 만듭니다. 보드 측정 전에는 CPU 코드가 기준 모델과 같은 점수를 내는지 PC에서 확인하고, RV32IMC 명령 수로 CPU 클록을 추정합니다.</p>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>구분</th><th>파일</th></tr></thead>
+        <tbody>
+          <tr><td>유지 (이전 장, 수정 없음)</td><td><ul><li><code>ch22/sw/npu_regs.h</code> <small>(22장)</small></li><li><code>ch22/sw/npu_hal.h</code> <small>(22장)</small></li><li><code>ch22/sw/npu_hal_mbv.c</code> <small>(22장)</small></li><li><code>ch22/sw/npu_drv.h</code> <small>(22장)</small></li><li><code>ch22/sw/npu_drv.c</code> <small>(22장)</small></li><li><code>ch22/reference/gen_model_header.py</code> <small>(22장)</small></li><li><code>ch22/host/bsp_stub/xil_io.h</code> <small>(22장)</small></li><li><code>ch18/reference/precision_rtl.py</code> <small>(18장)</small></li><li><code>ch18/model/model_int8.txt</code> <small>(18장)</small></li></ul></td></tr>
+          <tr><td>이번 장 작성</td><td><ul><li><code>ch23/sw/cpu_infer.h</code></li><li><code>ch23/sw/cpu_infer.c</code></li><li><code>ch23/sw/axi_timer.h</code></li><li><code>ch23/sw/bench.c</code></li></ul></td></tr>
+        </tbody>
+      </table></div>
+      <p>전체 누적 관계: <a href="index.html#techtree">INDEX · 01 전체 테크트리</a> (00~31장 흐름 · 00~12장 모듈 재사용 도면)</p>
+      <p>실습 순서: 01 구조 확인 → 02 준비 → 03 RTL 작성 → 04 테스트벤치·기준 모델 작성 → 05 시뮬레이션 → 06 결과 판정 → 08 합성·타이밍(Vivado) → 09 인계.</p>
+    </section>
+    <section class="section" id="s01">
+      <h2><span class="num">01</span>구조도</h2>
+      <div class="figure-wrap" tabindex="0" role="region" aria-label="도면 (가로 스크롤 가능)"><svg viewBox="0 0 1027 363" role="img" aria-label="npu_axi_lite 실제 포트와 하위 모듈 구조">
+      <rect x="297" y="30" width="480" height="293" rx="10" fill="#fff" stroke="#4635b1" stroke-width="2"/>
+      <text x="537" y="54" font-size="18" font-weight="700" text-anchor="middle">npu_axi_lite</text>
+      <text x="537" y="72" font-size="13" text-anchor="middle" fill="#555">ch20/rtl/npu_axi_lite.v · 구현 도식</text>
+      <text x="269" y="64" font-size="14" font-family="monospace" text-anchor="end">s_axi_aclk</text>
+      <path d="M273 60 H297" stroke="#4635b1" stroke-width="1.5" stroke-dasharray="4 3"/><path d="M297 60 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="269" y="87" font-size="14" font-family="monospace" text-anchor="end">s_axi_aresetn</text>
+      <path d="M273 83 H297" stroke="#4635b1" stroke-width="1.5" stroke-dasharray="4 3"/><path d="M297 83 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="269" y="110" font-size="14" font-family="monospace" text-anchor="end">s_axi_awaddr[ADDR_WIDTH-1:0]</text>
+      <path d="M273 106 H297" stroke="#4635b1" stroke-width="1.5"/><path d="M297 106 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="269" y="133" font-size="14" font-family="monospace" text-anchor="end">s_axi_awvalid</text>
+      <path d="M273 129 H297" stroke="#4635b1" stroke-width="1.5"/><path d="M297 129 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="269" y="156" font-size="14" font-family="monospace" text-anchor="end">s_axi_wdata[31:0]</text>
+      <path d="M273 152 H297" stroke="#4635b1" stroke-width="1.5"/><path d="M297 152 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="269" y="179" font-size="14" font-family="monospace" text-anchor="end">s_axi_wstrb[3:0]</text>
+      <path d="M273 175 H297" stroke="#4635b1" stroke-width="1.5"/><path d="M297 175 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="269" y="202" font-size="14" font-family="monospace" text-anchor="end">s_axi_wvalid</text>
+      <path d="M273 198 H297" stroke="#4635b1" stroke-width="1.5"/><path d="M297 198 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="269" y="225" font-size="14" font-family="monospace" text-anchor="end">s_axi_bready</text>
+      <path d="M273 221 H297" stroke="#4635b1" stroke-width="1.5"/><path d="M297 221 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="269" y="248" font-size="14" font-family="monospace" text-anchor="end">s_axi_araddr[ADDR_WIDTH-1:0]</text>
+      <path d="M273 244 H297" stroke="#4635b1" stroke-width="1.5"/><path d="M297 244 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="269" y="271" font-size="14" font-family="monospace" text-anchor="end">s_axi_arvalid</text>
+      <path d="M273 267 H297" stroke="#4635b1" stroke-width="1.5"/><path d="M297 267 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="269" y="294" font-size="14" font-family="monospace" text-anchor="end">s_axi_rready</text>
+      <path d="M273 290 H297" stroke="#4635b1" stroke-width="1.5"/><path d="M297 290 l-7 -4 v8 z" fill="#4635b1"/>
+      <path d="M777 60 H801" stroke="#4635b1" stroke-width="1.5"/><path d="M801 60 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="805" y="65" font-size="14" font-family="monospace">s_axi_awready</text>
+      <path d="M777 83 H801" stroke="#4635b1" stroke-width="1.5"/><path d="M801 83 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="805" y="88" font-size="14" font-family="monospace">s_axi_wready</text>
+      <path d="M777 106 H801" stroke="#4635b1" stroke-width="1.5"/><path d="M801 106 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="805" y="111" font-size="14" font-family="monospace">s_axi_bresp[1:0]</text>
+      <path d="M777 129 H801" stroke="#4635b1" stroke-width="1.5"/><path d="M801 129 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="805" y="134" font-size="14" font-family="monospace">s_axi_bvalid</text>
+      <path d="M777 152 H801" stroke="#4635b1" stroke-width="1.5"/><path d="M801 152 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="805" y="157" font-size="14" font-family="monospace">s_axi_arready</text>
+      <path d="M777 175 H801" stroke="#4635b1" stroke-width="1.5"/><path d="M801 175 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="805" y="180" font-size="14" font-family="monospace">s_axi_rdata[31:0]</text>
+      <path d="M777 198 H801" stroke="#4635b1" stroke-width="1.5"/><path d="M801 198 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="805" y="203" font-size="14" font-family="monospace">s_axi_rresp[1:0]</text>
+      <path d="M777 221 H801" stroke="#4635b1" stroke-width="1.5"/><path d="M801 221 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="805" y="226" font-size="14" font-family="monospace">s_axi_rvalid</text>
+      <path d="M777 244 H801" stroke="#4635b1" stroke-width="1.5"/><path d="M801 244 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="805" y="249" font-size="14" font-family="monospace">irq_o</text>
+      <rect x="317" y="88" width="440" height="28" rx="5" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="5 3"/>
+      <text x="329" y="107" font-size="14" font-family="monospace">npu_tiled_784_npe  (core)</text>
+      <text x="745" y="107" font-size="12" text-anchor="end" fill="#4635b1">ch19 재사용</text>
+      <rect x="297" y="338" width="16" height="12" fill="#edeafa" stroke="#4635b1"/><text x="319" y="349" font-size="13">이번 장 신규</text>
+      <rect x="417" y="338" width="16" height="12" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="4 2"/><text x="439" y="349" font-size="13">이전 장 파일 재사용(수정 없음)</text>
+      <text x="647" y="349" font-size="13">왼쪽 input · 오른쪽 output · 점선 = 클록·리셋</text>
+      </svg></div>
+      <p>구현 도식: 포트 이름·폭과 하위 인스턴스는 <code>ch20/rtl/npu_axi_lite.v</code> 선언에서 자동으로 가져왔습니다.</p>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>방향</th><th>포트</th><th>폭</th><th>구분</th><th>설명</th></tr></thead>
+        <tbody><tr><td>input</td><td class="nw"><code>s_axi_aclk</code></td><td class="nw"><code>1</code></td><td class="nw">클록</td><td>AXI 클록 (100MHz)</td></tr><tr><td>input</td><td class="nw"><code>s_axi_aresetn</code></td><td class="nw"><code>1</code></td><td class="nw">리셋</td><td>AXI 동기 리셋 (Active-Low)</td></tr><tr><td>input</td><td class="nw"><code>s_axi_awaddr</code></td><td class="nw"><code>[ADDR_WIDTH-1:0]</code></td><td class="nw">데이터·제어</td><td>쓰기 주소</td></tr><tr><td>input</td><td class="nw"><code>s_axi_awvalid</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>쓰기 주소 유효</td></tr><tr><td>input</td><td class="nw"><code>s_axi_wdata</code></td><td class="nw"><code>[31:0]</code></td><td class="nw">데이터·제어</td><td>쓰기 데이터</td></tr><tr><td>input</td><td class="nw"><code>s_axi_wstrb</code></td><td class="nw"><code>[3:0]</code></td><td class="nw">데이터·제어</td><td>쓰기 바이트 선택</td></tr><tr><td>input</td><td class="nw"><code>s_axi_wvalid</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>쓰기 데이터 유효</td></tr><tr><td>input</td><td class="nw"><code>s_axi_bready</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>쓰기 응답 받음</td></tr><tr><td>input</td><td class="nw"><code>s_axi_araddr</code></td><td class="nw"><code>[ADDR_WIDTH-1:0]</code></td><td class="nw">데이터·제어</td><td>읽기 주소</td></tr><tr><td>input</td><td class="nw"><code>s_axi_arvalid</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>읽기 주소 유효</td></tr><tr><td>input</td><td class="nw"><code>s_axi_rready</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>읽기 데이터 받음</td></tr><tr><td>output</td><td class="nw"><code>s_axi_awready</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>쓰기 주소 받을 수 있음</td></tr><tr><td>output</td><td class="nw"><code>s_axi_wready</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>쓰기 데이터 받을 수 있음</td></tr><tr><td>output</td><td class="nw"><code>s_axi_bresp</code></td><td class="nw"><code>[1:0]</code></td><td class="nw">데이터·제어</td><td>쓰기 응답 (OKAY)</td></tr><tr><td>output</td><td class="nw"><code>s_axi_bvalid</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>쓰기 응답 유효</td></tr><tr><td>output</td><td class="nw"><code>s_axi_arready</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>읽기 주소 받을 수 있음</td></tr><tr><td>output</td><td class="nw"><code>s_axi_rdata</code></td><td class="nw"><code>[31:0]</code></td><td class="nw">데이터·제어</td><td>읽기 데이터</td></tr><tr><td>output</td><td class="nw"><code>s_axi_rresp</code></td><td class="nw"><code>[1:0]</code></td><td class="nw">데이터·제어</td><td>읽기 응답 (OKAY)</td></tr><tr><td>output</td><td class="nw"><code>s_axi_rvalid</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>읽기 데이터 유효</td></tr><tr><td>output</td><td class="nw"><code>irq_o</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>인터럽트 (쓰지 않음)</td></tr></tbody>
+      </table></div>
+    </section>
+    <section class="section" id="s02">
+      <h2><span class="num">02</span>준비</h2>
+      <ol>
+        <li>VS Code에서 저장소 루트(<code>amd_soc_npu/</code>)를 엽니다.</li>
+        <li>도구를 확인합니다.</li>
+      </ol>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 도구 확인</span></div>
+        <pre tabindex="0"><code>sudo apt install -y iverilog python3 ripgrep   # 처음 한 번
+iverilog -V 2&gt;&amp;1 | head -1      # Icarus Verilog version 12.0 이상
+python3 --version</code></pre></div>
+      <ol start="3"><li>00절 '유지' 파일이 이전 장 결과 그대로 있는지 확인합니다 (22장과 같은 <code>gcc</code>·<code>clang</code>, 그리고 <code>llvm-objdump</code>(Ubuntu <code>llvm</code> 패키지)가 필요합니다).</li></ol>
+    </section>
+    <section class="section" id="s03">
+      <h2><span class="num">03</span>RTL 작성</h2>
+      <p>아래 파일을 경로 그대로 만들고 전체 코드를 입력합니다.</p>
+      <div class="codeblock">
+        <div class="codebar"><span>ch23/sw/cpu_infer.h · c · 원본 · ⚠ 미검증</span></div>
+        <pre tabindex="0"><code class="language-c">/* 23장 CPU 기준 추론: NPU와 같은 정수 계산(784×10 내적 + Bias, 동점은 낮은 번호)을 C로 한다. */
+#ifndef CPU_INFER_H
+#define CPU_INFER_H
+#include &lt;stdint.h&gt;
+
+uint32_t cpu_infer(const int8_t w[10][784], const int32_t b[10], const uint8_t x[784], int32_t score[10]);
+
+#endif</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>ch23/sw/cpu_infer.c · c · 원본 · ⚠ 미검증</span></div>
+        <pre tabindex="0"><code class="language-c">/* 23장 CPU 기준 추론 (RV32IMC: 곱은 MUL, 누산은 32비트 — |점수| &lt; 2^25이므로 넘치지 않음) */
+#include "cpu_infer.h"
+
+uint32_t cpu_infer(const int8_t w[10][784], const int32_t b[10], const uint8_t x[784], int32_t score[10])
+{
+    uint32_t best = 0;
+    for (uint32_t c = 0; c &lt; 10; c++) {
+        int32_t acc = 0;
+        for (uint32_t i = 0; i &lt; 784; i++)
+            acc += (int32_t)w[c][i] * (int32_t)x[i];
+        score[c] = acc + b[c];
+        if (score[c] &gt; score[best]) best = c;     /* 같으면 앞 번호 유지 */
+    }
+    return best;
+}</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>ch23/sw/axi_timer.h · c · 원본 · ⚠ 미검증</span></div>
+        <pre tabindex="0"><code class="language-c">/* 23장 AXI Timer 0번 카운터를 자유 증가 카운터로 쓴다 (레지스터 직접 접근, PG079 레지스터 표). */
+#ifndef AXI_TIMER_H
+#define AXI_TIMER_H
+#include &lt;stdint.h&gt;
+#include "xil_io.h"
+
+#ifndef TIMER_BASE
+/* ⚠ xparameters.h의 AXI Timer 기준 주소로 바꾼다 (제1부 11장 SoC의 값). 0x41C00000은 Vivado 기본값이며 미확인. */
+#define TIMER_BASE 0x41C00000u
+#endif
+#define TMR_TCSR0 0x00u     /* 제어·상태 */
+#define TMR_TLR0  0x04u     /* 적재 값 */
+#define TMR_TCR0  0x08u     /* 카운터 */
+#define TCSR_LOAD 0x20u     /* TLR 값을 카운터에 적재 */
+#define TCSR_ENT  0x80u     /* 카운터 동작 (UDT0=0: 위로 셈) */
+
+static inline void timer_start(void)
+{
+    Xil_Out32(TIMER_BASE + TMR_TLR0, 0);
+    Xil_Out32(TIMER_BASE + TMR_TCSR0, TCSR_LOAD);   /* 0 적재 */
+    Xil_Out32(TIMER_BASE + TMR_TCSR0, TCSR_ENT);    /* 위로 세기 시작 */
+}
+static inline uint32_t timer_now(void) { return Xil_In32(TIMER_BASE + TMR_TCR0); }
+
+#endif</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>ch23/sw/bench.c · c · 원본 · ⚠ 미검증</span></div>
+        <pre tabindex="0"><code class="language-c">/* 23장 CPU·NPU 시간 비교: 같은 모델·같은 5장으로 CPU 추론, NPU 입력 적재, NPU 실행을 AXI Timer로 잰다.
+ * 출력은 CSV 한 줄씩: image,label,cpu_class,npu_class,cpu_clk,npu_load_clk,npu_run_clk,npu_core_clk */
+#include "cpu_infer.h"
+#include "npu_drv.h"
+#include "axi_timer.h"
+#include "model_int8.h"
+#include "xil_printf.h"
+
+int main(void)
+{
+    int32_t s[10];
+    npu_result_t r;
+    xil_printf("=== ch23 CPU vs NPU (MNIST INT8 784x10, 100 MHz) ===\r\n");
+    if (npu_init() != NPU_OK) { xil_printf("[FAIL] NPU ID\r\n"); return 1; }
+    npu_load_model(MODEL_W, MODEL_B);
+    timer_start();
+    xil_printf("image,label,cpu_class,npu_class,cpu_clk,npu_load_clk,npu_run_clk,npu_core_clk\r\n");
+    int same = 0;
+    for (int n = 0; n &lt; TEST_N; n++) {
+        uint32_t t0 = timer_now();
+        uint32_t cc = cpu_infer(MODEL_W, MODEL_B, TEST_X[n], s);
+        uint32_t t1 = timer_now();
+        if (npu_load_input(TEST_X[n]) != NPU_OK) return 1;
+        uint32_t t2 = timer_now();
+        if (npu_run(&amp;r, 100000u) != NPU_OK) return 1;
+        uint32_t t3 = timer_now();
+        int eq = (cc == r.cls);
+        for (int k = 0; k &lt; 10; k++) eq &amp;= (s[k] == r.score[k]);
+        same += eq;
+        xil_printf("%d,%d,%d,%d,%d,%d,%d,%d\r\n", n, (int)TEST_LABEL[n], (int)cc, (int)r.cls,
+                   (int)(t1 - t0), (int)(t2 - t1), (int)(t3 - t2), (int)r.cycles);
+    }
+    xil_printf("[%s] CPU and NPU scores equal %d/%d\r\n", same == TEST_N ? "PASS" : "FAIL", same, TEST_N);
+    return 0;
+}</code></pre>
+      </div>
+    </section>
+    <section class="section" id="s04">
+      <h2><span class="num">04</span>테스트벤치·기준 모델 작성</h2>
+      <p>테스트벤치는 출력을 자동 판정합니다. RTL 시뮬레이션이 아니라 PC 시험입니다. <code>cpu_infer.c</code>를 PC에서 18장 시험 앞 20장으로 돌려 점수 200개를 Python 정수 기준과 비교하고, 같은 파일을 RV32IMC로 컴파일해 안쪽 반복의 명령 수를 셉니다.</p>
+      <div class="codeblock">
+        <div class="codebar"><span>ch23/host/test_cpu_infer.c · c · 원본 · ⚠ 미검증</span></div>
+        <pre tabindex="0"><code class="language-c">/* 23장 PC 시험: cpu_infer가 18장 정수 기준과 같은 점수를 내는지 시험 집합 20장으로 확인한다 (점수는 표준 출력). */
+#include &lt;stdio.h&gt;
+#include "cpu_infer.h"
+#include "model_int8.h"
+
+int main(void)
+{
+    int32_t s[10];
+    for (int n = 0; n &lt; TEST_N; n++) {
+        uint32_t c = cpu_infer(MODEL_W, MODEL_B, TEST_X[n], s);
+        printf("%d", n);
+        for (int k = 0; k &lt; 10; k++) printf(" %d", s[k]);
+        printf(" %u\n", c);
+    }
+    return 0;
+}</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>ch23/reference/estimate.py · python · 원본 · ⚠ 미검증</span></div>
+        <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
+"""23장 추정: cpu_infer.c를 RV32IMC -O2로 컴파일해 안쪽 반복의 명령 수를 세고, CPU 클록을 CPI 가정별로 추정한다.
+NPU 쪽은 19·22장 시뮬레이션 값(코어 7,185클록)과 AXI 쓰기 횟수(입력 784번)를 쓴다.
+보드에서 bench.c로 잰 값이 나오기 전까지 모든 CPU 숫자는 '추정'이다."""
+from __future__ import annotations
+import re
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parents[1]
+
+
+def inner_loop_len(obj):
+    dis = subprocess.run(["llvm-objdump", "-d", "--no-show-raw-insn", obj], capture_output=True, text=True, check=True).stdout
+    lines = [ln for ln in dis.splitlines() if re.match(r"\s+[0-9a-f]+:\s", ln)]
+    addr = [int(ln.split(":")[0], 16) for ln in lines]
+    best = None
+    for k, ln in enumerate(lines):                       # 뒤로 가는 분기 = 반복의 끝, 가장 짧은 반복 = 안쪽 반복
+        m = re.search(r"\s(b\w+)\s.*?0x([0-9a-f]+)\s*&lt;", ln)
+        if m:
+            tgt = int(m.group(2), 16)
+            if tgt &lt; addr[k]:
+                body = [x for x in lines if tgt &lt;= int(x.split(":")[0], 16) &lt;= addr[k]]
+                if best is None or len(body) &lt; len(best):
+                    best = body
+    return best
+
+
+def main():
+    with tempfile.TemporaryDirectory() as d:
+        obj = f"{d}/cpu_infer.elf"         # 분기 목적지를 풀기 위해 링크까지 한다 (진입점 = cpu_infer)
+        subprocess.run(["clang", "--target=riscv32-unknown-elf", "-march=rv32imc", "-O2", "-nostdlib", "-fuse-ld=lld",
+                        "-Wl,--entry=cpu_infer", str(HERE / "sw" / "cpu_infer.c"), "-I", str(HERE / "sw"), "-o", obj], check=True)
+        body = inner_loop_len(obj)
+    n = len(body)
+    ops = ", ".join(re.split(r"\s+", b.split(":", 1)[1].strip())[0] for b in body)
+    macs = 784 * 10
+    print(f"CPU_INNER_LOOP instructions={n} ({ops})")
+    for cpi in (1.0, 1.5, 2.0):
+        print(f"ESTIMATE cpu_clk cpi={cpi} ≈ {int(macs * n * cpi):,} (= 7,840 MAC × {n}명령 × CPI, 바깥 반복 제외)")
+    print("MEASURED_SIM npu_core_clk=7185 (19장 NPE=4) · npu_load = AXI 쓰기 784번 + 제어 (버스 클록은 보드 측정)")
+    print(f"ESTIMATE speedup_core_only cpi=1 ≈ {macs * n / 7185:.1f}x (입력 적재 시간 제외)")
+    print("CPU_ESTIMATE_DONE (보드 측정 전 추정)")
+
+
+if __name__ == "__main__":
+    main()</code></pre>
+      </div>
+    </section>
+    <section class="section" id="s05">
+      <h2><span class="num">05</span>시뮬레이션 실행</h2>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 저장소 루트에서 실행</span></div>
+        <pre tabindex="0"><code>bash ch23/scripts/run_sim.sh   # 모델 헤더 → RV32IMC 교차 컴파일 → CPU 기준 PC 시험 → CPU 클록 추정</code></pre></div>
+      <p>기대 출력 (도구 버전 미기록 · 2026-11-19 실제 실행 로그 발췌, 출처 <code>ch23/validation/rtl_sim_20261119.log</code>):</p>
+      <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
+        <pre tabindex="0"><code>gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+Ubuntu clang version 18.1.3 (1ubuntu1)
+RV32IMC_COMPILE_PASS files=2
+CPU_REF_PASS images=20 scores=200 (C cpu_infer = Python 정수 기준)
+CPU_INNER_LOOP instructions=7 (lb, lbu, mul, add, addi, addi, bne)
+ESTIMATE cpu_clk cpi=1.0 ≈ 54,880 (= 7,840 MAC × 7명령 × CPI, 바깥 반복 제외)
+ESTIMATE cpu_clk cpi=1.5 ≈ 82,320 (= 7,840 MAC × 7명령 × CPI, 바깥 반복 제외)
+ESTIMATE cpu_clk cpi=2.0 ≈ 109,760 (= 7,840 MAC × 7명령 × CPI, 바깥 반복 제외)
+MEASURED_SIM npu_core_clk=7185 (19장 NPE=4) · npu_load = AXI 쓰기 784번 + 제어 (버스 클록은 보드 측정)
+ESTIMATE speedup_core_only cpi=1 ≈ 7.6x (입력 적재 시간 제외)
+CPU_ESTIMATE_DONE (보드 측정 전 추정)</code></pre></div>
+    </section>
+    <section class="section" id="s06">
+      <h2><span class="num">06</span>결과 판정</h2>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
+        <tbody><tr><td><code>RV32IMC_COMPILE_PASS files=2</code></td><td><code>cpu_infer.c</code>·<code>bench.c</code>가 RISC-V 32비트로 경고 없이 컴파일됨</td></tr><tr><td><code>CPU_REF_PASS images=20 scores=200</code></td><td>C CPU 추론 점수 200개·클래스가 Python 정수 기준과 같음 → 보드에서 CPU·NPU 점수가 같아야 함</td></tr><tr><td><code>CPU_INNER_LOOP instructions=7 (lb, lbu, mul, add, addi, addi, bne)</code></td><td>곱셈-누산 1번에 명령 7개 → CPU ≥ 54,880클록(CPI 1 가정, 추정)</td></tr><tr><td><code>ESTIMATE speedup_core_only cpi=1 ≈ 7.6x</code></td><td>NPU 코어 7,185클록 대비 추정 배율. 입력 적재 시간을 빼고 본 값이며 보드 측정 전까지 추정</td></tr></tbody>
+      </table></div>
+      <p><b>실패 시:</b> TB의 <code>$fatal</code> 메시지에 표시된 cycle 번호와 기대값/실제값을 확인하고, 03절 코드와 한 줄씩 대조합니다. 하나라도 실패하면 다음 장으로 넘어가지 않습니다.</p>
+    </section>
+    <section class="section" id="s07">
+      <h2><span class="num">07</span>코드 읽기 포인트</h2>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>위치</th><th>내용</th></tr></thead>
+        <tbody><tr><td>무엇을 따로 재나</td><td>CPU 추론, NPU 입력 적재(AXI 쓰기 784번), NPU 실행(START~결과 읽기)을 각각 잽니다. 코어만 보면 NPU가 빠르지만, CPU가 입력을 레지스터로 한 바이트씩 쓰는 시간이 코어 시간과 비슷하거나 더 클 수 있습니다.</td></tr>
+<tr><td>AXI Timer 직접 접근</td><td><code>axi_timer.h</code>는 드라이버 라이브러리 없이 TCSR0·TLR0·TCR0만 씁니다. 0을 적재하고 위로 세게 한 뒤 전후 값을 뺍니다. 32비트이므로 100 MHz에서 약 42초까지 넘치지 않습니다.</td></tr>
+<tr><td>추정의 근거</td><td><code>estimate.py</code>는 실제 RV32IMC 기계어에서 가장 짧은 반복(안쪽 반복)을 찾아 명령 수를 셉니다. MicroBlaze V의 곱셈·적재 지연에 따라 CPI가 1보다 커지므로 1~2 범위로만 적습니다.</td></tr>
+<tr><td>같은 결과 확인</td><td><code>bench.c</code>는 그림마다 CPU 점수 10개와 NPU 점수 10개를 비교해 마지막 줄에 일치 수를 찍습니다. 시간 비교는 두 결과가 같을 때만 의미가 있습니다.</td></tr></tbody>
+      </table></div>
+    </section>
+    <section class="section" id="s08">
+      <h2><span class="num">08</span>합성·타이밍·보드</h2>
+      <p>이 장은 RTL을 더하지 않습니다. 21장 비트스트림·XSA를 그대로 씁니다 → <a href="ch21_soc_bd_v02.html#s08">21장 · 08</a></p>
+      <h3>8-1. 보드에서 재기 (Vitis 2024.2)</h3>
+      <p>⚠ 미검증 — 보드에서 실행하지 않았습니다. 22장 <code>npu_app</code>과 같은 플랫폼에 애플리케이션 <code>npu_bench</code>를 하나 더 만듭니다.</p>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>순서</th><th>조작</th><th>성공 기준</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td><code>src</code>에 22장 <code>sw/</code>의 <code>npu_regs.h</code>·<code>npu_hal.h</code>·<code>npu_hal_mbv.c</code>·<code>npu_drv.h</code>·<code>npu_drv.c</code>, 이 장 <code>sw/</code> 4개, 모델 헤더(<code>--n 5</code>) 복사</td><td>파일 10개 (22장 <code>main.c</code>는 넣지 않음)</td></tr>
+          <tr><td>2</td><td><code>xparameters.h</code>에서 AXI Timer 기준 주소를 찾아 <code>axi_timer.h</code>의 <code>TIMER_BASE</code>와 비교</td><td>다르면 그 값으로 바꿈</td></tr>
+          <tr><td>3</td><td>빌드 설정: 최적화 <code>-O2</code> (05절 추정과 같은 조건)</td><td>경고 0</td></tr>
+          <tr><td>4</td><td>Run → 터미널 출력 CSV를 <code>ch23/validation/board_bench_YYYYMMDD.csv</code>로 저장</td><td>마지막 줄 <code>[PASS] CPU and NPU scores equal 5/5</code></td></tr>
+        </tbody>
+      </table></div>
+      <h3>8-2. 채울 표 (100 MHz 클록 수 → μs = 클록 / 100)</h3>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>구간</th><th>추정 (05절)</th><th>보드 측정</th></tr></thead>
+        <tbody>
+          <tr><td>CPU 추론 <code>cpu_clk</code></td><td>54,880 이상 (CPI 1) ~ 109,760 (CPI 2)</td><td>⚠ 미측정</td></tr>
+          <tr><td>NPU 입력 적재 <code>npu_load_clk</code> (AXI 쓰기 784번)</td><td>버스 왕복 클록 × 784</td><td>⚠ 미측정</td></tr>
+          <tr><td>NPU 실행 <code>npu_run_clk</code> (START~결과 읽기)</td><td>7,185 + 폴링·읽기 12번</td><td>⚠ 미측정</td></tr>
+          <tr><td>NPU 코어 <code>npu_core_clk</code></td><td>7,185 (시뮬레이션)</td><td>CYCLES 레지스터 값</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+    <section class="section" id="s09">
+      <h2><span class="num">09</span>검증 현황·인계</h2>
+      <p>누적 보고 (이전 결과 → 추가 RTL → 시험 벡터 → 시뮬레이션 → 합성/보드 → 인계):</p>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>이전 결과</th><th>추가 RTL</th><th>시험 벡터</th><th>시뮬레이션</th><th>합성 / 보드</th><th>인계</th></tr></thead>
+        <tbody><tr><td>18장 · 22장</td><td><code>없음 (스크립트·제약만)</code></td><td><code>test_cpu_infer.c</code><br><code>estimate.py</code></td><td>해당 없음</td><td>⚠ 대기 / 미실시</td><td>2건 (아래 표)</td></tr></tbody>
+      </table></div>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>다음 장으로 넘기는 파일</th><th>사용처</th></tr></thead>
+        <tbody><tr><td><code>ch23/sw/axi_timer.h</code></td><td>25장 전력·에너지 계산의 실행 시간</td></tr><tr><td><code>ch23/validation/board_bench_*.csv</code></td><td>24·25장 보고서와 같은 비트스트림에서 잰 시간 (⚠ 보드 측정 대기)</td></tr></tbody>
+      </table></div>
+      <p>검증 게이트 (<code>ch23/validation/</code> 증거 파일 기준으로 자동 표시):</p>
+      <div class="gate-row">
+        <div class="gate pass">
+          <b>HTML_PASS</b>
+          <span>v02 · 생성기·정적 검사</span>
+        </div>
+        <div class="gate na">
+          <b>HOST_MODEL_PASS</b>
+          <span>해당 없음 (Python 기준 모델 없음)</span>
+        </div>
+        <div class="gate na">
+          <b>RTL_SIM_PASS</b>
+          <span>해당 없음 (RTL 시뮬레이션 대상 아님) · PC 시험: CPU_REF_PASS images=20 scores=200 (C cpu_infer = Python 정수 기… · 2026-11-19</span>
+        </div>
+        <div class="gate todo">
+          <b>SYNTH_TIMING_PASS</b>
+          <span>⚠ 미검증 · VS Code Vivado 실행 대기 (08절)</span>
+        </div>
+        <div class="gate todo">
+          <b>BOARD_PASS</b>
+          <span>⚠ 미실시 · 현재 실물 보드 확인 불가</span>
+        </div>
+      </div>
+    </section>
+    <div class="chapter-links" id="chapter-links"></div>
+  </main>
+</div>
+<script>
+window.COURSE={
+ "title": "Basys3 소형 NPU 실습 (고도화판)",
+ "chapters": [
+  {
+   "id": "ch00",
+   "number": 0,
+   "title": "UART Echo",
+   "file": "ch00_uart_echo_v05.html"
+  },
+  {
+   "id": "ch01",
+   "number": 1,
+   "title": "DSP 추론 MAC 누산",
+   "file": "ch01_mac_v05.html"
+  },
+  {
+   "id": "ch02",
+   "number": 2,
+   "title": "DSP48E1 타깃 곱셈",
+   "file": "ch02_dsp_v05.html"
+  },
+  {
+   "id": "ch03",
+   "number": 3,
+   "title": "MAC 2단계 파이프라인",
+   "file": "ch03_mac_pipeline_v05.html"
+  },
+  {
+   "id": "ch04",
+   "number": 4,
+   "title": "BRAM 동기 버퍼",
+   "file": "ch04_bram_v05.html"
+  },
+  {
+   "id": "ch05",
+   "number": 5,
+   "title": "Fixed-Point Quantizer",
+   "file": "ch05_fixed_v05.html"
+  },
+  {
+   "id": "ch06",
+   "number": 6,
+   "title": "INT8·INT16 정밀도 비교",
+   "file": "ch06_precision_v05.html"
+  },
+  {
+   "id": "ch07",
+   "number": 7,
+   "title": "벡터 내적",
+   "file": "ch07_vector_dot_v05.html"
+  },
+  {
+   "id": "ch08",
+   "number": 8,
+   "title": "4PE 병렬 어레이",
+   "file": "ch08_pe4_v05.html"
+  },
+  {
+   "id": "ch09",
+   "number": 9,
+   "title": "Dense 4뉴런 레이어",
+   "file": "ch09_dense_v05.html"
+  },
+  {
+   "id": "ch10",
+   "number": 10,
+   "title": "4뉴런 NPU Core",
+   "file": "ch10_npu_core_v05.html"
+  },
+  {
+   "id": "ch11",
+   "number": 11,
+   "title": "UART 모델 적재 컨트롤러",
+   "file": "ch11_uart_register_v05.html"
+  },
+  {
+   "id": "ch12",
+   "number": 12,
+   "title": "통합 NPU Top",
+   "file": "ch12_integrated_npu_v05.html"
+  },
+  {
+   "id": "ch13",
+   "number": 13,
+   "title": "8×8 손글씨·10분류 준비",
+   "file": "ch13_mnist_8x8_v02.html"
+  },
+  {
+   "id": "ch14",
+   "number": 14,
+   "title": "4PE 그룹·10개 출력",
+   "file": "ch14_group10_v02.html"
+  },
+  {
+   "id": "ch15",
+   "number": 15,
+   "title": "Dense 64→10 공통 블록",
+   "file": "ch15_dense_64x10_v02.html"
+  },
+  {
+   "id": "ch16",
+   "number": 16,
+   "title": "2층 신경망 64→8→10",
+   "file": "ch16_mlp_64_8_10_v02.html"
+  },
+  {
+   "id": "ch17",
+   "number": 17,
+   "title": "784원소 타일 실행",
+   "file": "ch17_tiled_784_v02.html"
+  },
+  {
+   "id": "ch18",
+   "number": 18,
+   "title": "Float32 · INT8 · INT16 정밀도",
+   "file": "ch18_precision_v02.html"
+  },
+  {
+   "id": "ch19",
+   "number": 19,
+   "title": "1·4·8PE 사이클 비교",
+   "file": "ch19_pe_compare_v02.html"
+  },
+  {
+   "id": "ch20",
+   "number": 20,
+   "title": "AXI4-Lite 레지스터",
+   "file": "ch20_axi_lite_v02.html"
+  },
+  {
+   "id": "ch21",
+   "number": 21,
+   "title": "MicroBlaze V + NPU 블록 설계",
+   "file": "ch21_soc_bd_v02.html"
+  },
+  {
+   "id": "ch22",
+   "number": 22,
+   "title": "Vitis C 드라이버",
+   "file": "ch22_vitis_driver_v02.html"
+  },
+  {
+   "id": "ch23",
+   "number": 23,
+   "title": "CPU · NPU 시간 비교",
+   "file": "ch23_cpu_vs_npu_v02.html"
+  }
+ ]
+};
+</script>
+<script defer src="assets/education/site.js"></script>
+</body>
+</html>

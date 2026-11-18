@@ -193,8 +193,8 @@
       "id": "ch23",
       "number": 23,
       "title": "CPU·NPU 성능 비교",
-      "file": "ch23_cpu_npu_benchmark_v02.html",
-      "html_status": "TODO",
+      "file": "ch23_cpu_vs_npu_v02.html",
+      "html_status": "DONE",
       "rtl_status": "TODO"
     },
     {
