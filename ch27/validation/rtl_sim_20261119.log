@@ -1,0 +1,20 @@
+Icarus Verilog version 12.0 (stable) ()
+gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+Ubuntu clang version 18.1.3 (1ubuntu1)
+DEMO_HEADER_OK images=10
+RTL_SIM_PASS FND_CLASS_DISPLAY words=13
+RV32IMC_COMPILE_PASS files=4
+LED_WORD_TEST_PASS words=11
+RTL_SIM_PASS DRIVER_REPLAY writes=15732 reads=141 polls=10 axi_violations=0
+DEMO sw=0 mnist_test[3] label=0 class=0 led=0x8001 fnd=0 OK
+DEMO sw=1 mnist_test[2] label=1 class=1 led=0x8402 fnd=1 OK
+DEMO sw=2 mnist_test[1] label=2 class=2 led=0x8804 fnd=2 OK
+DEMO sw=3 mnist_test[18] label=3 class=2 led=0x8804 fnd=2 MISS
+DEMO sw=4 mnist_test[4] label=4 class=4 led=0x9010 fnd=4 OK
+DEMO sw=5 mnist_test[8] label=5 class=6 led=0x9840 fnd=6 MISS
+DEMO sw=6 mnist_test[11] label=6 class=6 led=0x9840 fnd=6 OK
+DEMO sw=7 mnist_test[0] label=7 class=7 led=0x9C80 fnd=7 OK
+DEMO sw=8 mnist_test[61] label=8 class=8 led=0xA100 fnd=8 OK
+DEMO sw=9 mnist_test[7] label=9 class=9 led=0xA600 fnd=9 OK
+DEMO_RTL_COMPARE_PASS images=10 correct=8/10 led_writes=11 (sw=12 → 표시 지움)
+TOP_XDC_STATIC_CHECK_PASS ports=48 pins=48 missing=[] extra=[] duplicate=False seg_pins_differ_from_ch12=[]

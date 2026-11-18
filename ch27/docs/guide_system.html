@@ -1,0 +1,31 @@
+      <p>05절이 모두 통과해야 합니다. 21장 프로젝트(<code>soc_npu</code>)를 그대로 쓰고 Top과 제약만 바꿉니다. ⚠ 미검증 — Vivado·Vitis·보드에서 실행하지 않았습니다.</p>
+      <h3>8-1. 하드웨어 (Vivado 2024.2)</h3>
+      <table>
+        <thead><tr><th>순서</th><th>조작</th><th>성공 기준</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Add Sources: <code>ch27/rtl/fnd_class_display.v</code>, <code>ch27/rtl/soc_npu27_top.v</code>, 제약 <code>ch27/constraints/soc_npu27.xdc</code></td><td>Sources에 세 파일</td></tr>
+          <tr><td>2</td><td>21장 제약 <code>soc_npu.xdc</code> → Disable File, <code>soc_npu27_top</code> → Set as Top</td><td>활성 제약 1개, Top 굵은 글씨</td></tr>
+          <tr><td>3</td><td>Generate Bitstream → Export Hardware (Include bitstream) → <code>soc_npu27_top.xsa</code></td><td>WNS ≥ 0, WHS ≥ 0, 핀 48개 배정</td></tr>
+        </tbody>
+      </table>
+      <h3>8-2. 소프트웨어 (Vitis 2024.2)</h3>
+      <table>
+        <thead><tr><th>순서</th><th>조작</th><th>성공 기준</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>새 XSA로 플랫폼 <code>soc_npu27_platform</code>, 애플리케이션 <code>npu_system</code> (Empty C)</td><td>빌드 성공</td></tr>
+          <tr><td>2</td><td><code>src</code>에 22장 <code>npu_regs.h·npu_hal.h·npu_hal_mbv.c·npu_drv.h·npu_drv.c</code>, 이 장 <code>sw/</code> 4개, <code>python3 ch27/reference/gen_demo_header.py model_int8.h</code>로 만든 헤더</td><td>파일 10개</td></tr>
+          <tr><td>3</td><td>Run (터미널 115200 bps)</td><td>첫 줄 <code>=== ch27 NPU SoC …</code>, 이어서 <code>sw=0 label=0 class=0 … OK</code></td></tr>
+        </tbody>
+      </table>
+      <h3>8-3. 보드에서 확인할 것 (05절 표와 같아야 함)</h3>
+      <table>
+        <thead><tr><th>sw[3:0]</th><th>UART</th><th>LED</th><th>7세그먼트 오른쪽</th></tr></thead>
+        <tbody>
+          <tr><td>0000 (0)</td><td><code>label=0 class=0 … OK</code></td><td>LED0·LED15 켜짐</td><td>0</td></tr>
+          <tr><td>0011 (3)</td><td><code>label=3 class=2 … MISS</code> (모델이 틀리는 그림)</td><td>LED2·LED11·LED15</td><td>2</td></tr>
+          <tr><td>0101 (5)</td><td><code>label=5 class=6 … MISS</code></td><td>LED6·LED11·LED12·LED15</td><td>6</td></tr>
+          <tr><td>1100 (12)</td><td><code>sw=12: no image</code></td><td>모두 꺼짐</td><td>-</td></tr>
+          <tr><td>btnC</td><td>첫 줄부터 다시</td><td>꺼졌다가 다시</td><td>-</td></tr>
+        </tbody>
+      </table>
+      <p>나머지 sw 값의 기대 출력은 05절 <code>DEMO</code> 줄에 있습니다. 결과를 <code>ch27/validation/board_YYYYMMDD.txt</code>(UART 출력)와 사진으로 남기면 BOARD 게이트를 갱신합니다.</p>
