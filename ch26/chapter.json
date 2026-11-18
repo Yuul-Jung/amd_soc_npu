@@ -1,0 +1,68 @@
+{
+  "id": "ch26",
+  "number": 26,
+  "version": "v02",
+  "slug": "tiny_cnn",
+  "nav_title": "3×3 소형 CNN",
+  "name": "3×3 소형 CNN 경로 (합성곱·풀링·Dense)",
+  "goal": "기존 NPU를 고치지 않고 옆에 소형 CNN 경로를 더합니다. 8×8 입력에 3×3 필터 4개로 합성곱(ReLU·정수 양자화)을 하고 2×2 최대 풀링으로 36특징을 만든 뒤, 15장 Dense와 16장 argmax로 10분류합니다. 새 TB와 함께 15·16·20장 회귀를 다시 돌립니다.",
+  "top": {"file": "ch26/rtl/npu_cnn3x3.v", "module": "npu_cnn3x3"},
+  "keep": ["ch01/rtl/mac_core.v", "ch04/rtl/bram_sync_buffer.v", "ch05/rtl/fixed_quantizer.v", "ch07/rtl/vector_dot_core.v",
+           "ch08/rtl/pe_array4.v", "ch15/rtl/npu_dense_core.v", "ch15/rtl/npu_dense_store.v", "ch15/rtl/npu_dense.v",
+           "ch16/rtl/npu_argmax.v", "ch13/reference/mnist8x8_reference.py", "host_tools/p3_integer_reference.py"],
+  "new": ["ch26/rtl/npu_cnn3x3.v"],
+  "tb": ["ch26/tb/tb_npu_cnn3x3.sv"],
+  "ref": ["ch26/reference/cnn_reference.py"],
+  "prep_note": "기준 모델은 13장 <code>features()</code>와 <code>host_tools</code>의 <code>round_shift_away</code>·<code>sat_int8</code>·<code>argmax_lowest</code>를 씁니다",
+  "tb_note": "12사례: 숫자 0~4는 경계 검출 필터(세로·가로 소벨, 라플라시안, 평균), 숫자 5~9는 무작위 필터, ReLU 뒤 전부 0, 포화. Dense 가중치는 무작위이며 학습한 모델이 아닙니다. 마지막에 15·16·20장 시뮬레이션을 그대로 다시 돌려 기존 경로가 깨지지 않았는지 봅니다.",
+  "run": "bash ch26/scripts/run_sim.sh",
+  "run_note": "기준 모델 → CNN RTL 시뮬레이션 (12사례) → Python 비교 → 15·16·20장 회귀",
+  "evidence": {"rtl_log": "ch26/validation/rtl_sim_*.log", "pattern": "_PASS|REGRESSION|Icarus"},
+  "checks": [
+    ["RTL_SIM_PASS CNN3X3 cases=12 cycles_per_inference=2512", "12사례 모두 오류 없이 끝나고, 실행 중 입력 쓰기는 무시됨"],
+    ["PYTHON_RTL_COMPARE_PASS cases=12 pooled=432 scores=120", "풀링 특징 432개(12×36), 점수 120개, 클래스가 Python과 같음"],
+    ["REGRESSION_PASS chapters=3", "재사용한 15·16장과 20장 AXI 경로의 시뮬레이션이 그대로 통과"]
+  ],
+  "read_points": [
+    ["합성곱 = 길이 9 내적", "출력 한 칸은 창 9화소와 필터 9개의 내적입니다. 07장 코어를 위치마다 한 번씩(6×6×4 = 144번) 돌리고, 창 주소는 <code>(oy+ky)·8 + ox+kx</code>입니다."],
+    ["ReLU·양자화", "합성곱 출력 = <code>sat_int8(round(ReLU(내적 + Bias) / 2^6))</code>. 16장 은닉층과 같은 05장 양자화기를 씁니다."],
+    ["2×2 최대 풀링", "6×6을 겹치지 않는 2×2 칸으로 나눠 최댓값을 고릅니다. 칸의 첫 위치는 <code>(2py)·6 + 2px</code>이고, ReLU 뒤라 값이 모두 0 이상입니다."],
+    ["36 → 64 맞추기", "15장 Dense는 입력 수가 2의 거듭제곱이어야 해서 64로 두고, 36~63번 입력은 0을 돌려줍니다. 그 자리의 가중치는 점수에 영향을 주지 않습니다."],
+    ["기존 경로와 분리", "이 모듈은 15·16장 파일을 고치지 않고 인스턴스만 합니다. 27장 통합 시스템은 784→10 경로를 쓰고, CNN은 같은 방식으로 AXI 래퍼를 하나 더 두면 붙일 수 있습니다."]
+  ],
+  "vivado": {"mode": "ooc", "resources": "DSP48E1: 합성곱 1 + Dense 4 · 합성곱 출력 144바이트는 LUTRAM/FF", "note": "<code>tools/vivado/ooc_timing.tcl</code>의 <code>ch26</code> 줄로 실행합니다. ⚠ 미검증 (Vivado 미실행)."},
+  "handoff": [
+    ["ch26/rtl/npu_cnn3x3.v", "확장 과제: AXI 래퍼(20장 방식)를 더해 SoC에 두 번째 가속기로 연결 (27장 기준선에는 넣지 않음)"]
+  ],
+  "port_notes": {
+    "clk": "시스템 클록", "resetn": "동기 리셋 (Active-Low)",
+    "x_wr_en_i": "입력 쓰기 (busy_o 동안 무시)", "x_addr_i": "입력 주소 0~63 (행*8 + 열)", "x_data_i": "입력 값 (INT8, 0~127)",
+    "k_wr_en_i": "합성곱 가중치 쓰기", "k_filter_i": "필터 번호 0~3", "k_addr_i": "필터 안 위치 0~8 (ky*3 + kx)", "k_data_i": "합성곱 가중치 (INT8)",
+    "kb_wr_en_i": "합성곱 Bias 쓰기", "kb_filter_i": "필터 번호 0~3", "kb_data_i": "합성곱 Bias (signed 32비트)",
+    "d_w_wr_en_i": "Dense 가중치 쓰기", "d_neuron_i": "Dense 클래스 0~9", "d_addr_i": "Dense 입력 번호 0~63", "d_data_i": "Dense 가중치 (INT8)",
+    "d_b_wr_en_i": "Dense Bias 쓰기", "d_b_data_i": "Dense Bias (signed 32비트)",
+    "start_i": "추론 시작 (IDLE에서만)", "busy_o": "추론 중",
+    "pooled_o": "풀링 특징 36개 (f*9 + py*3 + px, INT8)", "scores_o": "점수 10개 (signed 32비트)",
+    "done_o": "추론 완료 1클록 펄스", "error_o": "오류 1클록 펄스 (Dense 입력 응답 없음)", "class_o": "결과 클래스 0~9"
+  },
+  "fsm": {
+    "file": "ch26/rtl/npu_cnn3x3.v",
+    "reset": "IDLE",
+    "rows": [
+      ["IDLE", "start_i", "CONV_GO", "f_q·oy_q·ox_q = 0"],
+      ["CONV_GO", "항상", "CONV_FEED", "길이 9 내적 시작, t_q=0"],
+      ["CONV_FEED", "dot_ready && t_q<8", "CONV_FEED", "창 화소·필터 1쌍 전달, t_q+1"],
+      ["CONV_FEED", "dot_ready && t_q==8", "CONV_WAIT", "마지막 쌍 전달"],
+      ["CONV_WAIT", "dot_done", "CONV_Q", "ReLU 값을 양자화기에 넣음"],
+      ["CONV_Q", "q_valid && 다음 위치·필터 있음", "CONV_GO", "출력 저장, ox→oy→f 순서로 증가"],
+      ["CONV_Q", "q_valid && 마지막 (f=3, oy=5, ox=5)", "POOL", "출력 저장, p_q=0"],
+      ["POOL", "p_q<36", "POOL", "풀링 1개 저장, p_q+1"],
+      ["POOL", "p_q==36", "DENSE", "Dense 시작"],
+      ["DENSE", "d_err", "IDLE", "error_o 펄스"],
+      ["DENSE", "d_done", "ARGMAX", "argmax 시작"],
+      ["ARGMAX", "am_done", "IDLE", "done_o 펄스"],
+      ["default", "유효하지 않은 상태", "IDLE", "error_o 펄스"]
+    ],
+    "diagram": "ch26/diagrams/ch26_cnn_fsm"
+  }
+}
