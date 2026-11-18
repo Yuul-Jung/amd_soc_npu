@@ -1,0 +1,21 @@
+      <h3>8-1. 보드에서 재기 (Vitis 2024.2)</h3>
+      <p>⚠ 미검증 — 보드에서 실행하지 않았습니다. 22장 <code>npu_app</code>과 같은 플랫폼에 애플리케이션 <code>npu_bench</code>를 하나 더 만듭니다.</p>
+      <table>
+        <thead><tr><th>순서</th><th>조작</th><th>성공 기준</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td><code>src</code>에 22장 <code>sw/</code>의 <code>npu_regs.h</code>·<code>npu_hal.h</code>·<code>npu_hal_mbv.c</code>·<code>npu_drv.h</code>·<code>npu_drv.c</code>, 이 장 <code>sw/</code> 4개, 모델 헤더(<code>--n 5</code>) 복사</td><td>파일 10개 (22장 <code>main.c</code>는 넣지 않음)</td></tr>
+          <tr><td>2</td><td><code>xparameters.h</code>에서 AXI Timer 기준 주소를 찾아 <code>axi_timer.h</code>의 <code>TIMER_BASE</code>와 비교</td><td>다르면 그 값으로 바꿈</td></tr>
+          <tr><td>3</td><td>빌드 설정: 최적화 <code>-O2</code> (05절 추정과 같은 조건)</td><td>경고 0</td></tr>
+          <tr><td>4</td><td>Run → 터미널 출력 CSV를 <code>ch23/validation/board_bench_YYYYMMDD.csv</code>로 저장</td><td>마지막 줄 <code>[PASS] CPU and NPU scores equal 5/5</code></td></tr>
+        </tbody>
+      </table>
+      <h3>8-2. 채울 표 (100 MHz 클록 수 → μs = 클록 / 100)</h3>
+      <table>
+        <thead><tr><th>구간</th><th>추정 (05절)</th><th>보드 측정</th></tr></thead>
+        <tbody>
+          <tr><td>CPU 추론 <code>cpu_clk</code></td><td>54,880 이상 (CPI 1) ~ 109,760 (CPI 2)</td><td>⚠ 미측정</td></tr>
+          <tr><td>NPU 입력 적재 <code>npu_load_clk</code> (AXI 쓰기 784번)</td><td>버스 왕복 클록 × 784</td><td>⚠ 미측정</td></tr>
+          <tr><td>NPU 실행 <code>npu_run_clk</code> (START~결과 읽기)</td><td>7,185 + 폴링·읽기 12번</td><td>⚠ 미측정</td></tr>
+          <tr><td>NPU 코어 <code>npu_core_clk</code></td><td>7,185 (시뮬레이션)</td><td>CYCLES 레지스터 값</td></tr>
+        </tbody>
+      </table>
