@@ -1,0 +1,8 @@
+PYTHON_DENSE_SELF_TEST_PASS INT16/40 cases=46 seed=309
+RTL_SIM_PASS DENSE4 INT16/40 cases=46
+tb/tb_dense_layer4.sv:50: $finish called at 19836000 (1ps)
+PYTHON_RTL_COMPARE_PASS cycles=46
+PYTHON_DENSE_SELF_TEST_PASS INT8/32 cases=46 seed=309
+RTL_SIM_PASS DENSE4 INT8/32 cases=46
+tb/tb_dense_layer4.sv:50: $finish called at 19836000 (1ps)
+PYTHON_RTL_COMPARE_PASS cycles=46

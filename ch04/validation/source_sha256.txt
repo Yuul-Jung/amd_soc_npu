@@ -1,0 +1,4 @@
+2f40c874bd5a8c46164b711b191c4e79ce790692077faa02184a6b49efc491ff  part03/ch04/rtl/bram_sync_buffer.v
+2cc278e8294969fb1b6aa0aa786354f7cf0f9a6d096a070f37c52d15f25f5045  part03/ch04/tb/tb_bram_sync_buffer.sv
+01099e2985a9861cbcfe8c680a47907b66c35e0621ef7f9505ed161da4408cac  part03/ch04/reference/bram_reference.py
+95ecc449b45f3db8dbe78e5fee4397138e214ad4f1489902dd05a32710e1237f  part03/ch04/scripts/run_sim.sh

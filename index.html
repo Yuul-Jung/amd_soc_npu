@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Basys3 소형 NPU 교육과정 — 고도화판</title>
+<meta name="description" content="Basys3 UART·NPU 00~12장 RTL 기반 + 13~31장 10분류 MNIST·MicroBlaze V SoC·종합 과제 고도화 교재">
+<link rel="stylesheet" href="assets/education/site.css">
+<style>
+.hero:before{background-image:linear-gradient(90deg,rgba(12,17,27,.89),rgba(12,17,27,.69) 58%,rgba(12,17,27,.48)),url('https://raw.githubusercontent.com/Yuul-Jung/rule_md/d1b8278d41fca8f5e3960736f3ac9d377e462fda/web/education-html/assets/hero-bookshelf.jpg')}
+.codeblock pre{max-height:760px;white-space:pre}
+.section svg{width:100%;height:auto}
+.badge{display:inline-block;padding:.15em .6em;border-radius:4px;font-size:.78em;font-weight:700;vertical-align:middle}
+.badge-ok{background:#d4edda;color:#155724}
+.badge-todo{background:#fff3cd;color:#856404}
+.badge-new{background:#cce5ff;color:#004085}
+table td,.section td{vertical-align:middle}
+</style>
+</head>
+<body>
+<a class="access-skip" href="#main-content">본문 바로가기</a>
+<button type="button" class="mobile-menu" id="mobile-menu" aria-controls="course-nav" aria-expanded="false">☰ 장·목차</button>
+<div class="shade" id="shade"></div>
+<header class="hero">
+  <div class="hero-inner">
+    <p class="kicker">BASYS3 · RTL · NPU · 고도화판</p>
+    <h1>소형 NPU 제작 학습안내서</h1>
+    <p><strong>준비 00장 + 01~31장</strong> · 소형 NPU → 10분류 MNIST → MicroBlaze V SoC → 종합 과제</p>
+    <div class="chips">
+      <span class="chip">RTL 고도화</span>
+      <span class="chip">UART 8N1</span>
+      <span class="chip">DSP/BRAM/4PE</span>
+      <span class="chip">INT8 MLP</span>
+      <span class="chip">AXI4-Lite</span>
+    </div>
+  </div>
+</header>
+<div class="wrap">
+  <nav class="toc" id="course-nav" aria-label="전체 장과 절"></nav>
+  <main class="content" id="main-content">
+
+    <section class="section" id="intro">
+      <h2><span class="num">00</span>교육과정 개요</h2>
+      <p>이 교재는 <code>Yuul-Jung/amd_soc_rtl</code> 제3부를 기반으로 고도화한 독립 NPU 교육과정입니다. 00~12장에서 MAC·DSP·BRAM·4PE·UART 기반 소형 4분류 NPU를 단계별로 제작합니다. 13~19장에서는 8×8 입력의 10분류 정수 MLP를 구현하고, 20~27장에서는 AXI4-Lite·MicroBlaze V SoC로 통합하며, 28~31장에서는 숫자 인식·센서 융합·모터 제어·보안 UART 종합 과제로 마무리합니다.</p>
+      <p><strong>고도화 내용:</strong> ch00~12 HTML v04 개선 · ch13~31 HTML v02 + RTL 신규 구현 · 장별 CI 게이트.</p>
+    </section>
+
+    <section class="section" id="techtree">
+      <h2><span class="num">01</span>전체 테크트리</h2>
+      <svg viewBox="0 0 980 145" role="img" aria-label="UART 수신에서 BRAM DSP 4PE 추론 및 출력">
+        <rect x="10" y="28" width="208" height="85" rx="9" fill="#edeafa" stroke="#4635b1"/>
+        <text x="114" y="77" font-size="16" text-anchor="middle">uart_core</text>
+        <path d="M218 70 H268" stroke="#4635b1" stroke-width="3"/>
+        <path d="M268 70 l-11 -7 v14 z" fill="#4635b1"/>
+        <rect x="277" y="28" width="230" height="85" rx="9" fill="#fff" stroke="#4635b1"/>
+        <text x="392" y="77" font-size="14" text-anchor="middle">uart_npu_command_controller</text>
+        <path d="M507 70 H562" stroke="#4635b1" stroke-width="3"/>
+        <path d="M562 70 l-11 -7 v14 z" fill="#4635b1"/>
+        <rect x="571" y="28" width="179" height="85" rx="9" fill="#edeafa" stroke="#4635b1"/>
+        <text x="660" y="77" font-size="17" text-anchor="middle">npu_engine4</text>
+        <path d="M750 70 H810" stroke="#4635b1" stroke-width="3"/>
+        <path d="M810 70 l-11 -7 v14 z" fill="#4635b1"/>
+        <rect x="819" y="28" width="154" height="85" rx="9" fill="#fff" stroke="#4635b1"/>
+        <text x="896" y="77" font-size="16" text-anchor="middle">LED/FND</text>
+      </svg>
+      <table>
+        <thead><tr><th>장</th><th>실습 제목</th><th>구간</th><th>HTML</th><th>RTL</th></tr></thead>
+        <tbody>
+          <tr><td>00</td><td><a href="ch00_uart_echo_v04.html">UART Echo</a></td><td>UART 준비</td><td><span class="badge badge-todo">v04 예정</span></td><td><span class="badge badge-ok">이전 완료</span></td></tr>
+          <tr><td>01</td><td><a href="ch01_mac_v04.html">MAC 누산</a></td><td>독립 RTL</td><td><span class="badge badge-todo">v04 예정</span></td><td><span class="badge badge-ok">이전 완료</span></td></tr>
+          <tr><td>02</td><td><a href="ch02_dsp_v04.html">DSP48E1 곱셈</a></td><td>독립 RTL</td><td><span class="badge badge-todo">v04 예정</span></td><td><span class="badge badge-ok">이전 완료</span></td></tr>
+          <tr><td>03</td><td><a href="ch03_mac_pipeline_v04.html">MAC Pipeline</a></td><td>독립 RTL</td><td><span class="badge badge-todo">v04 예정</span></td><td><span class="badge badge-ok">이전 완료</span></td></tr>
+          <tr><td>04</td><td><a href="ch04_bram_v04.html">BRAM 동기 버퍼</a></td><td>독립 RTL</td><td><span class="badge badge-todo">v04 예정</span></td><td><span class="badge badge-ok">이전 완료</span></td></tr>
+          <tr><td>05</td><td><a href="ch05_fixed_v04.html">Fixed Quantizer</a></td><td>독립 RTL</td><td><span class="badge badge-todo">v04 예정</span></td><td><span class="badge badge-ok">이전 완료</span></td></tr>
+          <tr><td>06</td><td><a href="ch06_precision_v04.html">INT8·INT16 비교</a></td><td>독립 RTL</td><td><span class="badge badge-todo">v04 예정</span></td><td><span class="badge badge-ok">이전 완료</span></td></tr>
+          <tr><td>07</td><td><a href="ch07_vector_dot_v04.html">Vector Dot</a></td><td>독립 RTL</td><td><span class="badge badge-todo">v04 예정</span></td><td><span class="badge badge-ok">이전 완료</span></td></tr>
+          <tr><td>08</td><td><a href="ch08_pe4_v04.html">4PE 병렬 연산</a></td><td>독립 RTL</td><td><span class="badge badge-todo">v04 예정</span></td><td><span class="badge badge-ok">이전 완료</span></td></tr>
+          <tr><td>09</td><td><a href="ch09_dense_v04.html">Dense4</a></td><td>독립 RTL</td><td><span class="badge badge-todo">v04 예정</span></td><td><span class="badge badge-ok">이전 완료</span></td></tr>
+          <tr><td>10</td><td><a href="ch10_npu_core_v04.html">4뉴런 NPU</a></td><td>독립 RTL</td><td><span class="badge badge-todo">v04 예정</span></td><td><span class="badge badge-ok">이전 완료</span></td></tr>
+          <tr><td>11</td><td><a href="ch11_uart_register_v04.html">UART 모델 적재</a></td><td>UART 통합</td><td><span class="badge badge-todo">v04 예정</span></td><td><span class="badge badge-ok">이전 완료</span></td></tr>
+          <tr><td>12</td><td><a href="ch12_integrated_npu_v04.html">통합 NPU</a></td><td>UART 통합</td><td><span class="badge badge-todo">v04 예정</span></td><td><span class="badge badge-ok">이전 완료</span></td></tr>
+          <tr><td>13</td><td><a href="ch13_mnist_8x8_v02.html">8×8 손글씨·10분류</a></td><td>10분류 정수</td><td><span class="badge badge-todo">v02 예정</span></td><td><span class="badge badge-new">신규 구현 예정</span></td></tr>
+          <tr><td>14</td><td><a href="ch14_group10_v02.html">4PE 그룹·10개 출력</a></td><td>10분류 정수</td><td><span class="badge badge-todo">v02 예정</span></td><td><span class="badge badge-new">신규 구현 예정</span></td></tr>
+          <tr><td>15</td><td><a href="ch15_mlp64_10_v02.html">64→10 정수 MLP</a></td><td>10분류 정수</td><td><span class="badge badge-todo">v02 예정</span></td><td><span class="badge badge-new">신규 구현 예정</span></td></tr>
+          <tr><td>16</td><td><a href="ch16_mlp64_8_10_v02.html">64→8→10 다층 MLP</a></td><td>10분류 정수</td><td><span class="badge badge-todo">v02 예정</span></td><td><span class="badge badge-new">신규 구현 예정</span></td></tr>
+          <tr><td>17</td><td><a href="ch17_mnist_784_tiling_v02.html">784픽셀 분할 누산</a></td><td>10분류 정수</td><td><span class="badge badge-todo">v02 예정</span></td><td><span class="badge badge-new">신규 구현 예정</span></td></tr>
+          <tr><td>18</td><td><a href="ch18_precision_tradeoff_v02.html">INT8·INT16 정밀도</a></td><td>10분류 정수</td><td><span class="badge badge-todo">v02 예정</span></td><td><span class="badge badge-new">신규 구현 예정</span></td></tr>
+          <tr><td>19</td><td><a href="ch19_architecture_tradeoff_v02.html">PE·BRAM 구조 비교</a></td><td>10분류 정수</td><td><span class="badge badge-todo">v02 예정</span></td><td><span class="badge badge-new">신규 구현 예정</span></td></tr>
+          <tr><td>20</td><td><a href="ch20_axi_npu_control_v02.html">AXI4-Lite NPU 제어 IP</a></td><td>AXI·SoC</td><td><span class="badge badge-todo">v02 예정</span></td><td><span class="badge badge-new">신규 구현 예정</span></td></tr>
+          <tr><td>21</td><td><a href="ch21_mbv_npu_v02.html">MicroBlaze V·NPU 통합</a></td><td>AXI·SoC</td><td><span class="badge badge-todo">v02 예정</span></td><td><span class="badge badge-new">신규 구현 예정</span></td></tr>
+          <tr><td>22</td><td><a href="ch22_vitis_npu_driver_v02.html">Vitis C 추론 드라이버</a></td><td>AXI·SoC</td><td><span class="badge badge-todo">v02 예정</span></td><td><span class="badge badge-new">신규 구현 예정</span></td></tr>
+          <tr><td>23</td><td><a href="ch23_cpu_npu_benchmark_v02.html">CPU·NPU 성능 비교</a></td><td>AXI·SoC</td><td><span class="badge badge-todo">v02 예정</span></td><td><span class="badge badge-new">신규 구현 예정</span></td></tr>
+          <tr><td>24</td><td><a href="ch24_resource_timing_v02.html">FPGA 자원·타이밍</a></td><td>AXI·SoC</td><td><span class="badge badge-todo">v02 예정</span></td><td><span class="badge badge-new">신규 구현 예정</span></td></tr>
+          <tr><td>25</td><td><a href="ch25_power_energy_v02.html">동적 전력·에너지</a></td><td>AXI·SoC</td><td><span class="badge badge-todo">v02 예정</span></td><td><span class="badge badge-new">신규 구현 예정</span></td></tr>
+          <tr><td>26</td><td><a href="ch26_tiny_cnn_v02.html">소형 CNN 확장</a></td><td>AXI·SoC</td><td><span class="badge badge-todo">v02 예정</span></td><td><span class="badge badge-new">신규 구현 예정</span></td></tr>
+          <tr><td>27</td><td><a href="ch27_npu_system_v02.html">NPU 최종 통합</a></td><td>AXI·SoC</td><td><span class="badge badge-todo">v02 예정</span></td><td><span class="badge badge-new">신규 구현 예정</span></td></tr>
+          <tr><td>28</td><td><a href="ch28_capstone_mnist_v02.html">손글씨 숫자 인식 종합</a></td><td>종합 과제</td><td><span class="badge badge-todo">v02 예정</span></td><td><span class="badge badge-new">신규 구현 예정</span></td></tr>
+          <tr><td>29</td><td><a href="ch29_capstone_sensor_v02.html">센서 융합 산업안전</a></td><td>종합 과제</td><td><span class="badge badge-todo">v02 예정</span></td><td><span class="badge badge-new">신규 구현 예정</span></td></tr>
+          <tr><td>30</td><td><a href="ch30_capstone_motor_v02.html">NPU·모터 안전 제어</a></td><td>종합 과제</td><td><span class="badge badge-todo">v02 예정</span></td><td><span class="badge badge-new">신규 구현 예정</span></td></tr>
+          <tr><td>31</td><td><a href="ch31_capstone_secure_uart_v02.html">AES-128·HMAC 보안 UART</a></td><td>종합 과제</td><td><span class="badge badge-todo">v02 예정</span></td><td><span class="badge badge-new">신규 구현 예정</span></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section" id="run">
+      <h2><span class="num">02</span>실행 절차</h2>
+      <p>ch00~12 RTL은 Icarus Verilog로 로컬 시뮬레이션 가능합니다. ch13~19 정수 기준모델은 Python 3으로 독립 실행합니다. Vivado 합성·Basys3 실물 검증은 각 장의 절차를 따릅니다.</p>
+      <div class="codeblock">
+        <div class="codebar"><span>Ubuntu Terminal · 실행 순서</span></div>
+        <pre><code># ch00 UART Echo
+bash ch00/scripts/run_sim.sh
+# ch01~ch10 독립 RTL 회귀
+bash mini_npu/scripts/run_batch_00_12.sh
+# ch11+ch12 통합 NPU (UART→Engine→LED)
+bash mini_npu/scripts/run_demo.sh
+# ch13~ch19 정수 기준 모델
+python3 host_tools/p3_integer_reference.py
+# 적대적 경계 시험
+bash mini_npu/scripts/run_adversarial.sh
+# 정적 검사 (HTML·링크·SHA)
+python3 tools/check_static.py</code></pre>
+      </div>
+    </section>
+
+    <section class="section" id="rules">
+      <h2><span class="num">03</span>설계 경계 · 검증 원칙</h2>
+      <p>아래 설계 경계는 <code>amd_soc_rtl</code> 적대적 검증에서 확정한 사항입니다.</p>
+      <ul>
+        <li><strong>4분류 ≠ 10분류.</strong> <code>npu_engine4.v</code>는 4뉴런·최대 64원소 입력 전용. 14장 10분류는 3그룹 실행·누산·클래스 매핑을 별도 설계해야 한다.</li>
+        <li><strong>64입력 ≠ 784픽셀.</strong> 8×8 입력은 다운샘플 64차원. 784 원본은 13개 타일(64×12+16)로 분할 누산.</li>
+        <li><strong>INT8/INT16 계약.</strong> Python <code>round_shift_away</code>·<code>sat_int8</code>와 RTL 출력을 대조. float 모델 출력과 자동 일치한다고 가정하지 않는다.</li>
+        <li><strong>AXI4-Lite.</strong> START/STATUS/LENGTH/CLASS 소규모 레지스터 중심. 대량 데이터는 BRAM·버스 대역폭을 별도 확인.</li>
+        <li><strong>Basys3 자원 한계.</strong> XC7A35T DSP/LUT/BRAM은 Vivado 보고서로 확인. 무조건 온칩에 올리지 않는다.</li>
+        <li><strong>게이트 구분.</strong> <code>HTML_PASS / HOST_MODEL_PASS / RTL_SIM_PASS / SYNTH_TIMING_PASS / BOARD_PASS</code>는 서로 대체할 수 없다.</li>
+      </ul>
+    </section>
+
+    <section class="section" id="links">
+      <h2><span class="num">04</span>참고 자료</h2>
+      <ul>
+        <li><a href="AGENTS.md">작업 필수 규칙 (AGENTS.md)</a></li>
+        <li><a href="mini_npu/README.md">통합 NPU 명령·모듈 설명</a></li>
+        <li><a href="mini_npu/constraints/basys3_npu.xdc">Basys3 핀 제약 (XDC)</a></li>
+        <li><a href="docs/P3_00_12_LOCAL_RTL_SIM_20261117_v01.md">ch00~12 RTL 시뮬레이션 로그 (원본 이전)</a></li>
+        <li><a href="docs/P3_00_12_ADVERSARIAL_REVIEW_20261117_v01.md">ch00~12 적대적 검토 기록</a></li>
+        <li><a href="https://github.com/Yuul-Jung/amd_soc_rtl/tree/main/part03" target="_blank" rel="noopener">원본 amd_soc_rtl/part03</a></li>
+      </ul>
+    </section>
+
+    <div class="chapter-links" id="chapter-links"></div>
+  </main>
+</div>
+<script>
+window.COURSE={
+  "title":"Basys3 소형 NPU 00~31 (고도화판)",
+  "chapters":[
+    {"id":"ch00","number":0,"title":"UART Echo","file":"ch00_uart_echo_v04.html"},
+    {"id":"ch01","number":1,"title":"MAC 누산","file":"ch01_mac_v04.html"},
+    {"id":"ch02","number":2,"title":"DSP48E1 곱셈","file":"ch02_dsp_v04.html"},
+    {"id":"ch03","number":3,"title":"MAC Pipeline","file":"ch03_mac_pipeline_v04.html"},
+    {"id":"ch04","number":4,"title":"BRAM 동기 버퍼","file":"ch04_bram_v04.html"},
+    {"id":"ch05","number":5,"title":"Fixed Quantizer","file":"ch05_fixed_v04.html"},
+    {"id":"ch06","number":6,"title":"INT8·INT16 비교","file":"ch06_precision_v04.html"},
+    {"id":"ch07","number":7,"title":"Vector Dot","file":"ch07_vector_dot_v04.html"},
+    {"id":"ch08","number":8,"title":"4PE 병렬 연산","file":"ch08_pe4_v04.html"},
+    {"id":"ch09","number":9,"title":"Dense4","file":"ch09_dense_v04.html"},
+    {"id":"ch10","number":10,"title":"4뉴런 NPU","file":"ch10_npu_core_v04.html"},
+    {"id":"ch11","number":11,"title":"UART 모델 적재","file":"ch11_uart_register_v04.html"},
+    {"id":"ch12","number":12,"title":"통합 NPU","file":"ch12_integrated_npu_v04.html"},
+    {"id":"ch13","number":13,"title":"8×8 손글씨·10분류","file":"ch13_mnist_8x8_v02.html"},
+    {"id":"ch14","number":14,"title":"4PE 그룹·10개 출력","file":"ch14_group10_v02.html"},
+    {"id":"ch15","number":15,"title":"64→10 정수 MLP","file":"ch15_mlp64_10_v02.html"},
+    {"id":"ch16","number":16,"title":"64→8→10 다층 MLP","file":"ch16_mlp64_8_10_v02.html"},
+    {"id":"ch17","number":17,"title":"784픽셀 분할 누산","file":"ch17_mnist_784_tiling_v02.html"},
+    {"id":"ch18","number":18,"title":"INT8·INT16 정밀도","file":"ch18_precision_tradeoff_v02.html"},
+    {"id":"ch19","number":19,"title":"PE·BRAM 구조 비교","file":"ch19_architecture_tradeoff_v02.html"},
+    {"id":"ch20","number":20,"title":"AXI4-Lite NPU 제어 IP","file":"ch20_axi_npu_control_v02.html"},
+    {"id":"ch21","number":21,"title":"MicroBlaze V·NPU 통합","file":"ch21_mbv_npu_v02.html"},
+    {"id":"ch22","number":22,"title":"Vitis C 추론 드라이버","file":"ch22_vitis_npu_driver_v02.html"},
+    {"id":"ch23","number":23,"title":"CPU·NPU 성능 비교","file":"ch23_cpu_npu_benchmark_v02.html"},
+    {"id":"ch24","number":24,"title":"FPGA 자원·타이밍","file":"ch24_resource_timing_v02.html"},
+    {"id":"ch25","number":25,"title":"동적 전력·에너지","file":"ch25_power_energy_v02.html"},
+    {"id":"ch26","number":26,"title":"소형 CNN 확장","file":"ch26_tiny_cnn_v02.html"},
+    {"id":"ch27","number":27,"title":"NPU 최종 통합","file":"ch27_npu_system_v02.html"},
+    {"id":"ch28","number":28,"title":"손글씨 숫자 인식 종합","file":"ch28_capstone_mnist_v02.html"},
+    {"id":"ch29","number":29,"title":"센서 융합 산업안전","file":"ch29_capstone_sensor_v02.html"},
+    {"id":"ch30","number":30,"title":"NPU·모터 안전 제어","file":"ch30_capstone_motor_v02.html"},
+    {"id":"ch31","number":31,"title":"AES-128·HMAC 보안 UART","file":"ch31_capstone_secure_uart_v02.html"}
+  ]
+};
+</script>
+<script defer src="assets/education/site.js"></script>
+</body>
+</html>
