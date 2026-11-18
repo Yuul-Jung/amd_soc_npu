@@ -32,7 +32,7 @@
 | 23 | CPU · NPU 시간 비교 | [ch23_cpu_vs_npu_v02.html](../ch23_cpu_vs_npu_v02.html) | — | — | ⏳ | — | ⏳ |
 | 24 | 자원 · 타이밍 · 임계 경로 | [ch24_resource_timing_v02.html](../ch24_resource_timing_v02.html) | — | — | ⏳ | — | ⏳ |
 | 25 | 추정 전력 · 에너지 | [ch25_power_energy_v02.html](../ch25_power_energy_v02.html) | — | — | ⏳ | — | ⏳ |
-| 26 | 3×3 소형 CNN 경로 | chapter.json 대기 | | | | | |
+| 26 | 3×3 소형 CNN | [ch26_tiny_cnn_v02.html](../ch26_tiny_cnn_v02.html) | ✅ | ✅ | ⏳ | — | ⏳ |
 | 27 | 10분류 NPU SoC 통합 | chapter.json 대기 | | | | | |
 | 28 | 손글씨 숫자 인식 종합 | chapter.json 대기 | | | | | |
 | 29 | 센서 융합 산업안전 감시 | chapter.json 대기 | | | | | |

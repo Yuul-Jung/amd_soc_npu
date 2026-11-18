@@ -1,0 +1,702 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Basys3 NPU 26장 실습 · 3×3 소형 CNN 경로 (합성곱·풀링·Dense)">
+<meta name="generator" content="tools/guide/build_guides.py — 직접 수정 금지, chapter.json을 고친 뒤 재생성">
+<title>26장 · 3×3 소형 CNN 경로 (합성곱·풀링·Dense) (v02)</title>
+<link rel="stylesheet" href="assets/education/site.css">
+<style>
+.codeblock pre{max-height:780px;white-space:pre}
+.section svg{width:100%;height:auto}
+.vbadge{display:inline-block;padding:.15em .6em;border-radius:4px;font-size:.78em;font-weight:700;background:#d4edda;color:#155724;vertical-align:middle}
+.gate-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:10px}
+.gate{border:1px solid var(--line,#e0e0e0);border-radius:6px;padding:10px 14px;overflow-wrap:anywhere}
+.gate b{display:block;font:600 11px var(--mono,monospace);letter-spacing:.04em;margin-bottom:4px}
+.gate span{font-size:13px}
+.gate.pass{border-color:#2d8a52;background:#f0fbf4}
+.gate.todo{border-color:#b08900;background:#fffbe6}
+.gate.fail{border-color:#b3261e;background:#fdeceb}
+.gate.na{border-color:#c8c8c8;background:#f6f6f6;color:#666}
+.table-wrap{overflow-x:auto}
+.table-wrap>table{min-width:620px}
+.figure-wrap{overflow-x:auto}
+.figure-wrap svg{min-width:860px}
+.section :not(pre)>code{overflow-wrap:anywhere}
+.codebar{gap:8px}
+.codebar span{min-width:0;overflow-wrap:anywhere}
+.hero p{max-width:none}
+.access-skip{position:absolute;left:-9999px;top:0}
+.access-skip:focus{left:12px;top:12px;z-index:1003;background:#fff;color:#15171c;padding:6px 10px}
+.nw code{white-space:nowrap;overflow-wrap:normal}
+</style>
+</head>
+<body data-chapter="ch26">
+<a class="access-skip" href="#main-content">본문 바로가기</a>
+<button type="button" class="mobile-menu" id="mobile-menu" aria-controls="course-nav" aria-expanded="false">☰ 장·목차</button>
+<div class="shade" id="shade"></div>
+<header class="hero">
+  <div class="hero-inner">
+    <p class="kicker">BASYS3 · NPU 고도화판 · 26장 실습 <span class="vbadge">v02</span></p>
+    <h1>제26장 · 3×3 소형 CNN 경로 (합성곱·풀링·Dense)</h1>
+    <p>기존 NPU를 고치지 않고 옆에 소형 CNN 경로를 더합니다. 8×8 입력에 3×3 필터 4개로 합성곱(ReLU·정수 양자화)을 하고 2×2 최대 풀링으로 36특징을 만든 뒤, 15장 Dense와 16장 argmax로 10분류합니다. 새 TB와 함께 15·16·20장 회귀를 다시 돌립니다.</p>
+  </div>
+</header>
+<div class="wrap">
+  <nav class="toc" id="course-nav" aria-label="전체 장과 절 탐색"></nav>
+  <main class="content" id="main-content">
+    <section class="section" id="s00">
+      <h2><span class="num">00</span>이 장의 위치</h2>
+      <p><b>목표:</b> 기존 NPU를 고치지 않고 옆에 소형 CNN 경로를 더합니다. 8×8 입력에 3×3 필터 4개로 합성곱(ReLU·정수 양자화)을 하고 2×2 최대 풀링으로 36특징을 만든 뒤, 15장 Dense와 16장 argmax로 10분류합니다. 새 TB와 함께 15·16·20장 회귀를 다시 돌립니다.</p>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>구분</th><th>파일</th></tr></thead>
+        <tbody>
+          <tr><td>유지 (이전 장, 수정 없음)</td><td><ul><li><code>ch01/rtl/mac_core.v</code> <small>(01장)</small></li><li><code>ch04/rtl/bram_sync_buffer.v</code> <small>(04장)</small></li><li><code>ch05/rtl/fixed_quantizer.v</code> <small>(05장)</small></li><li><code>ch07/rtl/vector_dot_core.v</code> <small>(07장)</small></li><li><code>ch08/rtl/pe_array4.v</code> <small>(08장)</small></li><li><code>ch15/rtl/npu_dense_core.v</code> <small>(15장)</small></li><li><code>ch15/rtl/npu_dense_store.v</code> <small>(15장)</small></li><li><code>ch15/rtl/npu_dense.v</code> <small>(15장)</small></li><li><code>ch16/rtl/npu_argmax.v</code> <small>(16장)</small></li><li><code>ch13/reference/mnist8x8_reference.py</code> <small>(13장)</small></li><li><code>host_tools/p3_integer_reference.py</code> <small>()</small></li></ul></td></tr>
+          <tr><td>이번 장 작성</td><td><ul><li><code>ch26/rtl/npu_cnn3x3.v</code></li></ul></td></tr>
+        </tbody>
+      </table></div>
+      <p>전체 누적 관계: <a href="index.html#techtree">INDEX · 01 전체 테크트리</a> (00~31장 흐름 · 00~12장 모듈 재사용 도면)</p>
+      <p>실습 순서: 01 구조 확인 → 02 준비 → 03 RTL 작성 → 04 테스트벤치·기준 모델 작성 → 05 시뮬레이션 → 06 결과 판정 → 08 합성·타이밍(Vivado) → 09 인계.</p>
+    </section>
+    <section class="section" id="s01">
+      <h2><span class="num">01</span>구조도</h2>
+      <div class="figure-wrap" tabindex="0" role="region" aria-label="도면 (가로 스크롤 가능)"><svg viewBox="0 0 1193 547" role="img" aria-label="npu_cnn3x3 실제 포트와 하위 모듈 구조">
+      <rect x="250" y="30" width="693" height="477" rx="10" fill="#fff" stroke="#4635b1" stroke-width="2"/>
+      <text x="596" y="54" font-size="18" font-weight="700" text-anchor="middle">npu_cnn3x3</text>
+      <text x="596" y="72" font-size="13" text-anchor="middle" fill="#555">ch26/rtl/npu_cnn3x3.v · 구현 도식</text>
+      <text x="270" y="255" font-size="13" fill="#555">FSM 상태 (localparam 선언 순서 · 전이는 아래 상태 전이표)</text>
+      <text x="270" y="277" font-size="14" font-family="monospace">IDLE · CONV_GO · CONV_FEED · CONV_WAIT · CONV_Q · POOL · DENSE · ARGMAX</text>
+      <text x="222" y="64" font-size="14" font-family="monospace" text-anchor="end">clk</text>
+      <path d="M226 60 H250" stroke="#4635b1" stroke-width="1.5" stroke-dasharray="4 3"/><path d="M250 60 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="87" font-size="14" font-family="monospace" text-anchor="end">resetn</text>
+      <path d="M226 83 H250" stroke="#4635b1" stroke-width="1.5" stroke-dasharray="4 3"/><path d="M250 83 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="110" font-size="14" font-family="monospace" text-anchor="end">x_wr_en_i</text>
+      <path d="M226 106 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 106 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="133" font-size="14" font-family="monospace" text-anchor="end">x_addr_i[5:0]</text>
+      <path d="M226 129 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 129 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="156" font-size="14" font-family="monospace" text-anchor="end">x_data_i[7:0]</text>
+      <path d="M226 152 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 152 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="179" font-size="14" font-family="monospace" text-anchor="end">k_wr_en_i</text>
+      <path d="M226 175 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 175 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="202" font-size="14" font-family="monospace" text-anchor="end">k_filter_i[1:0]</text>
+      <path d="M226 198 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 198 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="225" font-size="14" font-family="monospace" text-anchor="end">k_addr_i[3:0]</text>
+      <path d="M226 221 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 221 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="248" font-size="14" font-family="monospace" text-anchor="end">k_data_i[7:0]</text>
+      <path d="M226 244 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 244 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="271" font-size="14" font-family="monospace" text-anchor="end">kb_wr_en_i</text>
+      <path d="M226 267 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 267 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="294" font-size="14" font-family="monospace" text-anchor="end">kb_filter_i[1:0]</text>
+      <path d="M226 290 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 290 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="317" font-size="14" font-family="monospace" text-anchor="end">kb_data_i[31:0]</text>
+      <path d="M226 313 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 313 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="340" font-size="14" font-family="monospace" text-anchor="end">d_w_wr_en_i</text>
+      <path d="M226 336 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 336 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="363" font-size="14" font-family="monospace" text-anchor="end">d_neuron_i[3:0]</text>
+      <path d="M226 359 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 359 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="386" font-size="14" font-family="monospace" text-anchor="end">d_addr_i[5:0]</text>
+      <path d="M226 382 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 382 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="409" font-size="14" font-family="monospace" text-anchor="end">d_data_i[7:0]</text>
+      <path d="M226 405 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 405 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="432" font-size="14" font-family="monospace" text-anchor="end">d_b_wr_en_i</text>
+      <path d="M226 428 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 428 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="455" font-size="14" font-family="monospace" text-anchor="end">d_b_data_i[31:0]</text>
+      <path d="M226 451 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 451 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="478" font-size="14" font-family="monospace" text-anchor="end">start_i</text>
+      <path d="M226 474 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 474 l-7 -4 v8 z" fill="#4635b1"/>
+      <path d="M943 60 H967" stroke="#4635b1" stroke-width="1.5"/><path d="M967 60 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="971" y="65" font-size="14" font-family="monospace">busy_o</text>
+      <path d="M943 83 H967" stroke="#4635b1" stroke-width="1.5"/><path d="M967 83 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="971" y="88" font-size="14" font-family="monospace">pooled_o[287:0]</text>
+      <path d="M943 106 H967" stroke="#4635b1" stroke-width="1.5"/><path d="M967 106 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="971" y="111" font-size="14" font-family="monospace">scores_o[319:0]</text>
+      <path d="M943 129 H967" stroke="#4635b1" stroke-width="1.5"/><path d="M967 129 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="971" y="134" font-size="14" font-family="monospace">done_o</text>
+      <path d="M943 152 H967" stroke="#4635b1" stroke-width="1.5"/><path d="M967 152 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="971" y="157" font-size="14" font-family="monospace">error_o</text>
+      <path d="M943 175 H967" stroke="#4635b1" stroke-width="1.5"/><path d="M967 175 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="971" y="180" font-size="14" font-family="monospace">class_o[3:0]</text>
+      <rect x="270" y="88" width="653" height="28" rx="5" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="5 3"/>
+      <text x="282" y="107" font-size="14" font-family="monospace">fixed_quantizer  (quant)</text>
+      <text x="911" y="107" font-size="12" text-anchor="end" fill="#4635b1">ch05 재사용</text>
+      <rect x="270" y="124" width="653" height="28" rx="5" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="5 3"/>
+      <text x="282" y="143" font-size="14" font-family="monospace">vector_dot_core  (conv_dot)</text>
+      <text x="911" y="143" font-size="12" text-anchor="end" fill="#4635b1">ch07 재사용</text>
+      <rect x="270" y="161" width="653" height="28" rx="5" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="5 3"/>
+      <text x="282" y="180" font-size="14" font-family="monospace">npu_dense  (dense)</text>
+      <text x="911" y="180" font-size="12" text-anchor="end" fill="#4635b1">ch15 재사용</text>
+      <rect x="270" y="198" width="653" height="28" rx="5" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="5 3"/>
+      <text x="282" y="217" font-size="14" font-family="monospace">npu_argmax  (argmax)</text>
+      <text x="911" y="217" font-size="12" text-anchor="end" fill="#4635b1">ch16 재사용</text>
+      <rect x="250" y="522" width="16" height="12" fill="#edeafa" stroke="#4635b1"/><text x="272" y="533" font-size="13">이번 장 신규</text>
+      <rect x="370" y="522" width="16" height="12" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="4 2"/><text x="392" y="533" font-size="13">이전 장 파일 재사용(수정 없음)</text>
+      <text x="600" y="533" font-size="13">왼쪽 input · 오른쪽 output · 점선 = 클록·리셋</text>
+      </svg></div>
+      <p>구현 도식: 포트 이름·폭과 하위 인스턴스는 <code>ch26/rtl/npu_cnn3x3.v</code> 선언에서 자동으로 가져왔습니다.</p>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>방향</th><th>포트</th><th>폭</th><th>구분</th><th>설명</th></tr></thead>
+        <tbody><tr><td>input</td><td class="nw"><code>clk</code></td><td class="nw"><code>1</code></td><td class="nw">클록</td><td>시스템 클록</td></tr><tr><td>input</td><td class="nw"><code>resetn</code></td><td class="nw"><code>1</code></td><td class="nw">리셋</td><td>동기 리셋 (Active-Low)</td></tr><tr><td>input</td><td class="nw"><code>x_wr_en_i</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>입력 쓰기 (busy_o 동안 무시)</td></tr><tr><td>input</td><td class="nw"><code>x_addr_i</code></td><td class="nw"><code>[5:0]</code></td><td class="nw">데이터·제어</td><td>입력 주소 0~63 (행*8 + 열)</td></tr><tr><td>input</td><td class="nw"><code>x_data_i</code></td><td class="nw"><code>[7:0]</code></td><td class="nw">데이터·제어</td><td>입력 값 (INT8, 0~127)</td></tr><tr><td>input</td><td class="nw"><code>k_wr_en_i</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>합성곱 가중치 쓰기</td></tr><tr><td>input</td><td class="nw"><code>k_filter_i</code></td><td class="nw"><code>[1:0]</code></td><td class="nw">데이터·제어</td><td>필터 번호 0~3</td></tr><tr><td>input</td><td class="nw"><code>k_addr_i</code></td><td class="nw"><code>[3:0]</code></td><td class="nw">데이터·제어</td><td>필터 안 위치 0~8 (ky*3 + kx)</td></tr><tr><td>input</td><td class="nw"><code>k_data_i</code></td><td class="nw"><code>[7:0]</code></td><td class="nw">데이터·제어</td><td>합성곱 가중치 (INT8)</td></tr><tr><td>input</td><td class="nw"><code>kb_wr_en_i</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>합성곱 Bias 쓰기</td></tr><tr><td>input</td><td class="nw"><code>kb_filter_i</code></td><td class="nw"><code>[1:0]</code></td><td class="nw">데이터·제어</td><td>필터 번호 0~3</td></tr><tr><td>input</td><td class="nw"><code>kb_data_i</code></td><td class="nw"><code>[31:0]</code></td><td class="nw">데이터·제어</td><td>합성곱 Bias (signed 32비트)</td></tr><tr><td>input</td><td class="nw"><code>d_w_wr_en_i</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>Dense 가중치 쓰기</td></tr><tr><td>input</td><td class="nw"><code>d_neuron_i</code></td><td class="nw"><code>[3:0]</code></td><td class="nw">데이터·제어</td><td>Dense 클래스 0~9</td></tr><tr><td>input</td><td class="nw"><code>d_addr_i</code></td><td class="nw"><code>[5:0]</code></td><td class="nw">데이터·제어</td><td>Dense 입력 번호 0~63</td></tr><tr><td>input</td><td class="nw"><code>d_data_i</code></td><td class="nw"><code>[7:0]</code></td><td class="nw">데이터·제어</td><td>Dense 가중치 (INT8)</td></tr><tr><td>input</td><td class="nw"><code>d_b_wr_en_i</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>Dense Bias 쓰기</td></tr><tr><td>input</td><td class="nw"><code>d_b_data_i</code></td><td class="nw"><code>[31:0]</code></td><td class="nw">데이터·제어</td><td>Dense Bias (signed 32비트)</td></tr><tr><td>input</td><td class="nw"><code>start_i</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>추론 시작 (IDLE에서만)</td></tr><tr><td>output</td><td class="nw"><code>busy_o</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>추론 중</td></tr><tr><td>output</td><td class="nw"><code>pooled_o</code></td><td class="nw"><code>[287:0]</code></td><td class="nw">데이터·제어</td><td>풀링 특징 36개 (f*9 + py*3 + px, INT8)</td></tr><tr><td>output</td><td class="nw"><code>scores_o</code></td><td class="nw"><code>[319:0]</code></td><td class="nw">데이터·제어</td><td>점수 10개 (signed 32비트)</td></tr><tr><td>output</td><td class="nw"><code>done_o</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>추론 완료 1클록 펄스</td></tr><tr><td>output</td><td class="nw"><code>error_o</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>오류 1클록 펄스 (Dense 입력 응답 없음)</td></tr><tr><td>output</td><td class="nw"><code>class_o</code></td><td class="nw"><code>[3:0]</code></td><td class="nw">데이터·제어</td><td>결과 클래스 0~9</td></tr></tbody>
+      </table></div>
+      <p>상태도 (원본 <a href="ch26/diagrams/ch26_cnn_fsm.json"><code>ch26/diagrams/ch26_cnn_fsm.json</code></a> · <a href="https://yuul-jung.github.io/svg-flow-editor/">svg-flow-editor</a>에서 <b>작업 불러오기</b>로 열어 편집 → <b>작업 저장</b> → <code>python3 tools/diagram/export_svg.py</code>):</p>
+      <div class="figure-wrap" tabindex="0" role="region" aria-label="도면 (가로 스크롤 가능)"><svg style="min-width:909px" id="ch26-fsm" xmlns="http://www.w3.org/2000/svg" width="1300" height="1260" viewBox="0 0 1300 1260" aria-label="npu_cnn3x3 FSM 상태도" role="img" version="1.1"><!-- 원본: ch26/diagrams/ch26_cnn_fsm.json · json-sha256: 5767c3be907ffbf30d21c073232588f79d3f933fe942a19f7ea51dd92506cf39 · 생성: svg-flow-editor (로컬 사본) · 직접 수정 금지 --><defs><marker id="ch26-fsm-arrowhead-0" markerWidth="15" markerHeight="15" refX="13.125" refY="7.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 15 7.5 L 0 15 z" fill="#5A1E1E"/></marker><marker id="ch26-fsm-arrowhead-1" markerWidth="15" markerHeight="15" refX="13.125" refY="7.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 15 7.5 L 0 15 z" fill="#5A1E1E"/></marker><marker id="ch26-fsm-arrowhead-2" markerWidth="15" markerHeight="15" refX="13.125" refY="7.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 15 7.5 L 0 15 z" fill="#5A1E1E"/></marker><marker id="ch26-fsm-arrowhead-3" markerWidth="15" markerHeight="15" refX="13.125" refY="7.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 15 7.5 L 0 15 z" fill="#5A1E1E"/></marker><marker id="ch26-fsm-arrowhead-4" markerWidth="15" markerHeight="15" refX="13.125" refY="7.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 15 7.5 L 0 15 z" fill="#5A1E1E"/></marker><marker id="ch26-fsm-arrowhead-5" markerWidth="15" markerHeight="15" refX="13.125" refY="7.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 15 7.5 L 0 15 z" fill="#5A1E1E"/></marker><marker id="ch26-fsm-arrowhead-6" markerWidth="15" markerHeight="15" refX="13.125" refY="7.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 15 7.5 L 0 15 z" fill="#5A1E1E"/></marker><marker id="ch26-fsm-arrowhead-7" markerWidth="15" markerHeight="15" refX="13.125" refY="7.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 15 7.5 L 0 15 z" fill="#5A1E1E"/></marker><marker id="ch26-fsm-arrowhead-8" markerWidth="15" markerHeight="15" refX="13.125" refY="7.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 15 7.5 L 0 15 z" fill="#5A1E1E"/></marker><marker id="ch26-fsm-arrowhead-9" markerWidth="15" markerHeight="15" refX="13.125" refY="7.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 15 7.5 L 0 15 z" fill="#5A1E1E"/></marker></defs><rect x="0" y="0" width="1300" height="1260" fill="#fff"/><g data-heading="title"><text x="52" y="58.2" font-size="30" font-weight="780" fill="#172439" text-anchor="start" class="heading-text" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">26장 · npu_cnn3x3 FSM 상태도</text></g><g data-heading="subtitle"><text x="52" y="103.78" font-size="17" font-weight="400" fill="#617083" text-anchor="start" class="heading-text" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">ch26/rtl/npu_cnn3x3.v · case(state) 기준 · 리셋 시 IDLE</text></g><line x1="0" y1="129" x2="1300" y2="129" stroke="#c5cfdb" stroke-width="2" pointer-events="none" data-role="heading-divider"/><g id="edges"><g data-edge="e1" class="edge"><path d="M 560 225 L 560 295" fill="none" stroke="#5A1E1E" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#ch26-fsm-arrowhead-0)"/><text x="570" y="265" text-anchor="start" font-size="16" font-weight="750" fill="#5A1E1E" class="edge-label" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">start_i</text></g><g data-edge="e2" class="edge"><path d="M 560 365 L 560 435" fill="none" stroke="#5A1E1E" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#ch26-fsm-arrowhead-1)"/><text x="570" y="405" text-anchor="start" font-size="16" font-weight="750" fill="#5A1E1E" class="edge-label" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">항상</text></g><g data-edge="e3" class="edge"><path d="M 560 505 L 560 575" fill="none" stroke="#5A1E1E" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#ch26-fsm-arrowhead-2)"/><text x="570" y="545" text-anchor="start" font-size="16" font-weight="750" fill="#5A1E1E" class="edge-label" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">t_q==8</text></g><g data-edge="e4" class="edge"><path d="M 560 645 L 560 715" fill="none" stroke="#5A1E1E" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#ch26-fsm-arrowhead-3)"/><text x="570" y="685" text-anchor="start" font-size="16" font-weight="750" fill="#5A1E1E" class="edge-label" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">dot_done</text></g><g data-edge="e5" class="edge"><path d="M 560 785 L 560 855" fill="none" stroke="#5A1E1E" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#ch26-fsm-arrowhead-4)"/><text x="570" y="825" text-anchor="start" font-size="16" font-weight="750" fill="#5A1E1E" class="edge-label" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">마지막 위치·필터</text></g><g data-edge="e6" class="edge"><path d="M 560 925 L 560 995" fill="none" stroke="#5A1E1E" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#ch26-fsm-arrowhead-5)"/><text x="570" y="965" text-anchor="start" font-size="16" font-weight="750" fill="#5A1E1E" class="edge-label" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">p_q==36</text></g><g data-edge="e7" class="edge"><path d="M 560 1065 L 560 1135" fill="none" stroke="#5A1E1E" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#ch26-fsm-arrowhead-6)"/><text x="570" y="1105" text-anchor="start" font-size="16" font-weight="750" fill="#5A1E1E" class="edge-label" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">d_done</text></g><g data-edge="e8" class="edge"><path d="M 645 750 L 840 750 L 840 330 L 622.5 330" fill="none" stroke="#5A1E1E" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#ch26-fsm-arrowhead-7)"/><text x="742.5" y="741" text-anchor="middle" font-size="16" font-weight="750" fill="#5A1E1E" class="edge-label" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">다음 위치 (144번)</text></g><g data-edge="e9" class="edge"><path d="M 460 1030 L 400 1030 L 400 190 L 510 190" fill="none" stroke="#5A1E1E" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#ch26-fsm-arrowhead-8)"/><text x="390" y="615" text-anchor="end" font-size="16" font-weight="750" fill="#5A1E1E" class="edge-label" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">d_err → error_o</text></g><g data-edge="e10" class="edge"><path d="M 635 1170 L 1120 1170 L 1120 190 L 610 190" fill="none" stroke="#5A1E1E" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#ch26-fsm-arrowhead-9)"/><text x="877.5" y="1161" text-anchor="middle" font-size="16" font-weight="750" fill="#5A1E1E" class="edge-label" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">am_done → done_o</text></g></g><g id="nodes"><g data-node="IDLE" class="node"><rect x="510" y="155" width="100" height="70" fill="none" stroke="#1F3A5F" stroke-width="3.2" class="node-shape" pointer-events="all"/><text x="560" y="179" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="22" font-weight="750" fill="#172439" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">IDLE</text><text x="560" y="204" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="16" font-weight="400" fill="#273e5e" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">대기 (유지)</text></g><g data-node="CONV_GO" class="node"><rect x="497.5" y="295" width="125" height="70" fill="none" stroke="#1F3A5F" stroke-width="3.2" class="node-shape" pointer-events="all"/><text x="560" y="319" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="22" font-weight="750" fill="#172439" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">CONV_GO</text><text x="560" y="344" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="16" font-weight="400" fill="#273e5e" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">길이 9 내적 시작</text></g><g data-node="CONV_FEED" class="node"><rect x="472.5" y="435" width="175" height="70" fill="none" stroke="#1F3A5F" stroke-width="3.2" class="node-shape" pointer-events="all"/><text x="560" y="459" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="22" font-weight="750" fill="#172439" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">CONV_FEED</text><text x="560" y="484" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="16" font-weight="400" fill="#273e5e" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">창·필터 9쌍 전달 (유지)</text></g><g data-node="CONV_WAIT" class="node"><rect x="482.5" y="575" width="155" height="70" fill="none" stroke="#1F3A5F" stroke-width="3.2" class="node-shape" pointer-events="all"/><text x="560" y="599" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="22" font-weight="750" fill="#172439" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">CONV_WAIT</text><text x="560" y="624" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="16" font-weight="400" fill="#273e5e" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">내적 완료 대기 (유지)</text></g><g data-node="CONV_Q" class="node"><rect x="475" y="715" width="170" height="70" fill="none" stroke="#1F3A5F" stroke-width="3.2" class="node-shape" pointer-events="all"/><text x="560" y="739" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="22" font-weight="750" fill="#172439" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">CONV_Q</text><text x="560" y="764" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="16" font-weight="400" fill="#273e5e" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">양자화 결과 저장 (유지)</text></g><g data-node="POOL" class="node"><rect x="477.5" y="855" width="165" height="70" fill="none" stroke="#1F3A5F" stroke-width="3.2" class="node-shape" pointer-events="all"/><text x="560" y="879" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="22" font-weight="750" fill="#172439" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">POOL</text><text x="560" y="904" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="16" font-weight="400" fill="#273e5e" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">2×2 최대 36개 (유지)</text></g><g data-node="DENSE" class="node"><rect x="460" y="995" width="200" height="70" fill="none" stroke="#1F3A5F" stroke-width="3.2" class="node-shape" pointer-events="all"/><text x="560" y="1019" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="22" font-weight="750" fill="#172439" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">DENSE</text><text x="560" y="1044" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="16" font-weight="400" fill="#273e5e" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">15장 Dense 64→10 (유지)</text></g><g data-node="ARGMAX" class="node"><rect x="485" y="1135" width="150" height="70" fill="none" stroke="#1F3A5F" stroke-width="3.2" class="node-shape" pointer-events="all"/><text x="560" y="1159" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="22" font-weight="750" fill="#172439" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">ARGMAX</text><text x="560" y="1184" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="16" font-weight="400" fill="#273e5e" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">16장 argmax (유지)</text></g></g></svg></div>
+      <p>상태 전이표 (<code>ch26/rtl/npu_cnn3x3.v</code>의 <code>case(state)</code> 기준, 리셋 시 <code>IDLE</code>):</p>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>현재 상태</th><th>조건</th><th>다음 상태</th><th>동작</th></tr></thead>
+        <tbody><tr><td class="nw"><code>IDLE</code></td><td><code>start_i</code></td><td class="nw"><code>CONV_GO</code></td><td>f_q·oy_q·ox_q = 0</td></tr><tr><td class="nw"><code>CONV_GO</code></td><td><code>항상</code></td><td class="nw"><code>CONV_FEED</code></td><td>길이 9 내적 시작, t_q=0</td></tr><tr><td class="nw"><code>CONV_FEED</code></td><td><code>dot_ready &amp;&amp; t_q&lt;8</code></td><td class="nw"><code>CONV_FEED</code></td><td>창 화소·필터 1쌍 전달, t_q+1</td></tr><tr><td class="nw"><code>CONV_FEED</code></td><td><code>dot_ready &amp;&amp; t_q==8</code></td><td class="nw"><code>CONV_WAIT</code></td><td>마지막 쌍 전달</td></tr><tr><td class="nw"><code>CONV_WAIT</code></td><td><code>dot_done</code></td><td class="nw"><code>CONV_Q</code></td><td>ReLU 값을 양자화기에 넣음</td></tr><tr><td class="nw"><code>CONV_Q</code></td><td><code>q_valid &amp;&amp; 다음 위치·필터 있음</code></td><td class="nw"><code>CONV_GO</code></td><td>출력 저장, ox→oy→f 순서로 증가</td></tr><tr><td class="nw"><code>CONV_Q</code></td><td><code>q_valid &amp;&amp; 마지막 (f=3, oy=5, ox=5)</code></td><td class="nw"><code>POOL</code></td><td>출력 저장, p_q=0</td></tr><tr><td class="nw"><code>POOL</code></td><td><code>p_q&lt;36</code></td><td class="nw"><code>POOL</code></td><td>풀링 1개 저장, p_q+1</td></tr><tr><td class="nw"><code>POOL</code></td><td><code>p_q==36</code></td><td class="nw"><code>DENSE</code></td><td>Dense 시작</td></tr><tr><td class="nw"><code>DENSE</code></td><td><code>d_err</code></td><td class="nw"><code>IDLE</code></td><td>error_o 펄스</td></tr><tr><td class="nw"><code>DENSE</code></td><td><code>d_done</code></td><td class="nw"><code>ARGMAX</code></td><td>argmax 시작</td></tr><tr><td class="nw"><code>ARGMAX</code></td><td><code>am_done</code></td><td class="nw"><code>IDLE</code></td><td>done_o 펄스</td></tr><tr><td class="nw"><code>default</code></td><td><code>유효하지 않은 상태</code></td><td class="nw"><code>IDLE</code></td><td>error_o 펄스</td></tr></tbody>
+      </table></div>
+    </section>
+    <section class="section" id="s02">
+      <h2><span class="num">02</span>준비</h2>
+      <ol>
+        <li>VS Code에서 저장소 루트(<code>amd_soc_npu/</code>)를 엽니다.</li>
+        <li>도구를 확인합니다.</li>
+      </ol>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 도구 확인</span></div>
+        <pre tabindex="0"><code>sudo apt install -y iverilog python3 ripgrep   # 처음 한 번
+iverilog -V 2&gt;&amp;1 | head -1      # Icarus Verilog version 12.0 이상
+python3 --version</code></pre></div>
+      <ol start="3"><li>00절 '유지' 파일이 이전 장 결과 그대로 있는지 확인합니다 (기준 모델은 13장 <code>features()</code>와 <code>host_tools</code>의 <code>round_shift_away</code>·<code>sat_int8</code>·<code>argmax_lowest</code>를 씁니다).</li></ol>
+    </section>
+    <section class="section" id="s03">
+      <h2><span class="num">03</span>RTL 작성</h2>
+      <p>아래 파일을 경로 그대로 만들고 전체 코드를 입력합니다.</p>
+      <div class="codeblock">
+        <div class="codebar"><span>ch26/rtl/npu_cnn3x3.v · verilog · 원본 · RTL_SIM 통과 2026-11-19</span></div>
+        <pre tabindex="0"><code class="language-verilog">`timescale 1ns/1ps
+`default_nettype none
+// 26장 소형 CNN: 8×8 입력(13장 계약) → 3×3 합성곱 필터 4개(보폭 1, 여백 없음) → ReLU·05장 양자화 → 6×6×4
+//                → 2×2 최대 풀링 → 3×3×4 = 36특징 → 15장 Dense 64→10(36~63번 입력은 0) → 16장 argmax.
+// 합성곱 출력 하나는 07장 내적 코어로 길이 9 내적을 한 번 돌려 만든다. 기존 NPU 파일은 고치지 않는다.
+module npu_cnn3x3 #(
+    parameter integer SHIFT = 6                  // 합성곱 출력 = sat_int8(round(ReLU(내적 + Bias) / 2^SHIFT))
+) (
+    input  wire                 clk,
+    input  wire                 resetn,
+    input  wire                 x_wr_en_i,       // 입력 8×8 (INT8, 0~127)
+    input  wire           [5:0] x_addr_i,
+    input  wire           [7:0] x_data_i,
+    input  wire                 k_wr_en_i,       // 합성곱 가중치: 필터 f, 위치 0~8 (행 우선)
+    input  wire           [1:0] k_filter_i,
+    input  wire           [3:0] k_addr_i,
+    input  wire           [7:0] k_data_i,
+    input  wire                 kb_wr_en_i,      // 합성곱 Bias (필터별 32비트)
+    input  wire           [1:0] kb_filter_i,
+    input  wire          [31:0] kb_data_i,
+    input  wire                 d_w_wr_en_i,     // Dense 가중치·Bias (15장 포트 그대로)
+    input  wire           [3:0] d_neuron_i,
+    input  wire           [5:0] d_addr_i,
+    input  wire           [7:0] d_data_i,
+    input  wire                 d_b_wr_en_i,
+    input  wire          [31:0] d_b_data_i,
+    input  wire                 start_i,
+    output wire                 busy_o,
+    output wire         [287:0] pooled_o,        // 36특징 (f*9 + py*3 + px)
+    output wire         [319:0] scores_o,
+    output reg                  done_o,
+    output reg                  error_o,
+    output wire           [3:0] class_o
+);
+    localparam IDLE=0, CONV_GO=1, CONV_FEED=2, CONV_WAIT=3, CONV_Q=4, POOL=5, DENSE=6, ARGMAX=7;
+    reg [2:0] state;
+    reg signed [7:0]  x_q  [0:63];
+    reg signed [7:0]  k_q  [0:35];
+    reg signed [31:0] kb_q [0:3];
+    reg signed [7:0]  conv_q [0:143];           // f*36 + oy*6 + ox
+    reg signed [7:0]  pool_q [0:35];
+    reg [1:0] f_q; reg [2:0] oy_q, ox_q; reg [3:0] t_q; reg [5:0] p_q;
+    integer i;
+    wire busy = (state != IDLE);
+    assign busy_o = busy;
+
+    always @(posedge clk) begin                  // 쓰기 포트 (실행 중 무시)
+        if (x_wr_en_i &amp;&amp; !busy) x_q[x_addr_i] &lt;= x_data_i;
+        if (k_wr_en_i &amp;&amp; !busy &amp;&amp; k_addr_i &lt; 9) k_q[k_filter_i * 9 + k_addr_i] &lt;= k_data_i;
+        if (kb_wr_en_i &amp;&amp; !busy) kb_q[kb_filter_i] &lt;= kb_data_i;
+    end
+
+    // ── 합성곱 출력 1개 = 길이 9 내적 (07장 코어)
+    wire [1:0] ky = (t_q &gt;= 6) ? 2'd2 : (t_q &gt;= 3) ? 2'd1 : 2'd0;
+    wire [1:0] kx = t_q - ky * 3;
+    wire signed [7:0] a = x_q[(oy_q + ky) * 8 + ox_q + kx];
+    wire signed [7:0] b = k_q[f_q * 9 + t_q];
+    wire dot_ready, dot_done; wire signed [31:0] dot;
+    vector_dot_core #(.DATA_WIDTH(8), .ACC_WIDTH(32)) conv_dot (
+        .clk(clk), .resetn(resetn), .start_i(state == CONV_GO), .valid_i(state == CONV_FEED), .length_i(9'd9),
+        .a_i(a), .b_i(b), .ready_o(dot_ready), .busy_o(), .done_o(dot_done), .error_o(), .result_o(dot));
+
+    // ── ReLU → 05장 양자화기 (1클록)
+    wire signed [31:0] pre = dot + kb_q[f_q];
+    wire signed [31:0] relu = pre[31] ? 32'sd0 : pre;
+    wire signed [7:0] q; wire q_valid;
+    fixed_quantizer #(.IN_WIDTH(32), .OUT_WIDTH(8), .SHIFT(SHIFT), .ROUND(1), .SATURATE(1)) quant (
+        .clk(clk), .resetn(resetn), .valid_i(state == CONV_WAIT &amp;&amp; dot_done), .x_i(relu),
+        .q_o(q), .valid_o(q_valid), .overflow_o());
+
+    // ── 2×2 최대 풀링 (ReLU 뒤라 모두 0 이상)
+    wire [1:0] pf = p_q / 9; wire [3:0] pr = p_q % 9; wire [1:0] py = pr / 3; wire [1:0] px = pr % 3;
+    wire [7:0] base = pf * 36 + py * 12 + px * 2;                       // (2py)*6 + 2px
+    wire signed [7:0] m0 = conv_q[base], m1 = conv_q[base + 1], m2 = conv_q[base + 6], m3 = conv_q[base + 7];
+    wire signed [7:0] m01 = (m1 &gt; m0) ? m1 : m0, m23 = (m3 &gt; m2) ? m3 : m2;
+    wire signed [7:0] mx = (m23 &gt; m01) ? m23 : m01;
+
+    // ── 15장 Dense 64→10 (입력 = 풀링 36개, 나머지 0, 1클록 지연 읽기)
+    wire d_x_en; wire [5:0] d_x_idx; reg signed [7:0] d_x; reg d_xv;
+    wire d_done, d_err;
+    npu_dense #(.N_IN(64), .N_OUT(10), .ACC_WIDTH(32)) dense (
+        .clk(clk), .resetn(resetn), .model_clear_i(1'b0),
+        .w_wr_en_i(d_w_wr_en_i &amp;&amp; !busy), .w_neuron_i(d_neuron_i), .w_addr_i(d_addr_i), .w_data_i(d_data_i),
+        .b_wr_en_i(d_b_wr_en_i &amp;&amp; !busy), .b_neuron_i(d_neuron_i), .b_data_i(d_b_data_i),
+        .model_sum_o(), .model_err_o(),
+        .x_rd_en_o(d_x_en), .x_rd_idx_o(d_x_idx), .x_data_i(d_x), .x_valid_i(d_xv),
+        .start_i(state == POOL &amp;&amp; p_q == 36), .busy_o(), .done_o(d_done), .error_o(d_err), .scores_o(scores_o));
+    always @(posedge clk) begin
+        d_xv &lt;= resetn &amp;&amp; d_x_en;
+        if (d_x_en) d_x &lt;= (d_x_idx &lt; 36) ? pool_q[d_x_idx] : 8'sd0;
+    end
+
+    wire am_done;
+    npu_argmax #(.N(10), .W(32)) argmax (
+        .clk(clk), .resetn(resetn), .start_i(d_done), .scores_i(scores_o), .busy_o(), .done_o(am_done), .class_o(class_o));
+
+    genvar g;
+    generate for (g = 0; g &lt; 36; g = g + 1) begin : po
+        assign pooled_o[g*8 +: 8] = pool_q[g];
+    end endgenerate
+
+    always @(posedge clk) begin
+        if (!resetn) begin
+            state &lt;= IDLE; f_q &lt;= 0; oy_q &lt;= 0; ox_q &lt;= 0; t_q &lt;= 0; p_q &lt;= 0; done_o &lt;= 0; error_o &lt;= 0;
+        end else begin
+            done_o &lt;= 0; error_o &lt;= 0;
+            case (state)
+                IDLE: if (start_i) begin f_q &lt;= 0; oy_q &lt;= 0; ox_q &lt;= 0; state &lt;= CONV_GO; end
+                CONV_GO: begin t_q &lt;= 0; state &lt;= CONV_FEED; end
+                CONV_FEED: if (dot_ready) begin                 // 9쌍을 한 클록에 하나씩
+                    if (t_q == 8) state &lt;= CONV_WAIT; else t_q &lt;= t_q + 4'd1;
+                end
+                CONV_WAIT: if (dot_done) state &lt;= CONV_Q;
+                CONV_Q: if (q_valid) begin                      // 양자화 결과 저장, 다음 위치·필터
+                    conv_q[f_q * 36 + oy_q * 6 + ox_q] &lt;= q;
+                    if (ox_q != 5) begin ox_q &lt;= ox_q + 3'd1; state &lt;= CONV_GO; end
+                    else if (oy_q != 5) begin ox_q &lt;= 0; oy_q &lt;= oy_q + 3'd1; state &lt;= CONV_GO; end
+                    else if (f_q != 3) begin ox_q &lt;= 0; oy_q &lt;= 0; f_q &lt;= f_q + 2'd1; state &lt;= CONV_GO; end
+                    else begin p_q &lt;= 0; state &lt;= POOL; end
+                end
+                POOL: begin                                     // p_q 0~35: 풀링 1개씩, 36: Dense 시작
+                    if (p_q &lt; 36) begin pool_q[p_q] &lt;= mx; p_q &lt;= p_q + 6'd1; end
+                    else state &lt;= DENSE;
+                end
+                DENSE: if (d_err) begin state &lt;= IDLE; error_o &lt;= 1; end
+                    else if (d_done) state &lt;= ARGMAX;
+                ARGMAX: if (am_done) begin state &lt;= IDLE; done_o &lt;= 1; end
+                default: begin state &lt;= IDLE; error_o &lt;= 1; end
+            endcase
+        end
+    end
+endmodule
+`default_nettype wire</code></pre>
+      </div>
+    </section>
+    <section class="section" id="s04">
+      <h2><span class="num">04</span>테스트벤치·기준 모델 작성</h2>
+      <p>테스트벤치는 출력을 자동 판정합니다. 12사례: 숫자 0~4는 경계 검출 필터(세로·가로 소벨, 라플라시안, 평균), 숫자 5~9는 무작위 필터, ReLU 뒤 전부 0, 포화. Dense 가중치는 무작위이며 학습한 모델이 아닙니다. 마지막에 15·16·20장 시뮬레이션을 그대로 다시 돌려 기존 경로가 깨지지 않았는지 봅니다.</p>
+      <div class="codeblock">
+        <div class="codebar"><span>ch26/tb/tb_npu_cnn3x3.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-19</span></div>
+        <pre tabindex="0"><code class="language-systemverilog">`timescale 1ns/1ps
+// 26장 TB: 12사례(경계 필터 숫자 5개, 무작위 필터 5개, ReLU 전부 0, 포화)의 풀링 36개·점수 10개·클래스를 돌려준다.
+module tb_npu_cnn3x3;
+    reg clk=0, rn=0, xwe=0, kwe=0, kbwe=0, dwe=0, dbwe=0, start=0;
+    reg [5:0] xa=0, da=0; reg [7:0] xd=0, kd=0, dd=0; reg [1:0] kf=0, kbf=0; reg [3:0] ka=0, dn=0;
+    reg [31:0] kbd=0, dbd=0;
+    wire busy, done, err; wire [287:0] pooled; wire [319:0] scores; wire [3:0] cls;
+    npu_cnn3x3 #(.SHIFT(6)) dut(.clk(clk), .resetn(rn), .x_wr_en_i(xwe), .x_addr_i(xa), .x_data_i(xd),
+        .k_wr_en_i(kwe), .k_filter_i(kf), .k_addr_i(ka), .k_data_i(kd), .kb_wr_en_i(kbwe), .kb_filter_i(kbf), .kb_data_i(kbd),
+        .d_w_wr_en_i(dwe), .d_neuron_i(dn), .d_addr_i(da), .d_data_i(dd), .d_b_wr_en_i(dbwe), .d_b_data_i(dbd),
+        .start_i(start), .busy_o(busy), .pooled_o(pooled), .scores_o(scores), .done_o(done), .error_o(err), .class_o(cls));
+    always #5 clk = ~clk;
+
+    integer f, o, n, k, c, v, cases = 0, cyc;
+    reg [8*16-1:0] name; string vp, ap;
+    task rdv(output integer r); begin if ($fscanf(f, "%d", r) != 1) $fatal(1, "벡터 형식"); end endtask
+
+    initial begin
+        if (!$value$plusargs("VECTORS=%s", vp) || !$value$plusargs("ACTUAL=%s", ap)) $fatal(1, "경로 인자");
+        f = $fopen(vp, "r"); o = $fopen(ap, "w"); if (!f || !o) $fatal(1, "파일 열기");
+        repeat (3) @(negedge clk); rn = 1;
+        while ($fscanf(f, "%d %s", n, name) == 2) begin
+            for (k = 0; k &lt; 64; k = k + 1) begin rdv(v); @(negedge clk); xwe = 1; xa = k; xd = v; end
+            @(negedge clk); xwe = 0;
+            for (c = 0; c &lt; 4; c = c + 1) for (k = 0; k &lt; 9; k = k + 1) begin rdv(v); @(negedge clk); kwe = 1; kf = c; ka = k; kd = v; end
+            @(negedge clk); kwe = 0;
+            for (c = 0; c &lt; 4; c = c + 1) begin rdv(v); @(negedge clk); kbwe = 1; kbf = c; kbd = v; end
+            @(negedge clk); kbwe = 0;
+            for (c = 0; c &lt; 10; c = c + 1) for (k = 0; k &lt; 64; k = k + 1) begin rdv(v); @(negedge clk); dwe = 1; dn = c; da = k; dd = v; end
+            @(negedge clk); dwe = 0;
+            for (c = 0; c &lt; 10; c = c + 1) begin rdv(v); @(negedge clk); dbwe = 1; dn = c; dbd = v; end
+            @(negedge clk); dbwe = 0;
+            @(negedge clk); start = 1; @(negedge clk); start = 0; cyc = 1;
+            @(negedge clk); xwe = 1; xa = 0; xd = 8'h55; @(negedge clk); xwe = 0;   // 실행 중 쓰기 → 무시
+            while (!done) begin @(negedge clk); cyc = cyc + 1; if (err) $fatal(1, "%s: error_o", name); end
+            $fwrite(o, "%0d", n);
+            for (c = 0; c &lt; 36; c = c + 1) $fwrite(o, " %0d", $signed(pooled[c*8 +: 8]));
+            for (c = 0; c &lt; 10; c = c + 1) $fwrite(o, " %0d", $signed(scores[c*32 +: 32]));
+            $fwrite(o, " %0d\n", cls);
+            cases = cases + 1;
+        end
+        $display("RTL_SIM_PASS CNN3X3 cases=%0d cycles_per_inference=%0d", cases, cyc);
+        $fclose(o); $finish;
+    end
+    initial begin #100000000; $fatal(1, "시간 초과"); end
+endmodule</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>ch26/reference/cnn_reference.py · python · 원본 · RTL_SIM 통과 2026-11-19</span></div>
+        <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
+"""26장 기준 모델: 8×8 → 3×3 합성곱 4필터(ReLU·반올림 시프트·INT8 포화) → 2×2 최대 풀링 → Dense 36(64)→10 → argmax."""
+from __future__ import annotations
+import argparse
+import random
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+sys.path[:0] = [str(ROOT / "ch13" / "reference"), str(ROOT / "host_tools")]
+from mnist8x8_reference import draw_digit, features            # noqa: E402
+from p3_integer_reference import argmax_lowest, dot_signed, round_shift_away, sat_int8  # noqa: E402
+
+SHIFT = 6
+
+
+def conv(x, k, kb):
+    out = []
+    for f in range(4):
+        for oy in range(6):
+            for ox in range(6):
+                win = [x[(oy + ky) * 8 + ox + kx] for ky in range(3) for kx in range(3)]
+                out.append(sat_int8(round_shift_away(max(0, dot_signed(win, k[f]) + kb[f]), SHIFT)))
+    return out
+
+
+def pool(c):
+    return [max(c[f * 36 + (2 * py + dy) * 6 + 2 * px + dx] for dy in (0, 1) for dx in (0, 1))
+            for f in range(4) for py in range(3) for px in range(3)]
+
+
+def infer(x, k, kb, w, b):
+    p = pool(conv(x, k, kb))
+    s = [dot_signed(p + [0] * 28, row) + bb for row, bb in zip(w, b)]
+    return p, s, argmax_lowest(s)
+
+
+def cases():
+    rng = random.Random(2626)
+    edges = [[-1, 0, 1, -2, 0, 2, -1, 0, 1], [-1, -2, -1, 0, 0, 0, 1, 2, 1],
+             [0, 1, 0, 1, -4, 1, 0, 1, 0], [1, 1, 1, 1, 1, 1, 1, 1, 1]]    # 세로·가로 경계, 라플라시안, 평균
+    out = []
+    for d in range(10):
+        x = features(draw_digit(d))
+        k = edges if d &lt; 5 else [[rng.randint(-20, 20) for _ in range(9)] for _ in range(4)]
+        kb = [rng.randint(-200, 200) for _ in range(4)]
+        w = [[rng.randint(-128, 127) for _ in range(64)] for _ in range(10)]   # 36~63번 가중치는 입력이 0이라 점수에 영향 없음
+        b = [rng.randint(-5000, 5000) for _ in range(10)]
+        out.append((f"digit_{d}", x, k, kb, w, b))
+    x = features(draw_digit(8))
+    out.append(("relu_zero", x, [[-10] * 9] * 4, [-1] * 4, [[1] * 64] * 10, list(range(10))))
+    out.append(("saturate", [127] * 64, [[127] * 9] * 4, [0] * 4, [[1] * 64] * 10, [0] * 10))
+    return out
+
+
+def main():
+    ap = argparse.ArgumentParser(); ap.add_argument("--out"); ap.add_argument("--actual")
+    a = ap.parse_args()
+    cs = cases()
+    seen = {n: infer(x, k, kb, w, b) for n, x, k, kb, w, b in cs}
+    assert not any(seen["relu_zero"][0]) and all(v == 127 for v in seen["saturate"][0])
+    print(f"PYTHON_CNN_SELF_TEST_PASS cases={len(cs)} conv=6x6x4 pool=3x3x4 shift={SHIFT}")
+    if a.out and not a.actual:
+        with open(Path(a.out) / "vectors.txt", "w") as f:
+            for n, (name, x, k, kb, w, b) in enumerate(cs):
+                f.write(f"{n} {name}\n")
+                for blk in ([x], k, [kb], w, [b]):
+                    f.writelines(" ".join(map(str, r)) + "\n" for r in blk)
+    if a.actual:
+        got = {}
+        for ln in open(a.actual):
+            try:
+                p = list(map(int, ln.split()))
+            except ValueError:
+                raise SystemExit(f"PYTHON_RTL_COMPARE_FAIL 정수가 아닌 RTL 출력: {ln[:60]}")
+            got[p[0]] = p[1:]
+        for n, (name, x, k, kb, w, b) in enumerate(cs):
+            p, s, c = infer(x, k, kb, w, b)
+            if got.get(n) != p + s + [c]:
+                raise SystemExit(f"PYTHON_RTL_COMPARE_FAIL case={name}\n rtl={got.get(n)}\n py ={p + s + [c]}")
+        print(f"PYTHON_RTL_COMPARE_PASS cases={len(cs)} pooled={36 * len(cs)} scores={10 * len(cs)}")
+
+
+if __name__ == "__main__":
+    main()</code></pre>
+      </div>
+    </section>
+    <section class="section" id="s05">
+      <h2><span class="num">05</span>시뮬레이션 실행</h2>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 저장소 루트에서 실행</span></div>
+        <pre tabindex="0"><code>bash ch26/scripts/run_sim.sh   # 기준 모델 → CNN RTL 시뮬레이션 (12사례) → Python 비교 → 15·16·20장 회귀</code></pre></div>
+      <p>기대 출력 (Icarus Verilog 12.0 · 2026-11-19 실제 실행 로그 발췌, 출처 <code>ch26/validation/rtl_sim_20261119.log</code>):</p>
+      <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
+        <pre tabindex="0"><code>Icarus Verilog version 12.0 (stable) ()
+PYTHON_CNN_SELF_TEST_PASS cases=12 conv=6x6x4 pool=3x3x4 shift=6
+RTL_SIM_PASS CNN3X3 cases=12 cycles_per_inference=2512
+PYTHON_CNN_SELF_TEST_PASS cases=12 conv=6x6x4 pool=3x3x4 shift=6
+PYTHON_RTL_COMPARE_PASS cases=12 pooled=432 scores=120
+REGRESSION ch15: PYTHON_RTL_COMPARE_PASS cfg=8x10 cases=7 scores=70 model_sum=ok
+REGRESSION ch16: PYTHON_RTL_COMPARE_PASS cases=11 hidden=88 scores=110 classes=11
+REGRESSION ch20: PYTHON_RTL_COMPARE_PASS npe=4 cases=2 scores=20
+REGRESSION_PASS chapters=3</code></pre></div>
+    </section>
+    <section class="section" id="s06">
+      <h2><span class="num">06</span>결과 판정</h2>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
+        <tbody><tr><td><code>RTL_SIM_PASS CNN3X3 cases=12 cycles_per_inference=2512</code></td><td>12사례 모두 오류 없이 끝나고, 실행 중 입력 쓰기는 무시됨</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS cases=12 pooled=432 scores=120</code></td><td>풀링 특징 432개(12×36), 점수 120개, 클래스가 Python과 같음</td></tr><tr><td><code>REGRESSION_PASS chapters=3</code></td><td>재사용한 15·16장과 20장 AXI 경로의 시뮬레이션이 그대로 통과</td></tr></tbody>
+      </table></div>
+      <p><b>실패 시:</b> TB의 <code>$fatal</code> 메시지에 표시된 cycle 번호와 기대값/실제값을 확인하고, 03절 코드와 한 줄씩 대조합니다. 하나라도 실패하면 다음 장으로 넘어가지 않습니다.</p>
+    </section>
+    <section class="section" id="s07">
+      <h2><span class="num">07</span>코드 읽기 포인트</h2>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>위치</th><th>내용</th></tr></thead>
+        <tbody><tr><td>합성곱 = 길이 9 내적</td><td>출력 한 칸은 창 9화소와 필터 9개의 내적입니다. 07장 코어를 위치마다 한 번씩(6×6×4 = 144번) 돌리고, 창 주소는 <code>(oy+ky)·8 + ox+kx</code>입니다.</td></tr>
+<tr><td>ReLU·양자화</td><td>합성곱 출력 = <code>sat_int8(round(ReLU(내적 + Bias) / 2^6))</code>. 16장 은닉층과 같은 05장 양자화기를 씁니다.</td></tr>
+<tr><td>2×2 최대 풀링</td><td>6×6을 겹치지 않는 2×2 칸으로 나눠 최댓값을 고릅니다. 칸의 첫 위치는 <code>(2py)·6 + 2px</code>이고, ReLU 뒤라 값이 모두 0 이상입니다.</td></tr>
+<tr><td>36 → 64 맞추기</td><td>15장 Dense는 입력 수가 2의 거듭제곱이어야 해서 64로 두고, 36~63번 입력은 0을 돌려줍니다. 그 자리의 가중치는 점수에 영향을 주지 않습니다.</td></tr>
+<tr><td>기존 경로와 분리</td><td>이 모듈은 15·16장 파일을 고치지 않고 인스턴스만 합니다. 27장 통합 시스템은 784→10 경로를 쓰고, CNN은 같은 방식으로 AXI 래퍼를 하나 더 두면 붙일 수 있습니다.</td></tr></tbody>
+      </table></div>
+    </section>
+    <section class="section" id="s08">
+      <h2><span class="num">08</span>합성·타이밍·보드</h2>
+      <p>Vivado가 설치된 PC의 VS Code 터미널에서 이 장 모듈만 Out-of-Context(OOC)로 합성·배치·배선하고 100 MHz 타이밍을 확인합니다.</p>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · Vivado 배치 (저장소 루트)</span></div>
+        <pre tabindex="0"><code>source /tools/Xilinx/Vivado/&lt;버전&gt;/settings64.sh   # 설치 경로에 맞게 변경
+vivado -mode batch -nojournal -source tools/vivado/ooc_timing.tcl -tclargs ch26
+# 기대: SYNTH_TIMING_PASS ch26 npu_cnn3x3 WNS=… WHS=… LUT=… FF=… DSP48E1=… RAMB=…</code></pre></div>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>판정 항목</th><th>기준</th><th>확인 위치</th></tr></thead>
+        <tbody>
+          <tr><td>Setup / Hold</td><td><code>WNS ≥ 0</code> · <code>WHS ≥ 0</code> (clk 10.000 ns)</td><td><code>build/vivado/ch26/timing_route.rpt</code></td></tr>
+          <tr><td>자원</td><td>DSP48E1: 합성곱 1 + Dense 4 · 합성곱 출력 144바이트는 LUTRAM/FF — 기대값 · 실행 전 ⚠ 미검증</td><td><code>build/vivado/ch26/route_util.rpt</code></td></tr>
+        </tbody>
+      </table></div>
+      <p>OOC 결과는 입출력 핀 지연을 포함하지 않으므로 보드 Top 타이밍을 대신하지 않습니다. 증거 저장은 <code>bash tools/run_vivado_all.sh ooc</code>(→ <code>ch26/validation/vivado_ooc_YYYYMMDD.txt</code>). 보드 확인은 <a href="ch12_integrated_npu_v05.html#s08">12장 · 08</a>에서 통합 Top으로 진행합니다.</p>
+    </section>
+    <section class="section" id="s09">
+      <h2><span class="num">09</span>검증 현황·인계</h2>
+      <p>누적 보고 (이전 결과 → 추가 RTL → 시험 벡터 → 시뮬레이션 → 합성/보드 → 인계):</p>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>이전 결과</th><th>추가 RTL</th><th>시험 벡터</th><th>시뮬레이션</th><th>합성 / 보드</th><th>인계</th></tr></thead>
+        <tbody><tr><td>01장 · 04장 · 05장 · 07장 · 08장 · 13장 · 15장 · 16장</td><td><code>npu_cnn3x3.v</code></td><td><code>tb_npu_cnn3x3.sv</code><br><code>cnn_reference.py</code></td><td>통과</td><td>⚠ 대기 / 미실시</td><td>1건 (아래 표)</td></tr></tbody>
+      </table></div>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>다음 장으로 넘기는 파일</th><th>사용처</th></tr></thead>
+        <tbody><tr><td><code>ch26/rtl/npu_cnn3x3.v</code></td><td>확장 과제: AXI 래퍼(20장 방식)를 더해 SoC에 두 번째 가속기로 연결 (27장 기준선에는 넣지 않음)</td></tr></tbody>
+      </table></div>
+      <p>검증 게이트 (<code>ch26/validation/</code> 증거 파일 기준으로 자동 표시):</p>
+      <div class="gate-row">
+        <div class="gate pass">
+          <b>HTML_PASS</b>
+          <span>v02 · 생성기·정적 검사</span>
+        </div>
+        <div class="gate pass">
+          <b>HOST_MODEL_PASS</b>
+          <span>PYTHON_CNN_SELF_TEST_PASS cases=12 conv=6x6x4 pool=3x3x4 shift=6</span>
+        </div>
+        <div class="gate pass">
+          <b>RTL_SIM_PASS</b>
+          <span>RTL_SIM_PASS CNN3X3 cases=12 cycles_per_inference=2512 · Icarus Verilog 12.0 · 2026-11-19</span>
+        </div>
+        <div class="gate todo">
+          <b>SYNTH_TIMING_PASS</b>
+          <span>⚠ 미검증 · VS Code Vivado 실행 대기 (08절)</span>
+        </div>
+        <div class="gate todo">
+          <b>BOARD_PASS</b>
+          <span>⚠ 미실시 · 현재 실물 보드 확인 불가</span>
+        </div>
+      </div>
+    </section>
+    <div class="chapter-links" id="chapter-links"></div>
+  </main>
+</div>
+<script>
+window.COURSE={
+ "title": "Basys3 소형 NPU 실습 (고도화판)",
+ "chapters": [
+  {
+   "id": "ch00",
+   "number": 0,
+   "title": "UART Echo",
+   "file": "ch00_uart_echo_v05.html"
+  },
+  {
+   "id": "ch01",
+   "number": 1,
+   "title": "DSP 추론 MAC 누산",
+   "file": "ch01_mac_v05.html"
+  },
+  {
+   "id": "ch02",
+   "number": 2,
+   "title": "DSP48E1 타깃 곱셈",
+   "file": "ch02_dsp_v05.html"
+  },
+  {
+   "id": "ch03",
+   "number": 3,
+   "title": "MAC 2단계 파이프라인",
+   "file": "ch03_mac_pipeline_v05.html"
+  },
+  {
+   "id": "ch04",
+   "number": 4,
+   "title": "BRAM 동기 버퍼",
+   "file": "ch04_bram_v05.html"
+  },
+  {
+   "id": "ch05",
+   "number": 5,
+   "title": "Fixed-Point Quantizer",
+   "file": "ch05_fixed_v05.html"
+  },
+  {
+   "id": "ch06",
+   "number": 6,
+   "title": "INT8·INT16 정밀도 비교",
+   "file": "ch06_precision_v05.html"
+  },
+  {
+   "id": "ch07",
+   "number": 7,
+   "title": "벡터 내적",
+   "file": "ch07_vector_dot_v05.html"
+  },
+  {
+   "id": "ch08",
+   "number": 8,
+   "title": "4PE 병렬 어레이",
+   "file": "ch08_pe4_v05.html"
+  },
+  {
+   "id": "ch09",
+   "number": 9,
+   "title": "Dense 4뉴런 레이어",
+   "file": "ch09_dense_v05.html"
+  },
+  {
+   "id": "ch10",
+   "number": 10,
+   "title": "4뉴런 NPU Core",
+   "file": "ch10_npu_core_v05.html"
+  },
+  {
+   "id": "ch11",
+   "number": 11,
+   "title": "UART 모델 적재 컨트롤러",
+   "file": "ch11_uart_register_v05.html"
+  },
+  {
+   "id": "ch12",
+   "number": 12,
+   "title": "통합 NPU Top",
+   "file": "ch12_integrated_npu_v05.html"
+  },
+  {
+   "id": "ch13",
+   "number": 13,
+   "title": "8×8 손글씨·10분류 준비",
+   "file": "ch13_mnist_8x8_v02.html"
+  },
+  {
+   "id": "ch14",
+   "number": 14,
+   "title": "4PE 그룹·10개 출력",
+   "file": "ch14_group10_v02.html"
+  },
+  {
+   "id": "ch15",
+   "number": 15,
+   "title": "Dense 64→10 공통 블록",
+   "file": "ch15_dense_64x10_v02.html"
+  },
+  {
+   "id": "ch16",
+   "number": 16,
+   "title": "2층 신경망 64→8→10",
+   "file": "ch16_mlp_64_8_10_v02.html"
+  },
+  {
+   "id": "ch17",
+   "number": 17,
+   "title": "784원소 타일 실행",
+   "file": "ch17_tiled_784_v02.html"
+  },
+  {
+   "id": "ch18",
+   "number": 18,
+   "title": "Float32 · INT8 · INT16 정밀도",
+   "file": "ch18_precision_v02.html"
+  },
+  {
+   "id": "ch19",
+   "number": 19,
+   "title": "1·4·8PE 사이클 비교",
+   "file": "ch19_pe_compare_v02.html"
+  },
+  {
+   "id": "ch20",
+   "number": 20,
+   "title": "AXI4-Lite 레지스터",
+   "file": "ch20_axi_lite_v02.html"
+  },
+  {
+   "id": "ch21",
+   "number": 21,
+   "title": "MicroBlaze V + NPU 블록 설계",
+   "file": "ch21_soc_bd_v02.html"
+  },
+  {
+   "id": "ch22",
+   "number": 22,
+   "title": "Vitis C 드라이버",
+   "file": "ch22_vitis_driver_v02.html"
+  },
+  {
+   "id": "ch23",
+   "number": 23,
+   "title": "CPU · NPU 시간 비교",
+   "file": "ch23_cpu_vs_npu_v02.html"
+  },
+  {
+   "id": "ch24",
+   "number": 24,
+   "title": "자원 · 타이밍 · 임계 경로",
+   "file": "ch24_resource_timing_v02.html"
+  },
+  {
+   "id": "ch25",
+   "number": 25,
+   "title": "추정 전력 · 에너지",
+   "file": "ch25_power_energy_v02.html"
+  },
+  {
+   "id": "ch26",
+   "number": 26,
+   "title": "3×3 소형 CNN",
+   "file": "ch26_tiny_cnn_v02.html"
+  }
+ ]
+};
+</script>
+<script defer src="assets/education/site.js"></script>
+</body>
+</html>
