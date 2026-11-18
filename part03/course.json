@@ -207,7 +207,9 @@
     "ch23_soc_sim": "xsim_full_soc_mbv_elf_pass_2026_11_18_cpu_1816547_npu_e2e_1080161_cycles_board_not_run",
     "ch24_timing": "ooc_route_period_sweep_2026_11_18_fmax_core146_int16_126_tile101_axi105_mhz",
     "ch26_cnn": "rtl_sim_pass_conv3x3_8x8_bit_exact_ooc_route_wns_4_647_2026_11_18",
-    "ch25_ch31": "education_guides_written_implementation_and_fpga_validation_not_run",
+    "ch25_power": "vivado_report_power_saif_2026_11_18_cpu_4_541mJ_npu_2_733mJ_estimate_match13pct",
+    "ch27_handoff": "run_all_level_sim_pass_2026_11_18_board_checklist_not_run",
+    "ch28_ch31": "education_guides_written_implementation_and_fpga_validation_not_run",
     "vivado": "ch19_ch20_ooc_synth_route_ch21_full_soc_bitstream_xsa_2026_11_18_all_wns_positive_100mhz",
     "board": "not_run",
     "web": "not_run"
