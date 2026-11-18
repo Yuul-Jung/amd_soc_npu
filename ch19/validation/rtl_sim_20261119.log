@@ -1,0 +1,15 @@
+Icarus Verilog version 12.0 (stable) ()
+RTL_SIM_PASS NPE=1 cases=5 same_as_ch18=0 cycles=23922
+PYTHON_RTL_COMPARE_PASS npe=1 cases=5 scores=50
+RTL_SIM_PASS NPE=2 cases=5 same_as_ch18=0 cycles=11967
+PYTHON_RTL_COMPARE_PASS npe=2 cases=5 scores=50
+CH18_DW8_CYCLES 7263 (pe_array4의 완료 레지스터 때문에 그룹마다 2클록 더 걸림)
+RTL_SIM_PASS NPE=4 cases=5 same_as_ch18=5 cycles=7185
+PYTHON_RTL_COMPARE_PASS npe=4 cases=5 scores=50
+RTL_SIM_PASS NPE=8 cases=5 same_as_ch18=0 cycles=4794
+PYTHON_RTL_COMPARE_PASS npe=8 cases=5 scores=50
+CYCLES npe=1 groups=10 measured=23922 formula=23922 speedup_vs_1pe=1.00
+CYCLES npe=2 groups=5 measured=11967 formula=11967 speedup_vs_1pe=2.00
+CYCLES npe=4 groups=3 measured=7185 formula=7185 speedup_vs_1pe=3.33
+CYCLES npe=8 groups=2 measured=4794 formula=4794 speedup_vs_1pe=4.99
+CYCLE_MODEL_PASS A=3 B=12 element=3clk
