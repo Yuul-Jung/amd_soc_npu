@@ -1,0 +1,96 @@
+PASS ch00
+PASS ch01
+PASS ch02
+PASS ch03
+PASS ch04
+PASS ch05
+PASS ch06
+PASS ch07
+PASS ch08
+PASS ch09
+PASS ch10
+PASS dsp_engine
+PASS ch11_ch12
+# 제3부 00~12장 실제 RTL 회귀 실행
+
+| 단계 | 실제 결과 | 로그 |
+|---|---|---|
+| ch00 | RTL_SIM_PASS | <repo>/mini_npu/validation/local_runs/20261118T033010175021430/ch00.log |
+| ch01 | RTL_SIM_PASS | <repo>/mini_npu/validation/local_runs/20261118T033010175021430/ch01.log |
+| ch02 | RTL_SIM_PASS | <repo>/mini_npu/validation/local_runs/20261118T033010175021430/ch02.log |
+| ch03 | RTL_SIM_PASS | <repo>/mini_npu/validation/local_runs/20261118T033010175021430/ch03.log |
+| ch04 | RTL_SIM_PASS | <repo>/mini_npu/validation/local_runs/20261118T033010175021430/ch04.log |
+| ch05 | RTL_SIM_PASS | <repo>/mini_npu/validation/local_runs/20261118T033010175021430/ch05.log |
+| ch06 | RTL_SIM_PASS | <repo>/mini_npu/validation/local_runs/20261118T033010175021430/ch06.log |
+| ch07 | RTL_SIM_PASS | <repo>/mini_npu/validation/local_runs/20261118T033010175021430/ch07.log |
+| ch08 | RTL_SIM_PASS | <repo>/mini_npu/validation/local_runs/20261118T033010175021430/ch08.log |
+| ch09 | RTL_SIM_PASS | <repo>/mini_npu/validation/local_runs/20261118T033010175021430/ch09.log |
+| ch10 | RTL_SIM_PASS | <repo>/mini_npu/validation/local_runs/20261118T033010175021430/ch10.log |
+| dsp_engine | RTL_SIM_PASS | <repo>/mini_npu/validation/local_runs/20261118T033010175021430/dsp_engine.log |
+| ch11_ch12 | RTL_SIM_PASS | <repo>/mini_npu/validation/local_runs/20261118T033010175021430/ch11_ch12.log |
+
+**실행 완료:** 원본 01~10장 독립 실험 + 신규 준비·DSP 엔진·UART 전체 회귀.
+**중요:** SYNTH_TIMING_PASS, BOARD_PASS를 뜻하지 않음.
+
+## run_adversarial.sh
+warning: Some design elements have no explicit time unit and/or
+       : time precision. This may cause confusing timing results.
+       : Affected design elements are:
+       :   -- module uart_core declared here: <repo>/mini_npu/../common/rtl/uart_core.v:3
+       :   -- module uart_rx declared here: <repo>/mini_npu/../common/rtl/uart_rx.v:2
+       :   -- module uart_tx declared here: <repo>/mini_npu/../common/rtl/uart_tx.v:2
+T1_RESET_DEFAULTS_PASS
+T2_TX_FULL_CAPACITY_PASS capacity=17 bytes=40 full_pushpop=23
+T3_NO_VALID_NO_TRANSFER_PASS
+T4_RX_FULL_17_NO_LOSS_PASS full_pushpop=1
+T5_RX_OVERRUN_18TH_DROPPED_PASS
+T6_RX_STREAM_RANDOM_READY_PASS bytes=64 pushpop=2
+T7_FULL_DUPLEX_PASS rx=20 tx=20
+T8_FRAMING_ERROR_PASS
+T9_RESET_DURING_TX_FLUSH_PASS
+T10_RESET_DURING_RX_PASS
+T11_ABORTED_FRAME_OBSERVED byte=F0 (8N1 has no truncation detection)
+COVERAGE rx_full=349 tx_full=2798 rx_full_pushpop=2 tx_full_pushpop=26 rx_pushpop=2 tx_pushpop=30 rx_hold=3485 tx_stall=2570
+UART_FIFO_ADVERSARIAL_SIM_PASS tests=11
+<repo>/mini_npu/tb/tb_uart_core_fifo.sv:308: $finish called at 177100000 (1ps)
+<repo>/mini_npu/rtl/npu_dsp_mac_lane.v:2: warning: timescale for npu_dsp_mac_lane inherited from another file.
+<repo>/mini_npu/../ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
+<repo>/mini_npu/rtl/npu_engine4.v:4: warning: timescale for npu_engine4 inherited from another file.
+<repo>/mini_npu/../ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
+<repo>/mini_npu/rtl/uart_npu_command_controller.v:4: warning: timescale for uart_npu_command_controller inherited from another file.
+<repo>/mini_npu/../ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
+<repo>/mini_npu/rtl/npu_display_controller.v:2: warning: timescale for npu_display_controller inherited from another file.
+<repo>/mini_npu/../ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
+<repo>/mini_npu/rtl/npu_reset_controller.v:2: warning: timescale for npu_reset_controller inherited from another file.
+<repo>/mini_npu/../ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
+<repo>/mini_npu/rtl/basys3_npu_top.v:2: warning: timescale for basys3_npu_top inherited from another file.
+<repo>/mini_npu/../ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
+warning: Some design elements have no explicit time unit and/or
+       : time precision. This may cause confusing timing results.
+       : Affected design elements are:
+       :   -- module uart_core declared here: <repo>/mini_npu/../common/rtl/uart_core.v:3
+       :   -- module uart_rx declared here: <repo>/mini_npu/../common/rtl/uart_rx.v:2
+       :   -- module uart_tx declared here: <repo>/mini_npu/../common/rtl/uart_tx.v:2
+<repo>/mini_npu/rtl/uart_npu_command_controller.v:74: warning: @* is sensitive to all 6 words in array 'payload'.
+<repo>/mini_npu/rtl/uart_npu_command_controller.v:74: warning: @* is sensitive to all 6 words in array 'payload'.
+<repo>/mini_npu/rtl/uart_npu_command_controller.v:74: warning: @* is sensitive to all 6 words in array 'payload'.
+<repo>/mini_npu/rtl/uart_npu_command_controller.v:75: warning: @* is sensitive to all 6 words in array 'payload'.
+<repo>/mini_npu/rtl/uart_npu_command_controller.v:75: warning: @* is sensitive to all 6 words in array 'payload'.
+<repo>/mini_npu/rtl/uart_npu_command_controller.v:76: warning: @* is sensitive to all 6 words in array 'payload'.
+<repo>/mini_npu/rtl/uart_npu_command_controller.v:76: warning: @* is sensitive to all 6 words in array 'payload'.
+<repo>/mini_npu/rtl/uart_npu_command_controller.v:77: warning: @* is sensitive to all 6 words in array 'payload'.
+<repo>/mini_npu/rtl/uart_npu_command_controller.v:78: warning: @* is sensitive to all 6 words in array 'payload'.
+<repo>/mini_npu/rtl/uart_npu_command_controller.v:78: warning: @* is sensitive to all 6 words in array 'payload'.
+<repo>/mini_npu/rtl/uart_npu_command_controller.v:78: warning: @* is sensitive to all 6 words in array 'payload'.
+<repo>/mini_npu/rtl/uart_npu_command_controller.v:78: warning: @* is sensitive to all 6 words in array 'payload'.
+<repo>/mini_npu/rtl/uart_npu_command_controller.v:78: warning: @* is sensitive to all 6 words in array 'payload'.
+A1_STATUS_CRLF_IGNORED_PASS
+A2_INVALID_OPCODE_ERR_PASS count=4
+A3_INVALID_FIELDS_ERR_PASS err=8 ok_boundary=2
+A4_COMMAND_DURING_RESPONSE_PASS ordered=4
+A5_BURST_20_STATUS_NO_LOSS_PASS
+A6_RESET_DURING_RESPONSE_PASS
+A7_ABORTED_COMMAND_NO_TIMEOUT_OBSERVED recovered_by_reset=1
+A8_FRAMING_ERROR_PASS
+NPU_UART_ADVERSARIAL_SIM_PASS tests=8 responses=43
+<repo>/mini_npu/tb/tb_npu_uart_adversarial.sv:187: $finish called at 51292620000 (1ps)

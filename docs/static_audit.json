@@ -1,0 +1,9 @@
+{
+  "kind": "STATIC_AUDIT_ONLY",
+  "checks": 330,
+  "link_checks": 60,
+  "errors": [],
+  "rtl_simulation": "NOT_EXECUTED_BY_THIS_SCRIPT",
+  "synthesis": "NOT_RUN",
+  "board": "NOT_RUN"
+}

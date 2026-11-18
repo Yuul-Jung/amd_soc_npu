@@ -1,0 +1,34 @@
+<repo>/mini_npu/rtl/npu_dsp_mac_lane.v:2: warning: timescale for npu_dsp_mac_lane inherited from another file.
+<repo>/mini_npu/../ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
+<repo>/mini_npu/rtl/npu_engine4.v:4: warning: timescale for npu_engine4 inherited from another file.
+<repo>/mini_npu/../ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
+<repo>/mini_npu/rtl/uart_npu_command_controller.v:4: warning: timescale for uart_npu_command_controller inherited from another file.
+<repo>/mini_npu/../ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
+<repo>/mini_npu/rtl/npu_display_controller.v:2: warning: timescale for npu_display_controller inherited from another file.
+<repo>/mini_npu/../ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
+<repo>/mini_npu/rtl/npu_reset_controller.v:2: warning: timescale for npu_reset_controller inherited from another file.
+<repo>/mini_npu/../ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
+<repo>/mini_npu/rtl/basys3_npu_top.v:2: warning: timescale for basys3_npu_top inherited from another file.
+<repo>/mini_npu/../ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
+warning: Some design elements have no explicit time unit and/or
+       : time precision. This may cause confusing timing results.
+       : Affected design elements are:
+       :   -- module uart_core declared here: <repo>/mini_npu/../common/rtl/uart_core.v:3
+       :   -- module uart_rx declared here: <repo>/mini_npu/../common/rtl/uart_rx.v:2
+       :   -- module uart_tx declared here: <repo>/mini_npu/../common/rtl/uart_tx.v:2
+<repo>/mini_npu/rtl/uart_npu_command_controller.v:74: warning: @* is sensitive to all 6 words in array 'payload'.
+<repo>/mini_npu/rtl/uart_npu_command_controller.v:74: warning: @* is sensitive to all 6 words in array 'payload'.
+<repo>/mini_npu/rtl/uart_npu_command_controller.v:74: warning: @* is sensitive to all 6 words in array 'payload'.
+<repo>/mini_npu/rtl/uart_npu_command_controller.v:75: warning: @* is sensitive to all 6 words in array 'payload'.
+<repo>/mini_npu/rtl/uart_npu_command_controller.v:75: warning: @* is sensitive to all 6 words in array 'payload'.
+<repo>/mini_npu/rtl/uart_npu_command_controller.v:76: warning: @* is sensitive to all 6 words in array 'payload'.
+<repo>/mini_npu/rtl/uart_npu_command_controller.v:76: warning: @* is sensitive to all 6 words in array 'payload'.
+<repo>/mini_npu/rtl/uart_npu_command_controller.v:77: warning: @* is sensitive to all 6 words in array 'payload'.
+<repo>/mini_npu/rtl/uart_npu_command_controller.v:78: warning: @* is sensitive to all 6 words in array 'payload'.
+<repo>/mini_npu/rtl/uart_npu_command_controller.v:78: warning: @* is sensitive to all 6 words in array 'payload'.
+<repo>/mini_npu/rtl/uart_npu_command_controller.v:78: warning: @* is sensitive to all 6 words in array 'payload'.
+<repo>/mini_npu/rtl/uart_npu_command_controller.v:78: warning: @* is sensitive to all 6 words in array 'payload'.
+<repo>/mini_npu/rtl/uart_npu_command_controller.v:78: warning: @* is sensitive to all 6 words in array 'payload'.
+INTEGRATED_UART_RTL_SIM_PASS classes=6 model_edit=1 invalid_length=1
+<repo>/mini_npu/tb/tb_npu_uart.sv:136: $finish called at 29187595000 (1ps)
+PC_GOLDEN_COMPARE_PASS predictions=6 model_edit=1

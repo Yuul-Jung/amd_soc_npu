@@ -1,0 +1,10 @@
+warning: Some design elements have no explicit time unit and/or
+       : time precision. This may cause confusing timing results.
+       : Affected design elements are:
+       :   -- module basys3_uart_echo_top declared here: <repo>/ch00/rtl/basys3_uart_echo_top.v:2
+       :   -- module uart_core declared here: <repo>/common/rtl/uart_core.v:3
+       :   -- module uart_echo_controller declared here: <repo>/common/rtl/uart_echo_controller.v:2
+       :   -- module uart_rx declared here: <repo>/common/rtl/uart_rx.v:2
+       :   -- module uart_tx declared here: <repo>/common/rtl/uart_tx.v:2
+UART_ECHO_RTL_SIM_PASS decoded=2
+<repo>/ch00/tb/tb_uart_echo.sv:35: $finish called at 251915000 (1ps)
