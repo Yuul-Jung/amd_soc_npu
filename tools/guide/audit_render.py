@@ -4,6 +4,7 @@
   pip install playwright && python3 -m playwright install chromium
   python3 tools/guide/audit_render.py                 # 로컬 파일
   python3 tools/guide/audit_render.py --base https://yuul-jung.github.io/amd_soc_npu/   # 배포본
+  python3 tools/guide/audit_render.py --browser firefox   # chromium(기본)·firefox·webkit(Safari 엔진)
 결과: docs/RENDER_AUDIT.md (통과/실패 판정과 근거). Playwright가 없으면 실행하지 않는다.
 """
 import json, os, sys
@@ -23,7 +24,9 @@ JS_PAGE = r"""() => {
   r.links = [...document.querySelectorAll('#chapter-links a')].map(a => a.getAttribute('href'));
   r.codeblocks = document.querySelectorAll('.codeblock').length;
   r.copy_buttons = document.querySelectorAll('.codebar button').length;
-  // SVG 글자끼리 겹침 검사 (같은 svg 안의 text 상자 교차)
+  // SVG 글자끼리 겹침 검사 (같은 svg 안의 text 상자 교차).
+  // 브라우저마다 글자 상자에 위아래 여백을 넣는 정도가 달라(Firefox가 큼) 바로 아랫줄과 몇 px 포개질 수 있으므로,
+  // 세로로 작은 글자 높이의 35% 이상 포개질 때만 겹침으로 본다.
   r.svg_overlaps = [];
   document.querySelectorAll('svg').forEach((svg, si) => {
     const t = [...svg.querySelectorAll('text')].map(e => [e.textContent, e.getBoundingClientRect()]);
@@ -31,7 +34,7 @@ JS_PAGE = r"""() => {
       const a = t[i][1], b = t[j][1];
       const ox = Math.min(a.right, b.right) - Math.max(a.left, b.left);
       const oy = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top);
-      if (ox > 1 && oy > 1) r.svg_overlaps.push(`svg${si}: "${t[i][0]}" ↔ "${t[j][0]}"`);
+      if (ox > 1 && oy > 0.35 * Math.min(a.height, b.height)) r.svg_overlaps.push(`svg${si}: "${t[i][0]}" ↔ "${t[j][0]}"`);
     }
   });
   return r;
@@ -45,13 +48,16 @@ def main():
         print("RENDER_AUDIT_NOT_RUN: playwright 미설치")
         return 2
     base = sys.argv[sys.argv.index("--base") + 1] if "--base" in sys.argv else None
+    engine = sys.argv[sys.argv.index("--browser") + 1] if "--browser" in sys.argv else "chromium"
     course = json.load(open(os.path.join(ROOT, "course.json"), encoding="utf-8"))
     pages = ["index.html"] + [c["file"] for c in course["chapters"] if os.path.exists(os.path.join(ROOT, c["file"]))]
     url = (lambda p: base.rstrip("/") + "/" + p) if base else (lambda p: "file://" + os.path.join(ROOT, p))
     rows, fails = [], 0
     with sync_playwright() as pw:
-        b = pw.chromium.launch()
-        ctx = b.new_context(permissions=["clipboard-read", "clipboard-write"])
+        b = getattr(pw, engine).launch()
+        ver = b.version
+        # 클립보드 읽기 권한은 Chromium에서만 부여할 수 있어 복사 원문 비교는 Chromium 전용
+        ctx = b.new_context(permissions=["clipboard-read", "clipboard-write"]) if engine == "chromium" else b.new_context()
         pg = ctx.new_page()
         for p in pages:
             issues, info = [], {}
@@ -95,7 +101,7 @@ def main():
                 pg.set_viewport_size({"width": 1366, "height": 900})
                 pg.goto(url(p)); pg.wait_for_timeout(250)
                 blocks = pg.locator(".codeblock").filter(has_text=".v · verilog")
-                if blocks.count():
+                if blocks.count() and engine == "chromium":
                     blk = blocks.first
                     blk.locator(".codebar button").click()
                     pg.wait_for_timeout(150)
@@ -111,12 +117,12 @@ def main():
         b.close()
     target = base or "로컬 파일"
     out = ["# 화면 점검 결과 (자동 생성)", "",
-           f"`python3 tools/guide/audit_render.py{' --base ' + base if base else ''}` · 대상: {target} · Chromium (Playwright)", "",
+           f"`python3 tools/guide/audit_render.py{' --base ' + base if base else ''}{' --browser ' + engine if engine != 'chromium' else ''}` · 대상: {target} · {engine} {ver} (Playwright)", "",
            f"검사: 화면 폭 {'·'.join(map(str, WIDTHS))}px 가로 넘침, 헤더 높이(1366px), 책장 사진·바탕색, 장 탐색, 이전/다음 링크, "
-           "390px 모바일 메뉴 열기·Escape 닫기, 코드 복사 버튼 수, 첫 Verilog 박스 복사 원문 일치, SVG 글자 겹침", "",
+           "390px 모바일 메뉴 열기·Escape 닫기, 코드 복사 버튼 수, " + ("첫 Verilog 박스 복사 원문 일치, " if engine == "chromium" else "") + "SVG 글자 겹침", "",
            "| 페이지 | 판정 | 근거 |", "|---|---|---|"] + [f"| {p} | {r} | {n} |" for p, r, n in rows]
-    out += ["", "미검증: 다크 테마(교육용은 밝은 테마 고정), 인쇄, 스크린리더 실제 낭독, Safari·Firefox."]
-    name = "RENDER_AUDIT_PAGES.md" if base else "RENDER_AUDIT.md"
+    out += ["", "다른 브라우저 결과: `docs/RENDER_AUDIT*_firefox.md`·`*_webkit.md`. 인쇄·접근성: `docs/A11Y_PRINT_AUDIT.md`."]
+    name = ("RENDER_AUDIT_PAGES" if base else "RENDER_AUDIT") + ("" if engine == "chromium" else "_" + engine) + ".md"
     open(os.path.join(ROOT, "docs", name), "w", encoding="utf-8").write("\n".join(out) + "\n")
     print(("RENDER_AUDIT_PASS" if not fails else f"RENDER_AUDIT_FAIL count={fails}") + f" pages={len(rows)}")
     return 1 if fails else 0
