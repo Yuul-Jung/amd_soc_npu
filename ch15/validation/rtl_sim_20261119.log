@@ -1,0 +1,11 @@
+Icarus Verilog version 12.0 (stable) ()
+PYTHON_DENSE_SELF_TEST_PASS configs=64x10/64x8/8x10 cases_each=7
+RTL_SIM_PASS DENSE cfg=64x10 cases=7 guards=2
+tb/tb_npu_dense.sv:72: $finish called at 87480000 (1ps)
+PYTHON_RTL_COMPARE_PASS cfg=64x10 cases=7 scores=70 model_sum=ok
+RTL_SIM_PASS DENSE cfg=64x8 cases=7 guards=2
+tb/tb_npu_dense.sv:72: $finish called at 64590000 (1ps)
+PYTHON_RTL_COMPARE_PASS cfg=64x8 cases=7 scores=56 model_sum=ok
+RTL_SIM_PASS DENSE cfg=8x10 cases=7 guards=2
+tb/tb_npu_dense.sv:72: $finish called at 13000000 (1ps)
+PYTHON_RTL_COMPARE_PASS cfg=8x10 cases=7 scores=70 model_sum=ok
