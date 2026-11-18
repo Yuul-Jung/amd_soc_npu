@@ -1,0 +1,182 @@
+{
+  "id": "ch13",
+  "number": 13,
+  "version": "v02",
+  "slug": "mnist_8x8",
+  "nav_title": "8×8 손글씨·10분류 준비",
+  "name": "8×8 손글씨 입력 적재기",
+  "goal": "28×28 손글씨 영상을 8×8 평균 풀링으로 64개 INT8 특징으로 줄이는 입력 계약을 정하고, 64원소를 04장 BRAM에 적재·검사하는 입력 적재기를 만듭니다.",
+  "top": {
+    "file": "ch13/rtl/npu10_input_loader.v",
+    "module": "npu10_input_loader"
+  },
+  "keep": [
+    "ch04/rtl/bram_sync_buffer.v"
+  ],
+  "new": [
+    "ch13/rtl/npu10_input_loader.v"
+  ],
+  "tb": [
+    "ch13/tb/tb_npu10_input_loader.sv"
+  ],
+  "ref": [
+    "ch13/reference/mnist8x8_reference.py"
+  ],
+  "prep_note": "기준 모델은 표준 라이브러리만 씁니다. 실제 MNIST 100장으로 풀링을 대조하려면 선택으로 <code>python3 ch13/reference/mnist8x8_reference.py --mnist data/mnist</code>를 실행합니다 — torch·torchvision과 인터넷 연결 필요, ⚠ 미검증",
+  "tb_note": "기준 모델(Python)이 숫자 0~9 합성 영상(5×7 글꼴, 실제 MNIST 아님)에서 64원소 벡터를 만들고, TB는 적재·읽기 결과를 파일로 돌려줍니다.",
+  "run": "bash ch13/scripts/run_sim.sh",
+  "run_note": "기준 모델 자체 시험 → 숫자 7의 8×8 특징 그림 → RTL 시뮬레이션 → Python 비교",
+  "evidence": {
+    "rtl_log": "ch13/validation/rtl_sim_*.log",
+    "pattern": "_PASS|Icarus|^[ .:=+*#%@-]+$"
+  },
+  "checks": [
+    [
+      "PYTHON_MNIST8X8_SELF_TEST_PASS samples=10 elements=64",
+      "풀링 창 8개가 모두 4화소이고 0~27행을 빠짐없이 덮음, 빈 영상 → 0, 꽉 찬 영상 → 127, 숫자 10개가 서로 다른 벡터"
+    ],
+    [
+      "RTL_SIM_PASS INPUT_LOADER samples=10 reads=640 error_cases=4",
+      "10샘플 적재 후 주소를 섞어 640회 읽기, 오류 4종(이른 마지막, 마지막 없음, 완료 뒤 추가, 부호 비트 1)과 리셋 복구 통과"
+    ],
+    [
+      "PYTHON_RTL_COMPARE_PASS samples=10 values=640",
+      "RTL이 읽어 낸 640개 값이 Python 벡터와 모두 같음"
+    ]
+  ],
+  "read_points": [
+    [
+      "풀링 창 4화소",
+      "28÷8 = 3.5이므로 PyTorch <code>adaptive_avg_pool2d</code>와 같이 창 i를 <code>[floor(i·28/8), ceil((i+1)·28/8))</code>로 잡습니다. 창은 모두 4화소이고 3·10·17·24행(열)이 이웃 창과 겹칩니다."
+    ],
+    [
+      "INT8 스케일",
+      "평균 0~255를 <code>round(평균/2)</code>, 상한 127로 바꿉니다. 부호 비트가 늘 0이므로 14장의 부호 있는 가중치와 곱해도 입력이 음수로 해석되지 않습니다. 부호 비트가 1인 값은 <code>range_err_o</code>로 거부합니다."
+    ],
+    [
+      "길이 계약",
+      "<code>in_last_i</code>는 64번째 원소에만 올립니다. 이르거나 없거나 완료 뒤 원소가 더 오면 <code>len_err_o</code>와 함께 ERR로 가고, 다음 <code>load_start_i</code>까지 읽기를 막습니다."
+    ],
+    [
+      "읽기 잠금",
+      "BRAM 읽기는 <code>rd_en_i && state == DONE</code>일 때만 요청합니다. 적재 중이거나 오류 상태의 읽기는 <code>rd_valid_o</code>가 오르지 않습니다."
+    ]
+  ],
+  "vivado": {
+    "mode": "ooc",
+    "resources": "RAMB 또는 LUTRAM 1개 (8비트×64는 작아 Vivado가 분산 RAM을 고를 수 있음 — 보고서로 확인)",
+    "note": "<code>tools/vivado/ooc_timing.tcl</code>의 <code>ch13</code> 줄로 실행합니다. ⚠ 미검증 (Vivado 미실행)."
+  },
+  "handoff": [
+    [
+      "ch13/rtl/npu10_input_loader.v",
+      "14장 4PE 그룹 제어가 <code>loaded_o</code>를 확인한 뒤 <code>rd_addr_i</code> 0~63으로 입력을 읽음 (수정 금지)"
+    ],
+    [
+      "ch13/reference/mnist8x8_reference.py",
+      "14~16장 기준 모델이 같은 <code>features()</code> 전처리를 사용"
+    ]
+  ],
+  "port_notes": {
+    "clk": "시스템 클록 (상승 에지에서 모든 레지스터 갱신)",
+    "resetn": "동기 리셋, 0이면 IDLE·개수 0 (Active-Low)",
+    "load_start_i": "새 샘플 적재 시작 — 어느 상태에서든 LOAD로 가고 개수·오류를 지움",
+    "in_valid_i": "이번 클록에 입력 원소가 있음",
+    "in_data_i": "입력 원소 (INT8, 0~127, 행 우선 순서)",
+    "in_last_i": "64번째(마지막) 원소 표시",
+    "rd_en_i": "읽기 요청 (적재 완료 상태에서만 받아들임)",
+    "rd_addr_i": "읽을 원소 주소 0~63 (행*8 + 열)",
+    "rd_data_o": "읽은 원소 (1클록 지연)",
+    "rd_valid_o": "rd_data_o가 직전 읽기 요청의 결과임",
+    "loading_o": "LOAD 상태 (원소를 받는 중)",
+    "loaded_o": "DONE 상태 (64원소 적재 완료, 읽기 가능)",
+    "len_err_o": "길이 오류 (마지막 표시 위치 틀림 또는 완료 뒤 추가 원소)",
+    "range_err_o": "범위 오류 (부호 비트가 1인 원소)",
+    "count_o": "지금까지 적재한 원소 수 0~64"
+  },
+  "fsm": {
+    "file": "ch13/rtl/npu10_input_loader.v",
+    "reset": "IDLE",
+    "rows": [
+      [
+        "IDLE",
+        "load_start_i (case보다 우선)",
+        "LOAD",
+        "count_o·len_err_o·range_err_o를 0으로"
+      ],
+      [
+        "LOAD",
+        "load_start_i (case보다 우선)",
+        "LOAD",
+        "적재 중에도 처음부터 다시"
+      ],
+      [
+        "DONE",
+        "load_start_i (case보다 우선)",
+        "LOAD",
+        "새 샘플 적재"
+      ],
+      [
+        "ERR",
+        "load_start_i (case보다 우선)",
+        "LOAD",
+        "오류를 지우고 다시 적재"
+      ],
+      [
+        "IDLE",
+        "그 외",
+        "IDLE",
+        "입력 무시"
+      ],
+      [
+        "LOAD",
+        "in_valid_i && in_data_i[7]",
+        "ERR",
+        "range_err_o=1"
+      ],
+      [
+        "LOAD",
+        "in_valid_i && in_last_i ≠ (count_o==63)",
+        "ERR",
+        "len_err_o=1"
+      ],
+      [
+        "LOAD",
+        "in_valid_i && 정상 && !in_last_i",
+        "LOAD",
+        "BRAM[count_o] 쓰기, count_o+1"
+      ],
+      [
+        "LOAD",
+        "in_valid_i && 정상 && in_last_i",
+        "DONE",
+        "BRAM[63] 쓰기, count_o=64"
+      ],
+      [
+        "DONE",
+        "in_valid_i",
+        "ERR",
+        "len_err_o=1 (완료 뒤 추가 원소)"
+      ],
+      [
+        "DONE",
+        "rd_en_i",
+        "DONE",
+        "BRAM 읽기, 다음 클록 rd_valid_o"
+      ],
+      [
+        "ERR",
+        "그 외",
+        "ERR",
+        "읽기 막음, load_start_i 대기"
+      ],
+      [
+        "default",
+        "유효하지 않은 상태",
+        "IDLE",
+        ""
+      ]
+    ],
+    "diagram": "ch13/diagrams/ch13_input_loader_fsm"
+  }
+}
