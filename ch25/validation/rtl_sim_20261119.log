@@ -1,0 +1,7 @@
+tclsh 8.6.14
+TCL_SYNTAX_STATIC_CHECK_PASS power_reports=2 activity_reset=1
+[견본·실측 아님] POWER A_default total=0.210W dynamic=0.137W static=0.073W confidence=Low
+[견본·실측 아님] POWER B_npu_active total=0.245W dynamic=0.172W static=0.073W confidence=Low
+[견본·실측 아님] ENERGY cpu=126.00uJ (P_A×600.0us)  npu=40.18uJ (P_B×164.0us)  [추정]
+ENERGY_PARSER_STATIC_CHECK_PASS fixture
+REAL_POWER NOT_RUN (Vivado 미실행)
