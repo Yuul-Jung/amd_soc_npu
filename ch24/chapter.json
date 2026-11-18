@@ -1,0 +1,39 @@
+{
+  "id": "ch24",
+  "number": 24,
+  "version": "v02",
+  "slug": "resource_timing",
+  "nav_title": "자원 · 타이밍 · 임계 경로",
+  "name": "자원·타이밍·임계 경로 보고서",
+  "goal": "23장에서 시간을 잰 것과 같은 SoC 빌드에서 자원(LUT·FF·BRAM·DSP, 전체와 NPU 계층), WNS·TNS·WHS, 임계 경로를 보고서로 뽑아 한 표로 정리합니다. 보고서를 뽑는 Tcl과 읽는 Python을 준비하고, Vivado 없이 할 수 있는 확인은 먼저 끝냅니다.",
+  "top": {"file": "ch21/rtl/soc_npu_top.v", "module": "soc_npu_top"},
+  "keep": ["ch21/rtl/soc_npu_top.v", "ch21/vivado/add_npu.tcl"],
+  "new": ["ch24/vivado/report_soc.tcl", "ch24/reference/parse_reports.py"],
+  "tb": ["ch24/scripts/run_check.sh"],
+  "ref": [],
+  "prep_note": "<code>tclsh</code>와 Python 3만 있으면 05절을 할 수 있습니다. 실제 숫자는 21장 프로젝트에서 8절로 뽑습니다",
+  "tb_note": "RTL 시뮬레이션이 아니라 정적 검사입니다. ① Tcl 괄호·따옴표 짝 확인 ② 작성한 견본 보고서 4개(<code>ch24/host/fixture/</code>, 실제 Vivado 출력 아님)로 해석기 시험 ③ 실제 보고서가 있으면 해석. 견본 숫자는 결과가 아닙니다.",
+  "run": "bash ch24/scripts/run_check.sh",
+  "run_note": "Tcl 문법 → 견본 보고서 해석 → (있으면) 실제 보고서 해석",
+  "evidence": {"rtl_log": "ch24/validation/rtl_sim_*.log", "pattern": "STATIC_CHECK|견본|REAL_REPORTS|REPORT_PARSE|tclsh", "kind": "static"},
+  "checks": [
+    ["TCL_SYNTAX_STATIC_CHECK_PASS reports=5", "<code>report_soc.tcl</code>의 괄호·따옴표가 맞고 보고서 명령 5개가 있음"],
+    ["PARSER_STATIC_CHECK_PASS fixture timing=met", "견본 보고서에서 전체·NPU 자원, WNS 등 4개, 임계 경로, 빌드 정보를 모두 읽음 (견본 숫자는 결과가 아님)"],
+    ["REAL_REPORTS NOT_RUN (Vivado 미실행)", "실제 보고서가 아직 없음 → 8절 표는 ⚠ 미측정"]
+  ],
+  "read_points": [
+    ["같은 빌드", "<code>build_info.txt</code>에 저장소 커밋과 비트스트림 SHA-256을 남깁니다. 23장 시간, 24장 자원, 25장 전력이 같은 비트스트림에서 나왔는지 이 해시로 확인합니다."],
+    ["계층별 자원", "<code>report_utilization -hierarchical</code>에서 <code>npu_0</code> 행을 찾아 전체 대비 비율을 냅니다. 19장 OOC 숫자(NPU 단독)와 달라질 수 있는데, SoC 안에서는 최적화·배치가 함께 바뀌기 때문입니다."],
+    ["임계 경로 읽기", "Source·Destination 레지스터 이름으로 어느 모듈의 경로인지 봅니다. NPU 안이면 누산기 덧셈(CARRY4 사슬)이 흔하고, 밖이면 AXI 인터커넥트·MicroBlaze V 쪽입니다."],
+    ["견본과 실제", "해석기는 Vivado 2024.2 텍스트 보고서 형식을 가정했습니다. 실제 보고서에서 <code>REPORT_PARSE_FAIL</code>이면 표 머리글 글자를 확인해 정규식을 맞춥니다(⚠ 형식 미확인)."]
+  ],
+  "vivado": {"mode": "via", "ref": "ch21", "note": "이 장은 RTL을 더하지 않습니다. 21장 구현 결과에서 보고서만 뽑습니다", "board_fragment": "ch24/docs/guide_reports.html"},
+  "handoff": [
+    ["build/ch24/build_info.txt", "25장 전력 보고서가 같은 빌드인지 확인 (⚠ Vivado 실행 대기)"],
+    ["ch24/reference/parse_reports.py", "25장 전력 보고서 해석과 같은 방식"]
+  ],
+  "port_notes": {
+    "clk": "W5 · 100 MHz 외부 클록", "btnC": "U18 · 리셋 버튼", "sw": "슬라이드 스위치 16개", "led": "LED 16개",
+    "RsRx": "USB-UART 수신", "RsTx": "USB-UART 송신"
+  }
+}
