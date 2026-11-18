@@ -1,42 +1,266 @@
 {
   "site": "amd_soc_npu",
   "title": "Basys3 소형 NPU 교육과정 — 고도화판",
-  "version": "v01",
+  "version": "v02",
   "source": "Yuul-Jung/amd_soc_rtl/part03",
   "rule_md_commit": "d1b8278d41fca8f5e3960736f3ac9d377e462fda",
   "chapters": [
-    {"id":"ch00","number":0,"title":"UART Echo","file":"ch00_uart_echo_v04.html","html_status":"TODO","rtl_status":"MIGRATED"},
-    {"id":"ch01","number":1,"title":"MAC 누산","file":"ch01_mac_v04.html","html_status":"TODO","rtl_status":"MIGRATED"},
-    {"id":"ch02","number":2,"title":"DSP48E1 곱셈","file":"ch02_dsp_v04.html","html_status":"TODO","rtl_status":"MIGRATED"},
-    {"id":"ch03","number":3,"title":"Pipeline MAC","file":"ch03_mac_pipeline_v04.html","html_status":"TODO","rtl_status":"MIGRATED"},
-    {"id":"ch04","number":4,"title":"BRAM 동기 버퍼","file":"ch04_bram_v04.html","html_status":"TODO","rtl_status":"MIGRATED"},
-    {"id":"ch05","number":5,"title":"Fixed Quantizer","file":"ch05_fixed_v04.html","html_status":"TODO","rtl_status":"MIGRATED"},
-    {"id":"ch06","number":6,"title":"INT8·INT16 비교","file":"ch06_precision_v04.html","html_status":"TODO","rtl_status":"MIGRATED"},
-    {"id":"ch07","number":7,"title":"Vector Dot","file":"ch07_vector_dot_v04.html","html_status":"TODO","rtl_status":"MIGRATED"},
-    {"id":"ch08","number":8,"title":"4PE 병렬 연산","file":"ch08_pe4_v04.html","html_status":"TODO","rtl_status":"MIGRATED"},
-    {"id":"ch09","number":9,"title":"Dense4","file":"ch09_dense_v04.html","html_status":"TODO","rtl_status":"MIGRATED"},
-    {"id":"ch10","number":10,"title":"4뉴런 NPU","file":"ch10_npu_core_v04.html","html_status":"TODO","rtl_status":"MIGRATED"},
-    {"id":"ch11","number":11,"title":"UART 모델 적재","file":"ch11_uart_register_v04.html","html_status":"TODO","rtl_status":"MIGRATED"},
-    {"id":"ch12","number":12,"title":"UART·DSP·BRAM·4PE 통합 NPU","file":"ch12_integrated_npu_v04.html","html_status":"TODO","rtl_status":"MIGRATED"},
-    {"id":"ch13","number":13,"title":"8×8 손글씨·10분류 준비","file":"ch13_mnist_8x8_v02.html","html_status":"TODO","rtl_status":"TODO"},
-    {"id":"ch14","number":14,"title":"4PE 그룹·10개 출력","file":"ch14_group10_v02.html","html_status":"TODO","rtl_status":"TODO"},
-    {"id":"ch15","number":15,"title":"64→10 정수 MLP","file":"ch15_mlp64_10_v02.html","html_status":"TODO","rtl_status":"TODO"},
-    {"id":"ch16","number":16,"title":"64→8→10 다층 MLP","file":"ch16_mlp64_8_10_v02.html","html_status":"TODO","rtl_status":"TODO"},
-    {"id":"ch17","number":17,"title":"784픽셀 분할 누산","file":"ch17_mnist_784_tiling_v02.html","html_status":"TODO","rtl_status":"TODO"},
-    {"id":"ch18","number":18,"title":"INT8·INT16 정밀도 비교","file":"ch18_precision_tradeoff_v02.html","html_status":"TODO","rtl_status":"TODO"},
-    {"id":"ch19","number":19,"title":"PE·BRAM 처리량 비교","file":"ch19_architecture_tradeoff_v02.html","html_status":"TODO","rtl_status":"TODO"},
-    {"id":"ch20","number":20,"title":"AXI4-Lite NPU 제어 IP","file":"ch20_axi_npu_control_v02.html","html_status":"TODO","rtl_status":"TODO"},
-    {"id":"ch21","number":21,"title":"MicroBlaze V·NPU 통합","file":"ch21_mbv_npu_v02.html","html_status":"TODO","rtl_status":"TODO"},
-    {"id":"ch22","number":22,"title":"Vitis C 추론 드라이버","file":"ch22_vitis_npu_driver_v02.html","html_status":"TODO","rtl_status":"TODO"},
-    {"id":"ch23","number":23,"title":"CPU·NPU 성능 비교","file":"ch23_cpu_npu_benchmark_v02.html","html_status":"TODO","rtl_status":"TODO"},
-    {"id":"ch24","number":24,"title":"FPGA 자원·타이밍","file":"ch24_resource_timing_v02.html","html_status":"TODO","rtl_status":"TODO"},
-    {"id":"ch25","number":25,"title":"동적 전력·추론 에너지","file":"ch25_power_energy_v02.html","html_status":"TODO","rtl_status":"TODO"},
-    {"id":"ch26","number":26,"title":"3×3 소형 CNN 경로","file":"ch26_tiny_cnn_v02.html","html_status":"TODO","rtl_status":"TODO"},
-    {"id":"ch27","number":27,"title":"10분류 NPU SoC 통합","file":"ch27_npu_system_v02.html","html_status":"TODO","rtl_status":"TODO"},
-    {"id":"ch28","number":28,"title":"손글씨 숫자 인식 종합","file":"ch28_capstone_mnist_v02.html","html_status":"TODO","rtl_status":"TODO"},
-    {"id":"ch29","number":29,"title":"센서 융합 산업안전 감시","file":"ch29_capstone_sensor_v02.html","html_status":"TODO","rtl_status":"TODO"},
-    {"id":"ch30","number":30,"title":"NPU·모터 안전 제어","file":"ch30_capstone_motor_v02.html","html_status":"TODO","rtl_status":"TODO"},
-    {"id":"ch31","number":31,"title":"AES-128·HMAC 보안 UART","file":"ch31_capstone_secure_uart_v02.html","html_status":"TODO","rtl_status":"TODO"}
+    {
+      "id": "ch00",
+      "number": 0,
+      "title": "UART Echo",
+      "file": "ch00_uart_echo_v05.html",
+      "html_status": "DONE",
+      "rtl_status": "MIGRATED"
+    },
+    {
+      "id": "ch01",
+      "number": 1,
+      "title": "MAC 누산",
+      "file": "ch01_mac_v05.html",
+      "html_status": "DONE",
+      "rtl_status": "MIGRATED"
+    },
+    {
+      "id": "ch02",
+      "number": 2,
+      "title": "DSP48E1 곱셈",
+      "file": "ch02_dsp_v05.html",
+      "html_status": "DONE",
+      "rtl_status": "MIGRATED"
+    },
+    {
+      "id": "ch03",
+      "number": 3,
+      "title": "Pipeline MAC",
+      "file": "ch03_mac_pipeline_v05.html",
+      "html_status": "DONE",
+      "rtl_status": "MIGRATED"
+    },
+    {
+      "id": "ch04",
+      "number": 4,
+      "title": "BRAM 동기 버퍼",
+      "file": "ch04_bram_v05.html",
+      "html_status": "DONE",
+      "rtl_status": "MIGRATED"
+    },
+    {
+      "id": "ch05",
+      "number": 5,
+      "title": "Fixed Quantizer",
+      "file": "ch05_fixed_v05.html",
+      "html_status": "DONE",
+      "rtl_status": "MIGRATED"
+    },
+    {
+      "id": "ch06",
+      "number": 6,
+      "title": "INT8·INT16 비교",
+      "file": "ch06_precision_v05.html",
+      "html_status": "DONE",
+      "rtl_status": "MIGRATED"
+    },
+    {
+      "id": "ch07",
+      "number": 7,
+      "title": "Vector Dot",
+      "file": "ch07_vector_dot_v05.html",
+      "html_status": "DONE",
+      "rtl_status": "MIGRATED"
+    },
+    {
+      "id": "ch08",
+      "number": 8,
+      "title": "4PE 병렬 연산",
+      "file": "ch08_pe4_v05.html",
+      "html_status": "DONE",
+      "rtl_status": "MIGRATED"
+    },
+    {
+      "id": "ch09",
+      "number": 9,
+      "title": "Dense4",
+      "file": "ch09_dense_v05.html",
+      "html_status": "DONE",
+      "rtl_status": "MIGRATED"
+    },
+    {
+      "id": "ch10",
+      "number": 10,
+      "title": "4뉴런 NPU",
+      "file": "ch10_npu_core_v05.html",
+      "html_status": "DONE",
+      "rtl_status": "MIGRATED"
+    },
+    {
+      "id": "ch11",
+      "number": 11,
+      "title": "UART 모델 적재",
+      "file": "ch11_uart_register_v05.html",
+      "html_status": "DONE",
+      "rtl_status": "MIGRATED"
+    },
+    {
+      "id": "ch12",
+      "number": 12,
+      "title": "UART·DSP·BRAM·4PE 통합 NPU",
+      "file": "ch12_integrated_npu_v05.html",
+      "html_status": "DONE",
+      "rtl_status": "MIGRATED"
+    },
+    {
+      "id": "ch13",
+      "number": 13,
+      "title": "8×8 손글씨·10분류 준비",
+      "file": "ch13_mnist_8x8_v02.html",
+      "html_status": "TODO",
+      "rtl_status": "TODO"
+    },
+    {
+      "id": "ch14",
+      "number": 14,
+      "title": "4PE 그룹·10개 출력",
+      "file": "ch14_group10_v02.html",
+      "html_status": "TODO",
+      "rtl_status": "TODO"
+    },
+    {
+      "id": "ch15",
+      "number": 15,
+      "title": "64→10 정수 MLP",
+      "file": "ch15_mlp64_10_v02.html",
+      "html_status": "TODO",
+      "rtl_status": "TODO"
+    },
+    {
+      "id": "ch16",
+      "number": 16,
+      "title": "64→8→10 다층 MLP",
+      "file": "ch16_mlp64_8_10_v02.html",
+      "html_status": "TODO",
+      "rtl_status": "TODO"
+    },
+    {
+      "id": "ch17",
+      "number": 17,
+      "title": "784픽셀 분할 누산",
+      "file": "ch17_mnist_784_tiling_v02.html",
+      "html_status": "TODO",
+      "rtl_status": "TODO"
+    },
+    {
+      "id": "ch18",
+      "number": 18,
+      "title": "INT8·INT16 정밀도 비교",
+      "file": "ch18_precision_tradeoff_v02.html",
+      "html_status": "TODO",
+      "rtl_status": "TODO"
+    },
+    {
+      "id": "ch19",
+      "number": 19,
+      "title": "PE·BRAM 처리량 비교",
+      "file": "ch19_architecture_tradeoff_v02.html",
+      "html_status": "TODO",
+      "rtl_status": "TODO"
+    },
+    {
+      "id": "ch20",
+      "number": 20,
+      "title": "AXI4-Lite NPU 제어 IP",
+      "file": "ch20_axi_npu_control_v02.html",
+      "html_status": "TODO",
+      "rtl_status": "TODO"
+    },
+    {
+      "id": "ch21",
+      "number": 21,
+      "title": "MicroBlaze V·NPU 통합",
+      "file": "ch21_mbv_npu_v02.html",
+      "html_status": "TODO",
+      "rtl_status": "TODO"
+    },
+    {
+      "id": "ch22",
+      "number": 22,
+      "title": "Vitis C 추론 드라이버",
+      "file": "ch22_vitis_npu_driver_v02.html",
+      "html_status": "TODO",
+      "rtl_status": "TODO"
+    },
+    {
+      "id": "ch23",
+      "number": 23,
+      "title": "CPU·NPU 성능 비교",
+      "file": "ch23_cpu_npu_benchmark_v02.html",
+      "html_status": "TODO",
+      "rtl_status": "TODO"
+    },
+    {
+      "id": "ch24",
+      "number": 24,
+      "title": "FPGA 자원·타이밍",
+      "file": "ch24_resource_timing_v02.html",
+      "html_status": "TODO",
+      "rtl_status": "TODO"
+    },
+    {
+      "id": "ch25",
+      "number": 25,
+      "title": "동적 전력·추론 에너지",
+      "file": "ch25_power_energy_v02.html",
+      "html_status": "TODO",
+      "rtl_status": "TODO"
+    },
+    {
+      "id": "ch26",
+      "number": 26,
+      "title": "3×3 소형 CNN 경로",
+      "file": "ch26_tiny_cnn_v02.html",
+      "html_status": "TODO",
+      "rtl_status": "TODO"
+    },
+    {
+      "id": "ch27",
+      "number": 27,
+      "title": "10분류 NPU SoC 통합",
+      "file": "ch27_npu_system_v02.html",
+      "html_status": "TODO",
+      "rtl_status": "TODO"
+    },
+    {
+      "id": "ch28",
+      "number": 28,
+      "title": "손글씨 숫자 인식 종합",
+      "file": "ch28_capstone_mnist_v02.html",
+      "html_status": "TODO",
+      "rtl_status": "TODO"
+    },
+    {
+      "id": "ch29",
+      "number": 29,
+      "title": "센서 융합 산업안전 감시",
+      "file": "ch29_capstone_sensor_v02.html",
+      "html_status": "TODO",
+      "rtl_status": "TODO"
+    },
+    {
+      "id": "ch30",
+      "number": 30,
+      "title": "NPU·모터 안전 제어",
+      "file": "ch30_capstone_motor_v02.html",
+      "html_status": "TODO",
+      "rtl_status": "TODO"
+    },
+    {
+      "id": "ch31",
+      "number": 31,
+      "title": "AES-128·HMAC 보안 UART",
+      "file": "ch31_capstone_secure_uart_v02.html",
+      "html_status": "TODO",
+      "rtl_status": "TODO"
+    }
   ],
   "validation": {
     "ch00_ch12_rtl": "source_migrated_from_amd_soc_rtl_simulation_logs_preserved",

@@ -1,0 +1,662 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Basys3 NPU 11장 실습 · UART 모델 적재 컨트롤러">
+<title>11장 · UART 모델 적재 컨트롤러 (v05)</title>
+<link rel="stylesheet" href="assets/education/site.css">
+<style>
+.hero:before{background-image:linear-gradient(90deg,rgba(12,17,27,.89),rgba(12,17,27,.69) 58%,rgba(12,17,27,.48)),url('https://raw.githubusercontent.com/Yuul-Jung/rule_md/d1b8278d41fca8f5e3960736f3ac9d377e462fda/web/education-html/assets/hero-bookshelf.jpg')}
+.codeblock pre{max-height:780px;white-space:pre}
+.section svg{width:100%;height:auto}
+.vbadge{display:inline-block;padding:.15em .6em;border-radius:4px;font-size:.78em;font-weight:700;background:#d4edda;color:#155724;vertical-align:middle}
+.gate-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:10px}
+.gate{border:1px solid var(--line,#e0e0e0);border-radius:6px;padding:10px 14px}
+.gate b{display:block;font:600 11px var(--mono,monospace);letter-spacing:.04em;margin-bottom:4px}
+.gate span{font-size:13px}
+.gate.pass{border-color:#2d8a52;background:#f0fbf4}
+.gate.todo{border-color:#b08900;background:#fffbe6}
+</style>
+</head>
+<body data-chapter="ch11">
+<a class="access-skip" href="#main-content">본문 바로가기</a>
+<button type="button" class="mobile-menu" id="mobile-menu" aria-controls="course-nav" aria-expanded="false">☰ 장·목차</button>
+<div class="shade" id="shade"></div>
+<header class="hero">
+  <div class="hero-inner">
+    <p class="kicker">BASYS3 · NPU 고도화판 · 11장 실습 <span class="vbadge">v05</span></p>
+    <h1>제11장 · UART 모델 적재 컨트롤러</h1>
+    <p>UART로 받은 X·W·B·R 바이너리 명령을 해석해 NPU 메모리에 모델을 적재하고, 추론 점수를 UART로 돌려주는 컨트롤러를 만듭니다.</p>
+  </div>
+</header>
+<div class="wrap">
+  <nav class="toc" id="course-nav" aria-label="전체 장과 절 탐색"></nav>
+  <main class="content" id="main-content">
+    <section class="section" id="s00">
+      <h2><span class="num">00</span>이 장의 위치</h2>
+      <p><b>목표:</b> UART로 받은 X·W·B·R 바이너리 명령을 해석해 NPU 메모리에 모델을 적재하고, 추론 점수를 UART로 돌려주는 컨트롤러를 만듭니다.</p>
+      <table>
+        <thead><tr><th>구분</th><th>파일</th></tr></thead>
+        <tbody>
+          <tr><td>유지 (이전 장, 수정 없음)</td><td><ul><li><code>common/rtl/uart_rx.v</code> <small>(00장)</small></li><li><code>common/rtl/uart_tx.v</code> <small>(00장)</small></li><li><code>common/rtl/uart_core.v</code> <small>(00장)</small></li><li><code>ch02/rtl/dsp_multiplier.v</code> <small>(02장)</small></li><li><code>mini_npu/rtl/npu_dsp_mac_lane.v</code> <small>(12장)</small></li><li><code>mini_npu/rtl/npu_engine4.v</code> <small>(12장)</small></li><li><code>mini_npu/rtl/npu_display_controller.v</code> <small>(12장)</small></li><li><code>mini_npu/rtl/npu_reset_controller.v</code> <small>(12장)</small></li><li><code>mini_npu/rtl/basys3_npu_top.v</code> <small>()</small></li></ul></td></tr>
+          <tr><td>이번 장 작성</td><td><ul><li><code>mini_npu/rtl/uart_npu_command_controller.v</code></li></ul></td></tr>
+        </tbody>
+      </table>
+      <p>실습 순서: 01 구조 확인 → 02 준비 → 03 RTL 작성 → 04 테스트벤치·기준 모델 작성 → 05 시뮬레이션 → 06 결과 판정 → 08 보드 확인 → 09 인계.</p>
+    </section>
+    <section class="section" id="s01">
+      <h2><span class="num">01</span>구조도</h2>
+      <svg viewBox="0 0 980 409" role="img" aria-label="uart_npu_command_controller 실제 포트와 하위 모듈 구조">
+      <rect x="250" y="30" width="480" height="339" rx="10" fill="#fff" stroke="#4635b1" stroke-width="2"/>
+      <text x="490" y="54" font-size="18" font-weight="700" text-anchor="middle">uart_npu_command_controller</text>
+      <text x="490" y="72" font-size="13" text-anchor="middle" fill="#555">mini_npu/rtl/uart_npu_command_controller.v</text>
+      <text x="270" y="108" font-size="13" fill="#555">FSM 상태 (localparam 선언 순서)</text>
+      <text x="270" y="130" font-size="14" font-family="monospace">IDLE → RECV → APPLY → PRESET → RUN → WAIT_NPU → SEND</text>
+      <text x="222" y="64" font-size="14" font-family="monospace" text-anchor="end">clk</text>
+      <path d="M226 60 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 60 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="87" font-size="14" font-family="monospace" text-anchor="end">resetn</text>
+      <path d="M226 83 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 83 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="110" font-size="14" font-family="monospace" text-anchor="end">rx_data_i[7:0]</text>
+      <path d="M226 106 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 106 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="133" font-size="14" font-family="monospace" text-anchor="end">rx_valid_i</text>
+      <path d="M226 129 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 129 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="156" font-size="14" font-family="monospace" text-anchor="end">tx_ready_i</text>
+      <path d="M226 152 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 152 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="179" font-size="14" font-family="monospace" text-anchor="end">npu_load_ready_i</text>
+      <path d="M226 175 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 175 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="202" font-size="14" font-family="monospace" text-anchor="end">npu_busy_i</text>
+      <path d="M226 198 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 198 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="225" font-size="14" font-family="monospace" text-anchor="end">npu_done_i</text>
+      <path d="M226 221 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 221 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="248" font-size="14" font-family="monospace" text-anchor="end">npu_error_i</text>
+      <path d="M226 244 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 244 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="271" font-size="14" font-family="monospace" text-anchor="end">npu_class_i[1:0]</text>
+      <path d="M226 267 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 267 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="294" font-size="14" font-family="monospace" text-anchor="end">npu_scores_i[163:0]</text>
+      <path d="M226 290 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 290 l-7 -4 v8 z" fill="#4635b1"/>
+      <path d="M730 60 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 60 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="758" y="65" font-size="14" font-family="monospace">rx_ready_o</text>
+      <path d="M730 83 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 83 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="758" y="88" font-size="14" font-family="monospace">tx_data_o[7:0]</text>
+      <path d="M730 106 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 106 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="758" y="111" font-size="14" font-family="monospace">tx_valid_o</text>
+      <path d="M730 129 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 129 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="758" y="134" font-size="14" font-family="monospace">npu_start_o</text>
+      <path d="M730 152 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 152 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="758" y="157" font-size="14" font-family="monospace">npu_length_o[6:0]</text>
+      <path d="M730 175 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 175 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="758" y="180" font-size="14" font-family="monospace">x_wr_en_o</text>
+      <path d="M730 198 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 198 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="758" y="203" font-size="14" font-family="monospace">w_wr_en_o</text>
+      <path d="M730 221 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 221 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="758" y="226" font-size="14" font-family="monospace">b_wr_en_o</text>
+      <path d="M730 244 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 244 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="758" y="249" font-size="14" font-family="monospace">wr_addr_o[5:0]</text>
+      <path d="M730 267 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 267 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="758" y="272" font-size="14" font-family="monospace">neuron_o[1:0]</text>
+      <path d="M730 290 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 290 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="758" y="295" font-size="14" font-family="monospace">wr_data_o[15:0]</text>
+      <path d="M730 313 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 313 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="758" y="318" font-size="14" font-family="monospace">bias_data_o[39:0]</text>
+      <path d="M730 336 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 336 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="758" y="341" font-size="14" font-family="monospace">protocol_error_o</text>
+      <rect x="250" y="384" width="16" height="12" fill="#edeafa" stroke="#4635b1"/><text x="272" y="395" font-size="13">이번 장 신규</text>
+      <rect x="370" y="384" width="16" height="12" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="4 2"/><text x="392" y="395" font-size="13">이전 장 파일 재사용(수정 없음)</text>
+      <text x="600" y="395" font-size="13">왼쪽 = input · 오른쪽 = output (RTL 선언 그대로)</text>
+      </svg>
+      <p>포트 이름과 하위 인스턴스는 <code>mini_npu/rtl/uart_npu_command_controller.v</code> 선언에서 그대로 가져왔습니다.</p>
+    </section>
+    <section class="section" id="s02">
+      <h2><span class="num">02</span>준비</h2>
+      <ol>
+        <li>VS Code에서 저장소 루트(<code>amd_soc_npu/</code>)를 엽니다.</li>
+        <li>도구를 확인합니다.</li>
+      </ol>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 도구 확인</span></div>
+        <pre><code>sudo apt install -y iverilog python3 ripgrep   # 처음 한 번
+iverilog -V 2&gt;&amp;1 | head -1      # Icarus Verilog version 12.0 이상
+python3 --version</code></pre></div>
+      <ol start="3"><li>00절 '유지' 파일이 이전 장 결과 그대로 있는지 확인합니다 (이 장의 통합 TB는 실제 UART 핀 파형으로 시험하므로 12장 Top과 NPU 엔진 파일이 함께 필요합니다. 아래 '유지' 목록의 12장 파일을 먼저 받아 둡니다(작성 설명은 12장).).</li></ol>
+    </section>
+    <section class="section" id="s03">
+      <h2><span class="num">03</span>RTL 작성</h2>
+      <p>아래 파일을 경로 그대로 만들고 전체 코드를 입력합니다.</p>
+      <div class="codeblock">
+        <div class="codebar"><span>mini_npu/rtl/uart_npu_command_controller.v · verilog</span></div>
+        <pre><code class="language-verilog">// (추가) UART 명령·모델 적재·추론 결과 직렬화 Controller.
+// 단일 문자 '0'~'3'은 2원소 고정 표본. 11장 바이너리 명령은 아래 README 참조.
+// 요청/응답은 stop-and-wait: ACK 또는 결과 LF까지 다음 명령 송신 금지.
+module uart_npu_command_controller(
+    input wire clk,resetn,
+    input wire [7:0] rx_data_i,
+    input wire rx_valid_i,
+    output wire rx_ready_o,
+    output wire [7:0] tx_data_o,
+    output wire tx_valid_o,
+    input wire tx_ready_i,
+    output wire npu_start_o,
+    output wire [6:0] npu_length_o,
+    output wire x_wr_en_o,w_wr_en_o,b_wr_en_o,
+    output reg [5:0] wr_addr_o,
+    output reg [1:0] neuron_o,
+    output reg signed [15:0] wr_data_o,
+    output reg signed [39:0] bias_data_o,
+    input wire npu_load_ready_i,
+    input wire npu_busy_i,npu_done_i,npu_error_i,
+    input wire [1:0] npu_class_i,
+    input wire [163:0] npu_scores_i,
+    output reg protocol_error_o
+);
+    localparam [2:0] IDLE=0,RECV=1,APPLY=2,PRESET=3,RUN=4,WAIT_NPU=5,SEND=6;
+    reg [2:0] state;
+    reg [7:0] opcode;
+    reg [7:0] payload[0:5];
+    reg [2:0] recv_index,expected_bytes;
+    reg [1:0] sample_id;
+    reg [3:0] preset_index;
+    reg [6:0] run_length;
+    reg [7:0] response[0:63];
+    reg [5:0] send_length,send_index;
+    integer i,j;
+
+    assign rx_ready_o=resetn&amp;&amp;(state==IDLE||state==RECV);
+    assign tx_valid_o=(state==SEND)&amp;&amp;(send_index&lt;send_length);
+    assign tx_data_o=response[send_index];
+    assign npu_start_o=(state==RUN);
+    assign npu_length_o=run_length;
+
+    // (추가) 필드 형식 거부. 주소 0~63, 뉴런 0~3, 길이 1~64.
+    wire accepted_fields =
+        (opcode=="X" &amp;&amp; payload[0]&lt;64) ||
+        (opcode=="W" &amp;&amp; payload[0]&lt;4 &amp;&amp; payload[1]&lt;64) ||
+        (opcode=="B" &amp;&amp; payload[0]&lt;4) ||
+        (opcode=="R" &amp;&amp; payload[0]&gt;=1 &amp;&amp; payload[0]&lt;=64);
+
+    assign x_wr_en_o=(state==PRESET &amp;&amp; preset_index&lt;2 &amp;&amp; npu_load_ready_i) ||
+        (state==APPLY &amp;&amp; opcode=="X" &amp;&amp; accepted_fields &amp;&amp; npu_load_ready_i);
+    assign w_wr_en_o=(state==PRESET &amp;&amp; preset_index&gt;=2 &amp;&amp; preset_index&lt;10 &amp;&amp;
+                      npu_load_ready_i) ||
+        (state==APPLY &amp;&amp; opcode=="W" &amp;&amp; accepted_fields &amp;&amp; npu_load_ready_i);
+    assign b_wr_en_o=(state==PRESET &amp;&amp; preset_index&gt;=10 &amp;&amp; npu_load_ready_i) ||
+        (state==APPLY &amp;&amp; opcode=="B" &amp;&amp; accepted_fields &amp;&amp; npu_load_ready_i);
+
+    always @*begin
+        wr_addr_o=0;neuron_o=0;wr_data_o=0;bias_data_o=0;
+        if(state==PRESET)begin
+            if(preset_index&lt;2)begin
+                wr_addr_o={2'b00,preset_index};
+                // X0=(+1,+1), X1=(+1,-1), X2=(-1,+1), X3=(-1,-1)
+                wr_data_o=((preset_index==0 &amp;&amp; sample_id[1]) ||
+                    (preset_index==1 &amp;&amp; sample_id[0])) ? -16'sd1 : 16'sd1;
+            end else if(preset_index&lt;10)begin
+                neuron_o=(preset_index-2)&gt;&gt;1;
+                wr_addr_o=(preset_index-2)&amp;1;
+                wr_data_o=((neuron_o[1] &amp;&amp; wr_addr_o==0) ||
+                    (neuron_o[0] &amp;&amp; wr_addr_o==1)) ? -16'sd1 : 16'sd1;
+            end else neuron_o=preset_index-10;
+        end else if(state==APPLY)begin
+            case(opcode)
+                "X":begin wr_addr_o=payload[0][5:0];wr_data_o={payload[1],payload[2]};end
+                "W":begin neuron_o=payload[0][1:0];wr_addr_o=payload[1][5:0];
+                    wr_data_o={payload[2],payload[3]};end
+                "B":begin neuron_o=payload[0][1:0];
+                    bias_data_o={payload[1],payload[2],payload[3],payload[4],payload[5]};end
+                default:begin end
+            endcase
+        end
+    end
+
+    function [7:0] hexdigit(input [3:0] n);
+        begin
+            hexdigit=(n&lt;10) ? (8'h30+n) : (8'h41+(n-10));
+        end
+    endfunction
+    function [7:0] score_hex(input [40:0] score,input integer position);
+        reg [43:0] ext;
+        reg [3:0] nib;
+        begin
+            ext={{3{score[40]}},score};
+            nib=(ext&gt;&gt;((10-position)*4)) &amp; 4'hf;
+            score_hex=hexdigit(nib);
+        end
+    endfunction
+
+    always @(posedge clk)begin
+        if(!resetn)begin
+            state&lt;=IDLE;opcode&lt;=0;recv_index&lt;=0;expected_bytes&lt;=0;
+            sample_id&lt;=0;preset_index&lt;=0;run_length&lt;=2;
+            send_length&lt;=0;send_index&lt;=0;protocol_error_o&lt;=0;
+        end else begin
+            protocol_error_o&lt;=0;
+            case(state)
+                IDLE:if(rx_valid_i &amp;&amp; rx_ready_o)begin
+                    if(rx_data_i&gt;="0" &amp;&amp; rx_data_i&lt;="3")begin
+                        sample_id&lt;=rx_data_i[1:0];preset_index&lt;=0;run_length&lt;=2;
+                        state&lt;=PRESET;
+                    end else if(rx_data_i=="X"||rx_data_i=="W"||
+                        rx_data_i=="B"||rx_data_i=="R")begin
+                        opcode&lt;=rx_data_i;recv_index&lt;=0;
+                        case(rx_data_i)
+                            "X":expected_bytes&lt;=3;
+                            "W":expected_bytes&lt;=4;
+                            "B":expected_bytes&lt;=6;
+                            default:expected_bytes&lt;=1;
+                        endcase
+                        state&lt;=RECV;
+                    end else if(rx_data_i=="S")begin
+                        response[0]&lt;="I";response[1]&lt;=8'h0d;response[2]&lt;=8'h0a;
+                        send_index&lt;=0;send_length&lt;=3;state&lt;=SEND;
+                    end else if(rx_data_i!=8'h0d &amp;&amp; rx_data_i!=8'h0a)begin
+                        protocol_error_o&lt;=1;
+                        response[0]&lt;="E";response[1]&lt;="R";response[2]&lt;="R";
+                        response[3]&lt;=8'h0d;response[4]&lt;=8'h0a;
+                        send_index&lt;=0;send_length&lt;=5;state&lt;=SEND;
+                    end
+                end
+                RECV:if(rx_valid_i &amp;&amp; rx_ready_o)begin
+                    payload[recv_index]&lt;=rx_data_i;
+                    if(recv_index+3'd1==expected_bytes)state&lt;=APPLY;
+                    else recv_index&lt;=recv_index+1'b1;
+                end
+                APPLY:begin
+                    if(!accepted_fields || !npu_load_ready_i)begin
+                        protocol_error_o&lt;=1;
+                        response[0]&lt;="E";response[1]&lt;="R";response[2]&lt;="R";
+                        response[3]&lt;=8'h0d;response[4]&lt;=8'h0a;
+                        send_index&lt;=0;send_length&lt;=5;state&lt;=SEND;
+                    end else if(opcode=="R")begin
+                        run_length&lt;=payload[0][6:0];state&lt;=RUN;
+                    end else begin
+                        response[0]&lt;="O";response[1]&lt;="K";
+                        response[2]&lt;=8'h0d;response[3]&lt;=8'h0a;
+                        send_index&lt;=0;send_length&lt;=4;state&lt;=SEND;
+                    end
+                end
+                PRESET:if(npu_load_ready_i)begin
+                    if(preset_index==13)state&lt;=RUN;
+                    else preset_index&lt;=preset_index+1'b1;
+                end
+                RUN:state&lt;=WAIT_NPU;
+                WAIT_NPU:begin
+                    if(npu_error_i)begin
+                        protocol_error_o&lt;=1;
+                        response[0]&lt;="E";response[1]&lt;="R";response[2]&lt;="R";
+                        response[3]&lt;=8'h0d;response[4]&lt;=8'h0a;
+                        send_index&lt;=0;send_length&lt;=5;state&lt;=SEND;
+                    end else if(npu_done_i)begin
+                        // Cx: + 4 signed 41bit scores each in 11 hex chars + CRLF.
+                        response[0]&lt;="C";response[1]&lt;=8'h30+{6'b0,npu_class_i};
+                        response[2]&lt;=":";
+                        for(i=0;i&lt;4;i=i+1)begin
+                            for(j=0;j&lt;11;j=j+1)
+                                response[3+i*12+j]&lt;=score_hex(
+                                    npu_scores_i[i*41+:41],j);
+                            if(i&lt;3)response[14+i*12]&lt;=",";
+                        end
+                        response[50]&lt;=8'h0d;response[51]&lt;=8'h0a;
+                        send_index&lt;=0;send_length&lt;=52;state&lt;=SEND;
+                    end
+                end
+                SEND:if(tx_valid_o &amp;&amp; tx_ready_i)begin
+                    if(send_index+6'd1==send_length)begin
+                        send_index&lt;=0;state&lt;=IDLE;
+                    end else send_index&lt;=send_index+1'b1;
+                end
+                default:begin state&lt;=IDLE;protocol_error_o&lt;=1;end
+            endcase
+        end
+    end
+endmodule</code></pre>
+      </div>
+    </section>
+    <section class="section" id="s04">
+      <h2><span class="num">04</span>테스트벤치·기준 모델 작성</h2>
+      <p>테스트벤치는 출력을 자동 판정합니다. 실제 UART 비트파형을 TB가 만들고 TX를 다시 복조해 판정합니다. <code>check_results.py</code>는 결과 CSV를 PC 기준값과 비교합니다.</p>
+      <div class="codeblock">
+        <div class="codebar"><span>mini_npu/tb/tb_npu_uart.sv · systemverilog</span></div>
+        <pre><code class="language-systemverilog">// (추가) CPU/AXI 없이 실제 UART RX 핀→BRAM→DSP 4PE→UART TX 핀 파형 검증.
+`timescale 1ns/1ps
+module tb_npu_uart;
+    localparam integer CPB=868;
+    reg clk=0,btnC=1,uart_rxd=1;
+    wire uart_txd,dp;
+    wire [15:0] led;
+    wire [6:0] seg;
+    wire [3:0] an;
+    wire [7:0] byte_out;
+    wire byte_valid,fe,ov;
+    integer c_count=0,ack_count=0,err_count=0,nbytes=0;
+    integer k,i,j;
+    reg [7:0] chars[0:63];
+    reg [8*256-1:0] csvpath;
+    integer csv_file;
+    always #5 clk=~clk;
+    basys3_npu_top dut(.clk(clk),.btnC(btnC),
+        .uart_rxd(uart_rxd),.uart_txd(uart_txd),
+        .led(led),.seg(seg),.an(an),.dp(dp));
+    uart_rx tx_monitor(.clk(clk),.resetn(!btnC),.rx_i(uart_txd),
+        .out_data_o(byte_out),.out_valid_o(byte_valid),
+        .out_ready_i(1'b1),.framing_error_o(fe),.overrun_o(ov));
+
+    task automatic send_byte(input [7:0] b);
+        integer bitno;
+        begin
+            @(negedge clk);uart_rxd=0;repeat(CPB)@(negedge clk);
+            for(bitno=0;bitno&lt;8;bitno=bitno+1)begin
+                uart_rxd=b[bitno];repeat(CPB)@(negedge clk);
+            end
+            uart_rxd=1;repeat(CPB)@(negedge clk);
+        end
+    endtask
+    function automatic [7:0] hexchar(input [3:0] value);
+        begin
+            if(value&lt;10)hexchar="0"+value;
+            else hexchar="A"+(value-10);
+        end
+    endfunction
+    function automatic signed [40:0] golden(input integer s,input integer n);
+        integer x0,x1,w0,w1;
+        begin
+            x0=(s&amp;2)?-1:1; x1=(s&amp;1)?-1:1;
+            w0=(n&amp;2)?-1:1; w1=(n&amp;1)?-1:1;
+            golden=x0*w0+x1*w1;
+            if(c_count==5 &amp;&amp; n==3)golden=golden+10;
+        end
+    endfunction
+    function automatic [7:0] gold_hex(input signed [40:0] val,input integer pos);
+        reg [43:0] ext;
+        begin
+            ext={{3{val[40]}},val};
+            gold_hex=hexchar((ext&gt;&gt;((10-pos)*4))&amp;4'hf);
+        end
+    endfunction
+    // (추가) 실제 TX 라인에서 복조한 ASCII HEX를 signed 41-bit 값으로 변환.
+    // CSV에 골든값을 복사하면 UART 검증 증거가 되지 않으므로 디코딩값을 기록.
+    function automatic signed [40:0] decoded_score(input integer lane);
+        integer p;
+        reg [7:0] ch;
+        reg [3:0] hex;
+        reg [43:0] packed_hex;
+        begin
+            packed_hex=44'd0;
+            for(p=0;p&lt;11;p=p+1)begin
+                ch=chars[3+lane*12+p];
+                if(ch&gt;="0" &amp;&amp; ch&lt;="9")hex=ch-"0";
+                else if(ch&gt;="A" &amp;&amp; ch&lt;="F")hex=ch-"A"+10;
+                else $fatal(1,"Non-hex RTL UART output");
+                packed_hex=(packed_hex&lt;&lt;4)|hex;
+            end
+            decoded_score=$signed(packed_hex[40:0]);
+        end
+    endfunction
+
+    integer scenario,exp_cls;
+    reg signed [40:0] exp_score;
+    always @(posedge clk)if(byte_valid)begin
+        if(nbytes&gt;=63)$fatal(1,"TX line overflow");
+        if(byte_out!=8'h0a)begin
+            chars[nbytes]=byte_out;nbytes=nbytes+1;
+        end else begin
+            if(nbytes==51 &amp;&amp; chars[0]=="C")begin
+                scenario=(c_count&lt;4)?c_count:0;
+                exp_cls=(c_count==5)?3:scenario;
+                if(chars[1]!==("0"+exp_cls))$fatal(1,"UART CLASS mismatch");
+                if(chars[2]!==":")$fatal(1,"Bad UART result header");
+                // (추가) 응답 점수 구분자와 CR도 실제 비트 복조값으로 검증.
+                if(chars[14]!=="," || chars[26]!=="," || chars[38]!=="," ||
+                   chars[50]!==8'h0d)$fatal(1,"UART score separators or CR mismatch");
+                for(i=0;i&lt;4;i=i+1)begin
+                    exp_score=golden(scenario,i);
+                    for(j=0;j&lt;11;j=j+1)
+                        if(chars[3+i*12+j]!==gold_hex(exp_score,j))
+                            $fatal(1,"UART SCORE mismatch case=%0d lane=%0d hex=%0d",c_count,i,j);
+                end
+                if(led[exp_cls]!==1'b1)$fatal(1,"LED class mismatch");
+                // (변경) 예상값이 아니라 TX 비트파형에서 실제 수신한 4개 점수 기록.
+                $fdisplay(csv_file,"%0d,%0d,%0d,%0d,%0d,%0d",c_count,exp_cls,
+                    decoded_score(0),decoded_score(1),
+                    decoded_score(2),decoded_score(3));
+                c_count=c_count+1;
+            end else if(nbytes==3 &amp;&amp; chars[0]=="O" &amp;&amp; chars[1]=="K")begin
+                ack_count=ack_count+1;
+            end else if(nbytes==4 &amp;&amp; chars[0]=="E" &amp;&amp; chars[1]=="R" &amp;&amp; chars[2]=="R")begin
+                err_count=err_count+1;
+            end else $fatal(1,"Unexpected UART response len=%0d",nbytes+1);
+            nbytes=0;
+        end
+    end
+    initial begin
+        csvpath="part03/mini_npu/outputs/predictions.csv";
+        if($value$plusargs("CSV=%s",csvpath))begin end
+        csv_file=$fopen(csvpath,"w");
+        if(csv_file==0)$fatal(1,"Cannot open CSV file");
+        $fdisplay(csv_file,"scenario,class,score0,score1,score2,score3");
+        repeat(10)@(negedge clk);btnC=0;
+        for(k=0;k&lt;4;k=k+1)begin
+            send_byte("0"+k);
+            wait(c_count==k+1);
+        end
+        send_byte("0");wait(c_count==5);
+        // 11장: Bias3=+10으로 실제 모델 데이터를 변경한 뒤 재추론.
+        send_byte("B");send_byte(8'h03);
+        send_byte(0);send_byte(0);send_byte(0);send_byte(0);send_byte(10);
+        wait(ack_count==1);
+        send_byte("R");send_byte(8'h02);
+        wait(c_count==6);
+        // 미적재 3번째 입력을 요청하면 ERR를 반환해야 한다.
+        send_byte("R");send_byte(8'h03);
+        wait(err_count==1);
+        if(fe||ov)$fatal(1,"UART line framing/overrun");
+        $fclose(csv_file);
+        $display("INTEGRATED_UART_RTL_SIM_PASS classes=6 model_edit=1 invalid_length=1");
+        $finish;
+    end
+    initial begin #100000000;$fatal(1,"UART NPU end-to-end timeout");end
+endmodule</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>mini_npu/reference/check_results.py · python</span></div>
+        <pre><code class="language-python">#!/usr/bin/env python3
+"""12장: HDL이 기록한 실제 예측 CSV를 독립 정수 정답과 비교한다."""
+import csv
+import sys
+from pathlib import Path
+
+
+def expected_row(scenario):
+    s = scenario if scenario &lt; 4 else 0
+    x = (-1 if s &amp; 2 else 1, -1 if s &amp; 1 else 1)
+    values = []
+    for lane in range(4):
+        w = (-1 if lane &amp; 2 else 1, -1 if lane &amp; 1 else 1)
+        dot = x[0] * w[0] + x[1] * w[1]
+        values.append(dot + (10 if scenario == 5 and lane == 3 else 0))
+    best = max(range(4), key=lambda k: (values[k], -k))
+    return [scenario, best, *values]
+
+
+def main():
+    path = Path(sys.argv[1])
+    with path.open(newline="", encoding="utf-8") as stream:
+        reader = csv.reader(stream)
+        assert next(reader) == [
+            "scenario", "class", "score0", "score1", "score2", "score3"
+        ]
+        rows = [[int(v) for v in row] for row in reader]
+    expected = [expected_row(s) for s in range(6)]
+    if rows != expected:
+        for scenario, (got, want) in enumerate(zip(rows, expected)):
+            if got != want:
+                print(f"FAIL scenario {scenario}: got={got} expected={want}")
+        raise SystemExit("GOLDEN_COMPARE_FAIL")
+    print("PC_GOLDEN_COMPARE_PASS predictions=6 model_edit=1")
+
+
+if __name__ == "__main__":
+    main()</code></pre>
+      </div>
+    </section>
+    <section class="section" id="s05">
+      <h2><span class="num">05</span>시뮬레이션 실행</h2>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 저장소 루트에서 실행</span></div>
+        <pre><code>bash ch11/scripts/run_sim.sh</code></pre></div>
+      <p>기대 출력 (Icarus Verilog 12.0 · 2026-11-18 실제 실행 로그 발췌):</p>
+      <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
+        <pre><code>INTEGRATED_UART_RTL_SIM_PASS classes=6 model_edit=1 invalid_length=1
+PC_GOLDEN_COMPARE_PASS predictions=6 model_edit=1</code></pre></div>
+      <p>명령 프로토콜 경계 시험(선택):</p>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal</span></div>
+        <pre><code>bash mini_npu/scripts/run_adversarial.sh</code></pre></div>
+      <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
+        <pre><code>A1_STATUS_CRLF_IGNORED_PASS
+A2_INVALID_OPCODE_ERR_PASS count=4
+A3_INVALID_FIELDS_ERR_PASS err=8 ok_boundary=2
+A4_COMMAND_DURING_RESPONSE_PASS ordered=4
+A5_BURST_20_STATUS_NO_LOSS_PASS
+A6_RESET_DURING_RESPONSE_PASS
+NPU_UART_ADVERSARIAL_SIM_PASS tests=8 responses=43</code></pre></div>
+    </section>
+    <section class="section" id="s06">
+      <h2><span class="num">06</span>결과 판정</h2>
+      <table>
+        <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
+        <tbody><tr><td><code>INTEGRATED_UART_RTL_SIM_PASS classes=6 model_edit=1 invalid_length=1</code></td><td>6개 표본 분류 · Bias 변경 후 분류 변화 · 잘못된 길이 거부</td></tr><tr><td><code>PC_GOLDEN_COMPARE_PASS predictions=6 model_edit=1</code></td><td>mini_npu/outputs/predictions.csv가 PC 기준 모델과 일치</td></tr></tbody>
+      </table>
+      <p><b>실패 시:</b> TB의 <code>$fatal</code> 메시지에 표시된 cycle 번호와 기대값/실제값을 확인하고, 03절 코드와 한 줄씩 대조합니다. 하나라도 실패하면 다음 장으로 넘어가지 않습니다.</p>
+    </section>
+    <section class="section" id="s07">
+      <h2><span class="num">07</span>코드 읽기 포인트</h2>
+      <table>
+        <thead><tr><th>위치</th><th>내용</th></tr></thead>
+        <tbody><tr><td>stop-and-wait</td><td><code>rx_ready_o = state==IDLE || state==RECV</code>이므로 APPLY·RUN·WAIT_NPU·SEND 동안 들어온 바이트는 UART RX FIFO에 머뭅니다. PC는 응답 줄바꿈을 받은 뒤 다음 명령을 보냅니다.</td></tr>
+<tr><td>필드 검사</td><td><code>accepted_fields</code>가 주소 0~63, 뉴런 0~3, 길이 1~64를 조합 논리로 검사합니다. 기록 Enable(<code>x_wr_en_o</code> 등)은 APPLY 상태 + 필드 통과 + <code>npu_load_ready_i</code>일 때만 1이 되므로 추론 중 덮어쓰기가 불가능합니다.</td></tr>
+<tr><td>점수 직렬화</td><td>4개 41비트 signed 점수를 각각 44비트로 부호 확장해 11자리 16진수로 보냅니다. 응답은 <code>C</code>+클래스+<code>:</code>+(11자×4)+쉼표 3개+CRLF = 52바이트입니다.</td></tr>
+<tr><td>프리셋</td><td><code>'0'~'3'</code>은 PRESET 상태에서 14단계(X 2개·W 8개·B 4개)를 자동 기록한 뒤 RUN으로 넘어갑니다. 표본 X0=(+1,+1)…X3=(−1,−1)의 부호 패턴입니다.</td></tr></tbody>
+      </table>
+    </section>
+    <section class="section" id="s08">
+      <h2><span class="num">08</span>보드 확인</h2>
+      <p>이 장은 단위 RTL 시험까지 진행합니다. 보드 확인은 <a href="ch12_integrated_npu_v05.html#s08">12장 · 08 보드 확인</a>에서 통합 Top으로 진행합니다.</p>
+    </section>
+    <section class="section" id="s09">
+      <h2><span class="num">09</span>검증 현황·인계</h2>
+      <table>
+        <thead><tr><th>다음 장으로 넘기는 파일</th><th>사용처</th></tr></thead>
+        <tbody><tr><td><code>mini_npu/rtl/uart_npu_command_controller.v</code></td><td>12장 basys3_npu_top의 명령 계층 (수정 금지)</td></tr></tbody>
+      </table>
+      <p>검증 게이트 (RTL 시뮬레이션 결과는 Icarus Verilog 12.0 · 2026-11-18 실행, 증거 <code>ch11/validation/</code>):</p>
+      <div class="gate-row">
+        <div class="gate pass">
+          <b>HTML_PASS</b>
+          <span>v05 · 정적 검사</span>
+        </div>
+        <div class="gate pass">
+          <b>HOST_MODEL_PASS</b>
+          <span>PC_GOLDEN_COMPARE_PASS predictions=6 model_edit=1</span>
+        </div>
+        <div class="gate pass">
+          <b>RTL_SIM_PASS</b>
+          <span>INTEGRATED_UART_RTL_SIM_PASS · NPU_UART_ADVERSARIAL_SIM_PASS tests=8</span>
+        </div>
+        <div class="gate todo">
+          <b>SYNTH_TIMING_PASS</b>
+          <span>⚠ 미검증 · Vivado 미실행</span>
+        </div>
+        <div class="gate todo">
+          <b>BOARD_PASS</b>
+          <span>⚠ 미검증 · 실물 Basys3 미확인</span>
+        </div>
+      </div>
+    </section>
+    <div class="chapter-links" id="chapter-links"></div>
+  </main>
+</div>
+<script>
+window.COURSE={
+ "title": "Basys3 소형 NPU 실습 (고도화판)",
+ "chapters": [
+  {
+   "id": "ch00",
+   "number": 0,
+   "title": "UART Echo",
+   "file": "ch00_uart_echo_v05.html"
+  },
+  {
+   "id": "ch01",
+   "number": 1,
+   "title": "DSP 추론 MAC 누산",
+   "file": "ch01_mac_v05.html"
+  },
+  {
+   "id": "ch02",
+   "number": 2,
+   "title": "DSP48E1 타깃 곱셈",
+   "file": "ch02_dsp_v05.html"
+  },
+  {
+   "id": "ch03",
+   "number": 3,
+   "title": "MAC 2단계 파이프라인",
+   "file": "ch03_mac_pipeline_v05.html"
+  },
+  {
+   "id": "ch04",
+   "number": 4,
+   "title": "BRAM 동기 버퍼",
+   "file": "ch04_bram_v05.html"
+  },
+  {
+   "id": "ch05",
+   "number": 5,
+   "title": "Fixed-Point Quantizer",
+   "file": "ch05_fixed_v05.html"
+  },
+  {
+   "id": "ch06",
+   "number": 6,
+   "title": "INT8·INT16 정밀도 비교",
+   "file": "ch06_precision_v05.html"
+  },
+  {
+   "id": "ch07",
+   "number": 7,
+   "title": "벡터 내적",
+   "file": "ch07_vector_dot_v05.html"
+  },
+  {
+   "id": "ch08",
+   "number": 8,
+   "title": "4PE 병렬 어레이",
+   "file": "ch08_pe4_v05.html"
+  },
+  {
+   "id": "ch09",
+   "number": 9,
+   "title": "Dense 4뉴런 레이어",
+   "file": "ch09_dense_v05.html"
+  },
+  {
+   "id": "ch10",
+   "number": 10,
+   "title": "4뉴런 NPU Core",
+   "file": "ch10_npu_core_v05.html"
+  },
+  {
+   "id": "ch11",
+   "number": 11,
+   "title": "UART 모델 적재 컨트롤러",
+   "file": "ch11_uart_register_v05.html"
+  },
+  {
+   "id": "ch12",
+   "number": 12,
+   "title": "통합 NPU Top",
+   "file": "ch12_integrated_npu_v05.html"
+  }
+ ]
+};
+</script>
+<script defer src="assets/education/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,1290 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Basys3 NPU 12장 실습 · 통합 NPU Top · Basys3">
+<title>12장 · 통합 NPU Top · Basys3 (v05)</title>
+<link rel="stylesheet" href="assets/education/site.css">
+<style>
+.hero:before{background-image:linear-gradient(90deg,rgba(12,17,27,.89),rgba(12,17,27,.69) 58%,rgba(12,17,27,.48)),url('https://raw.githubusercontent.com/Yuul-Jung/rule_md/d1b8278d41fca8f5e3960736f3ac9d377e462fda/web/education-html/assets/hero-bookshelf.jpg')}
+.codeblock pre{max-height:780px;white-space:pre}
+.section svg{width:100%;height:auto}
+.vbadge{display:inline-block;padding:.15em .6em;border-radius:4px;font-size:.78em;font-weight:700;background:#d4edda;color:#155724;vertical-align:middle}
+.gate-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:10px}
+.gate{border:1px solid var(--line,#e0e0e0);border-radius:6px;padding:10px 14px}
+.gate b{display:block;font:600 11px var(--mono,monospace);letter-spacing:.04em;margin-bottom:4px}
+.gate span{font-size:13px}
+.gate.pass{border-color:#2d8a52;background:#f0fbf4}
+.gate.todo{border-color:#b08900;background:#fffbe6}
+</style>
+</head>
+<body data-chapter="ch12">
+<a class="access-skip" href="#main-content">본문 바로가기</a>
+<button type="button" class="mobile-menu" id="mobile-menu" aria-controls="course-nav" aria-expanded="false">☰ 장·목차</button>
+<div class="shade" id="shade"></div>
+<header class="hero">
+  <div class="hero-inner">
+    <p class="kicker">BASYS3 · NPU 고도화판 · 12장 실습 <span class="vbadge">v05</span></p>
+    <h1>제12장 · 통합 NPU Top · Basys3</h1>
+    <p>00~11장 결과를 하나의 Basys3 Top으로 묶어 전체 회귀 시뮬레이션 → Vivado 합성·구현 → 비트스트림 → 보드에서 UART·LED·FND를 확인합니다.</p>
+  </div>
+</header>
+<div class="wrap">
+  <nav class="toc" id="course-nav" aria-label="전체 장과 절 탐색"></nav>
+  <main class="content" id="main-content">
+    <section class="section" id="s00">
+      <h2><span class="num">00</span>이 장의 위치</h2>
+      <p><b>목표:</b> 00~11장 결과를 하나의 Basys3 Top으로 묶어 전체 회귀 시뮬레이션 → Vivado 합성·구현 → 비트스트림 → 보드에서 UART·LED·FND를 확인합니다.</p>
+      <table>
+        <thead><tr><th>구분</th><th>파일</th></tr></thead>
+        <tbody>
+          <tr><td>유지 (이전 장, 수정 없음)</td><td><ul><li><code>common/rtl/uart_rx.v</code> <small>(00장)</small></li><li><code>common/rtl/uart_tx.v</code> <small>(00장)</small></li><li><code>common/rtl/uart_core.v</code> <small>(00장)</small></li><li><code>ch02/rtl/dsp_multiplier.v</code> <small>(02장)</small></li><li><code>mini_npu/rtl/uart_npu_command_controller.v</code> <small>(11장)</small></li></ul></td></tr>
+          <tr><td>이번 장 작성</td><td><ul><li><code>mini_npu/rtl/npu_dsp_mac_lane.v</code></li><li><code>mini_npu/rtl/npu_engine4.v</code></li><li><code>mini_npu/rtl/npu_display_controller.v</code></li><li><code>mini_npu/rtl/npu_reset_controller.v</code></li><li><code>mini_npu/rtl/basys3_npu_top.v</code></li><li><code>mini_npu/constraints/basys3_npu.xdc</code></li><li><code>mini_npu/scripts/build_vivado.tcl</code></li><li><code>mini_npu/scripts/run_vivado_synth.sh</code></li></ul></td></tr>
+        </tbody>
+      </table>
+      <p>실습 순서: 01 구조 확인 → 02 준비 → 03 RTL 작성 → 04 테스트벤치·기준 모델 작성 → 05 시뮬레이션 → 06 결과 판정 → 08 보드 확인 → 09 인계.</p>
+    </section>
+    <section class="section" id="s01">
+      <h2><span class="num">01</span>구조도</h2>
+      <svg viewBox="0 0 980 340" role="img" aria-label="basys3_npu_top 실제 포트와 하위 모듈 구조">
+      <rect x="250" y="30" width="480" height="270" rx="10" fill="#fff" stroke="#4635b1" stroke-width="2"/>
+      <text x="490" y="54" font-size="18" font-weight="700" text-anchor="middle">basys3_npu_top</text>
+      <text x="490" y="72" font-size="13" text-anchor="middle" fill="#555">mini_npu/rtl/basys3_npu_top.v</text>
+      <text x="222" y="64" font-size="14" font-family="monospace" text-anchor="end">clk</text>
+      <path d="M226 60 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 60 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="87" font-size="14" font-family="monospace" text-anchor="end">btnC</text>
+      <path d="M226 83 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 83 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="110" font-size="14" font-family="monospace" text-anchor="end">uart_rxd</text>
+      <path d="M226 106 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 106 l-7 -4 v8 z" fill="#4635b1"/>
+      <path d="M730 60 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 60 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="758" y="65" font-size="14" font-family="monospace">uart_txd</text>
+      <path d="M730 83 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 83 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="758" y="88" font-size="14" font-family="monospace">led[15:0]</text>
+      <path d="M730 106 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 106 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="758" y="111" font-size="14" font-family="monospace">seg[6:0]</text>
+      <path d="M730 129 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 129 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="758" y="134" font-size="14" font-family="monospace">an[3:0]</text>
+      <path d="M730 152 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 152 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="758" y="157" font-size="14" font-family="monospace">dp</text>
+      <rect x="270" y="88" width="440" height="28" rx="5" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="5 3"/>
+      <text x="282" y="107" font-size="14" font-family="monospace">uart_core  (uart)</text>
+      <text x="698" y="107" font-size="12" text-anchor="end" fill="#4635b1">ch00 재사용</text>
+      <rect x="270" y="124" width="440" height="28" rx="5" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="5 3"/>
+      <text x="282" y="143" font-size="14" font-family="monospace">uart_npu_command_controller  (commands)</text>
+      <text x="698" y="143" font-size="12" text-anchor="end" fill="#4635b1">ch11 재사용</text>
+      <rect x="270" y="161" width="440" height="28" rx="5" fill="#edeafa" stroke="#4635b1"/>
+      <text x="282" y="180" font-size="14" font-family="monospace">npu_engine4  (engine)</text>
+      <text x="698" y="180" font-size="12" text-anchor="end" fill="#4635b1">이번 장 신규</text>
+      <rect x="270" y="198" width="440" height="28" rx="5" fill="#edeafa" stroke="#4635b1"/>
+      <text x="282" y="217" font-size="14" font-family="monospace">npu_display_controller  (display)</text>
+      <text x="698" y="217" font-size="12" text-anchor="end" fill="#4635b1">이번 장 신규</text>
+      <rect x="270" y="235" width="440" height="28" rx="5" fill="#edeafa" stroke="#4635b1"/>
+      <text x="282" y="254" font-size="14" font-family="monospace">npu_reset_controller  (rst)</text>
+      <text x="698" y="254" font-size="12" text-anchor="end" fill="#4635b1">이번 장 신규</text>
+      <rect x="250" y="315" width="16" height="12" fill="#edeafa" stroke="#4635b1"/><text x="272" y="326" font-size="13">이번 장 신규</text>
+      <rect x="370" y="315" width="16" height="12" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="4 2"/><text x="392" y="326" font-size="13">이전 장 파일 재사용(수정 없음)</text>
+      <text x="600" y="326" font-size="13">왼쪽 = input · 오른쪽 = output (RTL 선언 그대로)</text>
+      </svg>
+      <p>포트 이름과 하위 인스턴스는 <code>mini_npu/rtl/basys3_npu_top.v</code> 선언에서 그대로 가져왔습니다.</p>
+    </section>
+    <section class="section" id="s02">
+      <h2><span class="num">02</span>준비</h2>
+      <ol>
+        <li>VS Code에서 저장소 루트(<code>amd_soc_npu/</code>)를 엽니다.</li>
+        <li>도구를 확인합니다.</li>
+      </ol>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 도구 확인</span></div>
+        <pre><code>sudo apt install -y iverilog python3 ripgrep   # 처음 한 번
+iverilog -V 2&gt;&amp;1 | head -1      # Icarus Verilog version 12.0 이상
+python3 --version</code></pre></div>
+      <ol start="3"><li>00절 '유지' 파일이 이전 장 결과 그대로 있는지 확인합니다.</li></ol>
+    </section>
+    <section class="section" id="s03">
+      <h2><span class="num">03</span>RTL 작성</h2>
+      <p>아래 파일을 경로 그대로 만들고 전체 코드를 입력합니다.</p>
+      <div class="codeblock">
+        <div class="codebar"><span>mini_npu/rtl/npu_dsp_mac_lane.v · verilog</span></div>
+        <pre><code class="language-verilog">// (추가) 02장 등록 DSP 곱을 다음 에지에 누산한다. 곱을 다시 수행하지 않는다.
+module npu_dsp_mac_lane #(
+    parameter integer DATA_WIDTH=16,
+    parameter integer ACC_WIDTH=40
+)(
+    input wire clk,resetn,clear_i,valid_i,
+    input wire signed [DATA_WIDTH-1:0] x_i,w_i,
+    output reg signed [ACC_WIDTH-1:0] acc_o
+);
+    wire signed [2*DATA_WIDTH-1:0] product;
+    wire product_valid;
+    dsp_multiplier #(.A_WIDTH(DATA_WIDTH),.B_WIDTH(DATA_WIDTH)) dsp(
+        .clk(clk),.resetn(resetn),.clear_i(clear_i),
+        .valid_i(valid_i),.a_i(x_i),.b_i(w_i),
+        .product_o(product),.valid_o(product_valid));
+    wire signed [ACC_WIDTH-1:0] product_extended =
+        {{(ACC_WIDTH-2*DATA_WIDTH){product[2*DATA_WIDTH-1]}},product};
+    always @(posedge clk)begin
+        if(!resetn || clear_i)acc_o&lt;=0;
+        else if(product_valid)acc_o&lt;=acc_o+product_extended;
+    end
+    // synthesis translate_off
+    initial if(ACC_WIDTH&lt;2*DATA_WIDTH)$fatal(1,"ACC_WIDTH too small");
+    // synthesis translate_on
+endmodule</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>mini_npu/rtl/npu_engine4.v · verilog</span></div>
+        <pre><code class="language-verilog">// (추가) 04장 BRAM 구조 + 02장 DSP 레지스터 곱 + 4개 누산기 통합.
+// 12장 최종 경로는 기존 ch07 벡터 닷의 곱 경로를 중복 사용하지 않는다.
+// 메모리 쓰기는 IDLE에서만 허용하며 Reset 시 유효 비트만 지운다.
+module npu_engine4(
+    input wire clk,resetn,start_i,
+    input wire [6:0] length_i,
+    input wire x_wr_en,w_wr_en,b_wr_en,
+    input wire [5:0] addr_i,
+    input wire [1:0] neuron_i,
+    input wire signed [15:0] data_i,
+    input wire signed [39:0] bias_i,
+    output wire load_ready_o,
+    output reg busy_o,done_o,error_o,
+    output reg [1:0] class_o,
+    output reg [163:0] scores_o
+);
+    localparam [2:0] IDLE=0,READ=1,ISSUE=2,DRAIN1=3,DRAIN2=4;
+    reg [2:0] state;
+    reg [6:0] length_q;
+    reg [5:0] index_q;
+    (* ram_style="block" *) reg signed [15:0] xmem[0:63];
+    (* ram_style="block" *) reg signed [15:0] w0[0:63];
+    (* ram_style="block" *) reg signed [15:0] w1[0:63];
+    (* ram_style="block" *) reg signed [15:0] w2[0:63];
+    (* ram_style="block" *) reg signed [15:0] w3[0:63];
+    reg [63:0] x_seen,w0_seen,w1_seen,w2_seen,w3_seen;
+    reg signed [39:0] bias0,bias1,bias2,bias3;
+    reg signed [15:0] x_sample,w_sample0,w_sample1,w_sample2,w_sample3;
+
+    reg input_valid;
+    integer k;
+    always @* begin
+        input_valid=(length_i!=0 &amp;&amp; length_i&lt;=64);
+        for(k=0;k&lt;64;k=k+1)
+            if(k&lt;length_i &amp;&amp;
+               (!x_seen[k] || !w0_seen[k] || !w1_seen[k] ||
+                !w2_seen[k] || !w3_seen[k]))
+                input_valid=0;
+    end
+    wire any_write=x_wr_en||w_wr_en||b_wr_en;
+    wire launch=(state==IDLE)&amp;&amp;start_i&amp;&amp;input_valid&amp;&amp;!any_write;
+    wire mul_valid=(state==ISSUE);
+    assign load_ready_o=resetn&amp;&amp;!busy_o&amp;&amp;!start_i;
+
+    wire signed [39:0] acc0,acc1,acc2,acc3;
+    npu_dsp_mac_lane lane0(.clk(clk),.resetn(resetn),.clear_i(launch),
+        .valid_i(mul_valid),.x_i(x_sample),.w_i(w_sample0),.acc_o(acc0));
+    npu_dsp_mac_lane lane1(.clk(clk),.resetn(resetn),.clear_i(launch),
+        .valid_i(mul_valid),.x_i(x_sample),.w_i(w_sample1),.acc_o(acc1));
+    npu_dsp_mac_lane lane2(.clk(clk),.resetn(resetn),.clear_i(launch),
+        .valid_i(mul_valid),.x_i(x_sample),.w_i(w_sample2),.acc_o(acc2));
+    npu_dsp_mac_lane lane3(.clk(clk),.resetn(resetn),.clear_i(launch),
+        .valid_i(mul_valid),.x_i(x_sample),.w_i(w_sample3),.acc_o(acc3));
+    // 41비트 signed: 40비트 누산값에 Bias를 더할 때 부호 확장 1비트.
+    wire signed [40:0] score0=$signed({acc0[39],acc0})+$signed({bias0[39],bias0});
+    wire signed [40:0] score1=$signed({acc1[39],acc1})+$signed({bias1[39],bias1});
+    wire signed [40:0] score2=$signed({acc2[39],acc2})+$signed({bias2[39],bias2});
+    wire signed [40:0] score3=$signed({acc3[39],acc3})+$signed({bias3[39],bias3});
+    reg [1:0] best_class;
+    reg signed [40:0] best_score;
+    always @*begin
+        best_class=0;best_score=score0;
+        if(score1&gt;best_score)begin best_score=score1;best_class=1;end
+        if(score2&gt;best_score)begin best_score=score2;best_class=2;end
+        if(score3&gt;best_score)begin best_score=score3;best_class=3;end
+    end
+
+    always @(posedge clk)begin
+        if(!resetn)begin
+            state&lt;=IDLE;busy_o&lt;=0;done_o&lt;=0;error_o&lt;=0;
+            class_o&lt;=0;scores_o&lt;=0;length_q&lt;=0;index_q&lt;=0;
+            x_seen&lt;=0;w0_seen&lt;=0;w1_seen&lt;=0;w2_seen&lt;=0;w3_seen&lt;=0;
+            bias0&lt;=0;bias1&lt;=0;bias2&lt;=0;bias3&lt;=0;
+            x_sample&lt;=0;w_sample0&lt;=0;w_sample1&lt;=0;w_sample2&lt;=0;w_sample3&lt;=0;
+        end else begin
+            done_o&lt;=0;error_o&lt;=0;
+            if(load_ready_o)begin
+                if(x_wr_en)begin
+                    xmem[addr_i]&lt;=data_i;x_seen[addr_i]&lt;=1;
+                end
+                if(w_wr_en)case(neuron_i)
+                    0:begin w0[addr_i]&lt;=data_i;w0_seen[addr_i]&lt;=1;end
+                    1:begin w1[addr_i]&lt;=data_i;w1_seen[addr_i]&lt;=1;end
+                    2:begin w2[addr_i]&lt;=data_i;w2_seen[addr_i]&lt;=1;end
+                    3:begin w3[addr_i]&lt;=data_i;w3_seen[addr_i]&lt;=1;end
+                endcase
+                if(b_wr_en)case(neuron_i)
+                    0:bias0&lt;=bias_i;
+                    1:bias1&lt;=bias_i;
+                    2:bias2&lt;=bias_i;
+                    3:bias3&lt;=bias_i;
+                endcase
+            end else if(any_write)error_o&lt;=1;
+            case(state)
+                IDLE:if(start_i)begin
+                    if(!input_valid||any_write)error_o&lt;=1;
+                    else begin
+                        state&lt;=READ;length_q&lt;=length_i;index_q&lt;=0;busy_o&lt;=1;
+                    end
+                end
+                READ:begin
+                    x_sample&lt;=xmem[index_q];
+                    w_sample0&lt;=w0[index_q];w_sample1&lt;=w1[index_q];
+                    w_sample2&lt;=w2[index_q];w_sample3&lt;=w3[index_q];
+                    state&lt;=ISSUE;
+                end
+                ISSUE:begin
+                    if({1'b0,index_q}+7'd1==length_q)state&lt;=DRAIN1;
+                    else begin index_q&lt;=index_q+1'b1;state&lt;=READ;end
+                end
+                DRAIN1:state&lt;=DRAIN2;
+                DRAIN2:begin
+                    scores_o&lt;={score3,score2,score1,score0};
+                    class_o&lt;=best_class;done_o&lt;=1;busy_o&lt;=0;state&lt;=IDLE;
+                end
+                default:begin state&lt;=IDLE;busy_o&lt;=0;error_o&lt;=1;end
+            endcase
+        end
+    end
+endmodule</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>mini_npu/rtl/npu_display_controller.v · verilog</span></div>
+        <pre><code class="language-verilog">// (추가) FND와 LED 표현 정책은 Top이 아닌 Controller에서 처리.
+module npu_display_controller(
+    input wire clk,resetn,
+    input wire [1:0] class_i,
+    input wire busy_i,done_i,error_i,protocol_error_i,
+    input wire uart_framing_error_i,uart_overrun_i,
+    output wire [15:0] led_o,
+    output reg [6:0] seg_o,
+    output reg [3:0] an_o,
+    output wire dp_o
+);
+    reg done_latched,error_latched;
+    reg [17:0] scan_count;
+    reg [3:0] digit;
+    wire [3:0] onehot=4'b0001&lt;&lt;class_i;
+    always @(posedge clk)begin
+        if(!resetn)begin
+            done_latched&lt;=0;error_latched&lt;=0;scan_count&lt;=0;
+        end else begin
+            scan_count&lt;=scan_count+1'b1;
+            if(done_i)done_latched&lt;=1;
+            if(error_i||protocol_error_i||uart_framing_error_i||uart_overrun_i)
+                error_latched&lt;=1;
+        end
+    end
+    assign led_o[3:0]=onehot;
+    assign led_o[12:4]=9'd0;
+    assign led_o[13]=busy_i;
+    assign led_o[14]=done_latched;
+    assign led_o[15]=error_latched;
+    assign dp_o=1'b1;
+    always @*begin
+        case(scan_count[17:16])
+            2'd0:begin an_o=4'b1110;digit={2'b00,class_i};end
+            2'd1:begin an_o=4'b1101;digit=0;end
+            2'd2:begin an_o=4'b1011;digit=0;end
+            default:begin an_o=4'b0111;digit=0;end
+        endcase
+        // Active low: segments {g,f,e,d,c,b,a} (seg[0] is a).
+        case(digit)
+            0:seg_o=7'b1000000;
+            1:seg_o=7'b1111001;
+            2:seg_o=7'b0100100;
+            3:seg_o=7'b0110000;
+            default:seg_o=7'b1111111;
+        endcase
+    end
+endmodule</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>mini_npu/rtl/npu_reset_controller.v · verilog</span></div>
+        <pre><code class="language-verilog">// (추가) Basys3 btnC 비동기 Assertion, 동기 Release Reset.
+module npu_reset_controller(
+    input wire clk,btnC,
+    output wire resetn
+);
+    reg [1:0] release_q;
+    always @(posedge clk or posedge btnC)
+        if(btnC)release_q&lt;=2'b00;
+        else release_q&lt;={release_q[0],1'b1};
+    assign resetn=release_q[1];
+endmodule</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>mini_npu/rtl/basys3_npu_top.v · verilog</span></div>
+        <pre><code class="language-verilog">// (추가) 12장 Basys3 Shell: 전원·UART·코어·Controller·FND 모듈 연결만 담당.
+module basys3_npu_top(
+    input wire clk,btnC,uart_rxd,
+    output wire uart_txd,
+    output wire [15:0] led,
+    output wire [6:0] seg,
+    output wire [3:0] an,
+    output wire dp
+);
+    wire resetn;
+    wire [7:0] rx_data,tx_data;
+    wire rx_valid,rx_ready,tx_valid,tx_ready,fe,ov,cmd_error;
+    wire start,xwe,wwe,bwe,load_ready,busy,done,error;
+    wire [6:0] length;
+    wire [5:0] wr_addr;
+    wire [1:0] neuron,class_id;
+    wire signed [15:0] wr_data;
+    wire signed [39:0] wr_bias;
+    wire [163:0] scores;
+    npu_reset_controller rst(.clk(clk),.btnC(btnC),.resetn(resetn));
+    uart_core uart(.clk(clk),.resetn(resetn),
+        .uart_rxd_i(uart_rxd),.uart_txd_o(uart_txd),
+        .rx_out_data(rx_data),.rx_out_valid(rx_valid),.rx_out_ready(rx_ready),
+        .tx_in_data(tx_data),.tx_in_valid(tx_valid),.tx_in_ready(tx_ready),
+        .rx_framing_error_o(fe),.rx_overrun_o(ov));
+    uart_npu_command_controller commands(.clk(clk),.resetn(resetn),
+        .rx_data_i(rx_data),.rx_valid_i(rx_valid),.rx_ready_o(rx_ready),
+        .tx_data_o(tx_data),.tx_valid_o(tx_valid),.tx_ready_i(tx_ready),
+        .npu_start_o(start),.npu_length_o(length),
+        .x_wr_en_o(xwe),.w_wr_en_o(wwe),.b_wr_en_o(bwe),
+        .wr_addr_o(wr_addr),.neuron_o(neuron),
+        .wr_data_o(wr_data),.bias_data_o(wr_bias),
+        .npu_load_ready_i(load_ready),
+        .npu_busy_i(busy),.npu_done_i(done),.npu_error_i(error),
+        .npu_class_i(class_id),.npu_scores_i(scores),
+        .protocol_error_o(cmd_error));
+    npu_engine4 engine(.clk(clk),.resetn(resetn),
+        .start_i(start),.length_i(length),
+        .x_wr_en(xwe),.w_wr_en(wwe),.b_wr_en(bwe),
+        .addr_i(wr_addr),.neuron_i(neuron),.data_i(wr_data),.bias_i(wr_bias),
+        .load_ready_o(load_ready),.busy_o(busy),.done_o(done),.error_o(error),
+        .class_o(class_id),.scores_o(scores));
+    npu_display_controller display(.clk(clk),.resetn(resetn),
+        .class_i(class_id),.busy_i(busy),.done_i(done),
+        .error_i(error),.protocol_error_i(cmd_error),
+        .uart_framing_error_i(fe),.uart_overrun_i(ov),
+        .led_o(led),.seg_o(seg),.an_o(an),.dp_o(dp));
+endmodule</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>mini_npu/constraints/basys3_npu.xdc · tcl</span></div>
+        <pre><code class="language-tcl"># Basys3 Master XDC 핀 기능을 제3부 Shell 포트명에 맞춰 선택 적용.
+set_property -dict { PACKAGE_PIN W5 IOSTANDARD LVCMOS33 } [get_ports clk]
+set_property -dict { PACKAGE_PIN U18 IOSTANDARD LVCMOS33 } [get_ports btnC]
+set_property -dict { PACKAGE_PIN B18 IOSTANDARD LVCMOS33 } [get_ports uart_rxd]
+set_property -dict { PACKAGE_PIN A18 IOSTANDARD LVCMOS33 } [get_ports uart_txd]
+set_property -dict { PACKAGE_PIN V7 IOSTANDARD LVCMOS33 } [get_ports dp]
+set_property -dict { PACKAGE_PIN W7 IOSTANDARD LVCMOS33 } [get_ports {seg[0]}]
+set_property -dict { PACKAGE_PIN W6 IOSTANDARD LVCMOS33 } [get_ports {seg[1]}]
+set_property -dict { PACKAGE_PIN U8 IOSTANDARD LVCMOS33 } [get_ports {seg[2]}]
+set_property -dict { PACKAGE_PIN V8 IOSTANDARD LVCMOS33 } [get_ports {seg[3]}]
+set_property -dict { PACKAGE_PIN U5 IOSTANDARD LVCMOS33 } [get_ports {seg[4]}]
+set_property -dict { PACKAGE_PIN V5 IOSTANDARD LVCMOS33 } [get_ports {seg[5]}]
+set_property -dict { PACKAGE_PIN U7 IOSTANDARD LVCMOS33 } [get_ports {seg[6]}]
+set_property -dict { PACKAGE_PIN U2 IOSTANDARD LVCMOS33 } [get_ports {an[0]}]
+set_property -dict { PACKAGE_PIN U4 IOSTANDARD LVCMOS33 } [get_ports {an[1]}]
+set_property -dict { PACKAGE_PIN V4 IOSTANDARD LVCMOS33 } [get_ports {an[2]}]
+set_property -dict { PACKAGE_PIN W4 IOSTANDARD LVCMOS33 } [get_ports {an[3]}]
+set_property -dict { PACKAGE_PIN U16 IOSTANDARD LVCMOS33 } [get_ports {led[0]}]
+set_property -dict { PACKAGE_PIN E19 IOSTANDARD LVCMOS33 } [get_ports {led[1]}]
+set_property -dict { PACKAGE_PIN U19 IOSTANDARD LVCMOS33 } [get_ports {led[2]}]
+set_property -dict { PACKAGE_PIN V19 IOSTANDARD LVCMOS33 } [get_ports {led[3]}]
+set_property -dict { PACKAGE_PIN W18 IOSTANDARD LVCMOS33 } [get_ports {led[4]}]
+set_property -dict { PACKAGE_PIN U15 IOSTANDARD LVCMOS33 } [get_ports {led[5]}]
+set_property -dict { PACKAGE_PIN U14 IOSTANDARD LVCMOS33 } [get_ports {led[6]}]
+set_property -dict { PACKAGE_PIN V14 IOSTANDARD LVCMOS33 } [get_ports {led[7]}]
+set_property -dict { PACKAGE_PIN V13 IOSTANDARD LVCMOS33 } [get_ports {led[8]}]
+set_property -dict { PACKAGE_PIN V3 IOSTANDARD LVCMOS33 } [get_ports {led[9]}]
+set_property -dict { PACKAGE_PIN W3 IOSTANDARD LVCMOS33 } [get_ports {led[10]}]
+set_property -dict { PACKAGE_PIN U3 IOSTANDARD LVCMOS33 } [get_ports {led[11]}]
+set_property -dict { PACKAGE_PIN P3 IOSTANDARD LVCMOS33 } [get_ports {led[12]}]
+set_property -dict { PACKAGE_PIN N3 IOSTANDARD LVCMOS33 } [get_ports {led[13]}]
+set_property -dict { PACKAGE_PIN P1 IOSTANDARD LVCMOS33 } [get_ports {led[14]}]
+set_property -dict { PACKAGE_PIN L1 IOSTANDARD LVCMOS33 } [get_ports {led[15]}]
+create_clock -name sys_clk_pin -period 10.000 -waveform {0 5} [get_ports clk]</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>mini_npu/scripts/build_vivado.tcl · tcl</span></div>
+        <pre><code class="language-tcl"># (추가) 12장: 기존 성공 프로젝트를 수정하지 않는 독립 Vivado 프로젝트.
+# 실행: vivado -mode batch -source mini_npu/scripts/build_vivado.tcl
+set project_root [file normalize [file join [file dirname [info script]] ../..]]
+set design_root [file join $project_root mini_npu]
+set build_dir [file join $design_root build]
+file mkdir $build_dir
+create_project -force p3_uart_npu $build_dir -part xc7a35tcpg236-1
+set_property target_language Verilog [current_project]
+foreach file [list \
+  common/rtl/uart_rx.v \
+  common/rtl/uart_tx.v \
+  common/rtl/uart_core.v \
+  ch02/rtl/dsp_multiplier.v \
+  mini_npu/rtl/npu_dsp_mac_lane.v \
+  mini_npu/rtl/npu_engine4.v \
+  mini_npu/rtl/uart_npu_command_controller.v \
+  mini_npu/rtl/npu_display_controller.v \
+  mini_npu/rtl/npu_reset_controller.v \
+  mini_npu/rtl/basys3_npu_top.v \
+] {
+  add_files -norecurse [file join $project_root $file]
+}
+add_files -fileset constrs_1 -norecurse \
+  [file join $design_root constraints basys3_npu.xdc]
+set_property top basys3_npu_top [current_fileset]
+update_compile_order -fileset sources_1
+set_property STEPS.SYNTH_DESIGN.ARGS.FLATTEN_HIERARCHY none [get_runs synth_1]
+launch_runs synth_1 -jobs 2
+wait_on_run synth_1
+set synth_status [get_property STATUS [get_runs synth_1]]
+puts "SYNTH_STATUS: $synth_status"
+if {![string match "*Complete*" $synth_status]} {
+    error "SYNTH_NOT_COMPLETE"
+}
+open_run synth_1
+report_utilization -file [file join $build_dir utilization_synth.rpt]
+report_timing_summary -file [file join $build_dir timing_synth.rpt]
+puts "SYNTH_REPORTS_CREATED (not timing-closure or board PASS)"
+if {[info exists ::env(P3_IMPLEMENT)] &amp;&amp; $::env(P3_IMPLEMENT) eq "1"} {
+    launch_runs impl_1 -to_step route_design -jobs 2
+    wait_on_run impl_1
+    set implementation_status [get_property STATUS [get_runs impl_1]]
+    puts "IMPLEMENT_STATUS: $implementation_status"
+    if {![string match "*Complete*" $implementation_status]} {
+        error "IMPL_NOT_COMPLETE"
+    }
+    open_run impl_1
+    report_utilization -file [file join $build_dir utilization_impl.rpt]
+    report_timing_summary -file [file join $build_dir timing_impl.rpt]
+    puts "IMPLEMENT_REPORTS_CREATED (must inspect WNS/TNS; not BOARD_PASS)"
+}
+close_project</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>mini_npu/scripts/run_vivado_synth.sh · bash</span></div>
+        <pre><code class="language-bash">#!/usr/bin/env bash
+# (추가) 실제 Vivado가 설치된 VS Code에서 00~12장 통합 NPU를 별도 합성.
+set -Eeuo pipefail
+root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." &amp;&amp; pwd)"
+cd "$root"
+if ! command -v vivado &gt;/dev/null 2&gt;&amp;1; then
+    echo "SYNTH_NOT_RUN: Vivado command not found" &gt;&amp;2
+    exit 2
+fi
+vivado -mode batch -source mini_npu/scripts/build_vivado.tcl
+echo "SYNTH_EXECUTED: inspect utilization_synth.rpt and timing_synth.rpt"</code></pre>
+      </div>
+    </section>
+    <section class="section" id="s04">
+      <h2><span class="num">04</span>테스트벤치·기준 모델 작성</h2>
+      <p>테스트벤치는 출력을 자동 판정합니다. 실제 UART 비트파형을 TB가 만들고 TX를 다시 복조해 판정합니다.</p>
+      <div class="codeblock">
+        <div class="codebar"><span>mini_npu/tb/tb_npu_engine4.sv · systemverilog</span></div>
+        <pre><code class="language-systemverilog">// (추가) 실제 DSP 등록 곱→BRAM→4PE 누적 NPU 정수 독립 검증.
+`timescale 1ns/1ps
+module tb_npu_engine4;
+    reg clk=0,resetn=0,start=0,xwe=0,wwe=0,bwe=0;
+    reg [6:0] len=2;
+    reg [5:0] addr=0;
+    reg [1:0] neuron=0;
+    reg signed [15:0] data=0;
+    reg signed [39:0] bias=0;
+    wire load_ready,busy,done,error;
+    wire [1:0] cls;
+    wire [163:0] scores;
+    integer sample,k,n;
+    always #5 clk=~clk;
+    npu_engine4 dut(.clk(clk),.resetn(resetn),.start_i(start),.length_i(len),
+        .x_wr_en(xwe),.w_wr_en(wwe),.b_wr_en(bwe),.addr_i(addr),
+        .neuron_i(neuron),.data_i(data),.bias_i(bias),
+        .load_ready_o(load_ready),.busy_o(busy),.done_o(done),.error_o(error),
+        .class_o(cls),.scores_o(scores));
+    task automatic write_x(input [5:0] a,input signed [15:0] v);
+        begin @(negedge clk);xwe=1;addr=a;data=v;
+              @(negedge clk);xwe=0;end
+    endtask
+    task automatic write_w(input [1:0] nn,input [5:0] a,input signed [15:0] v);
+        begin @(negedge clk);wwe=1;neuron=nn;addr=a;data=v;
+              @(negedge clk);wwe=0;end
+    endtask
+    task automatic write_b(input [1:0] nn,input signed [39:0] v);
+        begin @(negedge clk);bwe=1;neuron=nn;bias=v;
+              @(negedge clk);bwe=0;end
+    endtask
+    task automatic run_npu(input [6:0] count);
+        begin @(negedge clk);len=count;start=1;
+              @(negedge clk);start=0;
+              wait(done || error);#1;end
+    endtask
+    function automatic signed [40:0] exp_score(input integer s,input integer row);
+        integer x0,x1,w0,w1;
+        begin
+            x0=(s&amp;2)?-1:1;x1=(s&amp;1)?-1:1;
+            w0=(row&amp;2)?-1:1;w1=(row&amp;1)?-1:1;
+            exp_score=x0*w0+x1*w1;
+        end
+    endfunction
+    initial begin
+        repeat(8)@(negedge clk);resetn=1;
+        for(n=0;n&lt;4;n=n+1)begin
+            write_w(n,0,(n&amp;2)?-16'sd1:16'sd1);
+            write_w(n,1,(n&amp;1)?-16'sd1:16'sd1);
+        end
+        for(sample=0;sample&lt;4;sample=sample+1)begin
+            write_x(0,(sample&amp;2)?-16'sd1:16'sd1);
+            write_x(1,(sample&amp;1)?-16'sd1:16'sd1);
+            run_npu(2);
+            if(error) $fatal(1,"Unexpected NPU error sample=%0d",sample);
+            if(cls!==sample[1:0])$fatal(1,"Class %0d != sample %0d",cls,sample);
+            for(k=0;k&lt;4;k=k+1)
+                if($signed(scores[k*41+:41])!==exp_score(sample,k))
+                    $fatal(1,"Score mismatch s=%0d lane=%0d",sample,k);
+        end
+        write_x(0,1);write_x(1,1);write_b(3,10);
+        run_npu(2);
+        if(cls!==2'd3 || $signed(scores[3*41+:41])!==41'sd8)
+            $fatal(1,"Bias update ignored");
+        @(negedge clk);len=3;start=1;
+        @(negedge clk);start=0;
+        wait(error);#1;
+        $display("NPU_ENGINE_RTL_SIM_PASS samples=4 bias_update=1 invalid_len=1");
+        $finish;
+    end
+    initial begin #1000000;$fatal(1,"Engine TB timeout");end
+endmodule</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>mini_npu/tb/tb_uart_core_fifo.sv · systemverilog</span></div>
+        <pre><code class="language-systemverilog">// (추가) uart_core 16바이트 RX/TX FIFO 적대적 경계 시험.
+// Empty/Full, 동시 Push/Pop, Ready/Valid, Reset 초기화, 연속 수신 손실, Overrun, Framing, 전송 중단.
+// 실제 직렬 비트파형으로 RX를 구동하고 TX 핀을 독립 uart_rx로 복조해 순서·값을 비교한다.
+`timescale 1ns/1ps
+module tb_uart_core_fifo;
+    localparam integer CLK_HZ=1000000,BAUD=100000;
+    localparam integer CPB=(CLK_HZ+BAUD/2)/BAUD; // 10 clocks/bit: 시뮬레이션 단축
+    reg clk=0,resetn=0,rxd=1;
+    wire txd;
+    wire [7:0] rx_data;
+    wire rx_valid;
+    reg rx_ready=0;
+    reg [7:0] tx_data=0;
+    reg tx_valid=0;
+    wire tx_ready;
+    wire fe,ov;
+    reg mon_resetn=0;
+    wire [7:0] mon_data;
+    wire mon_valid,mon_fe,mon_ov;
+    always #5 clk=~clk;
+
+    uart_core #(.CLK_HZ(CLK_HZ),.BAUD(BAUD)) dut(.clk(clk),.resetn(resetn),
+        .uart_rxd_i(rxd),.uart_txd_o(txd),
+        .rx_out_data(rx_data),.rx_out_valid(rx_valid),.rx_out_ready(rx_ready),
+        .tx_in_data(tx_data),.tx_in_valid(tx_valid),.tx_in_ready(tx_ready),
+        .rx_framing_error_o(fe),.rx_overrun_o(ov));
+    uart_rx #(.CLK_HZ(CLK_HZ),.BAUD(BAUD)) mon(.clk(clk),.resetn(mon_resetn),
+        .rx_i(txd),.out_data_o(mon_data),.out_valid_o(mon_valid),
+        .out_ready_i(1'b1),.framing_error_o(mon_fe),.overrun_o(mon_ov));
+
+    // ---------------- scoreboards ----------------
+    reg [7:0] txq[0:1023];
+    integer tx_head=0,tx_tail=0;
+    reg [7:0] rxq[0:1023];
+    integer rx_head=0,rx_tail=0;
+    integer tx_accepted=0,rx_delivered=0;
+    // coverage
+    integer cov_rx_full=0,cov_tx_full=0,cov_rx_full_pushpop=0,cov_tx_full_pushpop=0;
+    integer cov_rx_pushpop=0,cov_tx_pushpop=0,cov_rx_empty_pop_attempt=0;
+    integer cov_tx_stall=0,cov_rx_hold=0;
+    reg [7:0] prev_rx_data;
+    reg prev_rx_stall=0;
+    reg [7:0] prev_tx_data;
+    reg prev_tx_stall=0;
+
+    always @(posedge clk)begin
+        // TX handshake: 수락된 바이트만 기대 큐에 넣는다.
+        if(tx_valid &amp;&amp; tx_ready)begin
+            txq[tx_tail%1024]=tx_data;tx_tail=tx_tail+1;tx_accepted=tx_accepted+1;
+        end
+        // RX handshake: 실제 수신 순서 비교
+        if(rx_valid &amp;&amp; rx_ready)begin
+            if(rx_head==rx_tail)$fatal(1,"RX unexpected byte %02h",rx_data);
+            if(rx_data!==rxq[rx_head%1024])
+                $fatal(1,"RX order/data mismatch idx=%0d got=%02h exp=%02h",
+                    rx_head,rx_data,rxq[rx_head%1024]);
+            rx_head=rx_head+1;rx_delivered=rx_delivered+1;
+        end
+        // TX 핀 복조 비교
+        if(mon_valid)begin
+            if(tx_head==tx_tail)$fatal(1,"TX unexpected byte on pin %02h",mon_data);
+            if(mon_data!==txq[tx_head%1024])
+                $fatal(1,"TX order/data mismatch idx=%0d got=%02h exp=%02h",
+                    tx_head,mon_data,txq[tx_head%1024]);
+            tx_head=tx_head+1;
+        end
+        if(mon_fe)$fatal(1,"TX pin framing error");
+        // Ready/Valid 규칙: valid &amp;&amp; !ready 동안 rx_out_data 유지
+        if(prev_rx_stall &amp;&amp; rx_data!==prev_rx_data)$fatal(1,"RX data changed while stalled");
+        prev_rx_stall=rx_valid &amp;&amp; !rx_ready;prev_rx_data=rx_data;
+        if(prev_tx_stall &amp;&amp; (!tx_valid || tx_data!==prev_tx_data))
+            $fatal(1,"TB violated TX valid/data hold");
+        prev_tx_stall=tx_valid &amp;&amp; !tx_ready;prev_tx_data=tx_data;
+        // FIFO 내부 불변식
+        if(resetn)begin
+            if(dut.rx_count&gt;16 || dut.tx_count&gt;16)$fatal(1,"FIFO count overflow");
+            if(dut.rx_count!=0 &amp;&amp; dut.rx_count!=16 &amp;&amp;
+               dut.rx_count!=((dut.rx_wptr-dut.rx_rptr)&amp;4'hf))$fatal(1,"RX ptr/count mismatch");
+            if(dut.tx_count!=0 &amp;&amp; dut.tx_count!=16 &amp;&amp;
+               dut.tx_count!=((dut.tx_wptr-dut.tx_rptr)&amp;4'hf))$fatal(1,"TX ptr/count mismatch");
+            if((dut.rx_count==0 || dut.rx_count==16) &amp;&amp; dut.rx_wptr!=dut.rx_rptr)
+                $fatal(1,"RX empty/full pointer mismatch");
+            if((dut.tx_count==0 || dut.tx_count==16) &amp;&amp; dut.tx_wptr!=dut.tx_rptr)
+                $fatal(1,"TX empty/full pointer mismatch");
+            if(rx_valid!==(dut.rx_count!=0))$fatal(1,"RX valid != !empty");
+            if(dut.tx_count==16 &amp;&amp; !dut.tx_pop &amp;&amp; tx_ready)$fatal(1,"TX ready while full");
+            if(dut.rx_count==16 &amp;&amp; dut.rx_push &amp;&amp; !dut.rx_pop)$fatal(1,"RX push while full");
+            // coverage
+            if(dut.rx_count==16)cov_rx_full=cov_rx_full+1;
+            if(dut.tx_count==16)cov_tx_full=cov_tx_full+1;
+            if(dut.rx_push &amp;&amp; dut.rx_pop)cov_rx_pushpop=cov_rx_pushpop+1;
+            if(dut.tx_push &amp;&amp; dut.tx_pop)cov_tx_pushpop=cov_tx_pushpop+1;
+            if(dut.rx_count==16 &amp;&amp; dut.rx_push &amp;&amp; dut.rx_pop)cov_rx_full_pushpop=cov_rx_full_pushpop+1;
+            if(dut.tx_count==16 &amp;&amp; dut.tx_push &amp;&amp; dut.tx_pop)cov_tx_full_pushpop=cov_tx_full_pushpop+1;
+            if(dut.rx_count==0 &amp;&amp; rx_ready)cov_rx_empty_pop_attempt=cov_rx_empty_pop_attempt+1;
+            if(tx_valid &amp;&amp; !tx_ready)cov_tx_stall=cov_tx_stall+1;
+            if(rx_valid &amp;&amp; !rx_ready)cov_rx_hold=cov_rx_hold+1;
+        end
+    end
+
+    // ---------------- serial drivers ----------------
+    task automatic send_frame(input [7:0] b,input stop_bit);
+        integer k;
+        begin
+            @(negedge clk);rxd=0;repeat(CPB)@(negedge clk);
+            for(k=0;k&lt;8;k=k+1)begin rxd=b[k];repeat(CPB)@(negedge clk);end
+            rxd=stop_bit;repeat(CPB)@(negedge clk);
+            rxd=1;
+        end
+    endtask
+    task automatic send_byte(input [7:0] b);
+        begin rxq[rx_tail%1024]=b;rx_tail=rx_tail+1;send_frame(b,1'b1);end
+    endtask
+    task automatic send_byte_dropped(input [7:0] b); // 기대 큐에 넣지 않음(overrun 대상)
+        begin send_frame(b,1'b1);end
+    endtask
+    task automatic do_reset(input integer cycles);
+        begin
+            @(negedge clk);resetn=0;mon_resetn=0;rx_ready=0;tx_valid=0;
+            repeat(2)@(negedge clk);
+            if(tx_ready!==1'b0)$fatal(1,"tx_ready must be low in reset");
+            repeat(cycles)@(negedge clk);
+            if(txd!==1'b1)$fatal(1,"TXD not idle in reset");
+            if(dut.rx_count!==0 || dut.tx_count!==0)$fatal(1,"FIFO count not cleared");
+            if(dut.rx_wptr!==0 || dut.rx_rptr!==0 || dut.tx_wptr!==0 || dut.tx_rptr!==0)
+                $fatal(1,"FIFO pointers not cleared");
+            if(rx_valid!==1'b0 || fe!==1'b0 || ov!==1'b0)$fatal(1,"status not cleared");
+            if(dut.rx.out_valid_o!==1'b0)$fatal(1,"PHY RX hold not cleared");
+            // 스코어보드도 초기화(리셋으로 버린 데이터는 기대하지 않는다)
+            tx_head=tx_tail;rx_head=rx_tail;
+            resetn=1;mon_resetn=1;
+            @(negedge clk);
+            if(tx_ready!==1'b1)$fatal(1,"tx_ready must rise after reset");
+        end
+    endtask
+    // TX push: negedge에서 데이터 제시, ready를 기다려 다음 posedge에서 수락.
+    task automatic tx_push(input [7:0] b);
+        begin
+            tx_data=b;tx_valid=1;
+            while(!tx_ready)@(negedge clk);
+            @(negedge clk);
+        end
+    endtask
+    task automatic wait_tx_drain;
+        integer guard;
+        begin
+            guard=0;
+            while(tx_head!=tx_tail || dut.tx_count!=0 || dut.tx.sending)begin
+                @(negedge clk);guard=guard+1;
+                if(guard&gt;CPB*10*80)$fatal(1,"TX drain timeout");
+            end
+            repeat(CPB*2)@(negedge clk);
+        end
+    endtask
+    task automatic wait_rx_drain;
+        integer guard;
+        begin
+            guard=0;
+            while(rx_head!=rx_tail)begin
+                @(negedge clk);guard=guard+1;
+                if(guard&gt;CPB*10*80)$fatal(1,"RX drain timeout head=%0d tail=%0d",rx_head,rx_tail);
+            end
+        end
+    endtask
+
+    integer i,first_stall_accept,seed,t;
+    reg rand_ready_en=0;
+    always @(negedge clk)if(rand_ready_en)rx_ready=($random(seed)&amp;1);
+
+    initial begin
+        seed=12345;
+        // ===== T1 Reset 상태 =====
+        repeat(5)@(negedge clk);
+        if(tx_ready!==1'b0)$fatal(1,"T1 tx_ready high during reset");
+        if(txd!==1'b1)$fatal(1,"T1 txd not idle");
+        do_reset(3);
+        if(rx_valid!==0)$fatal(1,"T1 rx_valid after reset");
+        $display("T1_RESET_DEFAULTS_PASS");
+
+        // ===== T2 TX Empty-&gt;Full, 정확한 용량(PHY 1 + FIFO 16), 동시 Push/Pop =====
+        @(negedge clk);
+        first_stall_accept=-1;
+        for(i=0;i&lt;40;i=i+1)begin
+            tx_data=8'h30+i;tx_valid=1;
+            if(!tx_ready &amp;&amp; first_stall_accept&lt;0)first_stall_accept=tx_accepted;
+            while(!tx_ready)@(negedge clk);
+            @(negedge clk);
+        end
+        tx_valid=0;
+        if(first_stall_accept!=17)
+            $fatal(1,"T2 TX capacity expected 17 (PHY1+FIFO16) got %0d",first_stall_accept);
+        wait_tx_drain;
+        if(tx_accepted!=40)$fatal(1,"T2 TX accepted count %0d",tx_accepted);
+        if(cov_tx_full==0 || cov_tx_full_pushpop==0)
+            $fatal(1,"T2 TX full / full push+pop not exercised");
+        $display("T2_TX_FULL_CAPACITY_PASS capacity=%0d bytes=40 full_pushpop=%0d",
+            first_stall_accept,cov_tx_full_pushpop);
+
+        // ===== T3 valid=0일 때 데이터 변동은 무시 =====
+        for(i=0;i&lt;200;i=i+1)begin tx_data=$random(seed);tx_valid=0;@(negedge clk);end
+        if(dut.tx_count!==0 || dut.tx.sending)$fatal(1,"T3 TX pushed without valid");
+        // valid=0 상태에서 rx_ready만 들어도 Empty pop 없음
+        rx_ready=1;repeat(50)@(negedge clk);rx_ready=0;
+        if(dut.rx_count!==0 || dut.rx_rptr!==dut.rx_wptr)$fatal(1,"T3 RX pop on empty");
+        $display("T3_NO_VALID_NO_TRANSFER_PASS");
+
+        // ===== T4 RX Full: ready=0으로 17바이트(FIFO16+PHY1) 무손실 보관 후 순서대로 배출 =====
+        rx_ready=0;
+        for(i=0;i&lt;17;i=i+1)send_byte(8'hA0+i);
+        repeat(CPB*2)@(negedge clk);
+        if(dut.rx_count!==16)$fatal(1,"T4 RX count %0d expected 16",dut.rx_count);
+        if(dut.rx.out_valid_o!==1'b1)$fatal(1,"T4 PHY hold byte missing");
+        if(ov||fe)$fatal(1,"T4 unexpected overrun/framing");
+        if(rx_data!==8'hA0)$fatal(1,"T4 head data %02h",rx_data);
+        rx_ready=1;wait_rx_drain;rx_ready=0;
+        if(cov_rx_full_pushpop==0)$fatal(1,"T4 RX full push+pop not exercised");
+        $display("T4_RX_FULL_17_NO_LOSS_PASS full_pushpop=%0d",cov_rx_full_pushpop);
+
+        // ===== T5 RX Overrun: 18번째 바이트만 손실, 앞 17바이트 보존, ov 래치 =====
+        for(i=0;i&lt;17;i=i+1)send_byte(8'h50+i);
+        send_byte_dropped(8'hEE);
+        repeat(CPB*2)@(negedge clk);
+        if(ov!==1'b1)$fatal(1,"T5 overrun not flagged");
+        rx_ready=1;wait_rx_drain;repeat(CPB)@(negedge clk);rx_ready=0;
+        if(rx_valid)$fatal(1,"T5 extra byte after drain (dropped byte leaked)");
+        do_reset(4); // ov는 Reset으로만 해제
+        $display("T5_RX_OVERRUN_18TH_DROPPED_PASS");
+
+        // ===== T6 연속 수신 + 무작위 backpressure: 손실 없음 =====
+        rand_ready_en=1;
+        for(i=0;i&lt;64;i=i+1)send_byte($random(seed));
+        wait_rx_drain;rand_ready_en=0;rx_ready=0;
+        if(ov||fe)$fatal(1,"T6 overrun/framing under random ready");
+        if(cov_rx_pushpop==0)$fatal(1,"T6 RX simultaneous push/pop not exercised");
+        $display("T6_RX_STREAM_RANDOM_READY_PASS bytes=64 pushpop=%0d",cov_rx_pushpop);
+
+        // ===== T7 동시 RX 수신 + TX 송신(Full duplex) =====
+        fork
+            begin for(i=0;i&lt;20;i=i+1)send_byte(8'hC0+i);end
+            begin : txside
+                integer m;
+                @(negedge clk);
+                for(m=0;m&lt;20;m=m+1)tx_push(8'h70+m);
+                tx_valid=0;
+            end
+            begin rx_ready=1;end
+        join
+        wait_rx_drain;wait_tx_drain;rx_ready=0;
+        if(ov||fe)$fatal(1,"T7 full duplex error");
+        $display("T7_FULL_DUPLEX_PASS rx=20 tx=20");
+
+        // ===== T8 Framing error: stop=0 바이트는 FIFO에 넣지 않고 fe 래치 =====
+        send_frame(8'h5A,1'b0);
+        repeat(CPB*3)@(negedge clk);
+        if(fe!==1'b1)$fatal(1,"T8 framing error not flagged");
+        if(rx_valid || dut.rx_count!=0)$fatal(1,"T8 bad frame was pushed");
+        send_byte(8'h3C);rx_ready=1;wait_rx_drain;rx_ready=0;
+        do_reset(4);
+        $display("T8_FRAMING_ERROR_PASS");
+
+        // ===== T9 TX 전송 중 Reset: FIFO/PHY 초기화, 이후 잔류 데이터 없음 =====
+        @(negedge clk);
+        for(i=0;i&lt;12;i=i+1)tx_push(8'h10+i);
+        tx_valid=0;
+        repeat(CPB*10+CPB*4)@(negedge clk); // 2번째 프레임 중간
+        if(!dut.tx.sending || dut.tx_count==0)$fatal(1,"T9 precondition");
+        do_reset(5);
+        @(negedge clk);
+        for(i=0;i&lt;3;i=i+1)tx_push(8'hD0+i);
+        tx_valid=0;
+        wait_tx_drain;
+        $display("T9_RESET_DURING_TX_FLUSH_PASS");
+
+        // ===== T10 RX 프레임 중간 Reset + 송신 중단: 반쪽 바이트 미적재 =====
+        fork
+            begin : partial
+                @(negedge clk);rxd=0;repeat(CPB)@(negedge clk);
+                for(t=0;t&lt;4;t=t+1)begin rxd=0;repeat(CPB)@(negedge clk);end
+                rxd=1; // 송신 중단(라인 idle)
+            end
+            begin repeat(CPB*3)@(negedge clk);@(negedge clk);resetn=0;mon_resetn=0;end
+        join
+        repeat(CPB*12)@(negedge clk);
+        if(dut.rx_count!==0 || dut.rx.out_valid_o!==0)$fatal(1,"T10 partial frame stored");
+        resetn=1;mon_resetn=1;
+        repeat(CPB*12)@(negedge clk);
+        if(rx_valid || fe || ov)$fatal(1,"T10 garbage after reset");
+        send_byte(8'h99);rx_ready=1;wait_rx_drain;rx_ready=0;
+        $display("T10_RESET_DURING_RX_PASS");
+
+        // ===== T11 (관측) Reset 없는 송신 중단: UART 특성상 남은 비트가 1로 읽힌다 =====
+        @(negedge clk);rxd=0;repeat(CPB)@(negedge clk);
+        for(t=0;t&lt;4;t=t+1)begin rxd=0;repeat(CPB)@(negedge clk);end
+        rxd=1;
+        rxq[rx_tail%1024]=8'hF0;rx_tail=rx_tail+1; // 하위 4비트 0, 상위 4비트 idle=1
+        repeat(CPB*8)@(negedge clk);
+        rx_ready=1;wait_rx_drain;rx_ready=0;
+        if(fe)$fatal(1,"T11 unexpected framing");
+        $display("T11_ABORTED_FRAME_OBSERVED byte=F0 (8N1 has no truncation detection)");
+
+        if(cov_rx_hold==0 || cov_tx_stall==0 || cov_rx_empty_pop_attempt==0)
+            $fatal(1,"coverage hole hold=%0d stall=%0d empty=%0d",
+                cov_rx_hold,cov_tx_stall,cov_rx_empty_pop_attempt);
+        $display("COVERAGE rx_full=%0d tx_full=%0d rx_full_pushpop=%0d tx_full_pushpop=%0d rx_pushpop=%0d tx_pushpop=%0d rx_hold=%0d tx_stall=%0d",
+            cov_rx_full,cov_tx_full,cov_rx_full_pushpop,cov_tx_full_pushpop,
+            cov_rx_pushpop,cov_tx_pushpop,cov_rx_hold,cov_tx_stall);
+        $display("UART_FIFO_ADVERSARIAL_SIM_PASS tests=11");
+        $finish;
+    end
+    initial begin #50000000;$fatal(1,"UART FIFO TB TIMEOUT");end
+endmodule</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>mini_npu/tb/tb_npu_uart_adversarial.sv · systemverilog</span></div>
+        <pre><code class="language-systemverilog">// (추가) 11·12장 통합 Top 적대적 UART 시험(실제 RX 핀 구동, TX 핀 복조).
+// 잘못된 명령·주소·길이, CR/LF 무시, 응답 전송 중 다음 명령 수신(FIFO 버퍼링),
+// 연속 명령 폭주, 응답 전송 중 Reset, 명령 중단(Timeout 부재 관측), Framing error.
+`timescale 1ns/1ps
+module tb_npu_uart_adversarial;
+    localparam integer CPB=868;
+    reg clk=0,btnC=1,uart_rxd=1;
+    wire uart_txd,dp;
+    wire [15:0] led;
+    wire [6:0] seg;
+    wire [3:0] an;
+    wire [7:0] byte_out;
+    wire byte_valid,mfe,mov;
+    always #5 clk=~clk;
+    basys3_npu_top dut(.clk(clk),.btnC(btnC),.uart_rxd(uart_rxd),.uart_txd(uart_txd),
+        .led(led),.seg(seg),.an(an),.dp(dp));
+    uart_rx mon(.clk(clk),.resetn(!btnC),.rx_i(uart_txd),
+        .out_data_o(byte_out),.out_valid_o(byte_valid),
+        .out_ready_i(1'b1),.framing_error_o(mfe),.overrun_o(mov));
+
+    // 응답 기록: kind 1=I 2=OK 3=ERR 4=C(class)
+    reg [7:0] chars[0:63];
+    integer nbytes=0,nresp=0;
+    integer kind[0:255];
+    integer cls[0:255];
+    integer i,j,k,base;
+    function automatic [7:0] hexchar(input [3:0] v);
+        hexchar=(v&lt;10)?("0"+v):("A"+(v-10));
+    endfunction
+    function automatic signed [40:0] golden(input integer s,input integer n);
+        integer x0,x1,w0,w1;
+        begin
+            x0=(s&amp;2)?-1:1;x1=(s&amp;1)?-1:1;w0=(n&amp;2)?-1:1;w1=(n&amp;1)?-1:1;
+            golden=x0*w0+x1*w1;
+        end
+    endfunction
+    function automatic [7:0] gold_hex(input signed [40:0] val,input integer pos);
+        reg [43:0] ext;
+        begin
+            ext={{3{val[40]}},val}; // 부호 비트만 3회 확장(44비트 = 11 hex)
+            gold_hex=hexchar((ext&gt;&gt;((10-pos)*4))&amp;4'hf);
+        end
+    endfunction
+    always @(posedge clk)if(byte_valid)begin
+        if(nbytes&gt;=63)$fatal(1,"TX line overflow");
+        if(byte_out!=8'h0a)begin chars[nbytes]=byte_out;nbytes=nbytes+1;end
+        else begin
+            if(nbytes==2 &amp;&amp; chars[0]=="I" &amp;&amp; chars[1]==8'h0d)kind[nresp]=1;
+            else if(nbytes==3 &amp;&amp; chars[0]=="O" &amp;&amp; chars[1]=="K" &amp;&amp; chars[2]==8'h0d)kind[nresp]=2;
+            else if(nbytes==4 &amp;&amp; chars[0]=="E" &amp;&amp; chars[1]=="R" &amp;&amp; chars[2]=="R" &amp;&amp;
+                    chars[3]==8'h0d)kind[nresp]=3;
+            else if(nbytes==51 &amp;&amp; chars[0]=="C" &amp;&amp; chars[2]==":" &amp;&amp; chars[50]==8'h0d)begin
+                kind[nresp]=4;cls[nresp]=chars[1]-"0";
+                // 프리셋 표본(Bias=0) 점수는 실제 TX 복조 문자로 비교
+                for(i=0;i&lt;4;i=i+1)for(j=0;j&lt;11;j=j+1)
+                    if(chars[3+i*12+j]!==gold_hex(golden(cls[nresp],i),j))
+                        $fatal(1,"Score mismatch resp=%0d lane=%0d",nresp,i);
+            end else $fatal(1,"Malformed UART response len=%0d first=%02h",nbytes,chars[0]);
+            nresp=nresp+1;nbytes=0;
+        end
+    end
+
+    task automatic send_frame(input [7:0] b,input stop_bit);
+        integer n;
+        begin
+            @(negedge clk);uart_rxd=0;repeat(CPB)@(negedge clk);
+            for(n=0;n&lt;8;n=n+1)begin uart_rxd=b[n];repeat(CPB)@(negedge clk);end
+            uart_rxd=stop_bit;repeat(CPB)@(negedge clk);uart_rxd=1;
+        end
+    endtask
+    task automatic send_byte(input [7:0] b);send_frame(b,1'b1);endtask
+    task automatic wait_resp(input integer n);
+        integer guard;
+        begin
+            guard=0;
+            while(nresp&lt;n)begin
+                @(negedge clk);guard=guard+1;
+                if(guard&gt;CPB*10*400)$fatal(1,"Response timeout want=%0d have=%0d",n,nresp);
+            end
+        end
+    endtask
+    task automatic expect_kind(input integer idx,input integer kd);
+        if(kind[idx]!==kd)$fatal(1,"Response %0d kind=%0d expected %0d",idx,kind[idx],kd);
+    endtask
+    task automatic expect_err(input integer idx);expect_kind(idx,3);endtask
+    task automatic quiet(input integer frames); // frames 바이트 시간 동안 새 응답 없음
+        integer before_n;
+        begin
+            before_n=nresp;repeat(CPB*10*frames)@(negedge clk);
+            if(nresp!=before_n || nbytes!=0)$fatal(1,"Unexpected response during quiet");
+        end
+    endtask
+    task automatic press_reset;
+        begin
+            @(negedge clk);btnC=1;repeat(100)@(negedge clk);btnC=0;
+            nbytes=0;repeat(10)@(negedge clk);
+        end
+    endtask
+
+    initial begin
+        repeat(10)@(negedge clk);btnC=0;repeat(10)@(negedge clk);
+
+        // A1 상태 질의 + CR/LF 무시
+        send_byte(8'h0d);send_byte(8'h0a);send_byte("S");
+        wait_resp(1);expect_kind(0,1);
+        quiet(3);
+        $display("A1_STATUS_CRLF_IGNORED_PASS");
+
+        // A2 잘못된 opcode
+        base=nresp;
+        send_byte("Z");wait_resp(base+1);expect_err(base);
+        send_byte("x");wait_resp(base+2);expect_err(base+1);
+        send_byte(8'hff);wait_resp(base+3);expect_err(base+2);
+        send_byte(8'h00);wait_resp(base+4);expect_err(base+3);
+        $display("A2_INVALID_OPCODE_ERR_PASS count=4");
+
+        // A3 잘못된 주소·뉴런·길이 + 경계 유효값
+        base=nresp;
+        send_byte("X");send_byte(64);send_byte(0);send_byte(1);wait_resp(base+1);expect_err(base);
+        send_byte("X");send_byte(63);send_byte(0);send_byte(1);wait_resp(base+2);expect_kind(base+1,2);
+        send_byte("W");send_byte(4);send_byte(0);send_byte(0);send_byte(1);wait_resp(base+3);expect_err(base+2);
+        send_byte("W");send_byte(0);send_byte(64);send_byte(0);send_byte(1);wait_resp(base+4);expect_err(base+3);
+        send_byte("W");send_byte(3);send_byte(63);send_byte(0);send_byte(1);wait_resp(base+5);expect_kind(base+4,2);
+        send_byte("B");send_byte(4);for(k=0;k&lt;5;k=k+1)send_byte(0);wait_resp(base+6);expect_err(base+5);
+        send_byte("R");send_byte(0);wait_resp(base+7);expect_err(base+6);
+        send_byte("R");send_byte(65);wait_resp(base+8);expect_err(base+7);
+        send_byte("R");send_byte(8'h80);wait_resp(base+9);expect_err(base+8);
+        send_byte("R");send_byte(64);wait_resp(base+10);expect_err(base+9); // 미적재 주소
+        if(led[15]!==1'b1)$fatal(1,"Error LED15 not latched");
+        $display("A3_INVALID_FIELDS_ERR_PASS err=8 ok_boundary=2");
+
+        // A4 응답 전송 중 다음 명령 수신: '0'~'3' 연속 송신(stop-and-wait 위반) -&gt; FIFO 보관, 순서 보존
+        base=nresp;
+        send_byte("0");send_byte("1");send_byte("2");send_byte("3");
+        wait_resp(base+4);
+        for(k=0;k&lt;4;k=k+1)begin
+            expect_kind(base+k,4);
+            if(cls[base+k]!=k)$fatal(1,"A4 class order k=%0d got=%0d",k,cls[base+k]);
+        end
+        if(dut.ov||dut.fe)$fatal(1,"A4 overrun/framing");
+        $display("A4_COMMAND_DURING_RESPONSE_PASS ordered=4");
+
+        // A5 'S' 20개 연속 폭주: 응답 3바이트 &gt; 입력 1바이트, FIFO 내에서 무손실
+        base=nresp;
+        for(k=0;k&lt;20;k=k+1)send_byte("S");
+        wait_resp(base+20);
+        for(k=0;k&lt;20;k=k+1)expect_kind(base+k,1);
+        if(dut.ov)$fatal(1,"A5 overrun within FIFO capacity");
+        $display("A5_BURST_20_STATUS_NO_LOSS_PASS");
+
+        // A6 응답 송신 중 Reset: TX 즉시 idle, 잔류 응답 없음, 이후 정상
+        send_byte("1");
+        while(nbytes&lt;10)@(negedge clk);
+        press_reset;
+        if(uart_txd!==1'b1)$fatal(1,"A6 TX not idle after reset");
+        base=nresp;
+        quiet(60); // 남은 42바이트가 새어 나오면 실패
+        send_byte("S");wait_resp(base+1);expect_kind(base,1);
+        send_byte("2");wait_resp(base+2);expect_kind(base+1,4);
+        if(cls[base+1]!=2)$fatal(1,"A6 class after reset");
+        if(led[15]!==1'b0)$fatal(1,"A6 error LED not cleared by reset");
+        $display("A6_RESET_DURING_RESPONSE_PASS");
+
+        // A7 명령 중단(Timeout 관측): 'B'+2바이트 후 중단 -&gt; 응답 없음,
+        //    다음 'S'는 페이로드로 소비됨(설계에 RX Timeout 없음). Reset으로만 복구.
+        base=nresp;
+        send_byte("B");send_byte(1);send_byte(0);
+        quiet(50);
+        send_byte("S");
+        quiet(10);
+        if(dut.commands.state!==3'd1)$fatal(1,"A7 expected controller stuck in RECV");
+        press_reset;
+        send_byte("S");wait_resp(base+1);expect_kind(base,1);
+        $display("A7_ABORTED_COMMAND_NO_TIMEOUT_OBSERVED recovered_by_reset=1");
+
+        // A8 Framing error: stop=0 바이트 무시, fe/LED15 래치, 명령 처리 지속
+        base=nresp;
+        send_frame("S",1'b0);
+        quiet(3);
+        if(dut.fe!==1'b1 || led[15]!==1'b1)$fatal(1,"A8 framing error not latched");
+        send_byte("S");wait_resp(base+1);expect_kind(base,1);
+        press_reset;
+        $display("A8_FRAMING_ERROR_PASS");
+
+        if(mfe||mov)$fatal(1,"TX monitor framing/overrun");
+        $display("NPU_UART_ADVERSARIAL_SIM_PASS tests=8 responses=%0d",nresp);
+        $finish;
+    end
+    initial begin #400000000;$fatal(1,"Adversarial TB global timeout");end
+endmodule</code></pre>
+      </div>
+    </section>
+    <section class="section" id="s05">
+      <h2><span class="num">05</span>시뮬레이션 실행</h2>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 저장소 루트에서 실행</span></div>
+        <pre><code>bash ch12/scripts/run_sim.sh</code></pre></div>
+      <p>기대 출력 (Icarus Verilog 12.0 · 2026-11-18 실제 실행 로그 발췌):</p>
+      <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
+        <pre><code>| 단계 | 실제 결과 | 로그 |
+|---|---|---|
+| ch00 | RTL_SIM_PASS | … |
+| ch01 | RTL_SIM_PASS | … |
+| ch02 | RTL_SIM_PASS | … |
+| ch03 | RTL_SIM_PASS | … |
+| ch04 | RTL_SIM_PASS | … |
+| ch05 | RTL_SIM_PASS | … |
+| ch06 | RTL_SIM_PASS | … |
+| ch07 | RTL_SIM_PASS | … |
+| ch08 | RTL_SIM_PASS | … |
+| ch09 | RTL_SIM_PASS | … |
+| ch10 | RTL_SIM_PASS | … |
+| dsp_engine | RTL_SIM_PASS | … |
+| ch11_ch12 | RTL_SIM_PASS | … |
+중요: SYNTH_TIMING_PASS, BOARD_PASS를 뜻하지 않음.</code></pre></div>
+      <p>적대적 시험:</p>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal</span></div>
+        <pre><code>bash mini_npu/scripts/run_adversarial.sh</code></pre></div>
+      <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
+        <pre><code>UART_FIFO_ADVERSARIAL_SIM_PASS tests=11
+NPU_UART_ADVERSARIAL_SIM_PASS tests=8 responses=43</code></pre></div>
+    </section>
+    <section class="section" id="s06">
+      <h2><span class="num">06</span>결과 판정</h2>
+      <table>
+        <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
+        <tbody><tr><td><code>결과 표 13행이 모두 RTL_SIM_PASS</code></td><td>ch00~ch10 · dsp_engine · ch11_ch12</td></tr><tr><td><code>UART_FIFO_ADVERSARIAL_SIM_PASS tests=11</code></td><td>FIFO Full·Reset·Framing·동시 Push/Pop</td></tr><tr><td><code>NPU_UART_ADVERSARIAL_SIM_PASS tests=8</code></td><td>잘못된 명령·필드, 응답 중 명령, 응답 중 Reset</td></tr></tbody>
+      </table>
+      <p><b>실패 시:</b> TB의 <code>$fatal</code> 메시지에 표시된 cycle 번호와 기대값/실제값을 확인하고, 03절 코드와 한 줄씩 대조합니다. 하나라도 실패하면 다음 장으로 넘어가지 않습니다.</p>
+    </section>
+    <section class="section" id="s07">
+      <h2><span class="num">07</span>코드 읽기 포인트</h2>
+      <table>
+        <thead><tr><th>위치</th><th>내용</th></tr></thead>
+        <tbody><tr><td>연결 전용 Top</td><td><code>basys3_npu_top</code>에는 로직이 없고 다섯 하위 모듈의 연결만 있습니다. 그래서 하위 모듈 단독 시험 결과가 Top에서도 그대로 유효합니다.</td></tr>
+<tr><td>리셋</td><td><code>npu_reset_controller</code>는 btnC(Active-High)를 동기화해 Active-Low <code>resetn</code>으로 바꿉니다. 세부 동작은 위 전체 소스를 기준으로 합니다.</td></tr>
+<tr><td>npu_engine4</td><td>10장 <code>npu_core</code>와 달리 BRAM 배열을 직접 두고 <code>npu_dsp_mac_lane</code> 4개(02장 <code>dsp_multiplier</code> 재사용)로 누산합니다. 주소별 <code>x_seen</code>/<code>w*_seen</code> 비트로 기록되지 않은 주소가 길이 범위 안에 있으면 추론을 거부합니다. 41비트 점수(누산+Bias) 최댓값 비교로 클래스를 정하며, 동점이면 낮은 번호가 이깁니다.</td></tr>
+<tr><td>표시</td><td><code>npu_display_controller</code>가 클래스와 busy·done·error, UART framing·overrun·protocol 오류를 LED와 FND에 나타냅니다.</td></tr></tbody>
+      </table>
+    </section>
+    <section class="section" id="s08">
+      <h2><span class="num">08</span>보드 확인</h2>
+      <p>먼저 05절 회귀 시뮬레이션이 모두 통과해야 합니다. 아래 단계에서 하나라도 실패하면 다음 단계로 넘어가지 않습니다.</p>
+      <h3>8-1. 합성 (VS Code 터미널)</h3>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · Vivado 배치 합성</span></div>
+        <pre><code>source /tools/Xilinx/Vivado/&lt;버전&gt;/settings64.sh   # 설치 경로에 맞게 변경
+bash mini_npu/scripts/run_vivado_synth.sh
+# 기대: SYNTH_STATUS: synth_design Complete!
+#       SYNTH_REPORTS_CREATED (not timing-closure or board PASS)
+# 생성: mini_npu/build/p3_uart_npu.xpr, utilization_synth.rpt, timing_synth.rpt</code></pre></div>
+      <h3>8-2. 구현·비트스트림 (Vivado GUI)</h3>
+      <ol>
+        <li><b>File → Project → Open</b> → <code>mini_npu/build/p3_uart_npu.xpr</code>.</li>
+        <li>Flow Navigator <b>Run Implementation</b> → 완료 창에서 <b>Open Implemented Design</b>.</li>
+        <li><b>Reports → Timing → Report Timing Summary</b>: <code>WNS ≥ 0</code>, <code>TNS = 0</code>, Failing Endpoints 0. 음수면 중단합니다.</li>
+        <li><b>Reports → Report DRC</b>: Error 0.</li>
+        <li><b>Generate Bitstream</b> → 생성 파일 <code>mini_npu/build/p3_uart_npu.runs/impl_1/basys3_npu_top.bit</code>.</li>
+        <li>터미널에서 <code>sha256sum mini_npu/build/p3_uart_npu.runs/impl_1/basys3_npu_top.bit</code> 값을 기록합니다.</li>
+      </ol>
+      <h3>8-3. 보드 프로그래밍</h3>
+      <ol>
+        <li>Basys3 점퍼 JP1을 <b>JTAG</b>로 두고, micro-USB(PROG/UART 겸용)를 PC에 연결한 뒤 전원 스위치를 ON합니다.</li>
+        <li>Vivado <b>Open Hardware Manager → Open Target → Auto Connect</b> → <code>xc7a35t_0</code> 확인.</li>
+        <li><b>Program Device</b> → Bitstream file에 8-2의 <code>.bit</code> 선택 → <b>Program</b>. DONE LED가 켜집니다.</li>
+      </ol>
+      <h3>8-4. UART 터미널 연결</h3>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 115200 8N1, 흐름 제어 없음</span></div>
+        <pre><code>ls -l /dev/serial/by-id/            # Digilent ...-if01-port0 → ttyUSBn 이 UART
+sudo apt install -y picocom
+picocom -b 115200 -d 8 -p n -y n -f n /dev/ttyUSB1   # n은 실제 번호로 변경 · 종료 Ctrl-A Ctrl-X</code></pre></div>
+      <h3>8-5. 시험 입력과 판정</h3>
+      <p>문자 키 하나를 누르면 1바이트가 전송됩니다. Enter의 CR/LF는 무시됩니다. 응답은 <code>C</code>+클래스+<code>:</code>+점수 4개(41비트 signed, 11자리 16진수)+CRLF입니다.</p>
+      <table>
+        <thead><tr><th>입력</th><th>기대 UART 응답</th><th>LED</th><th>FND</th></tr></thead>
+        <tbody>
+<tr><td><code>0</code></td><td><code>C0:00000000002,00000000000,00000000000,FFFFFFFFFFE</code></td><td>LED0 켜짐 · LED14 켜짐</td><td>오른쪽 끝 자리 <b>0</b> (나머지 세 자리 0)</td></tr>
+<tr><td><code>1</code></td><td><code>C1:00000000000,00000000002,FFFFFFFFFFE,00000000000</code></td><td>LED1 켜짐 · LED14 켜짐</td><td>오른쪽 끝 자리 <b>1</b> (나머지 세 자리 0)</td></tr>
+<tr><td><code>2</code></td><td><code>C2:00000000000,FFFFFFFFFFE,00000000002,00000000000</code></td><td>LED2 켜짐 · LED14 켜짐</td><td>오른쪽 끝 자리 <b>2</b> (나머지 세 자리 0)</td></tr>
+<tr><td><code>3</code></td><td><code>C3:FFFFFFFFFFE,00000000000,00000000000,00000000002</code></td><td>LED3 켜짐 · LED14 켜짐</td><td>오른쪽 끝 자리 <b>3</b> (나머지 세 자리 0)</td></tr>
+          <tr><td><code>S</code></td><td><code>I</code></td><td>변화 없음</td><td>변화 없음</td></tr>
+          <tr><td><code>Z</code></td><td><code>ERR</code></td><td>LED15 켜짐 (오류 래치)</td><td>변화 없음</td></tr>
+          <tr><td>BTNC</td><td>응답 없음</td><td>LED14·LED15 꺼짐, LED0 켜짐</td><td>오른쪽 끝 자리 0</td></tr>
+        </tbody>
+      </table>
+      <p>LED 할당(<code>npu_display_controller.v</code>): LED0~3 = 클래스 one-hot, LED13 = BUSY, LED14 = DONE 래치, LED15 = 오류 래치(NPU·명령·UART framing·overrun). LED4~12는 꺼져 있습니다. BTNC는 리셋입니다.</p>
+      <div class="tip"><span class="lbl">주의</span><code>X</code>·<code>W</code>·<code>B</code>·<code>R</code>은 뒤에 바이너리 바이트가 따라와야 하므로 터미널 키 입력으로 시험하지 않습니다. 잘못 눌러 응답이 멈추면 BTNC로 리셋합니다.</div>
+      <h3>8-6. 기록</h3>
+      <table>
+        <thead><tr><th>항목</th><th>기록 내용</th></tr></thead>
+        <tbody>
+          <tr><td>비트스트림</td><td>sha256 · Vivado 버전 · Git 커밋 SHA</td></tr>
+          <tr><td>타이밍</td><td>WNS · TNS · utilization (LUT/FF/BRAM/DSP)</td></tr>
+          <tr><td>입력별 관찰</td><td>위 표 7행 각각의 실제 UART 응답 · LED · FND</td></tr>
+        </tbody>
+      </table>
+      <p>7행이 모두 기대와 같을 때만 <code>BOARD_PASS</code>로 기록합니다. 기록 파일은 <code>ch12/validation/board_YYYYMMDD.md</code>로 저장합니다.</p>
+    </section>
+    <section class="section" id="s09">
+      <h2><span class="num">09</span>검증 현황·인계</h2>
+      <table>
+        <thead><tr><th>다음 장으로 넘기는 파일</th><th>사용처</th></tr></thead>
+        <tbody><tr><td><code>mini_npu/ 전체 + common/rtl/ + ch02/rtl/dsp_multiplier.v</code></td><td>4분류 원형 기준선 — 13장 이후 10분류 NPU는 별도 폴더에서 개발하고 이 폴더는 수정하지 않음</td></tr><tr><td><code>mini_npu/build/…/basys3_npu_top.bit</code></td><td>보드 확인에 사용한 비트스트림 (Git에 넣지 않고 SHA-256만 기록)</td></tr></tbody>
+      </table>
+      <p>검증 게이트 (RTL 시뮬레이션 결과는 Icarus Verilog 12.0 · 2026-11-18 실행, 증거 <code>ch12/validation/</code>):</p>
+      <div class="gate-row">
+        <div class="gate pass">
+          <b>HTML_PASS</b>
+          <span>v05 · 정적 검사</span>
+        </div>
+        <div class="gate pass">
+          <b>HOST_MODEL_PASS</b>
+          <span>PC_GOLDEN_COMPARE_PASS (11장과 공유)</span>
+        </div>
+        <div class="gate pass">
+          <b>RTL_SIM_PASS</b>
+          <span>run_batch_00_12 13단계 · 적대적 시험 19항목</span>
+        </div>
+        <div class="gate todo">
+          <b>SYNTH_TIMING_PASS</b>
+          <span>⚠ 미검증 · Vivado 미실행</span>
+        </div>
+        <div class="gate todo">
+          <b>BOARD_PASS</b>
+          <span>⚠ 미검증 · 실물 Basys3 미확인</span>
+        </div>
+      </div>
+    </section>
+    <div class="chapter-links" id="chapter-links"></div>
+  </main>
+</div>
+<script>
+window.COURSE={
+ "title": "Basys3 소형 NPU 실습 (고도화판)",
+ "chapters": [
+  {
+   "id": "ch00",
+   "number": 0,
+   "title": "UART Echo",
+   "file": "ch00_uart_echo_v05.html"
+  },
+  {
+   "id": "ch01",
+   "number": 1,
+   "title": "DSP 추론 MAC 누산",
+   "file": "ch01_mac_v05.html"
+  },
+  {
+   "id": "ch02",
+   "number": 2,
+   "title": "DSP48E1 타깃 곱셈",
+   "file": "ch02_dsp_v05.html"
+  },
+  {
+   "id": "ch03",
+   "number": 3,
+   "title": "MAC 2단계 파이프라인",
+   "file": "ch03_mac_pipeline_v05.html"
+  },
+  {
+   "id": "ch04",
+   "number": 4,
+   "title": "BRAM 동기 버퍼",
+   "file": "ch04_bram_v05.html"
+  },
+  {
+   "id": "ch05",
+   "number": 5,
+   "title": "Fixed-Point Quantizer",
+   "file": "ch05_fixed_v05.html"
+  },
+  {
+   "id": "ch06",
+   "number": 6,
+   "title": "INT8·INT16 정밀도 비교",
+   "file": "ch06_precision_v05.html"
+  },
+  {
+   "id": "ch07",
+   "number": 7,
+   "title": "벡터 내적",
+   "file": "ch07_vector_dot_v05.html"
+  },
+  {
+   "id": "ch08",
+   "number": 8,
+   "title": "4PE 병렬 어레이",
+   "file": "ch08_pe4_v05.html"
+  },
+  {
+   "id": "ch09",
+   "number": 9,
+   "title": "Dense 4뉴런 레이어",
+   "file": "ch09_dense_v05.html"
+  },
+  {
+   "id": "ch10",
+   "number": 10,
+   "title": "4뉴런 NPU Core",
+   "file": "ch10_npu_core_v05.html"
+  },
+  {
+   "id": "ch11",
+   "number": 11,
+   "title": "UART 모델 적재 컨트롤러",
+   "file": "ch11_uart_register_v05.html"
+  },
+  {
+   "id": "ch12",
+   "number": 12,
+   "title": "통합 NPU Top",
+   "file": "ch12_integrated_npu_v05.html"
+  }
+ ]
+};
+</script>
+<script defer src="assets/education/site.js"></script>
+</body>
+</html>

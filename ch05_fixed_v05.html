@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Basys3 NPU 05장 실습 · Fixed-Point Quantizer">
+<title>05장 · Fixed-Point Quantizer (v05)</title>
+<link rel="stylesheet" href="assets/education/site.css">
+<style>
+.hero:before{background-image:linear-gradient(90deg,rgba(12,17,27,.89),rgba(12,17,27,.69) 58%,rgba(12,17,27,.48)),url('https://raw.githubusercontent.com/Yuul-Jung/rule_md/d1b8278d41fca8f5e3960736f3ac9d377e462fda/web/education-html/assets/hero-bookshelf.jpg')}
+.codeblock pre{max-height:780px;white-space:pre}
+.section svg{width:100%;height:auto}
+.vbadge{display:inline-block;padding:.15em .6em;border-radius:4px;font-size:.78em;font-weight:700;background:#d4edda;color:#155724;vertical-align:middle}
+.gate-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:10px}
+.gate{border:1px solid var(--line,#e0e0e0);border-radius:6px;padding:10px 14px}
+.gate b{display:block;font:600 11px var(--mono,monospace);letter-spacing:.04em;margin-bottom:4px}
+.gate span{font-size:13px}
+.gate.pass{border-color:#2d8a52;background:#f0fbf4}
+.gate.todo{border-color:#b08900;background:#fffbe6}
+</style>
+</head>
+<body data-chapter="ch05">
+<a class="access-skip" href="#main-content">본문 바로가기</a>
+<button type="button" class="mobile-menu" id="mobile-menu" aria-controls="course-nav" aria-expanded="false">☰ 장·목차</button>
+<div class="shade" id="shade"></div>
+<header class="hero">
+  <div class="hero-inner">
+    <p class="kicker">BASYS3 · NPU 고도화판 · 05장 실습 <span class="vbadge">v05</span></p>
+    <h1>제05장 · Fixed-Point Quantizer</h1>
+    <p>누산값을 SHIFT·반올림·포화 규칙으로 INT8/INT16으로 줄이는 양자화기를 작성하고 4가지 모드를 동시에 검증합니다.</p>
+  </div>
+</header>
+<div class="wrap">
+  <nav class="toc" id="course-nav" aria-label="전체 장과 절 탐색"></nav>
+  <main class="content" id="main-content">
+    <section class="section" id="s00">
+      <h2><span class="num">00</span>이 장의 위치</h2>
+      <p><b>목표:</b> 누산값을 SHIFT·반올림·포화 규칙으로 INT8/INT16으로 줄이는 양자화기를 작성하고 4가지 모드를 동시에 검증합니다.</p>
+      <table>
+        <thead><tr><th>구분</th><th>파일</th></tr></thead>
+        <tbody>
+          <tr><td>유지 (이전 장, 수정 없음)</td><td><ul><li>없음 (첫 장)</li></ul></td></tr>
+          <tr><td>이번 장 작성</td><td><ul><li><code>ch05/rtl/fixed_quantizer.v</code></li></ul></td></tr>
+        </tbody>
+      </table>
+      <p>실습 순서: 01 구조 확인 → 02 준비 → 03 RTL 작성 → 04 테스트벤치·기준 모델 작성 → 05 시뮬레이션 → 06 결과 판정 → 08 보드 확인 → 09 인계.</p>
+    </section>
+    <section class="section" id="s01">
+      <h2><span class="num">01</span>구조도</h2>
+      <svg viewBox="0 0 980 202" role="img" aria-label="fixed_quantizer 실제 포트와 하위 모듈 구조">
+      <rect x="250" y="30" width="480" height="132" rx="10" fill="#fff" stroke="#4635b1" stroke-width="2"/>
+      <text x="490" y="54" font-size="18" font-weight="700" text-anchor="middle">fixed_quantizer</text>
+      <text x="490" y="72" font-size="13" text-anchor="middle" fill="#555">ch05/rtl/fixed_quantizer.v</text>
+      <text x="222" y="64" font-size="14" font-family="monospace" text-anchor="end">clk</text>
+      <path d="M226 60 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 60 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="87" font-size="14" font-family="monospace" text-anchor="end">resetn</text>
+      <path d="M226 83 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 83 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="110" font-size="14" font-family="monospace" text-anchor="end">valid_i</text>
+      <path d="M226 106 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 106 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="133" font-size="14" font-family="monospace" text-anchor="end">x_i[IN_WIDTH-1:0]</text>
+      <path d="M226 129 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 129 l-7 -4 v8 z" fill="#4635b1"/>
+      <path d="M730 60 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 60 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="758" y="65" font-size="14" font-family="monospace">q_o[OUT_WIDTH-1:0]</text>
+      <path d="M730 83 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 83 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="758" y="88" font-size="14" font-family="monospace">valid_o</text>
+      <path d="M730 106 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 106 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="758" y="111" font-size="14" font-family="monospace">overflow_o</text>
+      <rect x="250" y="177" width="16" height="12" fill="#edeafa" stroke="#4635b1"/><text x="272" y="188" font-size="13">이번 장 신규</text>
+      <rect x="370" y="177" width="16" height="12" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="4 2"/><text x="392" y="188" font-size="13">이전 장 파일 재사용(수정 없음)</text>
+      <text x="600" y="188" font-size="13">왼쪽 = input · 오른쪽 = output (RTL 선언 그대로)</text>
+      </svg>
+      <p>포트 이름과 하위 인스턴스는 <code>ch05/rtl/fixed_quantizer.v</code> 선언에서 그대로 가져왔습니다.</p>
+    </section>
+    <section class="section" id="s02">
+      <h2><span class="num">02</span>준비</h2>
+      <ol>
+        <li>VS Code에서 저장소 루트(<code>amd_soc_npu/</code>)를 엽니다.</li>
+        <li>도구를 확인합니다.</li>
+      </ol>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 도구 확인</span></div>
+        <pre><code>sudo apt install -y iverilog python3 ripgrep   # 처음 한 번
+iverilog -V 2&gt;&amp;1 | head -1      # Icarus Verilog version 12.0 이상
+python3 --version</code></pre></div>
+      <ol start="3"><li>00절 '유지' 파일이 이전 장 결과 그대로 있는지 확인합니다.</li></ol>
+    </section>
+    <section class="section" id="s03">
+      <h2><span class="num">03</span>RTL 작성</h2>
+      <p>아래 파일을 경로 그대로 만들고 전체 코드를 입력합니다.</p>
+      <div class="codeblock">
+        <div class="codebar"><span>ch05/rtl/fixed_quantizer.v · verilog</span></div>
+        <pre><code class="language-verilog">`timescale 1ns/1ps
+module fixed_quantizer #(
+    parameter integer IN_WIDTH=32, OUT_WIDTH=8, SHIFT=8, ROUND=1, SATURATE=1
+) (
+    input wire clk, resetn, valid_i,
+    input wire signed [IN_WIDTH-1:0] x_i,
+    output reg signed [OUT_WIDTH-1:0] q_o,
+    output reg valid_o, overflow_o
+);
+    wire signed [63:0] wide, rounded, scaled, lower, upper;
+    wire ov;
+    // (변경) 입력이 초기 0에서 변하지 않아도 조합 계산을 시작하는 연속 할당이다.
+    assign wide = $signed(x_i);
+    assign lower = -(64'sd1 &lt;&lt;&lt; (OUT_WIDTH-1));
+    assign upper = (64'sd1 &lt;&lt;&lt; (OUT_WIDTH-1))-1;
+    // 음수는 크기를 반올림한 뒤 부호를 복원하여 tie-away 규칙을 적용한다.
+    assign rounded = (ROUND &amp;&amp; SHIFT&gt;0) ?
+      (wide&lt;0 ? -(((-wide)+(64'sd1 &lt;&lt;&lt; (SHIFT-1))) &gt;&gt;&gt; SHIFT) :
+                 (wide+(64'sd1 &lt;&lt;&lt; (SHIFT-1))) &gt;&gt;&gt; SHIFT) : wide &gt;&gt;&gt; SHIFT;
+    assign ov = rounded&lt;lower || rounded&gt;upper;
+    assign scaled = (SATURATE &amp;&amp; rounded&lt;lower) ? lower :
+                    (SATURATE &amp;&amp; rounded&gt;upper) ? upper : rounded;
+    always @(posedge clk) begin
+        if(!resetn) begin q_o&lt;=0; valid_o&lt;=0; overflow_o&lt;=0; end
+        else begin
+            valid_o&lt;=valid_i;
+            if(valid_i) begin q_o&lt;=scaled[OUT_WIDTH-1:0]; overflow_o&lt;=ov; end
+        end
+    end
+    // synthesis translate_off
+    initial if(IN_WIDTH&lt;2 || IN_WIDTH&gt;48 || OUT_WIDTH&lt;2 || OUT_WIDTH&gt;32 || SHIFT&lt;0 || SHIFT&gt;30)
+        $fatal(1,"Unsupported quantizer parameters");
+    // synthesis translate_on
+endmodule</code></pre>
+      </div>
+    </section>
+    <section class="section" id="s04">
+      <h2><span class="num">04</span>테스트벤치·기준 모델 작성</h2>
+      <p>테스트벤치는 출력을 자동 판정합니다. 기준 모델(Python)은 시험 벡터와 정답을 만듭니다.</p>
+      <div class="codeblock">
+        <div class="codebar"><span>ch05/tb/tb_fixed_quantizer.sv · systemverilog</span></div>
+        <pre><code class="language-systemverilog">`timescale 1ns/1ps
+module tb_fixed_quantizer;
+    parameter IW=32,OW=8,S=8;
+    reg clk=0,rn=0,vi=0;
+    reg signed [IW-1:0] x=0;
+    wire signed [OW-1:0] q[0:3];
+    wire ov[0:3],v[0:3];
+    genvar g;
+    generate for(g=0;g&lt;4;g=g+1) begin: modes
+        fixed_quantizer #(.IN_WIDTH(IW),.OUT_WIDTH(OW),.SHIFT(S),.ROUND(g/2),.SATURATE(g%2)) dut
+          (.clk(clk),.resetn(rn),.valid_i(vi),.x_i(x),.q_o(q[g]),.valid_o(v[g]),.overflow_o(ov[g]));
+    end endgenerate
+    always #5 clk=~clk;
+    integer f,o,n,c=0,r,valid_in,xi,eq[0:3],eo[0:3],ev,i;
+    reg signed [OW-1:0] held[0:3];
+    reg hv[0:3],ho[0:3];
+    string vp,ap;
+    initial begin
+        if(!$value$plusargs("VECTORS=%s",vp)||!$value$plusargs("ACTUAL=%s",ap)) $fatal(1,"Missing paths");
+        f=$fopen(vp,"r"); o=$fopen(ap,"w"); if(!f||!o) $fatal(1,"Open failed");
+        @(posedge clk); #1;
+        while(!$feof(f)) begin
+            n=$fscanf(f,"%d %d %d %d %d %d %d %d %d %d %d %d\n",
+              r,valid_in,xi,eq[0],eo[0],eq[1],eo[1],eq[2],eo[2],eq[3],eo[3],ev);
+            if(n!=12) $fatal(1,"Bad row");
+            @(negedge clk);
+            for(i=0;i&lt;4;i=i+1) begin held[i]=q[i]; hv[i]=v[i]; ho[i]=ov[i]; end
+            rn=r; vi=valid_in; x=xi; #1;
+            for(i=0;i&lt;4;i=i+1) if(q[i]!==held[i]||v[i]!==hv[i]||ov[i]!==ho[i]) $fatal(1,"Async output");
+            @(posedge clk); #1; c=c+1;
+            for(i=0;i&lt;4;i=i+1) if($signed(q[i])!==eq[i]||ov[i]!==eo[i][0]||v[i]!==ev[0])
+                $fatal(1,"Mismatch cycle=%0d mode=%0d",c,i);
+            $fdisplay(o,"%0d %0d %0d %0d %0d %0d %0d %0d %0d %0d",c,
+              q[0],ov[0],q[1],ov[1],q[2],ov[2],q[3],ov[3],v[0]);
+        end
+        if(!c) $fatal(1,"Empty");
+        $fclose(o); $display("RTL_SIM_PASS FIXED IW=%0d OW=%0d SHIFT=%0d cycles=%0d",IW,OW,S,c); $finish;
+    end
+    initial begin #10000000; $fatal(1,"Timeout"); end
+endmodule</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>ch05/reference/fixed_reference.py · python</span></div>
+        <pre><code class="language-python">import argparse
+import random
+import sys
+from pathlib import Path
+sys.path.insert(0,str(Path(__file__).resolve().parents[2]/'ch01/reference'))
+from mac_reference import wrap, compare
+
+
+def quantize(x, width, shift, rounding=1, saturate=1):
+    # Python 정수 나눗셈을 사용하여 RTL의 시프트 구현과 독립적으로 계산한다.
+    if rounding and shift:
+        mag=(abs(x)+(1&lt;&lt;(shift-1)))//(1&lt;&lt;shift)
+        y=-mag if x&lt;0 else mag
+    else: y=x//(1&lt;&lt;shift)
+    lo,hi=-(1&lt;&lt;(width-1)),(1&lt;&lt;(width-1))-1
+    ov=int(y&lt;lo or y&gt;hi)
+    return (min(hi,max(lo,y)) if saturate else wrap(y,width)),ov
+
+
+def self_test():
+    assert quantize(-3,8,1,0)==(-2,0)
+    assert quantize(-3,8,1,1)==(-2,0)
+    assert quantize(-1,8,1,0)==(-1,0)
+    assert quantize(-1,8,1,1)==(-1,0)
+    assert quantize(1,8,1,1)==(1,0)
+    assert quantize(256,8,0,1,1)==(127,1)
+    assert quantize(256,8,0,1,0)==(0,1)
+    print('PYTHON_FIXED_SELF_TEST_PASS')
+
+
+def generate(iw,ow,shift,out):
+    lo,hi=-(1&lt;&lt;(iw-1)),(1&lt;&lt;(iw-1))-1
+    half=1&lt;&lt;(max(shift-1,0))
+    xs=[lo,hi,0,1,-1]
+    for anchor in (0,1,-1,(1&lt;&lt;(ow-1))-1,-(1&lt;&lt;(ow-1))):
+        for delta in (-half-1,-half,-half+1,half-1,half,half+1):
+            x=anchor*(1&lt;&lt;shift)+delta
+            if lo&lt;=x&lt;=hi: xs.append(x)
+    rng=random.Random(305)
+    xs += [rng.randint(lo,hi) for _ in range(2000)]
+    state=[(0,0)]*4
+    with (out/'vectors.txt').open('w') as vf,(out/'expected.txt').open('w') as ef:
+        for c,x in enumerate(xs,1):
+            # TB 초기 Reset 이후 첫 최솟값도 실제 수락시켜 경계 검사를 생략하지 않는다.
+            rn=int(c%97!=0); vi=int(c%7!=0)
+            ev=rn and vi
+            for k in range(4):
+                if not rn: state[k]=(0,0)
+                elif vi: state[k]=quantize(x,ow,shift,k//2,k%2)
+            results=[v for pair in state for v in pair]+[int(ev)]
+            vf.write(' '.join(map(str,(rn,vi,x,*results)))+'\n')
+            ef.write(' '.join(map(str,(c,*results)))+'\n')
+    print(f'PYTHON_VECTORS IN={iw} OUT={ow} SHIFT={shift} cycles={len(xs)} seed=305')
+
+
+if __name__=='__main__':
+    p=argparse.ArgumentParser(); p.add_argument('--in-width',type=int,default=32)
+    p.add_argument('--out-width',type=int,default=8); p.add_argument('--shift',type=int,default=8)
+    p.add_argument('--out',type=Path); p.add_argument('--actual',type=Path)
+    a=p.parse_args(); self_test()
+    if a.actual: compare(a.out/'expected.txt',a.actual)
+    else: generate(a.in_width,a.out_width,a.shift,a.out)</code></pre>
+      </div>
+    </section>
+    <section class="section" id="s05">
+      <h2><span class="num">05</span>시뮬레이션 실행</h2>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 저장소 루트에서 실행</span></div>
+        <pre><code>bash ch05/scripts/run_sim.sh</code></pre></div>
+      <p>기대 출력 (Icarus Verilog 12.0 · 2026-11-18 실제 실행 로그 발췌):</p>
+      <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
+        <pre><code>PYTHON_FIXED_SELF_TEST_PASS
+PYTHON_VECTORS IN=32 OUT=8 SHIFT=8 cycles=2035 seed=305
+RTL_SIM_PASS FIXED IW=32 OW=8 SHIFT=8 cycles=2035
+PYTHON_FIXED_SELF_TEST_PASS
+PYTHON_RTL_COMPARE_PASS cycles=2035
+PYTHON_FIXED_SELF_TEST_PASS
+PYTHON_VECTORS IN=32 OUT=16 SHIFT=4 cycles=2035 seed=305
+RTL_SIM_PASS FIXED IW=32 OW=16 SHIFT=4 cycles=2035
+PYTHON_FIXED_SELF_TEST_PASS
+PYTHON_RTL_COMPARE_PASS cycles=2035
+PYTHON_FIXED_SELF_TEST_PASS
+PYTHON_VECTORS IN=16 OUT=8 SHIFT=0 cycles=2035 seed=305
+RTL_SIM_PASS FIXED IW=16 OW=8 SHIFT=0 cycles=2035
+PYTHON_FIXED_SELF_TEST_PASS
+PYTHON_RTL_COMPARE_PASS cycles=2035</code></pre></div>
+    </section>
+    <section class="section" id="s06">
+      <h2><span class="num">06</span>결과 판정</h2>
+      <table>
+        <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
+        <tbody><tr><td><code>RTL_SIM_PASS FIXED IW=32 OW=8 SHIFT=8 cycles=2035</code></td><td>INT8 출력 설정 통과</td></tr><tr><td><code>RTL_SIM_PASS FIXED IW=32 OW=16 SHIFT=4 cycles=2035</code></td><td>INT16 출력 설정 통과</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS</code></td><td>RTL 출력 파일과 Python 기준값이 모든 사이클에서 일치</td></tr></tbody>
+      </table>
+      <p><b>실패 시:</b> TB의 <code>$fatal</code> 메시지에 표시된 cycle 번호와 기대값/실제값을 확인하고, 03절 코드와 한 줄씩 대조합니다. 하나라도 실패하면 다음 장으로 넘어가지 않습니다.</p>
+    </section>
+    <section class="section" id="s07">
+      <h2><span class="num">07</span>코드 읽기 포인트</h2>
+      <table>
+        <thead><tr><th>위치</th><th>내용</th></tr></thead>
+        <tbody><tr><td>Tie-away 반올림</td><td>양수는 <code>(x + (1 &lt;&lt; (SHIFT-1))) &gt;&gt;&gt; SHIFT</code>, 음수는 크기를 반올림한 뒤 부호를 복원합니다. Python <code>round()</code>의 Banker's rounding과 다르므로 기준 모델도 같은 규칙을 따릅니다.</td></tr>
+<tr><td>포화(Saturation)</td><td>범위 초과 시 <code>lower</code> 또는 <code>upper</code>로 클리핑합니다. SATURATE=0이면 2의 보수 순환이 발생합니다. <code>overflow_o</code>는 SATURATE와 무관하게 오버플로 여부를 알려줍니다.</td></tr>
+<tr><td>조합 연산</td><td><code>wide</code>·<code>rounded</code>·<code>scaled</code>는 모두 <code>assign</code>으로 조합 계산하고, 클록 에지에서 <code>q_o</code>에만 등록합니다. 이를 통해 Vivado가 연산 경로를 최적화할 수 있습니다.</td></tr></tbody>
+      </table>
+    </section>
+    <section class="section" id="s08">
+      <h2><span class="num">08</span>보드 확인</h2>
+      <p>이 장은 단위 RTL 시험까지 진행합니다. 이 장 모듈만으로는 Basys3 핀 제약(XDC)이 없으므로 비트스트림을 만들지 않습니다. 보드 확인은 <a href="ch12_integrated_npu_v05.html#s08">12장 · 08 보드 확인</a>에서 통합 Top으로 진행합니다.</p>
+    </section>
+    <section class="section" id="s09">
+      <h2><span class="num">09</span>검증 현황·인계</h2>
+      <table>
+        <thead><tr><th>다음 장으로 넘기는 파일</th><th>사용처</th></tr></thead>
+        <tbody><tr><td><code>ch05/rtl/fixed_quantizer.v</code></td><td>06장 precision_compare · 09장 dense_layer4 (수정 금지)</td></tr></tbody>
+      </table>
+      <p>검증 게이트 (RTL 시뮬레이션 결과는 Icarus Verilog 12.0 · 2026-11-18 실행, 증거 <code>ch05/validation/</code>):</p>
+      <div class="gate-row">
+        <div class="gate pass">
+          <b>HTML_PASS</b>
+          <span>v05 · 정적 검사</span>
+        </div>
+        <div class="gate pass">
+          <b>HOST_MODEL_PASS</b>
+          <span>PYTHON_FIXED_SELF_TEST_PASS</span>
+        </div>
+        <div class="gate pass">
+          <b>RTL_SIM_PASS</b>
+          <span>RTL_SIM_PASS FIXED (다중 설정)</span>
+        </div>
+        <div class="gate todo">
+          <b>SYNTH_TIMING_PASS</b>
+          <span>⚠ 미검증 · Vivado 미실행</span>
+        </div>
+        <div class="gate todo">
+          <b>BOARD_PASS</b>
+          <span>⚠ 미검증 · 실물 Basys3 미확인</span>
+        </div>
+      </div>
+    </section>
+    <div class="chapter-links" id="chapter-links"></div>
+  </main>
+</div>
+<script>
+window.COURSE={
+ "title": "Basys3 소형 NPU 실습 (고도화판)",
+ "chapters": [
+  {
+   "id": "ch00",
+   "number": 0,
+   "title": "UART Echo",
+   "file": "ch00_uart_echo_v05.html"
+  },
+  {
+   "id": "ch01",
+   "number": 1,
+   "title": "DSP 추론 MAC 누산",
+   "file": "ch01_mac_v05.html"
+  },
+  {
+   "id": "ch02",
+   "number": 2,
+   "title": "DSP48E1 타깃 곱셈",
+   "file": "ch02_dsp_v05.html"
+  },
+  {
+   "id": "ch03",
+   "number": 3,
+   "title": "MAC 2단계 파이프라인",
+   "file": "ch03_mac_pipeline_v05.html"
+  },
+  {
+   "id": "ch04",
+   "number": 4,
+   "title": "BRAM 동기 버퍼",
+   "file": "ch04_bram_v05.html"
+  },
+  {
+   "id": "ch05",
+   "number": 5,
+   "title": "Fixed-Point Quantizer",
+   "file": "ch05_fixed_v05.html"
+  },
+  {
+   "id": "ch06",
+   "number": 6,
+   "title": "INT8·INT16 정밀도 비교",
+   "file": "ch06_precision_v05.html"
+  },
+  {
+   "id": "ch07",
+   "number": 7,
+   "title": "벡터 내적",
+   "file": "ch07_vector_dot_v05.html"
+  },
+  {
+   "id": "ch08",
+   "number": 8,
+   "title": "4PE 병렬 어레이",
+   "file": "ch08_pe4_v05.html"
+  },
+  {
+   "id": "ch09",
+   "number": 9,
+   "title": "Dense 4뉴런 레이어",
+   "file": "ch09_dense_v05.html"
+  },
+  {
+   "id": "ch10",
+   "number": 10,
+   "title": "4뉴런 NPU Core",
+   "file": "ch10_npu_core_v05.html"
+  },
+  {
+   "id": "ch11",
+   "number": 11,
+   "title": "UART 모델 적재 컨트롤러",
+   "file": "ch11_uart_register_v05.html"
+  },
+  {
+   "id": "ch12",
+   "number": 12,
+   "title": "통합 NPU Top",
+   "file": "ch12_integrated_npu_v05.html"
+  }
+ ]
+};
+</script>
+<script defer src="assets/education/site.js"></script>
+</body>
+</html>

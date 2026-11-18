@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Basys3 NPU 04장 실습 · BRAM 동기 버퍼">
+<title>04장 · BRAM 동기 버퍼 (v05)</title>
+<link rel="stylesheet" href="assets/education/site.css">
+<style>
+.hero:before{background-image:linear-gradient(90deg,rgba(12,17,27,.89),rgba(12,17,27,.69) 58%,rgba(12,17,27,.48)),url('https://raw.githubusercontent.com/Yuul-Jung/rule_md/d1b8278d41fca8f5e3960736f3ac9d377e462fda/web/education-html/assets/hero-bookshelf.jpg')}
+.codeblock pre{max-height:780px;white-space:pre}
+.section svg{width:100%;height:auto}
+.vbadge{display:inline-block;padding:.15em .6em;border-radius:4px;font-size:.78em;font-weight:700;background:#d4edda;color:#155724;vertical-align:middle}
+.gate-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:10px}
+.gate{border:1px solid var(--line,#e0e0e0);border-radius:6px;padding:10px 14px}
+.gate b{display:block;font:600 11px var(--mono,monospace);letter-spacing:.04em;margin-bottom:4px}
+.gate span{font-size:13px}
+.gate.pass{border-color:#2d8a52;background:#f0fbf4}
+.gate.todo{border-color:#b08900;background:#fffbe6}
+</style>
+</head>
+<body data-chapter="ch04">
+<a class="access-skip" href="#main-content">본문 바로가기</a>
+<button type="button" class="mobile-menu" id="mobile-menu" aria-controls="course-nav" aria-expanded="false">☰ 장·목차</button>
+<div class="shade" id="shade"></div>
+<header class="hero">
+  <div class="hero-inner">
+    <p class="kicker">BASYS3 · NPU 고도화판 · 04장 실습 <span class="vbadge">v05</span></p>
+    <h1>제04장 · BRAM 동기 버퍼</h1>
+    <p>Block RAM으로 추론되는 동기 읽기·쓰기 버퍼를 작성하고, 충돌·초기화 전 읽기를 TB 감시기로 차단합니다.</p>
+  </div>
+</header>
+<div class="wrap">
+  <nav class="toc" id="course-nav" aria-label="전체 장과 절 탐색"></nav>
+  <main class="content" id="main-content">
+    <section class="section" id="s00">
+      <h2><span class="num">00</span>이 장의 위치</h2>
+      <p><b>목표:</b> Block RAM으로 추론되는 동기 읽기·쓰기 버퍼를 작성하고, 충돌·초기화 전 읽기를 TB 감시기로 차단합니다.</p>
+      <table>
+        <thead><tr><th>구분</th><th>파일</th></tr></thead>
+        <tbody>
+          <tr><td>유지 (이전 장, 수정 없음)</td><td><ul><li>없음 (첫 장)</li></ul></td></tr>
+          <tr><td>이번 장 작성</td><td><ul><li><code>ch04/rtl/bram_sync_buffer.v</code></li></ul></td></tr>
+        </tbody>
+      </table>
+      <p>실습 순서: 01 구조 확인 → 02 준비 → 03 RTL 작성 → 04 테스트벤치·기준 모델 작성 → 05 시뮬레이션 → 06 결과 판정 → 08 보드 확인 → 09 인계.</p>
+    </section>
+    <section class="section" id="s01">
+      <h2><span class="num">01</span>구조도</h2>
+      <svg viewBox="0 0 980 271" role="img" aria-label="bram_sync_buffer 실제 포트와 하위 모듈 구조">
+      <rect x="250" y="30" width="480" height="201" rx="10" fill="#fff" stroke="#4635b1" stroke-width="2"/>
+      <text x="490" y="54" font-size="18" font-weight="700" text-anchor="middle">bram_sync_buffer</text>
+      <text x="490" y="72" font-size="13" text-anchor="middle" fill="#555">ch04/rtl/bram_sync_buffer.v</text>
+      <text x="222" y="64" font-size="14" font-family="monospace" text-anchor="end">clk</text>
+      <path d="M226 60 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 60 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="87" font-size="14" font-family="monospace" text-anchor="end">resetn</text>
+      <path d="M226 83 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 83 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="110" font-size="14" font-family="monospace" text-anchor="end">wr_en</text>
+      <path d="M226 106 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 106 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="133" font-size="14" font-family="monospace" text-anchor="end">rd_en</text>
+      <path d="M226 129 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 129 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="156" font-size="14" font-family="monospace" text-anchor="end">wr_addr[ADDR_WIDTH-1:0]</text>
+      <path d="M226 152 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 152 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="179" font-size="14" font-family="monospace" text-anchor="end">rd_addr[ADDR_WIDTH-1:0]</text>
+      <path d="M226 175 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 175 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="202" font-size="14" font-family="monospace" text-anchor="end">wr_data[DATA_WIDTH-1:0]</text>
+      <path d="M226 198 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 198 l-7 -4 v8 z" fill="#4635b1"/>
+      <path d="M730 60 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 60 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="758" y="65" font-size="14" font-family="monospace">rd_data[DATA_WIDTH-1:0]</text>
+      <path d="M730 83 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 83 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="758" y="88" font-size="14" font-family="monospace">rd_valid</text>
+      <rect x="250" y="246" width="16" height="12" fill="#edeafa" stroke="#4635b1"/><text x="272" y="257" font-size="13">이번 장 신규</text>
+      <rect x="370" y="246" width="16" height="12" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="4 2"/><text x="392" y="257" font-size="13">이전 장 파일 재사용(수정 없음)</text>
+      <text x="600" y="257" font-size="13">왼쪽 = input · 오른쪽 = output (RTL 선언 그대로)</text>
+      </svg>
+      <p>포트 이름과 하위 인스턴스는 <code>ch04/rtl/bram_sync_buffer.v</code> 선언에서 그대로 가져왔습니다.</p>
+    </section>
+    <section class="section" id="s02">
+      <h2><span class="num">02</span>준비</h2>
+      <ol>
+        <li>VS Code에서 저장소 루트(<code>amd_soc_npu/</code>)를 엽니다.</li>
+        <li>도구를 확인합니다.</li>
+      </ol>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 도구 확인</span></div>
+        <pre><code>sudo apt install -y iverilog python3 ripgrep   # 처음 한 번
+iverilog -V 2&gt;&amp;1 | head -1      # Icarus Verilog version 12.0 이상
+python3 --version</code></pre></div>
+      <ol start="3"><li>00절 '유지' 파일이 이전 장 결과 그대로 있는지 확인합니다.</li></ol>
+    </section>
+    <section class="section" id="s03">
+      <h2><span class="num">03</span>RTL 작성</h2>
+      <p>아래 파일을 경로 그대로 만들고 전체 코드를 입력합니다.</p>
+      <div class="codeblock">
+        <div class="codebar"><span>ch04/rtl/bram_sync_buffer.v · verilog</span></div>
+        <pre><code class="language-verilog">`timescale 1ns/1ps
+`default_nettype none
+module bram_sync_buffer #(
+    parameter integer DATA_WIDTH=16, ADDR_WIDTH=8
+) (
+    input wire clk, resetn, wr_en, rd_en,
+    input wire [ADDR_WIDTH-1:0] wr_addr, rd_addr,
+    input wire signed [DATA_WIDTH-1:0] wr_data,
+    output reg signed [DATA_WIDTH-1:0] rd_data,
+    output reg rd_valid
+);
+    (* ram_style="block" *) reg signed [DATA_WIDTH-1:0] mem [0:(1&lt;&lt;ADDR_WIDTH)-1];
+    // 배열에는 Reset 루프를 두지 않는다. Reset 중 쓰기는 억제한다.
+    always @(posedge clk) begin
+        if (resetn &amp;&amp; wr_en) mem[wr_addr] &lt;= wr_data;
+        if (!resetn) begin
+            rd_data &lt;= 0;
+            rd_valid &lt;= 0;
+        end else begin
+            rd_valid &lt;= rd_en;
+            if (rd_en) rd_data &lt;= mem[rd_addr];
+        end
+    end
+endmodule
+`default_nettype wire</code></pre>
+      </div>
+    </section>
+    <section class="section" id="s04">
+      <h2><span class="num">04</span>테스트벤치·기준 모델 작성</h2>
+      <p>테스트벤치는 출력을 자동 판정합니다. 기준 모델(Python)은 시험 벡터와 정답을 만듭니다.</p>
+      <div class="codeblock">
+        <div class="codebar"><span>ch04/tb/tb_bram_sync_buffer.sv · systemverilog</span></div>
+        <pre><code class="language-systemverilog">`timescale 1ns/1ps
+module tb_bram_sync_buffer;
+    parameter W=16, A=8;
+    reg clk=0, resetn=0;
+    reg wr[0:1], rd[0:1];
+    reg [A-1:0] wa[0:1], ra[0:1];
+    reg signed [W-1:0] wd[0:1];
+    wire signed [W-1:0] data[0:1];
+    wire valid[0:1];
+    reg written[0:1][0:(1&lt;&lt;A)-1];
+    genvar g;
+    generate for(g=0;g&lt;2;g=g+1) begin: buffers
+        bram_sync_buffer #(.DATA_WIDTH(W),.ADDR_WIDTH(A)) dut
+          (.clk(clk),.resetn(resetn),.wr_en(wr[g]),.rd_en(rd[g]),
+           .wr_addr(wa[g]),.rd_addr(ra[g]),.wr_data(wd[g]),.rd_data(data[g]),.rd_valid(valid[g]));
+    end endgenerate
+    always #5 clk=~clk;
+    integer f,o,n,c=0,i,j;
+    integer rn,w0,wa0,wd0,r0,ra0,w1,wa1,wd1,r1,ra1,e0,v0,e1,v1;
+    reg signed [W-1:0] held[0:1];
+    reg hv[0:1];
+    string vp,ap;
+    // 금지 입력을 시험 환경에서 검출하고 RTL 충돌 동작을 명세로 확정하지 않는다.
+    always @(posedge clk) if(resetn) begin
+        for(integer k=0;k&lt;2;k=k+1) begin
+            if(wr[k] &amp;&amp; rd[k] &amp;&amp; wa[k]==ra[k]) $fatal(1,"COLLISION");
+            if(rd[k] &amp;&amp; !written[k][ra[k]]) $fatal(1,"UNINITIALIZED_READ");
+            if(wr[k]) written[k][wa[k]]=1;
+        end
+    end
+    initial begin
+        for(i=0;i&lt;2;i=i+1) begin
+            wr[i]=0; rd[i]=0; wa[i]=0; ra[i]=0; wd[i]=0;
+            for(j=0;j&lt;(1&lt;&lt;A);j=j+1) written[i][j]=0;
+        end
+        if($test$plusargs("COLLISION_TEST")) begin
+            @(negedge clk); resetn=1; wr[0]=1; rd[0]=1;
+            #20; $fatal(1,"Missing collision guard");
+        end else if($test$plusargs("UNINITIALIZED_TEST")) begin
+            @(negedge clk); resetn=1; rd[0]=1;
+            #20; $fatal(1,"Missing uninitialized guard");
+        end else begin
+            if(!$value$plusargs("VECTORS=%s",vp)||!$value$plusargs("ACTUAL=%s",ap)) $fatal(1,"Missing paths");
+            f=$fopen(vp,"r"); o=$fopen(ap,"w"); if(!f||!o) $fatal(1,"Open failed");
+            @(posedge clk); #1;
+            while(!$feof(f)) begin
+                n=$fscanf(f,"%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n",
+                  rn,w0,wa0,wd0,r0,ra0,w1,wa1,wd1,r1,ra1,e0,v0,e1,v1);
+                if(n!=15) $fatal(1,"Bad row");
+                @(negedge clk);
+                for(i=0;i&lt;2;i=i+1) begin held[i]=data[i]; hv[i]=valid[i]; end
+                resetn=rn; wr[0]=w0; wa[0]=wa0; wd[0]=wd0; rd[0]=r0; ra[0]=ra0;
+                wr[1]=w1; wa[1]=wa1; wd[1]=wd1; rd[1]=r1; ra[1]=ra1;
+                #1;
+                for(i=0;i&lt;2;i=i+1) if(data[i]!==held[i]||valid[i]!==hv[i]) $fatal(1,"Async output");
+                @(posedge clk); #1; c=c+1;
+                if($signed(data[0])!==e0||valid[0]!==v0[0]||$signed(data[1])!==e1||valid[1]!==v1[0])
+                    $fatal(1,"Mismatch cycle=%0d",c);
+                $fdisplay(o,"%0d %0d %0d %0d %0d",c,data[0],valid[0],data[1],valid[1]);
+            end
+            if(c==0) $fatal(1,"Empty");
+            $fclose(o); $display("RTL_SIM_PASS BRAM W=%0d A=%0d cycles=%0d",W,A,c); $finish;
+        end
+    end
+    initial begin #10000000; $fatal(1,"Timeout"); end
+endmodule</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>ch04/reference/bram_reference.py · python</span></div>
+        <pre><code class="language-python">import argparse
+import random
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]/'ch01/reference'))
+from mac_reference import compare
+
+
+class Memory:
+    def __init__(self):
+        self.mem = {}
+        self.data = 0
+
+    def tick(self, rn, wr, wa, wd, rd, ra):
+        if not rn:
+            self.data = 0
+            return 0, 0
+        if wr and rd and wa == ra:
+            raise ValueError('COLLISION')
+        if rd:
+            if ra not in self.mem:
+                raise ValueError('UNINITIALIZED_READ')
+            self.data = self.mem[ra]
+        if wr:
+            self.mem[wa] = wd
+        return self.data, rd
+
+
+def self_test():
+    m = Memory()
+    for args, error in (((1,1,0,3,1,0),'COLLISION'), ((1,0,0,0,1,0),'UNINITIALIZED_READ')):
+        try:
+            m.tick(*args)
+        except ValueError as exc:
+            assert str(exc) == error
+        else:
+            raise AssertionError('Missing rejection')
+    m.tick(1,1,0,-7,0,0)
+    m.tick(0,1,0,99,1,0)
+    assert m.tick(1,0,0,0,1,0) == (-7,1)
+    print('PYTHON_SELF_TEST_PASS reset_retention,collision,uninitialized')
+
+
+def generate(dw, ab, dest):
+    depth = 1 &lt;&lt; ab
+    lo, hi = -(1 &lt;&lt; (dw-1)), (1 &lt;&lt; (dw-1))-1
+    models = [Memory(), Memory()]
+    rows = [(0, *(0,0,0,0,0)*2)]
+    # 각 주소를 서로 다른 signed 패턴으로 초기화하고 독립성을 확인한다.
+    for addr in range(depth):
+        rows.append((1,1,addr,lo+addr,0,0,1,addr,hi-addr,0,0))
+    for addr in range(depth):
+        rows.append((1,0,0,0,1,addr,0,0,0,1,addr))
+    rows += [(0,1,0,9,1,0,1,depth-1,9,1,depth-1),
+             (1,0,0,0,1,0,0,0,0,1,depth-1), (1,*(0,0,0,0,0)*2)]
+    rng = random.Random(304)
+    for _ in range(500):
+        values = [int(rng.randrange(31)!=0)]
+        for _ in range(2):
+            wa = rng.randrange(depth)
+            ra = (wa + rng.randrange(1,depth)) % depth
+            values += [rng.randrange(2),wa,rng.randint(lo,hi),rng.randrange(2),ra]
+        rows.append(tuple(values))
+    with (dest/'vectors.txt').open('w') as vf, (dest/'expected.txt').open('w') as ef:
+        for cycle, row in enumerate(rows,1):
+            out = []
+            for i,m in enumerate(models):
+                out.extend(m.tick(row[0],*row[1+5*i:6+5*i]))
+            vf.write(' '.join(map(str,(*row,*out)))+'\n')
+            ef.write(' '.join(map(str,(cycle,*out)))+'\n')
+    print(f'PYTHON_VECTORS width={dw} depth={depth} cycles={len(rows)} seed=304')
+
+
+if __name__ == '__main__':
+    p=argparse.ArgumentParser()
+    p.add_argument('--width',type=int,default=16); p.add_argument('--addr',type=int,default=8)
+    p.add_argument('--out',type=Path); p.add_argument('--actual',type=Path)
+    a=p.parse_args(); self_test()
+    if a.actual: compare(a.out/'expected.txt',a.actual)
+    else: generate(a.width,a.addr,a.out)</code></pre>
+      </div>
+    </section>
+    <section class="section" id="s05">
+      <h2><span class="num">05</span>시뮬레이션 실행</h2>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 저장소 루트에서 실행</span></div>
+        <pre><code>bash ch04/scripts/run_sim.sh</code></pre></div>
+      <p>기대 출력 (Icarus Verilog 12.0 · 2026-11-18 실제 실행 로그 발췌):</p>
+      <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
+        <pre><code>PYTHON_SELF_TEST_PASS reset_retention,collision,uninitialized
+PYTHON_VECTORS width=16 depth=256 cycles=1016 seed=304
+RTL_SIM_PASS BRAM W=16 A=8 cycles=1016
+PYTHON_SELF_TEST_PASS reset_retention,collision,uninitialized
+PYTHON_RTL_COMPARE_PASS cycles=1016
+PYTHON_SELF_TEST_PASS reset_retention,collision,uninitialized
+PYTHON_VECTORS width=8 depth=8 cycles=520 seed=304
+RTL_SIM_PASS BRAM W=8 A=3 cycles=520
+PYTHON_SELF_TEST_PASS reset_retention,collision,uninitialized
+PYTHON_RTL_COMPARE_PASS cycles=520</code></pre></div>
+    </section>
+    <section class="section" id="s06">
+      <h2><span class="num">06</span>결과 판정</h2>
+      <table>
+        <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
+        <tbody><tr><td><code>RTL_SIM_PASS BRAM W=16 A=8 cycles=1016</code></td><td>16비트·256깊이 설정 통과</td></tr><tr><td><code>RTL_SIM_PASS BRAM W=8 A=3 cycles=520</code></td><td>8비트·8깊이 설정 통과</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS</code></td><td>RTL 출력 파일과 Python 기준값이 모든 사이클에서 일치</td></tr></tbody>
+      </table>
+      <p><b>실패 시:</b> TB의 <code>$fatal</code> 메시지에 표시된 cycle 번호와 기대값/실제값을 확인하고, 03절 코드와 한 줄씩 대조합니다. 하나라도 실패하면 다음 장으로 넘어가지 않습니다.</p>
+    </section>
+    <section class="section" id="s07">
+      <h2><span class="num">07</span>코드 읽기 포인트</h2>
+      <table>
+        <thead><tr><th>위치</th><th>내용</th></tr></thead>
+        <tbody><tr><td>Block RAM 추론</td><td><code>(* ram_style="block" *)</code> 힌트로 Vivado가 LUT 대신 BRAM36을 사용하도록 유도합니다. 배열 선언과 순수 동기 접근 패턴이 함께 필요합니다.</td></tr>
+<tr><td>Reset 중 쓰기 억제</td><td><code>if (resetn && wr_en) mem[wr_addr] <= wr_data;</code>. Reset이 아닌 동안에만 쓰기가 이루어져 초기화 직후 의도치 않은 메모리 변경을 방지합니다.</td></tr>
+<tr><td>배열 초기화 없음</td><td>BRAM에는 Reset 루프를 두지 않습니다. 초기화 전 읽기는 테스트벤치가 <code>written[][]</code> 비트맵으로 추적하여 차단합니다. 실물 보드에서는 Vivado가 초기화 비트스트림을 채울 수 있습니다.</td></tr></tbody>
+      </table>
+    </section>
+    <section class="section" id="s08">
+      <h2><span class="num">08</span>보드 확인</h2>
+      <p>이 장은 단위 RTL 시험까지 진행합니다. 이 장 모듈만으로는 Basys3 핀 제약(XDC)이 없으므로 비트스트림을 만들지 않습니다. 보드 확인은 <a href="ch12_integrated_npu_v05.html#s08">12장 · 08 보드 확인</a>에서 통합 Top으로 진행합니다.</p>
+    </section>
+    <section class="section" id="s09">
+      <h2><span class="num">09</span>검증 현황·인계</h2>
+      <table>
+        <thead><tr><th>다음 장으로 넘기는 파일</th><th>사용처</th></tr></thead>
+        <tbody><tr><td><code>ch04/rtl/bram_sync_buffer.v</code></td><td>10장 npu_core의 입력 메모리 1개 + 가중치 메모리 4개 (수정 금지)</td></tr></tbody>
+      </table>
+      <p>검증 게이트 (RTL 시뮬레이션 결과는 Icarus Verilog 12.0 · 2026-11-18 실행, 증거 <code>ch04/validation/</code>):</p>
+      <div class="gate-row">
+        <div class="gate pass">
+          <b>HTML_PASS</b>
+          <span>v05 · 정적 검사</span>
+        </div>
+        <div class="gate pass">
+          <b>HOST_MODEL_PASS</b>
+          <span>PYTHON_SELF_TEST_PASS reset_retention,collision,uninitialized</span>
+        </div>
+        <div class="gate pass">
+          <b>RTL_SIM_PASS</b>
+          <span>RTL_SIM_PASS BRAM W=16 A=8 · W=8 A=3</span>
+        </div>
+        <div class="gate todo">
+          <b>SYNTH_TIMING_PASS</b>
+          <span>⚠ 미검증 · Vivado 미실행</span>
+        </div>
+        <div class="gate todo">
+          <b>BOARD_PASS</b>
+          <span>⚠ 미검증 · 실물 Basys3 미확인</span>
+        </div>
+      </div>
+    </section>
+    <div class="chapter-links" id="chapter-links"></div>
+  </main>
+</div>
+<script>
+window.COURSE={
+ "title": "Basys3 소형 NPU 실습 (고도화판)",
+ "chapters": [
+  {
+   "id": "ch00",
+   "number": 0,
+   "title": "UART Echo",
+   "file": "ch00_uart_echo_v05.html"
+  },
+  {
+   "id": "ch01",
+   "number": 1,
+   "title": "DSP 추론 MAC 누산",
+   "file": "ch01_mac_v05.html"
+  },
+  {
+   "id": "ch02",
+   "number": 2,
+   "title": "DSP48E1 타깃 곱셈",
+   "file": "ch02_dsp_v05.html"
+  },
+  {
+   "id": "ch03",
+   "number": 3,
+   "title": "MAC 2단계 파이프라인",
+   "file": "ch03_mac_pipeline_v05.html"
+  },
+  {
+   "id": "ch04",
+   "number": 4,
+   "title": "BRAM 동기 버퍼",
+   "file": "ch04_bram_v05.html"
+  },
+  {
+   "id": "ch05",
+   "number": 5,
+   "title": "Fixed-Point Quantizer",
+   "file": "ch05_fixed_v05.html"
+  },
+  {
+   "id": "ch06",
+   "number": 6,
+   "title": "INT8·INT16 정밀도 비교",
+   "file": "ch06_precision_v05.html"
+  },
+  {
+   "id": "ch07",
+   "number": 7,
+   "title": "벡터 내적",
+   "file": "ch07_vector_dot_v05.html"
+  },
+  {
+   "id": "ch08",
+   "number": 8,
+   "title": "4PE 병렬 어레이",
+   "file": "ch08_pe4_v05.html"
+  },
+  {
+   "id": "ch09",
+   "number": 9,
+   "title": "Dense 4뉴런 레이어",
+   "file": "ch09_dense_v05.html"
+  },
+  {
+   "id": "ch10",
+   "number": 10,
+   "title": "4뉴런 NPU Core",
+   "file": "ch10_npu_core_v05.html"
+  },
+  {
+   "id": "ch11",
+   "number": 11,
+   "title": "UART 모델 적재 컨트롤러",
+   "file": "ch11_uart_register_v05.html"
+  },
+  {
+   "id": "ch12",
+   "number": 12,
+   "title": "통합 NPU Top",
+   "file": "ch12_integrated_npu_v05.html"
+  }
+ ]
+};
+</script>
+<script defer src="assets/education/site.js"></script>
+</body>
+</html>

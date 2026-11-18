@@ -1,0 +1,500 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Basys3 NPU 01장 실습 · DSP 추론 MAC 누산">
+<title>01장 · DSP 추론 MAC 누산 (v05)</title>
+<link rel="stylesheet" href="assets/education/site.css">
+<style>
+.hero:before{background-image:linear-gradient(90deg,rgba(12,17,27,.89),rgba(12,17,27,.69) 58%,rgba(12,17,27,.48)),url('https://raw.githubusercontent.com/Yuul-Jung/rule_md/d1b8278d41fca8f5e3960736f3ac9d377e462fda/web/education-html/assets/hero-bookshelf.jpg')}
+.codeblock pre{max-height:780px;white-space:pre}
+.section svg{width:100%;height:auto}
+.vbadge{display:inline-block;padding:.15em .6em;border-radius:4px;font-size:.78em;font-weight:700;background:#d4edda;color:#155724;vertical-align:middle}
+.gate-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:10px}
+.gate{border:1px solid var(--line,#e0e0e0);border-radius:6px;padding:10px 14px}
+.gate b{display:block;font:600 11px var(--mono,monospace);letter-spacing:.04em;margin-bottom:4px}
+.gate span{font-size:13px}
+.gate.pass{border-color:#2d8a52;background:#f0fbf4}
+.gate.todo{border-color:#b08900;background:#fffbe6}
+</style>
+</head>
+<body data-chapter="ch01">
+<a class="access-skip" href="#main-content">본문 바로가기</a>
+<button type="button" class="mobile-menu" id="mobile-menu" aria-controls="course-nav" aria-expanded="false">☰ 장·목차</button>
+<div class="shade" id="shade"></div>
+<header class="hero">
+  <div class="hero-inner">
+    <p class="kicker">BASYS3 · NPU 고도화판 · 01장 실습 <span class="vbadge">v05</span></p>
+    <h1>제01장 · DSP 추론 MAC 누산</h1>
+    <p>signed 16×16 곱을 40비트로 누산하는 mac_core를 작성하고, Python 기준 모델과 사이클 단위로 대조합니다.</p>
+  </div>
+</header>
+<div class="wrap">
+  <nav class="toc" id="course-nav" aria-label="전체 장과 절 탐색"></nav>
+  <main class="content" id="main-content">
+    <section class="section" id="s00">
+      <h2><span class="num">00</span>이 장의 위치</h2>
+      <p><b>목표:</b> signed 16×16 곱을 40비트로 누산하는 mac_core를 작성하고, Python 기준 모델과 사이클 단위로 대조합니다.</p>
+      <table>
+        <thead><tr><th>구분</th><th>파일</th></tr></thead>
+        <tbody>
+          <tr><td>유지 (이전 장, 수정 없음)</td><td><ul><li>없음 (첫 장)</li></ul></td></tr>
+          <tr><td>이번 장 작성</td><td><ul><li><code>ch01/rtl/mac_core.v</code></li></ul></td></tr>
+        </tbody>
+      </table>
+      <p>실습 순서: 01 구조 확인 → 02 준비 → 03 RTL 작성 → 04 테스트벤치·기준 모델 작성 → 05 시뮬레이션 → 06 결과 판정 → 08 보드 확인 → 09 인계.</p>
+    </section>
+    <section class="section" id="s01">
+      <h2><span class="num">01</span>구조도</h2>
+      <svg viewBox="0 0 980 248" role="img" aria-label="mac_core 실제 포트와 하위 모듈 구조">
+      <rect x="250" y="30" width="480" height="178" rx="10" fill="#fff" stroke="#4635b1" stroke-width="2"/>
+      <text x="490" y="54" font-size="18" font-weight="700" text-anchor="middle">mac_core</text>
+      <text x="490" y="72" font-size="13" text-anchor="middle" fill="#555">ch01/rtl/mac_core.v</text>
+      <text x="222" y="64" font-size="14" font-family="monospace" text-anchor="end">clk</text>
+      <path d="M226 60 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 60 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="87" font-size="14" font-family="monospace" text-anchor="end">resetn</text>
+      <path d="M226 83 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 83 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="110" font-size="14" font-family="monospace" text-anchor="end">clear_i</text>
+      <path d="M226 106 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 106 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="133" font-size="14" font-family="monospace" text-anchor="end">valid_i</text>
+      <path d="M226 129 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 129 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="156" font-size="14" font-family="monospace" text-anchor="end">a_i[DATA_WIDTH-1:0]</text>
+      <path d="M226 152 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 152 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="179" font-size="14" font-family="monospace" text-anchor="end">b_i[DATA_WIDTH-1:0]</text>
+      <path d="M226 175 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 175 l-7 -4 v8 z" fill="#4635b1"/>
+      <path d="M730 60 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 60 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="758" y="65" font-size="14" font-family="monospace">acc_o[ACC_WIDTH-1:0]</text>
+      <path d="M730 83 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 83 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="758" y="88" font-size="14" font-family="monospace">valid_o</text>
+      <rect x="250" y="223" width="16" height="12" fill="#edeafa" stroke="#4635b1"/><text x="272" y="234" font-size="13">이번 장 신규</text>
+      <rect x="370" y="223" width="16" height="12" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="4 2"/><text x="392" y="234" font-size="13">이전 장 파일 재사용(수정 없음)</text>
+      <text x="600" y="234" font-size="13">왼쪽 = input · 오른쪽 = output (RTL 선언 그대로)</text>
+      </svg>
+      <p>포트 이름과 하위 인스턴스는 <code>ch01/rtl/mac_core.v</code> 선언에서 그대로 가져왔습니다.</p>
+    </section>
+    <section class="section" id="s02">
+      <h2><span class="num">02</span>준비</h2>
+      <ol>
+        <li>VS Code에서 저장소 루트(<code>amd_soc_npu/</code>)를 엽니다.</li>
+        <li>도구를 확인합니다.</li>
+      </ol>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 도구 확인</span></div>
+        <pre><code>sudo apt install -y iverilog python3 ripgrep   # 처음 한 번
+iverilog -V 2&gt;&amp;1 | head -1      # Icarus Verilog version 12.0 이상
+python3 --version</code></pre></div>
+      <ol start="3"><li>00절 '유지' 파일이 이전 장 결과 그대로 있는지 확인합니다.</li></ol>
+    </section>
+    <section class="section" id="s03">
+      <h2><span class="num">03</span>RTL 작성</h2>
+      <p>아래 파일을 경로 그대로 만들고 전체 코드를 입력합니다.</p>
+      <div class="codeblock">
+        <div class="codebar"><span>ch01/rtl/mac_core.v · verilog</span></div>
+        <pre><code class="language-verilog">`timescale 1ns/1ps
+`default_nettype none
+
+// 독립 signed MAC: 보드 및 AXI에 의존하지 않는다.
+(* use_dsp = "yes" *)
+module mac_core #(
+    parameter integer DATA_WIDTH = 16,
+    parameter integer ACC_WIDTH = 40
+) (
+    input wire clk,
+    input wire resetn,
+    input wire clear_i,
+    input wire valid_i,
+    input wire signed [DATA_WIDTH-1:0] a_i,
+    input wire signed [DATA_WIDTH-1:0] b_i,
+    output reg signed [ACC_WIDTH-1:0] acc_o,
+    output reg valid_o
+);
+    localparam integer PRODUCT_WIDTH = 2 * DATA_WIDTH;
+    wire signed [PRODUCT_WIDTH-1:0] product_w;
+    wire signed [ACC_WIDTH-1:0] product_ext_w;
+
+    // 전체 곱을 보존한 뒤 부호 비트를 복제하여 누산 폭으로 확장한다.
+    // 지원 조건: DATA_WIDTH &gt;= 2, ACC_WIDTH &gt;= 2*DATA_WIDTH.
+    assign product_w = $signed(a_i) * $signed(b_i);
+    assign product_ext_w = {{(ACC_WIDTH-PRODUCT_WIDTH){product_w[PRODUCT_WIDTH-1]}}, product_w};
+
+    // 동기식 Active-Low Reset &gt; Clear &gt; Valid 순서.
+    // 입력을 수락한 상승 에지 직후 acc_o와 valid_o가 함께 갱신된다.
+    // valid_i=0이면 acc_o 유지, valid_o=0. Clear와 겹친 입력은 버린다.
+    always @(posedge clk) begin
+        if (!resetn) begin
+            acc_o &lt;= {ACC_WIDTH{1'b0}};
+            valid_o &lt;= 1'b0;
+        end else if (clear_i) begin
+            acc_o &lt;= {ACC_WIDTH{1'b0}};
+            valid_o &lt;= 1'b0;
+        end else begin
+            valid_o &lt;= valid_i;
+            if (valid_i)
+                // 범위 초과 시 상위 비트를 버리는 2의 보수 순환 연산이다.
+                acc_o &lt;= acc_o + product_ext_w;
+        end
+    end
+
+    // synthesis translate_off
+    initial begin
+        if (DATA_WIDTH &lt; 2 || ACC_WIDTH &lt; PRODUCT_WIDTH)
+            $fatal(1, "Require DATA_WIDTH&gt;=2 and ACC_WIDTH&gt;=2*DATA_WIDTH");
+    end
+    // synthesis translate_on
+endmodule
+`default_nettype wire</code></pre>
+      </div>
+    </section>
+    <section class="section" id="s04">
+      <h2><span class="num">04</span>테스트벤치·기준 모델 작성</h2>
+      <p>테스트벤치는 출력을 자동 판정합니다. 기준 모델(Python)은 시험 벡터와 정답을 만듭니다.</p>
+      <div class="codeblock">
+        <div class="codebar"><span>ch01/tb/tb_mac_core.sv · systemverilog</span></div>
+        <pre><code class="language-systemverilog">`timescale 1ns/1ps
+`default_nettype none
+module tb_mac_core;
+    parameter integer DATA_WIDTH = 16;
+    parameter integer ACC_WIDTH = 40;
+    reg clk = 0;
+    reg resetn = 0, clear_i = 0, valid_i = 0;
+    reg signed [DATA_WIDTH-1:0] a_i = 0, b_i = 0;
+    wire signed [ACC_WIDTH-1:0] acc_o;
+    wire valid_o;
+    mac_core #(.DATA_WIDTH(DATA_WIDTH), .ACC_WIDTH(ACC_WIDTH)) dut (.*);
+    always #5 clk = ~clk;
+
+    integer vectors, actual, fields, cycle = 0;
+    integer rn, cl, vi, ai, bi, expected_valid;
+    reg signed [ACC_WIDTH-1:0] expected_acc;
+    reg signed [ACC_WIDTH-1:0] previous_acc;
+    reg previous_valid;
+    longint signed model_acc = 0;
+    longint signed model_product;
+    reg model_valid;
+    string vectors_path, actual_path;
+
+    initial begin
+        if (!$value$plusargs("VECTORS=%s", vectors_path) ||
+            !$value$plusargs("ACTUAL=%s", actual_path))
+            $fatal(1, "Missing VECTORS/ACTUAL path");
+        vectors = $fopen(vectors_path, "r");
+        actual = $fopen(actual_path, "w");
+        if (!vectors || !actual) $fatal(1, "Cannot open vector/trace file");
+        // 첫 상승 에지에서 동기식 Reset을 적용하여 알려진 상태를 만든다.
+        @(posedge clk); #1;
+        if (acc_o !== 0 || valid_o !== 0) $fatal(1, "Initial reset failed");
+        while (!$feof(vectors)) begin
+            fields = $fscanf(vectors, "%d %d %d %d %d %d %d\n",
+                              rn, cl, vi, ai, bi, expected_acc, expected_valid);
+            if (fields != 7) $fatal(1, "Malformed vector row");
+            @(negedge clk);
+            previous_acc = acc_o;
+            previous_valid = valid_o;
+            resetn = rn; clear_i = cl; valid_i = vi; a_i = ai; b_i = bi;
+            #1;
+            // 입력 변경만으로 출력이 변하면 동기식 타이밍 위반이다.
+            if (acc_o !== previous_acc || valid_o !== previous_valid)
+                $fatal(1, "Output changed before rising edge cycle=%0d", cycle+1);
+            @(posedge clk); #1; // NBA 갱신 이후 같은 에지의 결과를 검사한다.
+            cycle = cycle + 1;
+            // Python 파일 외에도 SV의 64비트 정수 산술로 독립 계산한다.
+            // 이 TB의 실행 설정은 ACC_WIDTH&lt;=40이므로 곱과 합이 64비트에 들어간다.
+            model_product = $signed(a_i);
+            model_product = model_product * $signed(b_i);
+            model_valid = rn &amp;&amp; !cl &amp;&amp; vi;
+            if (!rn || cl) model_acc = 0;
+            else if (vi) model_acc = model_acc + model_product;
+            model_acc = $signed(model_acc[ACC_WIDTH-1:0]);
+            if (expected_acc !== model_acc[ACC_WIDTH-1:0] || expected_valid[0] !== model_valid)
+                $fatal(1, "SV/Python reference mismatch cycle=%0d", cycle);
+            if (acc_o !== expected_acc || valid_o !== expected_valid[0])
+                $fatal(1, "cycle=%0d a=%0d b=%0d expected=%0d/%0d actual=%0d/%0d",
+                       cycle, a_i, b_i, expected_acc, expected_valid, acc_o, valid_o);
+            $fdisplay(actual, "%0d %0d %0d", cycle, acc_o, valid_o);
+        end
+        if (cycle == 0) $fatal(1, "Empty vector file");
+        $fclose(vectors); $fclose(actual);
+        $display("RTL_SIM_PASS INT%0d/%0d cycles=%0d", DATA_WIDTH, ACC_WIDTH, cycle);
+        $finish;
+    end
+    initial begin
+        #10000000;
+        $fatal(1, "Simulation timeout");
+    end
+endmodule
+`default_nettype wire</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>ch01/reference/mac_reference.py · python</span></div>
+        <pre><code class="language-python">#!/usr/bin/env python3
+"""P3-01 독립 정수 모델, 재현 가능한 자극 생성 및 RTL 전 사이클 대조."""
+import argparse
+import random
+from pathlib import Path
+
+
+def wrap(value, width):
+    """Python 무제한 정수를 signed 2의 보수 범위로 변환한다."""
+    modulus = 1 &lt;&lt; width
+    return (value + modulus // 2) % modulus - modulus // 2
+
+
+def step(acc, resetn, clear, valid, a, b, acc_width):
+    if not resetn or clear:
+        return 0, 0
+    return (wrap(acc + a * b, acc_width), 1) if valid else (acc, 0)
+
+
+def self_test():
+    # 별도의 상수 정답으로 산술/제어 및 각 설정의 양·음 오버플로를 검증한다.
+    for dw, aw in ((8, 32), (16, 40)):
+        maximum = (1 &lt;&lt; (aw - 1)) - 1
+        minimum = -(1 &lt;&lt; (aw - 1))
+        assert step(0, 1, 0, 1, 3, 4, aw) == (12, 1)
+        assert step(0, 1, 0, 1, 3, -4, aw) == (-12, 1)
+        assert step(0, 1, 0, 1, -3, -4, aw) == (12, 1)
+        assert step(maximum, 1, 0, 1, 1, 1, aw) == (minimum, 1)
+        assert step(minimum, 1, 0, 1, 1, -1, aw) == (maximum, 1)
+        assert step(7, 1, 0, 0, 3, 4, aw) == (7, 0)
+        assert step(7, 1, 1, 1, 3, 4, aw) == (0, 0)
+        assert step(7, 0, 1, 1, 3, 4, aw) == (0, 0)
+        assert wrap((-(1 &lt;&lt; (dw - 1))) ** 2, aw) == 1 &lt;&lt; (2 * dw - 2)
+    print("PYTHON_SELF_TEST_PASS configurations=INT8/32,INT16/40")
+
+
+def stimulus(dw, aw):
+    lo, hi = -(1 &lt;&lt; (dw - 1)), (1 &lt;&lt; (dw - 1)) - 1
+    yield (0, 0, 1, hi, lo)
+    yield (0, 1, 1, lo, lo)
+    yield (1, 0, 0, 0, 0)
+    # 부호 조합, 0, 입력 경계, 연속 valid 및 idle.
+    for a, b in ((3, 4), (3, -4), (-3, -4), (hi, hi),
+                 (lo, lo), (lo, hi), (hi, lo), (0, lo), (-1, -1)):
+        yield (1, 0, 1, a, b)
+    for _ in range(4):
+        yield (1, 0, 0, hi, hi)
+    yield (1, 1, 1, hi, hi)
+    yield (1, 1, 0, lo, lo)
+    # 내부 레지스터 force 없이 실제 포트로 최댓값에 도달한다.
+    target = (1 &lt;&lt; (aw - 1)) - 1
+    count, remainder = divmod(target, lo * lo)
+    for _ in range(count):
+        yield (1, 0, 1, lo, lo)
+    count, remainder = divmod(remainder, hi)
+    for _ in range(count):
+        yield (1, 0, 1, hi, 1)
+    if remainder:
+        yield (1, 0, 1, remainder, 1)
+    yield (1, 0, 0, hi, hi)  # 최댓값 유지
+    yield (1, 0, 1, 1, 1)    # max + 1 -&gt; min
+    yield (1, 0, 0, hi, hi)  # 최솟값 유지
+    yield (1, 0, 1, -1, 1)   # min - 1 -&gt; max
+    yield (0, 1, 1, lo, hi)  # Reset/Clear/Valid 동시 입력
+    rng = random.Random(301 + dw)
+    for _ in range(2000):
+        yield (int(rng.randrange(53) != 0), int(rng.randrange(29) == 0),
+               int(rng.randrange(4) != 0), rng.randint(lo, hi), rng.randint(lo, hi))
+    yield (1, 0, 0, 0, 0)
+
+
+def generate(dw, aw, vectors, expected):
+    acc = 0
+    count = 0
+    with vectors.open("w") as vf, expected.open("w") as ef:
+        for count, row in enumerate(stimulus(dw, aw), 1):
+            acc, valid = step(acc, *row, aw)
+            vf.write(" ".join(map(str, (*row, acc, valid))) + "\n")
+            ef.write(f"{count} {acc} {valid}\n")
+    print(f"PYTHON_VECTORS INT{dw}/{aw} cycles={count} seed={301 + dw}")
+
+
+def compare(expected, actual):
+    # 길이도 비교하여 조기 종료/누락 행이 PASS가 되지 않게 한다.
+    from itertools import zip_longest
+    count = 0
+    with expected.open() as ef, actual.open() as af:
+        for count, (e, a) in enumerate(zip_longest(ef, af), 1):
+            if e is None or a is None or e.split() != a.split():
+                raise AssertionError(f"cycle={count}: expected={e!r}, actual={a!r}")
+    if count == 0:
+        raise AssertionError("Empty comparison")
+    print(f"PYTHON_RTL_COMPARE_PASS cycles={count}")
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--data-width", type=int, default=16)
+    parser.add_argument("--acc-width", type=int, default=40)
+    parser.add_argument("--vectors", type=Path)
+    parser.add_argument("--expected", type=Path)
+    parser.add_argument("--actual", type=Path)
+    args = parser.parse_args()
+    if args.data_width &lt; 2 or args.acc_width &lt; 2 * args.data_width:
+        parser.error("Require DATA_WIDTH&gt;=2 and ACC_WIDTH&gt;=2*DATA_WIDTH")
+    self_test()
+    if args.actual:
+        compare(args.expected, args.actual)
+    elif args.vectors:
+        generate(args.data_width, args.acc_width, args.vectors, args.expected)</code></pre>
+      </div>
+    </section>
+    <section class="section" id="s05">
+      <h2><span class="num">05</span>시뮬레이션 실행</h2>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 저장소 루트에서 실행</span></div>
+        <pre><code>bash ch01/scripts/run_sim.sh</code></pre></div>
+      <p>기대 출력 (Icarus Verilog 12.0 · 2026-11-18 실제 실행 로그 발췌):</p>
+      <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
+        <pre><code>PYTHON_SELF_TEST_PASS configurations=INT8/32,INT16/40
+PYTHON_VECTORS INT16/40 cycles=35304 seed=317
+RTL_SIM_PASS INT16/40 cycles=35304
+PYTHON_SELF_TEST_PASS configurations=INT8/32,INT16/40
+PYTHON_RTL_COMPARE_PASS cycles=35304
+PYTHON_SELF_TEST_PASS configurations=INT8/32,INT16/40
+PYTHON_VECTORS INT8/32 cycles=133224 seed=309
+RTL_SIM_PASS INT8/32 cycles=133224
+PYTHON_SELF_TEST_PASS configurations=INT8/32,INT16/40
+PYTHON_RTL_COMPARE_PASS cycles=133224</code></pre></div>
+    </section>
+    <section class="section" id="s06">
+      <h2><span class="num">06</span>결과 판정</h2>
+      <table>
+        <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
+        <tbody><tr><td><code>RTL_SIM_PASS INT16/40 cycles=35304</code></td><td>INT16·40비트 누산 설정 통과</td></tr><tr><td><code>RTL_SIM_PASS INT8/32 cycles=133224</code></td><td>INT8·32비트 설정 통과</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS</code></td><td>RTL 출력 파일과 Python 기준값이 모든 사이클에서 일치</td></tr></tbody>
+      </table>
+      <p><b>실패 시:</b> TB의 <code>$fatal</code> 메시지에 표시된 cycle 번호와 기대값/실제값을 확인하고, 03절 코드와 한 줄씩 대조합니다. 하나라도 실패하면 다음 장으로 넘어가지 않습니다.</p>
+    </section>
+    <section class="section" id="s07">
+      <h2><span class="num">07</span>코드 읽기 포인트</h2>
+      <table>
+        <thead><tr><th>위치</th><th>내용</th></tr></thead>
+        <tbody><tr><td>부호 확장</td><td><code>product_ext_w = {{(ACC_WIDTH-PRODUCT_WIDTH){product_w[PRODUCT_WIDTH-1]}}, product_w}</code>은 32비트 곱의 부호 비트를 40비트까지 복제합니다. 음수 곱도 올바르게 누산됩니다.</td></tr>
+<tr><td>Reset &gt; Clear &gt; Valid 우선순위</td><td><code>!resetn</code>이 최우선, 그 다음 <code>clear_i</code>, 마지막으로 <code>valid_i</code>를 처리합니다. 이 계약은 02·03·07장도 그대로 따릅니다.</td></tr>
+<tr><td>2의 보수 순환</td><td><code>ACC_WIDTH</code>가 초과되면 상위 비트를 버리는 wrap-around가 발생합니다. 테스트벤치 SV 모델에서 <code>$signed(model_acc[ACC_WIDTH-1:0])</code>으로 명시적으로 동일하게 처리합니다.</td></tr>
+<tr><td>DSP 추론</td><td><code>(* use_dsp = "yes" *)</code>는 합성 힌트입니다. 시뮬레이션에서는 무시되며 Vivado 합성 후 Resource 탭에서 DSP48E1 사용 여부를 확인합니다.</td></tr></tbody>
+      </table>
+    </section>
+    <section class="section" id="s08">
+      <h2><span class="num">08</span>보드 확인</h2>
+      <p>이 장은 단위 RTL 시험까지 진행합니다. 이 장 모듈만으로는 Basys3 핀 제약(XDC)이 없으므로 비트스트림을 만들지 않습니다. 보드 확인은 <a href="ch12_integrated_npu_v05.html#s08">12장 · 08 보드 확인</a>에서 통합 Top으로 진행합니다.</p>
+    </section>
+    <section class="section" id="s09">
+      <h2><span class="num">09</span>검증 현황·인계</h2>
+      <table>
+        <thead><tr><th>다음 장으로 넘기는 파일</th><th>사용처</th></tr></thead>
+        <tbody><tr><td><code>ch01/rtl/mac_core.v</code></td><td>02장 TB 교차 검증 · 07장 vector_dot_core 내부 (수정 금지)</td></tr></tbody>
+      </table>
+      <p>검증 게이트 (RTL 시뮬레이션 결과는 Icarus Verilog 12.0 · 2026-11-18 실행, 증거 <code>ch01/validation/</code>):</p>
+      <div class="gate-row">
+        <div class="gate pass">
+          <b>HTML_PASS</b>
+          <span>v05 · 정적 검사</span>
+        </div>
+        <div class="gate pass">
+          <b>HOST_MODEL_PASS</b>
+          <span>PYTHON_SELF_TEST_PASS configurations=INT8/32,INT16/40</span>
+        </div>
+        <div class="gate pass">
+          <b>RTL_SIM_PASS</b>
+          <span>RTL_SIM_PASS INT16/40 · INT8/32</span>
+        </div>
+        <div class="gate todo">
+          <b>SYNTH_TIMING_PASS</b>
+          <span>⚠ 미검증 · Vivado 미실행</span>
+        </div>
+        <div class="gate todo">
+          <b>BOARD_PASS</b>
+          <span>⚠ 미검증 · 실물 Basys3 미확인</span>
+        </div>
+      </div>
+    </section>
+    <div class="chapter-links" id="chapter-links"></div>
+  </main>
+</div>
+<script>
+window.COURSE={
+ "title": "Basys3 소형 NPU 실습 (고도화판)",
+ "chapters": [
+  {
+   "id": "ch00",
+   "number": 0,
+   "title": "UART Echo",
+   "file": "ch00_uart_echo_v05.html"
+  },
+  {
+   "id": "ch01",
+   "number": 1,
+   "title": "DSP 추론 MAC 누산",
+   "file": "ch01_mac_v05.html"
+  },
+  {
+   "id": "ch02",
+   "number": 2,
+   "title": "DSP48E1 타깃 곱셈",
+   "file": "ch02_dsp_v05.html"
+  },
+  {
+   "id": "ch03",
+   "number": 3,
+   "title": "MAC 2단계 파이프라인",
+   "file": "ch03_mac_pipeline_v05.html"
+  },
+  {
+   "id": "ch04",
+   "number": 4,
+   "title": "BRAM 동기 버퍼",
+   "file": "ch04_bram_v05.html"
+  },
+  {
+   "id": "ch05",
+   "number": 5,
+   "title": "Fixed-Point Quantizer",
+   "file": "ch05_fixed_v05.html"
+  },
+  {
+   "id": "ch06",
+   "number": 6,
+   "title": "INT8·INT16 정밀도 비교",
+   "file": "ch06_precision_v05.html"
+  },
+  {
+   "id": "ch07",
+   "number": 7,
+   "title": "벡터 내적",
+   "file": "ch07_vector_dot_v05.html"
+  },
+  {
+   "id": "ch08",
+   "number": 8,
+   "title": "4PE 병렬 어레이",
+   "file": "ch08_pe4_v05.html"
+  },
+  {
+   "id": "ch09",
+   "number": 9,
+   "title": "Dense 4뉴런 레이어",
+   "file": "ch09_dense_v05.html"
+  },
+  {
+   "id": "ch10",
+   "number": 10,
+   "title": "4뉴런 NPU Core",
+   "file": "ch10_npu_core_v05.html"
+  },
+  {
+   "id": "ch11",
+   "number": 11,
+   "title": "UART 모델 적재 컨트롤러",
+   "file": "ch11_uart_register_v05.html"
+  },
+  {
+   "id": "ch12",
+   "number": 12,
+   "title": "통합 NPU Top",
+   "file": "ch12_integrated_npu_v05.html"
+  }
+ ]
+};
+</script>
+<script defer src="assets/education/site.js"></script>
+</body>
+</html>

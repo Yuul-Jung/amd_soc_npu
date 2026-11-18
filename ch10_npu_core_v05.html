@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Basys3 NPU 10장 실습 · 4뉴런 NPU Core">
+<title>10장 · 4뉴런 NPU Core (v05)</title>
+<link rel="stylesheet" href="assets/education/site.css">
+<style>
+.hero:before{background-image:linear-gradient(90deg,rgba(12,17,27,.89),rgba(12,17,27,.69) 58%,rgba(12,17,27,.48)),url('https://raw.githubusercontent.com/Yuul-Jung/rule_md/d1b8278d41fca8f5e3960736f3ac9d377e462fda/web/education-html/assets/hero-bookshelf.jpg')}
+.codeblock pre{max-height:780px;white-space:pre}
+.section svg{width:100%;height:auto}
+.vbadge{display:inline-block;padding:.15em .6em;border-radius:4px;font-size:.78em;font-weight:700;background:#d4edda;color:#155724;vertical-align:middle}
+.gate-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:10px}
+.gate{border:1px solid var(--line,#e0e0e0);border-radius:6px;padding:10px 14px}
+.gate b{display:block;font:600 11px var(--mono,monospace);letter-spacing:.04em;margin-bottom:4px}
+.gate span{font-size:13px}
+.gate.pass{border-color:#2d8a52;background:#f0fbf4}
+.gate.todo{border-color:#b08900;background:#fffbe6}
+</style>
+</head>
+<body data-chapter="ch10">
+<a class="access-skip" href="#main-content">본문 바로가기</a>
+<button type="button" class="mobile-menu" id="mobile-menu" aria-controls="course-nav" aria-expanded="false">☰ 장·목차</button>
+<div class="shade" id="shade"></div>
+<header class="hero">
+  <div class="hero-inner">
+    <p class="kicker">BASYS3 · NPU 고도화판 · 10장 실습 <span class="vbadge">v05</span></p>
+    <h1>제10장 · 4뉴런 NPU Core</h1>
+    <p>04장 BRAM 5개와 09장 Dense를 6상태 FSM으로 연결해, 메모리에 적재한 입력·가중치로 추론하는 NPU 코어를 만듭니다.</p>
+  </div>
+</header>
+<div class="wrap">
+  <nav class="toc" id="course-nav" aria-label="전체 장과 절 탐색"></nav>
+  <main class="content" id="main-content">
+    <section class="section" id="s00">
+      <h2><span class="num">00</span>이 장의 위치</h2>
+      <p><b>목표:</b> 04장 BRAM 5개와 09장 Dense를 6상태 FSM으로 연결해, 메모리에 적재한 입력·가중치로 추론하는 NPU 코어를 만듭니다.</p>
+      <table>
+        <thead><tr><th>구분</th><th>파일</th></tr></thead>
+        <tbody>
+          <tr><td>유지 (이전 장, 수정 없음)</td><td><ul><li><code>ch01/rtl/mac_core.v</code> <small>(01장)</small></li><li><code>ch04/rtl/bram_sync_buffer.v</code> <small>(04장)</small></li><li><code>ch05/rtl/fixed_quantizer.v</code> <small>(05장)</small></li><li><code>ch07/rtl/vector_dot_core.v</code> <small>(07장)</small></li><li><code>ch08/rtl/pe_array4.v</code> <small>(08장)</small></li><li><code>ch09/rtl/dense_layer4.v</code> <small>(09장)</small></li></ul></td></tr>
+          <tr><td>이번 장 작성</td><td><ul><li><code>ch10/rtl/npu_core.v</code></li></ul></td></tr>
+        </tbody>
+      </table>
+      <p>실습 순서: 01 구조 확인 → 02 준비 → 03 RTL 작성 → 04 테스트벤치·기준 모델 작성 → 05 시뮬레이션 → 06 결과 판정 → 08 보드 확인 → 09 인계.</p>
+    </section>
+    <section class="section" id="s01">
+      <h2><span class="num">01</span>구조도</h2>
+      <svg viewBox="0 0 980 386" role="img" aria-label="npu_core 실제 포트와 하위 모듈 구조">
+      <rect x="250" y="30" width="480" height="316" rx="10" fill="#fff" stroke="#4635b1" stroke-width="2"/>
+      <text x="490" y="54" font-size="18" font-weight="700" text-anchor="middle">npu_core</text>
+      <text x="490" y="72" font-size="13" text-anchor="middle" fill="#555">ch10/rtl/npu_core.v</text>
+      <text x="270" y="181" font-size="13" fill="#555">FSM 상태 (localparam 선언 순서)</text>
+      <text x="270" y="203" font-size="14" font-family="monospace">IDLE → LAUNCH → READ → WAIT_READ → SEND → WAIT_DONE</text>
+      <text x="222" y="64" font-size="14" font-family="monospace" text-anchor="end">clk</text>
+      <path d="M226 60 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 60 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="87" font-size="14" font-family="monospace" text-anchor="end">resetn</text>
+      <path d="M226 83 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 83 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="110" font-size="14" font-family="monospace" text-anchor="end">start_i</text>
+      <path d="M226 106 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 106 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="133" font-size="14" font-family="monospace" text-anchor="end">length_i[8:0]</text>
+      <path d="M226 129 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 129 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="156" font-size="14" font-family="monospace" text-anchor="end">biases_i[4*ACC_WIDTH-1:0]</text>
+      <path d="M226 152 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 152 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="179" font-size="14" font-family="monospace" text-anchor="end">x_wr_en</text>
+      <path d="M226 175 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 175 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="202" font-size="14" font-family="monospace" text-anchor="end">w_wr_en</text>
+      <path d="M226 198 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 198 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="225" font-size="14" font-family="monospace" text-anchor="end">x_wr_addr[5:0]</text>
+      <path d="M226 221 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 221 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="248" font-size="14" font-family="monospace" text-anchor="end">w_wr_addr[5:0]</text>
+      <path d="M226 244 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 244 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="271" font-size="14" font-family="monospace" text-anchor="end">w_neuron[1:0]</text>
+      <path d="M226 267 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 267 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="294" font-size="14" font-family="monospace" text-anchor="end">x_wr_data[DATA_WIDTH-1:0]</text>
+      <path d="M226 290 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 290 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="317" font-size="14" font-family="monospace" text-anchor="end">w_wr_data[DATA_WIDTH-1:0]</text>
+      <path d="M226 313 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 313 l-7 -4 v8 z" fill="#4635b1"/>
+      <path d="M730 60 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 60 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="758" y="65" font-size="14" font-family="monospace">load_ready_o</text>
+      <path d="M730 83 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 83 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="758" y="88" font-size="14" font-family="monospace">busy_o</text>
+      <path d="M730 106 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 106 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="758" y="111" font-size="14" font-family="monospace">done_o</text>
+      <path d="M730 129 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 129 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="758" y="134" font-size="14" font-family="monospace">error_o</text>
+      <path d="M730 152 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 152 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="758" y="157" font-size="14" font-family="monospace">result_o[4*DATA_WIDTH-1:0]</text>
+      <path d="M730 175 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 175 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="758" y="180" font-size="14" font-family="monospace">overflow_o[3:0]</text>
+      <rect x="270" y="88" width="440" height="28" rx="5" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="5 3"/>
+      <text x="282" y="107" font-size="14" font-family="monospace">bram_sync_buffer ×5  (inputs_mem · mem[4])</text>
+      <text x="698" y="107" font-size="12" text-anchor="end" fill="#4635b1">ch04 재사용</text>
+      <rect x="270" y="124" width="440" height="28" rx="5" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="5 3"/>
+      <text x="282" y="143" font-size="14" font-family="monospace">dense_layer4  (dense)</text>
+      <text x="698" y="143" font-size="12" text-anchor="end" fill="#4635b1">ch09 재사용</text>
+      <rect x="250" y="361" width="16" height="12" fill="#edeafa" stroke="#4635b1"/><text x="272" y="372" font-size="13">이번 장 신규</text>
+      <rect x="370" y="361" width="16" height="12" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="4 2"/><text x="392" y="372" font-size="13">이전 장 파일 재사용(수정 없음)</text>
+      <text x="600" y="372" font-size="13">왼쪽 = input · 오른쪽 = output (RTL 선언 그대로)</text>
+      </svg>
+      <p>포트 이름과 하위 인스턴스는 <code>ch10/rtl/npu_core.v</code> 선언에서 그대로 가져왔습니다.</p>
+    </section>
+    <section class="section" id="s02">
+      <h2><span class="num">02</span>준비</h2>
+      <ol>
+        <li>VS Code에서 저장소 루트(<code>amd_soc_npu/</code>)를 엽니다.</li>
+        <li>도구를 확인합니다.</li>
+      </ol>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 도구 확인</span></div>
+        <pre><code>sudo apt install -y iverilog python3 ripgrep   # 처음 한 번
+iverilog -V 2&gt;&amp;1 | head -1      # Icarus Verilog version 12.0 이상
+python3 --version</code></pre></div>
+      <ol start="3"><li>00절 '유지' 파일이 이전 장 결과 그대로 있는지 확인합니다.</li></ol>
+    </section>
+    <section class="section" id="s03">
+      <h2><span class="num">03</span>RTL 작성</h2>
+      <p>아래 파일을 경로 그대로 만들고 전체 코드를 입력합니다.</p>
+      <div class="codeblock">
+        <div class="codebar"><span>ch10/rtl/npu_core.v · verilog</span></div>
+        <pre><code class="language-verilog">`timescale 1ns/1ps
+module npu_core #(parameter integer DATA_WIDTH=16,ACC_WIDTH=40)(
+    input wire clk,resetn,start_i,
+    input wire [8:0] length_i,
+    input wire [4*ACC_WIDTH-1:0] biases_i,
+    input wire x_wr_en,w_wr_en,
+    input wire [5:0] x_wr_addr,w_wr_addr,
+    input wire [1:0] w_neuron,
+    input wire signed [DATA_WIDTH-1:0] x_wr_data,w_wr_data,
+    output wire load_ready_o,
+    output reg busy_o,done_o,error_o,
+    output reg [4*DATA_WIDTH-1:0] result_o,
+    output reg [3:0] overflow_o
+);
+    localparam IDLE=0,LAUNCH=1,READ=2,WAIT_READ=3,SEND=4,WAIT_DONE=5;
+    reg [2:0] state;
+    reg [8:0] length_q;
+    reg [5:0] index_q;
+    reg [4*ACC_WIDTH-1:0] biases_q;
+    wire rd_en=state==READ;
+    wire signed [DATA_WIDTH-1:0] x_data;
+    wire x_valid;
+    wire [4*DATA_WIDTH-1:0] w_data;
+    wire [3:0] w_valid;
+    wire dense_ready,dense_done,dense_error;
+    wire [4*DATA_WIDTH-1:0] dense_result;
+    wire [3:0] dense_overflow;
+    assign load_ready_o=resetn &amp;&amp; !busy_o;
+    bram_sync_buffer #(.DATA_WIDTH(DATA_WIDTH),.ADDR_WIDTH(6)) inputs_mem
+      (.clk(clk),.resetn(resetn),.wr_en(x_wr_en &amp;&amp; load_ready_o),.wr_addr(x_wr_addr),.wr_data(x_wr_data),
+       .rd_en(rd_en),.rd_addr(index_q),.rd_data(x_data),.rd_valid(x_valid));
+    genvar g;
+    generate for(g=0;g&lt;4;g=g+1)begin: weights_mem
+        bram_sync_buffer #(.DATA_WIDTH(DATA_WIDTH),.ADDR_WIDTH(6)) mem
+          (.clk(clk),.resetn(resetn),.wr_en(w_wr_en &amp;&amp; load_ready_o &amp;&amp; w_neuron==g),
+           .wr_addr(w_wr_addr),.wr_data(w_wr_data),.rd_en(rd_en),.rd_addr(index_q),
+           .rd_data(w_data[g*DATA_WIDTH+:DATA_WIDTH]),.rd_valid(w_valid[g]));
+    end endgenerate
+    dense_layer4 #(.DATA_WIDTH(DATA_WIDTH),.ACC_WIDTH(ACC_WIDTH)) dense
+      (.clk(clk),.resetn(resetn),.start_i(state==LAUNCH),.length_i(length_q),
+       .valid_i(state==SEND),.x_i(x_data),.weights_i(w_data),.biases_i(biases_q),
+       .ready_o(dense_ready),.busy_o(),.done_o(dense_done),.error_o(dense_error),
+       .result_o(dense_result),.overflow_o(dense_overflow));
+    always @(posedge clk)begin
+        if(!resetn)begin
+            state&lt;=IDLE;busy_o&lt;=0;done_o&lt;=0;error_o&lt;=0;result_o&lt;=0;overflow_o&lt;=0;
+            index_q&lt;=0;length_q&lt;=0;biases_q&lt;=0;
+        end else begin
+            done_o&lt;=0;error_o&lt;=0;
+            case(state)
+                IDLE: if(start_i)begin
+                    if(length_i&gt;64 || x_wr_en || w_wr_en)error_o&lt;=1;
+                    else begin
+                        length_q&lt;=length_i;biases_q&lt;=biases_i;index_q&lt;=0;busy_o&lt;=1;state&lt;=LAUNCH;
+                    end
+                end
+                LAUNCH: if(length_q==0)state&lt;=WAIT_DONE;else state&lt;=READ;
+                READ: state&lt;=WAIT_READ;
+                WAIT_READ: begin
+                    // 메모리 출력과 Valid가 정렬된 에지를 확인한 뒤 전송한다.
+                    if(x_valid &amp;&amp; (&amp;w_valid))state&lt;=SEND;
+                    else begin state&lt;=IDLE;busy_o&lt;=0;error_o&lt;=1;end
+                end
+                SEND: if(dense_ready)begin
+                    if({3'b0,index_q}+9'd1==length_q)state&lt;=WAIT_DONE;
+                    else begin index_q&lt;=index_q+1'b1;state&lt;=READ;end
+                end
+                WAIT_DONE: if(dense_done)begin
+                    result_o&lt;=dense_result;overflow_o&lt;=dense_overflow;busy_o&lt;=0;done_o&lt;=1;state&lt;=IDLE;
+                end
+                default: begin state&lt;=IDLE;busy_o&lt;=0;error_o&lt;=1;end
+            endcase
+            if(dense_error)begin state&lt;=IDLE;busy_o&lt;=0;error_o&lt;=1;end
+        end
+    end
+endmodule</code></pre>
+      </div>
+    </section>
+    <section class="section" id="s04">
+      <h2><span class="num">04</span>테스트벤치·기준 모델 작성</h2>
+      <p>테스트벤치는 출력을 자동 판정합니다. 기준 모델(Python)은 시험 벡터와 정답을 만듭니다.</p>
+      <div class="codeblock">
+        <div class="codebar"><span>ch10/tb/tb_npu_core.sv · systemverilog</span></div>
+        <pre><code class="language-systemverilog">`timescale 1ns/1ps
+module tb_npu_core;
+    parameter DW=16,AW=40;
+    reg clk=0,rn=0,start=0,xwe=0,wwe=0;
+    reg[8:0]len=0;reg[5:0]xa=0,wa=0;reg[1:0]neuron=0;
+    reg signed[DW-1:0]xd=0,wd=0;
+    reg[4*AW-1:0]biases=0;
+    wire ready,busy,done,error;wire[4*DW-1:0]result;wire[3:0]overflow;
+    npu_core #(.DATA_WIDTH(DW),.ACC_WIDTH(AW)) dut(.clk(clk),.resetn(rn),.start_i(start),.length_i(len),
+      .biases_i(biases),.x_wr_en(xwe),.w_wr_en(wwe),.x_wr_addr(xa),.w_wr_addr(wa),.w_neuron(neuron),
+      .x_wr_data(xd),.w_wr_data(wd),.load_ready_o(ready),.busy_o(busy),.done_o(done),.error_o(error),
+      .result_o(result),.overflow_o(overflow));
+    always #5 clk=~clk;
+    integer f,o,n,c=0,k,i,t,run,xi,ws[0:3],expected[0:3],em;
+    reg signed[AW-1:0]bs[0:3];
+    reg signed[DW-1:0]xm[0:63],wm[0:3][0:63];
+    string vp,ap;
+    initial begin
+        if(!$value$plusargs("VECTORS=%s",vp)||!$value$plusargs("ACTUAL=%s",ap))$fatal(1,"Paths");
+        f=$fopen(vp,"r");o=$fopen(ap,"w");if(!f||!o)$fatal(1,"Open");
+        repeat(2)@(negedge clk);rn=1;start=1;len=65;
+        @(posedge clk);#1;if(!error||busy)$fatal(1,"Length guard");
+        @(negedge clk);start=0;
+        while(!$feof(f))begin
+            if($fscanf(f,"%d %d %d %d %d %d %d %d %d %d\n",n,bs[0],bs[1],bs[2],bs[3],
+              expected[0],expected[1],expected[2],expected[3],em)!=10)$fatal(1,"Header");
+            for(k=0;k&lt;n;k=k+1)begin
+                if($fscanf(f,"%d %d %d %d %d\n",xi,ws[0],ws[1],ws[2],ws[3])!=5)$fatal(1,"Data");
+                xm[k]=xi;for(i=0;i&lt;4;i=i+1)wm[i][k]=ws[i];
+            end
+            // 역순 주소로 적재하여 전송 순서와 메모리 주소 순서를 분리한다.
+            for(k=n-1;k&gt;=0;k=k-1)for(i=0;i&lt;4;i=i+1)begin
+                @(negedge clk);if(!ready)$fatal(1,"Load ready");
+                xwe=(i==0);xa=k;xd=xm[k];wwe=1;wa=k;wd=wm[i][k];neuron=i;
+                @(posedge clk);#1;
+            end
+            @(negedge clk);xwe=0;wwe=0;
+            for(run=1;run&lt;=2;run=run+1)begin
+                if(run==2)begin
+                    // 계산을 시작해 중간에 취소한 뒤 재적재 없이 다시 실행한다.
+                    @(negedge clk);start=1;len=n;biases=0;
+                    @(negedge clk);start=0;
+                    repeat(3)@(negedge clk);rn=0;
+                    @(posedge clk);#1;if(busy||done||ready||result!==0)$fatal(1,"Reset cancel");
+                    @(negedge clk);rn=1;
+                end
+                @(negedge clk);start=1;len=n;
+                for(i=0;i&lt;4;i=i+1)biases[i*AW+:AW]=bs[i];
+                @(posedge clk);#1;if(!busy||done||ready)$fatal(1,"Start");
+                @(negedge clk);start=0;biases=0;t=0;
+                while(!done)begin
+                    @(negedge clk);
+                    // busy 중 주소0 오염 요청은 차단되어야 한다.
+                    xwe=(t==2);wwe=(t==2);start=(t==2);xa=0;wa=0;xd=99;wd=99;neuron=0;
+                    @(posedge clk);#1;t=t+1;
+                    if(error)$fatal(1,"Core error state=%0d",dut.state);
+                    if(t&gt;1000)$fatal(1,"Timeout inference");
+                end
+                if(busy||!ready||overflow!==em[3:0])$fatal(1,"Flags");
+                for(i=0;i&lt;4;i=i+1)if($signed(result[i*DW+:DW])!==expected[i])$fatal(1,"Result dataset=%0d neuron=%0d",c+1,i);
+                $fdisplay(o,"%0d %0d %0d %0d %0d %0d %0d",c+1,run,$signed(result[0*DW+:DW]),
+                  $signed(result[1*DW+:DW]),$signed(result[2*DW+:DW]),$signed(result[3*DW+:DW]),overflow);
+                @(negedge clk);start=0;xwe=0;wwe=0;
+                @(posedge clk);#1;if(done||busy)$fatal(1,"Done pulse");
+            end
+            c=c+1;
+        end
+        if(!c)$fatal(1,"Empty");$fclose(o);$display("RTL_SIM_PASS NPU INT%0d/%0d datasets=%0d inferences=%0d",DW,AW,c,2*c);$finish;
+    end
+    initial begin #10000000;$fatal(1,"Timeout");end
+endmodule</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>ch10/reference/npu_reference.py · python</span></div>
+        <pre><code class="language-python">import argparse
+import random
+import sys
+from pathlib import Path
+sys.path.insert(0,str(Path(__file__).resolve().parents[2]/'ch09/reference'))
+from dense_reference import dense,compare
+
+
+def infer(x_mem,w_mem,length,bias,dw,aw):
+    # 주소 순으로 읽은 이미지를 전체 층 모델에 전달한다. 미적재 주소는 KeyError다.
+    x=[x_mem[k] for k in range(length)]
+    w=[[w_mem[i,k] for k in range(length)] for i in range(4)]
+    return dense(x,w,bias,dw,aw)
+
+
+def generate(dw,aw,out):
+    assert infer({0:2},{(i,0):i-2 for i in range(4)},1,[0]*4,dw,aw)[0]==[0,0,0,2]
+    rng=random.Random(310);sizes=[0,1,4,16,64]+[rng.randrange(65) for _ in range(17)]
+    with (out/'vectors.txt').open('w') as vf,(out/'expected.txt').open('w') as ef:
+        for c,n in enumerate(sizes,1):
+            xm={k:rng.randint(-64,63) for k in range(n)}
+            wm={(i,k):rng.randint(-16,15) for i in range(4) for k in range(n)}
+            bias=[rng.randint(-1000,1000) for _ in range(4)]
+            if c==1:bias=[-7,7,-(1&lt;&lt;(aw-1)),(1&lt;&lt;(aw-1))-1]
+            vals,mask=infer(xm,wm,n,bias,dw,aw)
+            vf.write(' '.join(map(str,(n,*bias,*vals,mask)))+'\n')
+            for k in range(n):vf.write(' '.join(map(str,(xm[k],*(wm[i,k] for i in range(4)))))+'\n')
+            for run in (1,2):ef.write(' '.join(map(str,(c,run,*vals,mask)))+'\n')
+    print(f'PYTHON_NPU_SELF_TEST_PASS INT{dw}/{aw} datasets={len(sizes)} inferences={len(sizes)*2} seed=310')
+
+
+if __name__=='__main__':
+    p=argparse.ArgumentParser();p.add_argument('--dw',type=int,default=16);p.add_argument('--aw',type=int,default=40)
+    p.add_argument('--out',type=Path);p.add_argument('--actual',type=Path);a=p.parse_args()
+    if a.actual:compare(a.out/'expected.txt',a.actual)
+    else:generate(a.dw,a.aw,a.out)</code></pre>
+      </div>
+    </section>
+    <section class="section" id="s05">
+      <h2><span class="num">05</span>시뮬레이션 실행</h2>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 저장소 루트에서 실행</span></div>
+        <pre><code>bash ch10/scripts/run_sim.sh</code></pre></div>
+      <p>기대 출력 (Icarus Verilog 12.0 · 2026-11-18 실제 실행 로그 발췌):</p>
+      <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
+        <pre><code>PYTHON_NPU_SELF_TEST_PASS INT16/40 datasets=22 inferences=44 seed=310
+RTL_SIM_PASS NPU INT16/40 datasets=22 inferences=44
+PYTHON_RTL_COMPARE_PASS cycles=44
+PYTHON_NPU_SELF_TEST_PASS INT8/32 datasets=22 inferences=44 seed=310
+RTL_SIM_PASS NPU INT8/32 datasets=22 inferences=44
+PYTHON_RTL_COMPARE_PASS cycles=44</code></pre></div>
+    </section>
+    <section class="section" id="s06">
+      <h2><span class="num">06</span>결과 판정</h2>
+      <table>
+        <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
+        <tbody><tr><td><code>RTL_SIM_PASS NPU INT16/40 datasets=22 inferences=44</code></td><td>22개 데이터셋·44회 추론 통과</td></tr><tr><td><code>RTL_SIM_PASS NPU INT8/32 datasets=22 inferences=44</code></td><td>INT8 설정 통과</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS</code></td><td>RTL 출력 파일과 Python 기준값이 모든 사이클에서 일치</td></tr></tbody>
+      </table>
+      <p><b>실패 시:</b> TB의 <code>$fatal</code> 메시지에 표시된 cycle 번호와 기대값/실제값을 확인하고, 03절 코드와 한 줄씩 대조합니다. 하나라도 실패하면 다음 장으로 넘어가지 않습니다.</p>
+    </section>
+    <section class="section" id="s07">
+      <h2><span class="num">07</span>코드 읽기 포인트</h2>
+      <table>
+        <thead><tr><th>위치</th><th>내용</th></tr></thead>
+        <tbody><tr><td>load_ready_o</td><td><code>resetn &amp;&amp; !busy_o</code>. 추론 중에는 쓰기 요청이 거부됩니다. start와 쓰기가 겹쳐 들어오면 error_o를 발생합니다.</td></tr>
+<tr><td>FSM 흐름</td><td>LAUNCH 상태에서 <code>length_q=0</code>이면 즉시 WAIT_DONE으로 건너뜁니다. WAIT_READ에서 BRAM Valid가 1이 아니면 에러로 복귀합니다.</td></tr>
+<tr><td>BRAM 타이밍</td><td>READ→WAIT_READ로 이동할 때 BRAM 읽기 요청이 발생합니다. BRAM은 1클록 레이턴시이므로 WAIT_READ에서 Valid가 도착합니다. Valid 확인 후 SEND로 전환하면 그 에지에서 Dense가 데이터를 수락합니다.</td></tr></tbody>
+      </table>
+    </section>
+    <section class="section" id="s08">
+      <h2><span class="num">08</span>보드 확인</h2>
+      <p>이 장은 단위 RTL 시험까지 진행합니다. 이 장 모듈만으로는 Basys3 핀 제약(XDC)이 없으므로 비트스트림을 만들지 않습니다. 보드 확인은 <a href="ch12_integrated_npu_v05.html#s08">12장 · 08 보드 확인</a>에서 통합 Top으로 진행합니다.</p>
+    </section>
+    <section class="section" id="s09">
+      <h2><span class="num">09</span>검증 현황·인계</h2>
+      <table>
+        <thead><tr><th>다음 장으로 넘기는 파일</th><th>사용처</th></tr></thead>
+        <tbody><tr><td><code>ch10/rtl/npu_core.v</code></td><td>직접 인스턴스 없음 — 12장 npu_engine4가 같은 BRAM·4뉴런 구조를 DSP 레인(02장)으로 다시 구성</td></tr></tbody>
+      </table>
+      <p>검증 게이트 (RTL 시뮬레이션 결과는 Icarus Verilog 12.0 · 2026-11-18 실행, 증거 <code>ch10/validation/</code>):</p>
+      <div class="gate-row">
+        <div class="gate pass">
+          <b>HTML_PASS</b>
+          <span>v05 · 정적 검사</span>
+        </div>
+        <div class="gate pass">
+          <b>HOST_MODEL_PASS</b>
+          <span>PYTHON_NPU_SELF_TEST_PASS seed=310</span>
+        </div>
+        <div class="gate pass">
+          <b>RTL_SIM_PASS</b>
+          <span>RTL_SIM_PASS NPU INT16/40 · INT8/32 inferences=44</span>
+        </div>
+        <div class="gate todo">
+          <b>SYNTH_TIMING_PASS</b>
+          <span>⚠ 미검증 · Vivado 미실행</span>
+        </div>
+        <div class="gate todo">
+          <b>BOARD_PASS</b>
+          <span>⚠ 미검증 · 실물 Basys3 미확인</span>
+        </div>
+      </div>
+    </section>
+    <div class="chapter-links" id="chapter-links"></div>
+  </main>
+</div>
+<script>
+window.COURSE={
+ "title": "Basys3 소형 NPU 실습 (고도화판)",
+ "chapters": [
+  {
+   "id": "ch00",
+   "number": 0,
+   "title": "UART Echo",
+   "file": "ch00_uart_echo_v05.html"
+  },
+  {
+   "id": "ch01",
+   "number": 1,
+   "title": "DSP 추론 MAC 누산",
+   "file": "ch01_mac_v05.html"
+  },
+  {
+   "id": "ch02",
+   "number": 2,
+   "title": "DSP48E1 타깃 곱셈",
+   "file": "ch02_dsp_v05.html"
+  },
+  {
+   "id": "ch03",
+   "number": 3,
+   "title": "MAC 2단계 파이프라인",
+   "file": "ch03_mac_pipeline_v05.html"
+  },
+  {
+   "id": "ch04",
+   "number": 4,
+   "title": "BRAM 동기 버퍼",
+   "file": "ch04_bram_v05.html"
+  },
+  {
+   "id": "ch05",
+   "number": 5,
+   "title": "Fixed-Point Quantizer",
+   "file": "ch05_fixed_v05.html"
+  },
+  {
+   "id": "ch06",
+   "number": 6,
+   "title": "INT8·INT16 정밀도 비교",
+   "file": "ch06_precision_v05.html"
+  },
+  {
+   "id": "ch07",
+   "number": 7,
+   "title": "벡터 내적",
+   "file": "ch07_vector_dot_v05.html"
+  },
+  {
+   "id": "ch08",
+   "number": 8,
+   "title": "4PE 병렬 어레이",
+   "file": "ch08_pe4_v05.html"
+  },
+  {
+   "id": "ch09",
+   "number": 9,
+   "title": "Dense 4뉴런 레이어",
+   "file": "ch09_dense_v05.html"
+  },
+  {
+   "id": "ch10",
+   "number": 10,
+   "title": "4뉴런 NPU Core",
+   "file": "ch10_npu_core_v05.html"
+  },
+  {
+   "id": "ch11",
+   "number": 11,
+   "title": "UART 모델 적재 컨트롤러",
+   "file": "ch11_uart_register_v05.html"
+  },
+  {
+   "id": "ch12",
+   "number": 12,
+   "title": "통합 NPU Top",
+   "file": "ch12_integrated_npu_v05.html"
+  }
+ ]
+};
+</script>
+<script defer src="assets/education/site.js"></script>
+</body>
+</html>
