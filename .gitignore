@@ -6,3 +6,4 @@ mini_npu/build/
 vivado*.log
 xsim.dir/
 __pycache__/
+data/
