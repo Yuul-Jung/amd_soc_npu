@@ -541,7 +541,7 @@ vivado -mode batch -nojournal -source tools/vivado/ooc_timing.tcl -tclargs ch16
       </table></div>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>다음 장으로 넘기는 파일</th><th>사용처</th></tr></thead>
-        <tbody><tr><td><code>ch16/rtl/npu_argmax.v</code></td><td>17장 784원소 10분류, 27장 통합 시스템의 클래스 결정 (수정 금지)</td></tr><tr><td><code>ch16/rtl/npu_mlp_64_8_10.v</code></td><td>18장 정밀도 비교의 2층 경로, 19장 사이클 비교 대상</td></tr><tr><td><code>ch16/reference/mlp_reference.py</code></td><td>18장 기준 모델의 은닉 계산식</td></tr></tbody>
+        <tbody><tr><td><code>ch16/rtl/npu_argmax.v</code></td><td>17장 784원소 10분류(<code>npu_tiled_784</code>), 27장 통합 시스템의 클래스 결정 (수정 금지)</td></tr><tr><td><code>ch16/rtl/npu_mlp_64_8_10.v</code></td><td>18장 정밀도 비교의 2층 경로, 19장 사이클 비교 대상</td></tr><tr><td><code>ch16/reference/mlp_reference.py</code></td><td>18장 기준 모델의 은닉 계산식</td></tr></tbody>
       </table></div>
       <p>검증 게이트 (<code>ch16/validation/</code> 증거 파일 기준으로 자동 표시):</p>
       <div class="gate-row">
@@ -675,6 +675,12 @@ window.COURSE={
    "number": 16,
    "title": "2층 신경망 64→8→10",
    "file": "ch16_mlp_64_8_10_v02.html"
+  },
+  {
+   "id": "ch17",
+   "number": 17,
+   "title": "784원소 타일 실행",
+   "file": "ch17_tiled_784_v02.html"
   }
  ]
 };

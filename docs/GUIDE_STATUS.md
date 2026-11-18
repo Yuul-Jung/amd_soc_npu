@@ -23,7 +23,7 @@
 | 14 | 4PE 그룹·10개 출력 | [ch14_group10_v02.html](../ch14_group10_v02.html) | ✅ | ✅ | ⏳ | — | ⏳ |
 | 15 | Dense 64→10 공통 블록 | [ch15_dense_64x10_v02.html](../ch15_dense_64x10_v02.html) | ✅ | ✅ | ⏳ | — | ⏳ |
 | 16 | 2층 신경망 64→8→10 | [ch16_mlp_64_8_10_v02.html](../ch16_mlp_64_8_10_v02.html) | ✅ | ✅ | ⏳ | — | ⏳ |
-| 17 | 784픽셀 분할 누산 | chapter.json 대기 | | | | | |
+| 17 | 784원소 타일 실행 | [ch17_tiled_784_v02.html](../ch17_tiled_784_v02.html) | ✅ | ✅ | ⏳ | — | ⏳ |
 | 18 | INT8·INT16 정밀도 비교 | chapter.json 대기 | | | | | |
 | 19 | PE·BRAM 처리량 비교 | chapter.json 대기 | | | | | |
 | 20 | AXI4-Lite NPU 제어 IP | chapter.json 대기 | | | | | |

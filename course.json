@@ -145,8 +145,8 @@
       "id": "ch17",
       "number": 17,
       "title": "784픽셀 분할 누산",
-      "file": "ch17_mnist_784_tiling_v02.html",
-      "html_status": "TODO",
+      "file": "ch17_tiled_784_v02.html",
+      "html_status": "DONE",
       "rtl_status": "TODO"
     },
     {
