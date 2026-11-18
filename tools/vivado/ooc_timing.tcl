@@ -35,6 +35,7 @@ set designs {
     {ch19 npu_tiled_784_npe {ch01/rtl/mac_core.v ch04/rtl/bram_sync_buffer.v ch07/rtl/vector_dot_core.v ch16/rtl/npu_argmax.v ch19/rtl/npu_tiled_784_npe.v} {NPE=1}}
     {ch19 npu_tiled_784_npe {ch01/rtl/mac_core.v ch04/rtl/bram_sync_buffer.v ch07/rtl/vector_dot_core.v ch16/rtl/npu_argmax.v ch19/rtl/npu_tiled_784_npe.v} {NPE=4}}
     {ch19 npu_tiled_784_npe {ch01/rtl/mac_core.v ch04/rtl/bram_sync_buffer.v ch07/rtl/vector_dot_core.v ch16/rtl/npu_argmax.v ch19/rtl/npu_tiled_784_npe.v} {NPE=8}}
+    {ch20 npu_axi_lite {ch01/rtl/mac_core.v ch04/rtl/bram_sync_buffer.v ch07/rtl/vector_dot_core.v ch16/rtl/npu_argmax.v ch19/rtl/npu_tiled_784_npe.v ch20/rtl/npu_axi_lite.v}}
 }
 
 proc worst_slack {kind} {
@@ -65,7 +66,7 @@ foreach d $designs {
         foreach f $files { read_verilog [file join $root $f] }
         set xdc [file join $cdir ooc.xdc]
         set x [open $xdc w]
-        puts $x "create_clock -name clk -period $period \[get_ports clk\]"
+        puts $x "create_clock -name clk -period $period \[get_ports -quiet {clk s_axi_aclk}\]"
         close $x
         read_xdc $xdc
         synth_design -top $top -part $part -mode out_of_context {*}$gargs
