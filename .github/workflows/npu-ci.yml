@@ -21,7 +21,7 @@ jobs:
         run: python3 tools/guide/build_guides.py --check
 
   rtl-sim-ch00-ch12:
-    name: RTL 시뮬레이션 ch00~ch30
+    name: RTL 시뮬레이션 ch00~ch31
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -89,6 +89,8 @@ jobs:
         run: bash ch29/scripts/run_sim.sh
       - name: Run ch30 Motor interlock
         run: bash ch30/scripts/run_sim.sh
+      - name: Run ch31 Secure frames
+        run: bash ch31/scripts/run_sim.sh
 
   host-model:
     name: Python 기준 정수 모델 단위 시험
