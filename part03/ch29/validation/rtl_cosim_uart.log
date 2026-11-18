@@ -1,0 +1,245 @@
+P3_SENSOR READY model=18496ca4 model_ok=1 feat=6 classes=3 bias_rc=0
+DISP fnd=000b3000 led=8008
+P3_SENSOR READY model=18496ca4 model_ok=1 feat=6 classes=3 junk=0
+STATE src=LINK_TIMEOUT seq=-1 guard=LINK fmask=0 umask=8 feat=- npu=-1 cpu=-1 match=-1 scores=- cand=3 state=3 latch=0 cnt=0 junk=0
+DISP fnd=000f3800 led=8008
+STATE src=LINK_TIMEOUT seq=-1 guard=LINK fmask=0 umask=8 feat=- npu=-1 cpu=-1 match=-1 scores=- cand=3 state=3 latch=0 cnt=0 junk=0
+DISP fnd=000f3800 led=8008
+STATE src=LINK_TIMEOUT seq=-1 guard=LINK fmask=0 umask=8 feat=- npu=-1 cpu=-1 match=-1 scores=- cand=3 state=3 latch=0 cnt=0 junk=0
+DISP fnd=000f3800 led=8008
+STATE src=LINK_TIMEOUT seq=-1 guard=LINK fmask=0 umask=8 feat=- npu=-1 cpu=-1 match=-1 scores=- cand=3 state=3 latch=0 cnt=0 junk=0
+DISP fnd=000f3800 led=8008
+STATE src=LINK_TIMEOUT seq=-1 guard=LINK fmask=0 umask=8 feat=- npu=-1 cpu=-1 match=-1 scores=- cand=3 state=3 latch=0 cnt=0 junk=0
+DISP fnd=000f3800 led=8008
+STATE src=LINK_TIMEOUT seq=-1 guard=LINK fmask=0 umask=8 feat=- npu=-1 cpu=-1 match=-1 scores=- cand=3 state=3 latch=0 cnt=0 junk=0
+DISP fnd=000f3800 led=8008
+STATE src=LINK_TIMEOUT seq=-1 guard=LINK fmask=0 umask=8 feat=- npu=-1 cpu=-1 match=-1 scores=- cand=3 state=3 latch=0 cnt=0 junk=0
+DISP fnd=000f3800 led=8008
+STATE src=LINK_TIMEOUT seq=-1 guard=LINK fmask=0 umask=8 feat=- npu=-1 cpu=-1 match=-1 scores=- cand=3 state=3 latch=0 cnt=0 junk=0
+DISP fnd=000f3800 led=8008
+STATE src=LINK_TIMEOUT seq=-1 guard=LINK fmask=0 umask=8 feat=- npu=-1 cpu=-1 match=-1 scores=- cand=3 state=3 latch=0 cnt=0 junk=0
+DISP fnd=000f3800 led=8008
+STATE src=LINK_TIMEOUT seq=-1 guard=LINK fmask=0 umask=8 feat=- npu=-1 cpu=-1 match=-1 scores=- cand=3 state=3 latch=0 cnt=0 junk=0
+DISP fnd=000f3800 led=8008
+STATE src=LINK_TIMEOUT seq=-1 guard=LINK fmask=0 umask=8 feat=- npu=-1 cpu=-1 match=-1 scores=- cand=3 state=3 latch=0 cnt=0 junk=0
+DISP fnd=000f3800 led=8008
+STATE src=LINK_TIMEOUT seq=-1 guard=LINK fmask=0 umask=8 feat=- npu=-1 cpu=-1 match=-1 scores=- cand=3 state=3 latch=0 cnt=0 junk=0
+DISP fnd=000f3800 led=8008
+STATE src=LINK_TIMEOUT seq=-1 guard=LINK fmask=0 umask=8 feat=- npu=-1 cpu=-1 match=-1 scores=- cand=3 state=3 latch=0 cnt=0 junk=0
+DISP fnd=000f3800 led=8008
+STATE src=LINK_TIMEOUT seq=-1 guard=LINK fmask=0 umask=8 feat=- npu=-1 cpu=-1 match=-1 scores=- cand=3 state=3 latch=0 cnt=0 junk=0
+DISP fnd=000f3800 led=8008
+STATE src=FRAME seq=100 guard=OK fmask=0 umask=0 feat=0,0,0,0,0,0 npu=0 cpu=0 match=1 scores=3219,1390,-4609 cand=0 state=3 latch=0 cnt=1 junk=0
+DISP fnd=000f3064 led=8008
+STATE src=FRAME seq=101 guard=OK fmask=0 umask=0 feat=0,0,0,0,0,0 npu=0 cpu=0 match=1 scores=3219,1390,-4609 cand=0 state=3 latch=0 cnt=2 junk=0
+DISP fnd=000f3065 led=8008
+STATE src=FRAME seq=102 guard=OK fmask=0 umask=0 feat=0,0,0,0,0,0 npu=0 cpu=0 match=1 scores=3219,1390,-4609 cand=0 state=0 latch=0 cnt=0 junk=0
+DISP fnd=000f0066 led=0001
+STATE src=FRAME seq=103 guard=OK fmask=0 umask=0 feat=0,0,0,0,38,45 npu=1 cpu=1 match=1 scores=-5367,2746,2621 cand=1 state=1 latch=0 cnt=0 junk=0
+DISP fnd=000f1067 led=8002
+STATE src=FRAME seq=104 guard=OK fmask=0 umask=0 feat=14,0,0,0,0,0 npu=0 cpu=0 match=1 scores=1679,1544,-3223 cand=0 state=1 latch=0 cnt=1 junk=0
+DISP fnd=000f1068 led=8002
+STATE src=FRAME seq=105 guard=OK fmask=0 umask=0 feat=0,0,0,0,0,0 npu=0 cpu=0 match=1 scores=3219,1390,-4609 cand=0 state=1 latch=0 cnt=2 junk=0
+DISP fnd=000f1069 led=8002
+STATE src=FRAME seq=106 guard=OK fmask=0 umask=0 feat=0,0,0,0,0,0 npu=0 cpu=0 match=1 scores=3219,1390,-4609 cand=0 state=0 latch=0 cnt=0 junk=0
+DISP fnd=000f006a led=0001
+STATE src=FRAME seq=107 guard=OK fmask=0 umask=0 feat=92,0,0,0,0,0 npu=2 cpu=2 match=1 scores=-6901,2402,4499 cand=2 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f206b led=a004
+STATE src=FRAME seq=108 guard=OK fmask=0 umask=0 feat=0,0,0,0,0,0 npu=0 cpu=0 match=1 scores=3219,1390,-4609 cand=0 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f206c led=a004
+STATE src=FRAME seq=109 guard=OK fmask=0 umask=0 feat=0,0,0,0,0,0 npu=0 cpu=0 match=1 scores=3219,1390,-4609 cand=0 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f206d led=a004
+STATE src=FRAME seq=110 guard=OK fmask=0 umask=0 feat=0,0,0,0,0,0 npu=0 cpu=0 match=1 scores=3219,1390,-4609 cand=0 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f206e led=a004
+ACK ok=1 state=2 latch=0
+DISP fnd=000b2000 led=8004
+STATE src=FRAME seq=111 guard=OK fmask=0 umask=0 feat=0,0,0,0,0,0 npu=0 cpu=0 match=1 scores=3219,1390,-4609 cand=0 state=2 latch=0 cnt=1 junk=0
+DISP fnd=000f206f led=8004
+STATE src=FRAME seq=112 guard=OK fmask=0 umask=0 feat=0,0,0,0,0,0 npu=0 cpu=0 match=1 scores=3219,1390,-4609 cand=0 state=2 latch=0 cnt=2 junk=0
+DISP fnd=000f2070 led=8004
+STATE src=FRAME seq=113 guard=OK fmask=0 umask=0 feat=0,0,0,0,0,0 npu=0 cpu=0 match=1 scores=3219,1390,-4609 cand=0 state=0 latch=0 cnt=0 junk=0
+DISP fnd=000f0071 led=0001
+ACK ok=0 state=0 latch=0
+DISP fnd=000b0000 led=0001
+STATE src=FRAME seq=114 guard=UNKNOWN fmask=0 umask=1 feat=- npu=-1 cpu=-1 match=-1 scores=- cand=3 state=3 latch=0 cnt=0 junk=0
+DISP fnd=000f3172 led=8008
+STATE src=FRAME seq=115 guard=OK fmask=0 umask=0 feat=0,15,0,0,0,0 npu=1 cpu=1 match=1 scores=1314,1780,-3094 cand=1 state=3 latch=0 cnt=1 junk=0
+DISP fnd=000f3073 led=8008
+STATE src=FRAME seq=116 guard=OK fmask=0 umask=0 feat=0,0,0,0,0,0 npu=0 cpu=0 match=1 scores=3219,1390,-4609 cand=0 state=3 latch=0 cnt=2 junk=0
+DISP fnd=000f3074 led=8008
+STATE src=FRAME seq=117 guard=OK fmask=0 umask=0 feat=0,0,0,0,0,0 npu=0 cpu=0 match=1 scores=3219,1390,-4609 cand=0 state=1 latch=0 cnt=0 junk=0
+DISP fnd=000f1075 led=8002
+STATE src=FRAME seq=118 guard=UNKNOWN fmask=0 umask=4 feat=- npu=-1 cpu=-1 match=-1 scores=- cand=3 state=3 latch=0 cnt=0 junk=0
+DISP fnd=000f3476 led=8008
+STATE src=FRAME seq=119 guard=UNKNOWN fmask=0 umask=4 feat=- npu=-1 cpu=-1 match=-1 scores=- cand=3 state=3 latch=0 cnt=0 junk=0
+DISP fnd=000f3477 led=8008
+STATE src=FRAME seq=120 guard=OK fmask=0 umask=0 feat=0,0,0,0,0,0 npu=0 cpu=0 match=1 scores=3219,1390,-4609 cand=0 state=3 latch=0 cnt=1 junk=0
+DISP fnd=000f3078 led=8008
+STATE src=FRAME seq=121 guard=OK fmask=0 umask=0 feat=0,0,0,0,0,0 npu=0 cpu=0 match=1 scores=3219,1390,-4609 cand=0 state=3 latch=0 cnt=2 junk=0
+DISP fnd=000f3079 led=8008
+STATE src=FRAME seq=122 guard=OK fmask=0 umask=0 feat=0,0,0,0,0,0 npu=0 cpu=0 match=1 scores=3219,1390,-4609 cand=0 state=0 latch=0 cnt=0 junk=0
+DISP fnd=000f007a led=0001
+STATE src=FRAME seq=123 guard=FAULT fmask=1 umask=0 feat=- npu=-1 cpu=-1 match=-1 scores=- cand=2 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f217b led=a004
+ACK ok=1 state=2 latch=0
+DISP fnd=000b2000 led=8004
+STATE src=FRAME seq=124 guard=FAULT fmask=2 umask=0 feat=- npu=-1 cpu=-1 match=-1 scores=- cand=2 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f227c led=a004
+ACK ok=1 state=2 latch=0
+DISP fnd=000b2000 led=8004
+STATE src=FRAME seq=125 guard=FAULT fmask=2 umask=0 feat=- npu=-1 cpu=-1 match=-1 scores=- cand=2 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f227d led=a004
+ACK ok=1 state=2 latch=0
+DISP fnd=000b2000 led=8004
+STATE src=FRAME seq=126 guard=FAULT fmask=4 umask=0 feat=- npu=-1 cpu=-1 match=-1 scores=- cand=2 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f247e led=a004
+ACK ok=1 state=2 latch=0
+DISP fnd=000b2000 led=8004
+STATE src=FRAME seq=127 guard=FAULT fmask=4 umask=3 feat=- npu=-1 cpu=-1 match=-1 scores=- cand=2 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f277f led=a004
+ACK ok=1 state=2 latch=0
+DISP fnd=000b2000 led=8004
+STATE src=FRAME seq=128 guard=OK fmask=0 umask=0 feat=0,0,0,0,0,0 npu=0 cpu=0 match=1 scores=3219,1390,-4609 cand=0 state=2 latch=0 cnt=1 junk=0
+DISP fnd=000f2080 led=8004
+STATE src=FRAME seq=129 guard=OK fmask=0 umask=0 feat=0,0,0,0,0,0 npu=0 cpu=0 match=1 scores=3219,1390,-4609 cand=0 state=2 latch=0 cnt=2 junk=0
+DISP fnd=000f2081 led=8004
+STATE src=FRAME seq=130 guard=OK fmask=0 umask=0 feat=0,0,0,0,0,0 npu=0 cpu=0 match=1 scores=3219,1390,-4609 cand=0 state=0 latch=0 cnt=0 junk=0
+DISP fnd=000f0082 led=0001
+STATE src=FRAME seq=2000 guard=OK fmask=0 umask=0 feat=0,0,0,0,0,0 npu=0 cpu=0 match=1 scores=3219,1390,-4609 cand=0 state=0 latch=0 cnt=0 junk=0
+DISP fnd=000f00d0 led=0001
+STATE src=FRAME seq=2001 guard=OK fmask=0 umask=0 feat=0,0,0,0,38,45 npu=1 cpu=1 match=1 scores=-5367,2746,2621 cand=1 state=1 latch=0 cnt=0 junk=0
+DISP fnd=000f10d1 led=8002
+STATE src=FRAME seq=2002 guard=OK fmask=0 umask=0 feat=92,0,0,0,0,0 npu=2 cpu=2 match=1 scores=-6901,2402,4499 cand=2 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f20d2 led=a004
+STATE src=FRAME seq=2003 guard=OK fmask=0 umask=0 feat=0,0,0,0,0,0 npu=0 cpu=0 match=1 scores=3219,1390,-4609 cand=0 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f20d3 led=a004
+STATE src=FRAME seq=2004 guard=OK fmask=0 umask=0 feat=0,15,0,0,0,0 npu=1 cpu=1 match=1 scores=1314,1780,-3094 cand=1 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f20d4 led=a004
+STATE src=FRAME seq=2005 guard=OK fmask=0 umask=0 feat=50,91,0,0,0,0 npu=2 cpu=2 match=1 scores=-13838,4306,9532 cand=2 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f20d5 led=a004
+STATE src=FRAME seq=2006 guard=OK fmask=0 umask=0 feat=0,0,0,0,0,0 npu=0 cpu=0 match=1 scores=3219,1390,-4609 cand=0 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f20d6 led=a004
+STATE src=FRAME seq=2007 guard=OK fmask=0 umask=0 feat=14,0,0,0,0,0 npu=0 cpu=0 match=1 scores=1679,1544,-3223 cand=0 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f20d7 led=a004
+STATE src=FRAME seq=2008 guard=OK fmask=0 umask=0 feat=54,89,0,0,0,0 npu=2 cpu=2 match=1 scores=-14024,4298,9726 cand=2 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f20d8 led=a004
+STATE src=FRAME seq=2009 guard=OK fmask=0 umask=0 feat=0,0,0,0,0,0 npu=0 cpu=0 match=1 scores=3219,1390,-4609 cand=0 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f20d9 led=a004
+STATE src=FRAME seq=2010 guard=OK fmask=0 umask=0 feat=0,19,0,0,0,0 npu=1 cpu=1 match=1 scores=806,1884,-2690 cand=1 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f20da led=a004
+STATE src=FRAME seq=2011 guard=OK fmask=0 umask=0 feat=0,0,0,0,35,96 npu=2 cpu=2 match=1 scores=-9708,3730,5978 cand=2 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f20db led=a004
+STATE src=FRAME seq=2012 guard=OK fmask=0 umask=0 feat=0,0,0,0,0,0 npu=0 cpu=0 match=1 scores=3219,1390,-4609 cand=0 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f20dc led=a004
+STATE src=FRAME seq=2013 guard=OK fmask=0 umask=0 feat=0,29,0,0,0,0 npu=1 cpu=1 match=1 scores=-464,2144,-1680 cand=1 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f20dd led=a004
+STATE src=FRAME seq=2014 guard=OK fmask=0 umask=0 feat=16,104,0,0,69,0 npu=2 cpu=2 match=1 scores=-19822,5098,14724 cand=2 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f20de led=a004
+STATE src=FRAME seq=2015 guard=OK fmask=0 umask=0 feat=0,0,0,0,0,0 npu=0 cpu=0 match=1 scores=3219,1390,-4609 cand=0 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f20df led=a004
+STATE src=FRAME seq=2016 guard=OK fmask=0 umask=0 feat=0,0,0,0,27,0 npu=1 cpu=1 match=1 scores=60,1714,-1774 cand=1 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f20e0 led=a004
+STATE src=FRAME seq=2017 guard=OK fmask=0 umask=0 feat=0,0,0,0,27,88 npu=2 cpu=2 match=1 scores=-8036,3474,4562 cand=2 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f20e1 led=a004
+STATE src=FRAME seq=2018 guard=OK fmask=0 umask=0 feat=0,0,0,0,0,0 npu=0 cpu=0 match=1 scores=3219,1390,-4609 cand=0 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f20e2 led=a004
+STATE src=FRAME seq=2019 guard=OK fmask=0 umask=0 feat=0,0,44,44,0,0 npu=1 cpu=1 match=1 scores=-2457,2578,-77 cand=1 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f20e3 led=a004
+STATE src=FRAME seq=2020 guard=OK fmask=0 umask=0 feat=83,0,0,0,41,120 npu=2 cpu=2 match=1 scores=-21748,5195,16553 cand=2 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f20e4 led=a004
+STATE src=FRAME seq=2021 guard=OK fmask=0 umask=0 feat=0,0,0,0,0,0 npu=0 cpu=0 match=1 scores=3219,1390,-4609 cand=0 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f20e5 led=a004
+STATE src=FRAME seq=2022 guard=OK fmask=0 umask=0 feat=0,20,0,0,0,0 npu=1 cpu=1 match=1 scores=679,1910,-2589 cand=1 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f20e6 led=a004
+STATE src=FRAME seq=2023 guard=OK fmask=0 umask=0 feat=53,81,0,0,68,0 npu=2 cpu=2 match=1 scores=-20854,4895,15959 cand=2 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f20e7 led=a004
+STATE src=FRAME seq=2024 guard=OK fmask=0 umask=0 feat=0,0,0,0,0,0 npu=0 cpu=0 match=1 scores=3219,1390,-4609 cand=0 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f20e8 led=a004
+STATE src=FRAME seq=2025 guard=OK fmask=0 umask=0 feat=0,0,0,0,19,0 npu=1 cpu=1 match=1 scores=996,1618,-2614 cand=1 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f20e9 led=a004
+STATE src=FRAME seq=2026 guard=OK fmask=0 umask=0 feat=0,0,93,93,0,0 npu=2 cpu=2 match=1 scores=-8778,3901,4970 cand=2 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f20ea led=a004
+STATE src=FRAME seq=2027 guard=OK fmask=0 umask=0 feat=0,0,0,0,0,0 npu=0 cpu=0 match=1 scores=3219,1390,-4609 cand=0 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f20eb led=a004
+STATE src=FRAME seq=2028 guard=OK fmask=0 umask=0 feat=0,0,0,0,30,45 npu=1 cpu=1 match=1 scores=-4431,2650,1781 cand=1 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f20ec led=a004
+STATE src=FRAME seq=2029 guard=OK fmask=0 umask=0 feat=4,84,0,0,0,0 npu=2 cpu=2 match=1 scores=-7889,3618,4271 cand=2 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f20ed led=a004
+STATE src=FRAME seq=2030 guard=OK fmask=0 umask=0 feat=0,0,0,0,0,0 npu=0 cpu=0 match=1 scores=3219,1390,-4609 cand=0 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f20ee led=a004
+STATE src=FRAME seq=2031 guard=OK fmask=0 umask=0 feat=0,18,0,0,0,0 npu=1 cpu=1 match=1 scores=933,1858,-2791 cand=1 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f20ef led=a004
+STATE src=FRAME seq=2032 guard=OK fmask=0 umask=0 feat=0,0,106,93,74,0 npu=2 cpu=2 match=1 scores=-18255,4906,13455 cand=2 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f20f0 led=a004
+STATE src=FRAME seq=2033 guard=OK fmask=0 umask=0 feat=0,0,0,0,0,0 npu=0 cpu=0 match=1 scores=3219,1390,-4609 cand=0 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f20f1 led=a004
+STATE src=FRAME seq=2034 guard=OK fmask=0 umask=0 feat=0,20,0,0,0,0 npu=1 cpu=1 match=1 scores=679,1910,-2589 cand=1 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f20f2 led=a004
+STATE src=FRAME seq=2035 guard=OK fmask=0 umask=0 feat=0,0,0,0,73,119 npu=2 cpu=2 match=1 scores=-16270,4646,11624 cand=2 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f20f3 led=a004
+STATE src=FRAME seq=2036 guard=OK fmask=0 umask=0 feat=0,0,0,0,0,0 npu=0 cpu=0 match=1 scores=3219,1390,-4609 cand=0 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f20f4 led=a004
+STATE src=FRAME seq=2037 guard=OK fmask=0 umask=0 feat=0,0,0,0,19,0 npu=1 cpu=1 match=1 scores=996,1618,-2614 cand=1 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f20f5 led=a004
+STATE src=FRAME seq=2038 guard=OK fmask=0 umask=0 feat=91,0,0,0,0,0 npu=2 cpu=2 match=1 scores=-6791,2391,4400 cand=2 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f20f6 led=a004
+STATE src=FRAME seq=2039 guard=OK fmask=0 umask=0 feat=0,0,0,0,0,0 npu=0 cpu=0 match=1 scores=3219,1390,-4609 cand=0 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f20f7 led=a004
+STATE src=FRAME seq=2040 guard=OK fmask=0 umask=0 feat=0,0,19,20,0,0 npu=1 cpu=1 match=1 scores=702,1921,-2604 cand=1 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f20f8 led=a004
+STATE src=FRAME seq=2041 guard=OK fmask=0 umask=0 feat=0,0,127,127,0,0 npu=2 cpu=2 match=1 scores=-13164,4819,8472 cand=2 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f20f9 led=a004
+STATE src=FRAME seq=2042 guard=OK fmask=0 umask=0 feat=0,0,0,0,0,0 npu=0 cpu=0 match=1 scores=3219,1390,-4609 cand=0 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f20fa led=a004
+STATE src=FRAME seq=2043 guard=OK fmask=0 umask=0 feat=8,36,0,0,0,0 npu=1 cpu=1 match=1 scores=-2233,2414,-181 cand=1 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f20fb led=a004
+STATE src=FRAME seq=2044 guard=OK fmask=0 umask=0 feat=126,0,0,0,34,81 npu=2 cpu=2 match=1 scores=-22071,4804,17267 cand=2 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f20fc led=a004
+STATE src=FRAME seq=2045 guard=OK fmask=0 umask=0 feat=0,0,0,0,0,0 npu=0 cpu=0 match=1 scores=3219,1390,-4609 cand=0 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f20fd led=a004
+STATE src=FRAME seq=2046 guard=OK fmask=0 umask=0 feat=0,0,0,0,32,0 npu=1 cpu=1 match=1 scores=-525,1774,-1249 cand=1 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f20fe led=a004
+STATE src=FRAME seq=2047 guard=OK fmask=0 umask=0 feat=0,0,0,0,47,92 npu=2 cpu=2 match=1 scores=-10744,3794,6950 cand=2 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f20ff led=a004
+STATE src=FRAME seq=2048 guard=OK fmask=0 umask=0 feat=0,0,0,0,0,0 npu=0 cpu=0 match=1 scores=3219,1390,-4609 cand=0 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f2000 led=a004
+STATE src=FRAME seq=2049 guard=OK fmask=0 umask=0 feat=0,0,46,46,40,0 npu=2 cpu=2 match=1 scores=-7395,3112,4329 cand=2 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f2001 led=a004
+STATE src=FRAME seq=2050 guard=OK fmask=0 umask=0 feat=0,0,127,127,0,0 npu=2 cpu=2 match=1 scores=-13164,4819,8472 cand=2 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f2002 led=a004
+STATE src=FRAME seq=2051 guard=OK fmask=0 umask=0 feat=0,0,0,0,0,0 npu=0 cpu=0 match=1 scores=3219,1390,-4609 cand=0 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f2003 led=a004
+STATE src=FRAME seq=2052 guard=OK fmask=0 umask=0 feat=0,19,0,0,15,0 npu=1 cpu=1 match=1 scores=-949,2064,-1115 cand=1 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f2004 led=a004
+STATE src=FRAME seq=2053 guard=OK fmask=0 umask=0 feat=112,0,126,111,0,0 npu=2 cpu=2 match=1 scores=-24365,5754,18737 cand=2 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f2005 led=a004
+STATE src=FRAME seq=2054 guard=OK fmask=0 umask=0 feat=0,0,0,0,0,0 npu=0 cpu=0 match=1 scores=3219,1390,-4609 cand=0 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f2006 led=a004
+STATE src=FRAME seq=2055 guard=OK fmask=0 umask=0 feat=0,0,35,30,0,0 npu=1 cpu=1 match=1 scores=-966,2245,-1244 cand=1 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f2007 led=a004
+STATE src=FRAME seq=2056 guard=OK fmask=0 umask=0 feat=0,0,127,127,0,0 npu=2 cpu=2 match=1 scores=-13164,4819,8472 cand=2 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f2008 led=a004
+STATE src=FRAME seq=2057 guard=OK fmask=0 umask=0 feat=0,0,0,0,0,0 npu=0 cpu=0 match=1 scores=3219,1390,-4609 cand=0 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f2009 led=a004
+STATE src=FRAME seq=2058 guard=OK fmask=0 umask=0 feat=40,0,0,0,0,0 npu=1 cpu=1 match=1 scores=-1181,1830,-649 cand=1 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f200a led=a004
+STATE src=FRAME seq=2059 guard=OK fmask=0 umask=0 feat=3,72,0,0,0,0 npu=1 cpu=1 match=1 scores=-6255,3295,2960 cand=1 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f200b led=a004
+ERROR seq=-1 code=1 name=CRC detail=60 junk=0 bad=1
+DISP fnd=008b20e1 led=e004
+ERROR seq=78 code=4 name=MODEL detail=1 junk=0 bad=2
+DISP fnd=008b20e4 led=e004
+ERROR seq=-1 code=3 name=CMD detail=90 junk=0 bad=3
+STATE src=LINK_BAD seq=-1 guard=LINK fmask=0 umask=8 feat=- npu=-1 cpu=-1 match=-1 scores=- cand=3 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008b20e3 led=e004
+STATE src=FRAME seq=77 guard=OK fmask=0 umask=0 feat=0,0,0,0,0,0 npu=0 cpu=0 match=1 scores=3219,1390,-4609 cand=0 state=2 latch=1 cnt=0 junk=4
+DISP fnd=008f204d led=a004
+ERROR seq=-1 code=2 name=TIMEOUT detail=27 junk=0 bad=1
+DISP fnd=008b20e2 led=e004
+STATE src=FRAME seq=77 guard=OK fmask=0 umask=0 feat=0,0,0,0,0,0 npu=0 cpu=0 match=1 scores=3219,1390,-4609 cand=0 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f204d led=a004
+STATE src=LINK_TIMEOUT seq=-1 guard=LINK fmask=0 umask=8 feat=- npu=-1 cpu=-1 match=-1 scores=- cand=3 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f2800 led=a004
+STATE src=FRAME seq=77 guard=OK fmask=0 umask=0 feat=0,0,0,0,0,0 npu=0 cpu=0 match=1 scores=3219,1390,-4609 cand=0 state=2 latch=1 cnt=0 junk=0
+DISP fnd=008f204d led=a004
+P3_SENSOR READY model=18496ca4 model_ok=1 feat=6 classes=3 junk=0

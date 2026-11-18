@@ -210,7 +210,8 @@
     "ch25_power": "vivado_report_power_saif_2026_11_18_cpu_4_541mJ_npu_2_733mJ_estimate_match13pct",
     "ch27_handoff": "run_all_level_sim_pass_2026_11_18_board_checklist_not_run",
     "ch28_digit_system": "cosim_host_fw_npu_rtl_22_samples_bit_exact_errsuite_11_mutants_8_vivado_bitstream_wns_0_420_vitis_elf_2026_11_18_board_not_run",
-    "ch29_ch31": "education_guides_written_implementation_and_fpga_validation_not_run",
+    "ch29_sensor_monitor": "policy_rtl_4070cyc_mutants_4_ooc_wns_6_711_cosim_109_checks_fw_mutants_12_synthetic_int8_95_67pct_vitis_elf_on_ch28_bitstream_2026_11_18_board_not_run",
+    "ch30_ch31": "education_guides_written_implementation_and_fpga_validation_not_run",
     "vivado": "ch19_ch20_ooc_synth_route_ch21_full_soc_bitstream_xsa_2026_11_18_all_wns_positive_100mhz",
     "board": "not_run",
     "web": "not_run"

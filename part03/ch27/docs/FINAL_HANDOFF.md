@@ -22,7 +22,8 @@
 | 25 | 전력·에너지 | 2674513 | Vivado report_power + 구간별 SAIF | CPU 4.541 mJ vs NPU 2.733 mJ/추론(1.66배), SAIF 매칭 13% |
 | 26 | 3×3 합성곱(선택) | 505be9e | RTL sim + OOC 배선 | 936출력 일치, WNS +4.647 |
 | 27 | 통합 실행기·인계 | e148ccd | `run_all.sh` LEVEL=sim PASS | 이 문서, 실물 점검표 |
-| 28 | 손글씨 숫자 인식 시스템(종합 1) | (28장 커밋) | 호스트↔펌웨어↔NPU RTL 협동 sim + Vivado 칩 전체·Bitstream + Vitis ELF + SoC xsim | 22장 점수 골든 일치, 오류 시험 11·변이 8, WNS +0.420 |
+| 28 | 손글씨 숫자 인식 시스템(종합 1) | c7fbcb3 | 호스트↔펌웨어↔NPU RTL 협동 sim + Vivado 칩 전체·Bitstream + Vitis ELF (SoC xsim 재실행 중) | 22장 점수 골든 일치, 오류 시험 11·변이 8, WNS +0.420 |
+| 29 | 센서 융합 상태 감시(종합 2) | (29장 커밋) | 정책 RTL sim·OOC 배선 + 호스트↔펌웨어↔NPU RTL 협동 sim + Vitis ELF(28장 Bitstream 재사용) | 정책 RTL 4070클록 일치·변이 4, 협동 109검사·변이 12, 합성 데이터 INT8 95.67% |
 
 ## 2. 재현
 
@@ -51,4 +52,4 @@ LEVEL=full …                                                          # + SoC 
 3. **타이밍 여유:** 17장 컨트롤러 argmax 1·2단이 Fmax 101 MHz를 정한다. 클록당 비교 1단 분할안(done +2클록)을 문서화만 했다.
 4. **빌드 설정:** Vitis 기본 Debug(-O0), MicroBlaze V rv32i(M 확장 없음). 최적화 빌드·M 확장 비교는 아직 없다.
 5. **인터럽트:** IRQ 신호와 INTC 연결까지 확인. ISR 소프트웨어는 없다(폴링 드라이버).
-6. **응용 과제:** 28장 완료(실물 B9~B13 NOT_RUN). 29~31장은 아직 착수하지 않았다.
+6. **응용 과제:** 28장 완료(실물 B9~B13 NOT_RUN, SoC xsim 재실행 중), 29장 완료(실물 B14~B17 NOT_RUN, 실제 센서 연결 안 함). 30·31장은 아직 착수하지 않았다.

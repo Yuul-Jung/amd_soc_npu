@@ -40,6 +40,17 @@
 | B12 | (선택) `--mnist-dir <MNIST raw> --limit 200` | 장치 class = 골든 class 200/200, 정확도는 골든·장치를 따로 기록 | |
 | B13 | (선택) 직접 그린 28×28 PNG `--images a.png [--invert]` | 응답·표시가 오는지 확인(정확도 주장은 하지 않음) | |
 
+## 1-29. 29장 센서 감시 (28장 비트스트림 그대로, ELF만 다르다)
+
+준비: 28장 `basys3_soc28_top.bit`, ELF `part03/ch29/build/ws/sensor_app/build/sensor_app.elf`(`ch29/validation/build_sw.log`의 SHA-256). 센서는 연결하지 않는다(가상 센서 값을 UART로 보냄).
+
+| # | 절차 | 기대 결과 (협동 시뮬레이션 근거) | 판정 |
+|---|---|---|---|
+| B14 | 28장 비트스트림 다운로드, `sensor_app.elf` 실행 | FND `3 _00`(UNKNOWN), LED3·LED15 켜짐 | |
+| B15 | `python3 part03/ch29/host/p3_sensor_host.py --port <포트> --limit 200 --csv b29.csv --log b29_uart.log`, 안내가 나오면 btnC | `BOOT PASS`, 모든 STEP PASS, `SENSOR_HOST_PASS` (`ch29/validation/rtl_cosim.csv`와 같은 판정) | |
+| B16 | 실행 중 FND·LED를 눈으로 확인 | FAULT 래치 때 자리 3의 점과 LED13, ACK 뒤 점이 꺼지고 3회 정상 뒤 `0` | |
+| B17 | 호스트를 멈추고 링크 감시 시간을 스톱워치로 잰다 | `STATE src=LINK_TIMEOUT`이 주기적으로 나온다. 실측 주기(초)를 기록(폴링 10,000,000회) | |
+
 ## 2. 기록할 것
 
 - 각 항목의 UART 원문(사진 또는 터미널 로그), Vivado·Vitis 버전, 보드 리비전.
@@ -47,5 +58,5 @@
 
 ## 3. 이번 점검 범위 밖
 
-- 제3부 29~31장 응용 과제의 센서·모터·보안 UART 실물 검증.
+- 29장 실제 센서(DS18B20·XADC·HC-SR04) 연결, 30·31장 모터·보안 UART 실물 검증.
 - 클록을 100 MHz 위로 올리는 시험(24장 Fmax는 OOC 추정).
