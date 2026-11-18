@@ -19,7 +19,7 @@
 | 10 | 4뉴런 NPU Core | [ch10_npu_core_v05.html](../ch10_npu_core_v05.html) | ✅ | ✅ | ⏳ | — | ⏳ |
 | 11 | UART 모델 적재 컨트롤러 | [ch11_uart_register_v05.html](../ch11_uart_register_v05.html) | ✅ | ✅ | ⏳ | — | ⏳ |
 | 12 | 통합 NPU Top | [ch12_integrated_npu_v05.html](../ch12_integrated_npu_v05.html) | ✅ | ✅ | ⏳ | ⏳ | ⏳ |
-| 13 | 8×8 손글씨·10분류 준비 | chapter.json 대기 | | | | | |
+| 13 | 8×8 손글씨·10분류 준비 | [ch13_mnist_8x8_v02.html](../ch13_mnist_8x8_v02.html) | ✅ | ✅ | ⏳ | — | ⏳ |
 | 14 | 4PE 그룹·10개 출력 | chapter.json 대기 | | | | | |
 | 15 | 64→10 정수 MLP | chapter.json 대기 | | | | | |
 | 16 | 64→8→10 다층 MLP | chapter.json 대기 | | | | | |

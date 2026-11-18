@@ -31,6 +31,12 @@ git commit -m "test: 00~12장 Vivado 합성·타이밍·타이밍 시뮬레이�
 
 같은 종류가 여러 개면 날짜가 가장 늦은 파일을 쓴다. 로그에는 개인 경로를 넣지 않는다(`<repo>`로 치환).
 
+## 2-1. 13장 — 웹 Claude가 작성 완료 (사용자 권한 위임, 2026-11-18)
+
+- `ch13/` 코드·TB·기준 모델·`chapter.json`·상태도는 웹 Claude가 작성했고 Icarus RTL 시뮬레이션까지 통과했다 (`ch13/validation/rtl_sim_20261118.log`).
+- VS Code 쪽에서 13장을 따로 만들고 있었다면 **`git pull` 후 이 버전과 비교**하고, 바꿀 때는 위 계약을 지킨다. 14장은 `npu10_input_loader`의 `loaded_o`·`rd_addr_i`·`rd_data_o`를 입력으로 쓴다.
+- Vivado: `tools/vivado/ooc_timing.tcl`의 `designs`에 `ch13` 줄을 추가했다. `bash tools/run_vivado_all.sh ooc`를 실행하면 `ch13/validation/vivado_ooc_YYYYMMDD.txt`가 생긴다 (⚠ 미검증).
+
 ## 3. 13~31장 새 장 추가 계약
 
 한 장은 아래가 모두 있어야 안내서가 만들어진다.

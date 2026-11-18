@@ -434,6 +434,7 @@ set designs {
     {ch08 pe_array4           {ch01/rtl/mac_core.v ch07/rtl/vector_dot_core.v ch08/rtl/pe_array4.v}}
     {ch09 dense_layer4        {ch01/rtl/mac_core.v ch05/rtl/fixed_quantizer.v ch07/rtl/vector_dot_core.v ch08/rtl/pe_array4.v ch09/rtl/dense_layer4.v}}
     {ch10 npu_core            {ch01/rtl/mac_core.v ch04/rtl/bram_sync_buffer.v ch05/rtl/fixed_quantizer.v ch07/rtl/vector_dot_core.v ch08/rtl/pe_array4.v ch09/rtl/dense_layer4.v ch10/rtl/npu_core.v}}
+    {ch13 npu10_input_loader  {ch04/rtl/bram_sync_buffer.v ch13/rtl/npu10_input_loader.v}}
 }
 
 proc worst_slack {kind} {
@@ -496,11 +497,11 @@ if {$fail &gt; 0} { error "OOC_TIMING_FAILED count=$fail" }</code></pre>
       <div class="codeblock">
         <div class="codebar"><span>tools/run_vivado_all.sh · bash · 원본 · ⚠ 미검증 (Vivado 미실행)</span></div>
         <pre tabindex="0"><code class="language-bash">#!/usr/bin/env bash
-# VS Code(Vivado 설치 PC)에서 00~12장 합성·타이밍·타이밍 시뮬레이션을 한 번에 실행하고
+# VS Code(Vivado 설치 PC)에서 00~13장 합성·타이밍·타이밍 시뮬레이션을 한 번에 실행하고
 # 각 장 validation/ 에 증거 로그를 남긴다. 보드 확인(BOARD_PASS)과는 별개다.
 #   source /tools/Xilinx/Vivado/&lt;버전&gt;/settings64.sh
 #   bash tools/run_vivado_all.sh            # 전체
-#   bash tools/run_vivado_all.sh ooc        # 00~10장 OOC만
+#   bash tools/run_vivado_all.sh ooc        # 00~10·13장 OOC만
 #   bash tools/run_vivado_all.sh impl       # 12장 구현 + 타이밍 시뮬레이션만
 set -Eeuo pipefail
 root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." &amp;&amp; pwd)"
@@ -660,6 +661,12 @@ window.COURSE={
    "number": 12,
    "title": "통합 NPU Top",
    "file": "ch12_integrated_npu_v05.html"
+  },
+  {
+   "id": "ch13",
+   "number": 13,
+   "title": "8×8 손글씨·10분류 준비",
+   "file": "ch13_mnist_8x8_v02.html"
   }
  ]
 };

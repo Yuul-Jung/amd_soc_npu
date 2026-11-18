@@ -348,11 +348,11 @@ vivado -mode batch -nojournal -source tools/vivado/ooc_timing.tcl -tclargs ch04
       <p>누적 보고 (이전 결과 → 추가 RTL → 시험 벡터 → 시뮬레이션 → 합성/보드 → 인계):</p>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>이전 결과</th><th>추가 RTL</th><th>시험 벡터</th><th>시뮬레이션</th><th>합성 / 보드</th><th>인계</th></tr></thead>
-        <tbody><tr><td>없음 (첫 장)</td><td><code>bram_sync_buffer.v</code></td><td><code>tb_bram_sync_buffer.sv</code><br><code>bram_reference.py</code></td><td>통과</td><td>⚠ 대기 / 미실시</td><td>1건 (아래 표)</td></tr></tbody>
+        <tbody><tr><td>없음 (첫 장)</td><td><code>bram_sync_buffer.v</code></td><td><code>tb_bram_sync_buffer.sv</code><br><code>bram_reference.py</code></td><td>통과</td><td>⚠ 대기 / 미실시</td><td>2건 (아래 표)</td></tr></tbody>
       </table></div>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>다음 장으로 넘기는 파일</th><th>사용처</th></tr></thead>
-        <tbody><tr><td><code>ch04/rtl/bram_sync_buffer.v</code></td><td>10장 npu_core의 입력 메모리 1개 + 가중치 메모리 4개 (수정 금지)</td></tr></tbody>
+        <tbody><tr><td><code>ch04/rtl/bram_sync_buffer.v</code></td><td>10장 npu_core의 입력 메모리 1개 + 가중치 메모리 4개 (수정 금지)</td></tr><tr><td><code>ch04/rtl/bram_sync_buffer.v</code></td><td>13장 npu10_input_loader의 입력 메모리 (8비트×64, 수정 금지)</td></tr></tbody>
       </table></div>
       <p>검증 게이트 (<code>ch04/validation/</code> 증거 파일 기준으로 자동 표시):</p>
       <div class="gate-row">
@@ -462,6 +462,12 @@ window.COURSE={
    "number": 12,
    "title": "통합 NPU Top",
    "file": "ch12_integrated_npu_v05.html"
+  },
+  {
+   "id": "ch13",
+   "number": 13,
+   "title": "8×8 손글씨·10분류 준비",
+   "file": "ch13_mnist_8x8_v02.html"
   }
  ]
 };

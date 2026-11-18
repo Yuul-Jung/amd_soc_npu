@@ -18,5 +18,6 @@
 | ch10_npu_core_v05.html | 통과 | PDF 13쪽 · 코드 끝줄 7/7 · axe 통과 규칙 28개 |
 | ch11_uart_register_v05.html | 통과 | PDF 17쪽 · 코드 끝줄 8/8 · axe 통과 규칙 28개 |
 | ch12_integrated_npu_v05.html | 통과 | PDF 32쪽 · 코드 끝줄 20/20 · axe 통과 규칙 27개 |
+| ch13_mnist_8x8_v02.html | 통과 | PDF 14쪽 · 코드 끝줄 7/7 · axe 통과 규칙 28개 |
 
 미검증: 실제 스크린리더(NVDA·VoiceOver) 낭독, 종이 인쇄 결과물.
