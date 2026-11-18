@@ -38,6 +38,7 @@ set designs {
     {ch20 npu_axi_lite {ch01/rtl/mac_core.v ch04/rtl/bram_sync_buffer.v ch07/rtl/vector_dot_core.v ch16/rtl/npu_argmax.v ch19/rtl/npu_tiled_784_npe.v ch20/rtl/npu_axi_lite.v}}
     {ch26 npu_cnn3x3 {ch01/rtl/mac_core.v ch04/rtl/bram_sync_buffer.v ch05/rtl/fixed_quantizer.v ch07/rtl/vector_dot_core.v ch08/rtl/pe_array4.v ch15/rtl/npu_dense_core.v ch15/rtl/npu_dense_store.v ch15/rtl/npu_dense.v ch16/rtl/npu_argmax.v ch26/rtl/npu_cnn3x3.v}}
     {ch29 sensor_guard_ai {ch01/rtl/mac_core.v ch04/rtl/bram_sync_buffer.v ch07/rtl/vector_dot_core.v ch08/rtl/pe_array4.v ch15/rtl/npu_dense_core.v ch15/rtl/npu_dense_store.v ch15/rtl/npu_dense.v ch29/rtl/sensor_guard_ai.v}}
+    {ch30 motor_interlock {ch29/rtl/sensor_guard_ai.v ch30/rtl/motor_interlock.v}}
 }
 
 proc worst_slack {kind} {
