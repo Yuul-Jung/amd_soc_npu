@@ -68,5 +68,104 @@
       "ch10/rtl/npu_core.v",
       "직접 인스턴스 없음 — 12장 npu_engine4가 같은 BRAM·4뉴런 구조를 DSP 레인(02장)으로 다시 구성"
     ]
-  ]
+  ],
+  "port_notes": {
+    "clk": "시스템 클록 (상승 에지에서 모든 레지스터 갱신)",
+    "resetn": "동기 리셋, 0이면 초기화 (Active-Low)",
+    "start_i": "추론 시작 (IDLE에서만 수락)",
+    "length_i": "입력 길이 (≤64)",
+    "biases_i": "뉴런 4개의 Bias (start 때 등록)",
+    "x_wr_en": "입력 메모리 쓰기",
+    "w_wr_en": "가중치 메모리 쓰기",
+    "x_wr_addr": "입력 메모리 주소 (0~63)",
+    "w_wr_addr": "가중치 메모리 주소 (0~63)",
+    "w_neuron": "가중치를 쓸 뉴런 번호 (0~3)",
+    "x_wr_data": "입력 데이터",
+    "w_wr_data": "가중치 데이터",
+    "load_ready_o": "메모리 적재 가능 (리셋 해제 && !busy_o)",
+    "busy_o": "추론 진행 중",
+    "done_o": "추론 완료 펄스",
+    "error_o": "길이 초과·쓰기 충돌·메모리 읽기 실패 오류 펄스",
+    "result_o": "뉴런 4개 출력",
+    "overflow_o": "뉴런별 양자화 범위 초과"
+  },
+  "fsm": {
+    "file": "ch10/rtl/npu_core.v",
+    "reset": "IDLE",
+    "rows": [
+      [
+        "IDLE",
+        "start_i && (length_i>64 || x_wr_en || w_wr_en)",
+        "IDLE",
+        "error_o 펄스"
+      ],
+      [
+        "IDLE",
+        "start_i && 정상",
+        "LAUNCH",
+        "length_q·biases_q 등록, busy_o=1"
+      ],
+      [
+        "LAUNCH",
+        "length_q==0",
+        "WAIT_DONE",
+        "원소 없이 Dense 완료 대기"
+      ],
+      [
+        "LAUNCH",
+        "length_q!=0",
+        "READ",
+        ""
+      ],
+      [
+        "READ",
+        "항상",
+        "WAIT_READ",
+        "BRAM 읽기 요청 (rd_en)"
+      ],
+      [
+        "WAIT_READ",
+        "x_valid && &w_valid",
+        "SEND",
+        ""
+      ],
+      [
+        "WAIT_READ",
+        "그 외",
+        "IDLE",
+        "busy_o=0, error_o 펄스"
+      ],
+      [
+        "SEND",
+        "dense_ready && 마지막 원소",
+        "WAIT_DONE",
+        ""
+      ],
+      [
+        "SEND",
+        "dense_ready && 남은 원소",
+        "READ",
+        "index_q+1"
+      ],
+      [
+        "WAIT_DONE",
+        "dense_done",
+        "IDLE",
+        "result_o 등록, done_o 펄스"
+      ],
+      [
+        "(모든 상태)",
+        "dense_error",
+        "IDLE",
+        "busy_o=0, error_o 펄스 (case 뒤에서 우선 적용)"
+      ],
+      [
+        "default",
+        "유효하지 않은 상태",
+        "IDLE",
+        "error_o 펄스"
+      ]
+    ]
+  },
+  "run_note": "RTL 컴파일 → 시뮬레이션 → TB 자동 판정 → Python 기준값 비교"
 }

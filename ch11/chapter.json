@@ -84,5 +84,128 @@
       "mini_npu/rtl/uart_npu_command_controller.v",
       "12장 basys3_npu_top의 명령 계층 (수정 금지)"
     ]
-  ]
+  ],
+  "port_notes": {
+    "clk": "시스템 클록 (상승 에지에서 모든 레지스터 갱신)",
+    "resetn": "동기 리셋, 0이면 초기화 (Active-Low)",
+    "rx_data_i": "UART 수신 바이트",
+    "rx_valid_i": "rx_data_i 유효",
+    "tx_ready_i": "UART 송신부가 바이트를 받을 수 있음",
+    "npu_load_ready_i": "NPU 메모리 적재 가능",
+    "npu_busy_i": "NPU 진행 중 (선언만 있고 현재 로직에서 사용하지 않음)",
+    "npu_done_i": "NPU 추론 완료",
+    "npu_error_i": "NPU 오류 (길이·미적재 주소)",
+    "npu_class_i": "추론 클래스 (0~3)",
+    "npu_scores_i": "점수 4개 × 41비트 signed",
+    "rx_ready_o": "수신 가능 (IDLE·RECV 상태에서만 1)",
+    "tx_data_o": "송신 바이트 (response[send_index])",
+    "tx_valid_o": "송신 바이트 유효 (SEND 상태)",
+    "npu_start_o": "NPU 추론 시작 (RUN 상태 1클록)",
+    "npu_length_o": "추론 입력 길이",
+    "x_wr_en_o": "입력 메모리 쓰기 (X 명령·프리셋)",
+    "w_wr_en_o": "가중치 메모리 쓰기 (W 명령·프리셋)",
+    "b_wr_en_o": "Bias 쓰기 (B 명령·프리셋)",
+    "wr_addr_o": "쓰기 주소",
+    "neuron_o": "쓰기 대상 뉴런",
+    "wr_data_o": "16비트 쓰기 데이터 (big-endian 조립)",
+    "bias_data_o": "40비트 Bias 데이터",
+    "protocol_error_o": "명령 오류 펄스 (ERR 응답과 함께)"
+  },
+  "fsm": {
+    "file": "mini_npu/rtl/uart_npu_command_controller.v",
+    "reset": "IDLE",
+    "rows": [
+      [
+        "IDLE",
+        "수신 '0'~'3'",
+        "PRESET",
+        "sample_id 등록, run_length=2"
+      ],
+      [
+        "IDLE",
+        "수신 'X'·'W'·'B'·'R'",
+        "RECV",
+        "expected_bytes=3·4·6·1"
+      ],
+      [
+        "IDLE",
+        "수신 'S'",
+        "SEND",
+        "응답 I\\r\\n"
+      ],
+      [
+        "IDLE",
+        "그 외 (CR·LF 제외)",
+        "SEND",
+        "응답 ERR\\r\\n, protocol_error_o"
+      ],
+      [
+        "RECV",
+        "마지막 페이로드 바이트",
+        "APPLY",
+        "그 전까지 RECV 유지"
+      ],
+      [
+        "APPLY",
+        "!accepted_fields || !npu_load_ready_i",
+        "SEND",
+        "응답 ERR\\r\\n"
+      ],
+      [
+        "APPLY",
+        "opcode=='R'",
+        "RUN",
+        "run_length=payload[0]"
+      ],
+      [
+        "APPLY",
+        "X·W·B 정상",
+        "SEND",
+        "메모리 기록, 응답 OK\\r\\n"
+      ],
+      [
+        "PRESET",
+        "npu_load_ready_i && preset_index==13",
+        "RUN",
+        "14단계 기록 완료"
+      ],
+      [
+        "PRESET",
+        "npu_load_ready_i && preset_index<13",
+        "PRESET",
+        "preset_index+1"
+      ],
+      [
+        "RUN",
+        "항상",
+        "WAIT_NPU",
+        "npu_start_o 1클록"
+      ],
+      [
+        "WAIT_NPU",
+        "npu_error_i",
+        "SEND",
+        "응답 ERR\\r\\n"
+      ],
+      [
+        "WAIT_NPU",
+        "npu_done_i",
+        "SEND",
+        "응답 Ck:점수×4\\r\\n (52바이트)"
+      ],
+      [
+        "SEND",
+        "마지막 바이트 송신",
+        "IDLE",
+        ""
+      ],
+      [
+        "default",
+        "유효하지 않은 상태",
+        "IDLE",
+        "protocol_error_o"
+      ]
+    ]
+  },
+  "run_note": "12장 Top 포함 컴파일 → UART 파형 시뮬레이션 → CSV를 PC 기준 모델과 비교"
 }

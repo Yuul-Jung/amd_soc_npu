@@ -7,7 +7,6 @@
 <meta name="description" content="Basys3 UART·NPU 00~12장 RTL 기반 + 13~31장 10분류 MNIST·MicroBlaze V SoC·종합 과제 고도화 교재">
 <link rel="stylesheet" href="assets/education/site.css">
 <style>
-.hero:before{background-image:linear-gradient(90deg,rgba(12,17,27,.89),rgba(12,17,27,.69) 58%,rgba(12,17,27,.48)),url('https://raw.githubusercontent.com/Yuul-Jung/rule_md/d1b8278d41fca8f5e3960736f3ac9d377e462fda/web/education-html/assets/hero-bookshelf.jpg')}
 .codeblock pre{max-height:760px;white-space:pre}
 .section svg{width:100%;height:auto}
 .badge{display:inline-block;padding:.15em .6em;border-radius:4px;font-size:.78em;font-weight:700;vertical-align:middle}
@@ -15,6 +14,13 @@
 .badge-todo{background:#fff3cd;color:#856404}
 .badge-new{background:#cce5ff;color:#004085}
 table td,.section td{vertical-align:middle}
+.table-wrap{overflow-x:auto}
+.section :not(pre)>code{overflow-wrap:anywhere}
+.codebar{gap:8px}
+.codebar span{min-width:0;overflow-wrap:anywhere}
+.access-skip{position:absolute;left:-9999px;top:0}
+.access-skip:focus{left:12px;top:12px;z-index:1003;background:#fff;color:#15171c;padding:6px 10px}
+.nw code{white-space:nowrap;overflow-wrap:normal}
 </style>
 </head>
 <body>
@@ -26,13 +32,6 @@ table td,.section td{vertical-align:middle}
     <p class="kicker">BASYS3 · RTL · NPU · 고도화판</p>
     <h1>소형 NPU 제작 학습안내서</h1>
     <p><strong>준비 00장 + 01~31장</strong> · 소형 NPU → 10분류 MNIST → MicroBlaze V SoC → 종합 과제</p>
-    <div class="chips">
-      <span class="chip">RTL 고도화</span>
-      <span class="chip">UART 8N1</span>
-      <span class="chip">DSP/BRAM/4PE</span>
-      <span class="chip">INT8 MLP</span>
-      <span class="chip">AXI4-Lite</span>
-    </div>
   </div>
 </header>
 <div class="wrap">
@@ -63,7 +62,7 @@ table td,.section td{vertical-align:middle}
         <rect x="819" y="28" width="154" height="85" rx="9" fill="#fff" stroke="#4635b1"/>
         <text x="896" y="77" font-size="16" text-anchor="middle">LED/FND</text>
       </svg>
-      <table>
+      <div class="table-wrap"><table>
         <thead><tr><th>장</th><th>실습 제목</th><th>구간</th><th>HTML</th><th>RTL</th></tr></thead>
         <tbody>
           <tr><td>00</td><td><a href="ch00_uart_echo_v05.html">UART Echo</a></td><td>UART 준비</td><td><span class="badge badge-ok">v05 완료</span></td><td><span class="badge badge-ok">이전 완료</span></td></tr>
@@ -99,7 +98,7 @@ table td,.section td{vertical-align:middle}
           <tr><td>30</td><td>NPU·모터 안전 제어</td><td>종합 과제</td><td><span class="badge badge-todo">v02 예정</span></td><td><span class="badge badge-new">신규 구현 예정</span></td></tr>
           <tr><td>31</td><td>AES-128·HMAC 보안 UART</td><td>종합 과제</td><td><span class="badge badge-todo">v02 예정</span></td><td><span class="badge badge-new">신규 구현 예정</span></td></tr>
         </tbody>
-      </table>
+      </table></div>
     </section>
 
     <section class="section" id="run">

@@ -7,30 +7,80 @@
   "nav_title": "8×8 손글씨·10분류",
   "name": "8×8 손글씨 10분류 NPU",
   "goal": "한 문장: 이 장에서 무엇을 만들고 무엇으로 확인하는가.",
-  "top": {"file": "ch13/rtl/npu10_top.v", "module": "npu10_top"},
-  "keep": ["ch01/rtl/mac_core.v"],
-  "new": ["ch13/rtl/npu10_top.v"],
-  "tb": ["ch13/tb/tb_npu10_top.sv"],
-  "ref": ["ch13/reference/npu10_reference.py"],
+  "top": {
+    "file": "ch13/rtl/npu10_top.v",
+    "module": "npu10_top"
+  },
+  "keep": [
+    "ch01/rtl/mac_core.v"
+  ],
+  "new": [
+    "ch13/rtl/npu10_top.v"
+  ],
+  "tb": [
+    "ch13/tb/tb_npu10_top.sv"
+  ],
+  "ref": [
+    "ch13/reference/npu10_reference.py"
+  ],
+  "port_notes": {
+    "clk": "시스템 클록 (상승 에지에서 모든 레지스터 갱신)",
+    "resetn": "동기 리셋, 0이면 초기화 (Active-Low)",
+    "_설명": "top.module의 모든 포트에 한글 설명 필수 — 빠지면 생성기가 중단된다"
+  },
+  "_fsm": {
+    "file": "ch13/rtl/npu10_top.v",
+    "reset": "IDLE",
+    "rows": [
+      [
+        "IDLE",
+        "start_i",
+        "RUN",
+        "동작 설명"
+      ]
+    ],
+    "_설명": "top 파일에 상태 localparam이 있으면 작성. 상태명은 localparam과 정확히 같아야 하며 모든 상태가 한 번 이상 나와야 한다(생성기가 검사)"
+  },
   "_prep_note": "선택: 02 준비 절에 덧붙일 한 문장",
   "_tb_note": "선택: 04절 TB 설명 문장 (기본: 기준 모델(Python)은 시험 벡터와 정답을 만듭니다.)",
   "run": "bash ch13/scripts/run_sim.sh",
+  "run_note": "명령 옆 주석으로 표시할 기능 설명 (예: RTL 컴파일 → 시뮬레이션 → TB 자동 판정)",
   "evidence": {
     "rtl_log": "ch13/validation/rtl_sim_*.log",
     "_pattern": "선택: 05절 기대 출력으로 뽑을 줄의 정규식 (기본 _PASS|PYTHON_VECTORS|^\\|)",
     "_host_model_pattern": "선택: HOST_MODEL 판정 줄 정규식",
     "_host_model_ref": "선택: 기준 모델 증거를 빌려 올 장 id"
   },
-  "_extra_runs": [{"title": "선택 시험", "cmd": "bash …", "log": "chNN/validation/rtl_sim_*.log", "section": "run_x.sh", "pattern": "_PASS"}],
+  "_extra_runs": [
+    {
+      "title": "선택 시험",
+      "cmd": "bash …",
+      "log": "chNN/validation/rtl_sim_*.log",
+      "section": "run_x.sh",
+      "pattern": "_PASS"
+    }
+  ],
   "checks": [
-    ["RTL_SIM_PASS …", "이 줄이 뜻하는 판정"]
+    [
+      "RTL_SIM_PASS …",
+      "이 줄이 뜻하는 판정"
+    ]
   ],
   "read_points": [
-    ["코드 위치나 주제", "핵심 동작 설명 (HTML 허용, 짧게)"]
+    [
+      "코드 위치나 주제",
+      "핵심 동작 설명 (HTML 허용, 짧게)"
+    ]
   ],
-  "vivado": {"mode": "ooc", "resources": "DSP48E1 ≥ 4"},
+  "vivado": {
+    "mode": "ooc",
+    "resources": "DSP48E1 ≥ 4"
+  },
   "_vivado_modes": "ooc: 단위 모듈 OOC (ooc_timing.tcl designs 표에 추가) · top: 보드 Top (board_fragment 필요) · via: 다른 장 Top에 포함 (ref, note) · none",
   "handoff": [
-    ["ch13/rtl/npu10_top.v", "14장 …에서 재사용 (수정 금지)"]
+    [
+      "ch13/rtl/npu10_top.v",
+      "14장 …에서 재사용 (수정 금지)"
+    ]
   ]
 }

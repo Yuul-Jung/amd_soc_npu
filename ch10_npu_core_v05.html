@@ -8,7 +8,6 @@
 <title>10장 · 4뉴런 NPU Core (v05)</title>
 <link rel="stylesheet" href="assets/education/site.css">
 <style>
-.hero:before{background-image:linear-gradient(90deg,rgba(12,17,27,.89),rgba(12,17,27,.69) 58%,rgba(12,17,27,.48)),url('https://raw.githubusercontent.com/Yuul-Jung/rule_md/d1b8278d41fca8f5e3960736f3ac9d377e462fda/web/education-html/assets/hero-bookshelf.jpg')}
 .codeblock pre{max-height:780px;white-space:pre}
 .section svg{width:100%;height:auto}
 .vbadge{display:inline-block;padding:.15em .6em;border-radius:4px;font-size:.78em;font-weight:700;background:#d4edda;color:#155724;vertical-align:middle}
@@ -20,6 +19,14 @@
 .gate.todo{border-color:#b08900;background:#fffbe6}
 .gate.fail{border-color:#b3261e;background:#fdeceb}
 .gate.na{border-color:#c8c8c8;background:#f6f6f6;color:#666}
+.table-wrap{overflow-x:auto}
+.section :not(pre)>code{overflow-wrap:anywhere}
+.codebar{gap:8px}
+.codebar span{min-width:0;overflow-wrap:anywhere}
+.hero p{max-width:none}
+.access-skip{position:absolute;left:-9999px;top:0}
+.access-skip:focus{left:12px;top:12px;z-index:1003;background:#fff;color:#15171c;padding:6px 10px}
+.nw code{white-space:nowrap;overflow-wrap:normal}
 </style>
 </head>
 <body data-chapter="ch10">
@@ -39,13 +46,13 @@
     <section class="section" id="s00">
       <h2><span class="num">00</span>이 장의 위치</h2>
       <p><b>목표:</b> 04장 BRAM 5개와 09장 Dense를 6상태 FSM으로 연결해, 메모리에 적재한 입력·가중치로 추론하는 NPU 코어를 만듭니다.</p>
-      <table>
+      <div class="table-wrap"><table>
         <thead><tr><th>구분</th><th>파일</th></tr></thead>
         <tbody>
           <tr><td>유지 (이전 장, 수정 없음)</td><td><ul><li><code>ch01/rtl/mac_core.v</code> <small>(01장)</small></li><li><code>ch04/rtl/bram_sync_buffer.v</code> <small>(04장)</small></li><li><code>ch05/rtl/fixed_quantizer.v</code> <small>(05장)</small></li><li><code>ch07/rtl/vector_dot_core.v</code> <small>(07장)</small></li><li><code>ch08/rtl/pe_array4.v</code> <small>(08장)</small></li><li><code>ch09/rtl/dense_layer4.v</code> <small>(09장)</small></li></ul></td></tr>
           <tr><td>이번 장 작성</td><td><ul><li><code>ch10/rtl/npu_core.v</code></li></ul></td></tr>
         </tbody>
-      </table>
+      </table></div>
       <p>실습 순서: 01 구조 확인 → 02 준비 → 03 RTL 작성 → 04 테스트벤치·기준 모델 작성 → 05 시뮬레이션 → 06 결과 판정 → 08 합성·타이밍(Vivado) → 09 인계.</p>
     </section>
     <section class="section" id="s01">
@@ -53,13 +60,13 @@
       <svg viewBox="0 0 980 386" role="img" aria-label="npu_core 실제 포트와 하위 모듈 구조">
       <rect x="250" y="30" width="480" height="316" rx="10" fill="#fff" stroke="#4635b1" stroke-width="2"/>
       <text x="490" y="54" font-size="18" font-weight="700" text-anchor="middle">npu_core</text>
-      <text x="490" y="72" font-size="13" text-anchor="middle" fill="#555">ch10/rtl/npu_core.v</text>
-      <text x="270" y="181" font-size="13" fill="#555">FSM 상태 (localparam 선언 순서)</text>
-      <text x="270" y="203" font-size="14" font-family="monospace">IDLE → LAUNCH → READ → WAIT_READ → SEND → WAIT_DONE</text>
+      <text x="490" y="72" font-size="13" text-anchor="middle" fill="#555">ch10/rtl/npu_core.v · 구현 도식</text>
+      <text x="270" y="181" font-size="13" fill="#555">FSM 상태 (localparam 선언 순서 · 전이는 아래 상태 전이표)</text>
+      <text x="270" y="203" font-size="14" font-family="monospace">IDLE · LAUNCH · READ · WAIT_READ · SEND · WAIT_DONE</text>
       <text x="222" y="64" font-size="14" font-family="monospace" text-anchor="end">clk</text>
-      <path d="M226 60 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 60 l-7 -4 v8 z" fill="#4635b1"/>
+      <path d="M226 60 H250" stroke="#4635b1" stroke-width="1.5" stroke-dasharray="4 3"/><path d="M250 60 l-7 -4 v8 z" fill="#4635b1"/>
       <text x="222" y="87" font-size="14" font-family="monospace" text-anchor="end">resetn</text>
-      <path d="M226 83 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 83 l-7 -4 v8 z" fill="#4635b1"/>
+      <path d="M226 83 H250" stroke="#4635b1" stroke-width="1.5" stroke-dasharray="4 3"/><path d="M250 83 l-7 -4 v8 z" fill="#4635b1"/>
       <text x="222" y="110" font-size="14" font-family="monospace" text-anchor="end">start_i</text>
       <path d="M226 106 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 106 l-7 -4 v8 z" fill="#4635b1"/>
       <text x="222" y="133" font-size="14" font-family="monospace" text-anchor="end">length_i[8:0]</text>
@@ -100,9 +107,18 @@
       <text x="698" y="143" font-size="12" text-anchor="end" fill="#4635b1">ch09 재사용</text>
       <rect x="250" y="361" width="16" height="12" fill="#edeafa" stroke="#4635b1"/><text x="272" y="372" font-size="13">이번 장 신규</text>
       <rect x="370" y="361" width="16" height="12" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="4 2"/><text x="392" y="372" font-size="13">이전 장 파일 재사용(수정 없음)</text>
-      <text x="600" y="372" font-size="13">왼쪽 = input · 오른쪽 = output (RTL 선언 그대로)</text>
+      <text x="600" y="372" font-size="13">왼쪽 input · 오른쪽 output · 점선 = 클록·리셋</text>
       </svg>
-      <p>포트 이름과 하위 인스턴스는 <code>ch10/rtl/npu_core.v</code> 선언에서 그대로 가져왔습니다.</p>
+      <p>구현 도식: 포트 이름·폭과 하위 인스턴스는 <code>ch10/rtl/npu_core.v</code> 선언에서 자동으로 가져왔습니다.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>방향</th><th>포트</th><th>폭</th><th>구분</th><th>설명</th></tr></thead>
+        <tbody><tr><td>input</td><td class="nw"><code>clk</code></td><td class="nw"><code>1</code></td><td>클록</td><td>시스템 클록 (상승 에지에서 모든 레지스터 갱신)</td></tr><tr><td>input</td><td class="nw"><code>resetn</code></td><td class="nw"><code>1</code></td><td>리셋</td><td>동기 리셋, 0이면 초기화 (Active-Low)</td></tr><tr><td>input</td><td class="nw"><code>start_i</code></td><td class="nw"><code>1</code></td><td>데이터·제어</td><td>추론 시작 (IDLE에서만 수락)</td></tr><tr><td>input</td><td class="nw"><code>length_i</code></td><td class="nw"><code>[8:0]</code></td><td>데이터·제어</td><td>입력 길이 (≤64)</td></tr><tr><td>input</td><td class="nw"><code>biases_i</code></td><td class="nw"><code>[4*ACC_WIDTH-1:0]</code></td><td>데이터·제어</td><td>뉴런 4개의 Bias (start 때 등록)</td></tr><tr><td>input</td><td class="nw"><code>x_wr_en</code></td><td class="nw"><code>1</code></td><td>데이터·제어</td><td>입력 메모리 쓰기</td></tr><tr><td>input</td><td class="nw"><code>w_wr_en</code></td><td class="nw"><code>1</code></td><td>데이터·제어</td><td>가중치 메모리 쓰기</td></tr><tr><td>input</td><td class="nw"><code>x_wr_addr</code></td><td class="nw"><code>[5:0]</code></td><td>데이터·제어</td><td>입력 메모리 주소 (0~63)</td></tr><tr><td>input</td><td class="nw"><code>w_wr_addr</code></td><td class="nw"><code>[5:0]</code></td><td>데이터·제어</td><td>가중치 메모리 주소 (0~63)</td></tr><tr><td>input</td><td class="nw"><code>w_neuron</code></td><td class="nw"><code>[1:0]</code></td><td>데이터·제어</td><td>가중치를 쓸 뉴런 번호 (0~3)</td></tr><tr><td>input</td><td class="nw"><code>x_wr_data</code></td><td class="nw"><code>[DATA_WIDTH-1:0]</code></td><td>데이터·제어</td><td>입력 데이터</td></tr><tr><td>input</td><td class="nw"><code>w_wr_data</code></td><td class="nw"><code>[DATA_WIDTH-1:0]</code></td><td>데이터·제어</td><td>가중치 데이터</td></tr><tr><td>output</td><td class="nw"><code>load_ready_o</code></td><td class="nw"><code>1</code></td><td>데이터·제어</td><td>메모리 적재 가능 (리셋 해제 && !busy_o)</td></tr><tr><td>output</td><td class="nw"><code>busy_o</code></td><td class="nw"><code>1</code></td><td>데이터·제어</td><td>추론 진행 중</td></tr><tr><td>output</td><td class="nw"><code>done_o</code></td><td class="nw"><code>1</code></td><td>데이터·제어</td><td>추론 완료 펄스</td></tr><tr><td>output</td><td class="nw"><code>error_o</code></td><td class="nw"><code>1</code></td><td>데이터·제어</td><td>길이 초과·쓰기 충돌·메모리 읽기 실패 오류 펄스</td></tr><tr><td>output</td><td class="nw"><code>result_o</code></td><td class="nw"><code>[4*DATA_WIDTH-1:0]</code></td><td>데이터·제어</td><td>뉴런 4개 출력</td></tr><tr><td>output</td><td class="nw"><code>overflow_o</code></td><td class="nw"><code>[3:0]</code></td><td>데이터·제어</td><td>뉴런별 양자화 범위 초과</td></tr></tbody>
+      </table></div>
+      <p>상태 전이표 (<code>ch10/rtl/npu_core.v</code>의 <code>case(state)</code> 기준, 리셋 시 <code>IDLE</code>):</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>현재 상태</th><th>조건</th><th>다음 상태</th><th>동작</th></tr></thead>
+        <tbody><tr><td class="nw"><code>IDLE</code></td><td><code>start_i &amp;&amp; (length_i&gt;64 || x_wr_en || w_wr_en)</code></td><td class="nw"><code>IDLE</code></td><td>error_o 펄스</td></tr><tr><td class="nw"><code>IDLE</code></td><td><code>start_i &amp;&amp; 정상</code></td><td class="nw"><code>LAUNCH</code></td><td>length_q·biases_q 등록, busy_o=1</td></tr><tr><td class="nw"><code>LAUNCH</code></td><td><code>length_q==0</code></td><td class="nw"><code>WAIT_DONE</code></td><td>원소 없이 Dense 완료 대기</td></tr><tr><td class="nw"><code>LAUNCH</code></td><td><code>length_q!=0</code></td><td class="nw"><code>READ</code></td><td></td></tr><tr><td class="nw"><code>READ</code></td><td><code>항상</code></td><td class="nw"><code>WAIT_READ</code></td><td>BRAM 읽기 요청 (rd_en)</td></tr><tr><td class="nw"><code>WAIT_READ</code></td><td><code>x_valid &amp;&amp; &amp;w_valid</code></td><td class="nw"><code>SEND</code></td><td></td></tr><tr><td class="nw"><code>WAIT_READ</code></td><td><code>그 외</code></td><td class="nw"><code>IDLE</code></td><td>busy_o=0, error_o 펄스</td></tr><tr><td class="nw"><code>SEND</code></td><td><code>dense_ready &amp;&amp; 마지막 원소</code></td><td class="nw"><code>WAIT_DONE</code></td><td></td></tr><tr><td class="nw"><code>SEND</code></td><td><code>dense_ready &amp;&amp; 남은 원소</code></td><td class="nw"><code>READ</code></td><td>index_q+1</td></tr><tr><td class="nw"><code>WAIT_DONE</code></td><td><code>dense_done</code></td><td class="nw"><code>IDLE</code></td><td>result_o 등록, done_o 펄스</td></tr><tr><td class="nw"><code>(모든 상태)</code></td><td><code>dense_error</code></td><td class="nw"><code>IDLE</code></td><td>busy_o=0, error_o 펄스 (case 뒤에서 우선 적용)</td></tr><tr><td class="nw"><code>default</code></td><td><code>유효하지 않은 상태</code></td><td class="nw"><code>IDLE</code></td><td>error_o 펄스</td></tr></tbody>
+      </table></div>
     </section>
     <section class="section" id="s02">
       <h2><span class="num">02</span>준비</h2>
@@ -120,7 +136,7 @@ python3 --version</code></pre></div>
       <h2><span class="num">03</span>RTL 작성</h2>
       <p>아래 파일을 경로 그대로 만들고 전체 코드를 입력합니다.</p>
       <div class="codeblock">
-        <div class="codebar"><span>ch10/rtl/npu_core.v · verilog</span></div>
+        <div class="codebar"><span>ch10/rtl/npu_core.v · verilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
         <pre><code class="language-verilog">`timescale 1ns/1ps
 module npu_core #(parameter integer DATA_WIDTH=16,ACC_WIDTH=40)(
     input wire clk,resetn,start_i,
@@ -203,7 +219,7 @@ endmodule</code></pre>
       <h2><span class="num">04</span>테스트벤치·기준 모델 작성</h2>
       <p>테스트벤치는 출력을 자동 판정합니다. 기준 모델(Python)은 시험 벡터와 정답을 만듭니다.</p>
       <div class="codeblock">
-        <div class="codebar"><span>ch10/tb/tb_npu_core.sv · systemverilog</span></div>
+        <div class="codebar"><span>ch10/tb/tb_npu_core.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
         <pre><code class="language-systemverilog">`timescale 1ns/1ps
 module tb_npu_core;
     parameter DW=16,AW=40;
@@ -277,7 +293,7 @@ module tb_npu_core;
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>ch10/reference/npu_reference.py · python</span></div>
+        <div class="codebar"><span>ch10/reference/npu_reference.py · python · 원본 · RTL_SIM 통과 2026-11-18</span></div>
         <pre><code class="language-python">import argparse
 import random
 import sys
@@ -319,7 +335,7 @@ if __name__=='__main__':
     <section class="section" id="s05">
       <h2><span class="num">05</span>시뮬레이션 실행</h2>
       <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 저장소 루트에서 실행</span></div>
-        <pre><code>bash ch10/scripts/run_sim.sh</code></pre></div>
+        <pre><code>bash ch10/scripts/run_sim.sh   # RTL 컴파일 → 시뮬레이션 → TB 자동 판정 → Python 기준값 비교</code></pre></div>
       <p>기대 출력 (도구 버전 미기록 · 2026-11-18 실제 실행 로그 발췌, 출처 <code>ch10/validation/rtl_sim_20261118.log</code>):</p>
       <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
         <pre><code>PYTHON_NPU_SELF_TEST_PASS INT16/40 datasets=22 inferences=44 seed=310
@@ -331,20 +347,20 @@ PYTHON_RTL_COMPARE_PASS cycles=44</code></pre></div>
     </section>
     <section class="section" id="s06">
       <h2><span class="num">06</span>결과 판정</h2>
-      <table>
+      <div class="table-wrap"><table>
         <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
         <tbody><tr><td><code>RTL_SIM_PASS NPU INT16/40 datasets=22 inferences=44</code></td><td>22개 데이터셋·44회 추론 통과</td></tr><tr><td><code>RTL_SIM_PASS NPU INT8/32 datasets=22 inferences=44</code></td><td>INT8 설정 통과</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS</code></td><td>RTL 출력 파일과 Python 기준값이 모든 사이클에서 일치</td></tr></tbody>
-      </table>
+      </table></div>
       <p><b>실패 시:</b> TB의 <code>$fatal</code> 메시지에 표시된 cycle 번호와 기대값/실제값을 확인하고, 03절 코드와 한 줄씩 대조합니다. 하나라도 실패하면 다음 장으로 넘어가지 않습니다.</p>
     </section>
     <section class="section" id="s07">
       <h2><span class="num">07</span>코드 읽기 포인트</h2>
-      <table>
+      <div class="table-wrap"><table>
         <thead><tr><th>위치</th><th>내용</th></tr></thead>
         <tbody><tr><td>load_ready_o</td><td><code>resetn &amp;&amp; !busy_o</code>. 추론 중에는 쓰기 요청이 거부됩니다. start와 쓰기가 겹쳐 들어오면 error_o를 발생합니다.</td></tr>
 <tr><td>FSM 흐름</td><td>LAUNCH 상태에서 <code>length_q=0</code>이면 즉시 WAIT_DONE으로 건너뜁니다. WAIT_READ에서 BRAM Valid가 1이 아니면 에러로 복귀합니다.</td></tr>
 <tr><td>BRAM 타이밍</td><td>READ→WAIT_READ로 이동할 때 BRAM 읽기 요청이 발생합니다. BRAM은 1클록 레이턴시이므로 WAIT_READ에서 Valid가 도착합니다. Valid 확인 후 SEND로 전환하면 그 에지에서 Dense가 데이터를 수락합니다.</td></tr></tbody>
-      </table>
+      </table></div>
     </section>
     <section class="section" id="s08">
       <h2><span class="num">08</span>합성·타이밍·보드</h2>
@@ -353,21 +369,21 @@ PYTHON_RTL_COMPARE_PASS cycles=44</code></pre></div>
         <pre><code>source /tools/Xilinx/Vivado/&lt;버전&gt;/settings64.sh   # 설치 경로에 맞게 변경
 vivado -mode batch -nojournal -source tools/vivado/ooc_timing.tcl -tclargs ch10
 # 기대: SYNTH_TIMING_PASS ch10 npu_core WNS=… WHS=… LUT=… FF=… DSP48E1=… RAMB=…</code></pre></div>
-      <table>
+      <div class="table-wrap"><table>
         <thead><tr><th>판정 항목</th><th>기준</th><th>확인 위치</th></tr></thead>
         <tbody>
           <tr><td>Setup / Hold</td><td><code>WNS ≥ 0</code> · <code>WHS ≥ 0</code> (clk 10.000 ns)</td><td><code>build/vivado/ch10/timing_route.rpt</code></td></tr>
           <tr><td>자원</td><td>DSP48E1 ≥ 4 · RAMB ≥ 1 — 기대값 · 실행 전 ⚠ 미검증</td><td><code>build/vivado/ch10/route_util.rpt</code></td></tr>
         </tbody>
-      </table>
+      </table></div>
       <p>OOC 결과는 입출력 핀 지연을 포함하지 않으므로 보드 Top 타이밍을 대신하지 않습니다. 증거 저장은 <code>bash tools/run_vivado_all.sh ooc</code>(→ <code>ch10/validation/vivado_ooc_YYYYMMDD.txt</code>). 보드 확인은 <a href="ch12_integrated_npu_v05.html#s08">12장 · 08</a>에서 통합 Top으로 진행합니다.</p>
     </section>
     <section class="section" id="s09">
       <h2><span class="num">09</span>검증 현황·인계</h2>
-      <table>
+      <div class="table-wrap"><table>
         <thead><tr><th>다음 장으로 넘기는 파일</th><th>사용처</th></tr></thead>
         <tbody><tr><td><code>ch10/rtl/npu_core.v</code></td><td>직접 인스턴스 없음 — 12장 npu_engine4가 같은 BRAM·4뉴런 구조를 DSP 레인(02장)으로 다시 구성</td></tr></tbody>
-      </table>
+      </table></div>
       <p>검증 게이트 (<code>ch10/validation/</code> 증거 파일 기준으로 자동 표시):</p>
       <div class="gate-row">
         <div class="gate pass">

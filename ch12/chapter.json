@@ -94,5 +94,16 @@
       "mini_npu/build/impl/basys3_npu_top.bit",
       "8-1 구현 결과 비트스트림 — Git에 넣지 않고 SHA-256을 ch12/validation/vivado_impl_timesim_*.txt에 기록"
     ]
-  ]
+  ],
+  "port_notes": {
+    "clk": "Basys3 W5 핀 100 MHz 오실레이터",
+    "btnC": "U18 가운데 버튼 = 리셋 (Active-High, 비동기 인가·동기 해제)",
+    "uart_rxd": "B18 USB-UART 수신 핀 (PC → FPGA, 115200 8N1)",
+    "uart_txd": "A18 USB-UART 송신 핀 (FPGA → PC)",
+    "led": "LED0~3 클래스 · LED13 BUSY · LED14 DONE 래치 · LED15 오류 래치",
+    "seg": "7세그먼트 a~g (Active-Low)",
+    "an": "7세그먼트 자리 선택 (Active-Low)",
+    "dp": "7세그먼트 소수점 (항상 1 = 꺼짐, Active-Low)"
+  },
+  "run_note": "00~12장 전체 회귀 시뮬레이션 (단계별 결과 표 출력)"
 }

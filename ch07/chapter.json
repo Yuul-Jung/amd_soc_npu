@@ -63,5 +63,20 @@
       "ch07/rtl/vector_dot_core.v",
       "08장 pe_array4의 PE 4개 (수정 금지)"
     ]
-  ]
+  ],
+  "port_notes": {
+    "clk": "시스템 클록 (상승 에지에서 모든 레지스터 갱신)",
+    "resetn": "동기 리셋, 0이면 초기화 (Active-Low)",
+    "start_i": "트랜잭션 시작 (busy_o=0일 때만 수락)",
+    "valid_i": "a_i·b_i 원소 1개 공급",
+    "length_i": "벡터 길이 (0~MAX_LEN, 초과 시 error_o)",
+    "a_i": "벡터 A 원소",
+    "b_i": "벡터 B 원소",
+    "ready_o": "원소를 받을 수 있음 (busy_o && accepted<length)",
+    "busy_o": "트랜잭션 진행 중",
+    "done_o": "내적 완료 펄스 (1클록)",
+    "error_o": "길이 초과 오류 펄스",
+    "result_o": "내적 결과 (done_o와 함께 갱신)"
+  },
+  "run_note": "RTL 컴파일 → 시뮬레이션 → TB 자동 판정 → Python 기준값 비교"
 }

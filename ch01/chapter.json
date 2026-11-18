@@ -65,5 +65,16 @@
       "ch01/rtl/mac_core.v",
       "02장 TB 교차 검증 · 07장 vector_dot_core 내부 (수정 금지)"
     ]
-  ]
+  ],
+  "port_notes": {
+    "clk": "시스템 클록 (상승 에지에서 모든 레지스터 갱신)",
+    "resetn": "동기 리셋, 0이면 초기화 (Active-Low)",
+    "clear_i": "누산기 0으로 초기화 (리셋 다음 우선순위)",
+    "valid_i": "이번 클록에 a_i·b_i를 누산",
+    "a_i": "signed 피연산자 A",
+    "b_i": "signed 피연산자 B",
+    "acc_o": "누산 결과 (2의 보수, 범위 초과 시 순환)",
+    "valid_o": "직전 에지에서 입력을 누산했음"
+  },
+  "run_note": "RTL 컴파일 → 시뮬레이션 → TB 자동 판정 → Python 기준값 비교"
 }

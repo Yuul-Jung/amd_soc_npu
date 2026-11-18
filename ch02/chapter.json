@@ -63,5 +63,16 @@
       "ch02/rtl/dsp_multiplier.v",
       "12장 npu_dsp_mac_lane 내부 곱셈기 (수정 금지)"
     ]
-  ]
+  ],
+  "port_notes": {
+    "clk": "시스템 클록 (상승 에지에서 모든 레지스터 갱신)",
+    "resetn": "동기 리셋, 0이면 초기화 (Active-Low)",
+    "clear_i": "곱 레지스터 0으로 초기화",
+    "valid_i": "이번 클록에 곱을 등록",
+    "a_i": "signed 피연산자 A (DSP 25비트 포트로 부호 확장)",
+    "b_i": "signed 피연산자 B (DSP 18비트 포트로 부호 확장)",
+    "product_o": "등록된 곱 (A_WIDTH+B_WIDTH 비트)",
+    "valid_o": "product_o가 이번 입력의 곱임"
+  },
+  "run_note": "RTL 컴파일 → 시뮬레이션 → TB 자동 판정 → Python 기준값 비교"
 }

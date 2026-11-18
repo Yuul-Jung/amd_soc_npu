@@ -64,5 +64,21 @@
       "ch08/rtl/pe_array4.v",
       "09장 dense_layer4 (수정 금지)"
     ]
-  ]
+  ],
+  "port_notes": {
+    "clk": "시스템 클록 (상승 에지에서 모든 레지스터 갱신)",
+    "resetn": "동기 리셋, 0이면 초기화 (Active-Low)",
+    "start_i": "4개 PE 동시 시작",
+    "length_i": "벡터 길이 (≤256, 초과 시 error_o)",
+    "valid_i": "PE별 원소 공급 (비트 g = PE g)",
+    "a_i": "PE 4개의 A 원소 묶음 (PE g = [g*DATA_WIDTH +: DATA_WIDTH])",
+    "b_i": "PE 4개의 B 원소 묶음",
+    "ready_o": "PE별 원소 수락 가능",
+    "busy_o": "진행 중",
+    "done_o": "4개 PE 모두 완료 후 1클록 펄스",
+    "error_o": "길이 초과 오류 펄스",
+    "pe_results_o": "PE별 내적 결과 4개",
+    "sum_o": "4개 결과의 합 (올림 보호 2비트 확장)"
+  },
+  "run_note": "RTL 컴파일 → 시뮬레이션 → TB 자동 판정 → Python 기준값 비교"
 }

@@ -102,7 +102,26 @@ def parse_instances(path, origin):
     return out
 
 
-def svg_block(chid, relpath, module, origin):
+CLK_RE = re.compile(r"^clk\w*$")
+RST_RE = re.compile(r"^(resetn|rst\w*|reset\w*|btnC)$")
+
+
+def port_kind(name, board):
+    if CLK_RE.match(name):
+        return "클록"
+    if RST_RE.match(name):
+        return "리셋"
+    return "보드 핀" if board else "데이터·제어"
+
+
+FSM_RE = re.compile(r"localparam\s*(?:\[[^\]]*\])?\s*((?:[A-Z_][A-Z0-9_]*\s*=\s*\d+\s*,\s*)+[A-Z_][A-Z0-9_]*\s*=\s*\d+)\s*;")
+
+
+def st_present(relpath):
+    return bool(FSM_RE.search(strip_comments(rd(relpath))))
+
+
+def svg_block(chid, relpath, module, origin, board=False):
     ins, outs = parse_ports(relpath, module)
     rows = []
     for mod, lst in parse_instances(relpath, origin).items():
@@ -113,23 +132,23 @@ def svg_block(chid, relpath, module, origin):
         rows.append((label, origin[mod]))
     rows.sort(key=lambda r: (r[1] == chid, r[1]))
     lh = 23
-    body_h = max(len(ins), len(outs), 2 + len(rows) * 1.6) * lh + 40
+    body_h = max(len(ins), len(outs), 2 + len(rows) * 1.6 + (2 if st_present(relpath) else 0)) * lh + 40
     W, x0, x1, y0 = 980, 250, 730, 30
-    s = [f'<svg viewBox="0 0 {W} {int(body_h+70)}" role="img" aria-label="{module} 실제 포트와 하위 모듈 구조">',
+    s = [f'<svg viewBox="0 0 {W} {int(body_h+(90 if board else 70))}" role="img" aria-label="{module} 실제 포트와 하위 모듈 구조">',
          f'<rect x="{x0}" y="{y0}" width="{x1-x0}" height="{int(body_h)}" rx="10" fill="#fff" stroke="#4635b1" stroke-width="2"/>',
          f'<text x="{(x0+x1)//2}" y="{y0+24}" font-size="18" font-weight="700" text-anchor="middle">{module}</text>',
-         f'<text x="{(x0+x1)//2}" y="{y0+42}" font-size="13" text-anchor="middle" fill="#555">{relpath}</text>']
-    st = re.search(r"localparam\s*(?:\[[^\]]*\])?\s*((?:[A-Z_][A-Z0-9_]*\s*=\s*\d+\s*,\s*)+[A-Z_][A-Z0-9_]*\s*=\s*\d+)\s*;",
-                   strip_comments(rd(relpath)))
+         f'<text x="{(x0+x1)//2}" y="{y0+42}" font-size="13" text-anchor="middle" fill="#555">{relpath} · 구현 도식</text>']
+    st = FSM_RE.search(strip_comments(rd(relpath)))
     if st:
         names = [n.split("=")[0].strip() for n in st.group(1).split(",")]
         yy = y0 + 58 + len(rows) * lh * 1.6 + 8
-        s.append(f'<text x="{x0+20}" y="{int(yy)+12}" font-size="13" fill="#555">FSM 상태 (localparam 선언 순서)</text>')
-        s.append(f'<text x="{x0+20}" y="{int(yy)+34}" font-size="14" font-family="monospace">{" → ".join(names)}</text>')
+        s.append(f'<text x="{x0+20}" y="{int(yy)+12}" font-size="13" fill="#555">FSM 상태 (localparam 선언 순서 · 전이는 아래 상태 전이표)</text>')
+        s.append(f'<text x="{x0+20}" y="{int(yy)+34}" font-size="14" font-family="monospace">{" · ".join(names)}</text>')
     for i, (n, w) in enumerate(ins):
         y = y0 + 30 + i * lh
         s.append(f'<text x="{x0-28}" y="{y+4}" font-size="14" font-family="monospace" text-anchor="end">{n}{w}</text>')
-        s.append(f'<path d="M{x0-24} {y} H{x0}" stroke="#4635b1" stroke-width="1.5"/><path d="M{x0} {y} l-7 -4 v8 z" fill="#4635b1"/>')
+        dash = ' stroke-dasharray="4 3"' if port_kind(n, board) in ("클록", "리셋") else ""
+        s.append(f'<path d="M{x0-24} {y} H{x0}" stroke="#4635b1" stroke-width="1.5"{dash}/><path d="M{x0} {y} l-7 -4 v8 z" fill="#4635b1"/>')
     for i, (n, w) in enumerate(outs):
         y = y0 + 30 + i * lh
         s.append(f'<path d="M{x1} {y} H{x1+24}" stroke="#4635b1" stroke-width="1.5"/><path d="M{x1+24} {y} l-7 -4 v8 z" fill="#4635b1"/>')
@@ -145,9 +164,45 @@ def svg_block(chid, relpath, module, origin):
     ly = int(body_h + y0 + 26)
     s.append(f'<rect x="{x0}" y="{ly-11}" width="16" height="12" fill="#edeafa" stroke="#4635b1"/><text x="{x0+22}" y="{ly}" font-size="13">이번 장 신규</text>')
     s.append(f'<rect x="{x0+120}" y="{ly-11}" width="16" height="12" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="4 2"/><text x="{x0+142}" y="{ly}" font-size="13">이전 장 파일 재사용(수정 없음)</text>')
-    s.append(f'<text x="{x0+350}" y="{ly}" font-size="13">왼쪽 = input · 오른쪽 = output (RTL 선언 그대로)</text>')
+    s.append(f'<text x="{x0+350}" y="{ly}" font-size="13">왼쪽 input · 오른쪽 output · 점선 = 클록·리셋</text>')
+    if board:
+        s.append(f'<text x="{x0}" y="{ly+20}" font-size="13">이 모듈의 포트는 Basys3 외부 핀입니다 (XDC 핀 배정).</text>')
     s.append("</svg>")
     return "\n".join(s)
+
+
+def port_table(c, board):
+    ins, outs = parse_ports(c["top"]["file"], c["top"]["module"])
+    notes = c.get("port_notes", {})
+    missing = [n for n, _ in ins + outs if n not in notes]
+    if missing:
+        raise SystemExit(f"{c['id']}: port_notes 누락 {missing} — chapter.json에 한글 설명을 추가하세요")
+    rows = "".join(f"<tr><td>{d}</td><td class=\"nw\"><code>{n}</code></td><td class=\"nw\"><code>{w or '1'}</code></td><td>{port_kind(n, board)}</td><td>{notes[n]}</td></tr>"
+                   for d, lst in (("input", ins), ("output", outs)) for n, w in lst)
+    return f"""      <table>
+        <thead><tr><th>방향</th><th>포트</th><th>폭</th><th>구분</th><th>설명</th></tr></thead>
+        <tbody>{rows}</tbody>
+      </table>"""
+
+
+def fsm_table(c):
+    f = c.get("fsm")
+    if not f:
+        return ""
+    st = FSM_RE.search(strip_comments(rd(f["file"])))
+    names = [n.split("=")[0].strip() for n in st.group(1).split(",")]
+    used = {r[0] for r in f["rows"]} | {r[2] for r in f["rows"]}
+    unknown = sorted(x for x in used if x not in names and x not in ("default", "(모든 상태)"))
+    if unknown or not set(names) <= used:
+        raise SystemExit(f"{c['id']}: fsm 표 상태명이 {f['file']} localparam과 다릅니다 {unknown or sorted(set(names) - used)}")
+    rows = "".join(f"<tr><td class=\"nw\"><code>{a}</code></td><td><code>{esc(b)}</code></td><td class=\"nw\"><code>{d}</code></td><td>{esc(e)}</td></tr>"
+                   for a, b, d, e in f["rows"])
+    return f"""
+      <p>상태 전이표 (<code>{f['file']}</code>의 <code>case(state)</code> 기준, 리셋 시 <code>{f['reset']}</code>):</p>
+      <table>
+        <thead><tr><th>현재 상태</th><th>조건</th><th>다음 상태</th><th>동작</th></tr></thead>
+        <tbody>{rows}</tbody>
+      </table>"""
 
 
 # ── 증거(validation/) 읽기 ───────────────────────────────────────────────────
@@ -282,7 +337,6 @@ HEAD = """<!doctype html>
 <title>{title}</title>
 <link rel="stylesheet" href="assets/education/site.css">
 <style>
-.hero:before{{background-image:linear-gradient(90deg,rgba(12,17,27,.89),rgba(12,17,27,.69) 58%,rgba(12,17,27,.48)),url('https://raw.githubusercontent.com/Yuul-Jung/rule_md/d1b8278d41fca8f5e3960736f3ac9d377e462fda/web/education-html/assets/hero-bookshelf.jpg')}}
 .codeblock pre{{max-height:780px;white-space:pre}}
 .section svg{{width:100%;height:auto}}
 .vbadge{{display:inline-block;padding:.15em .6em;border-radius:4px;font-size:.78em;font-weight:700;background:#d4edda;color:#155724;vertical-align:middle}}
@@ -294,6 +348,14 @@ HEAD = """<!doctype html>
 .gate.todo{{border-color:#b08900;background:#fffbe6}}
 .gate.fail{{border-color:#b3261e;background:#fdeceb}}
 .gate.na{{border-color:#c8c8c8;background:#f6f6f6;color:#666}}
+.table-wrap{{overflow-x:auto}}
+.section :not(pre)>code{{overflow-wrap:anywhere}}
+.codebar{{gap:8px}}
+.codebar span{{min-width:0;overflow-wrap:anywhere}}
+.hero p{{max-width:none}}
+.access-skip{{position:absolute;left:-9999px;top:0}}
+.access-skip:focus{{left:12px;top:12px;z-index:1003;background:#fff;color:#15171c;padding:6px 10px}}
+.nw code{{white-space:nowrap;overflow-wrap:normal}}
 </style>
 </head>
 <body data-chapter="{chid}">
@@ -329,9 +391,24 @@ def course_js(chs):
     return "window.COURSE=" + json.dumps(data, ensure_ascii=False, indent=1) + ";"
 
 
-def code(path):
-    lang = {"v": "verilog", "sv": "systemverilog", "py": "python", "sh": "bash", "tcl": "tcl", "xdc": "tcl"}[path.rsplit(".", 1)[1]]
-    return (f'      <div class="codeblock">\n        <div class="codebar"><span>{path} · {lang}</span></div>\n'
+VIVADO_FILES = re.compile(r"(\.xdc|\.tcl|run_vivado_all\.sh|run_timing_sim\.sh)$")
+
+
+def code_status(path, e):
+    if e is None:
+        return "원본"
+    if VIVADO_FILES.search(path):
+        if e.synth:
+            return "원본 · Vivado 실행 " + ("통과" if e.synth.startswith("SYNTH_TIMING_PASS") else "실패")
+        return "원본 · ⚠ 미검증 (Vivado 미실행)"
+    if e.rtl_pass and not e.rtl_fail:
+        return f"원본 · RTL_SIM 통과 {file_date(e.rtl_path)}"
+    return "원본 · ⚠ 미검증"
+
+
+def code(path, e=None):
+    lang = {"v": "verilog", "sv": "systemverilog", "py": "python", "sh": "bash", "tcl": "tcl", "xdc": "xdc"}[path.rsplit(".", 1)[1]]
+    return (f'      <div class="codeblock">\n        <div class="codebar"><span>{path} · {lang} · {code_status(path, e)}</span></div>\n'
             f'        <pre><code class="language-{lang}">{esc(rd(path).rstrip(chr(10)))}</code></pre>\n      </div>')
 
 
@@ -365,7 +442,7 @@ vivado -mode batch -nojournal -source tools/vivado/ooc_timing.tcl -tclargs {k}
       </table>
       <p>OOC 결과는 입출력 핀 지연을 포함하지 않으므로 보드 Top 타이밍을 대신하지 않습니다. 증거 저장은 <code>bash tools/run_vivado_all.sh ooc</code>(→ <code>{k}/validation/vivado_ooc_YYYYMMDD.txt</code>). 보드 확인은 {link_to(chs, 'ch12', 's08', '12장 · 08')}에서 통합 Top으로 진행합니다.</p>"""
         for p in v.get("extra_code", []):
-            s += f"\n      <p><code>{p}</code> 전체:</p>\n" + code(p)
+            s += f"\n      <p><code>{p}</code> 전체:</p>\n" + code(p, e)
     if v["mode"] == "top":
         s = rd(v["board_fragment"]).rstrip("\n")
     if e.synth:
@@ -374,6 +451,12 @@ vivado -mode batch -nojournal -source tools/vivado/ooc_timing.tcl -tclargs {k}
               f'      <div class="codeblock"><div class="codebar"><span>Vivado 실행 결과</span></div>\n'
               f'        <pre><code>{esc(rec)}</code></pre></div>')
     return s
+
+
+def wrap_tables(text):
+    """표를 가로 스크롤 영역으로 감싸 좁은 화면에서 페이지 전체가 넘치지 않게 한다."""
+    text = re.sub(r'(?<!<div class="table-wrap">)<table>', '<div class="table-wrap"><table>', text)
+    return re.sub(r'</table>(?!</div>)', '</table></div>', text)
 
 
 def section(i, title, body):
@@ -400,8 +483,10 @@ def build(c, chs, origin, by_id):
         </tbody>
       </table>
       <p>실습 순서: 01 구조 확인 → 02 준비 → 03 RTL 작성 → 04 테스트벤치·기준 모델 작성 → 05 시뮬레이션 → 06 결과 판정 → 08 합성·타이밍(Vivado) → 09 인계.</p>"""
-    s01 = "      " + svg_block(k, c["top"]["file"], c["top"]["module"], origin).replace("\n", "\n      ")
-    s01 += f'\n      <p>포트 이름과 하위 인스턴스는 <code>{c["top"]["file"]}</code> 선언에서 그대로 가져왔습니다.</p>'
+    board = c.get("vivado", {}).get("mode") == "top"
+    s01 = "      " + svg_block(k, c["top"]["file"], c["top"]["module"], origin, board).replace("\n", "\n      ")
+    s01 += f'\n      <p>구현 도식: 포트 이름·폭과 하위 인스턴스는 <code>{c["top"]["file"]}</code> 선언에서 자동으로 가져왔습니다.</p>\n'
+    s01 += port_table(c, board) + fsm_table(c)
     prep = c.get("prep_note", "")
     s02 = f"""      <ol>
         <li>VS Code에서 저장소 루트(<code>amd_soc_npu/</code>)를 엽니다.</li>
@@ -412,12 +497,12 @@ def build(c, chs, origin, by_id):
 iverilog -V 2&gt;&amp;1 | head -1      # Icarus Verilog version 12.0 이상
 python3 --version</code></pre></div>
       <ol start="3"><li>00절 '유지' 파일이 이전 장 결과 그대로 있는지 확인합니다{(' (' + prep + ')') if prep else ''}.</li></ol>"""
-    s03 = "      <p>아래 파일을 경로 그대로 만들고 전체 코드를 입력합니다.</p>\n" + "\n".join(code(p) for p in c["new"])
+    s03 = "      <p>아래 파일을 경로 그대로 만들고 전체 코드를 입력합니다.</p>\n" + "\n".join(code(p, e) for p in c["new"])
     tb_note = c.get("tb_note", "기준 모델(Python)은 시험 벡터와 정답을 만듭니다.")
-    s04 = f"      <p>테스트벤치는 출력을 자동 판정합니다. {tb_note}</p>\n" + "\n".join(code(p) for p in c["tb"] + c["ref"])
+    s04 = f"      <p>테스트벤치는 출력을 자동 판정합니다. {tb_note}</p>\n" + "\n".join(code(p, e) for p in c["tb"] + c["ref"])
     pat = c.get("evidence", {}).get("pattern", r"_PASS|PYTHON_VECTORS|^\|")
     s05 = f"""      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 저장소 루트에서 실행</span></div>
-        <pre><code>{esc(c['run'])}</code></pre></div>
+        <pre><code>{esc(c['run'])}   # {esc(c.get('run_note', 'RTL 컴파일 → 시뮬레이션 → TB 자동 판정'))}</code></pre></div>
       <p>기대 출력 ({e.tool} · {file_date(e.rtl_path)} 실제 실행 로그 발췌, 출처 <code>{e.rtl_path}</code>):</p>
       <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
         <pre><code>{esc(excerpt(e.rtl, pat)) or '⚠ 실행 로그 없음'}</code></pre></div>"""
@@ -426,7 +511,7 @@ python3 --version</code></pre></div>
         s05 += f"""
       <p>{x['title']}:</p>
       <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal</span></div>
-        <pre><code>{esc(x['cmd'])}</code></pre></div>
+        <pre><code>{esc(x['cmd'])}   # {esc(x.get('note', x['title']))}</code></pre></div>
       <div class="codeblock"><div class="codebar"><span>기대 출력 (출처 {lp})</span></div>
         <pre><code>{esc(excerpt(log_lines(lp, x.get('section')), x['pattern']))}</code></pre></div>"""
     chk = "".join(f"<tr><td><code>{a}</code></td><td>{b}</td></tr>" for a, b in c["checks"])
@@ -453,7 +538,8 @@ python3 --version</code></pre></div>
     body = "\n".join(section(i, t, b) for i, (t, b) in enumerate(secs))
     head = HEAD.format(desc=f"Basys3 NPU {n:02d}장 실습 · {c['name']}", title=f"{n:02d}장 · {c['name']} ({c['version']})",
                        chid=k, numstr=f"{n:02d}장 실습", ver=c["version"], h1=f"제{n:02d}장 · {c['name']}", subtitle=c["goal"])
-    return head + body + "\n" + FOOT.format(course=course_js(chs)), gates(c, e)
+    html_out = wrap_tables(head + body + "\n" + FOOT.format(course=course_js(chs)))
+    return html_out, gates(c, e)
 
 
 # ── index.html · course.json · 현황표 ────────────────────────────────────────
@@ -472,6 +558,13 @@ def update_index(text, chs):
         return "<tr>" + "".join(f"<td>{x}</td>" for x in cells) + "</tr>"
 
     text = re.sub(r"<tr><td>(\d\d)</td>.*?</tr>", row, text)
+    # 장식용 칩 제거 (STANDARD 3절, 헤더 높이 160~220px)
+    text = re.sub(r'\n\s*<div class="chips">.*?</div>', "", text, count=1, flags=re.S)
+    if ".table-wrap{" not in text:
+        text = text.replace("</style>", ".table-wrap{overflow-x:auto}\n.section :not(pre)>code{overflow-wrap:anywhere}\n.codebar{gap:8px}\n.codebar span{min-width:0;overflow-wrap:anywhere}\n.access-skip{position:absolute;left:-9999px;top:0}\n.access-skip:focus{left:12px;top:12px;z-index:1003;background:#fff;color:#15171c;padding:6px 10px}\n.nw code{white-space:nowrap;overflow-wrap:normal}\n</style>", 1)
+    text = wrap_tables(text)
+    # 책장 사진은 assets/education/hero-bookshelf.jpg (site.css) 를 쓴다. 외부 주소 덮어쓰기 제거.
+    text = re.sub(r"^\.hero:before\{background-image:[^\n]*raw\.githubusercontent[^\n]*\n", "", text, flags=re.M)
     return re.sub(r"window\.COURSE=\{.*?\n\};", course_js(chs).rstrip(";") + ";", text, flags=re.S)
 
 

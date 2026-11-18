@@ -61,5 +61,16 @@
       "ch03/rtl/mac_pipeline_core.v",
       "후속 장 직접 사용 없음 (01장 MAC과 지연 비교용)"
     ]
-  ]
+  ],
+  "port_notes": {
+    "clk": "시스템 클록 (상승 에지에서 모든 레지스터 갱신)",
+    "resetn": "동기 리셋, 0이면 초기화 (Active-Low)",
+    "clear_i": "곱·누산 두 단계 모두 0으로 초기화",
+    "valid_i": "이번 클록 입력을 파이프라인에 넣음",
+    "a_i": "signed 피연산자 A",
+    "b_i": "signed 피연산자 B",
+    "acc_o": "누산 결과 (입력보다 1클록 늦게 반영)",
+    "valid_o": "2단계에서 누산이 일어났음"
+  },
+  "run_note": "RTL 컴파일 → 시뮬레이션 → TB 자동 판정 → Python 기준값 비교"
 }

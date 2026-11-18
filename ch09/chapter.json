@@ -66,5 +66,22 @@
       "ch09/rtl/dense_layer4.v",
       "10장 npu_core (수정 금지)"
     ]
-  ]
+  ],
+  "port_notes": {
+    "clk": "시스템 클록 (상승 에지에서 모든 레지스터 갱신)",
+    "resetn": "동기 리셋, 0이면 초기화 (Active-Low)",
+    "start_i": "레이어 계산 시작 (이때 biases_i 등록)",
+    "valid_i": "입력 원소 1개 공급",
+    "length_i": "입력 길이 (≤64, 초과 시 error_o)",
+    "x_i": "입력 원소 (4뉴런 공통)",
+    "weights_i": "뉴런 4개의 가중치 원소 묶음",
+    "biases_i": "뉴런 4개의 Bias 묶음",
+    "ready_o": "원소 수락 가능",
+    "busy_o": "진행 중",
+    "done_o": "완료 펄스",
+    "error_o": "길이 초과 오류 펄스",
+    "result_o": "Bias+ReLU+양자화 결과 4개",
+    "overflow_o": "뉴런별 양자화 범위 초과"
+  },
+  "run_note": "RTL 컴파일 → 시뮬레이션 → TB 자동 판정 → Python 기준값 비교"
 }

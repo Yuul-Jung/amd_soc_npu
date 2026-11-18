@@ -61,5 +61,17 @@
       "ch04/rtl/bram_sync_buffer.v",
       "10장 npu_core의 입력 메모리 1개 + 가중치 메모리 4개 (수정 금지)"
     ]
-  ]
+  ],
+  "port_notes": {
+    "clk": "시스템 클록 (상승 에지에서 모든 레지스터 갱신)",
+    "resetn": "동기 리셋, 0이면 초기화 (Active-Low) · 리셋 중 쓰기 억제",
+    "wr_en": "쓰기 요청",
+    "rd_en": "읽기 요청 (다음 에지에 rd_data 유효)",
+    "wr_addr": "쓰기 주소",
+    "rd_addr": "읽기 주소",
+    "wr_data": "쓰기 데이터 (signed)",
+    "rd_data": "읽기 데이터 (1클록 지연)",
+    "rd_valid": "rd_data가 직전 읽기 요청의 결과임"
+  },
+  "run_note": "RTL 컴파일 → 시뮬레이션 → TB 자동 판정 → Python 기준값 비교"
 }

@@ -8,7 +8,6 @@
 <title>00장 · 물리 UART 8N1·Echo (v05)</title>
 <link rel="stylesheet" href="assets/education/site.css">
 <style>
-.hero:before{background-image:linear-gradient(90deg,rgba(12,17,27,.89),rgba(12,17,27,.69) 58%,rgba(12,17,27,.48)),url('https://raw.githubusercontent.com/Yuul-Jung/rule_md/d1b8278d41fca8f5e3960736f3ac9d377e462fda/web/education-html/assets/hero-bookshelf.jpg')}
 .codeblock pre{max-height:780px;white-space:pre}
 .section svg{width:100%;height:auto}
 .vbadge{display:inline-block;padding:.15em .6em;border-radius:4px;font-size:.78em;font-weight:700;background:#d4edda;color:#155724;vertical-align:middle}
@@ -20,6 +19,14 @@
 .gate.todo{border-color:#b08900;background:#fffbe6}
 .gate.fail{border-color:#b3261e;background:#fdeceb}
 .gate.na{border-color:#c8c8c8;background:#f6f6f6;color:#666}
+.table-wrap{overflow-x:auto}
+.section :not(pre)>code{overflow-wrap:anywhere}
+.codebar{gap:8px}
+.codebar span{min-width:0;overflow-wrap:anywhere}
+.hero p{max-width:none}
+.access-skip{position:absolute;left:-9999px;top:0}
+.access-skip:focus{left:12px;top:12px;z-index:1003;background:#fff;color:#15171c;padding:6px 10px}
+.nw code{white-space:nowrap;overflow-wrap:normal}
 </style>
 </head>
 <body data-chapter="ch00">
@@ -39,13 +46,13 @@
     <section class="section" id="s00">
       <h2><span class="num">00</span>이 장의 위치</h2>
       <p><b>목표:</b> PC에서 보낸 바이트가 FPGA UART RX → FIFO → TX를 거쳐 그대로 돌아오는 Echo 회로를 시뮬레이션으로 확인합니다.</p>
-      <table>
+      <div class="table-wrap"><table>
         <thead><tr><th>구분</th><th>파일</th></tr></thead>
         <tbody>
           <tr><td>유지 (이전 장, 수정 없음)</td><td><ul><li>없음 (첫 장)</li></ul></td></tr>
           <tr><td>이번 장 작성</td><td><ul><li><code>common/rtl/uart_rx.v</code></li><li><code>common/rtl/uart_tx.v</code></li><li><code>common/rtl/uart_core.v</code></li><li><code>common/rtl/uart_echo_controller.v</code></li><li><code>ch00/rtl/basys3_uart_echo_top.v</code></li></ul></td></tr>
         </tbody>
-      </table>
+      </table></div>
       <p>실습 순서: 01 구조 확인 → 02 준비 → 03 RTL 작성 → 04 테스트벤치·기준 모델 작성 → 05 시뮬레이션 → 06 결과 판정 → 08 합성·타이밍(Vivado) → 09 인계.</p>
     </section>
     <section class="section" id="s01">
@@ -53,11 +60,11 @@
       <svg viewBox="0 0 980 229" role="img" aria-label="basys3_uart_echo_top 실제 포트와 하위 모듈 구조">
       <rect x="250" y="30" width="480" height="159" rx="10" fill="#fff" stroke="#4635b1" stroke-width="2"/>
       <text x="490" y="54" font-size="18" font-weight="700" text-anchor="middle">basys3_uart_echo_top</text>
-      <text x="490" y="72" font-size="13" text-anchor="middle" fill="#555">ch00/rtl/basys3_uart_echo_top.v</text>
+      <text x="490" y="72" font-size="13" text-anchor="middle" fill="#555">ch00/rtl/basys3_uart_echo_top.v · 구현 도식</text>
       <text x="222" y="64" font-size="14" font-family="monospace" text-anchor="end">clk</text>
-      <path d="M226 60 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 60 l-7 -4 v8 z" fill="#4635b1"/>
+      <path d="M226 60 H250" stroke="#4635b1" stroke-width="1.5" stroke-dasharray="4 3"/><path d="M250 60 l-7 -4 v8 z" fill="#4635b1"/>
       <text x="222" y="87" font-size="14" font-family="monospace" text-anchor="end">resetn</text>
-      <path d="M226 83 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 83 l-7 -4 v8 z" fill="#4635b1"/>
+      <path d="M226 83 H250" stroke="#4635b1" stroke-width="1.5" stroke-dasharray="4 3"/><path d="M250 83 l-7 -4 v8 z" fill="#4635b1"/>
       <text x="222" y="110" font-size="14" font-family="monospace" text-anchor="end">uart_rxd</text>
       <path d="M226 106 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 106 l-7 -4 v8 z" fill="#4635b1"/>
       <path d="M730 60 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 60 l-7 -4 v8 z" fill="#4635b1"/>
@@ -70,9 +77,13 @@
       <text x="698" y="143" font-size="12" text-anchor="end" fill="#4635b1">이번 장 신규</text>
       <rect x="250" y="204" width="16" height="12" fill="#edeafa" stroke="#4635b1"/><text x="272" y="215" font-size="13">이번 장 신규</text>
       <rect x="370" y="204" width="16" height="12" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="4 2"/><text x="392" y="215" font-size="13">이전 장 파일 재사용(수정 없음)</text>
-      <text x="600" y="215" font-size="13">왼쪽 = input · 오른쪽 = output (RTL 선언 그대로)</text>
+      <text x="600" y="215" font-size="13">왼쪽 input · 오른쪽 output · 점선 = 클록·리셋</text>
       </svg>
-      <p>포트 이름과 하위 인스턴스는 <code>ch00/rtl/basys3_uart_echo_top.v</code> 선언에서 그대로 가져왔습니다.</p>
+      <p>구현 도식: 포트 이름·폭과 하위 인스턴스는 <code>ch00/rtl/basys3_uart_echo_top.v</code> 선언에서 자동으로 가져왔습니다.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>방향</th><th>포트</th><th>폭</th><th>구분</th><th>설명</th></tr></thead>
+        <tbody><tr><td>input</td><td class="nw"><code>clk</code></td><td class="nw"><code>1</code></td><td>클록</td><td>시스템 클록 (상승 에지에서 모든 레지스터 갱신)</td></tr><tr><td>input</td><td class="nw"><code>resetn</code></td><td class="nw"><code>1</code></td><td>리셋</td><td>동기 리셋, 0이면 초기화 (Active-Low) · 이 장 TB가 구동 (보드 Top 아님)</td></tr><tr><td>input</td><td class="nw"><code>uart_rxd</code></td><td class="nw"><code>1</code></td><td>데이터·제어</td><td>UART 수신 핀 (115200 8N1, 유휴 1)</td></tr><tr><td>output</td><td class="nw"><code>uart_txd</code></td><td class="nw"><code>1</code></td><td>데이터·제어</td><td>UART 송신 핀 (수신 바이트를 그대로 되돌려 보냄)</td></tr></tbody>
+      </table></div>
     </section>
     <section class="section" id="s02">
       <h2><span class="num">02</span>준비</h2>
@@ -90,7 +101,7 @@ python3 --version</code></pre></div>
       <h2><span class="num">03</span>RTL 작성</h2>
       <p>아래 파일을 경로 그대로 만들고 전체 코드를 입력합니다.</p>
       <div class="codeblock">
-        <div class="codebar"><span>common/rtl/uart_rx.v · verilog</span></div>
+        <div class="codebar"><span>common/rtl/uart_rx.v · verilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
         <pre><code class="language-verilog">// (추가) 8N1 수신. RX 2FF, start midpoint/bit center, hold/overrun.
 module uart_rx #(
     parameter integer CLK_HZ=100000000, BAUD=115200
@@ -144,7 +155,7 @@ module uart_rx #(
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>common/rtl/uart_tx.v · verilog</span></div>
+        <div class="codebar"><span>common/rtl/uart_tx.v · verilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
         <pre><code class="language-verilog">// (추가) 8N1 송신. valid/ready handshake, 10bit start/data/stop.
 module uart_tx #(
     parameter integer CLK_HZ=100000000, BAUD=115200
@@ -183,7 +194,7 @@ module uart_tx #(
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>common/rtl/uart_core.v · verilog</span></div>
+        <div class="codebar"><span>common/rtl/uart_core.v · verilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
         <pre><code class="language-verilog">// (변경) 8N1 PHY 내부에 깊이 16 RX/TX FIFO를 넣어 byte stream ready/valid를 보존.
 // 1바이트 UART 수신 레지스터와 FIFO는 별개. Controller는 stop-and-wait 정책을 유지.
 module uart_core #(
@@ -260,7 +271,7 @@ module uart_core #(
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>common/rtl/uart_echo_controller.v · verilog</span></div>
+        <div class="codebar"><span>common/rtl/uart_echo_controller.v · verilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
         <pre><code class="language-verilog">// (추가) 준비 단계 UART Echo controller: pure combinational stream transfer.
 module uart_echo_controller(
     input wire [7:0] rx_data_i,
@@ -276,7 +287,7 @@ module uart_echo_controller(
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>ch00/rtl/basys3_uart_echo_top.v · verilog</span></div>
+        <div class="codebar"><span>ch00/rtl/basys3_uart_echo_top.v · verilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
         <pre><code class="language-verilog">// (추가) Shell top: no logic except instances and wires.
 module basys3_uart_echo_top(
     input wire clk,resetn,uart_rxd,
@@ -300,7 +311,7 @@ endmodule</code></pre>
       <h2><span class="num">04</span>테스트벤치·기준 모델 작성</h2>
       <p>테스트벤치는 출력을 자동 판정합니다. 기준 모델(Python)은 시험 벡터와 정답을 만듭니다.</p>
       <div class="codeblock">
-        <div class="codebar"><span>ch00/tb/tb_uart_echo.sv · systemverilog</span></div>
+        <div class="codebar"><span>ch00/tb/tb_uart_echo.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
         <pre><code class="language-systemverilog">// (추가) UART 실핀 비트파형 8N1 입력 및 TX 재복조 자동 판정.
 `timescale 1ns/1ps
 module tb_uart_echo;
@@ -344,34 +355,34 @@ endmodule</code></pre>
     <section class="section" id="s05">
       <h2><span class="num">05</span>시뮬레이션 실행</h2>
       <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 저장소 루트에서 실행</span></div>
-        <pre><code>bash ch00/scripts/run_sim.sh</code></pre></div>
+        <pre><code>bash ch00/scripts/run_sim.sh   # RTL 컴파일 → 시뮬레이션 → TB 자동 판정</code></pre></div>
       <p>기대 출력 (Icarus Verilog 12.0 · 2026-11-18 실제 실행 로그 발췌, 출처 <code>ch00/validation/rtl_sim_20261118.log</code>):</p>
       <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
         <pre><code>UART_ECHO_RTL_SIM_PASS decoded=2</code></pre></div>
       <p>UART FIFO 경계 시험(선택):</p>
       <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal</span></div>
-        <pre><code>bash mini_npu/scripts/run_adversarial.sh</code></pre></div>
+        <pre><code>bash mini_npu/scripts/run_adversarial.sh   # UART FIFO 경계 시험(선택)</code></pre></div>
       <div class="codeblock"><div class="codebar"><span>기대 출력 (출처 ch12/validation/rtl_sim_20261118.log)</span></div>
         <pre><code>UART_FIFO_ADVERSARIAL_SIM_PASS tests=11</code></pre></div>
     </section>
     <section class="section" id="s06">
       <h2><span class="num">06</span>결과 판정</h2>
-      <table>
+      <div class="table-wrap"><table>
         <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
         <tbody><tr><td><code>UART_ECHO_RTL_SIM_PASS decoded=2</code></td><td>TB가 보낸 'A'·'5'가 TX 핀에서 같은 값으로 복조됨</td></tr><tr><td><code>$fatal 없음</code></td><td>framing error·overrun 없이 종료</td></tr></tbody>
-      </table>
+      </table></div>
       <p><b>실패 시:</b> TB의 <code>$fatal</code> 메시지에 표시된 cycle 번호와 기대값/실제값을 확인하고, 03절 코드와 한 줄씩 대조합니다. 하나라도 실패하면 다음 장으로 넘어가지 않습니다.</p>
     </section>
     <section class="section" id="s07">
       <h2><span class="num">07</span>코드 읽기 포인트</h2>
-      <table>
+      <div class="table-wrap"><table>
         <thead><tr><th>위치</th><th>내용</th></tr></thead>
         <tbody><tr><td>CPB 계산</td><td><code>CPB=(CLK_HZ+BAUD/2)/BAUD</code>는 반올림 나누기입니다. 100 MHz/115200 bps = 868.056 → 868 클록/비트. CPB&lt;4이면 <code>$fatal</code>으로 합성 전에 차단합니다.</td></tr>
 <tr><td>RX 2FF 동기화</td><td><code>rx_meta←rx_i; rx_sync←rx_meta</code>로 2단계 플립플롭을 거쳐 메타스태빌리티를 억제합니다. 이후 FSM은 <code>rx_sync</code>만 참조합니다.</td></tr>
 <tr><td>Start bit midpoint</td><td>IDLE에서 falling edge 감지 후 <code>HALF-1</code> 클록 대기합니다. START에서 중앙에서 rx_sync를 재확인해 글리치를 걸러내고 DATA로 진입합니다.</td></tr>
 <tr><td>FIFO 포인터</td><td><code>rx_wptr</code>/<code>rx_rptr</code>는 4비트 자연 wrap-around입니다. <code>rx_count</code>는 5비트(0~16)로 Full(16)/Empty(0) 구분합니다.</td></tr>
 <tr><td>Echo controller</td><td>조합 로직만으로 RX→TX를 그대로 연결합니다. <code>rx_ready_o=tx_ready_i</code>가 성립하면 반드시 backpressure가 전파됩니다.</td></tr></tbody>
-      </table>
+      </table></div>
     </section>
     <section class="section" id="s08">
       <h2><span class="num">08</span>합성·타이밍·보드</h2>
@@ -380,17 +391,17 @@ endmodule</code></pre>
         <pre><code>source /tools/Xilinx/Vivado/&lt;버전&gt;/settings64.sh   # 설치 경로에 맞게 변경
 vivado -mode batch -nojournal -source tools/vivado/ooc_timing.tcl -tclargs ch00
 # 기대: SYNTH_TIMING_PASS ch00 basys3_uart_echo_top WNS=… WHS=… LUT=… FF=… DSP48E1=… RAMB=…</code></pre></div>
-      <table>
+      <div class="table-wrap"><table>
         <thead><tr><th>판정 항목</th><th>기준</th><th>확인 위치</th></tr></thead>
         <tbody>
           <tr><td>Setup / Hold</td><td><code>WNS ≥ 0</code> · <code>WHS ≥ 0</code> (clk 10.000 ns)</td><td><code>build/vivado/ch00/timing_route.rpt</code></td></tr>
           
         </tbody>
-      </table>
+      </table></div>
       <p>OOC 결과는 입출력 핀 지연을 포함하지 않으므로 보드 Top 타이밍을 대신하지 않습니다. 증거 저장은 <code>bash tools/run_vivado_all.sh ooc</code>(→ <code>ch00/validation/vivado_ooc_YYYYMMDD.txt</code>). 보드 확인은 <a href="ch12_integrated_npu_v05.html#s08">12장 · 08</a>에서 통합 Top으로 진행합니다.</p>
       <p><code>tools/vivado/ooc_timing.tcl</code> 전체:</p>
       <div class="codeblock">
-        <div class="codebar"><span>tools/vivado/ooc_timing.tcl · tcl</span></div>
+        <div class="codebar"><span>tools/vivado/ooc_timing.tcl · tcl · 원본 · ⚠ 미검증 (Vivado 미실행)</span></div>
         <pre><code class="language-tcl"># 00~10장 단위 모듈 Out-of-Context(OOC) 합성·배치·배선·타이밍 확인.
 # 실행 (저장소 루트):
 #   vivado -mode batch -nojournal -source tools/vivado/ooc_timing.tcl            ;# 전체
@@ -479,7 +490,7 @@ if {$fail &gt; 0} { error "OOC_TIMING_FAILED count=$fail" }</code></pre>
       </div>
       <p><code>tools/run_vivado_all.sh</code> 전체:</p>
       <div class="codeblock">
-        <div class="codebar"><span>tools/run_vivado_all.sh · bash</span></div>
+        <div class="codebar"><span>tools/run_vivado_all.sh · bash · 원본 · ⚠ 미검증 (Vivado 미실행)</span></div>
         <pre><code class="language-bash">#!/usr/bin/env bash
 # VS Code(Vivado 설치 PC)에서 00~12장 합성·타이밍·타이밍 시뮬레이션을 한 번에 실행하고
 # 각 장 validation/ 에 증거 로그를 남긴다. 보드 확인(BOARD_PASS)과는 별개다.
@@ -528,10 +539,10 @@ exit $status</code></pre>
     </section>
     <section class="section" id="s09">
       <h2><span class="num">09</span>검증 현황·인계</h2>
-      <table>
+      <div class="table-wrap"><table>
         <thead><tr><th>다음 장으로 넘기는 파일</th><th>사용처</th></tr></thead>
         <tbody><tr><td><code>common/rtl/uart_rx.v · uart_tx.v · uart_core.v</code></td><td>11·12장 통합 Top의 UART 계층 (수정 금지)</td></tr><tr><td><code>common/rtl/uart_echo_controller.v · ch00/rtl/basys3_uart_echo_top.v</code></td><td>이 장 전용 (후속 장 미사용)</td></tr></tbody>
-      </table>
+      </table></div>
       <p>검증 게이트 (<code>ch00/validation/</code> 증거 파일 기준으로 자동 표시):</p>
       <div class="gate-row">
         <div class="gate pass">

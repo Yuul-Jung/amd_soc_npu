@@ -58,5 +58,17 @@
       "ch06/rtl/precision_compare.v",
       "후속 장 직접 사용 없음 (18장 정밀도 비교의 기준 실험)"
     ]
-  ]
+  ],
+  "port_notes": {
+    "clk": "시스템 클록 (상승 에지에서 모든 레지스터 갱신)",
+    "resetn": "동기 리셋, 0이면 초기화 (Active-Low)",
+    "valid_i": "이번 클록에 x_i를 두 정밀도로 변환",
+    "x_i": "공통 signed 32비트 입력",
+    "q8_o": "INT8 결과 (SHIFT=8)",
+    "q16_o": "INT16 결과 (SHIFT=4)",
+    "overflow8_o": "INT8 범위 초과",
+    "overflow16_o": "INT16 범위 초과",
+    "valid_o": "두 출력이 유효함 (INT8 인스턴스 기준)"
+  },
+  "run_note": "RTL 컴파일 → 시뮬레이션 → TB 자동 판정 → Python 기준값 비교"
 }

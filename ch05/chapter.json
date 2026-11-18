@@ -60,5 +60,15 @@
       "ch05/rtl/fixed_quantizer.v",
       "06장 precision_compare · 09장 dense_layer4 (수정 금지)"
     ]
-  ]
+  ],
+  "port_notes": {
+    "clk": "시스템 클록 (상승 에지에서 모든 레지스터 갱신)",
+    "resetn": "동기 리셋, 0이면 초기화 (Active-Low)",
+    "valid_i": "이번 클록에 x_i를 양자화",
+    "x_i": "양자화할 signed 입력 (누산값)",
+    "q_o": "SHIFT·반올림·포화를 거친 출력",
+    "valid_o": "q_o가 유효함",
+    "overflow_o": "출력 범위를 벗어났음 (포화 여부와 무관)"
+  },
+  "run_note": "RTL 컴파일 → 시뮬레이션 → TB 자동 판정 → Python 기준값 비교"
 }

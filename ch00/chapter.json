@@ -83,5 +83,12 @@
       "common/rtl/uart_echo_controller.v · ch00/rtl/basys3_uart_echo_top.v",
       "이 장 전용 (후속 장 미사용)"
     ]
-  ]
+  ],
+  "port_notes": {
+    "clk": "시스템 클록 (상승 에지에서 모든 레지스터 갱신)",
+    "resetn": "동기 리셋, 0이면 초기화 (Active-Low) · 이 장 TB가 구동 (보드 Top 아님)",
+    "uart_rxd": "UART 수신 핀 (115200 8N1, 유휴 1)",
+    "uart_txd": "UART 송신 핀 (수신 바이트를 그대로 되돌려 보냄)"
+  },
+  "run_note": "RTL 컴파일 → 시뮬레이션 → TB 자동 판정"
 }

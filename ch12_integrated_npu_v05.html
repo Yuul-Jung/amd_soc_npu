@@ -8,7 +8,6 @@
 <title>12장 · 통합 NPU Top · Basys3 (v05)</title>
 <link rel="stylesheet" href="assets/education/site.css">
 <style>
-.hero:before{background-image:linear-gradient(90deg,rgba(12,17,27,.89),rgba(12,17,27,.69) 58%,rgba(12,17,27,.48)),url('https://raw.githubusercontent.com/Yuul-Jung/rule_md/d1b8278d41fca8f5e3960736f3ac9d377e462fda/web/education-html/assets/hero-bookshelf.jpg')}
 .codeblock pre{max-height:780px;white-space:pre}
 .section svg{width:100%;height:auto}
 .vbadge{display:inline-block;padding:.15em .6em;border-radius:4px;font-size:.78em;font-weight:700;background:#d4edda;color:#155724;vertical-align:middle}
@@ -20,6 +19,14 @@
 .gate.todo{border-color:#b08900;background:#fffbe6}
 .gate.fail{border-color:#b3261e;background:#fdeceb}
 .gate.na{border-color:#c8c8c8;background:#f6f6f6;color:#666}
+.table-wrap{overflow-x:auto}
+.section :not(pre)>code{overflow-wrap:anywhere}
+.codebar{gap:8px}
+.codebar span{min-width:0;overflow-wrap:anywhere}
+.hero p{max-width:none}
+.access-skip{position:absolute;left:-9999px;top:0}
+.access-skip:focus{left:12px;top:12px;z-index:1003;background:#fff;color:#15171c;padding:6px 10px}
+.nw code{white-space:nowrap;overflow-wrap:normal}
 </style>
 </head>
 <body data-chapter="ch12">
@@ -39,25 +46,25 @@
     <section class="section" id="s00">
       <h2><span class="num">00</span>이 장의 위치</h2>
       <p><b>목표:</b> 00~11장 결과를 하나의 Basys3 Top으로 묶어 전체 회귀 시뮬레이션 → Vivado 합성·구현 → 비트스트림 → 보드에서 UART·LED·FND를 확인합니다.</p>
-      <table>
+      <div class="table-wrap"><table>
         <thead><tr><th>구분</th><th>파일</th></tr></thead>
         <tbody>
           <tr><td>유지 (이전 장, 수정 없음)</td><td><ul><li><code>common/rtl/uart_rx.v</code> <small>(00장)</small></li><li><code>common/rtl/uart_tx.v</code> <small>(00장)</small></li><li><code>common/rtl/uart_core.v</code> <small>(00장)</small></li><li><code>ch02/rtl/dsp_multiplier.v</code> <small>(02장)</small></li><li><code>mini_npu/rtl/uart_npu_command_controller.v</code> <small>(11장)</small></li></ul></td></tr>
           <tr><td>이번 장 작성</td><td><ul><li><code>mini_npu/rtl/npu_dsp_mac_lane.v</code></li><li><code>mini_npu/rtl/npu_engine4.v</code></li><li><code>mini_npu/rtl/npu_display_controller.v</code></li><li><code>mini_npu/rtl/npu_reset_controller.v</code></li><li><code>mini_npu/rtl/basys3_npu_top.v</code></li><li><code>mini_npu/constraints/basys3_npu.xdc</code></li><li><code>mini_npu/scripts/vivado_impl.tcl</code></li><li><code>mini_npu/scripts/run_timing_sim.sh</code></li></ul></td></tr>
         </tbody>
-      </table>
+      </table></div>
       <p>실습 순서: 01 구조 확인 → 02 준비 → 03 RTL 작성 → 04 테스트벤치·기준 모델 작성 → 05 시뮬레이션 → 06 결과 판정 → 08 합성·타이밍(Vivado) → 09 인계.</p>
     </section>
     <section class="section" id="s01">
       <h2><span class="num">01</span>구조도</h2>
-      <svg viewBox="0 0 980 340" role="img" aria-label="basys3_npu_top 실제 포트와 하위 모듈 구조">
+      <svg viewBox="0 0 980 360" role="img" aria-label="basys3_npu_top 실제 포트와 하위 모듈 구조">
       <rect x="250" y="30" width="480" height="270" rx="10" fill="#fff" stroke="#4635b1" stroke-width="2"/>
       <text x="490" y="54" font-size="18" font-weight="700" text-anchor="middle">basys3_npu_top</text>
-      <text x="490" y="72" font-size="13" text-anchor="middle" fill="#555">mini_npu/rtl/basys3_npu_top.v</text>
+      <text x="490" y="72" font-size="13" text-anchor="middle" fill="#555">mini_npu/rtl/basys3_npu_top.v · 구현 도식</text>
       <text x="222" y="64" font-size="14" font-family="monospace" text-anchor="end">clk</text>
-      <path d="M226 60 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 60 l-7 -4 v8 z" fill="#4635b1"/>
+      <path d="M226 60 H250" stroke="#4635b1" stroke-width="1.5" stroke-dasharray="4 3"/><path d="M250 60 l-7 -4 v8 z" fill="#4635b1"/>
       <text x="222" y="87" font-size="14" font-family="monospace" text-anchor="end">btnC</text>
-      <path d="M226 83 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 83 l-7 -4 v8 z" fill="#4635b1"/>
+      <path d="M226 83 H250" stroke="#4635b1" stroke-width="1.5" stroke-dasharray="4 3"/><path d="M250 83 l-7 -4 v8 z" fill="#4635b1"/>
       <text x="222" y="110" font-size="14" font-family="monospace" text-anchor="end">uart_rxd</text>
       <path d="M226 106 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 106 l-7 -4 v8 z" fill="#4635b1"/>
       <path d="M730 60 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 60 l-7 -4 v8 z" fill="#4635b1"/>
@@ -87,9 +94,14 @@
       <text x="698" y="254" font-size="12" text-anchor="end" fill="#4635b1">이번 장 신규</text>
       <rect x="250" y="315" width="16" height="12" fill="#edeafa" stroke="#4635b1"/><text x="272" y="326" font-size="13">이번 장 신규</text>
       <rect x="370" y="315" width="16" height="12" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="4 2"/><text x="392" y="326" font-size="13">이전 장 파일 재사용(수정 없음)</text>
-      <text x="600" y="326" font-size="13">왼쪽 = input · 오른쪽 = output (RTL 선언 그대로)</text>
+      <text x="600" y="326" font-size="13">왼쪽 input · 오른쪽 output · 점선 = 클록·리셋</text>
+      <text x="250" y="346" font-size="13">이 모듈의 포트는 Basys3 외부 핀입니다 (XDC 핀 배정).</text>
       </svg>
-      <p>포트 이름과 하위 인스턴스는 <code>mini_npu/rtl/basys3_npu_top.v</code> 선언에서 그대로 가져왔습니다.</p>
+      <p>구현 도식: 포트 이름·폭과 하위 인스턴스는 <code>mini_npu/rtl/basys3_npu_top.v</code> 선언에서 자동으로 가져왔습니다.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>방향</th><th>포트</th><th>폭</th><th>구분</th><th>설명</th></tr></thead>
+        <tbody><tr><td>input</td><td class="nw"><code>clk</code></td><td class="nw"><code>1</code></td><td>클록</td><td>Basys3 W5 핀 100 MHz 오실레이터</td></tr><tr><td>input</td><td class="nw"><code>btnC</code></td><td class="nw"><code>1</code></td><td>리셋</td><td>U18 가운데 버튼 = 리셋 (Active-High, 비동기 인가·동기 해제)</td></tr><tr><td>input</td><td class="nw"><code>uart_rxd</code></td><td class="nw"><code>1</code></td><td>보드 핀</td><td>B18 USB-UART 수신 핀 (PC → FPGA, 115200 8N1)</td></tr><tr><td>output</td><td class="nw"><code>uart_txd</code></td><td class="nw"><code>1</code></td><td>보드 핀</td><td>A18 USB-UART 송신 핀 (FPGA → PC)</td></tr><tr><td>output</td><td class="nw"><code>led</code></td><td class="nw"><code>[15:0]</code></td><td>보드 핀</td><td>LED0~3 클래스 · LED13 BUSY · LED14 DONE 래치 · LED15 오류 래치</td></tr><tr><td>output</td><td class="nw"><code>seg</code></td><td class="nw"><code>[6:0]</code></td><td>보드 핀</td><td>7세그먼트 a~g (Active-Low)</td></tr><tr><td>output</td><td class="nw"><code>an</code></td><td class="nw"><code>[3:0]</code></td><td>보드 핀</td><td>7세그먼트 자리 선택 (Active-Low)</td></tr><tr><td>output</td><td class="nw"><code>dp</code></td><td class="nw"><code>1</code></td><td>보드 핀</td><td>7세그먼트 소수점 (항상 1 = 꺼짐, Active-Low)</td></tr></tbody>
+      </table></div>
     </section>
     <section class="section" id="s02">
       <h2><span class="num">02</span>준비</h2>
@@ -107,7 +119,7 @@ python3 --version</code></pre></div>
       <h2><span class="num">03</span>RTL 작성</h2>
       <p>아래 파일을 경로 그대로 만들고 전체 코드를 입력합니다.</p>
       <div class="codeblock">
-        <div class="codebar"><span>mini_npu/rtl/npu_dsp_mac_lane.v · verilog</span></div>
+        <div class="codebar"><span>mini_npu/rtl/npu_dsp_mac_lane.v · verilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
         <pre><code class="language-verilog">// (추가) 02장 등록 DSP 곱을 다음 에지에 누산한다. 곱을 다시 수행하지 않는다.
 module npu_dsp_mac_lane #(
     parameter integer DATA_WIDTH=16,
@@ -135,7 +147,7 @@ module npu_dsp_mac_lane #(
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>mini_npu/rtl/npu_engine4.v · verilog</span></div>
+        <div class="codebar"><span>mini_npu/rtl/npu_engine4.v · verilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
         <pre><code class="language-verilog">// (추가) 04장 BRAM 구조 + 02장 DSP 레지스터 곱 + 4개 누산기 통합.
 // 12장 최종 경로는 기존 ch07 벡터 닷의 곱 경로를 중복 사용하지 않는다.
 // 메모리 쓰기는 IDLE에서만 허용하며 Reset 시 유효 비트만 지운다.
@@ -258,7 +270,7 @@ module npu_engine4(
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>mini_npu/rtl/npu_display_controller.v · verilog</span></div>
+        <div class="codebar"><span>mini_npu/rtl/npu_display_controller.v · verilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
         <pre><code class="language-verilog">// (추가) FND와 LED 표현 정책은 Top이 아닌 Controller에서 처리.
 module npu_display_controller(
     input wire clk,resetn,
@@ -309,7 +321,7 @@ module npu_display_controller(
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>mini_npu/rtl/npu_reset_controller.v · verilog</span></div>
+        <div class="codebar"><span>mini_npu/rtl/npu_reset_controller.v · verilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
         <pre><code class="language-verilog">// (추가) Basys3 btnC 비동기 Assertion, 동기 Release Reset.
 module npu_reset_controller(
     input wire clk,btnC,
@@ -323,7 +335,7 @@ module npu_reset_controller(
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>mini_npu/rtl/basys3_npu_top.v · verilog</span></div>
+        <div class="codebar"><span>mini_npu/rtl/basys3_npu_top.v · verilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
         <pre><code class="language-verilog">// (추가) 12장 Basys3 Shell: 전원·UART·코어·Controller·FND 모듈 연결만 담당.
 module basys3_npu_top(
     input wire clk,btnC,uart_rxd,
@@ -374,8 +386,8 @@ module basys3_npu_top(
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>mini_npu/constraints/basys3_npu.xdc · tcl</span></div>
-        <pre><code class="language-tcl"># Basys3 Master XDC 핀 기능을 제3부 Shell 포트명에 맞춰 선택 적용.
+        <div class="codebar"><span>mini_npu/constraints/basys3_npu.xdc · xdc · 원본 · ⚠ 미검증 (Vivado 미실행)</span></div>
+        <pre><code class="language-xdc"># Basys3 Master XDC 핀 기능을 제3부 Shell 포트명에 맞춰 선택 적용.
 set_property -dict { PACKAGE_PIN W5 IOSTANDARD LVCMOS33 } [get_ports clk]
 set_property -dict { PACKAGE_PIN U18 IOSTANDARD LVCMOS33 } [get_ports btnC]
 set_property -dict { PACKAGE_PIN B18 IOSTANDARD LVCMOS33 } [get_ports uart_rxd]
@@ -411,7 +423,7 @@ set_property -dict { PACKAGE_PIN L1 IOSTANDARD LVCMOS33 } [get_ports {led[15]}]
 create_clock -name sys_clk_pin -period 10.000 -waveform {0 5} [get_ports clk]</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>mini_npu/scripts/vivado_impl.tcl · tcl</span></div>
+        <div class="codebar"><span>mini_npu/scripts/vivado_impl.tcl · tcl · 원본 · ⚠ 미검증 (Vivado 미실행)</span></div>
         <pre><code class="language-tcl"># 12장 통합 NPU Top: 합성 → 구현 → 타이밍 판정 → 비트스트림 → 타이밍 시뮬레이션용 넷리스트.
 # 실행 (저장소 루트): vivado -mode batch -nojournal -source mini_npu/scripts/vivado_impl.tcl
 # 결과: mini_npu/build/impl/
@@ -490,7 +502,7 @@ puts $line
 if {!$ok} { error "IMPL_TIMING_FAILED" }</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>mini_npu/scripts/run_timing_sim.sh · bash</span></div>
+        <div class="codebar"><span>mini_npu/scripts/run_timing_sim.sh · bash · 원본 · ⚠ 미검증 (Vivado 미실행)</span></div>
         <pre><code class="language-bash">#!/usr/bin/env bash
 # 12장 배선 후 타이밍 시뮬레이션 (Vivado xsim + SDF slow corner).
 # 입력: vivado_impl.tcl 이 만든 mini_npu/build/impl/basys3_npu_top_timesim.{v,sdf}
@@ -534,7 +546,7 @@ echo "TIMING_SIM_PASS ch12 basys3_npu_top post-route SDF(slow) classes=6 model_e
       <h2><span class="num">04</span>테스트벤치·기준 모델 작성</h2>
       <p>테스트벤치는 출력을 자동 판정합니다. 실제 UART 비트파형을 TB가 만들고 TX를 다시 복조해 판정합니다.</p>
       <div class="codeblock">
-        <div class="codebar"><span>mini_npu/tb/tb_npu_engine4.sv · systemverilog</span></div>
+        <div class="codebar"><span>mini_npu/tb/tb_npu_engine4.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
         <pre><code class="language-systemverilog">// (추가) 실제 DSP 등록 곱→BRAM→4PE 누적 NPU 정수 독립 검증.
 `timescale 1ns/1ps
 module tb_npu_engine4;
@@ -609,7 +621,7 @@ module tb_npu_engine4;
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>mini_npu/tb/tb_uart_core_fifo.sv · systemverilog</span></div>
+        <div class="codebar"><span>mini_npu/tb/tb_uart_core_fifo.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
         <pre><code class="language-systemverilog">// (추가) uart_core 16바이트 RX/TX FIFO 적대적 경계 시험.
 // Empty/Full, 동시 Push/Pop, Ready/Valid, Reset 초기화, 연속 수신 손실, Overrun, Framing, 전송 중단.
 // 실제 직렬 비트파형으로 RX를 구동하고 TX 핀을 독립 uart_rx로 복조해 순서·값을 비교한다.
@@ -923,7 +935,7 @@ module tb_uart_core_fifo;
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>mini_npu/tb/tb_npu_uart_adversarial.sv · systemverilog</span></div>
+        <div class="codebar"><span>mini_npu/tb/tb_npu_uart_adversarial.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
         <pre><code class="language-systemverilog">// (추가) 11·12장 통합 Top 적대적 UART 시험(실제 RX 핀 구동, TX 핀 복조).
 // 잘못된 명령·주소·길이, CR/LF 무시, 응답 전송 중 다음 명령 수신(FIFO 버퍼링),
 // 연속 명령 폭주, 응답 전송 중 Reset, 명령 중단(Timeout 부재 관측), Framing error.
@@ -1119,7 +1131,7 @@ endmodule</code></pre>
     <section class="section" id="s05">
       <h2><span class="num">05</span>시뮬레이션 실행</h2>
       <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 저장소 루트에서 실행</span></div>
-        <pre><code>bash ch12/scripts/run_sim.sh</code></pre></div>
+        <pre><code>bash ch12/scripts/run_sim.sh   # 00~12장 전체 회귀 시뮬레이션 (단계별 결과 표 출력)</code></pre></div>
       <p>기대 출력 (Icarus Verilog 12.0 · 2026-11-18 실제 실행 로그 발췌, 출처 <code>ch12/validation/rtl_sim_20261118.log</code>):</p>
       <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
         <pre><code>| 단계 | 실제 결과 | 로그 |
@@ -1140,28 +1152,28 @@ endmodule</code></pre>
 중요: SYNTH_TIMING_PASS, BOARD_PASS를 뜻하지 않음.</code></pre></div>
       <p>적대적 시험:</p>
       <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal</span></div>
-        <pre><code>bash mini_npu/scripts/run_adversarial.sh</code></pre></div>
+        <pre><code>bash mini_npu/scripts/run_adversarial.sh   # 적대적 시험</code></pre></div>
       <div class="codeblock"><div class="codebar"><span>기대 출력 (출처 ch12/validation/rtl_sim_20261118.log)</span></div>
         <pre><code>UART_FIFO_ADVERSARIAL_SIM_PASS tests=11
 NPU_UART_ADVERSARIAL_SIM_PASS tests=8 responses=43</code></pre></div>
     </section>
     <section class="section" id="s06">
       <h2><span class="num">06</span>결과 판정</h2>
-      <table>
+      <div class="table-wrap"><table>
         <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
         <tbody><tr><td><code>결과 표 13행이 모두 RTL_SIM_PASS</code></td><td>ch00~ch10 · dsp_engine · ch11_ch12</td></tr><tr><td><code>UART_FIFO_ADVERSARIAL_SIM_PASS tests=11</code></td><td>FIFO Full·Reset·Framing·동시 Push/Pop</td></tr><tr><td><code>NPU_UART_ADVERSARIAL_SIM_PASS tests=8</code></td><td>잘못된 명령·필드, 응답 중 명령, 응답 중 Reset</td></tr></tbody>
-      </table>
+      </table></div>
       <p><b>실패 시:</b> TB의 <code>$fatal</code> 메시지에 표시된 cycle 번호와 기대값/실제값을 확인하고, 03절 코드와 한 줄씩 대조합니다. 하나라도 실패하면 다음 장으로 넘어가지 않습니다.</p>
     </section>
     <section class="section" id="s07">
       <h2><span class="num">07</span>코드 읽기 포인트</h2>
-      <table>
+      <div class="table-wrap"><table>
         <thead><tr><th>위치</th><th>내용</th></tr></thead>
         <tbody><tr><td>연결 전용 Top</td><td><code>basys3_npu_top</code>에는 로직이 없고 다섯 하위 모듈의 연결만 있습니다. 그래서 하위 모듈 단독 시험 결과가 Top에서도 그대로 유효합니다.</td></tr>
 <tr><td>리셋</td><td><code>npu_reset_controller</code>는 btnC(Active-High)를 동기화해 Active-Low <code>resetn</code>으로 바꿉니다. 세부 동작은 위 전체 소스를 기준으로 합니다.</td></tr>
 <tr><td>npu_engine4</td><td>10장 <code>npu_core</code>와 달리 BRAM 배열을 직접 두고 <code>npu_dsp_mac_lane</code> 4개(02장 <code>dsp_multiplier</code> 재사용)로 누산합니다. 주소별 <code>x_seen</code>/<code>w*_seen</code> 비트로 기록되지 않은 주소가 길이 범위 안에 있으면 추론을 거부합니다. 41비트 점수(누산+Bias) 최댓값 비교로 클래스를 정하며, 동점이면 낮은 번호가 이깁니다.</td></tr>
 <tr><td>표시</td><td><code>npu_display_controller</code>가 클래스와 busy·done·error, UART framing·overrun·protocol 오류를 LED와 FND에 나타냅니다.</td></tr></tbody>
-      </table>
+      </table></div>
     </section>
     <section class="section" id="s08">
       <h2><span class="num">08</span>합성·타이밍·보드</h2>
@@ -1171,7 +1183,7 @@ NPU_UART_ADVERSARIAL_SIM_PASS tests=8 responses=43</code></pre></div>
         <pre><code>source /tools/Xilinx/Vivado/&lt;버전&gt;/settings64.sh   # 설치 경로에 맞게 변경
 vivado -mode batch -nojournal -source mini_npu/scripts/vivado_impl.tcl
 # 마지막 줄 기대: SYNTH_TIMING_PASS ch12 basys3_npu_top WNS=… WHS=… DRC_ERRORS=0 LUT=… FF=… DSP48E1=… RAMB=…</code></pre></div>
-      <table>
+      <div class="table-wrap"><table>
         <thead><tr><th>판정 항목</th><th>기준</th><th>확인 위치</th></tr></thead>
         <tbody>
           <tr><td>Setup</td><td><code>WNS ≥ 0</code> (TNS = 0)</td><td><code>mini_npu/build/impl/timing_route.rpt</code></td></tr>
@@ -1179,7 +1191,7 @@ vivado -mode batch -nojournal -source mini_npu/scripts/vivado_impl.tcl
           <tr><td>DRC</td><td>Error 0</td><td><code>drc_route.rpt</code></td></tr>
           <tr><td>자원</td><td>DSP48E1 ≥ 4 (MAC 레인 4개) — 기대값, 실행 전 ⚠ 미검증</td><td><code>util_route.rpt</code></td></tr>
         </tbody>
-      </table>
+      </table></div>
       <p>생성물(<code>mini_npu/build/impl/</code>): <code>basys3_npu_top.bit</code>, <code>post_route.dcp</code>(GUI 확인: File → Checkpoint → Open), 타이밍 시뮬레이션용 <code>basys3_npu_top_timesim.v</code>·<code>.sdf</code>. <code>SYNTH_TIMING_FAIL</code>이면 다음 단계로 넘어가지 않습니다.</p>
       <h3>8-2. 배선 후 타이밍 시뮬레이션 (xsim + SDF)</h3>
       <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 8-1 성공 후</span></div>
@@ -1209,7 +1221,7 @@ sudo apt install -y picocom
 picocom -b 115200 -d 8 -p n -y n -f n /dev/ttyUSB1   # n은 실제 번호로 변경 · 종료 Ctrl-A Ctrl-X</code></pre></div>
       <h3>8-6. 시험 입력과 판정</h3>
       <p>문자 키 하나를 누르면 1바이트가 전송됩니다. Enter의 CR/LF는 무시됩니다. 응답은 <code>C</code>+클래스+<code>:</code>+점수 4개(41비트 signed, 11자리 16진수)+CRLF입니다.</p>
-      <table>
+      <div class="table-wrap"><table>
         <thead><tr><th>입력</th><th>기대 UART 응답</th><th>LED</th><th>FND</th></tr></thead>
         <tbody>
 <tr><td><code>0</code></td><td><code>C0:00000000002,00000000000,00000000000,FFFFFFFFFFE</code></td><td>LED0 켜짐 · LED14 켜짐</td><td>오른쪽 끝 자리 <b>0</b> (나머지 세 자리 0)</td></tr>
@@ -1220,26 +1232,26 @@ picocom -b 115200 -d 8 -p n -y n -f n /dev/ttyUSB1   # n은 실제 번호로 변
           <tr><td><code>Z</code></td><td><code>ERR</code></td><td>LED15 켜짐 (오류 래치)</td><td>변화 없음</td></tr>
           <tr><td>BTNC</td><td>응답 없음</td><td>LED14·LED15 꺼짐, LED0 켜짐</td><td>오른쪽 끝 자리 0</td></tr>
         </tbody>
-      </table>
+      </table></div>
       <p>LED 할당(<code>npu_display_controller.v</code>): LED0~3 = 클래스 one-hot, LED13 = BUSY, LED14 = DONE 래치, LED15 = 오류 래치(NPU·명령·UART framing·overrun). LED4~12는 꺼져 있습니다. BTNC는 리셋입니다.</p>
       <div class="tip"><span class="lbl">주의</span><code>X</code>·<code>W</code>·<code>B</code>·<code>R</code>은 뒤에 바이너리 바이트가 따라와야 하므로 터미널 키 입력으로 시험하지 않습니다. 잘못 눌러 응답이 멈추면 BTNC로 리셋합니다.</div>
       <h3>8-7. 기록</h3>
-      <table>
+      <div class="table-wrap"><table>
         <thead><tr><th>항목</th><th>기록 내용</th></tr></thead>
         <tbody>
           <tr><td>비트스트림</td><td>sha256 · Vivado 버전 · Git 커밋 SHA</td></tr>
           <tr><td>타이밍</td><td>WNS · TNS · utilization (LUT/FF/BRAM/DSP)</td></tr>
           <tr><td>입력별 관찰</td><td>위 표 7행 각각의 실제 UART 응답 · LED · FND</td></tr>
         </tbody>
-      </table>
+      </table></div>
       <p>7행이 모두 기대와 같을 때만 <code>BOARD_PASS</code>로 기록합니다. 기록 파일은 <code>ch12/validation/board_YYYYMMDD.md</code>로 저장합니다.</p>
     </section>
     <section class="section" id="s09">
       <h2><span class="num">09</span>검증 현황·인계</h2>
-      <table>
+      <div class="table-wrap"><table>
         <thead><tr><th>다음 장으로 넘기는 파일</th><th>사용처</th></tr></thead>
         <tbody><tr><td><code>mini_npu/ 전체 + common/rtl/ + ch02/rtl/dsp_multiplier.v</code></td><td>4분류 원형 기준선 — 13장 이후 10분류 NPU는 별도 폴더에서 개발하고 이 폴더는 수정하지 않음</td></tr><tr><td><code>mini_npu/build/impl/basys3_npu_top.bit</code></td><td>8-1 구현 결과 비트스트림 — Git에 넣지 않고 SHA-256을 ch12/validation/vivado_impl_timesim_*.txt에 기록</td></tr></tbody>
-      </table>
+      </table></div>
       <p>검증 게이트 (<code>ch12/validation/</code> 증거 파일 기준으로 자동 표시):</p>
       <div class="gate-row">
         <div class="gate pass">

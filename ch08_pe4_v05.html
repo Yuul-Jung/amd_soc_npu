@@ -8,7 +8,6 @@
 <title>08장 · 4PE 병렬 어레이 (v05)</title>
 <link rel="stylesheet" href="assets/education/site.css">
 <style>
-.hero:before{background-image:linear-gradient(90deg,rgba(12,17,27,.89),rgba(12,17,27,.69) 58%,rgba(12,17,27,.48)),url('https://raw.githubusercontent.com/Yuul-Jung/rule_md/d1b8278d41fca8f5e3960736f3ac9d377e462fda/web/education-html/assets/hero-bookshelf.jpg')}
 .codeblock pre{max-height:780px;white-space:pre}
 .section svg{width:100%;height:auto}
 .vbadge{display:inline-block;padding:.15em .6em;border-radius:4px;font-size:.78em;font-weight:700;background:#d4edda;color:#155724;vertical-align:middle}
@@ -20,6 +19,14 @@
 .gate.todo{border-color:#b08900;background:#fffbe6}
 .gate.fail{border-color:#b3261e;background:#fdeceb}
 .gate.na{border-color:#c8c8c8;background:#f6f6f6;color:#666}
+.table-wrap{overflow-x:auto}
+.section :not(pre)>code{overflow-wrap:anywhere}
+.codebar{gap:8px}
+.codebar span{min-width:0;overflow-wrap:anywhere}
+.hero p{max-width:none}
+.access-skip{position:absolute;left:-9999px;top:0}
+.access-skip:focus{left:12px;top:12px;z-index:1003;background:#fff;color:#15171c;padding:6px 10px}
+.nw code{white-space:nowrap;overflow-wrap:normal}
 </style>
 </head>
 <body data-chapter="ch08">
@@ -39,13 +46,13 @@
     <section class="section" id="s00">
       <h2><span class="num">00</span>이 장의 위치</h2>
       <p><b>목표:</b> 07장 vector_dot_core 4개를 병렬로 묶고, 완료 시점이 다른 4개 결과를 모아 합산합니다.</p>
-      <table>
+      <div class="table-wrap"><table>
         <thead><tr><th>구분</th><th>파일</th></tr></thead>
         <tbody>
           <tr><td>유지 (이전 장, 수정 없음)</td><td><ul><li><code>ch01/rtl/mac_core.v</code> <small>(01장)</small></li><li><code>ch07/rtl/vector_dot_core.v</code> <small>(07장)</small></li></ul></td></tr>
           <tr><td>이번 장 작성</td><td><ul><li><code>ch08/rtl/pe_array4.v</code></li></ul></td></tr>
         </tbody>
-      </table>
+      </table></div>
       <p>실습 순서: 01 구조 확인 → 02 준비 → 03 RTL 작성 → 04 테스트벤치·기준 모델 작성 → 05 시뮬레이션 → 06 결과 판정 → 08 합성·타이밍(Vivado) → 09 인계.</p>
     </section>
     <section class="section" id="s01">
@@ -53,11 +60,11 @@
       <svg viewBox="0 0 980 271" role="img" aria-label="pe_array4 실제 포트와 하위 모듈 구조">
       <rect x="250" y="30" width="480" height="201" rx="10" fill="#fff" stroke="#4635b1" stroke-width="2"/>
       <text x="490" y="54" font-size="18" font-weight="700" text-anchor="middle">pe_array4</text>
-      <text x="490" y="72" font-size="13" text-anchor="middle" fill="#555">ch08/rtl/pe_array4.v</text>
+      <text x="490" y="72" font-size="13" text-anchor="middle" fill="#555">ch08/rtl/pe_array4.v · 구현 도식</text>
       <text x="222" y="64" font-size="14" font-family="monospace" text-anchor="end">clk</text>
-      <path d="M226 60 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 60 l-7 -4 v8 z" fill="#4635b1"/>
+      <path d="M226 60 H250" stroke="#4635b1" stroke-width="1.5" stroke-dasharray="4 3"/><path d="M250 60 l-7 -4 v8 z" fill="#4635b1"/>
       <text x="222" y="87" font-size="14" font-family="monospace" text-anchor="end">resetn</text>
-      <path d="M226 83 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 83 l-7 -4 v8 z" fill="#4635b1"/>
+      <path d="M226 83 H250" stroke="#4635b1" stroke-width="1.5" stroke-dasharray="4 3"/><path d="M250 83 l-7 -4 v8 z" fill="#4635b1"/>
       <text x="222" y="110" font-size="14" font-family="monospace" text-anchor="end">start_i</text>
       <path d="M226 106 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 106 l-7 -4 v8 z" fill="#4635b1"/>
       <text x="222" y="133" font-size="14" font-family="monospace" text-anchor="end">length_i[8:0]</text>
@@ -85,9 +92,13 @@
       <text x="698" y="107" font-size="12" text-anchor="end" fill="#4635b1">ch07 재사용</text>
       <rect x="250" y="246" width="16" height="12" fill="#edeafa" stroke="#4635b1"/><text x="272" y="257" font-size="13">이번 장 신규</text>
       <rect x="370" y="246" width="16" height="12" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="4 2"/><text x="392" y="257" font-size="13">이전 장 파일 재사용(수정 없음)</text>
-      <text x="600" y="257" font-size="13">왼쪽 = input · 오른쪽 = output (RTL 선언 그대로)</text>
+      <text x="600" y="257" font-size="13">왼쪽 input · 오른쪽 output · 점선 = 클록·리셋</text>
       </svg>
-      <p>포트 이름과 하위 인스턴스는 <code>ch08/rtl/pe_array4.v</code> 선언에서 그대로 가져왔습니다.</p>
+      <p>구현 도식: 포트 이름·폭과 하위 인스턴스는 <code>ch08/rtl/pe_array4.v</code> 선언에서 자동으로 가져왔습니다.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>방향</th><th>포트</th><th>폭</th><th>구분</th><th>설명</th></tr></thead>
+        <tbody><tr><td>input</td><td class="nw"><code>clk</code></td><td class="nw"><code>1</code></td><td>클록</td><td>시스템 클록 (상승 에지에서 모든 레지스터 갱신)</td></tr><tr><td>input</td><td class="nw"><code>resetn</code></td><td class="nw"><code>1</code></td><td>리셋</td><td>동기 리셋, 0이면 초기화 (Active-Low)</td></tr><tr><td>input</td><td class="nw"><code>start_i</code></td><td class="nw"><code>1</code></td><td>데이터·제어</td><td>4개 PE 동시 시작</td></tr><tr><td>input</td><td class="nw"><code>length_i</code></td><td class="nw"><code>[8:0]</code></td><td>데이터·제어</td><td>벡터 길이 (≤256, 초과 시 error_o)</td></tr><tr><td>input</td><td class="nw"><code>valid_i</code></td><td class="nw"><code>[3:0]</code></td><td>데이터·제어</td><td>PE별 원소 공급 (비트 g = PE g)</td></tr><tr><td>input</td><td class="nw"><code>a_i</code></td><td class="nw"><code>[4*DATA_WIDTH-1:0]</code></td><td>데이터·제어</td><td>PE 4개의 A 원소 묶음 (PE g = [g*DATA_WIDTH +: DATA_WIDTH])</td></tr><tr><td>input</td><td class="nw"><code>b_i</code></td><td class="nw"><code>[4*DATA_WIDTH-1:0]</code></td><td>데이터·제어</td><td>PE 4개의 B 원소 묶음</td></tr><tr><td>output</td><td class="nw"><code>ready_o</code></td><td class="nw"><code>[3:0]</code></td><td>데이터·제어</td><td>PE별 원소 수락 가능</td></tr><tr><td>output</td><td class="nw"><code>busy_o</code></td><td class="nw"><code>1</code></td><td>데이터·제어</td><td>진행 중</td></tr><tr><td>output</td><td class="nw"><code>done_o</code></td><td class="nw"><code>1</code></td><td>데이터·제어</td><td>4개 PE 모두 완료 후 1클록 펄스</td></tr><tr><td>output</td><td class="nw"><code>error_o</code></td><td class="nw"><code>1</code></td><td>데이터·제어</td><td>길이 초과 오류 펄스</td></tr><tr><td>output</td><td class="nw"><code>pe_results_o</code></td><td class="nw"><code>[4*ACC_WIDTH-1:0]</code></td><td>데이터·제어</td><td>PE별 내적 결과 4개</td></tr><tr><td>output</td><td class="nw"><code>sum_o</code></td><td class="nw"><code>[ACC_WIDTH+1:0]</code></td><td>데이터·제어</td><td>4개 결과의 합 (올림 보호 2비트 확장)</td></tr></tbody>
+      </table></div>
     </section>
     <section class="section" id="s02">
       <h2><span class="num">02</span>준비</h2>
@@ -105,7 +116,7 @@ python3 --version</code></pre></div>
       <h2><span class="num">03</span>RTL 작성</h2>
       <p>아래 파일을 경로 그대로 만들고 전체 코드를 입력합니다.</p>
       <div class="codeblock">
-        <div class="codebar"><span>ch08/rtl/pe_array4.v · verilog</span></div>
+        <div class="codebar"><span>ch08/rtl/pe_array4.v · verilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
         <pre><code class="language-verilog">`timescale 1ns/1ps
 module pe_array4 #(parameter integer DATA_WIDTH=16,ACC_WIDTH=40)(
     input wire clk,resetn,start_i,
@@ -160,7 +171,7 @@ endmodule</code></pre>
       <h2><span class="num">04</span>테스트벤치·기준 모델 작성</h2>
       <p>테스트벤치는 출력을 자동 판정합니다. 기준 모델(Python)은 시험 벡터와 정답을 만듭니다.</p>
       <div class="codeblock">
-        <div class="codebar"><span>ch08/tb/tb_pe_array4.sv · systemverilog</span></div>
+        <div class="codebar"><span>ch08/tb/tb_pe_array4.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
         <pre><code class="language-systemverilog">`timescale 1ns/1ps
 module tb_pe_array4;
     parameter DW=16,AW=40;
@@ -220,7 +231,7 @@ module tb_pe_array4;
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>ch08/reference/pe_reference.py · python</span></div>
+        <div class="codebar"><span>ch08/reference/pe_reference.py · python · 원본 · RTL_SIM 통과 2026-11-18</span></div>
         <pre><code class="language-python">import argparse
 import random
 import sys
@@ -256,7 +267,7 @@ if __name__=='__main__':
     <section class="section" id="s05">
       <h2><span class="num">05</span>시뮬레이션 실행</h2>
       <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 저장소 루트에서 실행</span></div>
-        <pre><code>bash ch08/scripts/run_sim.sh</code></pre></div>
+        <pre><code>bash ch08/scripts/run_sim.sh   # RTL 컴파일 → 시뮬레이션 → TB 자동 판정 → Python 기준값 비교</code></pre></div>
       <p>기대 출력 (도구 버전 미기록 · 2026-11-18 실제 실행 로그 발췌, 출처 <code>ch08/validation/rtl_sim_20261118.log</code>):</p>
       <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
         <pre><code>PYTHON_PE_SELF_TEST_PASS INT16/40 cases=26 seed=308
@@ -268,20 +279,20 @@ PYTHON_RTL_COMPARE_PASS cycles=26</code></pre></div>
     </section>
     <section class="section" id="s06">
       <h2><span class="num">06</span>결과 판정</h2>
-      <table>
+      <div class="table-wrap"><table>
         <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
         <tbody><tr><td><code>RTL_SIM_PASS PE4 INT16/40 cases=26</code></td><td>4개 PE 결과·합산 26건 통과</td></tr><tr><td><code>RTL_SIM_PASS PE4 INT8/32 cases=26</code></td><td>INT8 설정 통과</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS</code></td><td>RTL 출력 파일과 Python 기준값이 모든 사이클에서 일치</td></tr></tbody>
-      </table>
+      </table></div>
       <p><b>실패 시:</b> TB의 <code>$fatal</code> 메시지에 표시된 cycle 번호와 기대값/실제값을 확인하고, 03절 코드와 한 줄씩 대조합니다. 하나라도 실패하면 다음 장으로 넘어가지 않습니다.</p>
     </section>
     <section class="section" id="s07">
       <h2><span class="num">07</span>코드 읽기 포인트</h2>
-      <table>
+      <div class="table-wrap"><table>
         <thead><tr><th>위치</th><th>내용</th></tr></thead>
         <tbody><tr><td>generate 블록</td><td>4개 <code>vector_dot_core</code>를 <code>genvar g</code>로 반복 생성합니다. 슬라이스 인덱스 <code>a_i[g*DATA_WIDTH+:DATA_WIDTH]</code>로 비트 필드를 추출합니다.</td></tr>
 <tr><td>비동기 완료 처리</td><td>4개 PE는 같은 길이를 처리하더라도 valid 타이밍이 달라 done이 다른 클록에 올 수 있습니다. <code>saved[g]</code>에 각 결과를 보관하고 <code>finished[g]</code>를 세팅합니다. <code>&amp;finished</code>에서 sum을 등록합니다.</td></tr>
 <tr><td>2비트 확장 합산</td><td><code>extended[g] = {{2{saved[g][ACC_WIDTH-1]}}, saved[g]}</code>으로 (ACC_WIDTH+2)비트로 확장한 뒤 더합니다. 4개 값을 더하면 올림이 최대 2비트까지 생기므로 보호 비트 2개를 둡니다.</td></tr></tbody>
-      </table>
+      </table></div>
     </section>
     <section class="section" id="s08">
       <h2><span class="num">08</span>합성·타이밍·보드</h2>
@@ -290,21 +301,21 @@ PYTHON_RTL_COMPARE_PASS cycles=26</code></pre></div>
         <pre><code>source /tools/Xilinx/Vivado/&lt;버전&gt;/settings64.sh   # 설치 경로에 맞게 변경
 vivado -mode batch -nojournal -source tools/vivado/ooc_timing.tcl -tclargs ch08
 # 기대: SYNTH_TIMING_PASS ch08 pe_array4 WNS=… WHS=… LUT=… FF=… DSP48E1=… RAMB=…</code></pre></div>
-      <table>
+      <div class="table-wrap"><table>
         <thead><tr><th>판정 항목</th><th>기준</th><th>확인 위치</th></tr></thead>
         <tbody>
           <tr><td>Setup / Hold</td><td><code>WNS ≥ 0</code> · <code>WHS ≥ 0</code> (clk 10.000 ns)</td><td><code>build/vivado/ch08/timing_route.rpt</code></td></tr>
           <tr><td>자원</td><td>DSP48E1 ≥ 4 (PE 4개) — 기대값 · 실행 전 ⚠ 미검증</td><td><code>build/vivado/ch08/route_util.rpt</code></td></tr>
         </tbody>
-      </table>
+      </table></div>
       <p>OOC 결과는 입출력 핀 지연을 포함하지 않으므로 보드 Top 타이밍을 대신하지 않습니다. 증거 저장은 <code>bash tools/run_vivado_all.sh ooc</code>(→ <code>ch08/validation/vivado_ooc_YYYYMMDD.txt</code>). 보드 확인은 <a href="ch12_integrated_npu_v05.html#s08">12장 · 08</a>에서 통합 Top으로 진행합니다.</p>
     </section>
     <section class="section" id="s09">
       <h2><span class="num">09</span>검증 현황·인계</h2>
-      <table>
+      <div class="table-wrap"><table>
         <thead><tr><th>다음 장으로 넘기는 파일</th><th>사용처</th></tr></thead>
         <tbody><tr><td><code>ch08/rtl/pe_array4.v</code></td><td>09장 dense_layer4 (수정 금지)</td></tr></tbody>
-      </table>
+      </table></div>
       <p>검증 게이트 (<code>ch08/validation/</code> 증거 파일 기준으로 자동 표시):</p>
       <div class="gate-row">
         <div class="gate pass">
