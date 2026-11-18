@@ -1,0 +1,487 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Basys3 NPU 24장 실습 · 자원·타이밍·임계 경로 보고서">
+<meta name="generator" content="tools/guide/build_guides.py — 직접 수정 금지, chapter.json을 고친 뒤 재생성">
+<title>24장 · 자원·타이밍·임계 경로 보고서 (v02)</title>
+<link rel="stylesheet" href="assets/education/site.css">
+<style>
+.codeblock pre{max-height:780px;white-space:pre}
+.section svg{width:100%;height:auto}
+.vbadge{display:inline-block;padding:.15em .6em;border-radius:4px;font-size:.78em;font-weight:700;background:#d4edda;color:#155724;vertical-align:middle}
+.gate-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:10px}
+.gate{border:1px solid var(--line,#e0e0e0);border-radius:6px;padding:10px 14px;overflow-wrap:anywhere}
+.gate b{display:block;font:600 11px var(--mono,monospace);letter-spacing:.04em;margin-bottom:4px}
+.gate span{font-size:13px}
+.gate.pass{border-color:#2d8a52;background:#f0fbf4}
+.gate.todo{border-color:#b08900;background:#fffbe6}
+.gate.fail{border-color:#b3261e;background:#fdeceb}
+.gate.na{border-color:#c8c8c8;background:#f6f6f6;color:#666}
+.table-wrap{overflow-x:auto}
+.table-wrap>table{min-width:620px}
+.figure-wrap{overflow-x:auto}
+.figure-wrap svg{min-width:860px}
+.section :not(pre)>code{overflow-wrap:anywhere}
+.codebar{gap:8px}
+.codebar span{min-width:0;overflow-wrap:anywhere}
+.hero p{max-width:none}
+.access-skip{position:absolute;left:-9999px;top:0}
+.access-skip:focus{left:12px;top:12px;z-index:1003;background:#fff;color:#15171c;padding:6px 10px}
+.nw code{white-space:nowrap;overflow-wrap:normal}
+</style>
+</head>
+<body data-chapter="ch24">
+<a class="access-skip" href="#main-content">본문 바로가기</a>
+<button type="button" class="mobile-menu" id="mobile-menu" aria-controls="course-nav" aria-expanded="false">☰ 장·목차</button>
+<div class="shade" id="shade"></div>
+<header class="hero">
+  <div class="hero-inner">
+    <p class="kicker">BASYS3 · NPU 고도화판 · 24장 실습 <span class="vbadge">v02</span></p>
+    <h1>제24장 · 자원·타이밍·임계 경로 보고서</h1>
+    <p>23장에서 시간을 잰 것과 같은 SoC 빌드에서 자원(LUT·FF·BRAM·DSP, 전체와 NPU 계층), WNS·TNS·WHS, 임계 경로를 보고서로 뽑아 한 표로 정리합니다. 보고서를 뽑는 Tcl과 읽는 Python을 준비하고, Vivado 없이 할 수 있는 확인은 먼저 끝냅니다.</p>
+  </div>
+</header>
+<div class="wrap">
+  <nav class="toc" id="course-nav" aria-label="전체 장과 절 탐색"></nav>
+  <main class="content" id="main-content">
+    <section class="section" id="s00">
+      <h2><span class="num">00</span>이 장의 위치</h2>
+      <p><b>목표:</b> 23장에서 시간을 잰 것과 같은 SoC 빌드에서 자원(LUT·FF·BRAM·DSP, 전체와 NPU 계층), WNS·TNS·WHS, 임계 경로를 보고서로 뽑아 한 표로 정리합니다. 보고서를 뽑는 Tcl과 읽는 Python을 준비하고, Vivado 없이 할 수 있는 확인은 먼저 끝냅니다.</p>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>구분</th><th>파일</th></tr></thead>
+        <tbody>
+          <tr><td>유지 (이전 장, 수정 없음)</td><td><ul><li><code>ch21/rtl/soc_npu_top.v</code> <small>(21장)</small></li><li><code>ch21/vivado/add_npu.tcl</code> <small>(21장)</small></li></ul></td></tr>
+          <tr><td>이번 장 작성</td><td><ul><li><code>ch24/vivado/report_soc.tcl</code></li><li><code>ch24/reference/parse_reports.py</code></li></ul></td></tr>
+        </tbody>
+      </table></div>
+      <p>전체 누적 관계: <a href="index.html#techtree">INDEX · 01 전체 테크트리</a> (00~31장 흐름 · 00~12장 모듈 재사용 도면)</p>
+      <p>실습 순서: 01 구조 확인 → 02 준비 → 03 RTL 작성 → 04 테스트벤치·기준 모델 작성 → 05 시뮬레이션 → 06 결과 판정 → 08 합성·타이밍(Vivado) → 09 인계.</p>
+    </section>
+    <section class="section" id="s01">
+      <h2><span class="num">01</span>구조도</h2>
+      <div class="figure-wrap" tabindex="0" role="region" aria-label="도면 (가로 스크롤 가능)"><svg viewBox="0 0 980 202" role="img" aria-label="soc_npu_top 실제 포트와 하위 모듈 구조">
+      <rect x="250" y="30" width="480" height="132" rx="10" fill="#fff" stroke="#4635b1" stroke-width="2"/>
+      <text x="490" y="54" font-size="18" font-weight="700" text-anchor="middle">soc_npu_top</text>
+      <text x="490" y="72" font-size="13" text-anchor="middle" fill="#555">ch21/rtl/soc_npu_top.v · 구현 도식</text>
+      <text x="222" y="64" font-size="14" font-family="monospace" text-anchor="end">clk</text>
+      <path d="M226 60 H250" stroke="#4635b1" stroke-width="1.5" stroke-dasharray="4 3"/><path d="M250 60 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="87" font-size="14" font-family="monospace" text-anchor="end">btnC</text>
+      <path d="M226 83 H250" stroke="#4635b1" stroke-width="1.5" stroke-dasharray="4 3"/><path d="M250 83 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="110" font-size="14" font-family="monospace" text-anchor="end">sw[15:0]</text>
+      <path d="M226 106 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 106 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="133" font-size="14" font-family="monospace" text-anchor="end">RsRx</text>
+      <path d="M226 129 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 129 l-7 -4 v8 z" fill="#4635b1"/>
+      <path d="M730 60 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 60 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="758" y="65" font-size="14" font-family="monospace">led[15:0]</text>
+      <path d="M730 83 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 83 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="758" y="88" font-size="14" font-family="monospace">RsTx</text>
+      <rect x="250" y="177" width="16" height="12" fill="#edeafa" stroke="#4635b1"/><text x="272" y="188" font-size="13">이번 장 신규</text>
+      <rect x="370" y="177" width="16" height="12" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="4 2"/><text x="392" y="188" font-size="13">이전 장 파일 재사용(수정 없음)</text>
+      <text x="600" y="188" font-size="13">왼쪽 input · 오른쪽 output · 점선 = 클록·리셋</text>
+      </svg></div>
+      <p>구현 도식: 포트 이름·폭과 하위 인스턴스는 <code>ch21/rtl/soc_npu_top.v</code> 선언에서 자동으로 가져왔습니다.</p>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>방향</th><th>포트</th><th>폭</th><th>구분</th><th>설명</th></tr></thead>
+        <tbody><tr><td>input</td><td class="nw"><code>clk</code></td><td class="nw"><code>1</code></td><td class="nw">클록</td><td>W5 · 100 MHz 외부 클록</td></tr><tr><td>input</td><td class="nw"><code>btnC</code></td><td class="nw"><code>1</code></td><td class="nw">리셋</td><td>U18 · 리셋 버튼</td></tr><tr><td>input</td><td class="nw"><code>sw</code></td><td class="nw"><code>[15:0]</code></td><td class="nw">데이터·제어</td><td>슬라이드 스위치 16개</td></tr><tr><td>input</td><td class="nw"><code>RsRx</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>USB-UART 수신</td></tr><tr><td>output</td><td class="nw"><code>led</code></td><td class="nw"><code>[15:0]</code></td><td class="nw">데이터·제어</td><td>LED 16개</td></tr><tr><td>output</td><td class="nw"><code>RsTx</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>USB-UART 송신</td></tr></tbody>
+      </table></div>
+    </section>
+    <section class="section" id="s02">
+      <h2><span class="num">02</span>준비</h2>
+      <ol>
+        <li>VS Code에서 저장소 루트(<code>amd_soc_npu/</code>)를 엽니다.</li>
+        <li>도구를 확인합니다.</li>
+      </ol>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 도구 확인</span></div>
+        <pre tabindex="0"><code>sudo apt install -y iverilog python3 ripgrep   # 처음 한 번
+iverilog -V 2&gt;&amp;1 | head -1      # Icarus Verilog version 12.0 이상
+python3 --version</code></pre></div>
+      <ol start="3"><li>00절 '유지' 파일이 이전 장 결과 그대로 있는지 확인합니다 (<code>tclsh</code>와 Python 3만 있으면 05절을 할 수 있습니다. 실제 숫자는 21장 프로젝트에서 8절로 뽑습니다).</li></ol>
+    </section>
+    <section class="section" id="s03">
+      <h2><span class="num">03</span>RTL 작성</h2>
+      <p>아래 파일을 경로 그대로 만들고 전체 코드를 입력합니다.</p>
+      <div class="codeblock">
+        <div class="codebar"><span>ch24/vivado/report_soc.tcl · tcl · 원본 · ⚠ 미검증 (Vivado 미실행)</span></div>
+        <pre tabindex="0"><code class="language-tcl"># 24장: 21장 SoC 구현 결과에서 자원·타이밍·임계 경로 보고서를 같은 빌드 기준으로 뽑는다.
+# 실행: 구현이 끝난 21장 프로젝트를 열고 Tcl Console에서  source &lt;저장소&gt;/ch24/vivado/report_soc.tcl
+# 결과: &lt;저장소&gt;/build/ch24/*.rpt 와 build_info.txt (빌드 SHA·비트스트림 해시)
+# ⚠ 미검증: Vivado에서 실행하지 않았다.
+set root [file normalize [file join [file dirname [info script]] ../..]]
+set out  [file join $root build ch24]
+file mkdir $out
+
+open_run impl_1
+report_utilization -file [file join $out util_total.rpt]
+report_utilization -hierarchical -hierarchical_depth 4 -file [file join $out util_hier.rpt]
+report_timing_summary -max_paths 10 -report_unconstrained -file [file join $out timing_summary.rpt]
+report_timing -max_paths 10 -nworst 1 -sort_by group -path_type summary -file [file join $out timing_paths.rpt]
+report_timing -max_paths 1 -path_type full -file [file join $out critical_path.rpt]
+
+# 같은 빌드인지 나중에 확인할 수 있게 저장소 커밋과 비트스트림 해시를 남긴다.
+set fh [open [file join $out build_info.txt] w]
+puts $fh "repo_commit [string trim [exec git -C $root rev-parse --short HEAD]]"
+puts $fh "vivado [version -short]"
+puts $fh "part [get_property PART [current_project]]"
+set bit [glob -nocomplain [file join [get_property DIRECTORY [current_project]] *.runs impl_1 *.bit]]
+if {[llength $bit]} { puts $fh "bitstream_sha256 [lindex [exec sha256sum [lindex $bit 0]] 0]" } else { puts $fh "bitstream_sha256 NONE" }
+close $fh
+puts "REPORT_SOC_DONE $out"</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>ch24/reference/parse_reports.py · python · 원본 · ⚠ 미검증</span></div>
+        <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
+"""24장: Vivado 보고서(report_soc.tcl 출력)에서 SoC 전체와 NPU(npu_0) 계층의 자원, WNS·TNS·WHS, 임계 경로를 한 표로 뽑는다.
+
+사용: parse_reports.py &lt;보고서 폴더&gt;  → 표 출력, 마지막 줄 REPORT_PARSE_PASS 또는 _FAIL
+보고서 형식은 Vivado 2024.2 텍스트 보고서를 기준으로 했다. ⚠ 실제 보고서로 아직 확인하지 않았다(05절은 작성한 견본으로 시험).
+"""
+from __future__ import annotations
+import re
+import sys
+from pathlib import Path
+
+
+def table_rows(text, first_col):
+    """'| a | b | ... |' 표에서 머리줄(first_col로 시작)을 찾아 행 사전 목록을 만든다."""
+    lines = [l for l in text.splitlines() if l.startswith("|")]
+    for k, l in enumerate(lines):
+        cells = [c.strip() for c in l.strip("|").split("|")]
+        if cells and cells[0] == first_col:
+            head = cells
+            return [dict(zip(head, [c.strip() for c in r.strip("|").split("|")])) for r in lines[k + 1:]]
+    return []
+
+
+def util_hier(text):
+    rows = table_rows(text, "Instance")
+    want = {"Total LUTs": "LUT", "FFs": "FF", "RAMB36": "RAMB36", "RAMB18": "RAMB18", "DSP Blocks": "DSP"}
+    out = {}
+    for r in rows:
+        name = r.get("Instance", "")
+        key = "TOTAL" if not name.startswith("(") and r is rows[0] else None
+        if re.search(r"\bnpu_0\b", name):
+            key = "NPU"
+        if key and key not in out:
+            out[key] = {v: float(r[k]) for k, v in want.items() if k in r and re.match(r"^[\d.]+$", r[k])}
+    return out
+
+
+def timing(text):
+    m = re.search(r"WNS\(ns\)\s+TNS\(ns\).*?\n\s*-+.*?\n\s*([-\d.]+)\s+([-\d.]+)\s+\d+\s+\d+\s+([-\d.]+)\s+([-\d.]+)", text, re.S)
+    return dict(zip(["WNS", "TNS", "WHS", "THS"], map(float, m.groups()))) if m else {}
+
+
+def critical(text):
+    src = re.search(r"Source:\s+(\S+)", text); dst = re.search(r"Destination:\s+(\S+)", text)
+    slack = re.search(r"Slack\s*\((MET|VIOLATED)\)\s*:\s*([-\d.]+)ns", text)
+    lv = re.search(r"Logic Levels:\s+(\d+)", text)
+    return {"from": src and src.group(1), "to": dst and dst.group(1), "slack": slack and float(slack.group(2)),
+            "levels": lv and int(lv.group(1))}
+
+
+def main(d):
+    d = Path(d)
+    u = util_hier((d / "util_hier.rpt").read_text())
+    t = timing((d / "timing_summary.rpt").read_text())
+    c = critical((d / "critical_path.rpt").read_text())
+    info = dict(l.split(" ", 1) for l in (d / "build_info.txt").read_text().splitlines() if " " in l)
+    ok = "TOTAL" in u and "NPU" in u and len(t) == 4 and c["slack"] is not None
+    for k in ("TOTAL", "NPU"):
+        if k in u:
+            share = "" if k == "TOTAL" else "  (" + ", ".join(f"{n} {100 * v / u['TOTAL'][n]:.0f}%" for n, v in u[k].items() if u["TOTAL"].get(n)) + ")"
+            print(f"UTIL {k:5s} " + " ".join(f"{n}={v:g}" for n, v in u[k].items()) + share)
+    print("TIMING " + " ".join(f"{k}={v:+.3f}" for k, v in t.items()))
+    print(f"CRITICAL slack={c['slack']} levels={c['levels']} from={c['from']} to={c['to']}")
+    print("BUILD " + " ".join(f"{k}={v}" for k, v in info.items()))
+    timing_ok = ok and t["WNS"] &gt;= 0 and t["WHS"] &gt;= 0
+    print(f"REPORT_PARSE_{'PASS' if ok else 'FAIL'} timing={'met' if timing_ok else 'NOT_MET'}")
+    return 0 if ok else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1]))</code></pre>
+      </div>
+    </section>
+    <section class="section" id="s04">
+      <h2><span class="num">04</span>테스트벤치·기준 모델 작성</h2>
+      <p>테스트벤치는 출력을 자동 판정합니다. RTL 시뮬레이션이 아니라 정적 검사입니다. ① Tcl 괄호·따옴표 짝 확인 ② 작성한 견본 보고서 4개(<code>ch24/host/fixture/</code>, 실제 Vivado 출력 아님)로 해석기 시험 ③ 실제 보고서가 있으면 해석. 견본 숫자는 결과가 아닙니다.</p>
+      <div class="codeblock">
+        <div class="codebar"><span>ch24/scripts/run_check.sh · bash · 원본 · ⚠ 미검증</span></div>
+        <pre tabindex="0"><code class="language-bash">#!/usr/bin/env bash
+set -euo pipefail
+cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.."
+export PYTHONDONTWRITEBYTECODE=1
+echo "tclsh $(echo 'puts [info patchlevel]' | tclsh)"
+# ① Tcl 문법(괄호·따옴표 짝) 확인
+tclsh &lt;&lt;'TCL'
+set fh [open vivado/report_soc.tcl]; set t [read $fh]; close $fh
+if {![info complete $t]} { puts "TCL_SYNTAX_STATIC_CHECK_FAIL"; exit 1 }
+set n [regexp -all {report_(utilization|timing_summary|timing)} $t]
+puts "TCL_SYNTAX_STATIC_CHECK_PASS reports=$n"
+TCL
+# ② 해석기 시험: 견본 보고서 (실제 Vivado 출력 아님)
+python3 reference/parse_reports.py host/fixture | sed -e 's/^REPORT_PARSE_PASS/PARSER_STATIC_CHECK_PASS fixture/' -e '/^PARSER/!s/^/[견본·실측 아님] /'
+# ③ 실제 보고서가 있으면 해석 (Vivado 실행 후)
+if [ -d ../build/ch24 ]; then python3 reference/parse_reports.py ../build/ch24; else echo "REAL_REPORTS NOT_RUN (Vivado 미실행)"; fi</code></pre>
+      </div>
+    </section>
+    <section class="section" id="s05">
+      <h2><span class="num">05</span>시뮬레이션 실행</h2>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 저장소 루트에서 실행</span></div>
+        <pre tabindex="0"><code>bash ch24/scripts/run_check.sh   # Tcl 문법 → 견본 보고서 해석 → (있으면) 실제 보고서 해석</code></pre></div>
+      <p>기대 출력 (도구 버전 미기록 · 2026-11-19 실제 실행 로그 발췌, 출처 <code>ch24/validation/rtl_sim_20261119.log</code>):</p>
+      <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
+        <pre tabindex="0"><code>tclsh 8.6.14
+TCL_SYNTAX_STATIC_CHECK_PASS reports=5
+[견본·실측 아님] UTIL TOTAL LUT=3000 FF=3500 RAMB36=20 RAMB18=2 DSP=7
+[견본·실측 아님] UTIL NPU   LUT=1200 FF=1100 RAMB36=10 RAMB18=1 DSP=4  (LUT 40%, FF 31%, RAMB36 50%, RAMB18 50%, DSP 57%)
+[견본·실측 아님] TIMING WNS=+1.234 TNS=+0.000 WHS=+0.045 THS=+0.000
+[견본·실측 아님] CRITICAL slack=1.234 levels=9 from=u_soc/soc_npu_i/npu_0/inst/core/lane[0].dot/acc_reg[3]/C to=u_soc/soc_npu_i/npu_0/inst/core/lane[0].dot/acc_reg[31]/D
+[견본·실측 아님] BUILD repo_commit=0000000 vivado=2024.2 part=xc7a35tcpg236-1 bitstream_sha256=NONE
+PARSER_STATIC_CHECK_PASS fixture timing=met
+REAL_REPORTS NOT_RUN (Vivado 미실행)</code></pre></div>
+    </section>
+    <section class="section" id="s06">
+      <h2><span class="num">06</span>결과 판정</h2>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
+        <tbody><tr><td><code>TCL_SYNTAX_STATIC_CHECK_PASS reports=5</code></td><td><code>report_soc.tcl</code>의 괄호·따옴표가 맞고 보고서 명령 5개가 있음</td></tr><tr><td><code>PARSER_STATIC_CHECK_PASS fixture timing=met</code></td><td>견본 보고서에서 전체·NPU 자원, WNS 등 4개, 임계 경로, 빌드 정보를 모두 읽음 (견본 숫자는 결과가 아님)</td></tr><tr><td><code>REAL_REPORTS NOT_RUN (Vivado 미실행)</code></td><td>실제 보고서가 아직 없음 → 8절 표는 ⚠ 미측정</td></tr></tbody>
+      </table></div>
+      <p><b>실패 시:</b> TB의 <code>$fatal</code> 메시지에 표시된 cycle 번호와 기대값/실제값을 확인하고, 03절 코드와 한 줄씩 대조합니다. 하나라도 실패하면 다음 장으로 넘어가지 않습니다.</p>
+    </section>
+    <section class="section" id="s07">
+      <h2><span class="num">07</span>코드 읽기 포인트</h2>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>위치</th><th>내용</th></tr></thead>
+        <tbody><tr><td>같은 빌드</td><td><code>build_info.txt</code>에 저장소 커밋과 비트스트림 SHA-256을 남깁니다. 23장 시간, 24장 자원, 25장 전력이 같은 비트스트림에서 나왔는지 이 해시로 확인합니다.</td></tr>
+<tr><td>계층별 자원</td><td><code>report_utilization -hierarchical</code>에서 <code>npu_0</code> 행을 찾아 전체 대비 비율을 냅니다. 19장 OOC 숫자(NPU 단독)와 달라질 수 있는데, SoC 안에서는 최적화·배치가 함께 바뀌기 때문입니다.</td></tr>
+<tr><td>임계 경로 읽기</td><td>Source·Destination 레지스터 이름으로 어느 모듈의 경로인지 봅니다. NPU 안이면 누산기 덧셈(CARRY4 사슬)이 흔하고, 밖이면 AXI 인터커넥트·MicroBlaze V 쪽입니다.</td></tr>
+<tr><td>견본과 실제</td><td>해석기는 Vivado 2024.2 텍스트 보고서 형식을 가정했습니다. 실제 보고서에서 <code>REPORT_PARSE_FAIL</code>이면 표 머리글 글자를 확인해 정규식을 맞춥니다(⚠ 형식 미확인).</td></tr></tbody>
+      </table></div>
+    </section>
+    <section class="section" id="s08">
+      <h2><span class="num">08</span>합성·타이밍·보드</h2>
+      <p>이 장은 RTL을 더하지 않습니다. 21장 구현 결과에서 보고서만 뽑습니다 → <a href="ch21_soc_bd_v02.html#s08">21장 · 08</a></p>
+      <h3>8-1. 보고서 뽑기 (Vivado 2024.2)</h3>
+      <p>⚠ 미검증 — Vivado에서 실행하지 않았습니다. 23장에서 시간을 잰 것과 <b>같은 비트스트림</b>의 구현 결과로 뽑아야 숫자를 서로 비교할 수 있습니다.</p>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>순서</th><th>조작</th><th>성공 기준</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>21장 프로젝트 열기 (구현 완료 상태)</td><td>Design Runs의 impl_1이 Complete</td></tr>
+          <tr><td>2</td><td>Tcl Console: <code>source &lt;저장소&gt;/ch24/vivado/report_soc.tcl</code></td><td><code>REPORT_SOC_DONE …/build/ch24</code></td></tr>
+          <tr><td>3</td><td>터미널: <code>bash ch24/scripts/run_check.sh</code></td><td>마지막 줄 <code>REPORT_PARSE_PASS timing=met</code></td></tr>
+          <tr><td>4</td><td>출력 전체를 <code>ch24/validation/vivado_reports_YYYYMMDD.txt</code>로 저장 (경로의 사용자 이름은 지움)</td><td>UTIL·TIMING·CRITICAL·BUILD 줄</td></tr>
+        </tbody>
+      </table></div>
+      <h3>8-2. 채울 표</h3>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>항목</th><th>SoC 전체</th><th>NPU (npu_0)</th><th>비고</th></tr></thead>
+        <tbody>
+          <tr><td>LUT · FF</td><td>⚠ 미측정</td><td>⚠ 미측정</td><td>XC7A35T: LUT 20,800 · FF 41,600</td></tr>
+          <tr><td>RAMB36 · RAMB18</td><td>⚠ 미측정</td><td>⚠ 미측정</td><td>50개(36Kb 기준). NPU 가중치 RAM 4개 + 입력 1개</td></tr>
+          <tr><td>DSP</td><td>⚠ 미측정</td><td>⚠ 미측정</td><td>90개. NPU 기대 4개 (NPE=4)</td></tr>
+          <tr><td>WNS · TNS · WHS</td><td colspan="2">⚠ 미측정</td><td>WNS ≥ 0, TNS = 0, WHS ≥ 0</td></tr>
+          <tr><td>임계 경로</td><td colspan="2">⚠ 미측정</td><td>시작·끝 레지스터, 논리 단수</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+    <section class="section" id="s09">
+      <h2><span class="num">09</span>검증 현황·인계</h2>
+      <p>누적 보고 (이전 결과 → 추가 RTL → 시험 벡터 → 시뮬레이션 → 합성/보드 → 인계):</p>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>이전 결과</th><th>추가 RTL</th><th>시험 벡터</th><th>시뮬레이션</th><th>합성 / 보드</th><th>인계</th></tr></thead>
+        <tbody><tr><td>21장</td><td><code>없음 (스크립트·제약만)</code></td><td><code>run_check.sh</code></td><td>해당 없음</td><td>⚠ 대기 / 미실시</td><td>2건 (아래 표)</td></tr></tbody>
+      </table></div>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>다음 장으로 넘기는 파일</th><th>사용처</th></tr></thead>
+        <tbody><tr><td><code>build/ch24/build_info.txt</code></td><td>25장 전력 보고서가 같은 빌드인지 확인 (⚠ Vivado 실행 대기)</td></tr><tr><td><code>ch24/reference/parse_reports.py</code></td><td>25장 전력 보고서 해석과 같은 방식</td></tr></tbody>
+      </table></div>
+      <p>검증 게이트 (<code>ch24/validation/</code> 증거 파일 기준으로 자동 표시):</p>
+      <div class="gate-row">
+        <div class="gate pass">
+          <b>HTML_PASS</b>
+          <span>v02 · 생성기·정적 검사</span>
+        </div>
+        <div class="gate na">
+          <b>HOST_MODEL_PASS</b>
+          <span>해당 없음 (Python 기준 모델 없음)</span>
+        </div>
+        <div class="gate na">
+          <b>RTL_SIM_PASS</b>
+          <span>해당 없음 (RTL 시뮬레이션 대상 아님) · 정적 검사: PARSER_STATIC_CHECK_PASS fixture timing=met · 2026-11-19</span>
+        </div>
+        <div class="gate todo">
+          <b>SYNTH_TIMING_PASS</b>
+          <span>⚠ 미검증 · VS Code Vivado 실행 대기 (08절)</span>
+        </div>
+        <div class="gate todo">
+          <b>BOARD_PASS</b>
+          <span>⚠ 미실시 · 현재 실물 보드 확인 불가</span>
+        </div>
+      </div>
+    </section>
+    <div class="chapter-links" id="chapter-links"></div>
+  </main>
+</div>
+<script>
+window.COURSE={
+ "title": "Basys3 소형 NPU 실습 (고도화판)",
+ "chapters": [
+  {
+   "id": "ch00",
+   "number": 0,
+   "title": "UART Echo",
+   "file": "ch00_uart_echo_v05.html"
+  },
+  {
+   "id": "ch01",
+   "number": 1,
+   "title": "DSP 추론 MAC 누산",
+   "file": "ch01_mac_v05.html"
+  },
+  {
+   "id": "ch02",
+   "number": 2,
+   "title": "DSP48E1 타깃 곱셈",
+   "file": "ch02_dsp_v05.html"
+  },
+  {
+   "id": "ch03",
+   "number": 3,
+   "title": "MAC 2단계 파이프라인",
+   "file": "ch03_mac_pipeline_v05.html"
+  },
+  {
+   "id": "ch04",
+   "number": 4,
+   "title": "BRAM 동기 버퍼",
+   "file": "ch04_bram_v05.html"
+  },
+  {
+   "id": "ch05",
+   "number": 5,
+   "title": "Fixed-Point Quantizer",
+   "file": "ch05_fixed_v05.html"
+  },
+  {
+   "id": "ch06",
+   "number": 6,
+   "title": "INT8·INT16 정밀도 비교",
+   "file": "ch06_precision_v05.html"
+  },
+  {
+   "id": "ch07",
+   "number": 7,
+   "title": "벡터 내적",
+   "file": "ch07_vector_dot_v05.html"
+  },
+  {
+   "id": "ch08",
+   "number": 8,
+   "title": "4PE 병렬 어레이",
+   "file": "ch08_pe4_v05.html"
+  },
+  {
+   "id": "ch09",
+   "number": 9,
+   "title": "Dense 4뉴런 레이어",
+   "file": "ch09_dense_v05.html"
+  },
+  {
+   "id": "ch10",
+   "number": 10,
+   "title": "4뉴런 NPU Core",
+   "file": "ch10_npu_core_v05.html"
+  },
+  {
+   "id": "ch11",
+   "number": 11,
+   "title": "UART 모델 적재 컨트롤러",
+   "file": "ch11_uart_register_v05.html"
+  },
+  {
+   "id": "ch12",
+   "number": 12,
+   "title": "통합 NPU Top",
+   "file": "ch12_integrated_npu_v05.html"
+  },
+  {
+   "id": "ch13",
+   "number": 13,
+   "title": "8×8 손글씨·10분류 준비",
+   "file": "ch13_mnist_8x8_v02.html"
+  },
+  {
+   "id": "ch14",
+   "number": 14,
+   "title": "4PE 그룹·10개 출력",
+   "file": "ch14_group10_v02.html"
+  },
+  {
+   "id": "ch15",
+   "number": 15,
+   "title": "Dense 64→10 공통 블록",
+   "file": "ch15_dense_64x10_v02.html"
+  },
+  {
+   "id": "ch16",
+   "number": 16,
+   "title": "2층 신경망 64→8→10",
+   "file": "ch16_mlp_64_8_10_v02.html"
+  },
+  {
+   "id": "ch17",
+   "number": 17,
+   "title": "784원소 타일 실행",
+   "file": "ch17_tiled_784_v02.html"
+  },
+  {
+   "id": "ch18",
+   "number": 18,
+   "title": "Float32 · INT8 · INT16 정밀도",
+   "file": "ch18_precision_v02.html"
+  },
+  {
+   "id": "ch19",
+   "number": 19,
+   "title": "1·4·8PE 사이클 비교",
+   "file": "ch19_pe_compare_v02.html"
+  },
+  {
+   "id": "ch20",
+   "number": 20,
+   "title": "AXI4-Lite 레지스터",
+   "file": "ch20_axi_lite_v02.html"
+  },
+  {
+   "id": "ch21",
+   "number": 21,
+   "title": "MicroBlaze V + NPU 블록 설계",
+   "file": "ch21_soc_bd_v02.html"
+  },
+  {
+   "id": "ch22",
+   "number": 22,
+   "title": "Vitis C 드라이버",
+   "file": "ch22_vitis_driver_v02.html"
+  },
+  {
+   "id": "ch23",
+   "number": 23,
+   "title": "CPU · NPU 시간 비교",
+   "file": "ch23_cpu_vs_npu_v02.html"
+  },
+  {
+   "id": "ch24",
+   "number": 24,
+   "title": "자원 · 타이밍 · 임계 경로",
+   "file": "ch24_resource_timing_v02.html"
+  }
+ ]
+};
+</script>
+<script defer src="assets/education/site.js"></script>
+</body>
+</html>

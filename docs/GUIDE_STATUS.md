@@ -30,7 +30,7 @@
 | 21 | MicroBlaze V + NPU 블록 설계 | [ch21_soc_bd_v02.html](../ch21_soc_bd_v02.html) | — | — | ⏳ | ⏳ | ⏳ |
 | 22 | Vitis C 드라이버 | [ch22_vitis_driver_v02.html](../ch22_vitis_driver_v02.html) | — | ✅ | ⏳ | — | ⏳ |
 | 23 | CPU · NPU 시간 비교 | [ch23_cpu_vs_npu_v02.html](../ch23_cpu_vs_npu_v02.html) | — | — | ⏳ | — | ⏳ |
-| 24 | FPGA 자원·타이밍 | chapter.json 대기 | | | | | |
+| 24 | 자원 · 타이밍 · 임계 경로 | [ch24_resource_timing_v02.html](../ch24_resource_timing_v02.html) | — | — | ⏳ | — | ⏳ |
 | 25 | 동적 전력·추론 에너지 | chapter.json 대기 | | | | | |
 | 26 | 3×3 소형 CNN 경로 | chapter.json 대기 | | | | | |
 | 27 | 10분류 NPU SoC 통합 | chapter.json 대기 | | | | | |
