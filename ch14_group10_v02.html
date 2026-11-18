@@ -155,7 +155,7 @@ python3 --version</code></pre></div>
       <h2><span class="num">03</span>RTL 작성</h2>
       <p>아래 파일을 경로 그대로 만들고 전체 코드를 입력합니다.</p>
       <div class="codeblock">
-        <div class="codebar"><span>ch14/rtl/npu10_group_scheduler.v · verilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <div class="codebar"><span>ch14/rtl/npu10_group_scheduler.v · verilog · 원본 · RTL_SIM 통과 2026-11-19</span></div>
         <pre tabindex="0"><code class="language-verilog">`timescale 1ns/1ps
 `default_nettype none
 // 14장 그룹 스케줄러: 08장 4PE를 4+4+2 세 그룹으로 세 번 돌려 10개 점수(내적 + Bias)를 모으고,
@@ -283,7 +283,7 @@ endmodule
       <h2><span class="num">04</span>테스트벤치·기준 모델 작성</h2>
       <p>테스트벤치는 출력을 자동 판정합니다. 기준 모델(Python)이 24개 사례를 만듭니다: 형판 가중치로 숫자 0~9를 한 번씩, 무작위 가중치·Bias 10개, 전부 동점, 8·9 동점, 점수 전부 음수, 9번 차선 승리. 형판 가중치는 숫자별 특징 그대로이고 Bias = −|특징|²/2인 최근접 형판 분류이며, 학습한 모델이 아닙니다.</p>
       <div class="codeblock">
-        <div class="codebar"><span>ch14/tb/tb_npu10_group_scheduler.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <div class="codebar"><span>ch14/tb/tb_npu10_group_scheduler.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-19</span></div>
         <pre tabindex="0"><code class="language-systemverilog">`timescale 1ns/1ps
 // 14장 TB: 24개 사례(형판 0~9, 무작위 10, 동점·음수·9번 차선)를 적재·실행하고 점수·클래스를 파일로 돌려준다.
 module tb_npu10_group_scheduler;
@@ -362,7 +362,7 @@ module tb_npu10_group_scheduler;
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>ch14/reference/group10_reference.py · python · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <div class="codebar"><span>ch14/reference/group10_reference.py · python · 원본 · RTL_SIM 통과 2026-11-19</span></div>
         <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
 """14장 기준 모델: 64원소 × 10클래스 점수 = 내적 + Bias, 동점이면 낮은 번호 argmax.
 
@@ -453,7 +453,7 @@ if __name__ == "__main__":
       <h2><span class="num">05</span>시뮬레이션 실행</h2>
       <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 저장소 루트에서 실행</span></div>
         <pre tabindex="0"><code>bash ch14/scripts/run_sim.sh   # 기준 모델 자체 시험 → RTL 시뮬레이션 (24사례) → Python 점수·클래스 비교</code></pre></div>
-      <p>기대 출력 (Icarus Verilog 12.0 · 2026-11-18 실제 실행 로그 발췌, 출처 <code>ch14/validation/rtl_sim_20261118.log</code>):</p>
+      <p>기대 출력 (Icarus Verilog 12.0 · 2026-11-19 실제 실행 로그 발췌, 출처 <code>ch14/validation/rtl_sim_20261119.log</code>):</p>
       <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
         <pre tabindex="0"><code>Icarus Verilog version 12.0 (stable) ()
 PYTHON_GROUP10_SELF_TEST_PASS cases=24 template_classes=0..9 ties=2
@@ -519,7 +519,7 @@ vivado -mode batch -nojournal -source tools/vivado/ooc_timing.tcl -tclargs ch14
         </div>
         <div class="gate pass">
           <b>RTL_SIM_PASS</b>
-          <span>RTL_SIM_PASS GROUP10 cases=24 scores=240 guards=2 cycles_per… · Icarus Verilog 12.0 · 2026-11-18</span>
+          <span>RTL_SIM_PASS GROUP10 cases=24 scores=240 guards=2 cycles_per… · Icarus Verilog 12.0 · 2026-11-19</span>
         </div>
         <div class="gate todo">
           <b>SYNTH_TIMING_PASS</b>
