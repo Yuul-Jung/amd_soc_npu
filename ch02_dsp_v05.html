@@ -61,7 +61,7 @@
     </section>
     <section class="section" id="s01">
       <h2><span class="num">01</span>구조도</h2>
-      <div class="figure-wrap" tabindex="0" role="region" aria-label="도면 (가로 스크롤 가능)"><svg viewBox="0 0 980 248" role="img" aria-label="dsp_multiplier 실제 포트와 하위 모듈 구조">
+      <div class="figure-wrap" tabindex="0" role="region" aria-label="도면 (가로 스크롤 가능)"><svg viewBox="0 0 1056 248" role="img" aria-label="dsp_multiplier 실제 포트와 하위 모듈 구조">
       <rect x="250" y="30" width="480" height="178" rx="10" fill="#fff" stroke="#4635b1" stroke-width="2"/>
       <text x="490" y="54" font-size="18" font-weight="700" text-anchor="middle">dsp_multiplier</text>
       <text x="490" y="72" font-size="13" text-anchor="middle" fill="#555">ch02/rtl/dsp_multiplier.v · 구현 도식</text>
@@ -88,7 +88,7 @@
       <p>구현 도식: 포트 이름·폭과 하위 인스턴스는 <code>ch02/rtl/dsp_multiplier.v</code> 선언에서 자동으로 가져왔습니다.</p>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>방향</th><th>포트</th><th>폭</th><th>구분</th><th>설명</th></tr></thead>
-        <tbody><tr><td>input</td><td class="nw"><code>clk</code></td><td class="nw"><code>1</code></td><td>클록</td><td>시스템 클록 (상승 에지에서 모든 레지스터 갱신)</td></tr><tr><td>input</td><td class="nw"><code>resetn</code></td><td class="nw"><code>1</code></td><td>리셋</td><td>동기 리셋, 0이면 초기화 (Active-Low)</td></tr><tr><td>input</td><td class="nw"><code>clear_i</code></td><td class="nw"><code>1</code></td><td>데이터·제어</td><td>곱 레지스터 0으로 초기화</td></tr><tr><td>input</td><td class="nw"><code>valid_i</code></td><td class="nw"><code>1</code></td><td>데이터·제어</td><td>이번 클록에 곱을 등록</td></tr><tr><td>input</td><td class="nw"><code>a_i</code></td><td class="nw"><code>[A_WIDTH-1:0]</code></td><td>데이터·제어</td><td>signed 피연산자 A (DSP 25비트 포트로 부호 확장)</td></tr><tr><td>input</td><td class="nw"><code>b_i</code></td><td class="nw"><code>[B_WIDTH-1:0]</code></td><td>데이터·제어</td><td>signed 피연산자 B (DSP 18비트 포트로 부호 확장)</td></tr><tr><td>output</td><td class="nw"><code>product_o</code></td><td class="nw"><code>[A_WIDTH+B_WIDTH-1:0]</code></td><td>데이터·제어</td><td>등록된 곱 (A_WIDTH+B_WIDTH 비트)</td></tr><tr><td>output</td><td class="nw"><code>valid_o</code></td><td class="nw"><code>1</code></td><td>데이터·제어</td><td>product_o가 이번 입력의 곱임</td></tr></tbody>
+        <tbody><tr><td>input</td><td class="nw"><code>clk</code></td><td class="nw"><code>1</code></td><td class="nw">클록</td><td>시스템 클록 (상승 에지에서 모든 레지스터 갱신)</td></tr><tr><td>input</td><td class="nw"><code>resetn</code></td><td class="nw"><code>1</code></td><td class="nw">리셋</td><td>동기 리셋, 0이면 초기화 (Active-Low)</td></tr><tr><td>input</td><td class="nw"><code>clear_i</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>곱 레지스터 0으로 초기화</td></tr><tr><td>input</td><td class="nw"><code>valid_i</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>이번 클록에 곱을 등록</td></tr><tr><td>input</td><td class="nw"><code>a_i</code></td><td class="nw"><code>[A_WIDTH-1:0]</code></td><td class="nw">데이터·제어</td><td>signed 피연산자 A (DSP 25비트 포트로 부호 확장)</td></tr><tr><td>input</td><td class="nw"><code>b_i</code></td><td class="nw"><code>[B_WIDTH-1:0]</code></td><td class="nw">데이터·제어</td><td>signed 피연산자 B (DSP 18비트 포트로 부호 확장)</td></tr><tr><td>output</td><td class="nw"><code>product_o</code></td><td class="nw"><code>[A_WIDTH+B_WIDTH-1:0]</code></td><td class="nw">데이터·제어</td><td>등록된 곱 (A_WIDTH+B_WIDTH 비트)</td></tr><tr><td>output</td><td class="nw"><code>valid_o</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>product_o가 이번 입력의 곱임</td></tr></tbody>
       </table></div>
     </section>
     <section class="section" id="s02">
@@ -535,6 +535,12 @@ window.COURSE={
    "number": 13,
    "title": "8×8 손글씨·10분류 준비",
    "file": "ch13_mnist_8x8_v02.html"
+  },
+  {
+   "id": "ch14",
+   "number": 14,
+   "title": "4PE 그룹·10개 출력",
+   "file": "ch14_group10_v02.html"
   }
  ]
 };

@@ -88,7 +88,7 @@
       <p>구현 도식: 포트 이름·폭과 하위 인스턴스는 <code>ch01/rtl/mac_core.v</code> 선언에서 자동으로 가져왔습니다.</p>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>방향</th><th>포트</th><th>폭</th><th>구분</th><th>설명</th></tr></thead>
-        <tbody><tr><td>input</td><td class="nw"><code>clk</code></td><td class="nw"><code>1</code></td><td>클록</td><td>시스템 클록 (상승 에지에서 모든 레지스터 갱신)</td></tr><tr><td>input</td><td class="nw"><code>resetn</code></td><td class="nw"><code>1</code></td><td>리셋</td><td>동기 리셋, 0이면 초기화 (Active-Low)</td></tr><tr><td>input</td><td class="nw"><code>clear_i</code></td><td class="nw"><code>1</code></td><td>데이터·제어</td><td>누산기 0으로 초기화 (리셋 다음 우선순위)</td></tr><tr><td>input</td><td class="nw"><code>valid_i</code></td><td class="nw"><code>1</code></td><td>데이터·제어</td><td>이번 클록에 a_i·b_i를 누산</td></tr><tr><td>input</td><td class="nw"><code>a_i</code></td><td class="nw"><code>[DATA_WIDTH-1:0]</code></td><td>데이터·제어</td><td>signed 피연산자 A</td></tr><tr><td>input</td><td class="nw"><code>b_i</code></td><td class="nw"><code>[DATA_WIDTH-1:0]</code></td><td>데이터·제어</td><td>signed 피연산자 B</td></tr><tr><td>output</td><td class="nw"><code>acc_o</code></td><td class="nw"><code>[ACC_WIDTH-1:0]</code></td><td>데이터·제어</td><td>누산 결과 (2의 보수, 범위 초과 시 순환)</td></tr><tr><td>output</td><td class="nw"><code>valid_o</code></td><td class="nw"><code>1</code></td><td>데이터·제어</td><td>직전 에지에서 입력을 누산했음</td></tr></tbody>
+        <tbody><tr><td>input</td><td class="nw"><code>clk</code></td><td class="nw"><code>1</code></td><td class="nw">클록</td><td>시스템 클록 (상승 에지에서 모든 레지스터 갱신)</td></tr><tr><td>input</td><td class="nw"><code>resetn</code></td><td class="nw"><code>1</code></td><td class="nw">리셋</td><td>동기 리셋, 0이면 초기화 (Active-Low)</td></tr><tr><td>input</td><td class="nw"><code>clear_i</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>누산기 0으로 초기화 (리셋 다음 우선순위)</td></tr><tr><td>input</td><td class="nw"><code>valid_i</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>이번 클록에 a_i·b_i를 누산</td></tr><tr><td>input</td><td class="nw"><code>a_i</code></td><td class="nw"><code>[DATA_WIDTH-1:0]</code></td><td class="nw">데이터·제어</td><td>signed 피연산자 A</td></tr><tr><td>input</td><td class="nw"><code>b_i</code></td><td class="nw"><code>[DATA_WIDTH-1:0]</code></td><td class="nw">데이터·제어</td><td>signed 피연산자 B</td></tr><tr><td>output</td><td class="nw"><code>acc_o</code></td><td class="nw"><code>[ACC_WIDTH-1:0]</code></td><td class="nw">데이터·제어</td><td>누산 결과 (2의 보수, 범위 초과 시 순환)</td></tr><tr><td>output</td><td class="nw"><code>valid_o</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>직전 에지에서 입력을 누산했음</td></tr></tbody>
       </table></div>
     </section>
     <section class="section" id="s02">
@@ -532,6 +532,12 @@ window.COURSE={
    "number": 13,
    "title": "8×8 손글씨·10분류 준비",
    "file": "ch13_mnist_8x8_v02.html"
+  },
+  {
+   "id": "ch14",
+   "number": 14,
+   "title": "4PE 그룹·10개 출력",
+   "file": "ch14_group10_v02.html"
   }
  ]
 };

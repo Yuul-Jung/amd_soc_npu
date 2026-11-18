@@ -1,0 +1,636 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Basys3 NPU 14장 실습 · 4PE 4+4+2 그룹 실행과 10분류 argmax">
+<meta name="generator" content="tools/guide/build_guides.py — 직접 수정 금지, chapter.json을 고친 뒤 재생성">
+<title>14장 · 4PE 4+4+2 그룹 실행과 10분류 argmax (v02)</title>
+<link rel="stylesheet" href="assets/education/site.css">
+<style>
+.codeblock pre{max-height:780px;white-space:pre}
+.section svg{width:100%;height:auto}
+.vbadge{display:inline-block;padding:.15em .6em;border-radius:4px;font-size:.78em;font-weight:700;background:#d4edda;color:#155724;vertical-align:middle}
+.gate-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:10px}
+.gate{border:1px solid var(--line,#e0e0e0);border-radius:6px;padding:10px 14px;overflow-wrap:anywhere}
+.gate b{display:block;font:600 11px var(--mono,monospace);letter-spacing:.04em;margin-bottom:4px}
+.gate span{font-size:13px}
+.gate.pass{border-color:#2d8a52;background:#f0fbf4}
+.gate.todo{border-color:#b08900;background:#fffbe6}
+.gate.fail{border-color:#b3261e;background:#fdeceb}
+.gate.na{border-color:#c8c8c8;background:#f6f6f6;color:#666}
+.table-wrap{overflow-x:auto}
+.table-wrap>table{min-width:620px}
+.figure-wrap{overflow-x:auto}
+.figure-wrap svg{min-width:860px}
+.section :not(pre)>code{overflow-wrap:anywhere}
+.codebar{gap:8px}
+.codebar span{min-width:0;overflow-wrap:anywhere}
+.hero p{max-width:none}
+.access-skip{position:absolute;left:-9999px;top:0}
+.access-skip:focus{left:12px;top:12px;z-index:1003;background:#fff;color:#15171c;padding:6px 10px}
+.nw code{white-space:nowrap;overflow-wrap:normal}
+</style>
+</head>
+<body data-chapter="ch14">
+<a class="access-skip" href="#main-content">본문 바로가기</a>
+<button type="button" class="mobile-menu" id="mobile-menu" aria-controls="course-nav" aria-expanded="false">☰ 장·목차</button>
+<div class="shade" id="shade"></div>
+<header class="hero">
+  <div class="hero-inner">
+    <p class="kicker">BASYS3 · NPU 고도화판 · 14장 실습 <span class="vbadge">v02</span></p>
+    <h1>제14장 · 4PE 4+4+2 그룹 실행과 10분류 argmax</h1>
+    <p>08장 4PE를 4+4+2 세 그룹으로 세 번 돌려 13장 입력 64원소에 대한 10개 점수(내적 + Bias)를 모으고, 동점이면 낮은 번호를 고르는 argmax로 클래스 0~9를 냅니다.</p>
+  </div>
+</header>
+<div class="wrap">
+  <nav class="toc" id="course-nav" aria-label="전체 장과 절 탐색"></nav>
+  <main class="content" id="main-content">
+    <section class="section" id="s00">
+      <h2><span class="num">00</span>이 장의 위치</h2>
+      <p><b>목표:</b> 08장 4PE를 4+4+2 세 그룹으로 세 번 돌려 13장 입력 64원소에 대한 10개 점수(내적 + Bias)를 모으고, 동점이면 낮은 번호를 고르는 argmax로 클래스 0~9를 냅니다.</p>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>구분</th><th>파일</th></tr></thead>
+        <tbody>
+          <tr><td>유지 (이전 장, 수정 없음)</td><td><ul><li><code>ch01/rtl/mac_core.v</code> <small>(01장)</small></li><li><code>ch04/rtl/bram_sync_buffer.v</code> <small>(04장)</small></li><li><code>ch07/rtl/vector_dot_core.v</code> <small>(07장)</small></li><li><code>ch08/rtl/pe_array4.v</code> <small>(08장)</small></li><li><code>ch13/rtl/npu10_input_loader.v</code> <small>(13장)</small></li><li><code>ch13/reference/mnist8x8_reference.py</code> <small>(13장)</small></li><li><code>host_tools/p3_integer_reference.py</code> <small>()</small></li></ul></td></tr>
+          <tr><td>이번 장 작성</td><td><ul><li><code>ch14/rtl/npu10_group_scheduler.v</code></li></ul></td></tr>
+        </tbody>
+      </table></div>
+      <p>전체 누적 관계: <a href="index.html#techtree">INDEX · 01 전체 테크트리</a> (00~31장 흐름 · 00~12장 모듈 재사용 도면)</p>
+      <p>실습 순서: 01 구조 확인 → 02 준비 → 03 RTL 작성 → 04 테스트벤치·기준 모델 작성 → 05 시뮬레이션 → 06 결과 판정 → 08 합성·타이밍(Vivado) → 09 인계.</p>
+    </section>
+    <section class="section" id="s01">
+      <h2><span class="num">01</span>구조도</h2>
+      <div class="figure-wrap" tabindex="0" role="region" aria-label="도면 (가로 스크롤 가능)"><svg viewBox="0 0 1113 432" role="img" aria-label="npu10_group_scheduler 실제 포트와 하위 모듈 구조">
+      <rect x="251" y="30" width="573" height="362" rx="10" fill="#fff" stroke="#4635b1" stroke-width="2"/>
+      <text x="537" y="54" font-size="18" font-weight="700" text-anchor="middle">npu10_group_scheduler</text>
+      <text x="537" y="72" font-size="13" text-anchor="middle" fill="#555">ch14/rtl/npu10_group_scheduler.v · 구현 도식</text>
+      <text x="271" y="218" font-size="13" fill="#555">FSM 상태 (localparam 선언 순서 · 전이는 아래 상태 전이표)</text>
+      <text x="271" y="240" font-size="14" font-family="monospace">IDLE · LAUNCH · READ · WAIT_READ · SEND · WAIT_PE · ARGMAX</text>
+      <text x="223" y="64" font-size="14" font-family="monospace" text-anchor="end">clk</text>
+      <path d="M227 60 H251" stroke="#4635b1" stroke-width="1.5" stroke-dasharray="4 3"/><path d="M251 60 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="223" y="87" font-size="14" font-family="monospace" text-anchor="end">resetn</text>
+      <path d="M227 83 H251" stroke="#4635b1" stroke-width="1.5" stroke-dasharray="4 3"/><path d="M251 83 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="223" y="110" font-size="14" font-family="monospace" text-anchor="end">load_start_i</text>
+      <path d="M227 106 H251" stroke="#4635b1" stroke-width="1.5"/><path d="M251 106 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="223" y="133" font-size="14" font-family="monospace" text-anchor="end">in_valid_i</text>
+      <path d="M227 129 H251" stroke="#4635b1" stroke-width="1.5"/><path d="M251 129 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="223" y="156" font-size="14" font-family="monospace" text-anchor="end">in_data_i[7:0]</text>
+      <path d="M227 152 H251" stroke="#4635b1" stroke-width="1.5"/><path d="M251 152 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="223" y="179" font-size="14" font-family="monospace" text-anchor="end">in_last_i</text>
+      <path d="M227 175 H251" stroke="#4635b1" stroke-width="1.5"/><path d="M251 175 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="223" y="202" font-size="14" font-family="monospace" text-anchor="end">w_wr_en_i</text>
+      <path d="M227 198 H251" stroke="#4635b1" stroke-width="1.5"/><path d="M251 198 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="223" y="225" font-size="14" font-family="monospace" text-anchor="end">w_class_i[3:0]</text>
+      <path d="M227 221 H251" stroke="#4635b1" stroke-width="1.5"/><path d="M251 221 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="223" y="248" font-size="14" font-family="monospace" text-anchor="end">w_addr_i[5:0]</text>
+      <path d="M227 244 H251" stroke="#4635b1" stroke-width="1.5"/><path d="M251 244 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="223" y="271" font-size="14" font-family="monospace" text-anchor="end">w_data_i[7:0]</text>
+      <path d="M227 267 H251" stroke="#4635b1" stroke-width="1.5"/><path d="M251 267 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="223" y="294" font-size="14" font-family="monospace" text-anchor="end">b_wr_en_i</text>
+      <path d="M227 290 H251" stroke="#4635b1" stroke-width="1.5"/><path d="M251 290 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="223" y="317" font-size="14" font-family="monospace" text-anchor="end">b_class_i[3:0]</text>
+      <path d="M227 313 H251" stroke="#4635b1" stroke-width="1.5"/><path d="M251 313 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="223" y="340" font-size="14" font-family="monospace" text-anchor="end">b_data_i[ACC_WIDTH-1:0]</text>
+      <path d="M227 336 H251" stroke="#4635b1" stroke-width="1.5"/><path d="M251 336 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="223" y="363" font-size="14" font-family="monospace" text-anchor="end">start_i</text>
+      <path d="M227 359 H251" stroke="#4635b1" stroke-width="1.5"/><path d="M251 359 l-7 -4 v8 z" fill="#4635b1"/>
+      <path d="M824 60 H848" stroke="#4635b1" stroke-width="1.5"/><path d="M848 60 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="852" y="65" font-size="14" font-family="monospace">x_loaded_o</text>
+      <path d="M824 83 H848" stroke="#4635b1" stroke-width="1.5"/><path d="M848 83 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="852" y="88" font-size="14" font-family="monospace">x_len_err_o</text>
+      <path d="M824 106 H848" stroke="#4635b1" stroke-width="1.5"/><path d="M848 106 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="852" y="111" font-size="14" font-family="monospace">x_range_err_o</text>
+      <path d="M824 129 H848" stroke="#4635b1" stroke-width="1.5"/><path d="M848 129 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="852" y="134" font-size="14" font-family="monospace">busy_o</text>
+      <path d="M824 152 H848" stroke="#4635b1" stroke-width="1.5"/><path d="M848 152 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="852" y="157" font-size="14" font-family="monospace">done_o</text>
+      <path d="M824 175 H848" stroke="#4635b1" stroke-width="1.5"/><path d="M848 175 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="852" y="180" font-size="14" font-family="monospace">error_o</text>
+      <path d="M824 198 H848" stroke="#4635b1" stroke-width="1.5"/><path d="M848 198 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="852" y="203" font-size="14" font-family="monospace">class_o[3:0]</text>
+      <path d="M824 221 H848" stroke="#4635b1" stroke-width="1.5"/><path d="M848 221 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="852" y="226" font-size="14" font-family="monospace">scores_o[10*ACC_WIDTH-1:0]</text>
+      <path d="M824 244 H848" stroke="#4635b1" stroke-width="1.5"/><path d="M848 244 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="852" y="249" font-size="14" font-family="monospace">cycles_o[15:0]</text>
+      <rect x="271" y="88" width="533" height="28" rx="5" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="5 3"/>
+      <text x="283" y="107" font-size="14" font-family="monospace">bram_sync_buffer ×4  (weight_ram[4])</text>
+      <text x="792" y="107" font-size="12" text-anchor="end" fill="#4635b1">ch04 재사용</text>
+      <rect x="271" y="124" width="533" height="28" rx="5" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="5 3"/>
+      <text x="283" y="143" font-size="14" font-family="monospace">pe_array4  (pe)</text>
+      <text x="792" y="143" font-size="12" text-anchor="end" fill="#4635b1">ch08 재사용</text>
+      <rect x="271" y="161" width="533" height="28" rx="5" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="5 3"/>
+      <text x="283" y="180" font-size="14" font-family="monospace">npu10_input_loader  (loader)</text>
+      <text x="792" y="180" font-size="12" text-anchor="end" fill="#4635b1">ch13 재사용</text>
+      <rect x="251" y="407" width="16" height="12" fill="#edeafa" stroke="#4635b1"/><text x="273" y="418" font-size="13">이번 장 신규</text>
+      <rect x="371" y="407" width="16" height="12" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="4 2"/><text x="393" y="418" font-size="13">이전 장 파일 재사용(수정 없음)</text>
+      <text x="601" y="418" font-size="13">왼쪽 input · 오른쪽 output · 점선 = 클록·리셋</text>
+      </svg></div>
+      <p>구현 도식: 포트 이름·폭과 하위 인스턴스는 <code>ch14/rtl/npu10_group_scheduler.v</code> 선언에서 자동으로 가져왔습니다.</p>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>방향</th><th>포트</th><th>폭</th><th>구분</th><th>설명</th></tr></thead>
+        <tbody><tr><td>input</td><td class="nw"><code>clk</code></td><td class="nw"><code>1</code></td><td class="nw">클록</td><td>시스템 클록 (상승 에지에서 모든 레지스터 갱신)</td></tr><tr><td>input</td><td class="nw"><code>resetn</code></td><td class="nw"><code>1</code></td><td class="nw">리셋</td><td>동기 리셋, 0이면 IDLE·점수·Bias 0 (Active-Low)</td></tr><tr><td>input</td><td class="nw"><code>load_start_i</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>13장 적재기: 새 입력 적재 시작</td></tr><tr><td>input</td><td class="nw"><code>in_valid_i</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>13장 적재기: 입력 원소 있음</td></tr><tr><td>input</td><td class="nw"><code>in_data_i</code></td><td class="nw"><code>[7:0]</code></td><td class="nw">데이터·제어</td><td>13장 적재기: 입력 원소 (INT8, 0~127)</td></tr><tr><td>input</td><td class="nw"><code>in_last_i</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>13장 적재기: 64번째 원소 표시</td></tr><tr><td>input</td><td class="nw"><code>w_wr_en_i</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>가중치 쓰기 (busy_o 동안 무시)</td></tr><tr><td>input</td><td class="nw"><code>w_class_i</code></td><td class="nw"><code>[3:0]</code></td><td class="nw">데이터·제어</td><td>가중치 클래스 0~9 (10 이상 무시)</td></tr><tr><td>input</td><td class="nw"><code>w_addr_i</code></td><td class="nw"><code>[5:0]</code></td><td class="nw">데이터·제어</td><td>가중치 원소 번호 0~63</td></tr><tr><td>input</td><td class="nw"><code>w_data_i</code></td><td class="nw"><code>[7:0]</code></td><td class="nw">데이터·제어</td><td>가중치 값 (INT8, signed)</td></tr><tr><td>input</td><td class="nw"><code>b_wr_en_i</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>Bias 쓰기 (busy_o 동안 무시)</td></tr><tr><td>input</td><td class="nw"><code>b_class_i</code></td><td class="nw"><code>[3:0]</code></td><td class="nw">데이터·제어</td><td>Bias 클래스 0~9 (10 이상 무시)</td></tr><tr><td>input</td><td class="nw"><code>b_data_i</code></td><td class="nw"><code>[ACC_WIDTH-1:0]</code></td><td class="nw">데이터·제어</td><td>Bias 값 (signed, ACC_WIDTH비트)</td></tr><tr><td>input</td><td class="nw"><code>start_i</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>추론 시작 (IDLE에서만, 입력 미적재면 error_o)</td></tr><tr><td>output</td><td class="nw"><code>x_loaded_o</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>입력 64원소 적재 완료 (실행 가능)</td></tr><tr><td>output</td><td class="nw"><code>x_len_err_o</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>입력 길이 오류 (13장 len_err_o)</td></tr><tr><td>output</td><td class="nw"><code>x_range_err_o</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>입력 범위 오류 (13장 range_err_o)</td></tr><tr><td>output</td><td class="nw"><code>busy_o</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>추론 중</td></tr><tr><td>output</td><td class="nw"><code>done_o</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>추론 완료 1클록 펄스 (class_o·scores_o 확정)</td></tr><tr><td>output</td><td class="nw"><code>error_o</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>오류 1클록 펄스 (입력 미적재 시작, 실행 중 입력 읽기 실패)</td></tr><tr><td>output</td><td class="nw"><code>class_o</code></td><td class="nw"><code>[3:0]</code></td><td class="nw">데이터·제어</td><td>결과 클래스 0~9 (동점이면 낮은 번호)</td></tr><tr><td>output</td><td class="nw"><code>scores_o</code></td><td class="nw"><code>[10*ACC_WIDTH-1:0]</code></td><td class="nw">데이터·제어</td><td>10개 점수 (클래스 c = [c*ACC_WIDTH +: ACC_WIDTH], signed)</td></tr><tr><td>output</td><td class="nw"><code>cycles_o</code></td><td class="nw"><code>[15:0]</code></td><td class="nw">데이터·제어</td><td>마지막 추론에 걸린 클록 수</td></tr></tbody>
+      </table></div>
+      <p>상태도 (원본 <a href="ch14/diagrams/ch14_group_scheduler_fsm.json"><code>ch14/diagrams/ch14_group_scheduler_fsm.json</code></a> · <a href="https://yuul-jung.github.io/svg-flow-editor/">svg-flow-editor</a>에서 <b>작업 불러오기</b>로 열어 편집 → <b>작업 저장</b> → <code>python3 tools/diagram/export_svg.py</code>):</p>
+      <div class="figure-wrap" tabindex="0" role="region" aria-label="도면 (가로 스크롤 가능)"><svg style="min-width:909px" id="ch14-fsm" xmlns="http://www.w3.org/2000/svg" width="1300" height="1260" viewBox="0 0 1300 1260" aria-label="npu10_group_scheduler FSM 상태도" role="img" version="1.1"><!-- 원본: ch14/diagrams/ch14_group_scheduler_fsm.json · json-sha256: 301c69bc4bfd4bed894001a61c629c6e2e88ff6a24c401b0a8524923d2de37b7 · 생성: svg-flow-editor (로컬 사본) · 직접 수정 금지 --><defs><marker id="ch14-fsm-arrowhead-0" markerWidth="15" markerHeight="15" refX="13.125" refY="7.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 15 7.5 L 0 15 z" fill="#5A1E1E"/></marker><marker id="ch14-fsm-arrowhead-1" markerWidth="15" markerHeight="15" refX="13.125" refY="7.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 15 7.5 L 0 15 z" fill="#5A1E1E"/></marker><marker id="ch14-fsm-arrowhead-2" markerWidth="15" markerHeight="15" refX="13.125" refY="7.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 15 7.5 L 0 15 z" fill="#5A1E1E"/></marker><marker id="ch14-fsm-arrowhead-3" markerWidth="15" markerHeight="15" refX="13.125" refY="7.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 15 7.5 L 0 15 z" fill="#5A1E1E"/></marker><marker id="ch14-fsm-arrowhead-4" markerWidth="15" markerHeight="15" refX="13.125" refY="7.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 15 7.5 L 0 15 z" fill="#5A1E1E"/></marker><marker id="ch14-fsm-arrowhead-5" markerWidth="15" markerHeight="15" refX="13.125" refY="7.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 15 7.5 L 0 15 z" fill="#5A1E1E"/></marker><marker id="ch14-fsm-arrowhead-6" markerWidth="15" markerHeight="15" refX="13.125" refY="7.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 15 7.5 L 0 15 z" fill="#5A1E1E"/></marker><marker id="ch14-fsm-arrowhead-7" markerWidth="15" markerHeight="15" refX="13.125" refY="7.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 15 7.5 L 0 15 z" fill="#5A1E1E"/></marker><marker id="ch14-fsm-arrowhead-8" markerWidth="15" markerHeight="15" refX="13.125" refY="7.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 15 7.5 L 0 15 z" fill="#5A1E1E"/></marker><marker id="ch14-fsm-arrowhead-9" markerWidth="15" markerHeight="15" refX="13.125" refY="7.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 15 7.5 L 0 15 z" fill="#5A1E1E"/></marker></defs><rect x="0" y="0" width="1300" height="1260" fill="#fff"/><g data-heading="title"><text x="52" y="58.2" font-size="30" font-weight="780" fill="#172439" text-anchor="start" class="heading-text" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">14장 · npu10_group_scheduler FSM 상태도</text></g><g data-heading="subtitle"><text x="52" y="103.78" font-size="17" font-weight="400" fill="#617083" text-anchor="start" class="heading-text" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">ch14/rtl/npu10_group_scheduler.v · case(state) 기준 · 리셋 시 IDLE</text></g><line x1="0" y1="129" x2="1300" y2="129" stroke="#c5cfdb" stroke-width="2" pointer-events="none" data-role="heading-divider"/><g id="edges"><g data-edge="e1" class="edge"><path d="M 560 225 L 560 295" fill="none" stroke="#5A1E1E" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#ch14-fsm-arrowhead-0)"/><text x="570" y="265" text-anchor="start" font-size="16" font-weight="750" fill="#5A1E1E" class="edge-label" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">start_i &amp;&amp; x_loaded_o</text></g><g data-edge="e2" class="edge"><path d="M 560 365 L 560 435" fill="none" stroke="#5A1E1E" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#ch14-fsm-arrowhead-1)"/><text x="570" y="405" text-anchor="start" font-size="16" font-weight="750" fill="#5A1E1E" class="edge-label" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">항상</text></g><g data-edge="e3" class="edge"><path d="M 560 505 L 560 575" fill="none" stroke="#5A1E1E" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#ch14-fsm-arrowhead-2)"/><text x="570" y="545" text-anchor="start" font-size="16" font-weight="750" fill="#5A1E1E" class="edge-label" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">항상</text></g><g data-edge="e4" class="edge"><path d="M 560 645 L 560 715" fill="none" stroke="#5A1E1E" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#ch14-fsm-arrowhead-3)"/><text x="570" y="685" text-anchor="start" font-size="16" font-weight="750" fill="#5A1E1E" class="edge-label" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">x_valid &amp;&amp; &amp;w_valid</text></g><g data-edge="e5" class="edge"><path d="M 560 785 L 560 855" fill="none" stroke="#5A1E1E" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#ch14-fsm-arrowhead-4)"/><text x="570" y="825" text-anchor="start" font-size="16" font-weight="750" fill="#5A1E1E" class="edge-label" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">idx_q==63</text></g><g data-edge="e6" class="edge"><path d="M 560 925 L 560 995" fill="none" stroke="#5A1E1E" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#ch14-fsm-arrowhead-5)"/><text x="570" y="965" text-anchor="start" font-size="16" font-weight="750" fill="#5A1E1E" class="edge-label" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">group_q==2</text></g><g data-edge="e7" class="edge"><path d="M 670 750 L 885 750 L 885 470 L 650 470" fill="none" stroke="#5A1E1E" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#ch14-fsm-arrowhead-6)"/><text x="777.5" y="741" text-anchor="middle" font-size="16" font-weight="750" fill="#5A1E1E" class="edge-label" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">idx_q&lt;63 → idx_q+1</text></g><g data-edge="e8" class="edge"><path d="M 630 890 L 1120 890 L 1120 330 L 632.5 330" fill="none" stroke="#5A1E1E" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#ch14-fsm-arrowhead-7)"/><text x="875" y="881" text-anchor="middle" font-size="16" font-weight="750" fill="#5A1E1E" class="edge-label" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">group_q&lt;2 → 다음 그룹</text></g><g data-edge="e9" class="edge"><path d="M 477.5 610 L 210 610 L 210 190 L 415 190" fill="none" stroke="#5A1E1E" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#ch14-fsm-arrowhead-8)"/><text x="343.75" y="601" text-anchor="middle" font-size="16" font-weight="750" fill="#5A1E1E" class="edge-label" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">Valid 없음 → error_o</text></g><g data-edge="e10" class="edge"><path d="M 447.5 1030 L 200 1030 L 200 190 L 415 190" fill="none" stroke="#5A1E1E" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#ch14-fsm-arrowhead-9)"/><text x="323.75" y="1021" text-anchor="middle" font-size="16" font-weight="750" fill="#5A1E1E" class="edge-label" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">k_q==9 → done_o</text></g></g><g id="nodes"><g data-node="IDLE" class="node"><rect x="415" y="155" width="290" height="70" fill="none" stroke="#1F3A5F" stroke-width="3.2" class="node-shape" pointer-events="all"/><text x="560" y="179" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="22" font-weight="750" fill="#172439" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">IDLE</text><text x="560" y="204" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="16" font-weight="400" fill="#273e5e" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">대기 · 입력 없이 start → error_o (유지)</text></g><g data-node="LAUNCH" class="node"><rect x="487.5" y="295" width="145" height="70" fill="none" stroke="#1F3A5F" stroke-width="3.2" class="node-shape" pointer-events="all"/><text x="560" y="319" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="22" font-weight="750" fill="#172439" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">LAUNCH</text><text x="560" y="344" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="16" font-weight="400" fill="#273e5e" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">4PE 시작 (길이 64)</text></g><g data-node="READ" class="node"><rect x="470" y="435" width="180" height="70" fill="none" stroke="#1F3A5F" stroke-width="3.2" class="node-shape" pointer-events="all"/><text x="560" y="459" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="22" font-weight="750" fill="#172439" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">READ</text><text x="560" y="484" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="16" font-weight="400" fill="#273e5e" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">입력·가중치 BRAM 읽기</text></g><g data-node="WAIT_READ" class="node"><rect x="477.5" y="575" width="165" height="70" fill="none" stroke="#1F3A5F" stroke-width="3.2" class="node-shape" pointer-events="all"/><text x="560" y="599" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="22" font-weight="750" fill="#172439" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">WAIT_READ</text><text x="560" y="624" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="16" font-weight="400" fill="#273e5e" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">x_valid·w_valid 확인</text></g><g data-node="SEND" class="node"><rect x="450" y="715" width="220" height="70" fill="none" stroke="#1F3A5F" stroke-width="3.2" class="node-shape" pointer-events="all"/><text x="560" y="739" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="22" font-weight="750" fill="#172439" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">SEND</text><text x="560" y="764" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="16" font-weight="400" fill="#273e5e" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">4차선에 원소 1개 (ready 대기)</text></g><g data-node="WAIT_PE" class="node"><rect x="490" y="855" width="140" height="70" fill="none" stroke="#1F3A5F" stroke-width="3.2" class="node-shape" pointer-events="all"/><text x="560" y="879" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="22" font-weight="750" fill="#172439" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">WAIT_PE</text><text x="560" y="904" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="16" font-weight="400" fill="#273e5e" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">점수 = 내적 + Bias</text></g><g data-node="ARGMAX" class="node"><rect x="447.5" y="995" width="225" height="70" fill="none" stroke="#1F3A5F" stroke-width="3.2" class="node-shape" pointer-events="all"/><text x="560" y="1019" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="22" font-weight="750" fill="#172439" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">ARGMAX</text><text x="560" y="1044" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="16" font-weight="400" fill="#273e5e" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">1~9 비교, 같으면 앞 번호 (유지)</text></g><g data-node="note1" class="node"><rect x="270" y="1138" width="580" height="64" fill="none" stroke="#7a7f8a" stroke-width="2" class="node-shape" pointer-events="all"/><text x="560" y="1159.5" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="18" font-weight="750" fill="#3a3f4a" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">※ 그룹 0·1·2 = 클래스 0~3·4~7·8~9, LAUNCH~WAIT_PE를 세 번 반복</text><text x="560" y="1182" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="15" font-weight="400" fill="#3a3f4a" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">default(정의되지 않은 상태) → IDLE · 전체 조건은 상태 전이표</text></g></g></svg></div>
+      <p>상태 전이표 (<code>ch14/rtl/npu10_group_scheduler.v</code>의 <code>case(state)</code> 기준, 리셋 시 <code>IDLE</code>):</p>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>현재 상태</th><th>조건</th><th>다음 상태</th><th>동작</th></tr></thead>
+        <tbody><tr><td class="nw"><code>IDLE</code></td><td><code>start_i &amp;&amp; !x_loaded_o</code></td><td class="nw"><code>IDLE</code></td><td>error_o 펄스</td></tr><tr><td class="nw"><code>IDLE</code></td><td><code>start_i &amp;&amp; x_loaded_o</code></td><td class="nw"><code>LAUNCH</code></td><td>busy_o=1, group_q=0, idx_q=0, cycles_o=0</td></tr><tr><td class="nw"><code>LAUNCH</code></td><td><code>항상</code></td><td class="nw"><code>READ</code></td><td>4PE 시작 (길이 64)</td></tr><tr><td class="nw"><code>READ</code></td><td><code>항상</code></td><td class="nw"><code>WAIT_READ</code></td><td>입력·가중치 BRAM 읽기 요청 (주소 idx_q, {group_q, idx_q})</td></tr><tr><td class="nw"><code>WAIT_READ</code></td><td><code>x_valid &amp;&amp; &amp;w_valid</code></td><td class="nw"><code>SEND</code></td><td></td></tr><tr><td class="nw"><code>WAIT_READ</code></td><td><code>그 외</code></td><td class="nw"><code>IDLE</code></td><td>busy_o=0, error_o 펄스</td></tr><tr><td class="nw"><code>SEND</code></td><td><code>&amp;pe_ready &amp;&amp; idx_q==63</code></td><td class="nw"><code>WAIT_PE</code></td><td>마지막 원소 전달</td></tr><tr><td class="nw"><code>SEND</code></td><td><code>&amp;pe_ready &amp;&amp; idx_q&lt;63</code></td><td class="nw"><code>READ</code></td><td>idx_q+1</td></tr><tr><td class="nw"><code>WAIT_PE</code></td><td><code>pe_done &amp;&amp; group_q&lt;2</code></td><td class="nw"><code>LAUNCH</code></td><td>점수 4개 = 내적 + Bias, group_q+1</td></tr><tr><td class="nw"><code>WAIT_PE</code></td><td><code>pe_done &amp;&amp; group_q==2</code></td><td class="nw"><code>ARGMAX</code></td><td>점수 8·9 저장, class_o=0, k_q=1</td></tr><tr><td class="nw"><code>ARGMAX</code></td><td><code>k_q&lt;9</code></td><td class="nw"><code>ARGMAX</code></td><td>score_q[k_q] &gt; score_q[class_o]이면 class_o=k_q, k_q+1</td></tr><tr><td class="nw"><code>ARGMAX</code></td><td><code>k_q==9</code></td><td class="nw"><code>IDLE</code></td><td>마지막 비교, busy_o=0, done_o 펄스</td></tr><tr><td class="nw"><code>default</code></td><td><code>유효하지 않은 상태</code></td><td class="nw"><code>IDLE</code></td><td>error_o 펄스</td></tr></tbody>
+      </table></div>
+    </section>
+    <section class="section" id="s02">
+      <h2><span class="num">02</span>준비</h2>
+      <ol>
+        <li>VS Code에서 저장소 루트(<code>amd_soc_npu/</code>)를 엽니다.</li>
+        <li>도구를 확인합니다.</li>
+      </ol>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 도구 확인</span></div>
+        <pre tabindex="0"><code>sudo apt install -y iverilog python3 ripgrep   # 처음 한 번
+iverilog -V 2&gt;&amp;1 | head -1      # Icarus Verilog version 12.0 이상
+python3 --version</code></pre></div>
+      <ol start="3"><li>00절 '유지' 파일이 이전 장 결과 그대로 있는지 확인합니다 (기준 모델은 13장 <code>features()</code>와 <code>host_tools/p3_integer_reference.py</code>의 <code>linear_64x10</code>·<code>argmax_lowest</code>를 그대로 가져다 씁니다).</li></ol>
+    </section>
+    <section class="section" id="s03">
+      <h2><span class="num">03</span>RTL 작성</h2>
+      <p>아래 파일을 경로 그대로 만들고 전체 코드를 입력합니다.</p>
+      <div class="codeblock">
+        <div class="codebar"><span>ch14/rtl/npu10_group_scheduler.v · verilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <pre tabindex="0"><code class="language-verilog">`timescale 1ns/1ps
+`default_nettype none
+// 14장 그룹 스케줄러: 08장 4PE를 4+4+2 세 그룹으로 세 번 돌려 10개 점수(내적 + Bias)를 모으고,
+// 동점이면 낮은 번호를 고르는 argmax로 클래스 0~9를 낸다.
+// 입력 64원소는 13장 적재기, 가중치는 차선(PE)별 04장 BRAM 4개 (주소 = 그룹*64 + 원소).
+// 클래스 c → 그룹 c/4, 차선 c%4. 마지막 그룹의 차선 2·3은 클래스가 없으므로 가중치 0을 넣고 결과를 버린다.
+module npu10_group_scheduler #(
+    parameter integer ACC_WIDTH = 32
+) (
+    input  wire                      clk,
+    input  wire                      resetn,
+    input  wire                      load_start_i,
+    input  wire                      in_valid_i,
+    input  wire                [7:0] in_data_i,
+    input  wire                      in_last_i,
+    output wire                      x_loaded_o,
+    output wire                      x_len_err_o,
+    output wire                      x_range_err_o,
+    input  wire                      w_wr_en_i,
+    input  wire                [3:0] w_class_i,
+    input  wire                [5:0] w_addr_i,
+    input  wire                [7:0] w_data_i,
+    input  wire                      b_wr_en_i,
+    input  wire                [3:0] b_class_i,
+    input  wire      [ACC_WIDTH-1:0] b_data_i,
+    input  wire                      start_i,
+    output reg                       busy_o,
+    output reg                       done_o,
+    output reg                       error_o,
+    output reg                 [3:0] class_o,
+    output wire [10*ACC_WIDTH-1:0]   scores_o,
+    output reg                [15:0] cycles_o
+);
+    localparam IDLE=0, LAUNCH=1, READ=2, WAIT_READ=3, SEND=4, WAIT_PE=5, ARGMAX=6;
+    reg [2:0] state;
+    reg [1:0] group_q;                 // 0: 클래스 0~3, 1: 4~7, 2: 8~9
+    reg [5:0] idx_q;                   // 원소 번호 0~63
+    reg [3:0] k_q;                     // argmax 비교 번호 1~9
+    reg signed [ACC_WIDTH-1:0] bias_q  [0:9];
+    reg signed [ACC_WIDTH-1:0] score_q [0:9];
+    integer i;
+
+    // ── 13장 입력 적재기 (64원소, 읽기는 이 모듈이 담당)
+    wire signed [7:0] x_data;
+    wire x_valid;
+    npu10_input_loader loader (
+        .clk(clk), .resetn(resetn), .load_start_i(load_start_i), .in_valid_i(in_valid_i),
+        .in_data_i(in_data_i), .in_last_i(in_last_i), .rd_en_i(state == READ), .rd_addr_i(idx_q),
+        .rd_data_o(x_data), .rd_valid_o(x_valid), .loading_o(), .loaded_o(x_loaded_o),
+        .len_err_o(x_len_err_o), .range_err_o(x_range_err_o), .count_o());
+
+    // ── 가중치 BRAM 4개 (차선별 8비트×256, 그룹 3개 × 64원소 사용)
+    wire w_ok = w_wr_en_i &amp;&amp; !busy_o &amp;&amp; (w_class_i &lt;= 4'd9);
+    wire [31:0] w_bus;                 // 4차선 × 8비트, PE 입력
+    wire [3:0]  w_valid;
+    genvar g;
+    generate for (g = 0; g &lt; 4; g = g + 1) begin : lane
+        wire signed [7:0] w_rd;
+        bram_sync_buffer #(.DATA_WIDTH(8), .ADDR_WIDTH(8)) weight_ram (
+            .clk(clk), .resetn(resetn),
+            .wr_en(w_ok &amp;&amp; w_class_i[1:0] == g), .wr_addr({w_class_i[3:2], w_addr_i}), .wr_data(w_data_i),
+            .rd_en(state == READ), .rd_addr({group_q, idx_q}),
+            .rd_data(w_rd), .rd_valid(w_valid[g]));
+        // 그룹 2의 차선 2·3은 클래스 10·11이 없으므로 0을 곱한다.
+        assign w_bus[g*8 +: 8] = (group_q == 2'd2 &amp;&amp; g &gt;= 2) ? 8'sd0 : w_rd;
+        assign scores_o[g*ACC_WIDTH +: ACC_WIDTH] = score_q[g];
+        assign scores_o[(g+4)*ACC_WIDTH +: ACC_WIDTH] = score_q[g+4];
+    end endgenerate
+    assign scores_o[8*ACC_WIDTH +: 2*ACC_WIDTH] = {score_q[9], score_q[8]};
+
+    // ── 08장 4PE (같은 입력 x를 4차선에 나눠 주고 차선별 가중치와 곱해 누산)
+    wire [3:0] pe_ready;
+    wire pe_done;
+    wire [4*ACC_WIDTH-1:0] pe_res;
+    pe_array4 #(.DATA_WIDTH(8), .ACC_WIDTH(ACC_WIDTH)) pe (
+        .clk(clk), .resetn(resetn), .start_i(state == LAUNCH), .length_i(9'd64),
+        .valid_i({4{state == SEND}}), .a_i({4{x_data}}), .b_i(w_bus),
+        .ready_o(pe_ready), .busy_o(), .done_o(pe_done), .error_o(), .pe_results_o(pe_res), .sum_o());
+
+    always @(posedge clk) begin
+        if (!resetn) begin
+            state &lt;= IDLE; busy_o &lt;= 0; done_o &lt;= 0; error_o &lt;= 0; class_o &lt;= 0; cycles_o &lt;= 0;
+            group_q &lt;= 0; idx_q &lt;= 0; k_q &lt;= 0;
+            for (i = 0; i &lt; 10; i = i + 1) begin bias_q[i] &lt;= 0; score_q[i] &lt;= 0; end
+        end else begin
+            done_o &lt;= 0; error_o &lt;= 0;
+            if (b_wr_en_i &amp;&amp; !busy_o &amp;&amp; b_class_i &lt;= 4'd9) bias_q[b_class_i] &lt;= b_data_i;
+            if (busy_o) cycles_o &lt;= cycles_o + 16'd1;
+            case (state)
+                IDLE: if (start_i) begin
+                    if (!x_loaded_o) error_o &lt;= 1;           // 64원소가 없으면 시작하지 않는다
+                    else begin
+                        busy_o &lt;= 1; cycles_o &lt;= 0; group_q &lt;= 0; idx_q &lt;= 0; state &lt;= LAUNCH;
+                    end
+                end
+                LAUNCH: state &lt;= READ;                          // 4PE 누산기 비우고 길이 64 등록
+                READ: state &lt;= WAIT_READ;                       // 입력·가중치 BRAM 읽기 요청
+                WAIT_READ: if (x_valid &amp;&amp; (&amp;w_valid)) state &lt;= SEND;
+                    else begin state &lt;= IDLE; busy_o &lt;= 0; error_o &lt;= 1; end
+                SEND: if (&amp;pe_ready) begin
+                    if (idx_q == 6'd63) state &lt;= WAIT_PE;
+                    else begin idx_q &lt;= idx_q + 6'd1; state &lt;= READ; end
+                end
+                WAIT_PE: if (pe_done) begin
+                    for (i = 0; i &lt; 10; i = i + 1)
+                        if (i / 4 == group_q) score_q[i] &lt;= $signed(pe_res[(i % 4)*ACC_WIDTH +: ACC_WIDTH]) + bias_q[i];
+                    idx_q &lt;= 0;
+                    if (group_q == 2'd2) begin class_o &lt;= 0; k_q &lt;= 1; state &lt;= ARGMAX; end
+                    else begin group_q &lt;= group_q + 2'd1; state &lt;= LAUNCH; end
+                end
+                ARGMAX: begin                                   // 한 클록에 하나씩 비교, 같으면 앞 번호 유지
+                    if (score_q[k_q] &gt; score_q[class_o]) class_o &lt;= k_q;
+                    if (k_q == 4'd9) begin state &lt;= IDLE; busy_o &lt;= 0; done_o &lt;= 1; end
+                    else k_q &lt;= k_q + 4'd1;
+                end
+                default: begin state &lt;= IDLE; busy_o &lt;= 0; error_o &lt;= 1; end
+            endcase
+        end
+    end
+endmodule
+`default_nettype wire</code></pre>
+      </div>
+    </section>
+    <section class="section" id="s04">
+      <h2><span class="num">04</span>테스트벤치·기준 모델 작성</h2>
+      <p>테스트벤치는 출력을 자동 판정합니다. 기준 모델(Python)이 24개 사례를 만듭니다: 형판 가중치로 숫자 0~9를 한 번씩, 무작위 가중치·Bias 10개, 전부 동점, 8·9 동점, 점수 전부 음수, 9번 차선 승리. 형판 가중치는 숫자별 특징 그대로이고 Bias = −|특징|²/2인 최근접 형판 분류이며, 학습한 모델이 아닙니다.</p>
+      <div class="codeblock">
+        <div class="codebar"><span>ch14/tb/tb_npu10_group_scheduler.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <pre tabindex="0"><code class="language-systemverilog">`timescale 1ns/1ps
+// 14장 TB: 24개 사례(형판 0~9, 무작위 10, 동점·음수·9번 차선)를 적재·실행하고 점수·클래스를 파일로 돌려준다.
+module tb_npu10_group_scheduler;
+    localparam AW = 32;
+    reg clk=0, rn=0, ls=0, iv=0, il=0, wwe=0, bwe=0, start=0;
+    reg [7:0] id=0, wd=0; reg [3:0] wc=0, bc=0; reg [5:0] wa=0; reg [AW-1:0] bd=0;
+    wire xl, xle, xre, busy, done, err; wire [3:0] cls; wire [10*AW-1:0] scores; wire [15:0] cycles;
+    npu10_group_scheduler #(.ACC_WIDTH(AW)) dut(.clk(clk), .resetn(rn), .load_start_i(ls), .in_valid_i(iv),
+        .in_data_i(id), .in_last_i(il), .x_loaded_o(xl), .x_len_err_o(xle), .x_range_err_o(xre),
+        .w_wr_en_i(wwe), .w_class_i(wc), .w_addr_i(wa), .w_data_i(wd), .b_wr_en_i(bwe), .b_class_i(bc),
+        .b_data_i(bd), .start_i(start), .busy_o(busy), .done_o(done), .error_o(err), .class_o(cls),
+        .scores_o(scores), .cycles_o(cycles));
+    always #5 clk = ~clk;
+
+    integer f, o, n, expc, k, c, v, cases = 0, guards = 0;
+    integer x [0:63]; integer w [0:9][0:63]; integer b [0:9];
+    reg [8*24-1:0] name; string vp, ap;
+
+    task load_x; integer s; begin
+        @(negedge clk); ls = 1; @(negedge clk); ls = 0;
+        for (s = 0; s &lt; 64; s = s + 1) begin @(negedge clk); iv = 1; id = x[s]; il = (s == 63); end
+        @(negedge clk); iv = 0; il = 0;
+        if (!xl) $fatal(1, "입력 적재 실패");
+    end endtask
+
+    task load_model; integer cc, s; begin
+        for (cc = 0; cc &lt; 10; cc = cc + 1) begin
+            for (s = 0; s &lt; 64; s = s + 1) begin @(negedge clk); wwe = 1; wc = cc; wa = s; wd = w[cc][s]; end
+            @(negedge clk); wwe = 0; bwe = 1; bc = cc; bd = b[cc];
+        end
+        @(negedge clk); bwe = 0;
+        // 클래스 10·11 쓰기는 무시돼야 한다 (그룹 2 차선 2·3 주소)
+        @(negedge clk); wwe = 1; wc = 10; wa = 0; wd = 8'h7f; @(negedge clk); wc = 11; @(negedge clk); wwe = 0;
+    end endtask
+
+    task run(output integer got_cycles); begin
+        @(negedge clk); start = 1; @(negedge clk); start = 0;
+        if (!busy) $fatal(1, "start 후 busy 아님");
+        // 실행 중 가중치·Bias 쓰기는 무시돼야 한다
+        @(negedge clk); wwe = 1; wc = 8; wa = 5; wd = 8'h55; bwe = 1; bc = 9; bd = 32'h1234; @(negedge clk); wwe = 0; bwe = 0;
+        while (!done) begin @(negedge clk); if (err) $fatal(1, "실행 중 error_o"); end
+        if (busy) $fatal(1, "done 후 busy");
+        got_cycles = cycles;
+    end endtask
+
+    initial begin
+        integer cyc;
+        if (!$value$plusargs("VECTORS=%s", vp) || !$value$plusargs("ACTUAL=%s", ap)) $fatal(1, "경로 인자");
+        f = $fopen(vp, "r"); o = $fopen(ap, "w"); if (!f || !o) $fatal(1, "파일 열기");
+        repeat (3) @(negedge clk); rn = 1;
+        // 입력 적재 전 start → error_o, busy 아님
+        @(negedge clk); start = 1; #1; @(posedge clk); #1;
+        if (!err || busy) $fatal(1, "입력 없이 시작함"); guards = guards + 1;
+        @(negedge clk); start = 0;
+        while ($fscanf(f, "%d %d %s", n, expc, name) == 3) begin
+            for (k = 0; k &lt; 64; k = k + 1) if ($fscanf(f, "%d", x[k]) != 1) $fatal(1, "x 형식");
+            for (c = 0; c &lt; 10; c = c + 1) for (k = 0; k &lt; 64; k = k + 1) begin if ($fscanf(f, "%d", v) != 1) $fatal(1, "w 형식"); w[c][k] = v; end
+            for (c = 0; c &lt; 10; c = c + 1) if ($fscanf(f, "%d", b[c]) != 1) $fatal(1, "b 형식");
+            load_x; load_model; run(cyc);
+            if (cls != expc) $fatal(1, "%s: class=%0d 기대 %0d", name, cls, expc);
+            $fwrite(o, "%0d %0d", n, cls);
+            for (c = 0; c &lt; 10; c = c + 1) $fwrite(o, " %0d", $signed(scores[c*AW +: AW]));
+            $fwrite(o, " %0d\n", cyc);
+            cases = cases + 1;
+        end
+        // 실행 도중 새 입력 적재 시작 → 입력을 읽을 수 없으므로 error_o 후 IDLE
+        load_x; @(negedge clk); start = 1; @(negedge clk); start = 0;
+        repeat (40) @(negedge clk); ls = 1; @(negedge clk); ls = 0;
+        k = 0; while (!err &amp;&amp; k &lt; 20) begin @(negedge clk); k = k + 1; end
+        repeat (2) @(negedge clk);
+        if (k &gt;= 20 || busy) $fatal(1, "실행 중 적재 시작이 오류로 끝나지 않음"); guards = guards + 1;
+        $display("RTL_SIM_PASS GROUP10 cases=%0d scores=%0d guards=%0d cycles_per_inference=%0d", cases, 10 * cases, guards, cyc);
+        $fclose(o); $finish;
+    end
+    initial begin #50000000; $fatal(1, "시간 초과"); end
+endmodule</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>ch14/reference/group10_reference.py · python · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
+"""14장 기준 모델: 64원소 × 10클래스 점수 = 내적 + Bias, 동점이면 낮은 번호 argmax.
+
+전처리는 13장 features(), 점수·argmax는 host_tools/p3_integer_reference.py를 그대로 가져다 쓴다.
+"""
+from __future__ import annotations
+import argparse
+import random
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+sys.path[:0] = [str(ROOT / "ch13" / "reference"), str(ROOT / "host_tools")]
+from mnist8x8_reference import draw_digit, features          # noqa: E402  13장 입력 계약
+from p3_integer_reference import argmax_lowest, linear_64x10  # noqa: E402  공통 정수 기준
+
+BIAS_LIMIT = 1 &lt;&lt; 24       # |Bias| 상한: 점수가 32비트 안에 남게 한다 (|내적| ≤ 64·127·128)
+
+
+def template_weights(xs: list[list[int]]) -&gt; tuple[list[list[int]], list[int]]:
+    """최근접 형판 분류: |x - t|²가 가장 작은 t는 x·t - |t|²/2가 가장 크다.
+    가중치 = 숫자별 특징(0~127, INT8 범위), Bias = -|t|²/2 (학습 아님, 형태 대조용)."""
+    return [list(x) for x in xs], [-(sum(v * v for v in x) // 2) for x in xs]
+
+
+def cases() -&gt; list[tuple[str, list[int], list[list[int]], list[int]]]:
+    xs = [features(draw_digit(d)) for d in range(10)]
+    tw, tb = template_weights(xs)
+    out = [(f"template_{d}", xs[d], tw, tb) for d in range(10)]
+    rng = random.Random(1414)
+    for k in range(10):                                   # 무작위 가중치·Bias (부호 섞임)
+        w = [[rng.randint(-128, 127) for _ in range(64)] for _ in range(10)]
+        b = [rng.randint(-BIAS_LIMIT, BIAS_LIMIT) for _ in range(10)]
+        out.append((f"random_{k}", xs[k], w, b))
+    out.append(("tie_all", xs[3], [[1] * 64] * 10, [5] * 10))            # 전부 동점 → 0
+    out.append(("tie_8_9", xs[1], [[0] * 64] * 10, [0] * 8 + [9, 9]))     # 8·9 동점 → 8
+    out.append(("all_negative", xs[8], [[-128] * 64] * 10, [-10 * c for c in range(10)][::-1]))
+    out.append(("lane9_wins", [127] * 64, [[-1] * 64] * 9 + [[127] * 64], [0] * 10))
+    return out
+
+
+def selftest() -&gt; list:
+    cs = cases()
+    for name, x, w, b in cs:
+        s = linear_64x10(x, w, b)
+        assert all(-(1 &lt;&lt; 31) &lt;= v &lt; (1 &lt;&lt; 31) for v in s), name
+    got = [argmax_lowest(linear_64x10(x, w, b)) for _, x, w, b in cs[:10]]
+    assert got == list(range(10)), got                     # 형태 대조로 0~9가 한 번씩 나온다
+    by = {n: argmax_lowest(linear_64x10(x, w, b)) for n, x, w, b in cs}
+    assert by["tie_all"] == 0 and by["tie_8_9"] == 8 and by["all_negative"] == 9 and by["lane9_wins"] == 9
+    print(f"PYTHON_GROUP10_SELF_TEST_PASS cases={len(cs)} template_classes=0..9 ties=2")
+    return cs
+
+
+def main() -&gt; None:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--out", help="vectors.txt를 쓸 폴더")
+    ap.add_argument("--actual", help="RTL 결과 actual.txt (Python 값과 비교)")
+    a = ap.parse_args()
+    cs = selftest()
+    if a.out and not a.actual:
+        with open(Path(a.out) / "vectors.txt", "w") as f:
+            for n, (name, x, w, b) in enumerate(cs):
+                s = linear_64x10(x, w, b)
+                f.write(f"{n} {argmax_lowest(s)} {name}\n")
+                f.write(" ".join(map(str, x)) + "\n")
+                for row in w:
+                    f.write(" ".join(map(str, row)) + "\n")
+                f.write(" ".join(map(str, b)) + "\n")
+    if a.actual:
+        rows = {}
+        for ln in open(a.actual):
+            p = ln.split()
+            rows[int(p[0])] = (int(p[1]), [int(v) for v in p[2:12]], int(p[12]))
+        for n, (name, x, w, b) in enumerate(cs):
+            s = linear_64x10(x, w, b)
+            if rows.get(n, (None, None, 0))[:2] != (argmax_lowest(s), s):
+                raise SystemExit(f"PYTHON_RTL_COMPARE_FAIL case={name} rtl={rows.get(n)} python={argmax_lowest(s)} {s}")
+        cyc = sorted({r[2] for r in rows.values()})
+        print(f"PYTHON_RTL_COMPARE_PASS cases={len(cs)} scores={10 * len(cs)} cycles_per_inference={','.join(map(str, cyc))}")
+
+
+if __name__ == "__main__":
+    main()</code></pre>
+      </div>
+    </section>
+    <section class="section" id="s05">
+      <h2><span class="num">05</span>시뮬레이션 실행</h2>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 저장소 루트에서 실행</span></div>
+        <pre tabindex="0"><code>bash ch14/scripts/run_sim.sh   # 기준 모델 자체 시험 → RTL 시뮬레이션 (24사례) → Python 점수·클래스 비교</code></pre></div>
+      <p>기대 출력 (Icarus Verilog 12.0 · 2026-11-18 실제 실행 로그 발췌, 출처 <code>ch14/validation/rtl_sim_20261118.log</code>):</p>
+      <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
+        <pre tabindex="0"><code>Icarus Verilog version 12.0 (stable) ()
+PYTHON_GROUP10_SELF_TEST_PASS cases=24 template_classes=0..9 ties=2
+RTL_SIM_PASS GROUP10 cases=24 scores=240 guards=2 cycles_per_inference=600
+PYTHON_GROUP10_SELF_TEST_PASS cases=24 template_classes=0..9 ties=2
+PYTHON_RTL_COMPARE_PASS cases=24 scores=240 cycles_per_inference=600</code></pre></div>
+    </section>
+    <section class="section" id="s06">
+      <h2><span class="num">06</span>결과 판정</h2>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
+        <tbody><tr><td><code>PYTHON_GROUP10_SELF_TEST_PASS cases=24 template_classes=0..9 ties=2</code></td><td>형판 사례에서 0~9가 한 번씩 나오고, 동점 사례 2개가 낮은 번호(0, 8)를 고름</td></tr><tr><td><code>RTL_SIM_PASS GROUP10 cases=24 scores=240 guards=2</code></td><td>24사례 클래스 일치, 입력 없이 시작 → error_o, 실행 중 입력 재적재 → error_o 후 IDLE</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS cases=24 scores=240 cycles_per_inference=600</code></td><td>RTL 점수 240개가 Python과 모두 같음, 추론 1회 600클록 (시뮬레이션 측정, 19장 비교 기준)</td></tr></tbody>
+      </table></div>
+      <p><b>실패 시:</b> TB의 <code>$fatal</code> 메시지에 표시된 cycle 번호와 기대값/실제값을 확인하고, 03절 코드와 한 줄씩 대조합니다. 하나라도 실패하면 다음 장으로 넘어가지 않습니다.</p>
+    </section>
+    <section class="section" id="s07">
+      <h2><span class="num">07</span>코드 읽기 포인트</h2>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>위치</th><th>내용</th></tr></thead>
+        <tbody><tr><td>클래스 → 그룹·차선</td><td>클래스 c는 그룹 <code>c/4</code>, 차선 <code>c%4</code>입니다. 가중치 BRAM 주소는 <code>{w_class_i[3:2], w_addr_i}</code> = 그룹×64 + 원소입니다.</td></tr>
+<tr><td>마지막 2차선 무효</td><td>그룹 2의 차선 2·3은 클래스 10·11이 없습니다. 가중치 0을 곱하고(<code>w_bus</code>), 점수 저장 루프의 <code>i / 4 == group_q</code> 조건(i < 10)으로 결과를 버립니다. 클래스 10·11 쓰기는 <code>w_class_i <= 9</code>로 막습니다.</td></tr>
+<tr><td>점수 = 내적 + Bias</td><td>ReLU·양자화 없이 32비트 그대로 비교합니다. |내적| ≤ 64×127×128 ≈ 2<sup>20</sup>이고 기준 모델이 |Bias| < 2<sup>24</sup>로 제한하므로 32비트에서 넘치지 않습니다. 09장 <code>dense_layer4</code>는 ReLU가 음수 점수를 0으로 만들어 argmax에 쓰지 않습니다.</td></tr>
+<tr><td>argmax 동점 규칙</td><td>ARGMAX 상태에서 1~9를 한 클록에 하나씩 <code>score_q[k_q] > score_q[class_o]</code>(엄격 비교)로 봅니다. 같으면 앞 번호가 남아 Python <code>argmax_lowest</code>와 일치합니다.</td></tr>
+<tr><td>실행 중 쓰기 무시</td><td><code>busy_o</code>인 동안 가중치·Bias 쓰기를 무시합니다. TB는 실행 중 클래스 8·9에 쓰기를 넣어 결과가 바뀌지 않는지 확인합니다.</td></tr></tbody>
+      </table></div>
+    </section>
+    <section class="section" id="s08">
+      <h2><span class="num">08</span>합성·타이밍·보드</h2>
+      <p>Vivado가 설치된 PC의 VS Code 터미널에서 이 장 모듈만 Out-of-Context(OOC)로 합성·배치·배선하고 100 MHz 타이밍을 확인합니다.</p>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · Vivado 배치 (저장소 루트)</span></div>
+        <pre tabindex="0"><code>source /tools/Xilinx/Vivado/&lt;버전&gt;/settings64.sh   # 설치 경로에 맞게 변경
+vivado -mode batch -nojournal -source tools/vivado/ooc_timing.tcl -tclargs ch14
+# 기대: SYNTH_TIMING_PASS ch14 npu10_group_scheduler WNS=… WHS=… LUT=… FF=… DSP48E1=… RAMB=…</code></pre></div>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>판정 항목</th><th>기준</th><th>확인 위치</th></tr></thead>
+        <tbody>
+          <tr><td>Setup / Hold</td><td><code>WNS ≥ 0</code> · <code>WHS ≥ 0</code> (clk 10.000 ns)</td><td><code>build/vivado/ch14/timing_route.rpt</code></td></tr>
+          <tr><td>자원</td><td>DSP48E1 ≥ 4 (차선별 MAC) · RAMB 또는 LUTRAM (가중치 4개 + 입력 1개) — 기대값 · 실행 전 ⚠ 미검증</td><td><code>build/vivado/ch14/route_util.rpt</code></td></tr>
+        </tbody>
+      </table></div>
+      <p>OOC 결과는 입출력 핀 지연을 포함하지 않으므로 보드 Top 타이밍을 대신하지 않습니다. 증거 저장은 <code>bash tools/run_vivado_all.sh ooc</code>(→ <code>ch14/validation/vivado_ooc_YYYYMMDD.txt</code>). 보드 확인은 <a href="ch12_integrated_npu_v05.html#s08">12장 · 08</a>에서 통합 Top으로 진행합니다.</p>
+    </section>
+    <section class="section" id="s09">
+      <h2><span class="num">09</span>검증 현황·인계</h2>
+      <p>누적 보고 (이전 결과 → 추가 RTL → 시험 벡터 → 시뮬레이션 → 합성/보드 → 인계):</p>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>이전 결과</th><th>추가 RTL</th><th>시험 벡터</th><th>시뮬레이션</th><th>합성 / 보드</th><th>인계</th></tr></thead>
+        <tbody><tr><td>01장 · 04장 · 07장 · 08장 · 13장</td><td><code>npu10_group_scheduler.v</code></td><td><code>tb_npu10_group_scheduler.sv</code><br><code>group10_reference.py</code></td><td>통과</td><td>⚠ 대기 / 미실시</td><td>2건 (아래 표)</td></tr></tbody>
+      </table></div>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>다음 장으로 넘기는 파일</th><th>사용처</th></tr></thead>
+        <tbody><tr><td><code>ch14/rtl/npu10_group_scheduler.v</code></td><td>15장 Dense 64→10이 가중치·Bias 적재 경로와 점수 10개를 그대로 사용 (수정 금지)</td></tr><tr><td><code>ch14/reference/group10_reference.py</code></td><td>15장 기준 모델이 사례 생성 방식(형판·무작위·동점)을 재사용</td></tr></tbody>
+      </table></div>
+      <p>검증 게이트 (<code>ch14/validation/</code> 증거 파일 기준으로 자동 표시):</p>
+      <div class="gate-row">
+        <div class="gate pass">
+          <b>HTML_PASS</b>
+          <span>v02 · 생성기·정적 검사</span>
+        </div>
+        <div class="gate pass">
+          <b>HOST_MODEL_PASS</b>
+          <span>PYTHON_GROUP10_SELF_TEST_PASS cases=24 template_classes=0..9 ties=2</span>
+        </div>
+        <div class="gate pass">
+          <b>RTL_SIM_PASS</b>
+          <span>RTL_SIM_PASS GROUP10 cases=24 scores=240 guards=2 cycles_per… · Icarus Verilog 12.0 · 2026-11-18</span>
+        </div>
+        <div class="gate todo">
+          <b>SYNTH_TIMING_PASS</b>
+          <span>⚠ 미검증 · VS Code Vivado 실행 대기 (08절)</span>
+        </div>
+        <div class="gate todo">
+          <b>BOARD_PASS</b>
+          <span>⚠ 미실시 · 현재 실물 보드 확인 불가</span>
+        </div>
+      </div>
+    </section>
+    <div class="chapter-links" id="chapter-links"></div>
+  </main>
+</div>
+<script>
+window.COURSE={
+ "title": "Basys3 소형 NPU 실습 (고도화판)",
+ "chapters": [
+  {
+   "id": "ch00",
+   "number": 0,
+   "title": "UART Echo",
+   "file": "ch00_uart_echo_v05.html"
+  },
+  {
+   "id": "ch01",
+   "number": 1,
+   "title": "DSP 추론 MAC 누산",
+   "file": "ch01_mac_v05.html"
+  },
+  {
+   "id": "ch02",
+   "number": 2,
+   "title": "DSP48E1 타깃 곱셈",
+   "file": "ch02_dsp_v05.html"
+  },
+  {
+   "id": "ch03",
+   "number": 3,
+   "title": "MAC 2단계 파이프라인",
+   "file": "ch03_mac_pipeline_v05.html"
+  },
+  {
+   "id": "ch04",
+   "number": 4,
+   "title": "BRAM 동기 버퍼",
+   "file": "ch04_bram_v05.html"
+  },
+  {
+   "id": "ch05",
+   "number": 5,
+   "title": "Fixed-Point Quantizer",
+   "file": "ch05_fixed_v05.html"
+  },
+  {
+   "id": "ch06",
+   "number": 6,
+   "title": "INT8·INT16 정밀도 비교",
+   "file": "ch06_precision_v05.html"
+  },
+  {
+   "id": "ch07",
+   "number": 7,
+   "title": "벡터 내적",
+   "file": "ch07_vector_dot_v05.html"
+  },
+  {
+   "id": "ch08",
+   "number": 8,
+   "title": "4PE 병렬 어레이",
+   "file": "ch08_pe4_v05.html"
+  },
+  {
+   "id": "ch09",
+   "number": 9,
+   "title": "Dense 4뉴런 레이어",
+   "file": "ch09_dense_v05.html"
+  },
+  {
+   "id": "ch10",
+   "number": 10,
+   "title": "4뉴런 NPU Core",
+   "file": "ch10_npu_core_v05.html"
+  },
+  {
+   "id": "ch11",
+   "number": 11,
+   "title": "UART 모델 적재 컨트롤러",
+   "file": "ch11_uart_register_v05.html"
+  },
+  {
+   "id": "ch12",
+   "number": 12,
+   "title": "통합 NPU Top",
+   "file": "ch12_integrated_npu_v05.html"
+  },
+  {
+   "id": "ch13",
+   "number": 13,
+   "title": "8×8 손글씨·10분류 준비",
+   "file": "ch13_mnist_8x8_v02.html"
+  },
+  {
+   "id": "ch14",
+   "number": 14,
+   "title": "4PE 그룹·10개 출력",
+   "file": "ch14_group10_v02.html"
+  }
+ ]
+};
+</script>
+<script defer src="assets/education/site.js"></script>
+</body>
+</html>

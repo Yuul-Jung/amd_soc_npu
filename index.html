@@ -43,7 +43,7 @@ table td,.section td{vertical-align:middle}
     <section class="section" id="intro">
       <h2><span class="num">00</span>교육과정 개요</h2>
       <p>이 교재는 <code>Yuul-Jung/amd_soc_rtl</code> 제3부를 기반으로 고도화한 독립 NPU 교육과정입니다. 00~12장에서 MAC·DSP·BRAM·4PE·UART 기반 소형 4분류 NPU를 단계별로 제작합니다. 13~19장에서는 8×8 입력의 10분류 정수 MLP를 구현하고, 20~27장에서는 AXI4-Lite·MicroBlaze V SoC로 통합하며, 28~31장에서는 숫자 인식·센서 융합·모터 제어·보안 UART 종합 과제로 마무리합니다.</p>
-      <p><strong>현재 상태:</strong> 00~12장 안내서 v05 (전체 코드 원문 수록, RTL 시뮬레이션 통과, Vivado 합성·보드 미검증) · 13장 안내서 v02 (RTL 시뮬레이션 통과, Vivado 미검증) · 14~31장은 코드 작성 중이며 안내서는 코드와 시뮬레이션 증거가 들어온 뒤 생성 · 장별 CI 게이트.</p>
+      <p><strong>현재 상태:</strong> 00~12장 안내서 v05 (전체 코드 원문 수록, RTL 시뮬레이션 통과, Vivado 합성·보드 미검증) · 13~14장 안내서 v02 (RTL 시뮬레이션 통과, Vivado 미검증) · 15~31장은 코드 작성 중이며 안내서는 코드와 시뮬레이션 증거가 들어온 뒤 생성 · 장별 CI 게이트.</p>
     </section>
 
     <section class="section" id="techtree">
@@ -86,7 +86,7 @@ table td,.section td{vertical-align:middle}
           <tr><td>11</td><td><a href="ch11_uart_register_v05.html">UART 모델 적재</a></td><td>UART 통합</td><td><span class="badge badge-ok">v05 완료</span></td><td><span class="badge badge-ok">이전 완료</span></td></tr>
           <tr><td>12</td><td><a href="ch12_integrated_npu_v05.html">통합 NPU</a></td><td>UART 통합</td><td><span class="badge badge-ok">v05 완료</span></td><td><span class="badge badge-ok">이전 완료</span></td></tr>
           <tr><td>13</td><td><a href="ch13_mnist_8x8_v02.html">8×8 손글씨·10분류</a></td><td>10분류 정수</td><td><span class="badge badge-ok">v02 완료</span></td><td><span class="badge badge-ok">RTL 시뮬 통과</span></td></tr>
-          <tr><td>14</td><td>4PE 그룹·10개 출력</td><td>10분류 정수</td><td><span class="badge badge-todo">v02 예정</span></td><td><span class="badge badge-new">신규 구현 예정</span></td></tr>
+          <tr><td>14</td><td><a href="ch14_group10_v02.html">4PE 그룹·10개 출력</a></td><td>10분류 정수</td><td><span class="badge badge-ok">v02 완료</span></td><td><span class="badge badge-ok">RTL 시뮬 통과</span></td></tr>
           <tr><td>15</td><td>64→10 정수 MLP</td><td>10분류 정수</td><td><span class="badge badge-todo">v02 예정</span></td><td><span class="badge badge-new">신규 구현 예정</span></td></tr>
           <tr><td>16</td><td>64→8→10 다층 MLP</td><td>10분류 정수</td><td><span class="badge badge-todo">v02 예정</span></td><td><span class="badge badge-new">신규 구현 예정</span></td></tr>
           <tr><td>17</td><td>784픽셀 분할 누산</td><td>10분류 정수</td><td><span class="badge badge-todo">v02 예정</span></td><td><span class="badge badge-new">신규 구현 예정</span></td></tr>
@@ -243,6 +243,12 @@ window.COURSE={
    "number": 13,
    "title": "8×8 손글씨·10분류 준비",
    "file": "ch13_mnist_8x8_v02.html"
+  },
+  {
+   "id": "ch14",
+   "number": 14,
+   "title": "4PE 그룹·10개 출력",
+   "file": "ch14_group10_v02.html"
   }
  ]
 };

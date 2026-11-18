@@ -86,7 +86,7 @@
       <p>구현 도식: 포트 이름·폭과 하위 인스턴스는 <code>ch00/rtl/basys3_uart_echo_top.v</code> 선언에서 자동으로 가져왔습니다.</p>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>방향</th><th>포트</th><th>폭</th><th>구분</th><th>설명</th></tr></thead>
-        <tbody><tr><td>input</td><td class="nw"><code>clk</code></td><td class="nw"><code>1</code></td><td>클록</td><td>시스템 클록 (상승 에지에서 모든 레지스터 갱신)</td></tr><tr><td>input</td><td class="nw"><code>resetn</code></td><td class="nw"><code>1</code></td><td>리셋</td><td>동기 리셋, 0이면 초기화 (Active-Low) · 이 장 TB가 구동 (보드 Top 아님)</td></tr><tr><td>input</td><td class="nw"><code>uart_rxd</code></td><td class="nw"><code>1</code></td><td>데이터·제어</td><td>UART 수신 핀 (115200 8N1, 유휴 1)</td></tr><tr><td>output</td><td class="nw"><code>uart_txd</code></td><td class="nw"><code>1</code></td><td>데이터·제어</td><td>UART 송신 핀 (수신 바이트를 그대로 되돌려 보냄)</td></tr></tbody>
+        <tbody><tr><td>input</td><td class="nw"><code>clk</code></td><td class="nw"><code>1</code></td><td class="nw">클록</td><td>시스템 클록 (상승 에지에서 모든 레지스터 갱신)</td></tr><tr><td>input</td><td class="nw"><code>resetn</code></td><td class="nw"><code>1</code></td><td class="nw">리셋</td><td>동기 리셋, 0이면 초기화 (Active-Low) · 이 장 TB가 구동 (보드 Top 아님)</td></tr><tr><td>input</td><td class="nw"><code>uart_rxd</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>UART 수신 핀 (115200 8N1, 유휴 1)</td></tr><tr><td>output</td><td class="nw"><code>uart_txd</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>UART 송신 핀 (수신 바이트를 그대로 되돌려 보냄)</td></tr></tbody>
       </table></div>
     </section>
     <section class="section" id="s02">
@@ -435,6 +435,7 @@ set designs {
     {ch09 dense_layer4        {ch01/rtl/mac_core.v ch05/rtl/fixed_quantizer.v ch07/rtl/vector_dot_core.v ch08/rtl/pe_array4.v ch09/rtl/dense_layer4.v}}
     {ch10 npu_core            {ch01/rtl/mac_core.v ch04/rtl/bram_sync_buffer.v ch05/rtl/fixed_quantizer.v ch07/rtl/vector_dot_core.v ch08/rtl/pe_array4.v ch09/rtl/dense_layer4.v ch10/rtl/npu_core.v}}
     {ch13 npu10_input_loader  {ch04/rtl/bram_sync_buffer.v ch13/rtl/npu10_input_loader.v}}
+    {ch14 npu10_group_scheduler {ch01/rtl/mac_core.v ch04/rtl/bram_sync_buffer.v ch07/rtl/vector_dot_core.v ch08/rtl/pe_array4.v ch13/rtl/npu10_input_loader.v ch14/rtl/npu10_group_scheduler.v}}
 }
 
 proc worst_slack {kind} {
@@ -667,6 +668,12 @@ window.COURSE={
    "number": 13,
    "title": "8×8 손글씨·10분류 준비",
    "file": "ch13_mnist_8x8_v02.html"
+  },
+  {
+   "id": "ch14",
+   "number": 14,
+   "title": "4PE 그룹·10개 출력",
+   "file": "ch14_group10_v02.html"
   }
  ]
 };

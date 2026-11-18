@@ -61,7 +61,7 @@
     </section>
     <section class="section" id="s01">
       <h2><span class="num">01</span>구조도</h2>
-      <div class="figure-wrap" tabindex="0" role="region" aria-label="도면 (가로 스크롤 가능)"><svg viewBox="0 0 980 271" role="img" aria-label="vector_dot_core 실제 포트와 하위 모듈 구조">
+      <div class="figure-wrap" tabindex="0" role="region" aria-label="도면 (가로 스크롤 가능)"><svg viewBox="0 0 991 271" role="img" aria-label="vector_dot_core 실제 포트와 하위 모듈 구조">
       <rect x="250" y="30" width="480" height="201" rx="10" fill="#fff" stroke="#4635b1" stroke-width="2"/>
       <text x="490" y="54" font-size="18" font-weight="700" text-anchor="middle">vector_dot_core</text>
       <text x="490" y="72" font-size="13" text-anchor="middle" fill="#555">ch07/rtl/vector_dot_core.v · 구현 도식</text>
@@ -99,7 +99,7 @@
       <p>구현 도식: 포트 이름·폭과 하위 인스턴스는 <code>ch07/rtl/vector_dot_core.v</code> 선언에서 자동으로 가져왔습니다.</p>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>방향</th><th>포트</th><th>폭</th><th>구분</th><th>설명</th></tr></thead>
-        <tbody><tr><td>input</td><td class="nw"><code>clk</code></td><td class="nw"><code>1</code></td><td>클록</td><td>시스템 클록 (상승 에지에서 모든 레지스터 갱신)</td></tr><tr><td>input</td><td class="nw"><code>resetn</code></td><td class="nw"><code>1</code></td><td>리셋</td><td>동기 리셋, 0이면 초기화 (Active-Low)</td></tr><tr><td>input</td><td class="nw"><code>start_i</code></td><td class="nw"><code>1</code></td><td>데이터·제어</td><td>트랜잭션 시작 (busy_o=0일 때만 수락)</td></tr><tr><td>input</td><td class="nw"><code>valid_i</code></td><td class="nw"><code>1</code></td><td>데이터·제어</td><td>a_i·b_i 원소 1개 공급</td></tr><tr><td>input</td><td class="nw"><code>length_i</code></td><td class="nw"><code>[8:0]</code></td><td>데이터·제어</td><td>벡터 길이 (0~MAX_LEN, 초과 시 error_o)</td></tr><tr><td>input</td><td class="nw"><code>a_i</code></td><td class="nw"><code>[DATA_WIDTH-1:0]</code></td><td>데이터·제어</td><td>벡터 A 원소</td></tr><tr><td>input</td><td class="nw"><code>b_i</code></td><td class="nw"><code>[DATA_WIDTH-1:0]</code></td><td>데이터·제어</td><td>벡터 B 원소</td></tr><tr><td>output</td><td class="nw"><code>ready_o</code></td><td class="nw"><code>1</code></td><td>데이터·제어</td><td>원소를 받을 수 있음 (busy_o && accepted<length)</td></tr><tr><td>output</td><td class="nw"><code>busy_o</code></td><td class="nw"><code>1</code></td><td>데이터·제어</td><td>트랜잭션 진행 중</td></tr><tr><td>output</td><td class="nw"><code>done_o</code></td><td class="nw"><code>1</code></td><td>데이터·제어</td><td>내적 완료 펄스 (1클록)</td></tr><tr><td>output</td><td class="nw"><code>error_o</code></td><td class="nw"><code>1</code></td><td>데이터·제어</td><td>길이 초과 오류 펄스</td></tr><tr><td>output</td><td class="nw"><code>result_o</code></td><td class="nw"><code>[ACC_WIDTH-1:0]</code></td><td>데이터·제어</td><td>내적 결과 (done_o와 함께 갱신)</td></tr></tbody>
+        <tbody><tr><td>input</td><td class="nw"><code>clk</code></td><td class="nw"><code>1</code></td><td class="nw">클록</td><td>시스템 클록 (상승 에지에서 모든 레지스터 갱신)</td></tr><tr><td>input</td><td class="nw"><code>resetn</code></td><td class="nw"><code>1</code></td><td class="nw">리셋</td><td>동기 리셋, 0이면 초기화 (Active-Low)</td></tr><tr><td>input</td><td class="nw"><code>start_i</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>트랜잭션 시작 (busy_o=0일 때만 수락)</td></tr><tr><td>input</td><td class="nw"><code>valid_i</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>a_i·b_i 원소 1개 공급</td></tr><tr><td>input</td><td class="nw"><code>length_i</code></td><td class="nw"><code>[8:0]</code></td><td class="nw">데이터·제어</td><td>벡터 길이 (0~MAX_LEN, 초과 시 error_o)</td></tr><tr><td>input</td><td class="nw"><code>a_i</code></td><td class="nw"><code>[DATA_WIDTH-1:0]</code></td><td class="nw">데이터·제어</td><td>벡터 A 원소</td></tr><tr><td>input</td><td class="nw"><code>b_i</code></td><td class="nw"><code>[DATA_WIDTH-1:0]</code></td><td class="nw">데이터·제어</td><td>벡터 B 원소</td></tr><tr><td>output</td><td class="nw"><code>ready_o</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>원소를 받을 수 있음 (busy_o && accepted<length)</td></tr><tr><td>output</td><td class="nw"><code>busy_o</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>트랜잭션 진행 중</td></tr><tr><td>output</td><td class="nw"><code>done_o</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>내적 완료 펄스 (1클록)</td></tr><tr><td>output</td><td class="nw"><code>error_o</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>길이 초과 오류 펄스</td></tr><tr><td>output</td><td class="nw"><code>result_o</code></td><td class="nw"><code>[ACC_WIDTH-1:0]</code></td><td class="nw">데이터·제어</td><td>내적 결과 (done_o와 함께 갱신)</td></tr></tbody>
       </table></div>
     </section>
     <section class="section" id="s02">
@@ -435,6 +435,12 @@ window.COURSE={
    "number": 13,
    "title": "8×8 손글씨·10분류 준비",
    "file": "ch13_mnist_8x8_v02.html"
+  },
+  {
+   "id": "ch14",
+   "number": 14,
+   "title": "4PE 그룹·10개 출력",
+   "file": "ch14_group10_v02.html"
   }
  ]
 };

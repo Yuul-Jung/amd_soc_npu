@@ -61,52 +61,52 @@
     </section>
     <section class="section" id="s01">
       <h2><span class="num">01</span>구조도</h2>
-      <div class="figure-wrap" tabindex="0" role="region" aria-label="도면 (가로 스크롤 가능)"><svg viewBox="0 0 980 294" role="img" aria-label="dense_layer4 실제 포트와 하위 모듈 구조">
-      <rect x="250" y="30" width="480" height="224" rx="10" fill="#fff" stroke="#4635b1" stroke-width="2"/>
-      <text x="490" y="54" font-size="18" font-weight="700" text-anchor="middle">dense_layer4</text>
-      <text x="490" y="72" font-size="13" text-anchor="middle" fill="#555">ch09/rtl/dense_layer4.v · 구현 도식</text>
-      <text x="222" y="64" font-size="14" font-family="monospace" text-anchor="end">clk</text>
-      <path d="M226 60 H250" stroke="#4635b1" stroke-width="1.5" stroke-dasharray="4 3"/><path d="M250 60 l-7 -4 v8 z" fill="#4635b1"/>
-      <text x="222" y="87" font-size="14" font-family="monospace" text-anchor="end">resetn</text>
-      <path d="M226 83 H250" stroke="#4635b1" stroke-width="1.5" stroke-dasharray="4 3"/><path d="M250 83 l-7 -4 v8 z" fill="#4635b1"/>
-      <text x="222" y="110" font-size="14" font-family="monospace" text-anchor="end">start_i</text>
-      <path d="M226 106 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 106 l-7 -4 v8 z" fill="#4635b1"/>
-      <text x="222" y="133" font-size="14" font-family="monospace" text-anchor="end">valid_i</text>
-      <path d="M226 129 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 129 l-7 -4 v8 z" fill="#4635b1"/>
-      <text x="222" y="156" font-size="14" font-family="monospace" text-anchor="end">length_i[8:0]</text>
-      <path d="M226 152 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 152 l-7 -4 v8 z" fill="#4635b1"/>
-      <text x="222" y="179" font-size="14" font-family="monospace" text-anchor="end">x_i[DATA_WIDTH-1:0]</text>
-      <path d="M226 175 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 175 l-7 -4 v8 z" fill="#4635b1"/>
-      <text x="222" y="202" font-size="14" font-family="monospace" text-anchor="end">weights_i[4*DATA_WIDTH-1:0]</text>
-      <path d="M226 198 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 198 l-7 -4 v8 z" fill="#4635b1"/>
-      <text x="222" y="225" font-size="14" font-family="monospace" text-anchor="end">biases_i[4*ACC_WIDTH-1:0]</text>
-      <path d="M226 221 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 221 l-7 -4 v8 z" fill="#4635b1"/>
-      <path d="M730 60 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 60 l-7 -4 v8 z" fill="#4635b1"/>
-      <text x="758" y="65" font-size="14" font-family="monospace">ready_o</text>
-      <path d="M730 83 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 83 l-7 -4 v8 z" fill="#4635b1"/>
-      <text x="758" y="88" font-size="14" font-family="monospace">busy_o</text>
-      <path d="M730 106 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 106 l-7 -4 v8 z" fill="#4635b1"/>
-      <text x="758" y="111" font-size="14" font-family="monospace">done_o</text>
-      <path d="M730 129 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 129 l-7 -4 v8 z" fill="#4635b1"/>
-      <text x="758" y="134" font-size="14" font-family="monospace">error_o</text>
-      <path d="M730 152 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 152 l-7 -4 v8 z" fill="#4635b1"/>
-      <text x="758" y="157" font-size="14" font-family="monospace">result_o[4*DATA_WIDTH-1:0]</text>
-      <path d="M730 175 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 175 l-7 -4 v8 z" fill="#4635b1"/>
-      <text x="758" y="180" font-size="14" font-family="monospace">overflow_o[3:0]</text>
-      <rect x="270" y="88" width="440" height="28" rx="5" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="5 3"/>
-      <text x="282" y="107" font-size="14" font-family="monospace">fixed_quantizer ×4  (q[4])</text>
-      <text x="698" y="107" font-size="12" text-anchor="end" fill="#4635b1">ch05 재사용</text>
-      <rect x="270" y="124" width="440" height="28" rx="5" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="5 3"/>
-      <text x="282" y="143" font-size="14" font-family="monospace">pe_array4  (pe)</text>
-      <text x="698" y="143" font-size="12" text-anchor="end" fill="#4635b1">ch08 재사용</text>
-      <rect x="250" y="269" width="16" height="12" fill="#edeafa" stroke="#4635b1"/><text x="272" y="280" font-size="13">이번 장 신규</text>
-      <rect x="370" y="269" width="16" height="12" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="4 2"/><text x="392" y="280" font-size="13">이전 장 파일 재사용(수정 없음)</text>
-      <text x="600" y="280" font-size="13">왼쪽 input · 오른쪽 output · 점선 = 클록·리셋</text>
+      <div class="figure-wrap" tabindex="0" role="region" aria-label="도면 (가로 스크롤 가능)"><svg viewBox="0 0 1057 294" role="img" aria-label="dense_layer4 실제 포트와 하위 모듈 구조">
+      <rect x="288" y="30" width="480" height="224" rx="10" fill="#fff" stroke="#4635b1" stroke-width="2"/>
+      <text x="528" y="54" font-size="18" font-weight="700" text-anchor="middle">dense_layer4</text>
+      <text x="528" y="72" font-size="13" text-anchor="middle" fill="#555">ch09/rtl/dense_layer4.v · 구현 도식</text>
+      <text x="260" y="64" font-size="14" font-family="monospace" text-anchor="end">clk</text>
+      <path d="M264 60 H288" stroke="#4635b1" stroke-width="1.5" stroke-dasharray="4 3"/><path d="M288 60 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="260" y="87" font-size="14" font-family="monospace" text-anchor="end">resetn</text>
+      <path d="M264 83 H288" stroke="#4635b1" stroke-width="1.5" stroke-dasharray="4 3"/><path d="M288 83 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="260" y="110" font-size="14" font-family="monospace" text-anchor="end">start_i</text>
+      <path d="M264 106 H288" stroke="#4635b1" stroke-width="1.5"/><path d="M288 106 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="260" y="133" font-size="14" font-family="monospace" text-anchor="end">valid_i</text>
+      <path d="M264 129 H288" stroke="#4635b1" stroke-width="1.5"/><path d="M288 129 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="260" y="156" font-size="14" font-family="monospace" text-anchor="end">length_i[8:0]</text>
+      <path d="M264 152 H288" stroke="#4635b1" stroke-width="1.5"/><path d="M288 152 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="260" y="179" font-size="14" font-family="monospace" text-anchor="end">x_i[DATA_WIDTH-1:0]</text>
+      <path d="M264 175 H288" stroke="#4635b1" stroke-width="1.5"/><path d="M288 175 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="260" y="202" font-size="14" font-family="monospace" text-anchor="end">weights_i[4*DATA_WIDTH-1:0]</text>
+      <path d="M264 198 H288" stroke="#4635b1" stroke-width="1.5"/><path d="M288 198 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="260" y="225" font-size="14" font-family="monospace" text-anchor="end">biases_i[4*ACC_WIDTH-1:0]</text>
+      <path d="M264 221 H288" stroke="#4635b1" stroke-width="1.5"/><path d="M288 221 l-7 -4 v8 z" fill="#4635b1"/>
+      <path d="M768 60 H792" stroke="#4635b1" stroke-width="1.5"/><path d="M792 60 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="796" y="65" font-size="14" font-family="monospace">ready_o</text>
+      <path d="M768 83 H792" stroke="#4635b1" stroke-width="1.5"/><path d="M792 83 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="796" y="88" font-size="14" font-family="monospace">busy_o</text>
+      <path d="M768 106 H792" stroke="#4635b1" stroke-width="1.5"/><path d="M792 106 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="796" y="111" font-size="14" font-family="monospace">done_o</text>
+      <path d="M768 129 H792" stroke="#4635b1" stroke-width="1.5"/><path d="M792 129 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="796" y="134" font-size="14" font-family="monospace">error_o</text>
+      <path d="M768 152 H792" stroke="#4635b1" stroke-width="1.5"/><path d="M792 152 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="796" y="157" font-size="14" font-family="monospace">result_o[4*DATA_WIDTH-1:0]</text>
+      <path d="M768 175 H792" stroke="#4635b1" stroke-width="1.5"/><path d="M792 175 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="796" y="180" font-size="14" font-family="monospace">overflow_o[3:0]</text>
+      <rect x="308" y="88" width="440" height="28" rx="5" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="5 3"/>
+      <text x="320" y="107" font-size="14" font-family="monospace">fixed_quantizer ×4  (q[4])</text>
+      <text x="736" y="107" font-size="12" text-anchor="end" fill="#4635b1">ch05 재사용</text>
+      <rect x="308" y="124" width="440" height="28" rx="5" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="5 3"/>
+      <text x="320" y="143" font-size="14" font-family="monospace">pe_array4  (pe)</text>
+      <text x="736" y="143" font-size="12" text-anchor="end" fill="#4635b1">ch08 재사용</text>
+      <rect x="288" y="269" width="16" height="12" fill="#edeafa" stroke="#4635b1"/><text x="310" y="280" font-size="13">이번 장 신규</text>
+      <rect x="408" y="269" width="16" height="12" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="4 2"/><text x="430" y="280" font-size="13">이전 장 파일 재사용(수정 없음)</text>
+      <text x="638" y="280" font-size="13">왼쪽 input · 오른쪽 output · 점선 = 클록·리셋</text>
       </svg></div>
       <p>구현 도식: 포트 이름·폭과 하위 인스턴스는 <code>ch09/rtl/dense_layer4.v</code> 선언에서 자동으로 가져왔습니다.</p>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>방향</th><th>포트</th><th>폭</th><th>구분</th><th>설명</th></tr></thead>
-        <tbody><tr><td>input</td><td class="nw"><code>clk</code></td><td class="nw"><code>1</code></td><td>클록</td><td>시스템 클록 (상승 에지에서 모든 레지스터 갱신)</td></tr><tr><td>input</td><td class="nw"><code>resetn</code></td><td class="nw"><code>1</code></td><td>리셋</td><td>동기 리셋, 0이면 초기화 (Active-Low)</td></tr><tr><td>input</td><td class="nw"><code>start_i</code></td><td class="nw"><code>1</code></td><td>데이터·제어</td><td>레이어 계산 시작 (이때 biases_i 등록)</td></tr><tr><td>input</td><td class="nw"><code>valid_i</code></td><td class="nw"><code>1</code></td><td>데이터·제어</td><td>입력 원소 1개 공급</td></tr><tr><td>input</td><td class="nw"><code>length_i</code></td><td class="nw"><code>[8:0]</code></td><td>데이터·제어</td><td>입력 길이 (≤64, 초과 시 error_o)</td></tr><tr><td>input</td><td class="nw"><code>x_i</code></td><td class="nw"><code>[DATA_WIDTH-1:0]</code></td><td>데이터·제어</td><td>입력 원소 (4뉴런 공통)</td></tr><tr><td>input</td><td class="nw"><code>weights_i</code></td><td class="nw"><code>[4*DATA_WIDTH-1:0]</code></td><td>데이터·제어</td><td>뉴런 4개의 가중치 원소 묶음</td></tr><tr><td>input</td><td class="nw"><code>biases_i</code></td><td class="nw"><code>[4*ACC_WIDTH-1:0]</code></td><td>데이터·제어</td><td>뉴런 4개의 Bias 묶음</td></tr><tr><td>output</td><td class="nw"><code>ready_o</code></td><td class="nw"><code>1</code></td><td>데이터·제어</td><td>원소 수락 가능</td></tr><tr><td>output</td><td class="nw"><code>busy_o</code></td><td class="nw"><code>1</code></td><td>데이터·제어</td><td>진행 중</td></tr><tr><td>output</td><td class="nw"><code>done_o</code></td><td class="nw"><code>1</code></td><td>데이터·제어</td><td>완료 펄스</td></tr><tr><td>output</td><td class="nw"><code>error_o</code></td><td class="nw"><code>1</code></td><td>데이터·제어</td><td>길이 초과 오류 펄스</td></tr><tr><td>output</td><td class="nw"><code>result_o</code></td><td class="nw"><code>[4*DATA_WIDTH-1:0]</code></td><td>데이터·제어</td><td>Bias+ReLU+양자화 결과 4개</td></tr><tr><td>output</td><td class="nw"><code>overflow_o</code></td><td class="nw"><code>[3:0]</code></td><td>데이터·제어</td><td>뉴런별 양자화 범위 초과</td></tr></tbody>
+        <tbody><tr><td>input</td><td class="nw"><code>clk</code></td><td class="nw"><code>1</code></td><td class="nw">클록</td><td>시스템 클록 (상승 에지에서 모든 레지스터 갱신)</td></tr><tr><td>input</td><td class="nw"><code>resetn</code></td><td class="nw"><code>1</code></td><td class="nw">리셋</td><td>동기 리셋, 0이면 초기화 (Active-Low)</td></tr><tr><td>input</td><td class="nw"><code>start_i</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>레이어 계산 시작 (이때 biases_i 등록)</td></tr><tr><td>input</td><td class="nw"><code>valid_i</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>입력 원소 1개 공급</td></tr><tr><td>input</td><td class="nw"><code>length_i</code></td><td class="nw"><code>[8:0]</code></td><td class="nw">데이터·제어</td><td>입력 길이 (≤64, 초과 시 error_o)</td></tr><tr><td>input</td><td class="nw"><code>x_i</code></td><td class="nw"><code>[DATA_WIDTH-1:0]</code></td><td class="nw">데이터·제어</td><td>입력 원소 (4뉴런 공통)</td></tr><tr><td>input</td><td class="nw"><code>weights_i</code></td><td class="nw"><code>[4*DATA_WIDTH-1:0]</code></td><td class="nw">데이터·제어</td><td>뉴런 4개의 가중치 원소 묶음</td></tr><tr><td>input</td><td class="nw"><code>biases_i</code></td><td class="nw"><code>[4*ACC_WIDTH-1:0]</code></td><td class="nw">데이터·제어</td><td>뉴런 4개의 Bias 묶음</td></tr><tr><td>output</td><td class="nw"><code>ready_o</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>원소 수락 가능</td></tr><tr><td>output</td><td class="nw"><code>busy_o</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>진행 중</td></tr><tr><td>output</td><td class="nw"><code>done_o</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>완료 펄스</td></tr><tr><td>output</td><td class="nw"><code>error_o</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>길이 초과 오류 펄스</td></tr><tr><td>output</td><td class="nw"><code>result_o</code></td><td class="nw"><code>[4*DATA_WIDTH-1:0]</code></td><td class="nw">데이터·제어</td><td>Bias+ReLU+양자화 결과 4개</td></tr><tr><td>output</td><td class="nw"><code>overflow_o</code></td><td class="nw"><code>[3:0]</code></td><td class="nw">데이터·제어</td><td>뉴런별 양자화 범위 초과</td></tr></tbody>
       </table></div>
     </section>
     <section class="section" id="s02">
@@ -449,6 +449,12 @@ window.COURSE={
    "number": 13,
    "title": "8×8 손글씨·10분류 준비",
    "file": "ch13_mnist_8x8_v02.html"
+  },
+  {
+   "id": "ch14",
+   "number": 14,
+   "title": "4PE 그룹·10개 출력",
+   "file": "ch14_group10_v02.html"
   }
  ]
 };
