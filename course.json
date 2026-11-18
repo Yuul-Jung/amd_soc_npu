@@ -185,8 +185,8 @@
       "id": "ch22",
       "number": 22,
       "title": "Vitis C 추론 드라이버",
-      "file": "ch22_vitis_npu_driver_v02.html",
-      "html_status": "TODO",
+      "file": "ch22_vitis_driver_v02.html",
+      "html_status": "DONE",
       "rtl_status": "TODO"
     },
     {

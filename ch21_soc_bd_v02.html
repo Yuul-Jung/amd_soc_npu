@@ -423,7 +423,7 @@ BD_STATIC_CHECK_PASS tcl_steps=17 files=8 npu=0x44A00000/64KB ports=36</code></p
       </table></div>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>다음 장으로 넘기는 파일</th><th>사용처</th></tr></thead>
-        <tbody><tr><td><code>soc_npu_top.xsa</code></td><td>22장 Vitis 플랫폼 (NPU 기준 주소 매크로는 xparameters.h에서 확인)</td></tr><tr><td><code>ch21/rtl/soc_npu_top.v · soc_npu.xdc</code></td><td>27장 통합 Top이 7세그먼트 핀을 더해 확장</td></tr></tbody>
+        <tbody><tr><td><code>soc_npu_top.xsa</code></td><td>22장 Vitis 플랫폼 (NPU 기준 주소 매크로는 xparameters.h에서 확인, 드라이버 기본값 0x44A0_0000)</td></tr><tr><td><code>ch21/rtl/soc_npu_top.v · soc_npu.xdc</code></td><td>27장 통합 Top이 7세그먼트 핀을 더해 확장</td></tr></tbody>
       </table></div>
       <p>검증 게이트 (<code>ch21/validation/</code> 증거 파일 기준으로 자동 표시):</p>
       <div class="gate-row">
@@ -591,6 +591,12 @@ window.COURSE={
    "number": 21,
    "title": "MicroBlaze V + NPU 블록 설계",
    "file": "ch21_soc_bd_v02.html"
+  },
+  {
+   "id": "ch22",
+   "number": 22,
+   "title": "Vitis C 드라이버",
+   "file": "ch22_vitis_driver_v02.html"
   }
  ]
 };

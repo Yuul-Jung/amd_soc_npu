@@ -28,7 +28,7 @@
 | 19 | 1·4·8PE 사이클 비교 | [ch19_pe_compare_v02.html](../ch19_pe_compare_v02.html) | — | ✅ | ⏳ | — | ⏳ |
 | 20 | AXI4-Lite 레지스터 | [ch20_axi_lite_v02.html](../ch20_axi_lite_v02.html) | — | ✅ | ⏳ | — | ⏳ |
 | 21 | MicroBlaze V + NPU 블록 설계 | [ch21_soc_bd_v02.html](../ch21_soc_bd_v02.html) | — | — | ⏳ | ⏳ | ⏳ |
-| 22 | Vitis C 추론 드라이버 | chapter.json 대기 | | | | | |
+| 22 | Vitis C 드라이버 | [ch22_vitis_driver_v02.html](../ch22_vitis_driver_v02.html) | — | ✅ | ⏳ | — | ⏳ |
 | 23 | CPU·NPU 성능 비교 | chapter.json 대기 | | | | | |
 | 24 | FPGA 자원·타이밍 | chapter.json 대기 | | | | | |
 | 25 | 동적 전력·추론 에너지 | chapter.json 대기 | | | | | |
