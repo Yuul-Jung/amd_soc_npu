@@ -35,6 +35,6 @@
 | 26 | 3×3 소형 CNN | [ch26_tiny_cnn_v02.html](../ch26_tiny_cnn_v02.html) | ✅ | ✅ | ⏳ | — | ⏳ |
 | 27 | 최종 NPU SoC | [ch27_npu_system_v02.html](../ch27_npu_system_v02.html) | — | ✅ | ⏳ | ⏳ | ⏳ |
 | 28 | PC 손글씨 → 보드 분류 | [ch28_handwriting_v02.html](../ch28_handwriting_v02.html) | — | ✅ | ⏳ | — | ⏳ |
-| 29 | 센서 융합 산업안전 감시 | chapter.json 대기 | | | | | |
+| 29 | 센서 유효성 + AI 상태 분류 | [ch29_sensor_ai_v02.html](../ch29_sensor_ai_v02.html) | ✅ | ✅ | ⏳ | — | ⏳ |
 | 30 | NPU·모터 안전 제어 | chapter.json 대기 | | | | | |
 | 31 | AES-128·HMAC 보안 UART | chapter.json 대기 | | | | | |

@@ -1,0 +1,710 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Basys3 NPU 29장 실습 · 응용 2: 센서 유효성 검사와 AI 상태 분류 (가상 센서)">
+<meta name="generator" content="tools/guide/build_guides.py — 직접 수정 금지, chapter.json을 고친 뒤 재생성">
+<title>29장 · 응용 2: 센서 유효성 검사와 AI 상태 분류 (가상 센서) (v02)</title>
+<link rel="stylesheet" href="assets/education/site.css">
+<style>
+.codeblock pre{max-height:780px;white-space:pre}
+.section svg{width:100%;height:auto}
+.vbadge{display:inline-block;padding:.15em .6em;border-radius:4px;font-size:.78em;font-weight:700;background:#d4edda;color:#155724;vertical-align:middle}
+.gate-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:10px}
+.gate{border:1px solid var(--line,#e0e0e0);border-radius:6px;padding:10px 14px;overflow-wrap:anywhere}
+.gate b{display:block;font:600 11px var(--mono,monospace);letter-spacing:.04em;margin-bottom:4px}
+.gate span{font-size:13px}
+.gate.pass{border-color:#2d8a52;background:#f0fbf4}
+.gate.todo{border-color:#b08900;background:#fffbe6}
+.gate.fail{border-color:#b3261e;background:#fdeceb}
+.gate.na{border-color:#c8c8c8;background:#f6f6f6;color:#666}
+.table-wrap{overflow-x:auto}
+.table-wrap>table{min-width:620px}
+.figure-wrap{overflow-x:auto}
+.figure-wrap svg{min-width:860px}
+.section :not(pre)>code{overflow-wrap:anywhere}
+.codebar{gap:8px}
+.codebar span{min-width:0;overflow-wrap:anywhere}
+.hero p{max-width:none}
+.access-skip{position:absolute;left:-9999px;top:0}
+.access-skip:focus{left:12px;top:12px;z-index:1003;background:#fff;color:#15171c;padding:6px 10px}
+.nw code{white-space:nowrap;overflow-wrap:normal}
+</style>
+</head>
+<body data-chapter="ch29">
+<a class="access-skip" href="#main-content">본문 바로가기</a>
+<button type="button" class="mobile-menu" id="mobile-menu" aria-controls="course-nav" aria-expanded="false">☰ 장·목차</button>
+<div class="shade" id="shade"></div>
+<header class="hero">
+  <div class="hero-inner">
+    <p class="kicker">BASYS3 · NPU 고도화판 · 29장 실습 <span class="vbadge">v02</span></p>
+    <h1>제29장 · 응용 2: 센서 유효성 검사와 AI 상태 분류 (가상 센서)</h1>
+    <p>센서 4채널 × 16샘플 창을 받아 범위·고착·순서를 먼저 검사하고, 고장이 없을 때만 15장 Dense로 NORMAL·HOT·VIBRATION·DRIFT를 분류합니다. 점수 차가 작으면 UNKNOWN, 고장이면 FAULT가 AI보다 우선합니다. 실제 센서를 연결하기 전에 가상 센서 벡터로 판정을 확인합니다.</p>
+  </div>
+</header>
+<div class="wrap">
+  <nav class="toc" id="course-nav" aria-label="전체 장과 절 탐색"></nav>
+  <main class="content" id="main-content">
+    <section class="section" id="s00">
+      <h2><span class="num">00</span>이 장의 위치</h2>
+      <p><b>목표:</b> 센서 4채널 × 16샘플 창을 받아 범위·고착·순서를 먼저 검사하고, 고장이 없을 때만 15장 Dense로 NORMAL·HOT·VIBRATION·DRIFT를 분류합니다. 점수 차가 작으면 UNKNOWN, 고장이면 FAULT가 AI보다 우선합니다. 실제 센서를 연결하기 전에 가상 센서 벡터로 판정을 확인합니다.</p>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>구분</th><th>파일</th></tr></thead>
+        <tbody>
+          <tr><td>유지 (이전 장, 수정 없음)</td><td><ul><li><code>ch01/rtl/mac_core.v</code> <small>(01장)</small></li><li><code>ch04/rtl/bram_sync_buffer.v</code> <small>(04장)</small></li><li><code>ch07/rtl/vector_dot_core.v</code> <small>(07장)</small></li><li><code>ch08/rtl/pe_array4.v</code> <small>(08장)</small></li><li><code>ch15/rtl/npu_dense_core.v</code> <small>(15장)</small></li><li><code>ch15/rtl/npu_dense_store.v</code> <small>(15장)</small></li><li><code>ch15/rtl/npu_dense.v</code> <small>(15장)</small></li><li><code>host_tools/p3_integer_reference.py</code> <small>()</small></li></ul></td></tr>
+          <tr><td>이번 장 작성</td><td><ul><li><code>ch29/rtl/sensor_guard_ai.v</code></li></ul></td></tr>
+        </tbody>
+      </table></div>
+      <p>전체 누적 관계: <a href="index.html#techtree">INDEX · 01 전체 테크트리</a> (00~31장 흐름 · 00~12장 모듈 재사용 도면)</p>
+      <p>실습 순서: 01 구조 확인 → 02 준비 → 03 RTL 작성 → 04 테스트벤치·기준 모델 작성 → 05 시뮬레이션 → 06 결과 판정 → 08 합성·타이밍(Vivado) → 09 인계.</p>
+    </section>
+    <section class="section" id="s01">
+      <h2><span class="num">01</span>구조도</h2>
+      <div class="figure-wrap" tabindex="0" role="region" aria-label="도면 (가로 스크롤 가능)"><svg viewBox="0 0 980 363" role="img" aria-label="sensor_guard_ai 실제 포트와 하위 모듈 구조">
+      <rect x="250" y="30" width="480" height="293" rx="10" fill="#fff" stroke="#4635b1" stroke-width="2"/>
+      <text x="490" y="54" font-size="18" font-weight="700" text-anchor="middle">sensor_guard_ai</text>
+      <text x="490" y="72" font-size="13" text-anchor="middle" fill="#555">ch29/rtl/sensor_guard_ai.v · 구현 도식</text>
+      <text x="270" y="144" font-size="13" fill="#555">FSM 상태 (localparam 선언 순서 · 전이는 아래 상태 전이표)</text>
+      <text x="270" y="166" font-size="14" font-family="monospace">COLLECT · CLASSIFY · DECIDE</text>
+      <text x="222" y="64" font-size="14" font-family="monospace" text-anchor="end">clk</text>
+      <path d="M226 60 H250" stroke="#4635b1" stroke-width="1.5" stroke-dasharray="4 3"/><path d="M250 60 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="87" font-size="14" font-family="monospace" text-anchor="end">resetn</text>
+      <path d="M226 83 H250" stroke="#4635b1" stroke-width="1.5" stroke-dasharray="4 3"/><path d="M250 83 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="110" font-size="14" font-family="monospace" text-anchor="end">s_valid_i</text>
+      <path d="M226 106 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 106 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="133" font-size="14" font-family="monospace" text-anchor="end">s_ch_i[1:0]</text>
+      <path d="M226 129 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 129 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="156" font-size="14" font-family="monospace" text-anchor="end">s_raw_i[11:0]</text>
+      <path d="M226 152 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 152 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="179" font-size="14" font-family="monospace" text-anchor="end">w_wr_en_i</text>
+      <path d="M226 175 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 175 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="202" font-size="14" font-family="monospace" text-anchor="end">w_neuron_i[3:0]</text>
+      <path d="M226 198 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 198 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="225" font-size="14" font-family="monospace" text-anchor="end">w_addr_i[5:0]</text>
+      <path d="M226 221 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 221 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="248" font-size="14" font-family="monospace" text-anchor="end">w_data_i[7:0]</text>
+      <path d="M226 244 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 244 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="271" font-size="14" font-family="monospace" text-anchor="end">b_wr_en_i</text>
+      <path d="M226 267 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 267 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="294" font-size="14" font-family="monospace" text-anchor="end">b_data_i[31:0]</text>
+      <path d="M226 290 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 290 l-7 -4 v8 z" fill="#4635b1"/>
+      <path d="M730 60 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 60 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="758" y="65" font-size="14" font-family="monospace">state_o[2:0]</text>
+      <path d="M730 83 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 83 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="758" y="88" font-size="14" font-family="monospace">fault_o[2:0]</text>
+      <path d="M730 106 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 106 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="758" y="111" font-size="14" font-family="monospace">scores_o[127:0]</text>
+      <path d="M730 129 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 129 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="758" y="134" font-size="14" font-family="monospace">done_o</text>
+      <path d="M730 152 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 152 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="758" y="157" font-size="14" font-family="monospace">busy_o</text>
+      <rect x="270" y="88" width="440" height="28" rx="5" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="5 3"/>
+      <text x="282" y="107" font-size="14" font-family="monospace">npu_dense  (dense)</text>
+      <text x="698" y="107" font-size="12" text-anchor="end" fill="#4635b1">ch15 재사용</text>
+      <rect x="250" y="338" width="16" height="12" fill="#edeafa" stroke="#4635b1"/><text x="272" y="349" font-size="13">이번 장 신규</text>
+      <rect x="370" y="338" width="16" height="12" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="4 2"/><text x="392" y="349" font-size="13">이전 장 파일 재사용(수정 없음)</text>
+      <text x="600" y="349" font-size="13">왼쪽 input · 오른쪽 output · 점선 = 클록·리셋</text>
+      </svg></div>
+      <p>구현 도식: 포트 이름·폭과 하위 인스턴스는 <code>ch29/rtl/sensor_guard_ai.v</code> 선언에서 자동으로 가져왔습니다.</p>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>방향</th><th>포트</th><th>폭</th><th>구분</th><th>설명</th></tr></thead>
+        <tbody><tr><td>input</td><td class="nw"><code>clk</code></td><td class="nw"><code>1</code></td><td class="nw">클록</td><td>시스템 클록</td></tr><tr><td>input</td><td class="nw"><code>resetn</code></td><td class="nw"><code>1</code></td><td class="nw">리셋</td><td>동기 리셋 (Active-Low)</td></tr><tr><td>input</td><td class="nw"><code>s_valid_i</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>센서 샘플 하나 있음</td></tr><tr><td>input</td><td class="nw"><code>s_ch_i</code></td><td class="nw"><code>[1:0]</code></td><td class="nw">데이터·제어</td><td>샘플 채널 0~3 (0·1·2·3 순서여야 함)</td></tr><tr><td>input</td><td class="nw"><code>s_raw_i</code></td><td class="nw"><code>[11:0]</code></td><td class="nw">데이터·제어</td><td>샘플 원시값 (12비트, 0~4095)</td></tr><tr><td>input</td><td class="nw"><code>w_wr_en_i</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>Dense 가중치 쓰기</td></tr><tr><td>input</td><td class="nw"><code>w_neuron_i</code></td><td class="nw"><code>[3:0]</code></td><td class="nw">데이터·제어</td><td>상태 0~3 (가중치·Bias 공통)</td></tr><tr><td>input</td><td class="nw"><code>w_addr_i</code></td><td class="nw"><code>[5:0]</code></td><td class="nw">데이터·제어</td><td>입력 번호 0~63 (t*4 + 채널)</td></tr><tr><td>input</td><td class="nw"><code>w_data_i</code></td><td class="nw"><code>[7:0]</code></td><td class="nw">데이터·제어</td><td>가중치 (INT8)</td></tr><tr><td>input</td><td class="nw"><code>b_wr_en_i</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>Dense Bias 쓰기</td></tr><tr><td>input</td><td class="nw"><code>b_data_i</code></td><td class="nw"><code>[31:0]</code></td><td class="nw">데이터·제어</td><td>Bias (signed 32비트)</td></tr><tr><td>output</td><td class="nw"><code>state_o</code></td><td class="nw"><code>[2:0]</code></td><td class="nw">데이터·제어</td><td>판정 0 NORMAL·1 HOT·2 VIBRATION·3 DRIFT·4 UNKNOWN·5 FAULT</td></tr><tr><td>output</td><td class="nw"><code>fault_o</code></td><td class="nw"><code>[2:0]</code></td><td class="nw">데이터·제어</td><td>고장 비트 (bit0 범위, bit1 고착, bit2 순서)</td></tr><tr><td>output</td><td class="nw"><code>scores_o</code></td><td class="nw"><code>[127:0]</code></td><td class="nw">데이터·제어</td><td>상태 점수 4개 (FAULT면 이전 값, 쓰지 않음)</td></tr><tr><td>output</td><td class="nw"><code>done_o</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>창 하나 판정 끝 1클록 펄스</td></tr><tr><td>output</td><td class="nw"><code>busy_o</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>분류 중 (이때 온 샘플은 버림)</td></tr></tbody>
+      </table></div>
+      <p>상태도 (원본 <a href="ch29/diagrams/ch29_sensor_fsm.json"><code>ch29/diagrams/ch29_sensor_fsm.json</code></a> · <a href="https://yuul-jung.github.io/svg-flow-editor/">svg-flow-editor</a>에서 <b>작업 불러오기</b>로 열어 편집 → <b>작업 저장</b> → <code>python3 tools/diagram/export_svg.py</code>):</p>
+      <div class="figure-wrap" tabindex="0" role="region" aria-label="도면 (가로 스크롤 가능)"><svg style="min-width:909px" id="ch29-fsm" xmlns="http://www.w3.org/2000/svg" width="1300" height="700" viewBox="0 0 1300 700" aria-label="sensor_guard_ai FSM 상태도" role="img" version="1.1"><!-- 원본: ch29/diagrams/ch29_sensor_fsm.json · json-sha256: b53735ec6150c1df6695b09d60d2e3d840b8a272a8acfe06e22a6449db99a8c4 · 생성: svg-flow-editor (로컬 사본) · 직접 수정 금지 --><defs><marker id="ch29-fsm-arrowhead-0" markerWidth="15" markerHeight="15" refX="13.125" refY="7.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 15 7.5 L 0 15 z" fill="#5A1E1E"/></marker><marker id="ch29-fsm-arrowhead-1" markerWidth="15" markerHeight="15" refX="13.125" refY="7.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 15 7.5 L 0 15 z" fill="#5A1E1E"/></marker><marker id="ch29-fsm-arrowhead-2" markerWidth="15" markerHeight="15" refX="13.125" refY="7.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 15 7.5 L 0 15 z" fill="#5A1E1E"/></marker><marker id="ch29-fsm-arrowhead-3" markerWidth="15" markerHeight="15" refX="13.125" refY="7.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 15 7.5 L 0 15 z" fill="#5A1E1E"/></marker></defs><rect x="0" y="0" width="1300" height="700" fill="#fff"/><g data-heading="title"><text x="52" y="58.2" font-size="30" font-weight="780" fill="#172439" text-anchor="start" class="heading-text" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">29장 · sensor_guard_ai FSM 상태도</text></g><g data-heading="subtitle"><text x="52" y="103.78" font-size="17" font-weight="400" fill="#617083" text-anchor="start" class="heading-text" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">ch29/rtl/sensor_guard_ai.v · case(st) 기준 · 리셋 시 COLLECT</text></g><line x1="0" y1="129" x2="1300" y2="129" stroke="#c5cfdb" stroke-width="2" pointer-events="none" data-role="heading-divider"/><g id="edges"><g data-edge="e1" class="edge"><path d="M 560 225 L 560 315" fill="none" stroke="#5A1E1E" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#ch29-fsm-arrowhead-0)"/><text x="570" y="275" text-anchor="start" font-size="16" font-weight="750" fill="#5A1E1E" class="edge-label" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">idx==63</text></g><g data-edge="e2" class="edge"><path d="M 560 385 L 560 475" fill="none" stroke="#5A1E1E" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#ch29-fsm-arrowhead-1)"/><text x="570" y="435" text-anchor="start" font-size="16" font-weight="750" fill="#5A1E1E" class="edge-label" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">d_done</text></g><g data-edge="e3" class="edge"><path d="M 677.5 350 L 900 350 L 900 190 L 660 190" fill="none" stroke="#5A1E1E" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#ch29-fsm-arrowhead-2)"/><text x="788.75" y="341" text-anchor="middle" font-size="16" font-weight="750" fill="#5A1E1E" class="edge-label" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">fault_o≠0 · d_err → FAULT</text></g><g data-edge="e4" class="edge"><path d="M 437.5 510 L 377.5 510 L 377.5 190 L 460 190" fill="none" stroke="#5A1E1E" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#ch29-fsm-arrowhead-3)"/><text x="367.5" y="355" text-anchor="end" font-size="16" font-weight="750" fill="#5A1E1E" class="edge-label" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">항상 → done_o</text></g></g><g id="nodes"><g data-node="COLLECT" class="node"><rect x="460" y="155" width="200" height="70" fill="none" stroke="#1F3A5F" stroke-width="3.2" class="node-shape" pointer-events="all"/><text x="560" y="179" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="22" font-weight="750" fill="#172439" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">COLLECT</text><text x="560" y="204" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="16" font-weight="400" fill="#273e5e" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">샘플 검사·저장 64개 (유지)</text></g><g data-node="CLASSIFY" class="node"><rect x="442.5" y="315" width="235" height="70" fill="none" stroke="#1F3A5F" stroke-width="3.2" class="node-shape" pointer-events="all"/><text x="560" y="339" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="22" font-weight="750" fill="#172439" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">CLASSIFY</text><text x="560" y="364" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="16" font-weight="400" fill="#273e5e" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">고장 없으면 Dense 64→4 (유지)</text></g><g data-node="DECIDE" class="node"><rect x="437.5" y="475" width="245" height="70" fill="none" stroke="#1F3A5F" stroke-width="3.2" class="node-shape" pointer-events="all"/><text x="560" y="499" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="22" font-weight="750" fill="#172439" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">DECIDE</text><text x="560" y="524" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="16" font-weight="400" fill="#273e5e" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">1·2위 차로 상태 또는 UNKNOWN</text></g></g></svg></div>
+      <p>상태 전이표 (<code>ch29/rtl/sensor_guard_ai.v</code>의 <code>case(state)</code> 기준, 리셋 시 <code>COLLECT</code>):</p>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>현재 상태</th><th>조건</th><th>다음 상태</th><th>동작</th></tr></thead>
+        <tbody><tr><td class="nw"><code>COLLECT</code></td><td><code>s_valid_i &amp;&amp; idx&lt;63</code></td><td class="nw"><code>COLLECT</code></td><td>샘플 검사·스케일·저장, idx+1</td></tr><tr><td class="nw"><code>COLLECT</code></td><td><code>s_valid_i &amp;&amp; idx==63</code></td><td class="nw"><code>CLASSIFY</code></td><td>마지막 샘플 저장</td></tr><tr><td class="nw"><code>CLASSIFY</code></td><td><code>fault_o≠0</code></td><td class="nw"><code>COLLECT</code></td><td>state_o=FAULT, done_o</td></tr><tr><td class="nw"><code>CLASSIFY</code></td><td><code>d_err</code></td><td class="nw"><code>COLLECT</code></td><td>state_o=FAULT, fault_o=순서, done_o</td></tr><tr><td class="nw"><code>CLASSIFY</code></td><td><code>d_done</code></td><td class="nw"><code>DECIDE</code></td><td>Dense 64→4 점수 확정</td></tr><tr><td class="nw"><code>DECIDE</code></td><td><code>항상</code></td><td class="nw"><code>COLLECT</code></td><td>1·2위 차 ≥ MARGIN이면 1위 상태, 아니면 UNKNOWN, done_o</td></tr><tr><td class="nw"><code>default</code></td><td><code>유효하지 않은 상태</code></td><td class="nw"><code>COLLECT</code></td><td></td></tr></tbody>
+      </table></div>
+    </section>
+    <section class="section" id="s02">
+      <h2><span class="num">02</span>준비</h2>
+      <ol>
+        <li>VS Code에서 저장소 루트(<code>amd_soc_npu/</code>)를 엽니다.</li>
+        <li>도구를 확인합니다.</li>
+      </ol>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 도구 확인</span></div>
+        <pre tabindex="0"><code>sudo apt install -y iverilog python3 ripgrep   # 처음 한 번
+iverilog -V 2&gt;&amp;1 | head -1      # Icarus Verilog version 12.0 이상
+python3 --version</code></pre></div>
+      <ol start="3"><li>00절 '유지' 파일이 이전 장 결과 그대로 있는지 확인합니다 (모델(<code>ch29/model/sensor_int8.txt</code>)은 <code>sensor_model.py --train</code>(numpy)이 이 파일이 만든 합성 센서 값 2,000개로 학습한 것이며 실제 센서 데이터가 아닙니다. 05절은 저장된 모델만 읽습니다. <b>실제 센서는 3.3 V 입력 범위·전원·보호 회로를 검토하기 전에 FPGA 핀에 직접 연결하지 않습니다</b>).</li></ol>
+    </section>
+    <section class="section" id="s03">
+      <h2><span class="num">03</span>RTL 작성</h2>
+      <p>아래 파일을 경로 그대로 만들고 전체 코드를 입력합니다.</p>
+      <div class="codeblock">
+        <div class="codebar"><span>ch29/rtl/sensor_guard_ai.v · verilog · 원본 · RTL_SIM 통과 2026-11-19</span></div>
+        <pre tabindex="0"><code class="language-verilog">`timescale 1ns/1ps
+`default_nettype none
+// 29장 센서 감시기: 가상 센서 4채널 × 16샘플(12비트)을 받아 유효성(범위·고착·순서)을 먼저 보고,
+// 고장이 없을 때만 15장 Dense 64→4로 상태를 분류한다. 점수 1·2위 차가 MARGIN보다 작으면 UNKNOWN.
+// 상태: 0 NORMAL, 1 HOT, 2 VIBRATION, 3 DRIFT, 4 UNKNOWN, 5 FAULT (고장이 AI보다 우선)
+module sensor_guard_ai #(
+    parameter integer MIN_RAW = 100,
+    parameter integer MAX_RAW = 4000,
+    parameter integer STUCK_N = 8,           // 같은 채널이 같은 값을 연속 STUCK_N번 → 고착
+    parameter integer MARGIN  = 3000
+) (
+    input  wire         clk,
+    input  wire         resetn,
+    input  wire         s_valid_i,           // 샘플 하나 (채널 0,1,2,3 순서로 16번 = 창 1개)
+    input  wire   [1:0] s_ch_i,
+    input  wire  [11:0] s_raw_i,
+    input  wire         w_wr_en_i,           // 15장 Dense 모델 쓰기 (클래스 0~3, 원소 0~63)
+    input  wire   [3:0] w_neuron_i,
+    input  wire   [5:0] w_addr_i,
+    input  wire   [7:0] w_data_i,
+    input  wire         b_wr_en_i,
+    input  wire  [31:0] b_data_i,
+    output reg    [2:0] state_o,
+    output reg    [2:0] fault_o,             // bit0 범위, bit1 고착, bit2 순서
+    output wire [127:0] scores_o,
+    output reg          done_o,              // 창 하나 판정 끝 1클록 펄스
+    output wire         busy_o
+);
+    localparam COLLECT=0, CLASSIFY=1, DECIDE=2;
+    reg [1:0] st;
+    reg dense_started;                       // CLASSIFY에서 Dense를 한 번만 시작
+    reg [5:0] idx;
+    reg signed [7:0] x_q [0:63];
+    reg [11:0] prev [0:3];
+    reg [3:0]  run  [0:3];
+    integer i;
+    assign busy_o = (st == CLASSIFY || st == DECIDE);
+
+    // ── 샘플 하나 판정 (채널은 '와야 할' 채널 idx[1:0] 기준으로 센다 — 순서가 틀려도 위치로 비교)
+    wire [1:0] ch = idx[1:0];
+    wire bad_order = (s_ch_i != ch);
+    wire bad_range = (s_raw_i &lt; MIN_RAW) || (s_raw_i &gt; MAX_RAW);
+    wire same = (idx &gt;= 4) &amp;&amp; (s_raw_i == prev[ch]);
+    wire [3:0] run_n = same ? run[ch] + 4'd1 : 4'd1;
+    wire signed [12:0] centered = $signed({1'b0, s_raw_i}) - 13'sd2048;
+    wire signed [12:0] shifted = centered &gt;&gt;&gt; 4;
+    wire signed [7:0] scaled = (shifted &gt; 127) ? 8'sd127 : (shifted &lt; -128) ? -8'sd128 : shifted[7:0];
+
+    // ── 15장 Dense 64→4 (입력 = 창 버퍼, 1클록 지연)
+    wire x_en; wire [5:0] x_idx; reg signed [7:0] x_d; reg x_v;
+    wire d_done, d_err;
+    npu_dense #(.N_IN(64), .N_OUT(4), .ACC_WIDTH(32)) dense (
+        .clk(clk), .resetn(resetn), .model_clear_i(1'b0),
+        .w_wr_en_i(w_wr_en_i), .w_neuron_i(w_neuron_i), .w_addr_i(w_addr_i), .w_data_i(w_data_i),
+        .b_wr_en_i(b_wr_en_i), .b_neuron_i(w_neuron_i), .b_data_i(b_data_i), .model_sum_o(), .model_err_o(),
+        .x_rd_en_o(x_en), .x_rd_idx_o(x_idx), .x_data_i(x_d), .x_valid_i(x_v),
+        .start_i(st == CLASSIFY &amp;&amp; !dense_started &amp;&amp; fault_o == 0), .busy_o(), .done_o(d_done), .error_o(d_err), .scores_o(scores_o));
+    always @(posedge clk) begin x_v &lt;= resetn &amp;&amp; x_en; if (x_en) x_d &lt;= x_q[x_idx]; end
+
+    // ── 1·2위 찾기 (4개, 같으면 낮은 번호가 위)
+    wire signed [31:0] s0 = scores_o[0 +: 32], s1 = scores_o[32 +: 32], s2 = scores_o[64 +: 32], s3 = scores_o[96 +: 32];
+    wire [1:0] b01 = (s1 &gt; s0) ? 2'd1 : 2'd0;  wire signed [31:0] v01 = (s1 &gt; s0) ? s1 : s0;  wire signed [31:0] l01 = (s1 &gt; s0) ? s0 : s1;
+    wire [1:0] b23 = (s3 &gt; s2) ? 2'd3 : 2'd2;  wire signed [31:0] v23 = (s3 &gt; s2) ? s3 : s2;  wire signed [31:0] l23 = (s3 &gt; s2) ? s2 : s3;
+    wire top23 = (v23 &gt; v01);
+    wire [1:0] best = top23 ? b23 : b01;
+    wire signed [31:0] bestv = top23 ? v23 : v01;
+    wire signed [31:0] second = top23 ? ((v01 &gt; l23) ? v01 : l23) : ((v23 &gt; l01) ? v23 : l01);
+
+    always @(posedge clk) begin
+        if (!resetn) begin
+            st &lt;= COLLECT; idx &lt;= 0; state_o &lt;= 0; fault_o &lt;= 0; done_o &lt;= 0; dense_started &lt;= 0;
+            for (i = 0; i &lt; 4; i = i + 1) begin prev[i] &lt;= 0; run[i] &lt;= 0; end
+        end else begin
+            done_o &lt;= 0;
+            case (st)
+                COLLECT: if (s_valid_i) begin
+                    x_q[idx] &lt;= scaled;
+                    prev[ch] &lt;= s_raw_i; run[ch] &lt;= run_n;
+                    fault_o &lt;= (idx == 0 ? 3'd0 : fault_o) | {bad_order, run_n &gt;= STUCK_N, bad_range};
+                    idx &lt;= idx + 6'd1;
+                    if (idx == 63) st &lt;= CLASSIFY;
+                end
+                CLASSIFY: begin
+                    if (fault_o != 0) begin state_o &lt;= 3'd5; done_o &lt;= 1; st &lt;= COLLECT; end   // 고장: 분류하지 않음
+                    else begin
+                        dense_started &lt;= 1;
+                        if (d_err) begin state_o &lt;= 3'd5; fault_o &lt;= 3'd4; done_o &lt;= 1; dense_started &lt;= 0; st &lt;= COLLECT; end
+                        else if (d_done) begin dense_started &lt;= 0; st &lt;= DECIDE; end
+                    end
+                end
+                DECIDE: begin
+                    state_o &lt;= (bestv - second &gt;= MARGIN) ? {1'b0, best} : 3'd4;
+                    done_o &lt;= 1; st &lt;= COLLECT;
+                end
+                default: st &lt;= COLLECT;
+            endcase
+        end
+    end
+endmodule
+`default_nettype wire</code></pre>
+      </div>
+    </section>
+    <section class="section" id="s04">
+      <h2><span class="num">04</span>테스트벤치·기준 모델 작성</h2>
+      <p>테스트벤치는 출력을 자동 판정합니다. 가상 센서 창 12개: 상태별 2개씩, 점수 차가 작은 섞인 경우 1개, 범위 밖 값(50), 채널 3이 같은 값 9번(고착), 채널 순서 뒤바뀜. 샘플 사이에 빈 클록을 섞습니다. 합성 시험 400개 정확도는 100%였는데, 합성 데이터가 쉬워서이며 실제 센서 성능을 뜻하지 않습니다.</p>
+      <div class="codeblock">
+        <div class="codebar"><span>ch29/tb/tb_sensor_guard_ai.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-19</span></div>
+        <pre tabindex="0"><code class="language-systemverilog">`timescale 1ns/1ps
+// 29장 TB: 가상 센서 창 12개(상태별 2개씩, 애매함, 범위 밖, 고착, 순서 틀림)를 샘플 사이 빈 클록을 섞어 넣고 판정을 돌려준다.
+module tb_sensor_guard_ai;
+    reg clk=0, rn=0, sv=0, wwe=0, bwe=0;
+    reg [1:0] sch=0; reg [11:0] sraw=0; reg [3:0] wn=0; reg [5:0] wa=0; reg [7:0] wd=0; reg [31:0] bd=0;
+    wire [2:0] state, fault; wire [127:0] scores; wire done, busy;
+    sensor_guard_ai dut(.clk(clk), .resetn(rn), .s_valid_i(sv), .s_ch_i(sch), .s_raw_i(sraw), .w_wr_en_i(wwe),
+        .w_neuron_i(wn), .w_addr_i(wa), .w_data_i(wd), .b_wr_en_i(bwe), .b_data_i(bd),
+        .state_o(state), .fault_o(fault), .scores_o(scores), .done_o(done), .busy_o(busy));
+    always #5 clk = ~clk;
+    integer f, o, n, k, c, v, r, cases = 0; reg [8*16-1:0] name; string vp, ap;
+    initial begin
+        if (!$value$plusargs("VECTORS=%s", vp) || !$value$plusargs("ACTUAL=%s", ap)) $fatal(1, "경로 인자");
+        f = $fopen(vp, "r"); o = $fopen(ap, "w"); if (!f || !o) $fatal(1, "파일 열기");
+        repeat (3) @(negedge clk); rn = 1;
+        for (c = 0; c &lt; 4; c = c + 1) for (k = 0; k &lt; 64; k = k + 1) begin
+            if ($fscanf(f, "%d", v) != 1) $fatal(1, "w"); @(negedge clk); wwe = 1; wn = c; wa = k; wd = v; end
+        @(negedge clk); wwe = 0;
+        for (c = 0; c &lt; 4; c = c + 1) begin if ($fscanf(f, "%d", v) != 1) $fatal(1, "b"); @(negedge clk); bwe = 1; wn = c; bd = v; end
+        @(negedge clk); bwe = 0;
+        while ($fscanf(f, "%d %s", n, name) == 2) begin
+            for (k = 0; k &lt; 64; k = k + 1) begin
+                if ($fscanf(f, "%d %d", c, r) != 2) $fatal(1, "샘플");
+                if (k % 5 == 3) begin @(negedge clk); sv = 0; end   // 샘플 사이 빈 클록 (valid 내림)
+                @(negedge clk); sv = 1; sch = c; sraw = r;
+            end
+            @(negedge clk); sv = 0;
+            while (!done) @(negedge clk);
+            $fwrite(o, "%0d %0d %0d", n, state, fault);
+            for (c = 0; c &lt; 4; c = c + 1) $fwrite(o, " %0d", state == 5 ? 0 : $signed(scores[c*32 +: 32]));
+            $fwrite(o, "\n"); cases = cases + 1;
+        end
+        $display("RTL_SIM_PASS SENSOR_GUARD cases=%0d", cases);
+        $fclose(o); $finish;
+    end
+    initial begin #50000000; $fatal(1, "시간 초과"); end
+endmodule</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>ch29/reference/sensor_model.py · python · 원본 · RTL_SIM 통과 2026-11-19</span></div>
+        <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
+"""29장 기준 모델: 가상 센서 4채널 × 16샘플(12비트) → 유효성 검사(범위·고착·순서) → INT8 스케일 → Dense 64→4 → 판정.
+
+상태: 0 NORMAL, 1 HOT(채널0 상승), 2 VIBRATION(채널1 진동), 3 DRIFT(채널2 천천히 벗어남), 4 UNKNOWN(점수 차 &lt; MARGIN), 5 FAULT.
+모델은 합성 데이터(이 파일이 만든 가상 센서 값)로 학습한 소프트맥스 회귀이며, 실제 센서 데이터가 아니다.
+--train: 학습·양자화해 model/sensor_int8.txt 저장 (numpy 필요) / --out·--actual: RTL 시험 벡터·비교 (표준 라이브러리)."""
+from __future__ import annotations
+import argparse
+import math
+import random
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "host_tools"))
+from p3_integer_reference import dot_signed               # noqa: E402
+
+MODEL = ROOT / "ch29" / "model" / "sensor_int8.txt"
+MIN_RAW, MAX_RAW, STUCK_N, MARGIN = 100, 4000, 8, 3000
+NAMES = ["NORMAL", "HOT", "VIBRATION", "DRIFT", "UNKNOWN", "FAULT"]
+
+
+def scenario(kind, rng, mix=None):
+    """16×4 원시값 (t 우선: 인덱스 = t*4 + ch)."""
+    out = []
+    for t in range(16):
+        v = [2048 + rng.randint(-40, 40) for _ in range(4)]
+        if kind == 1: v[0] += 60 * t                          # 온도 상승
+        if kind == 2: v[1] += int(700 * math.sin(t * 1.9))     # 진동
+        if kind == 3: v[2] -= 25 * t * t // 4                  # 느린 이탈 (가속)
+        if mix: v[0] += int(mix[0] * 60 * t); v[1] += int(mix[1] * 700 * math.sin(t * 1.9))
+        out += v
+    return out
+
+
+def scale(raw):
+    return max(-128, min(127, (raw - 2048) &gt;&gt; 4))
+
+
+def guard(raw, chans=None):
+    """고장 비트: bit0 범위, bit1 고착(같은 채널 같은 값 8번 연속), bit2 순서."""
+    fault = 0
+    chans = chans or [i % 4 for i in range(64)]
+    if any(c != i % 4 for i, c in enumerate(chans)): fault |= 4
+    if any(not MIN_RAW &lt;= r &lt;= MAX_RAW for r in raw): fault |= 1
+    for ch in range(4):
+        run = 1
+        for t in range(1, 16):
+            run = run + 1 if raw[t * 4 + ch] == raw[(t - 1) * 4 + ch] else 1
+            if run &gt;= STUCK_N: fault |= 2
+    return fault
+
+
+def decide(raw, w, b, chans=None):
+    f = guard(raw, chans)
+    if f: return 5, f, [0] * 4
+    x = [scale(r) for r in raw]
+    s = [dot_signed(x, row) + bb for row, bb in zip(w, b)]
+    order = sorted(range(4), key=lambda i: (-s[i], i))
+    return (order[0] if s[order[0]] - s[order[1]] &gt;= MARGIN else 4), 0, s
+
+
+def train():
+    import numpy as np
+    rng = random.Random(29)
+    X, Y = [], []
+    for _ in range(2000):
+        k = rng.randrange(4)
+        X.append([scale(r) / 128 for r in scenario(k, rng)]); Y.append(k)
+    X, Y = np.array(X, np.float32), np.array(Y)
+    W = np.zeros((64, 4), np.float32); B = np.zeros(4, np.float32); oh = np.eye(4, dtype=np.float32)[Y]
+    for _ in range(300):
+        z = X @ W + B; z -= z.max(1, keepdims=True); p = np.exp(z); p /= p.sum(1, keepdims=True)
+        g = (p - oh) / len(X); W -= 2.0 * X.T @ g; B -= 2.0 * g.sum(0)
+    s = float(np.abs(W).max()) / 127
+    wq = np.clip(np.rint(W / s), -128, 127).astype(int).T
+    bq = np.rint(B / (s / 128)).astype(int)                 # x = scale/128 단위 → 정수 점수 단위
+    MODEL.parent.mkdir(exist_ok=True)
+    MODEL.write_text("\n".join(" ".join(map(str, r)) for r in wq) + "\n" + " ".join(map(str, bq)) + "\n")
+    rng = random.Random(2929); right = 0
+    w, b = load()
+    for _ in range(400):
+        k = rng.randrange(4); st, _, _ = decide(scenario(k, rng), w, b); right += st == k
+    print(f"SENSOR_MODEL_TRAINED synthetic_test_accuracy={right / 4:.1f}% (합성 데이터 400개, UNKNOWN은 틀림으로 셈)")
+
+
+def load():
+    rows = [list(map(int, l.split())) for l in MODEL.read_text().splitlines()]
+    return rows[:4], rows[4]
+
+
+def cases():
+    rng = random.Random(299)
+    out = [(f"{NAMES[k]}_{i}", scenario(k, rng), None) for k in range(4) for i in range(2)]
+    w, b = load()
+    for _ in range(500):                                     # 점수 차가 작은 섞인 경우를 하나 찾는다
+        raw = scenario(0, rng, mix=(rng.random(), rng.random()))
+        if decide(raw, w, b)[0] == 4:
+            out.append(("ambiguous", raw, None)); break
+    raw = scenario(0, rng); raw[17] = 50; out.append(("range_low", raw, None))
+    raw = scenario(0, rng)
+    for t in range(4, 13): raw[t * 4 + 3] = 2100
+    out.append(("stuck_ch3", raw, None))
+    ch = [i % 4 for i in range(64)]; ch[30], ch[31] = ch[31], ch[30]
+    out.append(("order", scenario(0, rng), ch))
+    return out
+
+
+def main():
+    ap = argparse.ArgumentParser(); ap.add_argument("--train", action="store_true"); ap.add_argument("--out"); ap.add_argument("--actual")
+    a = ap.parse_args()
+    if a.train:
+        train(); return
+    w, b = load(); cs = cases()
+    got = [decide(r, w, b, c)[0] for _, r, c in cs]
+    assert set(got) == {0, 1, 2, 3, 4, 5}, got
+    print(f"PYTHON_SENSOR_SELF_TEST_PASS cases={len(cs)} states={'/'.join(NAMES[s] for s in sorted(set(got)))}")
+    if a.out and not a.actual:
+        with open(a.out, "w") as f:
+            f.writelines(" ".join(map(str, row)) + "\n" for row in w)
+            f.write(" ".join(map(str, b)) + "\n")
+            for n, (name, raw, ch) in enumerate(cs):
+                ch = ch or [i % 4 for i in range(64)]
+                f.write(f"{n} {name} " + " ".join(f"{c} {r}" for c, r in zip(ch, raw)) + "\n")
+    if a.actual:
+        rows = {int(p[0]): list(map(int, p[1:])) for p in (l.split() for l in open(a.actual))}
+        for n, (name, raw, ch) in enumerate(cs):
+            st, f, s = decide(raw, w, b, ch)
+            if rows.get(n) != [st, f] + s:
+                raise SystemExit(f"PYTHON_RTL_COMPARE_FAIL case={name} rtl={rows.get(n)} py={[st, f] + s}")
+            print(f"STATE {name:12s} → {NAMES[st]}" + (f" fault=0b{f:03b}" if f else f" margin={sorted(s)[-1] - sorted(s)[-2]}"))
+        print(f"PYTHON_RTL_COMPARE_PASS cases={len(cs)}")
+
+
+if __name__ == "__main__":
+    main()</code></pre>
+      </div>
+    </section>
+    <section class="section" id="s05">
+      <h2><span class="num">05</span>시뮬레이션 실행</h2>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 저장소 루트에서 실행</span></div>
+        <pre tabindex="0"><code>bash ch29/scripts/run_sim.sh   # 기준 모델 → RTL 시뮬레이션 (12창) → 상태·고장 비트·점수 비교</code></pre></div>
+      <p>기대 출력 (Icarus Verilog 12.0 · 2026-11-19 실제 실행 로그 발췌, 출처 <code>ch29/validation/rtl_sim_20261119.log</code>):</p>
+      <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
+        <pre tabindex="0"><code>Icarus Verilog version 12.0 (stable) ()
+PYTHON_SENSOR_SELF_TEST_PASS cases=12 states=NORMAL/HOT/VIBRATION/DRIFT/UNKNOWN/FAULT
+RTL_SIM_PASS SENSOR_GUARD cases=12
+PYTHON_SENSOR_SELF_TEST_PASS cases=12 states=NORMAL/HOT/VIBRATION/DRIFT/UNKNOWN/FAULT
+STATE NORMAL_0     → NORMAL margin=26733
+STATE NORMAL_1     → NORMAL margin=26340
+STATE HOT_0        → HOT margin=30237
+STATE HOT_1        → HOT margin=28789
+STATE VIBRATION_0  → VIBRATION margin=29513
+STATE VIBRATION_1  → VIBRATION margin=29233
+STATE DRIFT_0      → DRIFT margin=31944
+STATE DRIFT_1      → DRIFT margin=31382
+STATE ambiguous    → UNKNOWN margin=2800
+STATE range_low    → FAULT fault=0b001
+STATE stuck_ch3    → FAULT fault=0b010
+STATE order        → FAULT fault=0b100
+PYTHON_RTL_COMPARE_PASS cases=12</code></pre></div>
+    </section>
+    <section class="section" id="s06">
+      <h2><span class="num">06</span>결과 판정</h2>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
+        <tbody><tr><td><code>PYTHON_SENSOR_SELF_TEST_PASS cases=12 states=NORMAL/HOT/VIBRATION/DRIFT/UNKNOWN/FAULT</code></td><td>시험 창 12개가 여섯 상태를 모두 덮음</td></tr><tr><td><code>STATE ambiguous → UNKNOWN margin=2800</code></td><td>1·2위 점수 차 2,800 < 3,000 → 분류를 내지 않음</td></tr><tr><td><code>STATE range_low/stuck_ch3/order → FAULT fault=0b001/010/100</code></td><td>고장 종류마다 비트 하나, 고장이면 Dense를 돌리지 않음</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS cases=12</code></td><td>상태·고장 비트·점수 4개가 Python과 같음</td></tr></tbody>
+      </table></div>
+      <p><b>실패 시:</b> TB의 <code>$fatal</code> 메시지에 표시된 cycle 번호와 기대값/실제값을 확인하고, 03절 코드와 한 줄씩 대조합니다. 하나라도 실패하면 다음 장으로 넘어가지 않습니다.</p>
+    </section>
+    <section class="section" id="s07">
+      <h2><span class="num">07</span>코드 읽기 포인트</h2>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>위치</th><th>내용</th></tr></thead>
+        <tbody><tr><td>고장이 먼저</td><td>범위(100~4000), 고착(같은 채널 같은 값 8번 연속), 순서(채널 0·1·2·3 반복)를 샘플마다 보고, 하나라도 있으면 FAULT입니다. 고장 난 값으로 AI를 돌리면 그럴듯한 오답이 나오기 때문입니다.</td></tr>
+<tr><td>위치 기준 비교</td><td>고착은 '와야 할' 채널(<code>idx[1:0]</code>) 기준으로 셉니다. 순서가 틀려도 같은 위치끼리 비교하므로 Python 기준 모델과 결과가 같습니다.</td></tr>
+<tr><td>스케일</td><td><code>(raw − 2048) >> 4</code>를 −128~127로 포화합니다. 12비트 가운데(2048)를 0으로 두는 부호 있는 INT8입니다.</td></tr>
+<tr><td>UNKNOWN</td><td>1·2위 차가 <code>MARGIN</code>(3,000)보다 작으면 분류하지 않습니다. 경보 장치에서 애매한 답을 확정처럼 보이지 않게 하는 장치입니다.</td></tr>
+<tr><td>보드 연결은 다음 단계</td><td>이 장은 RTL과 가상 벡터까지입니다. SoC에 붙이려면 20장처럼 AXI 래퍼를 두고 27장 LED·7세그먼트로 상태를 보이게 합니다(⚠ 미작성·미검증).</td></tr></tbody>
+      </table></div>
+    </section>
+    <section class="section" id="s08">
+      <h2><span class="num">08</span>합성·타이밍·보드</h2>
+      <p>Vivado가 설치된 PC의 VS Code 터미널에서 이 장 모듈만 Out-of-Context(OOC)로 합성·배치·배선하고 100 MHz 타이밍을 확인합니다.</p>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · Vivado 배치 (저장소 루트)</span></div>
+        <pre tabindex="0"><code>source /tools/Xilinx/Vivado/&lt;버전&gt;/settings64.sh   # 설치 경로에 맞게 변경
+vivado -mode batch -nojournal -source tools/vivado/ooc_timing.tcl -tclargs ch29
+# 기대: SYNTH_TIMING_PASS ch29 sensor_guard_ai WNS=… WHS=… LUT=… FF=… DSP48E1=… RAMB=…</code></pre></div>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>판정 항목</th><th>기준</th><th>확인 위치</th></tr></thead>
+        <tbody>
+          <tr><td>Setup / Hold</td><td><code>WNS ≥ 0</code> · <code>WHS ≥ 0</code> (clk 10.000 ns)</td><td><code>build/vivado/ch29/timing_route.rpt</code></td></tr>
+          <tr><td>자원</td><td>DSP48E1 ≥ 4 (15장 Dense) · 창 버퍼 64바이트 — 기대값 · 실행 전 ⚠ 미검증</td><td><code>build/vivado/ch29/route_util.rpt</code></td></tr>
+        </tbody>
+      </table></div>
+      <p>OOC 결과는 입출력 핀 지연을 포함하지 않으므로 보드 Top 타이밍을 대신하지 않습니다. 증거 저장은 <code>bash tools/run_vivado_all.sh ooc</code>(→ <code>ch29/validation/vivado_ooc_YYYYMMDD.txt</code>). 보드 확인은 <a href="ch12_integrated_npu_v05.html#s08">12장 · 08</a>에서 통합 Top으로 진행합니다.</p>
+    </section>
+    <section class="section" id="s09">
+      <h2><span class="num">09</span>검증 현황·인계</h2>
+      <p>누적 보고 (이전 결과 → 추가 RTL → 시험 벡터 → 시뮬레이션 → 합성/보드 → 인계):</p>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>이전 결과</th><th>추가 RTL</th><th>시험 벡터</th><th>시뮬레이션</th><th>합성 / 보드</th><th>인계</th></tr></thead>
+        <tbody><tr><td>01장 · 04장 · 07장 · 08장 · 15장</td><td><code>sensor_guard_ai.v</code></td><td><code>tb_sensor_guard_ai.sv</code><br><code>sensor_model.py</code></td><td>통과</td><td>⚠ 대기 / 미실시</td><td>1건 (아래 표)</td></tr></tbody>
+      </table></div>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>다음 장으로 넘기는 파일</th><th>사용처</th></tr></thead>
+        <tbody><tr><td><code>ch29/rtl/sensor_guard_ai.v</code></td><td>30장 모터 인터록의 '안전 상태' 입력 (FAULT·UNKNOWN이면 정지)</td></tr></tbody>
+      </table></div>
+      <p>검증 게이트 (<code>ch29/validation/</code> 증거 파일 기준으로 자동 표시):</p>
+      <div class="gate-row">
+        <div class="gate pass">
+          <b>HTML_PASS</b>
+          <span>v02 · 생성기·정적 검사</span>
+        </div>
+        <div class="gate pass">
+          <b>HOST_MODEL_PASS</b>
+          <span>PYTHON_SENSOR_SELF_TEST_PASS cases=12 states=NORMAL/HOT/VIBRATION/DRIFT/UNKNOWN/FAULT</span>
+        </div>
+        <div class="gate pass">
+          <b>RTL_SIM_PASS</b>
+          <span>RTL_SIM_PASS SENSOR_GUARD cases=12 · Icarus Verilog 12.0 · 2026-11-19</span>
+        </div>
+        <div class="gate todo">
+          <b>SYNTH_TIMING_PASS</b>
+          <span>⚠ 미검증 · VS Code Vivado 실행 대기 (08절)</span>
+        </div>
+        <div class="gate todo">
+          <b>BOARD_PASS</b>
+          <span>⚠ 미실시 · 현재 실물 보드 확인 불가</span>
+        </div>
+      </div>
+    </section>
+    <div class="chapter-links" id="chapter-links"></div>
+  </main>
+</div>
+<script>
+window.COURSE={
+ "title": "Basys3 소형 NPU 실습 (고도화판)",
+ "chapters": [
+  {
+   "id": "ch00",
+   "number": 0,
+   "title": "UART Echo",
+   "file": "ch00_uart_echo_v05.html"
+  },
+  {
+   "id": "ch01",
+   "number": 1,
+   "title": "DSP 추론 MAC 누산",
+   "file": "ch01_mac_v05.html"
+  },
+  {
+   "id": "ch02",
+   "number": 2,
+   "title": "DSP48E1 타깃 곱셈",
+   "file": "ch02_dsp_v05.html"
+  },
+  {
+   "id": "ch03",
+   "number": 3,
+   "title": "MAC 2단계 파이프라인",
+   "file": "ch03_mac_pipeline_v05.html"
+  },
+  {
+   "id": "ch04",
+   "number": 4,
+   "title": "BRAM 동기 버퍼",
+   "file": "ch04_bram_v05.html"
+  },
+  {
+   "id": "ch05",
+   "number": 5,
+   "title": "Fixed-Point Quantizer",
+   "file": "ch05_fixed_v05.html"
+  },
+  {
+   "id": "ch06",
+   "number": 6,
+   "title": "INT8·INT16 정밀도 비교",
+   "file": "ch06_precision_v05.html"
+  },
+  {
+   "id": "ch07",
+   "number": 7,
+   "title": "벡터 내적",
+   "file": "ch07_vector_dot_v05.html"
+  },
+  {
+   "id": "ch08",
+   "number": 8,
+   "title": "4PE 병렬 어레이",
+   "file": "ch08_pe4_v05.html"
+  },
+  {
+   "id": "ch09",
+   "number": 9,
+   "title": "Dense 4뉴런 레이어",
+   "file": "ch09_dense_v05.html"
+  },
+  {
+   "id": "ch10",
+   "number": 10,
+   "title": "4뉴런 NPU Core",
+   "file": "ch10_npu_core_v05.html"
+  },
+  {
+   "id": "ch11",
+   "number": 11,
+   "title": "UART 모델 적재 컨트롤러",
+   "file": "ch11_uart_register_v05.html"
+  },
+  {
+   "id": "ch12",
+   "number": 12,
+   "title": "통합 NPU Top",
+   "file": "ch12_integrated_npu_v05.html"
+  },
+  {
+   "id": "ch13",
+   "number": 13,
+   "title": "8×8 손글씨·10분류 준비",
+   "file": "ch13_mnist_8x8_v02.html"
+  },
+  {
+   "id": "ch14",
+   "number": 14,
+   "title": "4PE 그룹·10개 출력",
+   "file": "ch14_group10_v02.html"
+  },
+  {
+   "id": "ch15",
+   "number": 15,
+   "title": "Dense 64→10 공통 블록",
+   "file": "ch15_dense_64x10_v02.html"
+  },
+  {
+   "id": "ch16",
+   "number": 16,
+   "title": "2층 신경망 64→8→10",
+   "file": "ch16_mlp_64_8_10_v02.html"
+  },
+  {
+   "id": "ch17",
+   "number": 17,
+   "title": "784원소 타일 실행",
+   "file": "ch17_tiled_784_v02.html"
+  },
+  {
+   "id": "ch18",
+   "number": 18,
+   "title": "Float32 · INT8 · INT16 정밀도",
+   "file": "ch18_precision_v02.html"
+  },
+  {
+   "id": "ch19",
+   "number": 19,
+   "title": "1·4·8PE 사이클 비교",
+   "file": "ch19_pe_compare_v02.html"
+  },
+  {
+   "id": "ch20",
+   "number": 20,
+   "title": "AXI4-Lite 레지스터",
+   "file": "ch20_axi_lite_v02.html"
+  },
+  {
+   "id": "ch21",
+   "number": 21,
+   "title": "MicroBlaze V + NPU 블록 설계",
+   "file": "ch21_soc_bd_v02.html"
+  },
+  {
+   "id": "ch22",
+   "number": 22,
+   "title": "Vitis C 드라이버",
+   "file": "ch22_vitis_driver_v02.html"
+  },
+  {
+   "id": "ch23",
+   "number": 23,
+   "title": "CPU · NPU 시간 비교",
+   "file": "ch23_cpu_vs_npu_v02.html"
+  },
+  {
+   "id": "ch24",
+   "number": 24,
+   "title": "자원 · 타이밍 · 임계 경로",
+   "file": "ch24_resource_timing_v02.html"
+  },
+  {
+   "id": "ch25",
+   "number": 25,
+   "title": "추정 전력 · 에너지",
+   "file": "ch25_power_energy_v02.html"
+  },
+  {
+   "id": "ch26",
+   "number": 26,
+   "title": "3×3 소형 CNN",
+   "file": "ch26_tiny_cnn_v02.html"
+  },
+  {
+   "id": "ch27",
+   "number": 27,
+   "title": "최종 NPU SoC",
+   "file": "ch27_npu_system_v02.html"
+  },
+  {
+   "id": "ch28",
+   "number": 28,
+   "title": "PC 손글씨 → 보드 분류",
+   "file": "ch28_handwriting_v02.html"
+  },
+  {
+   "id": "ch29",
+   "number": 29,
+   "title": "센서 유효성 + AI 상태 분류",
+   "file": "ch29_sensor_ai_v02.html"
+  }
+ ]
+};
+</script>
+<script defer src="assets/education/site.js"></script>
+</body>
+</html>
