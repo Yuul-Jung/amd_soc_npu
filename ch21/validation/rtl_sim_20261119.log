@@ -1,0 +1,25 @@
+tclsh 8.6.14
+  ok   파일 있음 ch01/rtl/mac_core.v
+  ok   파일 있음 ch04/rtl/bram_sync_buffer.v
+  ok   파일 있음 ch07/rtl/vector_dot_core.v
+  ok   파일 있음 ch16/rtl/npu_argmax.v
+  ok   파일 있음 ch19/rtl/npu_tiled_784_npe.v
+  ok   파일 있음 ch20/rtl/npu_axi_lite.v
+  ok   파일 있음 ch21/rtl/soc_npu_top.v
+  ok   파일 있음 ch21/constraints/soc_npu.xdc
+  ok   모듈 참조 npu_axi_lite가 더한 파일에 정의됨
+  ok   하위 모듈 bram_sync_buffer 정의됨
+  ok   하위 모듈 mac_core 정의됨
+  ok   하위 모듈 npu_argmax 정의됨
+  ok   하위 모듈 npu_tiled_784_npe 정의됨
+  ok   하위 모듈 vector_dot_core 정의됨
+  ok   NPU 0x44A00000 64KB, 범위 단위 정렬
+  ok   NPU와 GPIO(LED/SW) 0x40000000 겹치지 않음 (제1부11장_xparameters.h)
+  ok   NPU와 INTC 0x41200000 겹치지 않음 (제1부11장_xparameters.h)
+  ok   NPU와 UART_Lite 0x40600000 겹치지 않음 (Vivado_기본값_미검증)
+  ok   NPU와 AXI_Timer 0x41C00000 겹치지 않음 (Vivado_기본값_미검증)
+  ok   레지스터 맵 0x00~0x67이 범위 안
+  ok   Top 포트 36개 = XDC 핀 배정 36개
+  ok   XDC 핀 중복 없음
+  ok   clk 100 MHz 클록 제약
+BD_STATIC_CHECK_PASS tcl_steps=17 files=8 npu=0x44A00000/64KB ports=36

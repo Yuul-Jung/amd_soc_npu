@@ -1,0 +1,35 @@
+      <p>05절 정적 검사(<code>BD_STATIC_CHECK_PASS</code>)가 통과해야 합니다. Vivado 2024.2 GUI에서 진행하며, 제1부 11장 원본 프로젝트(<code>soc11_integration</code>)는 열기만 하고 바꾸지 않습니다. ⚠ 미검증 — 이 절은 Vivado에서 실행하지 않았습니다. 화면 이름이 다르면 그 글자를 기록해 둡니다.</p>
+      <h3>8-1. 복제와 NPU 추가 (Vivado GUI)</h3>
+      <table>
+        <thead><tr><th>순서</th><th>조작</th><th>성공 기준</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>제1부 11장 프로젝트 열기 → File → Project → Save As → 새 경로 <code>soc_npu</code></td><td>제목 표시줄 경로가 새 경로</td></tr>
+          <tr><td>2</td><td>블록 설계 열기 → File → Save Block Design As → <code>soc_npu</code></td><td>Sources에 <code>soc_npu.bd</code>, 원본 BD는 그대로</td></tr>
+          <tr><td>3</td><td>Tcl Console: <code>source &lt;저장소&gt;/ch21/vivado/add_npu.tcl</code></td><td>오류 없이 끝나고 블록 설계에 <code>npu_0</code></td></tr>
+          <tr><td>4</td><td>Sources → Constraints에서 복제해 온 <code>basys3_soc11_top.xdc</code> → 오른쪽 클릭 → Disable File</td><td>활성 제약은 <code>soc_npu.xdc</code> 하나</td></tr>
+          <tr><td>5</td><td>Address Editor 확인</td><td><code>npu_0 / s_axi / reg0</code> 0x44A0_0000, 64K, 다른 행과 겹침 없음</td></tr>
+          <tr><td>6</td><td>Tools → Validate Design</td><td>Validation successful (Critical Warning 0)</td></tr>
+          <tr><td>7</td><td>Generate Bitstream</td><td>Implementation 완료, Timing: WNS ≥ 0, WHS ≥ 0</td></tr>
+          <tr><td>8</td><td>File → Export → Export Hardware → <b>Include bitstream</b> → <code>soc_npu_top.xsa</code></td><td>XSA 파일 생성 (22장 플랫폼 입력)</td></tr>
+        </tbody>
+      </table>
+      <h3>8-2. 기록할 증거</h3>
+      <table>
+        <thead><tr><th>항목</th><th>위치</th><th>기록 파일</th></tr></thead>
+        <tbody>
+          <tr><td>Address Editor 표</td><td>Address Editor 화면 또는 <code>report_bd_addresses</code>(⚠ 명령 이름 미검증)</td><td><code>ch21/validation/address_map_YYYYMMDD.txt</code></td></tr>
+          <tr><td>Validate Design 결과</td><td>Tcl Console</td><td>같은 파일</td></tr>
+          <tr><td>WNS·WHS·자원</td><td>Implemented Design → Report Timing Summary · Report Utilization</td><td><code>ch21/validation/vivado_impl_YYYYMMDD.txt</code></td></tr>
+        </tbody>
+      </table>
+      <h3>8-3. 실패할 때</h3>
+      <table>
+        <thead><tr><th>증상</th><th>원인</th><th>조치</th></tr></thead>
+        <tbody>
+          <tr><td><code>create_bd_cell</code>: module not found</td><td>RTL이 프로젝트에 없음, 문법 오류</td><td>Sources에 6개 파일, <code>update_compile_order</code> 뒤 Messages 확인</td></tr>
+          <tr><td><code>npu_0</code>에 <code>s_axi</code> 인터페이스가 없음</td><td>포트 이름 자동 인식 실패</td><td>20장 포트 이름(<code>s_axi_*</code>)을 바꾸지 않았는지 확인</td></tr>
+          <tr><td><code>get_bd_addr_segs npu_0/s_axi/reg0</code> 없음</td><td>세그먼트 이름이 다름</td><td>Address Editor의 실제 이름으로 <code>add_npu.tcl</code> 4)를 바꿔 다시 실행</td></tr>
+          <tr><td>Placer: 같은 핀 두 번</td><td>복제해 온 제약이 켜져 있음</td><td>8-1의 4번</td></tr>
+          <tr><td>WNS &lt; 0</td><td>NPU 연산 경로</td><td>19장 OOC 보고서와 비교, 경로 이름 기록</td></tr>
+        </tbody>
+      </table>
