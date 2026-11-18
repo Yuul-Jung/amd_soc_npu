@@ -59,6 +59,10 @@
     [
       "ch05/rtl/fixed_quantizer.v",
       "06장 precision_compare · 09장 dense_layer4 (수정 금지)"
+    ],
+    [
+      "ch05/rtl/fixed_quantizer.v",
+      "16장 은닉층 ReLU 뒤 반올림 시프트·INT8 포화 (SHIFT=10, 수정 금지)"
     ]
   ],
   "port_notes": {
