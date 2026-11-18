@@ -49,7 +49,7 @@
     <section class="section" id="s00">
       <h2><span class="num">00</span>이 장의 위치</h2>
       <p><b>목표:</b> 곱 레지스터와 누산 레지스터를 나눈 2단계 MAC을 작성하고, 01장 대비 1클록 늦은 출력을 확인합니다.</p>
-      <div class="table-wrap"><table>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>구분</th><th>파일</th></tr></thead>
         <tbody>
           <tr><td>유지 (이전 장, 수정 없음)</td><td><ul><li>없음 (첫 장)</li></ul></td></tr>
@@ -61,7 +61,7 @@
     </section>
     <section class="section" id="s01">
       <h2><span class="num">01</span>구조도</h2>
-      <div class="figure-wrap"><svg viewBox="0 0 980 248" role="img" aria-label="mac_pipeline_core 실제 포트와 하위 모듈 구조">
+      <div class="figure-wrap" tabindex="0" role="region" aria-label="도면 (가로 스크롤 가능)"><svg viewBox="0 0 980 248" role="img" aria-label="mac_pipeline_core 실제 포트와 하위 모듈 구조">
       <rect x="250" y="30" width="480" height="178" rx="10" fill="#fff" stroke="#4635b1" stroke-width="2"/>
       <text x="490" y="54" font-size="18" font-weight="700" text-anchor="middle">mac_pipeline_core</text>
       <text x="490" y="72" font-size="13" text-anchor="middle" fill="#555">ch03/rtl/mac_pipeline_core.v · 구현 도식</text>
@@ -86,7 +86,7 @@
       <text x="600" y="234" font-size="13">왼쪽 input · 오른쪽 output · 점선 = 클록·리셋</text>
       </svg></div>
       <p>구현 도식: 포트 이름·폭과 하위 인스턴스는 <code>ch03/rtl/mac_pipeline_core.v</code> 선언에서 자동으로 가져왔습니다.</p>
-      <div class="table-wrap"><table>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>방향</th><th>포트</th><th>폭</th><th>구분</th><th>설명</th></tr></thead>
         <tbody><tr><td>input</td><td class="nw"><code>clk</code></td><td class="nw"><code>1</code></td><td>클록</td><td>시스템 클록 (상승 에지에서 모든 레지스터 갱신)</td></tr><tr><td>input</td><td class="nw"><code>resetn</code></td><td class="nw"><code>1</code></td><td>리셋</td><td>동기 리셋, 0이면 초기화 (Active-Low)</td></tr><tr><td>input</td><td class="nw"><code>clear_i</code></td><td class="nw"><code>1</code></td><td>데이터·제어</td><td>곱·누산 두 단계 모두 0으로 초기화</td></tr><tr><td>input</td><td class="nw"><code>valid_i</code></td><td class="nw"><code>1</code></td><td>데이터·제어</td><td>이번 클록 입력을 파이프라인에 넣음</td></tr><tr><td>input</td><td class="nw"><code>a_i</code></td><td class="nw"><code>[DATA_WIDTH-1:0]</code></td><td>데이터·제어</td><td>signed 피연산자 A</td></tr><tr><td>input</td><td class="nw"><code>b_i</code></td><td class="nw"><code>[DATA_WIDTH-1:0]</code></td><td>데이터·제어</td><td>signed 피연산자 B</td></tr><tr><td>output</td><td class="nw"><code>acc_o</code></td><td class="nw"><code>[ACC_WIDTH-1:0]</code></td><td>데이터·제어</td><td>누산 결과 (입력보다 1클록 늦게 반영)</td></tr><tr><td>output</td><td class="nw"><code>valid_o</code></td><td class="nw"><code>1</code></td><td>데이터·제어</td><td>2단계에서 누산이 일어났음</td></tr></tbody>
       </table></div>
@@ -98,7 +98,7 @@
         <li>도구를 확인합니다.</li>
       </ol>
       <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 도구 확인</span></div>
-        <pre><code>sudo apt install -y iverilog python3 ripgrep   # 처음 한 번
+        <pre tabindex="0"><code>sudo apt install -y iverilog python3 ripgrep   # 처음 한 번
 iverilog -V 2&gt;&amp;1 | head -1      # Icarus Verilog version 12.0 이상
 python3 --version</code></pre></div>
       <ol start="3"><li>00절 '유지' 파일이 이전 장 결과 그대로 있는지 확인합니다.</li></ol>
@@ -108,7 +108,7 @@ python3 --version</code></pre></div>
       <p>아래 파일을 경로 그대로 만들고 전체 코드를 입력합니다.</p>
       <div class="codeblock">
         <div class="codebar"><span>ch03/rtl/mac_pipeline_core.v · verilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
-        <pre><code class="language-verilog">`timescale 1ns/1ps
+        <pre tabindex="0"><code class="language-verilog">`timescale 1ns/1ps
 `default_nettype none
 
 // 곱 레지스터와 누산 레지스터를 분리한 독립 MAC. k 입력 → k+1 출력.
@@ -177,7 +177,7 @@ endmodule
       <p>테스트벤치는 출력을 자동 판정합니다. 기준 모델(Python)은 시험 벡터와 정답을 만듭니다.</p>
       <div class="codeblock">
         <div class="codebar"><span>ch03/tb/tb_mac_pipeline_core.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
-        <pre><code class="language-systemverilog">`timescale 1ns/1ps
+        <pre tabindex="0"><code class="language-systemverilog">`timescale 1ns/1ps
 `default_nettype none
 module tb_mac_pipeline_core;
     parameter integer DATA_WIDTH = 16;
@@ -265,7 +265,7 @@ endmodule
       </div>
       <div class="codeblock">
         <div class="codebar"><span>ch03/reference/mac_pipeline_reference.py · python · 원본 · RTL_SIM 통과 2026-11-18</span></div>
-        <pre><code class="language-python">#!/usr/bin/env python3
+        <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
 """P3-03 대기 큐 모델: 입력 수락 에지와 출력 에지를 분리한다."""
 import argparse
 import csv
@@ -421,10 +421,10 @@ if __name__ == "__main__":
     <section class="section" id="s05">
       <h2><span class="num">05</span>시뮬레이션 실행</h2>
       <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 저장소 루트에서 실행</span></div>
-        <pre><code>bash ch03/scripts/run_sim.sh   # RTL 컴파일 → 시뮬레이션 → TB 자동 판정 → Python 기준값 비교</code></pre></div>
+        <pre tabindex="0"><code>bash ch03/scripts/run_sim.sh   # RTL 컴파일 → 시뮬레이션 → TB 자동 판정 → Python 기준값 비교</code></pre></div>
       <p>기대 출력 (Icarus Verilog 12.0 · 2026-11-18 실제 실행 로그 발췌, 출처 <code>ch03/validation/rtl_sim_20261118.log</code>):</p>
       <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
-        <pre><code>PYTHON_PIPELINE_SELF_TEST_PASS ACC=32,40
+        <pre tabindex="0"><code>PYTHON_PIPELINE_SELF_TEST_PASS ACC=32,40
 PYTHON_VECTORS INT16/40 cycles=2546 seed=30316
 RTL_SIM_PASS INT16/40 cycles=2546
 PYTHON_PIPELINE_SELF_TEST_PASS ACC=32,40
@@ -437,7 +437,7 @@ PYTHON_RTL_COMPARE_PASS cycles=133106</code></pre></div>
     </section>
     <section class="section" id="s06">
       <h2><span class="num">06</span>결과 판정</h2>
-      <div class="table-wrap"><table>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
         <tbody><tr><td><code>RTL_SIM_PASS INT16/40 cycles=2546</code></td><td>INT16 설정 통과</td></tr><tr><td><code>RTL_SIM_PASS INT8/32 cycles=133106</code></td><td>INT8 설정 통과</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS</code></td><td>RTL 출력 파일과 Python 기준값이 모든 사이클에서 일치</td></tr></tbody>
       </table></div>
@@ -445,7 +445,7 @@ PYTHON_RTL_COMPARE_PASS cycles=133106</code></pre></div>
     </section>
     <section class="section" id="s07">
       <h2><span class="num">07</span>코드 읽기 포인트</h2>
-      <div class="table-wrap"><table>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>위치</th><th>내용</th></tr></thead>
         <tbody><tr><td>2단계 레이턴시</td><td>k개 valid 입력 → k+1 클록 후 출력. 마지막 valid_i=1 에지에서 곱이 <code>product_q</code>에 등록되고, 그 다음 에지에서 <code>acc_o</code>에 반영됩니다.</td></tr>
 <tr><td>clear_i 대기 없음</td><td><code>clear_i</code>가 1이면 두 파이프라인 단계가 동시에 0으로 초기화됩니다. 이미 <code>product_q</code>에 있던 값도 버려져 "지연 Valid"가 남지 않습니다.</td></tr>
@@ -456,10 +456,10 @@ PYTHON_RTL_COMPARE_PASS cycles=133106</code></pre></div>
       <h2><span class="num">08</span>합성·타이밍·보드</h2>
       <p>Vivado가 설치된 PC의 VS Code 터미널에서 이 장 모듈만 Out-of-Context(OOC)로 합성·배치·배선하고 100 MHz 타이밍을 확인합니다.</p>
       <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · Vivado 배치 (저장소 루트)</span></div>
-        <pre><code>source /tools/Xilinx/Vivado/&lt;버전&gt;/settings64.sh   # 설치 경로에 맞게 변경
+        <pre tabindex="0"><code>source /tools/Xilinx/Vivado/&lt;버전&gt;/settings64.sh   # 설치 경로에 맞게 변경
 vivado -mode batch -nojournal -source tools/vivado/ooc_timing.tcl -tclargs ch03
 # 기대: SYNTH_TIMING_PASS ch03 mac_pipeline_core WNS=… WHS=… LUT=… FF=… DSP48E1=… RAMB=…</code></pre></div>
-      <div class="table-wrap"><table>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>판정 항목</th><th>기준</th><th>확인 위치</th></tr></thead>
         <tbody>
           <tr><td>Setup / Hold</td><td><code>WNS ≥ 0</code> · <code>WHS ≥ 0</code> (clk 10.000 ns)</td><td><code>build/vivado/ch03/timing_route.rpt</code></td></tr>
@@ -471,11 +471,11 @@ vivado -mode batch -nojournal -source tools/vivado/ooc_timing.tcl -tclargs ch03
     <section class="section" id="s09">
       <h2><span class="num">09</span>검증 현황·인계</h2>
       <p>누적 보고 (이전 결과 → 추가 RTL → 시험 벡터 → 시뮬레이션 → 합성/보드 → 인계):</p>
-      <div class="table-wrap"><table>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>이전 결과</th><th>추가 RTL</th><th>시험 벡터</th><th>시뮬레이션</th><th>합성 / 보드</th><th>인계</th></tr></thead>
         <tbody><tr><td>없음 (첫 장)</td><td><code>mac_pipeline_core.v</code></td><td><code>tb_mac_pipeline_core.sv</code><br><code>mac_pipeline_reference.py</code></td><td>통과</td><td>⚠ 대기 / 미실시</td><td>1건 (아래 표)</td></tr></tbody>
       </table></div>
-      <div class="table-wrap"><table>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>다음 장으로 넘기는 파일</th><th>사용처</th></tr></thead>
         <tbody><tr><td><code>ch03/rtl/mac_pipeline_core.v</code></td><td>후속 장 직접 사용 없음 (01장 MAC과 지연 비교용)</td></tr></tbody>
       </table></div>

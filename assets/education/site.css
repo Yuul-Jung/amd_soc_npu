@@ -11,7 +11,7 @@
   --card: #fff;
   --ink: #15171c;
   --ink-2: #4a4f5a;
-  --ink-3: #858b96;
+  --ink-3: #676d78; /* 보조 글자: 바탕 #F1F2EE 대비 4.63:1 (WCAG AA 4.5:1, 이관 원본 #858b96은 3.0:1) */
   --line: #dddfd8;
   --accent: #4635b1;
   --soft: #edeafa;
@@ -40,7 +40,10 @@ a {
   color: var(--accent);
 }
 a:focus-visible,
-button:focus-visible {
+button:focus-visible,
+pre:focus-visible,
+.table-wrap:focus-visible,
+.figure-wrap:focus-visible {
   outline: 3px solid var(--yellow);
   outline-offset: 3px;
 }
@@ -427,5 +430,69 @@ pre code {
   }
   .toc {
     transition: none;
+  }
+}
+
+/* 11. 인쇄 — STANDARD 10.2: 핵심 내용과 코드가 잘리지 않게
+ *  - 좌측 탐색·모바일 메뉴·이전/다음·복사 버튼 숨김, 본문 전체 폭
+ *  - 배경 인쇄가 꺼져도 읽히도록 상단 배너를 흰 바탕·검은 글자로
+ *  - 코드 박스 최대 높이·가로 스크롤 해제(줄바꿈), 표·도면 최소 폭 해제 */
+@media print {
+  .toc,
+  .mobile-menu,
+  .shade,
+  .access-skip,
+  .chapter-links,
+  .codebar button {
+    display: none !important;
+  }
+  body {
+    background: #fff;
+  }
+  .hero {
+    background: none;
+    color: var(--ink);
+    border-bottom: 2px solid var(--ink);
+  }
+  .hero:before {
+    display: none;
+  }
+  .hero p,
+  .hero .kicker {
+    color: var(--ink-2);
+  }
+  .wrap {
+    display: block;
+    max-width: none;
+    padding: 0;
+  }
+  .content {
+    padding-top: 12px;
+  }
+  .section {
+    border: 0;
+    padding: 12px 0;
+  }
+  .section h2,
+  .section h3 {
+    break-after: avoid;
+  }
+  .codeblock pre {
+    max-height: none !important;
+    overflow: visible !important;
+    white-space: pre-wrap !important;
+    overflow-wrap: anywhere;
+  }
+  .table-wrap,
+  .figure-wrap {
+    overflow: visible !important;
+  }
+  .table-wrap > table,
+  .figure-wrap svg {
+    min-width: 0 !important;
+  }
+  svg {
+    max-width: 100%;
+    height: auto;
   }
 }

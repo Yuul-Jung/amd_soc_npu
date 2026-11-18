@@ -525,10 +525,18 @@ vivado -mode batch -nojournal -source tools/vivado/ooc_timing.tcl -tclargs {k}
     return s
 
 
+TABLE_WRAP = '<div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)">'
+FIGURE_WRAP = '<div class="figure-wrap" tabindex="0" role="region" aria-label="도면 (가로 스크롤 가능)">'
+
+
 def wrap_tables(text):
-    """표를 가로 스크롤 영역으로 감싸 좁은 화면에서 페이지 전체가 넘치지 않게 한다."""
-    text = re.sub(r'(?<!<div class="table-wrap">)<table>', '<div class="table-wrap"><table>', text)
-    return re.sub(r'</table>(?!</div>)', '</table></div>', text)
+    """표를 가로 스크롤 영역으로 감싸 좁은 화면에서 페이지 전체가 넘치지 않게 한다.
+    스크롤 영역과 코드 박스는 키보드로 초점을 받아 화살표로 스크롤할 수 있어야 한다 (axe scrollable-region-focusable)."""
+    text = re.sub(r'<div class="table-wrap">(?=<table>)', TABLE_WRAP, text)
+    text = re.sub(r'(?<!aria-label="표 \(가로 스크롤 가능\)">)<table>', TABLE_WRAP + "<table>", text)
+    text = re.sub(r'</table>(?!</div>)', '</table></div>', text)
+    text = text.replace('<div class="figure-wrap">', FIGURE_WRAP)
+    return re.sub(r"<pre(?![^>]*tabindex)(?=[ >])", '<pre tabindex="0"', text)
 
 
 def section(i, title, body):

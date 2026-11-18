@@ -49,7 +49,7 @@
     <section class="section" id="s00">
       <h2><span class="num">00</span>이 장의 위치</h2>
       <p><b>목표:</b> Block RAM으로 추론되는 동기 읽기·쓰기 버퍼를 작성하고, 충돌·초기화 전 읽기를 TB 감시기로 차단합니다.</p>
-      <div class="table-wrap"><table>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>구분</th><th>파일</th></tr></thead>
         <tbody>
           <tr><td>유지 (이전 장, 수정 없음)</td><td><ul><li>없음 (첫 장)</li></ul></td></tr>
@@ -61,7 +61,7 @@
     </section>
     <section class="section" id="s01">
       <h2><span class="num">01</span>구조도</h2>
-      <div class="figure-wrap"><svg viewBox="0 0 980 271" role="img" aria-label="bram_sync_buffer 실제 포트와 하위 모듈 구조">
+      <div class="figure-wrap" tabindex="0" role="region" aria-label="도면 (가로 스크롤 가능)"><svg viewBox="0 0 980 271" role="img" aria-label="bram_sync_buffer 실제 포트와 하위 모듈 구조">
       <rect x="250" y="30" width="480" height="201" rx="10" fill="#fff" stroke="#4635b1" stroke-width="2"/>
       <text x="490" y="54" font-size="18" font-weight="700" text-anchor="middle">bram_sync_buffer</text>
       <text x="490" y="72" font-size="13" text-anchor="middle" fill="#555">ch04/rtl/bram_sync_buffer.v · 구현 도식</text>
@@ -88,7 +88,7 @@
       <text x="600" y="257" font-size="13">왼쪽 input · 오른쪽 output · 점선 = 클록·리셋</text>
       </svg></div>
       <p>구현 도식: 포트 이름·폭과 하위 인스턴스는 <code>ch04/rtl/bram_sync_buffer.v</code> 선언에서 자동으로 가져왔습니다.</p>
-      <div class="table-wrap"><table>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>방향</th><th>포트</th><th>폭</th><th>구분</th><th>설명</th></tr></thead>
         <tbody><tr><td>input</td><td class="nw"><code>clk</code></td><td class="nw"><code>1</code></td><td>클록</td><td>시스템 클록 (상승 에지에서 모든 레지스터 갱신)</td></tr><tr><td>input</td><td class="nw"><code>resetn</code></td><td class="nw"><code>1</code></td><td>리셋</td><td>동기 리셋, 0이면 초기화 (Active-Low) · 리셋 중 쓰기 억제</td></tr><tr><td>input</td><td class="nw"><code>wr_en</code></td><td class="nw"><code>1</code></td><td>데이터·제어</td><td>쓰기 요청</td></tr><tr><td>input</td><td class="nw"><code>rd_en</code></td><td class="nw"><code>1</code></td><td>데이터·제어</td><td>읽기 요청 (다음 에지에 rd_data 유효)</td></tr><tr><td>input</td><td class="nw"><code>wr_addr</code></td><td class="nw"><code>[ADDR_WIDTH-1:0]</code></td><td>데이터·제어</td><td>쓰기 주소</td></tr><tr><td>input</td><td class="nw"><code>rd_addr</code></td><td class="nw"><code>[ADDR_WIDTH-1:0]</code></td><td>데이터·제어</td><td>읽기 주소</td></tr><tr><td>input</td><td class="nw"><code>wr_data</code></td><td class="nw"><code>[DATA_WIDTH-1:0]</code></td><td>데이터·제어</td><td>쓰기 데이터 (signed)</td></tr><tr><td>output</td><td class="nw"><code>rd_data</code></td><td class="nw"><code>[DATA_WIDTH-1:0]</code></td><td>데이터·제어</td><td>읽기 데이터 (1클록 지연)</td></tr><tr><td>output</td><td class="nw"><code>rd_valid</code></td><td class="nw"><code>1</code></td><td>데이터·제어</td><td>rd_data가 직전 읽기 요청의 결과임</td></tr></tbody>
       </table></div>
@@ -100,7 +100,7 @@
         <li>도구를 확인합니다.</li>
       </ol>
       <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 도구 확인</span></div>
-        <pre><code>sudo apt install -y iverilog python3 ripgrep   # 처음 한 번
+        <pre tabindex="0"><code>sudo apt install -y iverilog python3 ripgrep   # 처음 한 번
 iverilog -V 2&gt;&amp;1 | head -1      # Icarus Verilog version 12.0 이상
 python3 --version</code></pre></div>
       <ol start="3"><li>00절 '유지' 파일이 이전 장 결과 그대로 있는지 확인합니다.</li></ol>
@@ -110,7 +110,7 @@ python3 --version</code></pre></div>
       <p>아래 파일을 경로 그대로 만들고 전체 코드를 입력합니다.</p>
       <div class="codeblock">
         <div class="codebar"><span>ch04/rtl/bram_sync_buffer.v · verilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
-        <pre><code class="language-verilog">`timescale 1ns/1ps
+        <pre tabindex="0"><code class="language-verilog">`timescale 1ns/1ps
 `default_nettype none
 module bram_sync_buffer #(
     parameter integer DATA_WIDTH=16, ADDR_WIDTH=8
@@ -142,7 +142,7 @@ endmodule
       <p>테스트벤치는 출력을 자동 판정합니다. 기준 모델(Python)은 시험 벡터와 정답을 만듭니다.</p>
       <div class="codeblock">
         <div class="codebar"><span>ch04/tb/tb_bram_sync_buffer.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
-        <pre><code class="language-systemverilog">`timescale 1ns/1ps
+        <pre tabindex="0"><code class="language-systemverilog">`timescale 1ns/1ps
 module tb_bram_sync_buffer;
     parameter W=16, A=8;
     reg clk=0, resetn=0;
@@ -211,7 +211,7 @@ endmodule</code></pre>
       </div>
       <div class="codeblock">
         <div class="codebar"><span>ch04/reference/bram_reference.py · python · 원본 · RTL_SIM 통과 2026-11-18</span></div>
-        <pre><code class="language-python">import argparse
+        <pre tabindex="0"><code class="language-python">import argparse
 import random
 import sys
 from pathlib import Path
@@ -296,10 +296,10 @@ if __name__ == '__main__':
     <section class="section" id="s05">
       <h2><span class="num">05</span>시뮬레이션 실행</h2>
       <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 저장소 루트에서 실행</span></div>
-        <pre><code>bash ch04/scripts/run_sim.sh   # RTL 컴파일 → 시뮬레이션 → TB 자동 판정 → Python 기준값 비교</code></pre></div>
+        <pre tabindex="0"><code>bash ch04/scripts/run_sim.sh   # RTL 컴파일 → 시뮬레이션 → TB 자동 판정 → Python 기준값 비교</code></pre></div>
       <p>기대 출력 (도구 버전 미기록 · 2026-11-18 실제 실행 로그 발췌, 출처 <code>ch04/validation/rtl_sim_20261118.log</code>):</p>
       <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
-        <pre><code>PYTHON_SELF_TEST_PASS reset_retention,collision,uninitialized
+        <pre tabindex="0"><code>PYTHON_SELF_TEST_PASS reset_retention,collision,uninitialized
 PYTHON_VECTORS width=16 depth=256 cycles=1016 seed=304
 RTL_SIM_PASS BRAM W=16 A=8 cycles=1016
 PYTHON_SELF_TEST_PASS reset_retention,collision,uninitialized
@@ -312,7 +312,7 @@ PYTHON_RTL_COMPARE_PASS cycles=520</code></pre></div>
     </section>
     <section class="section" id="s06">
       <h2><span class="num">06</span>결과 판정</h2>
-      <div class="table-wrap"><table>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
         <tbody><tr><td><code>RTL_SIM_PASS BRAM W=16 A=8 cycles=1016</code></td><td>16비트·256깊이 설정 통과</td></tr><tr><td><code>RTL_SIM_PASS BRAM W=8 A=3 cycles=520</code></td><td>8비트·8깊이 설정 통과</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS</code></td><td>RTL 출력 파일과 Python 기준값이 모든 사이클에서 일치</td></tr></tbody>
       </table></div>
@@ -320,7 +320,7 @@ PYTHON_RTL_COMPARE_PASS cycles=520</code></pre></div>
     </section>
     <section class="section" id="s07">
       <h2><span class="num">07</span>코드 읽기 포인트</h2>
-      <div class="table-wrap"><table>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>위치</th><th>내용</th></tr></thead>
         <tbody><tr><td>Block RAM 추론</td><td><code>(* ram_style="block" *)</code> 힌트로 Vivado가 LUT 대신 BRAM36을 사용하도록 유도합니다. 배열 선언과 순수 동기 접근 패턴이 함께 필요합니다.</td></tr>
 <tr><td>Reset 중 쓰기 억제</td><td><code>if (resetn && wr_en) mem[wr_addr] <= wr_data;</code>. Reset이 아닌 동안에만 쓰기가 이루어져 초기화 직후 의도치 않은 메모리 변경을 방지합니다.</td></tr>
@@ -331,10 +331,10 @@ PYTHON_RTL_COMPARE_PASS cycles=520</code></pre></div>
       <h2><span class="num">08</span>합성·타이밍·보드</h2>
       <p>Vivado가 설치된 PC의 VS Code 터미널에서 이 장 모듈만 Out-of-Context(OOC)로 합성·배치·배선하고 100 MHz 타이밍을 확인합니다.</p>
       <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · Vivado 배치 (저장소 루트)</span></div>
-        <pre><code>source /tools/Xilinx/Vivado/&lt;버전&gt;/settings64.sh   # 설치 경로에 맞게 변경
+        <pre tabindex="0"><code>source /tools/Xilinx/Vivado/&lt;버전&gt;/settings64.sh   # 설치 경로에 맞게 변경
 vivado -mode batch -nojournal -source tools/vivado/ooc_timing.tcl -tclargs ch04
 # 기대: SYNTH_TIMING_PASS ch04 bram_sync_buffer WNS=… WHS=… LUT=… FF=… DSP48E1=… RAMB=…</code></pre></div>
-      <div class="table-wrap"><table>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>판정 항목</th><th>기준</th><th>확인 위치</th></tr></thead>
         <tbody>
           <tr><td>Setup / Hold</td><td><code>WNS ≥ 0</code> · <code>WHS ≥ 0</code> (clk 10.000 ns)</td><td><code>build/vivado/ch04/timing_route.rpt</code></td></tr>
@@ -346,11 +346,11 @@ vivado -mode batch -nojournal -source tools/vivado/ooc_timing.tcl -tclargs ch04
     <section class="section" id="s09">
       <h2><span class="num">09</span>검증 현황·인계</h2>
       <p>누적 보고 (이전 결과 → 추가 RTL → 시험 벡터 → 시뮬레이션 → 합성/보드 → 인계):</p>
-      <div class="table-wrap"><table>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>이전 결과</th><th>추가 RTL</th><th>시험 벡터</th><th>시뮬레이션</th><th>합성 / 보드</th><th>인계</th></tr></thead>
         <tbody><tr><td>없음 (첫 장)</td><td><code>bram_sync_buffer.v</code></td><td><code>tb_bram_sync_buffer.sv</code><br><code>bram_reference.py</code></td><td>통과</td><td>⚠ 대기 / 미실시</td><td>1건 (아래 표)</td></tr></tbody>
       </table></div>
-      <div class="table-wrap"><table>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>다음 장으로 넘기는 파일</th><th>사용처</th></tr></thead>
         <tbody><tr><td><code>ch04/rtl/bram_sync_buffer.v</code></td><td>10장 npu_core의 입력 메모리 1개 + 가중치 메모리 4개 (수정 금지)</td></tr></tbody>
       </table></div>
