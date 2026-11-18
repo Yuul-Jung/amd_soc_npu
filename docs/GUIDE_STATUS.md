@@ -33,7 +33,7 @@
 | 24 | 자원 · 타이밍 · 임계 경로 | [ch24_resource_timing_v02.html](../ch24_resource_timing_v02.html) | — | — | ⏳ | — | ⏳ |
 | 25 | 추정 전력 · 에너지 | [ch25_power_energy_v02.html](../ch25_power_energy_v02.html) | — | — | ⏳ | — | ⏳ |
 | 26 | 3×3 소형 CNN | [ch26_tiny_cnn_v02.html](../ch26_tiny_cnn_v02.html) | ✅ | ✅ | ⏳ | — | ⏳ |
-| 27 | 10분류 NPU SoC 통합 | chapter.json 대기 | | | | | |
+| 27 | 최종 NPU SoC | [ch27_npu_system_v02.html](../ch27_npu_system_v02.html) | — | ✅ | ⏳ | ⏳ | ⏳ |
 | 28 | 손글씨 숫자 인식 종합 | chapter.json 대기 | | | | | |
 | 29 | 센서 융합 산업안전 감시 | chapter.json 대기 | | | | | |
 | 30 | NPU·모터 안전 제어 | chapter.json 대기 | | | | | |

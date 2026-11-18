@@ -226,7 +226,7 @@
       "number": 27,
       "title": "10분류 NPU SoC 통합",
       "file": "ch27_npu_system_v02.html",
-      "html_status": "TODO",
+      "html_status": "DONE",
       "rtl_status": "TODO"
     },
     {

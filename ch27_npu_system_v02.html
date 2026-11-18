@@ -1,0 +1,854 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Basys3 NPU 27장 실습 · 최종 시스템: CPU → AXI → NPU → UART·LED·7세그먼트">
+<meta name="generator" content="tools/guide/build_guides.py — 직접 수정 금지, chapter.json을 고친 뒤 재생성">
+<title>27장 · 최종 시스템: CPU → AXI → NPU → UART·LED·7세그먼트 (v02)</title>
+<link rel="stylesheet" href="assets/education/site.css">
+<style>
+.codeblock pre{max-height:780px;white-space:pre}
+.section svg{width:100%;height:auto}
+.vbadge{display:inline-block;padding:.15em .6em;border-radius:4px;font-size:.78em;font-weight:700;background:#d4edda;color:#155724;vertical-align:middle}
+.gate-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:10px}
+.gate{border:1px solid var(--line,#e0e0e0);border-radius:6px;padding:10px 14px;overflow-wrap:anywhere}
+.gate b{display:block;font:600 11px var(--mono,monospace);letter-spacing:.04em;margin-bottom:4px}
+.gate span{font-size:13px}
+.gate.pass{border-color:#2d8a52;background:#f0fbf4}
+.gate.todo{border-color:#b08900;background:#fffbe6}
+.gate.fail{border-color:#b3261e;background:#fdeceb}
+.gate.na{border-color:#c8c8c8;background:#f6f6f6;color:#666}
+.table-wrap{overflow-x:auto}
+.table-wrap>table{min-width:620px}
+.figure-wrap{overflow-x:auto}
+.figure-wrap svg{min-width:860px}
+.section :not(pre)>code{overflow-wrap:anywhere}
+.codebar{gap:8px}
+.codebar span{min-width:0;overflow-wrap:anywhere}
+.hero p{max-width:none}
+.access-skip{position:absolute;left:-9999px;top:0}
+.access-skip:focus{left:12px;top:12px;z-index:1003;background:#fff;color:#15171c;padding:6px 10px}
+.nw code{white-space:nowrap;overflow-wrap:normal}
+</style>
+</head>
+<body data-chapter="ch27">
+<a class="access-skip" href="#main-content">본문 바로가기</a>
+<button type="button" class="mobile-menu" id="mobile-menu" aria-controls="course-nav" aria-expanded="false">☰ 장·목차</button>
+<div class="shade" id="shade"></div>
+<header class="hero">
+  <div class="hero-inner">
+    <p class="kicker">BASYS3 · NPU 고도화판 · 27장 실습 <span class="vbadge">v02</span></p>
+    <h1>제27장 · 최종 시스템: CPU → AXI → NPU → UART·LED·7세그먼트</h1>
+    <p>21장 SoC에 7세그먼트 표시기를 더하고, 펌웨어가 스위치로 고른 실제 MNIST 시험 그림(숫자마다 1장)을 NPU로 분류해 UART·LED·7세그먼트에 보이게 합니다. 보드 없이도 같은 펌웨어의 레지스터 접근을 RTL에서 재생해 기대 화면을 미리 만듭니다. 28~31장의 기준선입니다.</p>
+  </div>
+</header>
+<div class="wrap">
+  <nav class="toc" id="course-nav" aria-label="전체 장과 절 탐색"></nav>
+  <main class="content" id="main-content">
+    <section class="section" id="s00">
+      <h2><span class="num">00</span>이 장의 위치</h2>
+      <p><b>목표:</b> 21장 SoC에 7세그먼트 표시기를 더하고, 펌웨어가 스위치로 고른 실제 MNIST 시험 그림(숫자마다 1장)을 NPU로 분류해 UART·LED·7세그먼트에 보이게 합니다. 보드 없이도 같은 펌웨어의 레지스터 접근을 RTL에서 재생해 기대 화면을 미리 만듭니다. 28~31장의 기준선입니다.</p>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>구분</th><th>파일</th></tr></thead>
+        <tbody>
+          <tr><td>유지 (이전 장, 수정 없음)</td><td><ul><li><code>ch21/rtl/soc_npu_top.v</code> <small>(21장)</small></li><li><code>ch21/constraints/soc_npu.xdc</code> <small>(21장)</small></li><li><code>ch22/sw/npu_regs.h</code> <small>(22장)</small></li><li><code>ch22/sw/npu_hal.h</code> <small>(22장)</small></li><li><code>ch22/sw/npu_hal_mbv.c</code> <small>(22장)</small></li><li><code>ch22/sw/npu_drv.h</code> <small>(22장)</small></li><li><code>ch22/sw/npu_drv.c</code> <small>(22장)</small></li><li><code>ch22/host/npu_hal_trace.c</code> <small>(22장)</small></li><li><code>ch22/tb/tb_driver_replay.sv</code> <small>(22장)</small></li><li><code>ch18/model/model_int8.txt</code> <small>(18장)</small></li><li><code>ch20/rtl/npu_axi_lite.v</code> <small>(20장)</small></li></ul></td></tr>
+          <tr><td>이번 장 작성</td><td><ul><li><code>ch27/rtl/fnd_class_display.v</code></li><li><code>ch27/rtl/soc_npu27_top.v</code></li><li><code>ch27/constraints/soc_npu27.xdc</code></li><li><code>ch27/sw/board_io.h</code></li><li><code>ch27/sw/board_io_mbv.c</code></li><li><code>ch27/sw/main.c</code></li><li><code>ch27/reference/make_demo_cases.py</code></li><li><code>ch27/reference/gen_demo_header.py</code></li></ul></td></tr>
+        </tbody>
+      </table></div>
+      <p>전체 누적 관계: <a href="index.html#techtree">INDEX · 01 전체 테크트리</a> (00~31장 흐름 · 00~12장 모듈 재사용 도면)</p>
+      <p>실습 순서: 01 구조 확인 → 02 준비 → 03 RTL 작성 → 04 테스트벤치·기준 모델 작성 → 05 시뮬레이션 → 06 결과 판정 → 08 합성·타이밍(Vivado) → 09 인계.</p>
+    </section>
+    <section class="section" id="s01">
+      <h2><span class="num">01</span>구조도</h2>
+      <div class="figure-wrap" tabindex="0" role="region" aria-label="도면 (가로 스크롤 가능)"><svg viewBox="0 0 980 245" role="img" aria-label="soc_npu27_top 실제 포트와 하위 모듈 구조">
+      <rect x="250" y="30" width="480" height="155" rx="10" fill="#fff" stroke="#4635b1" stroke-width="2"/>
+      <text x="490" y="54" font-size="18" font-weight="700" text-anchor="middle">soc_npu27_top</text>
+      <text x="490" y="72" font-size="13" text-anchor="middle" fill="#555">ch27/rtl/soc_npu27_top.v · 구현 도식</text>
+      <text x="222" y="64" font-size="14" font-family="monospace" text-anchor="end">clk</text>
+      <path d="M226 60 H250" stroke="#4635b1" stroke-width="1.5" stroke-dasharray="4 3"/><path d="M250 60 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="87" font-size="14" font-family="monospace" text-anchor="end">btnC</text>
+      <path d="M226 83 H250" stroke="#4635b1" stroke-width="1.5" stroke-dasharray="4 3"/><path d="M250 83 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="110" font-size="14" font-family="monospace" text-anchor="end">sw[15:0]</text>
+      <path d="M226 106 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 106 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="222" y="133" font-size="14" font-family="monospace" text-anchor="end">RsRx</text>
+      <path d="M226 129 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 129 l-7 -4 v8 z" fill="#4635b1"/>
+      <path d="M730 60 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 60 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="758" y="65" font-size="14" font-family="monospace">led[15:0]</text>
+      <path d="M730 83 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 83 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="758" y="88" font-size="14" font-family="monospace">RsTx</text>
+      <path d="M730 106 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 106 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="758" y="111" font-size="14" font-family="monospace">seg[6:0]</text>
+      <path d="M730 129 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 129 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="758" y="134" font-size="14" font-family="monospace">an[3:0]</text>
+      <path d="M730 152 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 152 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="758" y="157" font-size="14" font-family="monospace">dp</text>
+      <rect x="270" y="88" width="440" height="28" rx="5" fill="#edeafa" stroke="#4635b1"/>
+      <text x="282" y="107" font-size="14" font-family="monospace">fnd_class_display  (u_fnd)</text>
+      <text x="698" y="107" font-size="12" text-anchor="end" fill="#4635b1">이번 장 신규</text>
+      <rect x="250" y="200" width="16" height="12" fill="#edeafa" stroke="#4635b1"/><text x="272" y="211" font-size="13">이번 장 신규</text>
+      <rect x="370" y="200" width="16" height="12" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="4 2"/><text x="392" y="211" font-size="13">이전 장 파일 재사용(수정 없음)</text>
+      <text x="600" y="211" font-size="13">왼쪽 input · 오른쪽 output · 점선 = 클록·리셋</text>
+      <text x="250" y="231" font-size="13">이 모듈의 포트는 Basys3 외부 핀입니다 (XDC 핀 배정).</text>
+      </svg></div>
+      <p>구현 도식: 포트 이름·폭과 하위 인스턴스는 <code>ch27/rtl/soc_npu27_top.v</code> 선언에서 자동으로 가져왔습니다.</p>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>방향</th><th>포트</th><th>폭</th><th>구분</th><th>설명</th></tr></thead>
+        <tbody><tr><td>input</td><td class="nw"><code>clk</code></td><td class="nw"><code>1</code></td><td class="nw">클록</td><td>W5 · 100 MHz 외부 클록</td></tr><tr><td>input</td><td class="nw"><code>btnC</code></td><td class="nw"><code>1</code></td><td class="nw">리셋</td><td>U18 · 리셋 버튼 (블록 설계 리셋, Active-High)</td></tr><tr><td>input</td><td class="nw"><code>sw</code></td><td class="nw"><code>[15:0]</code></td><td class="nw">보드 핀</td><td>스위치 16개 (sw[3:0] = 그림 번호)</td></tr><tr><td>input</td><td class="nw"><code>RsRx</code></td><td class="nw"><code>1</code></td><td class="nw">보드 핀</td><td>USB-UART 수신</td></tr><tr><td>output</td><td class="nw"><code>led</code></td><td class="nw"><code>[15:0]</code></td><td class="nw">보드 핀</td><td>LED 16개 (LED 워드)</td></tr><tr><td>output</td><td class="nw"><code>RsTx</code></td><td class="nw"><code>1</code></td><td class="nw">보드 핀</td><td>USB-UART 송신</td></tr><tr><td>output</td><td class="nw"><code>seg</code></td><td class="nw"><code>[6:0]</code></td><td class="nw">보드 핀</td><td>7세그먼트 {g,f,e,d,c,b,a} (Active-Low)</td></tr><tr><td>output</td><td class="nw"><code>an</code></td><td class="nw"><code>[3:0]</code></td><td class="nw">보드 핀</td><td>자리 선택 4개 (Active-Low)</td></tr><tr><td>output</td><td class="nw"><code>dp</code></td><td class="nw"><code>1</code></td><td class="nw">보드 핀</td><td>소수점 (항상 꺼짐)</td></tr></tbody>
+      </table></div>
+    </section>
+    <section class="section" id="s02">
+      <h2><span class="num">02</span>준비</h2>
+      <ol>
+        <li>VS Code에서 저장소 루트(<code>amd_soc_npu/</code>)를 엽니다.</li>
+        <li>도구를 확인합니다.</li>
+      </ol>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 도구 확인</span></div>
+        <pre tabindex="0"><code>sudo apt install -y iverilog python3 ripgrep   # 처음 한 번
+iverilog -V 2&gt;&amp;1 | head -1      # Icarus Verilog version 12.0 이상
+python3 --version</code></pre></div>
+      <ol start="3"><li>00절 '유지' 파일이 이전 장 결과 그대로 있는지 확인합니다 (<code>ch27/model/demo_cases_int8.txt</code>(실제 MNIST 시험 집합에서 숫자마다 첫 그림, 번호 3·2·1·18·4·8·11·0·61·7)는 <code>make_demo_cases.py</code>로 한 번 만들어 저장소에 넣었습니다. 05절은 내려받기 없이 이 파일을 씁니다).</li></ol>
+    </section>
+    <section class="section" id="s03">
+      <h2><span class="num">03</span>RTL 작성</h2>
+      <p>아래 파일을 경로 그대로 만들고 전체 코드를 입력합니다.</p>
+      <div class="codeblock">
+        <div class="codebar"><span>ch27/rtl/fnd_class_display.v · verilog · 원본 · RTL_SIM 통과 2026-11-19</span></div>
+        <pre tabindex="0"><code class="language-verilog">`timescale 1ns/1ps
+`default_nettype none
+// 27장 7세그먼트 표시기: GPIO LED 워드(펌웨어가 씀)에서 클래스를 읽어 오른쪽 자리에 숫자로 보인다.
+// LED 워드 약속: [9:0] 클래스 원핫, [13:10] 클래스 번호(0~9), [14] 오류, [15] 결과 있음.
+// 오른쪽 자리: 결과 있음 → 0~9, 오류 → E, 결과 없음 → '-'. 나머지 세 자리는 끔. 세그먼트·자리 모두 Active-Low.
+module fnd_class_display #(
+    parameter integer SCAN_BITS = 18        // 100 MHz / 2^16 ≈ 1.5 kHz로 자리 전환 (시뮬레이션은 작게)
+) (
+    input  wire        clk,
+    input  wire [15:0] led_word_i,
+    output reg   [6:0] seg_o,               // {g,f,e,d,c,b,a}
+    output reg   [3:0] an_o,
+    output wire        dp_o
+);
+    // 자리 전환 카운터는 리셋이 필요 없다 (FPGA 구성 때 0으로 시작, 값은 표시 순서에만 쓰임).
+    reg [SCAN_BITS-1:0] scan = {SCAN_BITS{1'b0}};
+    always @(posedge clk) scan &lt;= scan + 1'b1;
+    assign dp_o = 1'b1;
+
+    wire [3:0] cls = led_word_i[13:10];
+    reg  [6:0] glyph;
+    always @(*) begin
+        if (led_word_i[14]) glyph = 7'b0000110;                 // E
+        else if (!led_word_i[15] || cls &gt; 9) glyph = 7'b0111111; // -
+        else case (cls)
+            4'd0: glyph = 7'b1000000; 4'd1: glyph = 7'b1111001; 4'd2: glyph = 7'b0100100; 4'd3: glyph = 7'b0110000;
+            4'd4: glyph = 7'b0011001; 4'd5: glyph = 7'b0010010; 4'd6: glyph = 7'b0000010; 4'd7: glyph = 7'b1111000;
+            4'd8: glyph = 7'b0000000; default: glyph = 7'b0010000;
+        endcase
+        case (scan[SCAN_BITS-1 -: 2])
+            2'd0:    begin an_o = 4'b1110; seg_o = glyph; end
+            2'd1:    begin an_o = 4'b1101; seg_o = 7'b1111111; end
+            2'd2:    begin an_o = 4'b1011; seg_o = 7'b1111111; end
+            default: begin an_o = 4'b0111; seg_o = 7'b1111111; end
+        endcase
+    end
+endmodule
+`default_nettype wire</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>ch27/rtl/soc_npu27_top.v · verilog · 원본 · RTL_SIM 통과 2026-11-19</span></div>
+        <pre tabindex="0"><code class="language-verilog">`timescale 1ns/1ps
+`default_nettype none
+// 27장 최종 Top: 21장 SoC(soc_npu_wrapper)에 7세그먼트 표시기를 더한다. Top은 연결만 한다.
+// LED 출력(GPIO 채널 1)은 보드 LED와 표시기 입력에 함께 간다.
+module soc_npu27_top (
+    input  wire        clk,
+    input  wire        btnC,
+    input  wire [15:0] sw,
+    output wire [15:0] led,
+    input  wire        RsRx,
+    output wire        RsTx,
+    output wire  [6:0] seg,
+    output wire  [3:0] an,
+    output wire        dp
+);
+    soc_npu_wrapper u_soc (
+        .clk        (clk),
+        .btnC       (btnC),
+        .sw_tri_i   (sw),
+        .led_tri_o  (led),
+        .UART_0_rxd (RsRx),
+        .UART_0_txd (RsTx)
+    );
+    fnd_class_display u_fnd (.clk(clk), .led_word_i(led), .seg_o(seg), .an_o(an), .dp_o(dp));
+endmodule
+`default_nettype wire</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>ch27/constraints/soc_npu27.xdc · xdc · 원본 · ⚠ 미검증 (Vivado 미실행)</span></div>
+        <pre tabindex="0"><code class="language-xdc">## 27장 soc_npu27_top - 21장 soc_npu.xdc에 7세그먼트(seg·an·dp) 12핀을 더한 것
+## seg·an·dp 핀은 12장 basys3_npu.xdc와 같다.
+
+## Clock signal
+set_property -dict { PACKAGE_PIN W5 IOSTANDARD LVCMOS33 } [get_ports clk]
+create_clock -name sys_clk_pin -period 10.00 -waveform {0 5} [get_ports clk]
+
+## Center Button : Reset
+set_property -dict { PACKAGE_PIN U18 IOSTANDARD LVCMOS33 } [get_ports btnC]
+
+## Basys3 Slide Switches
+set_property -dict { PACKAGE_PIN V17 IOSTANDARD LVCMOS33 } [get_ports {sw[0]}]
+set_property -dict { PACKAGE_PIN V16 IOSTANDARD LVCMOS33 } [get_ports {sw[1]}]
+set_property -dict { PACKAGE_PIN W16 IOSTANDARD LVCMOS33 } [get_ports {sw[2]}]
+set_property -dict { PACKAGE_PIN W17 IOSTANDARD LVCMOS33 } [get_ports {sw[3]}]
+set_property -dict { PACKAGE_PIN W15 IOSTANDARD LVCMOS33 } [get_ports {sw[4]}]
+set_property -dict { PACKAGE_PIN V15 IOSTANDARD LVCMOS33 } [get_ports {sw[5]}]
+set_property -dict { PACKAGE_PIN W14 IOSTANDARD LVCMOS33 } [get_ports {sw[6]}]
+set_property -dict { PACKAGE_PIN W13 IOSTANDARD LVCMOS33 } [get_ports {sw[7]}]
+set_property -dict { PACKAGE_PIN V2 IOSTANDARD LVCMOS33 } [get_ports {sw[8]}]
+set_property -dict { PACKAGE_PIN T3 IOSTANDARD LVCMOS33 } [get_ports {sw[9]}]
+set_property -dict { PACKAGE_PIN T2 IOSTANDARD LVCMOS33 } [get_ports {sw[10]}]
+set_property -dict { PACKAGE_PIN R3 IOSTANDARD LVCMOS33 } [get_ports {sw[11]}]
+set_property -dict { PACKAGE_PIN W2 IOSTANDARD LVCMOS33 } [get_ports {sw[12]}]
+set_property -dict { PACKAGE_PIN U1 IOSTANDARD LVCMOS33 } [get_ports {sw[13]}]
+set_property -dict { PACKAGE_PIN T1 IOSTANDARD LVCMOS33 } [get_ports {sw[14]}]
+set_property -dict { PACKAGE_PIN R2 IOSTANDARD LVCMOS33 } [get_ports {sw[15]}]
+
+## Basys3 LEDs
+set_property -dict { PACKAGE_PIN U16 IOSTANDARD LVCMOS33 } [get_ports {led[0]}]
+set_property -dict { PACKAGE_PIN E19 IOSTANDARD LVCMOS33 } [get_ports {led[1]}]
+set_property -dict { PACKAGE_PIN U19 IOSTANDARD LVCMOS33 } [get_ports {led[2]}]
+set_property -dict { PACKAGE_PIN V19 IOSTANDARD LVCMOS33 } [get_ports {led[3]}]
+set_property -dict { PACKAGE_PIN W18 IOSTANDARD LVCMOS33 } [get_ports {led[4]}]
+set_property -dict { PACKAGE_PIN U15 IOSTANDARD LVCMOS33 } [get_ports {led[5]}]
+set_property -dict { PACKAGE_PIN U14 IOSTANDARD LVCMOS33 } [get_ports {led[6]}]
+set_property -dict { PACKAGE_PIN V14 IOSTANDARD LVCMOS33 } [get_ports {led[7]}]
+set_property -dict { PACKAGE_PIN V13 IOSTANDARD LVCMOS33 } [get_ports {led[8]}]
+set_property -dict { PACKAGE_PIN V3 IOSTANDARD LVCMOS33 } [get_ports {led[9]}]
+set_property -dict { PACKAGE_PIN W3 IOSTANDARD LVCMOS33 } [get_ports {led[10]}]
+set_property -dict { PACKAGE_PIN U3 IOSTANDARD LVCMOS33 } [get_ports {led[11]}]
+set_property -dict { PACKAGE_PIN P3 IOSTANDARD LVCMOS33 } [get_ports {led[12]}]
+set_property -dict { PACKAGE_PIN N3 IOSTANDARD LVCMOS33 } [get_ports {led[13]}]
+set_property -dict { PACKAGE_PIN P1 IOSTANDARD LVCMOS33 } [get_ports {led[14]}]
+set_property -dict { PACKAGE_PIN L1 IOSTANDARD LVCMOS33 } [get_ports {led[15]}]
+
+## Basys3 USB-RS232 Interface
+set_property -dict { PACKAGE_PIN B18 IOSTANDARD LVCMOS33 } [get_ports RsRx]
+set_property -dict { PACKAGE_PIN A18 IOSTANDARD LVCMOS33 } [get_ports RsTx]
+
+## Configuration options (10장 실제 XDC 설정 유지)
+set_property CONFIG_VOLTAGE 3.3 [current_design]
+set_property CFGBVS VCCO [current_design]
+set_property BITSTREAM.GENERAL.COMPRESS TRUE [current_design]
+set_property BITSTREAM.CONFIG.CONFIGRATE 33 [current_design]
+set_property CONFIG_MODE SPIx4 [current_design]
+
+## 7-Segment Display (12장과 같은 핀)
+set_property -dict { PACKAGE_PIN V7 IOSTANDARD LVCMOS33 } [get_ports dp]
+set_property -dict { PACKAGE_PIN W7 IOSTANDARD LVCMOS33 } [get_ports {seg[0]}]
+set_property -dict { PACKAGE_PIN W6 IOSTANDARD LVCMOS33 } [get_ports {seg[1]}]
+set_property -dict { PACKAGE_PIN U8 IOSTANDARD LVCMOS33 } [get_ports {seg[2]}]
+set_property -dict { PACKAGE_PIN V8 IOSTANDARD LVCMOS33 } [get_ports {seg[3]}]
+set_property -dict { PACKAGE_PIN U5 IOSTANDARD LVCMOS33 } [get_ports {seg[4]}]
+set_property -dict { PACKAGE_PIN V5 IOSTANDARD LVCMOS33 } [get_ports {seg[5]}]
+set_property -dict { PACKAGE_PIN U7 IOSTANDARD LVCMOS33 } [get_ports {seg[6]}]
+set_property -dict { PACKAGE_PIN U2 IOSTANDARD LVCMOS33 } [get_ports {an[0]}]
+set_property -dict { PACKAGE_PIN U4 IOSTANDARD LVCMOS33 } [get_ports {an[1]}]
+set_property -dict { PACKAGE_PIN V4 IOSTANDARD LVCMOS33 } [get_ports {an[2]}]
+set_property -dict { PACKAGE_PIN W4 IOSTANDARD LVCMOS33 } [get_ports {an[3]}]</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>ch27/sw/board_io.h · c · 원본 · PC 시험 통과 2026-11-19 · 보드 ⚠ 미검증</span></div>
+        <pre tabindex="0"><code class="language-c">/* 27장 보드 입출력: AXI GPIO(제1부 11장, 0x4000_0000) 채널 1 = LED 출력, 채널 2 = 스위치 입력 */
+#ifndef BOARD_IO_H
+#define BOARD_IO_H
+#include &lt;stdint.h&gt;
+
+void     led_write(uint32_t v);
+uint32_t sw_read(void);
+
+/* LED 워드 약속 (27장 fnd_class_display.v와 같음): [9:0] 원핫, [13:10] 클래스, [14] 오류, [15] 결과 있음 */
+static inline uint32_t led_word(uint32_t cls, int err)
+{
+    if (err) return 1u &lt;&lt; 14;
+    return (1u &lt;&lt; 15) | ((cls &amp; 0xFu) &lt;&lt; 10) | (1u &lt;&lt; cls);
+}
+
+#endif</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>ch27/sw/board_io_mbv.c · c · 원본 · PC 시험 통과 2026-11-19 · 보드 ⚠ 미검증</span></div>
+        <pre tabindex="0"><code class="language-c">/* 27장 MicroBlaze V용 GPIO 직접 접근 (PG144: GPIO_DATA 0x00, GPIO2_DATA 0x08) */
+#include "board_io.h"
+#include "xil_io.h"
+
+#ifndef GPIO_BASE
+#define GPIO_BASE 0x40000000u   /* 제1부 11장 xparameters.h XPAR_XGPIO_0_BASEADDR 확인값 */
+#endif
+
+void led_write(uint32_t v) { Xil_Out32(GPIO_BASE + 0x00u, v &amp; 0xFFFFu); }
+uint32_t sw_read(void) { return Xil_In32(GPIO_BASE + 0x08u) &amp; 0xFFFFu; }</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>ch27/sw/main.c · c · 원본 · PC 시험 통과 2026-11-19 · 보드 ⚠ 미검증</span></div>
+        <pre tabindex="0"><code class="language-c">/* 27장 최종 시스템: 스위치 sw[3:0]로 고른 숫자 그림(실제 MNIST 시험 그림, 숫자마다 1장)을 NPU로 분류해
+ * UART에 점수 10개·클래스·클록을 찍고, LED에 원핫·번호, 7세그먼트 오른쪽 자리에 클래스를 보인다.
+ * sw[3:0]가 10 이상이면 표시를 '-'로 지운다. */
+#include "npu_drv.h"
+#include "board_io.h"
+#include "model_int8.h"
+#ifdef NPU_HOST
+#include &lt;stdio.h&gt;
+#define PRINT printf
+extern uint32_t host_steps;              /* PC 시험: 스위치 값을 차례로 바꿔 보는 횟수 */
+#else
+#include "xil_printf.h"
+#define PRINT xil_printf
+#endif
+
+static void show(uint32_t idx)
+{
+    npu_result_t r;
+    if (idx &gt;= TEST_N) { led_write(0); PRINT("sw=%d: no image\r\n", (int)idx); return; }
+    npu_status_t s = npu_load_input(TEST_X[idx]);
+    if (s == NPU_OK) s = npu_run(&amp;r, 100000u);
+    if (s != NPU_OK) { led_write(led_word(0, 1)); PRINT("sw=%d: NPU error %d\r\n", (int)idx, (int)s); return; }
+    led_write(led_word(r.cls, 0));
+    PRINT("sw=%d label=%d class=%d cycles=%d score", (int)idx, (int)TEST_LABEL[idx], (int)r.cls, (int)r.cycles);
+    for (int k = 0; k &lt; NPU_N_OUT; k++) PRINT(" %d", (int)r.score[k]);
+    PRINT(" %s\r\n", r.cls == TEST_LABEL[idx] ? "OK" : "MISS");
+}
+
+int main(void)
+{
+    PRINT("=== ch27 NPU SoC (MNIST INT8 784x10, sw[3:0] = digit image) ===\r\n");
+    if (npu_init() != NPU_OK) { led_write(led_word(0, 1)); PRINT("[FAIL] NPU ID\r\n"); return 1; }
+    npu_load_model(MODEL_W, MODEL_B);
+    uint32_t last = 0xFFFFFFFFu;
+#ifdef NPU_HOST
+    while (host_steps--) {
+#else
+    for (;;) {
+#endif
+        uint32_t idx = sw_read() &amp; 0xFu;
+        if (idx != last) { show(idx); last = idx; }
+    }
+    return 0;
+}</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>ch27/reference/make_demo_cases.py · python · 원본 · RTL_SIM 통과 2026-11-19</span></div>
+        <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
+"""27장: 실제 MNIST 시험 집합에서 숫자마다 첫 그림 1장씩(10장)을 골라 INT8 입력(13·18장 계약)으로 ch27/model/에 쓴다.
+한 번 실행해 저장소에 넣은 파일을 시뮬레이션·펌웨어가 쓴다 (CI는 내려받지 않음)."""
+from __future__ import annotations
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "host_tools"))
+from mnist_idx import images, labels    # noqa: E402
+
+imgs, labs = images("test"), labels("test")
+out = ROOT / "ch27" / "model" / "demo_cases_int8.txt"
+with open(out, "w") as f:
+    for d in range(10):
+        k = labs.index(d)
+        x = [min(127, (p + 1) &gt;&gt; 1) for p in imgs[k]]
+        f.write(f"{k} {d} " + " ".join(map(str, x)) + "\n")
+print(f"DEMO_CASES_OK images=10 test_indices={[labs.index(d) for d in range(10)]}")</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>ch27/reference/gen_demo_header.py · python · 원본 · RTL_SIM 통과 2026-11-19</span></div>
+        <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
+"""27장: 18장 INT8 모델 + 숫자별 시험 그림 10장(model/demo_cases_int8.txt)을 C 헤더로 만든다 (22장 헤더와 같은 이름)."""
+from __future__ import annotations
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "ch18" / "reference"))
+from precision_rtl import load    # noqa: E402
+
+
+def demo_cases():
+    rows = [list(map(int, l.split())) for l in open(ROOT / "ch27" / "model" / "demo_cases_int8.txt")]
+    return [(r[0], r[1], r[2:]) for r in rows]
+
+
+def main(out):
+    w, b, _ = load(8)
+    cs = demo_cases()
+    L = ["/* 자동 생성: ch27/reference/gen_demo_header.py — 직접 고치지 않는다 */", "#ifndef MODEL_INT8_H", "#define MODEL_INT8_H",
+         "#include &lt;stdint.h&gt;", f"#define TEST_N {len(cs)}", "static const int8_t MODEL_W[10][784] = {"]
+    L += ["  {" + ",".join(map(str, r)) + "}," for r in w]
+    L += ["};", "static const int32_t MODEL_B[10] = {" + ",".join(map(str, b)) + "};", f"static const uint8_t TEST_X[{len(cs)}][784] = {{"]
+    L += ["  {" + ",".join(map(str, x)) + "}," for _, _, x in cs]
+    L += ["};", "static const uint8_t TEST_LABEL[%d] = {%s};" % (len(cs), ",".join(str(l) for _, l, _ in cs)), "#endif", ""]
+    Path(out).write_text("\n".join(L))
+    print(f"DEMO_HEADER_OK images={len(cs)}")
+
+
+if __name__ == "__main__":
+    main(sys.argv[1])</code></pre>
+      </div>
+    </section>
+    <section class="section" id="s04">
+      <h2><span class="num">04</span>테스트벤치·기준 모델 작성</h2>
+      <p>테스트벤치는 출력을 자동 판정합니다. 다섯 가지를 확인합니다. ① 7세그먼트 표시기 13가지 워드 ② 펌웨어 RV32IMC 교차 컴파일 ③ LED 워드 약속 ④ 같은 <code>main.c</code>를 PC에서 스위치를 0~9, 12로 바꿔 가며 돌려 남긴 NPU 접근 기록을 20장 RTL에서 재생(22장 TB 그대로) ⑤ 최종 Top 포트와 XDC 핀</p>
+      <div class="codeblock">
+        <div class="codebar"><span>ch27/tb/tb_fnd_class_display.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-19</span></div>
+        <pre tabindex="0"><code class="language-systemverilog">`timescale 1ns/1ps
+// 27장 TB: LED 워드 13가지(클래스 0~9, 오류, 결과 없음, 범위 밖 번호)에서 네 자리의 세그먼트를 모두 확인한다.
+module tb_fnd_class_display;
+    reg clk = 0; reg [15:0] w = 0;
+    wire [6:0] seg; wire [3:0] an; wire dp;
+    fnd_class_display #(.SCAN_BITS(4)) dut(.clk(clk), .led_word_i(w), .seg_o(seg), .an_o(an), .dp_o(dp));
+    always #5 clk = ~clk;
+    reg [6:0] want [0:12];
+    integer k, s, seen, checks = 0;
+    task check_word(input [15:0] word, input [6:0] g); begin
+        w = word; seen = 0;
+        for (s = 0; s &lt; 16; s = s + 1) begin
+            @(negedge clk);
+            case (an)
+                4'b1110: begin if (seg !== g) $fatal(1, "word %h: 오른쪽 자리 %b, 기대 %b", word, seg, g); seen = seen | 1; end
+                4'b1101, 4'b1011, 4'b0111: begin if (seg !== 7'b1111111) $fatal(1, "word %h: 다른 자리가 켜짐", word); seen = seen | 2; end
+                default: $fatal(1, "an=%b (한 자리만 0이어야 함)", an);
+            endcase
+            if (dp !== 1'b1) $fatal(1, "dp가 켜짐");
+        end
+        if (seen != 3) $fatal(1, "자리 전환 없음");
+        checks = checks + 1;
+    end endtask
+    initial begin
+        want[0]=7'b1000000; want[1]=7'b1111001; want[2]=7'b0100100; want[3]=7'b0110000; want[4]=7'b0011001;
+        want[5]=7'b0010010; want[6]=7'b0000010; want[7]=7'b1111000; want[8]=7'b0000000; want[9]=7'b0010000;
+        for (k = 0; k &lt; 10; k = k + 1) check_word(16'h8000 | (k &lt;&lt; 10) | (1 &lt;&lt; k), want[k]);
+        check_word(16'hC000, 7'b0000110);      // 오류 → E
+        check_word(16'h0000, 7'b0111111);      // 결과 없음 → -
+        check_word(16'h8000 | (12 &lt;&lt; 10), 7'b0111111);   // 범위 밖 번호 → -
+        $display("RTL_SIM_PASS FND_CLASS_DISPLAY words=%0d", checks);
+        $finish;
+    end
+endmodule</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>ch27/host/board_io_host.c · c · 원본 · PC 시험 통과 2026-11-19 · 보드 ⚠ 미검증</span></div>
+        <pre tabindex="0"><code class="language-c">/* 27장 PC 시험용 GPIO: 스위치는 0,1,…,9,12 순서로 바꾸고, LED 쓰기는 기록 파일에 'G 값'으로 남긴다. */
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include "board_io.h"
+
+uint32_t host_steps = 11;
+static const uint32_t seq[11] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 12};
+static int pos = -1;
+
+uint32_t sw_read(void) { return seq[++pos % 11]; }
+
+void led_write(uint32_t v)
+{
+    const char *p = getenv("LED_LOG");
+    FILE *fp = p ? fopen(p, "a") : NULL;
+    if (fp) { fprintf(fp, "%u %u\n", seq[pos % 11], v); fclose(fp); }
+}</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>ch27/host/test_led_word.c · c · 원본 · PC 시험 통과 2026-11-19 · 보드 ⚠ 미검증</span></div>
+        <pre tabindex="0"><code class="language-c">/* 27장 PC 시험: led_word가 표시기 약속([9:0] 원핫, [13:10] 번호, [14] 오류, [15] 결과)과 같은지 */
+#include &lt;stdio.h&gt;
+#include "board_io.h"
+int main(void)
+{
+    int fails = 0;
+    for (uint32_t c = 0; c &lt; 10; c++)
+        if (led_word(c, 0) != (0x8000u | (c &lt;&lt; 10) | (1u &lt;&lt; c))) { printf("  FAIL class %u\n", c); fails++; }
+    if (led_word(3, 1) != 0x4000u) { printf("  FAIL error word\n"); fails++; }
+    printf(fails ? "LED_WORD_TEST_FAIL\n" : "LED_WORD_TEST_PASS words=11\n");
+    return fails != 0;
+}</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>ch27/tb/check_top_xdc.py · python · 원본 · RTL_SIM 통과 2026-11-19</span></div>
+        <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
+"""27장 정적 검사: soc_npu27_top 포트(비트 단위)와 soc_npu27.xdc 핀 배정이 같고, 핀이 겹치지 않으며,
+7세그먼트 핀이 12장 basys3_npu.xdc와 같은지 본다 (Vivado를 대신하지 않음)."""
+import re
+import sys
+from pathlib import Path
+
+R = Path(__file__).resolve().parents[2]
+top = (R / "ch27/rtl/soc_npu27_top.v").read_text()
+ports = []
+for _, w, n in re.findall(r"(input|output)\s+wire\s+(\[\d+:\d+\])?\s*(\w+)", top):
+    if w:
+        hi, lo = map(int, re.findall(r"\d+", w))
+        ports += [f"{n}[{i}]" for i in range(lo, hi + 1)]
+    else:
+        ports.append(n)
+
+
+def pins(path):
+    return {p1 or p2: pin for pin, p1, p2 in re.findall(r"PACKAGE_PIN\s+(\w+)[^\[]*\[get_ports\s+(?:\{([^}]+)\}|(\w+))\]", path.read_text())}
+
+
+x27, x12 = pins(R / "ch27/constraints/soc_npu27.xdc"), pins(R / "mini_npu/constraints/basys3_npu.xdc")
+miss, extra = sorted(set(ports) - set(x27)), sorted(set(x27) - set(ports))
+dup = len(x27.values()) != len(set(x27.values()))
+seg_diff = [p for p in x27 if re.match(r"(seg|an)\[|dp$", p) and x12.get(p) != x27[p]]
+ok = not (miss or extra or dup or seg_diff)
+print(f"{'TOP_XDC_STATIC_CHECK_PASS' if ok else 'TOP_XDC_STATIC_CHECK_FAIL'} ports={len(ports)} pins={len(x27)} "
+      f"missing={miss} extra={extra} duplicate={dup} seg_pins_differ_from_ch12={seg_diff}")
+sys.exit(0 if ok else 1)</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>ch27/reference/demo_check.py · python · 원본 · RTL_SIM 통과 2026-11-19</span></div>
+        <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
+"""27장: 펌웨어 기록을 RTL에서 재생한 결과로 그림 10장의 점수·클래스를 18장 기준과 비교하고,
+펌웨어가 LED·7세그먼트에 보낼 워드를 클래스에서 계산해 표로 낸다."""
+from __future__ import annotations
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+sys.path[:0] = [str(ROOT / "ch18" / "reference"), str(ROOT / "ch27" / "reference")]
+from precision_rtl import load, scores                   # noqa: E402
+from p3_integer_reference import argmax_lowest           # noqa: E402
+from gen_demo_header import demo_cases                    # noqa: E402
+
+GLYPH = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+
+
+def led_word(cls):
+    return (1 &lt;&lt; 15) | (cls &lt;&lt; 10) | (1 &lt;&lt; cls)
+
+
+def main(actual, led_log):
+    w, b, _ = load(8)
+    cs = demo_cases()
+    images, cur = [], None
+    for op, off, val in (ln.split() for ln in open(actual)):
+        off, val = int(off), int(val)
+        if op == "P":
+            cur = {}; images.append(cur)
+        elif cur is not None and 0x40 &lt;= off &lt;= 0x64:
+            cur.setdefault("score", []).append(val - (1 &lt;&lt; 32) if val &gt;= 1 &lt;&lt; 31 else val)
+        elif cur is not None and off == 0x08:
+            cur["class"] = val
+    if len(images) != len(cs):
+        raise SystemExit(f"DEMO_RTL_COMPARE_FAIL images={len(images)}")
+    right = 0
+    for k, ((idx, label, x), img) in enumerate(zip(cs, images)):
+        s = scores(x, w, b); c = argmax_lowest(s)
+        if img.get("score") != s or img.get("class") != c:
+            raise SystemExit(f"DEMO_RTL_COMPARE_FAIL sw={k}")
+        right += c == label
+        print(f"DEMO sw={k} mnist_test[{idx}] label={label} class={c} led=0x{led_word(c):04X} fnd={GLYPH[c]} {'OK' if c == label else 'MISS'}")
+    leds = [tuple(map(int, l.split())) for l in open(led_log)]
+    if len(leds) != 11 or leds[-1] != (12, 0) or any(v &gt;&gt; 14 &amp; 1 for _, v in leds):
+        raise SystemExit(f"DEMO_LED_SEQUENCE_FAIL {leds}")
+    print(f"DEMO_RTL_COMPARE_PASS images=10 correct={right}/10 led_writes=11 (sw=12 → 표시 지움)")
+
+
+if __name__ == "__main__":
+    main(sys.argv[1], sys.argv[2])</code></pre>
+      </div>
+    </section>
+    <section class="section" id="s05">
+      <h2><span class="num">05</span>시뮬레이션 실행</h2>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 저장소 루트에서 실행</span></div>
+        <pre tabindex="0"><code>bash ch27/scripts/run_sim.sh   # 표시기 RTL → 교차 컴파일 → LED 워드 → 펌웨어 기록·RTL 재생 → Top·XDC</code></pre></div>
+      <p>기대 출력 (Icarus Verilog 12.0 · 2026-11-19 실제 실행 로그 발췌, 출처 <code>ch27/validation/rtl_sim_20261119.log</code>):</p>
+      <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
+        <pre tabindex="0"><code>Icarus Verilog version 12.0 (stable) ()
+gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+Ubuntu clang version 18.1.3 (1ubuntu1)
+DEMO_HEADER_OK images=10
+RTL_SIM_PASS FND_CLASS_DISPLAY words=13
+RV32IMC_COMPILE_PASS files=4
+LED_WORD_TEST_PASS words=11
+RTL_SIM_PASS DRIVER_REPLAY writes=15732 reads=141 polls=10 axi_violations=0
+DEMO sw=0 mnist_test[3] label=0 class=0 led=0x8001 fnd=0 OK
+DEMO sw=1 mnist_test[2] label=1 class=1 led=0x8402 fnd=1 OK
+DEMO sw=2 mnist_test[1] label=2 class=2 led=0x8804 fnd=2 OK
+DEMO sw=3 mnist_test[18] label=3 class=2 led=0x8804 fnd=2 MISS
+DEMO sw=4 mnist_test[4] label=4 class=4 led=0x9010 fnd=4 OK
+DEMO sw=5 mnist_test[8] label=5 class=6 led=0x9840 fnd=6 MISS
+DEMO sw=6 mnist_test[11] label=6 class=6 led=0x9840 fnd=6 OK
+DEMO sw=7 mnist_test[0] label=7 class=7 led=0x9C80 fnd=7 OK
+DEMO sw=8 mnist_test[61] label=8 class=8 led=0xA100 fnd=8 OK
+DEMO sw=9 mnist_test[7] label=9 class=9 led=0xA600 fnd=9 OK
+DEMO_RTL_COMPARE_PASS images=10 correct=8/10 led_writes=11 (sw=12 → 표시 지움)
+TOP_XDC_STATIC_CHECK_PASS ports=48 pins=48 missing=[] extra=[] duplicate=False seg_pins_differ_from_ch12=[]</code></pre></div>
+    </section>
+    <section class="section" id="s06">
+      <h2><span class="num">06</span>결과 판정</h2>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
+        <tbody><tr><td><code>RTL_SIM_PASS FND_CLASS_DISPLAY words=13</code></td><td>0~9, 오류 E, 결과 없음 '-', 범위 밖 번호 '-'. 오른쪽 자리만 켜지고 나머지 세 자리는 꺼짐</td></tr><tr><td><code>RTL_SIM_PASS DRIVER_REPLAY writes=15732 reads=141 polls=10 axi_violations=0</code></td><td>펌웨어의 모델 적재와 그림 10장 추론이 RTL에서 그대로 동작</td></tr><tr><td><code>DEMO_RTL_COMPARE_PASS images=10 correct=8/10 led_writes=11</code></td><td>점수·클래스가 18장 기준과 같음. 3번·5번 그림은 모델이 2·6으로 틀림(모델 정확도 92.14%의 실제 예)</td></tr><tr><td><code>TOP_XDC_STATIC_CHECK_PASS ports=48 pins=48</code></td><td>Top 포트 48비트와 XDC 핀이 같고, 7세그먼트 핀이 12장과 같음</td></tr></tbody>
+      </table></div>
+      <p><b>실패 시:</b> TB의 <code>$fatal</code> 메시지에 표시된 cycle 번호와 기대값/실제값을 확인하고, 03절 코드와 한 줄씩 대조합니다. 하나라도 실패하면 다음 장으로 넘어가지 않습니다.</p>
+    </section>
+    <section class="section" id="s07">
+      <h2><span class="num">07</span>코드 읽기 포인트</h2>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>위치</th><th>내용</th></tr></thead>
+        <tbody><tr><td>표시 경로</td><td>펌웨어는 GPIO 채널 1(LED)에 한 워드만 씁니다. 같은 선이 보드 LED와 <code>fnd_class_display</code>로 가므로 블록 설계를 다시 고치지 않고 7세그먼트를 더합니다. Top은 연결만 합니다.</td></tr>
+<tr><td>LED 워드</td><td><code>[9:0]</code> 클래스 원핫, <code>[13:10]</code> 클래스 번호, <code>[14]</code> 오류, <code>[15]</code> 결과 있음. C의 <code>led_word()</code>와 RTL 표시기가 같은 약속을 씁니다.</td></tr>
+<tr><td>기대 화면을 먼저</td><td>05절 <code>DEMO</code> 줄이 보드에서 나와야 할 UART·LED·7세그먼트입니다. 보드 결과가 다르면 하드웨어·빌드 쪽 문제로 좁힐 수 있습니다.</td></tr>
+<tr><td>틀린 그림도 그대로</td><td>숫자마다 첫 그림을 골랐고 고르는 과정에서 결과를 보지 않았습니다. 2장이 틀리는 것은 모델 한계이며, 하드웨어는 Python 정수 계산과 같은 답을 냅니다.</td></tr>
+<tr><td>28~31장 기준선</td><td>이 장의 하드웨어(<code>soc_npu27_top</code>)와 드라이버를 응용 장에서 복사·참조합니다. 응용 장끼리는 서로의 파일을 고치지 않습니다.</td></tr></tbody>
+      </table></div>
+    </section>
+    <section class="section" id="s08">
+      <h2><span class="num">08</span>합성·타이밍·보드</h2>
+      <p>05절이 모두 통과해야 합니다. 21장 프로젝트(<code>soc_npu</code>)를 그대로 쓰고 Top과 제약만 바꿉니다. ⚠ 미검증 — Vivado·Vitis·보드에서 실행하지 않았습니다.</p>
+      <h3>8-1. 하드웨어 (Vivado 2024.2)</h3>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>순서</th><th>조작</th><th>성공 기준</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Add Sources: <code>ch27/rtl/fnd_class_display.v</code>, <code>ch27/rtl/soc_npu27_top.v</code>, 제약 <code>ch27/constraints/soc_npu27.xdc</code></td><td>Sources에 세 파일</td></tr>
+          <tr><td>2</td><td>21장 제약 <code>soc_npu.xdc</code> → Disable File, <code>soc_npu27_top</code> → Set as Top</td><td>활성 제약 1개, Top 굵은 글씨</td></tr>
+          <tr><td>3</td><td>Generate Bitstream → Export Hardware (Include bitstream) → <code>soc_npu27_top.xsa</code></td><td>WNS ≥ 0, WHS ≥ 0, 핀 48개 배정</td></tr>
+        </tbody>
+      </table></div>
+      <h3>8-2. 소프트웨어 (Vitis 2024.2)</h3>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>순서</th><th>조작</th><th>성공 기준</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>새 XSA로 플랫폼 <code>soc_npu27_platform</code>, 애플리케이션 <code>npu_system</code> (Empty C)</td><td>빌드 성공</td></tr>
+          <tr><td>2</td><td><code>src</code>에 22장 <code>npu_regs.h·npu_hal.h·npu_hal_mbv.c·npu_drv.h·npu_drv.c</code>, 이 장 <code>sw/</code> 4개, <code>python3 ch27/reference/gen_demo_header.py model_int8.h</code>로 만든 헤더</td><td>파일 10개</td></tr>
+          <tr><td>3</td><td>Run (터미널 115200 bps)</td><td>첫 줄 <code>=== ch27 NPU SoC …</code>, 이어서 <code>sw=0 label=0 class=0 … OK</code></td></tr>
+        </tbody>
+      </table></div>
+      <h3>8-3. 보드에서 확인할 것 (05절 표와 같아야 함)</h3>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>sw[3:0]</th><th>UART</th><th>LED</th><th>7세그먼트 오른쪽</th></tr></thead>
+        <tbody>
+          <tr><td>0000 (0)</td><td><code>label=0 class=0 … OK</code></td><td>LED0·LED15 켜짐</td><td>0</td></tr>
+          <tr><td>0011 (3)</td><td><code>label=3 class=2 … MISS</code> (모델이 틀리는 그림)</td><td>LED2·LED11·LED15</td><td>2</td></tr>
+          <tr><td>0101 (5)</td><td><code>label=5 class=6 … MISS</code></td><td>LED6·LED11·LED12·LED15</td><td>6</td></tr>
+          <tr><td>1100 (12)</td><td><code>sw=12: no image</code></td><td>모두 꺼짐</td><td>-</td></tr>
+          <tr><td>btnC</td><td>첫 줄부터 다시</td><td>꺼졌다가 다시</td><td>-</td></tr>
+        </tbody>
+      </table></div>
+      <p>나머지 sw 값의 기대 출력은 05절 <code>DEMO</code> 줄에 있습니다. 결과를 <code>ch27/validation/board_YYYYMMDD.txt</code>(UART 출력)와 사진으로 남기면 BOARD 게이트를 갱신합니다.</p>
+    </section>
+    <section class="section" id="s09">
+      <h2><span class="num">09</span>검증 현황·인계</h2>
+      <p>누적 보고 (이전 결과 → 추가 RTL → 시험 벡터 → 시뮬레이션 → 합성/보드 → 인계):</p>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>이전 결과</th><th>추가 RTL</th><th>시험 벡터</th><th>시뮬레이션</th><th>합성 / 보드</th><th>인계</th></tr></thead>
+        <tbody><tr><td>18장 · 20장 · 21장 · 22장</td><td><code>fnd_class_display.v</code><br><code>soc_npu27_top.v</code></td><td><code>tb_fnd_class_display.sv</code><br><code>board_io_host.c</code><br><code>test_led_word.c</code><br><code>check_top_xdc.py</code><br><code>demo_check.py</code></td><td>통과</td><td>⚠ 대기 · 타이밍 시뮬 ⚠ 대기 / 미실시</td><td>2건 (아래 표)</td></tr></tbody>
+      </table></div>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>다음 장으로 넘기는 파일</th><th>사용처</th></tr></thead>
+        <tbody><tr><td><code>ch27/rtl/soc_npu27_top.v · soc_npu27.xdc · sw/</code></td><td>28~31장 응용의 공통 하드웨어·펌웨어 기준선 (수정 금지)</td></tr><tr><td><code>ch27/sw/board_io.h</code></td><td>29·30장 경보·인터록 표시</td></tr></tbody>
+      </table></div>
+      <p>검증 게이트 (<code>ch27/validation/</code> 증거 파일 기준으로 자동 표시):</p>
+      <div class="gate-row">
+        <div class="gate pass">
+          <b>HTML_PASS</b>
+          <span>v02 · 생성기·정적 검사</span>
+        </div>
+        <div class="gate na">
+          <b>HOST_MODEL_PASS</b>
+          <span>해당 없음 (Python 기준 모델 없음)</span>
+        </div>
+        <div class="gate pass">
+          <b>RTL_SIM_PASS</b>
+          <span>RTL_SIM_PASS FND_CLASS_DISPLAY words=13 외 1건 · Icarus Verilog 12.0 · 2026-11-19</span>
+        </div>
+        <div class="gate todo">
+          <b>SYNTH_TIMING_PASS</b>
+          <span>⚠ 미검증 · VS Code Vivado 실행 대기 (08절)</span>
+        </div>
+        <div class="gate todo">
+          <b>TIMING_SIM_PASS</b>
+          <span>⚠ 미검증 · 배선 후 SDF 시뮬레이션 실행 대기 (8-2)</span>
+        </div>
+        <div class="gate todo">
+          <b>BOARD_PASS</b>
+          <span>⚠ 미실시 · 현재 실물 보드 확인 불가</span>
+        </div>
+      </div>
+    </section>
+    <div class="chapter-links" id="chapter-links"></div>
+  </main>
+</div>
+<script>
+window.COURSE={
+ "title": "Basys3 소형 NPU 실습 (고도화판)",
+ "chapters": [
+  {
+   "id": "ch00",
+   "number": 0,
+   "title": "UART Echo",
+   "file": "ch00_uart_echo_v05.html"
+  },
+  {
+   "id": "ch01",
+   "number": 1,
+   "title": "DSP 추론 MAC 누산",
+   "file": "ch01_mac_v05.html"
+  },
+  {
+   "id": "ch02",
+   "number": 2,
+   "title": "DSP48E1 타깃 곱셈",
+   "file": "ch02_dsp_v05.html"
+  },
+  {
+   "id": "ch03",
+   "number": 3,
+   "title": "MAC 2단계 파이프라인",
+   "file": "ch03_mac_pipeline_v05.html"
+  },
+  {
+   "id": "ch04",
+   "number": 4,
+   "title": "BRAM 동기 버퍼",
+   "file": "ch04_bram_v05.html"
+  },
+  {
+   "id": "ch05",
+   "number": 5,
+   "title": "Fixed-Point Quantizer",
+   "file": "ch05_fixed_v05.html"
+  },
+  {
+   "id": "ch06",
+   "number": 6,
+   "title": "INT8·INT16 정밀도 비교",
+   "file": "ch06_precision_v05.html"
+  },
+  {
+   "id": "ch07",
+   "number": 7,
+   "title": "벡터 내적",
+   "file": "ch07_vector_dot_v05.html"
+  },
+  {
+   "id": "ch08",
+   "number": 8,
+   "title": "4PE 병렬 어레이",
+   "file": "ch08_pe4_v05.html"
+  },
+  {
+   "id": "ch09",
+   "number": 9,
+   "title": "Dense 4뉴런 레이어",
+   "file": "ch09_dense_v05.html"
+  },
+  {
+   "id": "ch10",
+   "number": 10,
+   "title": "4뉴런 NPU Core",
+   "file": "ch10_npu_core_v05.html"
+  },
+  {
+   "id": "ch11",
+   "number": 11,
+   "title": "UART 모델 적재 컨트롤러",
+   "file": "ch11_uart_register_v05.html"
+  },
+  {
+   "id": "ch12",
+   "number": 12,
+   "title": "통합 NPU Top",
+   "file": "ch12_integrated_npu_v05.html"
+  },
+  {
+   "id": "ch13",
+   "number": 13,
+   "title": "8×8 손글씨·10분류 준비",
+   "file": "ch13_mnist_8x8_v02.html"
+  },
+  {
+   "id": "ch14",
+   "number": 14,
+   "title": "4PE 그룹·10개 출력",
+   "file": "ch14_group10_v02.html"
+  },
+  {
+   "id": "ch15",
+   "number": 15,
+   "title": "Dense 64→10 공통 블록",
+   "file": "ch15_dense_64x10_v02.html"
+  },
+  {
+   "id": "ch16",
+   "number": 16,
+   "title": "2층 신경망 64→8→10",
+   "file": "ch16_mlp_64_8_10_v02.html"
+  },
+  {
+   "id": "ch17",
+   "number": 17,
+   "title": "784원소 타일 실행",
+   "file": "ch17_tiled_784_v02.html"
+  },
+  {
+   "id": "ch18",
+   "number": 18,
+   "title": "Float32 · INT8 · INT16 정밀도",
+   "file": "ch18_precision_v02.html"
+  },
+  {
+   "id": "ch19",
+   "number": 19,
+   "title": "1·4·8PE 사이클 비교",
+   "file": "ch19_pe_compare_v02.html"
+  },
+  {
+   "id": "ch20",
+   "number": 20,
+   "title": "AXI4-Lite 레지스터",
+   "file": "ch20_axi_lite_v02.html"
+  },
+  {
+   "id": "ch21",
+   "number": 21,
+   "title": "MicroBlaze V + NPU 블록 설계",
+   "file": "ch21_soc_bd_v02.html"
+  },
+  {
+   "id": "ch22",
+   "number": 22,
+   "title": "Vitis C 드라이버",
+   "file": "ch22_vitis_driver_v02.html"
+  },
+  {
+   "id": "ch23",
+   "number": 23,
+   "title": "CPU · NPU 시간 비교",
+   "file": "ch23_cpu_vs_npu_v02.html"
+  },
+  {
+   "id": "ch24",
+   "number": 24,
+   "title": "자원 · 타이밍 · 임계 경로",
+   "file": "ch24_resource_timing_v02.html"
+  },
+  {
+   "id": "ch25",
+   "number": 25,
+   "title": "추정 전력 · 에너지",
+   "file": "ch25_power_energy_v02.html"
+  },
+  {
+   "id": "ch26",
+   "number": 26,
+   "title": "3×3 소형 CNN",
+   "file": "ch26_tiny_cnn_v02.html"
+  },
+  {
+   "id": "ch27",
+   "number": 27,
+   "title": "최종 NPU SoC",
+   "file": "ch27_npu_system_v02.html"
+  }
+ ]
+};
+</script>
+<script defer src="assets/education/site.js"></script>
+</body>
+</html>
