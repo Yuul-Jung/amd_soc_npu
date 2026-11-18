@@ -79,8 +79,8 @@ python3 part03/ch29/host/p3_sensor_host.py --port /dev/ttyUSB1 --limit 200 --csv
 
 ## 7. 결과 (실제 실행)
 
-> 아래는 1차 실행(2026-11-18) 결과다. 호스트 표본 선택을 장치 연결 전으로 옮긴 뒤 전체 회귀를 다시 돌리는 중이며,
-> 끝나면 `validation/rtl_sim.log`와 이 표를 갱신한다(1차에서 호스트 계산 지연 때문에 생긴 링크 감시 응답 14회는 호스트가 모델에 반영해 판정함).
+> 최종 회귀(`scripts/run_ch13_19.sh`, 2026-11-18, `validation/rtl_sim.log`) 결과. 1차 실행에서 호스트가 장치 연결 뒤에 표본을 고르느라
+> 생긴 링크 감시 응답 14회는, 표본 선택을 연결 전으로 옮긴 뒤 0회가 됐다(`unsolicited_link_timeout=0`).
 
 | 근거 | 결과 |
 |---|---|

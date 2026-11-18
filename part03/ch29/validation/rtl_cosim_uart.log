@@ -1,34 +1,6 @@
 P3_SENSOR READY model=18496ca4 model_ok=1 feat=6 classes=3 bias_rc=0
 DISP fnd=000b3000 led=8008
 P3_SENSOR READY model=18496ca4 model_ok=1 feat=6 classes=3 junk=0
-STATE src=LINK_TIMEOUT seq=-1 guard=LINK fmask=0 umask=8 feat=- npu=-1 cpu=-1 match=-1 scores=- cand=3 state=3 latch=0 cnt=0 junk=0
-DISP fnd=000f3800 led=8008
-STATE src=LINK_TIMEOUT seq=-1 guard=LINK fmask=0 umask=8 feat=- npu=-1 cpu=-1 match=-1 scores=- cand=3 state=3 latch=0 cnt=0 junk=0
-DISP fnd=000f3800 led=8008
-STATE src=LINK_TIMEOUT seq=-1 guard=LINK fmask=0 umask=8 feat=- npu=-1 cpu=-1 match=-1 scores=- cand=3 state=3 latch=0 cnt=0 junk=0
-DISP fnd=000f3800 led=8008
-STATE src=LINK_TIMEOUT seq=-1 guard=LINK fmask=0 umask=8 feat=- npu=-1 cpu=-1 match=-1 scores=- cand=3 state=3 latch=0 cnt=0 junk=0
-DISP fnd=000f3800 led=8008
-STATE src=LINK_TIMEOUT seq=-1 guard=LINK fmask=0 umask=8 feat=- npu=-1 cpu=-1 match=-1 scores=- cand=3 state=3 latch=0 cnt=0 junk=0
-DISP fnd=000f3800 led=8008
-STATE src=LINK_TIMEOUT seq=-1 guard=LINK fmask=0 umask=8 feat=- npu=-1 cpu=-1 match=-1 scores=- cand=3 state=3 latch=0 cnt=0 junk=0
-DISP fnd=000f3800 led=8008
-STATE src=LINK_TIMEOUT seq=-1 guard=LINK fmask=0 umask=8 feat=- npu=-1 cpu=-1 match=-1 scores=- cand=3 state=3 latch=0 cnt=0 junk=0
-DISP fnd=000f3800 led=8008
-STATE src=LINK_TIMEOUT seq=-1 guard=LINK fmask=0 umask=8 feat=- npu=-1 cpu=-1 match=-1 scores=- cand=3 state=3 latch=0 cnt=0 junk=0
-DISP fnd=000f3800 led=8008
-STATE src=LINK_TIMEOUT seq=-1 guard=LINK fmask=0 umask=8 feat=- npu=-1 cpu=-1 match=-1 scores=- cand=3 state=3 latch=0 cnt=0 junk=0
-DISP fnd=000f3800 led=8008
-STATE src=LINK_TIMEOUT seq=-1 guard=LINK fmask=0 umask=8 feat=- npu=-1 cpu=-1 match=-1 scores=- cand=3 state=3 latch=0 cnt=0 junk=0
-DISP fnd=000f3800 led=8008
-STATE src=LINK_TIMEOUT seq=-1 guard=LINK fmask=0 umask=8 feat=- npu=-1 cpu=-1 match=-1 scores=- cand=3 state=3 latch=0 cnt=0 junk=0
-DISP fnd=000f3800 led=8008
-STATE src=LINK_TIMEOUT seq=-1 guard=LINK fmask=0 umask=8 feat=- npu=-1 cpu=-1 match=-1 scores=- cand=3 state=3 latch=0 cnt=0 junk=0
-DISP fnd=000f3800 led=8008
-STATE src=LINK_TIMEOUT seq=-1 guard=LINK fmask=0 umask=8 feat=- npu=-1 cpu=-1 match=-1 scores=- cand=3 state=3 latch=0 cnt=0 junk=0
-DISP fnd=000f3800 led=8008
-STATE src=LINK_TIMEOUT seq=-1 guard=LINK fmask=0 umask=8 feat=- npu=-1 cpu=-1 match=-1 scores=- cand=3 state=3 latch=0 cnt=0 junk=0
-DISP fnd=000f3800 led=8008
 STATE src=FRAME seq=100 guard=OK fmask=0 umask=0 feat=0,0,0,0,0,0 npu=0 cpu=0 match=1 scores=3219,1390,-4609 cand=0 state=3 latch=0 cnt=1 junk=0
 DISP fnd=000f3064 led=8008
 STATE src=FRAME seq=101 guard=OK fmask=0 umask=0 feat=0,0,0,0,0,0 npu=0 cpu=0 match=1 scores=3219,1390,-4609 cand=0 state=3 latch=0 cnt=2 junk=0
