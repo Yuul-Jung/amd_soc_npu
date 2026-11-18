@@ -6,65 +6,182 @@
   "nav_title": "2층 신경망 64→8→10",
   "name": "2층 신경망 64→8→10 (ReLU·정수 양자화·argmax)",
   "goal": "15장 Dense 층 두 개를 은닉층 64→8과 출력층 8→10으로 이어, 사이에 ReLU와 05장 정수 양자화(반올림 시프트·INT8 포화)를 넣습니다. 은닉값 8개, 점수 10개, 클래스를 단계별 완료 펄스와 함께 Python과 비교합니다.",
-  "top": {"file": "ch16/rtl/npu_mlp_64_8_10.v", "module": "npu_mlp_64_8_10"},
-  "keep": ["ch01/rtl/mac_core.v", "ch04/rtl/bram_sync_buffer.v", "ch05/rtl/fixed_quantizer.v", "ch07/rtl/vector_dot_core.v",
-           "ch08/rtl/pe_array4.v", "ch15/rtl/npu_dense_core.v", "ch15/rtl/npu_dense_store.v", "ch15/rtl/npu_dense.v",
-           "ch13/reference/mnist8x8_reference.py", "ch15/reference/dense_reference.py", "host_tools/p3_integer_reference.py"],
-  "new": ["ch16/rtl/npu_argmax.v", "ch16/rtl/npu_mlp_64_8_10.v"],
-  "tb": ["ch16/tb/tb_npu_mlp.sv"],
-  "ref": ["ch16/reference/mlp_reference.py"],
+  "top": {
+    "file": "ch16/rtl/npu_mlp_64_8_10.v",
+    "module": "npu_mlp_64_8_10"
+  },
+  "keep": [
+    "ch01/rtl/mac_core.v",
+    "ch04/rtl/bram_sync_buffer.v",
+    "ch05/rtl/fixed_quantizer.v",
+    "ch07/rtl/vector_dot_core.v",
+    "ch08/rtl/pe_array4.v",
+    "ch15/rtl/npu_dense_core.v",
+    "ch15/rtl/npu_dense_store.v",
+    "ch15/rtl/npu_dense.v",
+    "ch13/reference/mnist8x8_reference.py",
+    "ch15/reference/dense_reference.py",
+    "host_tools/p3_integer_reference.py"
+  ],
+  "new": [
+    "ch16/rtl/npu_argmax.v",
+    "ch16/rtl/npu_mlp_64_8_10.v"
+  ],
+  "tb": [
+    "ch16/tb/tb_npu_mlp.sv"
+  ],
+  "ref": [
+    "ch16/reference/mlp_reference.py"
+  ],
   "prep_note": "기준 모델은 <code>host_tools/p3_integer_reference.py</code>의 <code>mlp_64_8_10</code>·<code>round_shift_away</code>·<code>sat_int8</code>를 그대로 씁니다",
   "tb_note": "기준 모델(Python)이 11사례를 만듭니다: 숫자 0~7 입력과 무작위 가중치 8개, 은닉 포화, ReLU 뒤 은닉 전부 0, 반올림 0.5(512/1024 → 1). 가중치는 무작위이며 학습한 모델이 아닙니다.",
   "run": "bash ch16/scripts/run_sim.sh",
   "run_note": "기준 모델 자체 시험 → RTL 시뮬레이션 (11사례) → Python 은닉·점수·클래스·포화·검증합 비교",
-  "evidence": {"rtl_log": "ch16/validation/rtl_sim_*.log", "pattern": "_PASS|Icarus"},
+  "evidence": {
+    "rtl_log": "ch16/validation/rtl_sim_*.log",
+    "pattern": "_PASS|Icarus"
+  },
   "checks": [
-    ["PYTHON_MLP_SELF_TEST_PASS cases=11 shift=10", "은닉값으로 다시 계산한 점수가 <code>mlp_64_8_10</code>과 같고, 포화·전부 0·반올림 0.5 사례가 실제로 들어 있음"],
-    ["RTL_SIM_PASS MLP_64_8_10 cases=11 guards=1", "사례마다 <code>hidden_valid_o</code> 정확히 1회, 실행 중 쓰기 무시, 입력 응답 없음 → <code>error_o</code>"],
-    ["PYTHON_RTL_COMPARE_PASS cases=11 hidden=88 scores=110 classes=11", "은닉 88개, 점수 110개, 클래스 11개, 포화 표시, 두 층 검증합이 Python과 같음"]
+    [
+      "PYTHON_MLP_SELF_TEST_PASS cases=11 shift=10",
+      "은닉값으로 다시 계산한 점수가 <code>mlp_64_8_10</code>과 같고, 포화·전부 0·반올림 0.5 사례가 실제로 들어 있음"
+    ],
+    [
+      "RTL_SIM_PASS MLP_64_8_10 cases=11 guards=1",
+      "사례마다 <code>hidden_valid_o</code> 정확히 1회, 실행 중 쓰기 무시, 입력 응답 없음 → <code>error_o</code>"
+    ],
+    [
+      "PYTHON_RTL_COMPARE_PASS cases=11 hidden=88 scores=110 classes=11",
+      "은닉 88개, 점수 110개, 클래스 11개, 포화 표시, 두 층 검증합이 Python과 같음"
+    ]
   ],
   "read_points": [
-    ["은닉 계산식", "<code>은닉 = sat_int8(round(ReLU(점수) / 2^SHIFT))</code>, SHIFT=10. 반올림은 0에서 먼 쪽(05장 <code>fixed_quantizer</code>, Python <code>round_shift_away</code>)입니다. ReLU 뒤라 은닉은 0~127입니다."],
-    ["QUANT 단계 타이밍", "<code>h_q</code> 0~7에 양자화기 입력을 넣고, 1클록 뒤 출력을 <code>q_idx</code> 칸에 저장합니다. <code>h_q==8</code>에서 마지막 저장과 함께 <code>hidden_valid_o</code>를, <code>h_q==9</code>에서 출력층을 시작합니다."],
-    ["출력층 입력", "출력층(8→10)의 입력 읽기 포트는 은닉 버퍼 <code>hid_q</code>에 연결되고 1클록 지연으로 응답합니다. 15장 코드를 바꾸지 않고 입력원만 바꿉니다."],
-    ["층 선택 쓰기", "<code>w_layer_i</code>로 층을 고릅니다. 실행 중에는 상위에서 쓰기를 막습니다. 출력층 자체는 1층이 도는 동안 쉬고 있어 15장 잠금만으로는 막히지 않기 때문입니다."],
-    ["argmax 분리", "<code>npu_argmax</code>는 점수 N개를 한 클록에 하나씩 비교합니다(동점 → 낮은 번호). 17장과 27장이 같은 모듈을 씁니다."]
+    [
+      "은닉 계산식",
+      "<code>은닉 = sat_int8(round(ReLU(점수) / 2^SHIFT))</code>, SHIFT=10. 반올림은 0에서 먼 쪽(05장 <code>fixed_quantizer</code>, Python <code>round_shift_away</code>)입니다. ReLU 뒤라 은닉은 0~127입니다."
+    ],
+    [
+      "QUANT 단계 타이밍",
+      "<code>h_q</code> 0~7에 양자화기 입력을 넣고, 1클록 뒤 출력을 <code>q_idx</code> 칸에 저장합니다. <code>h_q==8</code>에서 마지막 저장과 함께 <code>hidden_valid_o</code>를, <code>h_q==9</code>에서 출력층을 시작합니다."
+    ],
+    [
+      "출력층 입력",
+      "출력층(8→10)의 입력 읽기 포트는 은닉 버퍼 <code>hid_q</code>에 연결되고 1클록 지연으로 응답합니다. 15장 코드를 바꾸지 않고 입력원만 바꿉니다."
+    ],
+    [
+      "층 선택 쓰기",
+      "<code>w_layer_i</code>로 층을 고릅니다. 실행 중에는 상위에서 쓰기를 막습니다. 출력층 자체는 1층이 도는 동안 쉬고 있어 15장 잠금만으로는 막히지 않기 때문입니다."
+    ],
+    [
+      "argmax 분리",
+      "<code>npu_argmax</code>는 점수 N개를 한 클록에 하나씩 비교합니다(동점 → 낮은 번호). 17장과 27장이 같은 모듈을 씁니다."
+    ]
   ],
-  "vivado": {"mode": "ooc", "resources": "DSP48E1 ≥ 8 (층마다 4PE) · 가중치 RAM 8개", "note": "<code>tools/vivado/ooc_timing.tcl</code>의 <code>ch16</code> 줄로 실행합니다. ⚠ 미검증 (Vivado 미실행)."},
+  "vivado": {
+    "mode": "ooc",
+    "resources": "DSP48E1 ≥ 8 (층마다 4PE) · 가중치 RAM 8개",
+    "note": "<code>tools/vivado/ooc_timing.tcl</code>의 <code>ch16</code> 줄로 실행합니다. ⚠ 미검증 (Vivado 미실행)."
+  },
   "handoff": [
-    ["ch16/rtl/npu_argmax.v", "17장 784원소 10분류, 27장 통합 시스템의 클래스 결정 (수정 금지)"],
-    ["ch16/rtl/npu_mlp_64_8_10.v", "18장 정밀도 비교의 2층 경로, 19장 사이클 비교 대상"],
-    ["ch16/reference/mlp_reference.py", "18장 기준 모델의 은닉 계산식"]
+    [
+      "ch16/rtl/npu_argmax.v",
+      "17장 784원소 10분류(<code>npu_tiled_784</code>), 27장 통합 시스템의 클래스 결정 (수정 금지)"
+    ],
+    [
+      "ch16/rtl/npu_mlp_64_8_10.v",
+      "18장 정밀도 비교의 2층 경로, 19장 사이클 비교 대상"
+    ],
+    [
+      "ch16/reference/mlp_reference.py",
+      "18장 기준 모델의 은닉 계산식"
+    ]
   ],
   "port_notes": {
-    "clk": "시스템 클록", "resetn": "동기 리셋 (Active-Low)",
+    "clk": "시스템 클록",
+    "resetn": "동기 리셋 (Active-Low)",
     "model_clear_i": "두 층의 적재 검증합·오류 지움",
     "w_layer_i": "쓸 층 선택 (0: 은닉층 64→8, 1: 출력층 8→10)",
-    "w_wr_en_i": "가중치 쓰기 (busy_o 동안 무시)", "w_neuron_i": "뉴런 번호 (은닉 0~7, 출력 0~9)",
-    "w_addr_i": "원소 번호 (은닉층 0~63, 출력층 0~7)", "w_data_i": "가중치 (INT8, signed)",
-    "b_wr_en_i": "Bias 쓰기 (busy_o 동안 무시)", "b_neuron_i": "Bias 뉴런 번호", "b_data_i": "Bias 값 (signed)",
-    "model_sum_o": "두 층 적재 검증합의 합 (mod 2^32)", "model_err_o": "범위 밖 쓰기가 있었음",
-    "x_rd_en_o": "입력 메모리 읽기 요청 (은닉층)", "x_rd_idx_o": "읽을 입력 원소 번호 0~63",
-    "x_data_i": "입력 원소 (요청 다음 클록)", "x_valid_i": "x_data_i 유효",
-    "start_i": "추론 시작 (IDLE에서만)", "busy_o": "추론 중",
-    "hidden_valid_o": "은닉 8개 확정 1클록 펄스", "hidden_o": "은닉값 8개 (h = [h*8 +: 8], INT8)",
+    "w_wr_en_i": "가중치 쓰기 (busy_o 동안 무시)",
+    "w_neuron_i": "뉴런 번호 (은닉 0~7, 출력 0~9)",
+    "w_addr_i": "원소 번호 (은닉층 0~63, 출력층 0~7)",
+    "w_data_i": "가중치 (INT8, signed)",
+    "b_wr_en_i": "Bias 쓰기 (busy_o 동안 무시)",
+    "b_neuron_i": "Bias 뉴런 번호",
+    "b_data_i": "Bias 값 (signed)",
+    "model_sum_o": "두 층 적재 검증합의 합 (mod 2^32)",
+    "model_err_o": "범위 밖 쓰기가 있었음",
+    "x_rd_en_o": "입력 메모리 읽기 요청 (은닉층)",
+    "x_rd_idx_o": "읽을 입력 원소 번호 0~63",
+    "x_data_i": "입력 원소 (요청 다음 클록)",
+    "x_valid_i": "x_data_i 유효",
+    "start_i": "추론 시작 (IDLE에서만)",
+    "busy_o": "추론 중",
+    "hidden_valid_o": "은닉 8개 확정 1클록 펄스",
+    "hidden_o": "은닉값 8개 (h = [h*8 +: 8], INT8)",
     "hidden_sat_o": "이번 추론에서 은닉 포화가 있었음",
-    "scores_o": "출력 점수 10개 (signed)", "done_o": "추론 완료 1클록 펄스 (class_o 확정)",
-    "error_o": "오류 1클록 펄스 (어느 층이든 입력·가중치 응답 없음)", "class_o": "결과 클래스 0~9 (동점이면 낮은 번호)"
+    "scores_o": "출력 점수 10개 (signed)",
+    "done_o": "추론 완료 1클록 펄스 (class_o 확정)",
+    "error_o": "오류 1클록 펄스 (어느 층이든 입력·가중치 응답 없음)",
+    "class_o": "결과 클래스 0~9 (동점이면 낮은 번호)"
   },
   "fsm": {
     "file": "ch16/rtl/npu_mlp_64_8_10.v",
     "reset": "IDLE",
     "rows": [
-      ["IDLE", "start_i", "L1", "은닉층 시작, hidden_sat_o=0"],
-      ["L1", "l1_err", "IDLE", "error_o 펄스"],
-      ["L1", "l1_done", "QUANT", "h_q=0"],
-      ["QUANT", "h_q<9", "QUANT", "h_q 0~7: 양자화기 입력, 출력은 다음 클록 q_idx 칸에 저장, h_q==8: hidden_valid_o"],
-      ["QUANT", "h_q==9", "L2", "출력층 시작"],
-      ["L2", "l2_err", "IDLE", "error_o 펄스"],
-      ["L2", "l2_done", "ARGMAX", "argmax 시작"],
-      ["ARGMAX", "am_done", "IDLE", "done_o 펄스"],
-      ["default", "유효하지 않은 상태", "IDLE", "error_o 펄스"]
+      [
+        "IDLE",
+        "start_i",
+        "L1",
+        "은닉층 시작, hidden_sat_o=0"
+      ],
+      [
+        "L1",
+        "l1_err",
+        "IDLE",
+        "error_o 펄스"
+      ],
+      [
+        "L1",
+        "l1_done",
+        "QUANT",
+        "h_q=0"
+      ],
+      [
+        "QUANT",
+        "h_q<9",
+        "QUANT",
+        "h_q 0~7: 양자화기 입력, 출력은 다음 클록 q_idx 칸에 저장, h_q==8: hidden_valid_o"
+      ],
+      [
+        "QUANT",
+        "h_q==9",
+        "L2",
+        "출력층 시작"
+      ],
+      [
+        "L2",
+        "l2_err",
+        "IDLE",
+        "error_o 펄스"
+      ],
+      [
+        "L2",
+        "l2_done",
+        "ARGMAX",
+        "argmax 시작"
+      ],
+      [
+        "ARGMAX",
+        "am_done",
+        "IDLE",
+        "done_o 펄스"
+      ],
+      [
+        "default",
+        "유효하지 않은 상태",
+        "IDLE",
+        "error_o 펄스"
+      ]
     ],
     "diagram": "ch16/diagrams/ch16_mlp_fsm"
   }
