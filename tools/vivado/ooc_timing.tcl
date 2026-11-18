@@ -28,6 +28,7 @@ set designs {
     {ch10 npu_core            {ch01/rtl/mac_core.v ch04/rtl/bram_sync_buffer.v ch05/rtl/fixed_quantizer.v ch07/rtl/vector_dot_core.v ch08/rtl/pe_array4.v ch09/rtl/dense_layer4.v ch10/rtl/npu_core.v}}
     {ch13 npu10_input_loader  {ch04/rtl/bram_sync_buffer.v ch13/rtl/npu10_input_loader.v}}
     {ch14 npu10_group_scheduler {ch01/rtl/mac_core.v ch04/rtl/bram_sync_buffer.v ch07/rtl/vector_dot_core.v ch08/rtl/pe_array4.v ch13/rtl/npu10_input_loader.v ch14/rtl/npu10_group_scheduler.v}}
+    {ch15 npu_dense {ch01/rtl/mac_core.v ch04/rtl/bram_sync_buffer.v ch07/rtl/vector_dot_core.v ch08/rtl/pe_array4.v ch15/rtl/npu_dense_core.v ch15/rtl/npu_dense_store.v ch15/rtl/npu_dense.v}}
 }
 
 proc worst_slack {kind} {

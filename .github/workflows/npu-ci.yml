@@ -21,7 +21,7 @@ jobs:
         run: python3 tools/guide/build_guides.py --check
 
   rtl-sim-ch00-ch12:
-    name: RTL 시뮬레이션 ch00~ch14
+    name: RTL 시뮬레이션 ch00~ch15
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -57,6 +57,8 @@ jobs:
         run: bash ch13/scripts/run_sim.sh
       - name: Run ch14 Group10 Scheduler
         run: bash ch14/scripts/run_sim.sh
+      - name: Run ch15 Dense 64x10/64x8/8x10
+        run: bash ch15/scripts/run_sim.sh
 
   host-model:
     name: Python 기준 정수 모델 단위 시험
