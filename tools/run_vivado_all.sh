@@ -17,11 +17,16 @@ status=0
 
 if [ "$what" = all ] || [ "$what" = ooc ]; then
     vivado -mode batch -nojournal -log "$logs/ooc.log" -source tools/vivado/ooc_timing.tcl || status=1
-    while read -r tag ch rest; do
+    seen=" "
+    while read -r tag ch top gen rest; do
         case "$tag" in SYNTH_TIMING_*) ;; *) continue ;; esac
-        { head -1 build/vivado/ooc_summary.txt; echo "$tag $ch $rest"; echo;
-          sed -n '/Design Timing Summary/,/^$/p;/WNS(ns)/,+3p' "build/vivado/$ch/timing_route.rpt" 2>/dev/null || true; } \
-          | clean /dev/stdin > "$ch/validation/vivado_ooc_$day.txt"
+        # 매개변수 줄(예: NPE=1)은 build/vivado/chNN_NPE=1/ 에 보고서가 있고, 같은 장 증거 파일에 이어 쓴다.
+        dir=$ch; case "$gen" in WNS=*) ;; *=*) dir="${ch}_${gen//,/_}" ;; esac
+        out="$ch/validation/vivado_ooc_$day.txt"
+        case "$seen" in *" $ch "*) ;; *) head -1 build/vivado/ooc_summary.txt | clean /dev/stdin > "$out"; seen="$seen$ch " ;; esac
+        { echo "$tag $ch $top $gen $rest"; echo;
+          sed -n '/Design Timing Summary/,/^$/p;/WNS(ns)/,+3p' "build/vivado/$dir/timing_route.rpt" 2>/dev/null || true; } \
+          | clean /dev/stdin >> "$out"
     done < build/vivado/ooc_summary.txt
     cat build/vivado/ooc_summary.txt
 fi
