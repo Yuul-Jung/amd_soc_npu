@@ -43,7 +43,7 @@
           <tr><td>이번 장 작성</td><td><ul><li><code>mini_npu/rtl/uart_npu_command_controller.v</code></li></ul></td></tr>
         </tbody>
       </table>
-      <p>실습 순서: 01 구조 확인 → 02 준비 → 03 RTL 작성 → 04 테스트벤치·기준 모델 작성 → 05 시뮬레이션 → 06 결과 판정 → 08 보드 확인 → 09 인계.</p>
+      <p>실습 순서: 01 구조 확인 → 02 준비 → 03 RTL 작성 → 04 테스트벤치·기준 모델 작성 → 05 시뮬레이션 → 06 결과 판정 → 08 합성·타이밍(Vivado) → 09 인계.</p>
     </section>
     <section class="section" id="s01">
       <h2><span class="num">01</span>구조도</h2>
@@ -536,8 +536,8 @@ NPU_UART_ADVERSARIAL_SIM_PASS tests=8 responses=43</code></pre></div>
       </table>
     </section>
     <section class="section" id="s08">
-      <h2><span class="num">08</span>보드 확인</h2>
-      <p>이 장은 단위 RTL 시험까지 진행합니다. 보드 확인은 <a href="ch12_integrated_npu_v05.html#s08">12장 · 08 보드 확인</a>에서 통합 Top으로 진행합니다.</p>
+      <h2><span class="num">08</span>합성·타이밍·보드</h2>
+      <p>이 컨트롤러는 단독 Top이 아니므로 별도 합성하지 않습니다. 12장 통합 Top 안에서 합성·타이밍·타이밍 시뮬레이션을 함께 확인합니다 (<a href="ch12_integrated_npu_v05.html#s08">12장 · 08</a>).</p>
     </section>
     <section class="section" id="s09">
       <h2><span class="num">09</span>검증 현황·인계</h2>
@@ -561,11 +561,11 @@ NPU_UART_ADVERSARIAL_SIM_PASS tests=8 responses=43</code></pre></div>
         </div>
         <div class="gate todo">
           <b>SYNTH_TIMING_PASS</b>
-          <span>⚠ 미검증 · Vivado 미실행</span>
+          <span>⚠ 미검증 · VS Code Vivado 실행 대기 (08절)</span>
         </div>
         <div class="gate todo">
           <b>BOARD_PASS</b>
-          <span>⚠ 미검증 · 실물 Basys3 미확인</span>
+          <span>⚠ 미실시 · 현재 실물 보드 확인 불가</span>
         </div>
       </div>
     </section>

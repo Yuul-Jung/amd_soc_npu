@@ -43,7 +43,7 @@
           <tr><td>이번 장 작성</td><td><ul><li><code>common/rtl/uart_rx.v</code></li><li><code>common/rtl/uart_tx.v</code></li><li><code>common/rtl/uart_core.v</code></li><li><code>common/rtl/uart_echo_controller.v</code></li><li><code>ch00/rtl/basys3_uart_echo_top.v</code></li></ul></td></tr>
         </tbody>
       </table>
-      <p>실습 순서: 01 구조 확인 → 02 준비 → 03 RTL 작성 → 04 테스트벤치·기준 모델 작성 → 05 시뮬레이션 → 06 결과 판정 → 08 보드 확인 → 09 인계.</p>
+      <p>실습 순서: 01 구조 확인 → 02 준비 → 03 RTL 작성 → 04 테스트벤치·기준 모델 작성 → 05 시뮬레이션 → 06 결과 판정 → 08 합성·타이밍(Vivado) → 09 인계.</p>
     </section>
     <section class="section" id="s01">
       <h2><span class="num">01</span>구조도</h2>
@@ -371,8 +371,157 @@ endmodule</code></pre>
       </table>
     </section>
     <section class="section" id="s08">
-      <h2><span class="num">08</span>보드 확인</h2>
-      <p>이 장의 <code>basys3_uart_echo_top</code>은 리셋 포트가 <code>resetn</code>이고 XDC가 없어 보드용 Top이 아닙니다. 같은 <code>uart_core</code>를 포함한 보드 확인은 <a href="ch12_integrated_npu_v05.html#s08">12장 · 08 보드 확인</a>에서 진행합니다.</p>
+      <h2><span class="num">08</span>합성·타이밍·보드</h2>
+      <p>Vivado가 설치된 PC의 VS Code 터미널에서 이 장 모듈만 Out-of-Context(OOC)로 합성·배치·배선하고 100 MHz 타이밍을 확인합니다.</p>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · Vivado 배치 (저장소 루트)</span></div>
+        <pre><code>source /tools/Xilinx/Vivado/&lt;버전&gt;/settings64.sh   # 설치 경로에 맞게 변경
+vivado -mode batch -nojournal -source tools/vivado/ooc_timing.tcl -tclargs ch00
+# 기대: SYNTH_TIMING_PASS ch00 basys3_uart_echo_top WNS=… WHS=… LUT=… FF=… DSP48E1=… RAMB=…</code></pre></div>
+      <table>
+        <thead><tr><th>판정 항목</th><th>기준</th><th>확인 위치</th></tr></thead>
+        <tbody>
+          <tr><td>Setup / Hold</td><td><code>WNS ≥ 0</code> · <code>WHS ≥ 0</code> (clk 10.000 ns)</td><td><code>build/vivado/ch00/timing_route.rpt</code></td></tr>
+          
+        </tbody>
+      </table>
+      <p>OOC 결과는 입출력 핀 지연을 포함하지 않으므로 보드 Top 타이밍을 대신하지 않습니다. 증거 저장은 <code>bash tools/run_vivado_all.sh ooc</code>(→ <code>ch00/validation/vivado_ooc_YYYYMMDD.txt</code>). 보드 확인은 <a href="ch12_integrated_npu_v05.html#s08">12장 · 08</a>에서 통합 Top으로 진행합니다.</p>
+      <p>OOC 스크립트 전체 (00~10장 공용):</p>
+      <div class="codeblock">
+        <div class="codebar"><span>tools/vivado/ooc_timing.tcl · tcl</span></div>
+        <pre><code class="language-tcl"># 00~10장 단위 모듈 Out-of-Context(OOC) 합성·배치·배선·타이밍 확인.
+# 실행 (저장소 루트):
+#   vivado -mode batch -nojournal -source tools/vivado/ooc_timing.tcl            ;# 전체
+#   vivado -mode batch -nojournal -source tools/vivado/ooc_timing.tcl -tclargs ch01 ch04
+# 결과: build/vivado/chNN/{synth_util,route_util,timing_route}.rpt
+#       build/vivado/ooc_summary.txt (장별 1줄 판정)
+# 판정: 배선 후 setup WNS &gt;= 0 이고 hold WHS &gt;= 0 (clk 100 MHz, 10.000 ns).
+#       OOC는 입출력 핀 지연을 포함하지 않으므로 보드 Top 타이밍(12장)을 대신하지 않는다.
+
+set root   [file normalize [file join [file dirname [info script]] ../..]]
+set part   xc7a35tcpg236-1
+set period 10.000
+set outdir [file join $root build vivado]
+file mkdir $outdir
+
+# {장  Top 모듈  RTL 파일(저장소 루트 기준)}
+set designs {
+    {ch00 basys3_uart_echo_top {common/rtl/uart_rx.v common/rtl/uart_tx.v common/rtl/uart_core.v common/rtl/uart_echo_controller.v ch00/rtl/basys3_uart_echo_top.v}}
+    {ch01 mac_core            {ch01/rtl/mac_core.v}}
+    {ch02 dsp_multiplier      {ch02/rtl/dsp_multiplier.v}}
+    {ch03 mac_pipeline_core   {ch03/rtl/mac_pipeline_core.v}}
+    {ch04 bram_sync_buffer    {ch04/rtl/bram_sync_buffer.v}}
+    {ch05 fixed_quantizer     {ch05/rtl/fixed_quantizer.v}}
+    {ch06 precision_compare   {ch05/rtl/fixed_quantizer.v ch06/rtl/precision_compare.v}}
+    {ch07 vector_dot_core     {ch01/rtl/mac_core.v ch07/rtl/vector_dot_core.v}}
+    {ch08 pe_array4           {ch01/rtl/mac_core.v ch07/rtl/vector_dot_core.v ch08/rtl/pe_array4.v}}
+    {ch09 dense_layer4        {ch01/rtl/mac_core.v ch05/rtl/fixed_quantizer.v ch07/rtl/vector_dot_core.v ch08/rtl/pe_array4.v ch09/rtl/dense_layer4.v}}
+    {ch10 npu_core            {ch01/rtl/mac_core.v ch04/rtl/bram_sync_buffer.v ch05/rtl/fixed_quantizer.v ch07/rtl/vector_dot_core.v ch08/rtl/pe_array4.v ch09/rtl/dense_layer4.v ch10/rtl/npu_core.v}}
+}
+
+proc worst_slack {kind} {
+    set p [get_timing_paths -quiet -$kind -max_paths 1 -nworst 1]
+    if {[llength $p] == 0} { return NA }
+    return [format %.3f [get_property SLACK $p]]
+}
+proc count_ref {pattern} {
+    return [llength [get_cells -quiet -hierarchical -filter "IS_PRIMITIVE &amp;&amp; REF_NAME =~ $pattern"]]
+}
+
+set selected $argv
+set summary [file join $outdir ooc_summary.txt]
+set fh [open $summary w]
+puts $fh "# OOC ${period}ns · $part · [clock format [clock seconds] -format {%Y-%m-%d %H:%M}] · [version -short]"
+set fail 0
+
+foreach d $designs {
+    lassign $d ch top files
+    if {[llength $selected] &gt; 0 &amp;&amp; [lsearch -exact $selected $ch] &lt; 0} { continue }
+    set cdir [file join $outdir $ch]
+    file mkdir $cdir
+    set rc [catch {
+        create_project -in_memory -part $part
+        foreach f $files { read_verilog [file join $root $f] }
+        set xdc [file join $cdir ooc.xdc]
+        set x [open $xdc w]
+        puts $x "create_clock -name clk -period $period \[get_ports clk\]"
+        close $x
+        read_xdc $xdc
+        synth_design -top $top -part $part -mode out_of_context
+        report_utilization -file [file join $cdir synth_util.rpt]
+        opt_design
+        place_design
+        route_design
+        report_utilization -file [file join $cdir route_util.rpt]
+        report_timing_summary -max_paths 10 -file [file join $cdir timing_route.rpt]
+        set wns [worst_slack setup]
+        set whs [worst_slack hold]
+        set res "LUT=[count_ref LUT*] FF=[count_ref FD*] DSP48E1=[count_ref DSP48E1] RAMB=[count_ref RAMB*]"
+        set ok [expr {($wns eq "NA" || $wns &gt;= 0) &amp;&amp; ($whs eq "NA" || $whs &gt;= 0)}]
+        set tag [expr {$ok ? "SYNTH_TIMING_PASS" : "SYNTH_TIMING_FAIL"}]
+        set line "$tag $ch $top WNS=$wns WHS=$whs $res"
+        close_project
+    } err]
+    if {$rc} {
+        set line "SYNTH_TIMING_FAIL $ch $top ERROR=[string map {\n { }} $err]"
+        catch {close_project}
+    }
+    if {[string match SYNTH_TIMING_FAIL* $line]} { incr fail }
+    puts $line
+    puts $fh $line
+    flush $fh
+}
+close $fh
+puts "OOC_SUMMARY: $summary"
+if {$fail &gt; 0} { error "OOC_TIMING_FAILED count=$fail" }</code></pre>
+      </div>
+      <p>증거 저장 래퍼 전체:</p>
+      <div class="codeblock">
+        <div class="codebar"><span>tools/run_vivado_all.sh · bash</span></div>
+        <pre><code class="language-bash">#!/usr/bin/env bash
+# VS Code(Vivado 설치 PC)에서 00~12장 합성·타이밍·타이밍 시뮬레이션을 한 번에 실행하고
+# 각 장 validation/ 에 증거 로그를 남긴다. 보드 확인(BOARD_PASS)과는 별개다.
+#   source /tools/Xilinx/Vivado/&lt;버전&gt;/settings64.sh
+#   bash tools/run_vivado_all.sh            # 전체
+#   bash tools/run_vivado_all.sh ooc        # 00~10장 OOC만
+#   bash tools/run_vivado_all.sh impl       # 12장 구현 + 타이밍 시뮬레이션만
+set -Eeuo pipefail
+root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." &amp;&amp; pwd)"
+cd "$root"
+command -v vivado &gt;/dev/null 2&gt;&amp;1 || { echo "VIVADO_NOT_RUN: vivado not found (source settings64.sh)" &gt;&amp;2; exit 2; }
+what="${1:-all}"
+day="$(date +%Y%m%d)"
+logs="$root/build/vivado/logs"; mkdir -p "$logs"
+clean() { sed -e "s#$root#&lt;repo&gt;#g" -e "s#$HOME#~#g" "$1"; }
+status=0
+
+if [ "$what" = all ] || [ "$what" = ooc ]; then
+    vivado -mode batch -nojournal -log "$logs/ooc.log" -source tools/vivado/ooc_timing.tcl || status=1
+    while read -r tag ch rest; do
+        case "$tag" in SYNTH_TIMING_*) ;; *) continue ;; esac
+        { head -1 build/vivado/ooc_summary.txt; echo "$tag $ch $rest"; echo;
+          sed -n '/Design Timing Summary/,/^$/p;/WNS(ns)/,+3p' "build/vivado/$ch/timing_route.rpt" 2&gt;/dev/null || true; } \
+          | clean /dev/stdin &gt; "$ch/validation/vivado_ooc_$day.txt"
+    done &lt; build/vivado/ooc_summary.txt
+    cat build/vivado/ooc_summary.txt
+fi
+
+if [ "$what" = all ] || [ "$what" = impl ]; then
+    if vivado -mode batch -nojournal -log "$logs/impl.log" -source mini_npu/scripts/vivado_impl.tcl; then
+        bash mini_npu/scripts/run_timing_sim.sh &gt; "$logs/timesim.log" 2&gt;&amp;1 || status=1
+    else
+        status=1
+    fi
+    { cat mini_npu/build/impl/impl_summary.txt 2&gt;/dev/null || true; echo;
+      sed -n '/WNS(ns)/,+3p' mini_npu/build/impl/timing_route.rpt 2&gt;/dev/null || true; echo;
+      if [ -f mini_npu/build/impl/basys3_npu_top.bit ]; then sha256sum mini_npu/build/impl/basys3_npu_top.bit; fi;
+      echo; echo "## run_timing_sim.sh"; grep -E '_PASS|_FAIL|NOT_RUN|Error|FATAL' "$logs/timesim.log" 2&gt;/dev/null || true; } \
+      | clean /dev/stdin &gt; ch12/validation/vivado_impl_timesim_$day.txt
+    cat ch12/validation/vivado_impl_timesim_$day.txt
+fi
+
+[ $status -eq 0 ] &amp;&amp; echo "VIVADO_ALL_PASS ($what)" || echo "VIVADO_ALL_FAIL ($what) — build/vivado/logs 확인"
+exit $status</code></pre>
+      </div>
     </section>
     <section class="section" id="s09">
       <h2><span class="num">09</span>검증 현황·인계</h2>
@@ -396,11 +545,11 @@ endmodule</code></pre>
         </div>
         <div class="gate todo">
           <b>SYNTH_TIMING_PASS</b>
-          <span>⚠ 미검증 · Vivado 미실행</span>
+          <span>⚠ 미검증 · VS Code Vivado 실행 대기 (08절)</span>
         </div>
         <div class="gate todo">
           <b>BOARD_PASS</b>
-          <span>⚠ 미검증 · 실물 Basys3 미확인</span>
+          <span>⚠ 미실시 · 현재 실물 보드 확인 불가</span>
         </div>
       </div>
     </section>
