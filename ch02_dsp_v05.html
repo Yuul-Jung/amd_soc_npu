@@ -20,6 +20,9 @@
 .gate.fail{border-color:#b3261e;background:#fdeceb}
 .gate.na{border-color:#c8c8c8;background:#f6f6f6;color:#666}
 .table-wrap{overflow-x:auto}
+.table-wrap>table{min-width:620px}
+.figure-wrap{overflow-x:auto}
+.figure-wrap svg{min-width:860px}
 .section :not(pre)>code{overflow-wrap:anywhere}
 .codebar{gap:8px}
 .codebar span{min-width:0;overflow-wrap:anywhere}
@@ -57,7 +60,7 @@
     </section>
     <section class="section" id="s01">
       <h2><span class="num">01</span>구조도</h2>
-      <svg viewBox="0 0 980 248" role="img" aria-label="dsp_multiplier 실제 포트와 하위 모듈 구조">
+      <div class="figure-wrap"><svg viewBox="0 0 980 248" role="img" aria-label="dsp_multiplier 실제 포트와 하위 모듈 구조">
       <rect x="250" y="30" width="480" height="178" rx="10" fill="#fff" stroke="#4635b1" stroke-width="2"/>
       <text x="490" y="54" font-size="18" font-weight="700" text-anchor="middle">dsp_multiplier</text>
       <text x="490" y="72" font-size="13" text-anchor="middle" fill="#555">ch02/rtl/dsp_multiplier.v · 구현 도식</text>
@@ -80,7 +83,7 @@
       <rect x="250" y="223" width="16" height="12" fill="#edeafa" stroke="#4635b1"/><text x="272" y="234" font-size="13">이번 장 신규</text>
       <rect x="370" y="223" width="16" height="12" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="4 2"/><text x="392" y="234" font-size="13">이전 장 파일 재사용(수정 없음)</text>
       <text x="600" y="234" font-size="13">왼쪽 input · 오른쪽 output · 점선 = 클록·리셋</text>
-      </svg>
+      </svg></div>
       <p>구현 도식: 포트 이름·폭과 하위 인스턴스는 <code>ch02/rtl/dsp_multiplier.v</code> 선언에서 자동으로 가져왔습니다.</p>
       <div class="table-wrap"><table>
         <thead><tr><th>방향</th><th>포트</th><th>폭</th><th>구분</th><th>설명</th></tr></thead>

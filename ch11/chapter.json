@@ -205,7 +205,8 @@
         "IDLE",
         "protocol_error_o"
       ]
-    ]
+    ],
+    "diagram": "ch11/diagrams/ch11_cmd_ctrl_fsm"
   },
   "run_note": "12장 Top 포함 컴파일 → UART 파형 시뮬레이션 → CSV를 PC 기준 모델과 비교"
 }

@@ -7,7 +7,7 @@
 안내서 HTML은 직접 수정하지 않는다. 내용은 chapter.json, 코드는 RTL/TB 파일,
 게이트 배지는 validation/ 증거 파일에서만 결정된다.
 """
-import glob, html, json, os, re, sys
+import glob, hashlib, html, json, os, re, sys
 
 ROOT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
 SITE_TITLE = "Basys3 소형 NPU 실습 (고도화판)"
@@ -195,14 +195,44 @@ def fsm_table(c):
     unknown = sorted(x for x in used if x not in names and x not in ("default", "(모든 상태)"))
     if unknown or not set(names) <= used:
         raise SystemExit(f"{c['id']}: fsm 표 상태명이 {f['file']} localparam과 다릅니다 {unknown or sorted(set(names) - used)}")
+    figure = fsm_diagram(c, names, f) if f.get("diagram") else ""
     rows = "".join(f"<tr><td class=\"nw\"><code>{a}</code></td><td><code>{esc(b)}</code></td><td class=\"nw\"><code>{d}</code></td><td>{esc(e)}</td></tr>"
                    for a, b, d, e in f["rows"])
-    return f"""
+    return figure + f"""
       <p>상태 전이표 (<code>{f['file']}</code>의 <code>case(state)</code> 기준, 리셋 시 <code>{f['reset']}</code>):</p>
       <table>
         <thead><tr><th>현재 상태</th><th>조건</th><th>다음 상태</th><th>동작</th></tr></thead>
         <tbody>{rows}</tbody>
       </table>"""
+
+
+EDITOR_URL = "https://yuul-jung.github.io/svg-flow-editor/"
+
+
+def fsm_diagram(c, names, f):
+    """svg-flow-editor JSON(원본)과 내보낸 SVG를 대조하고 안내서에 넣는다."""
+    stem = f["diagram"]
+    doc = json.loads(rd(stem + ".json"))
+    page = doc["pages"][doc.get("activePage", 0)] if isinstance(doc.get("pages"), list) else doc
+    states = {n["title"] for n in page["nodes"] if not n["id"].startswith("note")}
+    if states != set(names):
+        raise SystemExit(f"{c['id']}: 상태도 노드 {sorted(states ^ set(names))} 가 localparam과 다릅니다 ({stem}.json)")
+    title = {n["id"]: n["title"] for n in page["nodes"]}
+    drawn = {(title[e["from"]], title[e["to"]]) for e in page["edges"]}
+    table = {(a, d) for a, _, d, _ in f["rows"] if a not in ("default", "(모든 상태)") and a != d}
+    if drawn != table:
+        raise SystemExit(f"{c['id']}: 상태도 간선과 전이표가 다릅니다 — 도면에만 {sorted(drawn - table)}, 표에만 {sorted(table - drawn)}")
+    svg = rd(stem + ".svg")
+    m = re.search(r"json-sha256: ([0-9a-f]{64})", svg)
+    digest = hashlib.sha256(open(os.path.join(ROOT, stem + ".json"), "rb").read()).hexdigest()
+    if not m or m.group(1) != digest:
+        raise SystemExit(f"{c['id']}: {stem}.svg 가 JSON보다 오래되었습니다 — python3 tools/diagram/export_svg.py 실행")
+    k = c["id"]
+    svg = svg.replace('id="canvas"', f'id="{k}-fsm"', 1).replace("arrowhead-", f"{k}-arrowhead-")
+    svg = re.sub(r'aria-label="[^"]*"', f'aria-label="{c["top"]["module"]} FSM 상태도" role="img"', svg, count=1)
+    return f"""
+      <p>상태도 (원본 <a href="{stem}.json"><code>{stem}.json</code></a> · <a href="{EDITOR_URL}">svg-flow-editor</a>에서 <b>작업 불러오기</b>로 열어 편집 → <b>작업 저장</b> → <code>python3 tools/diagram/export_svg.py</code>):</p>
+      <div class="figure-wrap">{svg.strip()}</div>"""
 
 
 # ── 증거(validation/) 읽기 ───────────────────────────────────────────────────
@@ -349,6 +379,9 @@ HEAD = """<!doctype html>
 .gate.fail{{border-color:#b3261e;background:#fdeceb}}
 .gate.na{{border-color:#c8c8c8;background:#f6f6f6;color:#666}}
 .table-wrap{{overflow-x:auto}}
+.table-wrap>table{{min-width:620px}}
+.figure-wrap{{overflow-x:auto}}
+.figure-wrap svg{{min-width:860px}}
 .section :not(pre)>code{{overflow-wrap:anywhere}}
 .codebar{{gap:8px}}
 .codebar span{{min-width:0;overflow-wrap:anywhere}}
@@ -484,7 +517,7 @@ def build(c, chs, origin, by_id):
       </table>
       <p>실습 순서: 01 구조 확인 → 02 준비 → 03 RTL 작성 → 04 테스트벤치·기준 모델 작성 → 05 시뮬레이션 → 06 결과 판정 → 08 합성·타이밍(Vivado) → 09 인계.</p>"""
     board = c.get("vivado", {}).get("mode") == "top"
-    s01 = "      " + svg_block(k, c["top"]["file"], c["top"]["module"], origin, board).replace("\n", "\n      ")
+    s01 = '      <div class="figure-wrap">' + svg_block(k, c["top"]["file"], c["top"]["module"], origin, board).replace("\n", "\n      ") + "</div>"
     s01 += f'\n      <p>구현 도식: 포트 이름·폭과 하위 인스턴스는 <code>{c["top"]["file"]}</code> 선언에서 자동으로 가져왔습니다.</p>\n'
     s01 += port_table(c, board) + fsm_table(c)
     prep = c.get("prep_note", "")
@@ -561,7 +594,7 @@ def update_index(text, chs):
     # 장식용 칩 제거 (STANDARD 3절, 헤더 높이 160~220px)
     text = re.sub(r'\n\s*<div class="chips">.*?</div>', "", text, count=1, flags=re.S)
     if ".table-wrap{" not in text:
-        text = text.replace("</style>", ".table-wrap{overflow-x:auto}\n.section :not(pre)>code{overflow-wrap:anywhere}\n.codebar{gap:8px}\n.codebar span{min-width:0;overflow-wrap:anywhere}\n.access-skip{position:absolute;left:-9999px;top:0}\n.access-skip:focus{left:12px;top:12px;z-index:1003;background:#fff;color:#15171c;padding:6px 10px}\n.nw code{white-space:nowrap;overflow-wrap:normal}\n</style>", 1)
+        text = text.replace("</style>", ".table-wrap{overflow-x:auto}\n.table-wrap>table{min-width:620px}\n.section :not(pre)>code{overflow-wrap:anywhere}\n.codebar{gap:8px}\n.codebar span{min-width:0;overflow-wrap:anywhere}\n.access-skip{position:absolute;left:-9999px;top:0}\n.access-skip:focus{left:12px;top:12px;z-index:1003;background:#fff;color:#15171c;padding:6px 10px}\n.nw code{white-space:nowrap;overflow-wrap:normal}\n</style>", 1)
     text = wrap_tables(text)
     # 책장 사진은 assets/education/hero-bookshelf.jpg (site.css) 를 쓴다. 외부 주소 덮어쓰기 제거.
     text = re.sub(r"^\.hero:before\{background-image:[^\n]*raw\.githubusercontent[^\n]*\n", "", text, flags=re.M)

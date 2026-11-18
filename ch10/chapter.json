@@ -165,7 +165,8 @@
         "IDLE",
         "error_o 펄스"
       ]
-    ]
+    ],
+    "diagram": "ch10/diagrams/ch10_npu_core_fsm"
   },
   "run_note": "RTL 컴파일 → 시뮬레이션 → TB 자동 판정 → Python 기준값 비교"
 }
