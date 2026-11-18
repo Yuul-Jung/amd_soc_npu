@@ -40,6 +40,9 @@
 - [`docs/VSCODE_HANDOFF.md`](docs/VSCODE_HANDOFF.md) — 코드·실행(VS Code)과 안내서 관리 분담
 - [MBV SoC 전용 규칙](rule_md/fpga-soc/MBV_SOC_rules.md) · [구조도 규칙](rule_md/common/flowchart-rules.md) · [코드 스타일](rule_md/common/code-style-rules.md)
 
+## 도면
+- FSM 상태도: [svg-flow-editor](https://yuul-jung.github.io/svg-flow-editor/)로 편집하는 JSON(`ch10/diagrams/`, `ch11/diagrams/`) → `python3 tools/diagram/export_svg.py`로 SVG 생성
+
 ## 검증 현황
 - 장별 게이트(HOST·RTL_SIM·SYNTH_TIMING·TIMING_SIM·BOARD): [`docs/GUIDE_STATUS.md`](docs/GUIDE_STATUS.md) — `validation/` 증거로 자동 생성
 - 화면 점검(폭 6종·탐색·복사·SVG): [`docs/RENDER_AUDIT.md`](docs/RENDER_AUDIT.md), 배포본 [`docs/RENDER_AUDIT_PAGES.md`](docs/RENDER_AUDIT_PAGES.md)
