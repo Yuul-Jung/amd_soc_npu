@@ -1,0 +1,5 @@
+Icarus Verilog version 12.0 (stable) ()
+AXI_PROTOCOL_PASS writes=9440 reads=3623 aw_first=3146 w_first=3146 same=3146 violations=0
+RTL_SIM_PASS NPU_AXI_LITE cases=2 wstrb=3 outstanding=2 id=NPU1 cycles=7185
+tb/tb_npu_axi_lite.sv:121: $finish called at 743550000 (1ps)
+PYTHON_RTL_COMPARE_PASS npe=4 cases=2 scores=20
