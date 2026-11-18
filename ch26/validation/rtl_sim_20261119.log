@@ -1,0 +1,10 @@
+Icarus Verilog version 12.0 (stable) ()
+PYTHON_CNN_SELF_TEST_PASS cases=12 conv=6x6x4 pool=3x3x4 shift=6
+RTL_SIM_PASS CNN3X3 cases=12 cycles_per_inference=2512
+tb/tb_npu_cnn3x3.sv:43: $finish called at 392910000 (1ps)
+PYTHON_CNN_SELF_TEST_PASS cases=12 conv=6x6x4 pool=3x3x4 shift=6
+PYTHON_RTL_COMPARE_PASS cases=12 pooled=432 scores=120
+REGRESSION ch15: PYTHON_RTL_COMPARE_PASS cfg=8x10 cases=7 scores=70 model_sum=ok
+REGRESSION ch16: PYTHON_RTL_COMPARE_PASS cases=11 hidden=88 scores=110 classes=11
+REGRESSION ch20: PYTHON_RTL_COMPARE_PASS npe=4 cases=2 scores=20
+REGRESSION_PASS chapters=3
