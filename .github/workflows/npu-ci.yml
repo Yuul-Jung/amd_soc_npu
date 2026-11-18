@@ -26,7 +26,7 @@ jobs:
       - name: Install Icarus Verilog
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y iverilog
+          sudo apt-get install -y iverilog ripgrep   # ch04·batch 스크립트가 rg 사용
       - name: Run ch00 UART Echo
         run: bash ch00/scripts/run_sim.sh
       - name: Run ch01 MAC
@@ -72,7 +72,7 @@ jobs:
       - name: Install Icarus Verilog
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y iverilog
+          sudo apt-get install -y iverilog ripgrep   # ch04·batch 스크립트가 rg 사용
       - name: Run ch13-ch31 simulations
         run: |
           for n in 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31; do
