@@ -591,7 +591,7 @@ vivado -mode batch -nojournal -source tools/vivado/ooc_timing.tcl -tclargs ch18
       </table></div>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>다음 장으로 넘기는 파일</th><th>사용처</th></tr></thead>
-        <tbody><tr><td><code>ch18/rtl/npu_tiled_784_p.v</code></td><td>19장 1/4/8PE 비교의 기준 (4PE, 7,263클록) (수정 금지)</td></tr><tr><td><code>ch18/model/model_int8.txt</code></td><td>27·28장 보드 시연용 INT8 784→10 모델 (실제 MNIST 학습, 정확도 92.14%)</td></tr><tr><td><code>host_tools/mnist_idx.py</code></td><td>28장 PC 손글씨 전처리·정답 비교</td></tr></tbody>
+        <tbody><tr><td><code>ch18/rtl/npu_tiled_784_p.v</code></td><td>19장 1/2/4/8PE 비교의 점수 기준 (NPE=4와 점수 일치, 7,263클록) (수정 금지)</td></tr><tr><td><code>ch18/model/model_int8.txt</code></td><td>27·28장 보드 시연용 INT8 784→10 모델 (실제 MNIST 학습, 정확도 92.14%)</td></tr><tr><td><code>host_tools/mnist_idx.py</code></td><td>28장 PC 손글씨 전처리·정답 비교</td></tr></tbody>
       </table></div>
       <p>검증 게이트 (<code>ch18/validation/</code> 증거 파일 기준으로 자동 표시):</p>
       <div class="gate-row">
@@ -737,6 +737,12 @@ window.COURSE={
    "number": 18,
    "title": "Float32 · INT8 · INT16 정밀도",
    "file": "ch18_precision_v02.html"
+  },
+  {
+   "id": "ch19",
+   "number": 19,
+   "title": "1·4·8PE 사이클 비교",
+   "file": "ch19_pe_compare_v02.html"
   }
  ]
 };

@@ -161,8 +161,8 @@
       "id": "ch19",
       "number": 19,
       "title": "PE·BRAM 처리량 비교",
-      "file": "ch19_architecture_tradeoff_v02.html",
-      "html_status": "TODO",
+      "file": "ch19_pe_compare_v02.html",
+      "html_status": "DONE",
       "rtl_status": "TODO"
     },
     {
