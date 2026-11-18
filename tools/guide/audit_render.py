@@ -28,8 +28,12 @@ JS_PAGE = r"""() => {
   // 브라우저마다 글자 상자에 위아래 여백을 넣는 정도가 달라(Firefox가 큼) 바로 아랫줄과 몇 px 포개질 수 있으므로,
   // 세로로 작은 글자 높이의 35% 이상 포개질 때만 겹침으로 본다.
   r.svg_overlaps = [];
+  r.svg_clipped = [];
   document.querySelectorAll('svg').forEach((svg, si) => {
     const t = [...svg.querySelectorAll('text')].map(e => [e.textContent, e.getBoundingClientRect()]);
+    // 도면 밖으로 나가 잘리는 글자 (예: 긴 출력 포트 이름)
+    const box = svg.getBoundingClientRect();
+    t.forEach(([s, a]) => { if (a.width && (a.right > box.right + 1 || a.left < box.left - 1)) r.svg_clipped.push(`svg${si}: "${s}"`); });
     for (let i = 0; i < t.length; i++) for (let j = i + 1; j < t.length; j++) {
       const a = t[i][1], b = t[j][1];
       const ox = Math.min(a.right, b.right) - Math.max(a.left, b.left);
@@ -110,6 +114,7 @@ def main():
                     if got.rstrip("\n") != want.rstrip("\n"):
                         issues.append("코드 복사 내용 불일치")
                 issues += [f"SVG 글자 겹침 {x}" for x in info["svg_overlaps"]]
+                issues += [f"SVG 글자 잘림 {x}" for x in info["svg_clipped"]]
             ok = not issues
             fails += not ok
             note = (f"헤더 {info.get('hero_h')}px · 코드 박스 {info.get('codeblocks')}" if ok else "; ".join(issues))

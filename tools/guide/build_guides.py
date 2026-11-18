@@ -133,7 +133,15 @@ def svg_block(chid, relpath, module, origin, board=False):
     rows.sort(key=lambda r: (r[1] == chid, r[1]))
     lh = 23
     body_h = max(len(ins), len(outs), 2 + len(rows) * 1.6 + (2 if st_present(relpath) else 0)) * lh + 40
-    W, x0, x1, y0 = 980, 250, 730, 30
+    # 고정폭 글자 14px ≈ 9px (글꼴 대체 여유 포함): 긴 포트 이름·상태 목록·하위 모듈 이름이 상자 밖으로 나가지 않게 폭을 정한다.
+    cw = 9.2
+    st_names = [n.split("=")[0].strip() for n in FSM_RE.search(strip_comments(rd(relpath))).group(1).split(",")] if st_present(relpath) else []
+    left = max([250] + [int(len(n + w) * cw) + 40 for n, w in ins])
+    right = max([250] + [int(len(n + w) * cw) + 50 for n, w in outs])
+    box = max([480, int(len(" · ".join(st_names)) * cw) + 40] + [int(len(lb) * cw) + 140 for lb, _ in rows])
+    x0, y0 = left, 30
+    x1 = x0 + box
+    W = x1 + right
     s = [f'<svg viewBox="0 0 {W} {int(body_h+(90 if board else 70))}" role="img" aria-label="{module} 실제 포트와 하위 모듈 구조">',
          f'<rect x="{x0}" y="{y0}" width="{x1-x0}" height="{int(body_h)}" rx="10" fill="#fff" stroke="#4635b1" stroke-width="2"/>',
          f'<text x="{(x0+x1)//2}" y="{y0+24}" font-size="18" font-weight="700" text-anchor="middle">{module}</text>',
@@ -177,7 +185,7 @@ def port_table(c, board):
     missing = [n for n, _ in ins + outs if n not in notes]
     if missing:
         raise SystemExit(f"{c['id']}: port_notes 누락 {missing} — chapter.json에 한글 설명을 추가하세요")
-    rows = "".join(f"<tr><td>{d}</td><td class=\"nw\"><code>{n}</code></td><td class=\"nw\"><code>{w or '1'}</code></td><td>{port_kind(n, board)}</td><td>{notes[n]}</td></tr>"
+    rows = "".join(f"<tr><td>{d}</td><td class=\"nw\"><code>{n}</code></td><td class=\"nw\"><code>{w or '1'}</code></td><td class=\"nw\">{port_kind(n, board)}</td><td>{notes[n]}</td></tr>"
                    for d, lst in (("input", ins), ("output", outs)) for n, w in lst)
     return f"""      <table>
         <thead><tr><th>방향</th><th>포트</th><th>폭</th><th>구분</th><th>설명</th></tr></thead>
