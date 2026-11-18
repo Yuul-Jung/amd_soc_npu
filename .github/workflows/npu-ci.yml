@@ -21,7 +21,7 @@ jobs:
         run: python3 tools/guide/build_guides.py --check
 
   rtl-sim-ch00-ch12:
-    name: RTL 시뮬레이션 ch00~ch21
+    name: RTL 시뮬레이션 ch00~ch22
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -71,6 +71,8 @@ jobs:
         run: bash ch20/scripts/run_sim.sh
       - name: Run ch21 BD static check
         run: bash ch21/scripts/run_check.sh
+      - name: Run ch22 Driver trace replay
+        run: bash ch22/scripts/run_sim.sh
 
   host-model:
     name: Python 기준 정수 모델 단위 시험
