@@ -489,7 +489,7 @@ vivado -mode batch -nojournal -source tools/vivado/ooc_timing.tcl -tclargs ch17
       </table></div>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>다음 장으로 넘기는 파일</th><th>사용처</th></tr></thead>
-        <tbody><tr><td><code>ch17/rtl/npu_tiled_784.v</code></td><td>18장 정밀도 비교의 784원소 INT8 경로, 19장 사이클 비교 대상 (수정 금지)</td></tr><tr><td><code>ch17/reference/tiled_reference.py</code></td><td>18장 기준 모델의 784원소 입력 변환·타일 계산</td></tr></tbody>
+        <tbody><tr><td><code>ch17/rtl/npu_tiled_784.v</code></td><td>18장 정밀도 비교에서 DW=8 결과와 점수가 같은지 교차 확인하는 기준 (수정 금지)</td></tr><tr><td><code>ch17/reference/tiled_reference.py</code></td><td>18장 기준 모델의 784원소 입력 변환·타일 계산</td></tr></tbody>
       </table></div>
       <p>검증 게이트 (<code>ch17/validation/</code> 증거 파일 기준으로 자동 표시):</p>
       <div class="gate-row">
@@ -629,6 +629,12 @@ window.COURSE={
    "number": 17,
    "title": "784원소 타일 실행",
    "file": "ch17_tiled_784_v02.html"
+  },
+  {
+   "id": "ch18",
+   "number": 18,
+   "title": "Float32 · INT8 · INT16 정밀도",
+   "file": "ch18_precision_v02.html"
   }
  ]
 };
