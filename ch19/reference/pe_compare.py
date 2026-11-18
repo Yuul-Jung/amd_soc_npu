@@ -37,6 +37,7 @@ def main():
             for k, label, x in cases:
                 f.write(f"{k} {label} " + " ".join(map(str, x)) + "\n")
     if a.actual:
+        seen = 0
         for ln in open(a.actual):
             try:
                 p = list(map(int, ln.split()))
@@ -45,7 +46,10 @@ def main():
             k = p[0]; s = scores(cases[k][2], w, b)
             if p[1:] != s + [argmax_lowest(s)]:
                 raise SystemExit(f"PYTHON_RTL_COMPARE_FAIL npe={a.npe} case={k}")
-        print(f"PYTHON_RTL_COMPARE_PASS npe={a.npe} cases={CASES} scores={10 * CASES}")
+            seen += 1
+        if seen == 0:
+            raise SystemExit("PYTHON_RTL_COMPARE_FAIL RTL 결과 없음")
+        print(f"PYTHON_RTL_COMPARE_PASS npe={a.npe} cases={seen} scores={10 * seen}")
     if a.cycles:
         meas = {int(k): int(v) for k, v in (c.split("=") for c in a.cycles)}
         base = sum(3 * n for n in LENS)                   # 그룹 1회의 원소 클록 합
