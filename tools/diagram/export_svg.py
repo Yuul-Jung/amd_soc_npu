@@ -68,7 +68,7 @@ def main():
         i = args.index("--editor")
         editor = "file://" + os.path.abspath(args[i + 1])
         del args[i:i + 2]
-    files = args or sorted(glob.glob(os.path.join(ROOT, "ch[0-9][0-9]", "diagrams", "*.json")))
+    files = args or sorted(glob.glob(os.path.join(ROOT, "diagrams", "*.json")) + glob.glob(os.path.join(ROOT, "ch[0-9][0-9]", "diagrams", "*.json")))
     try:
         from playwright.sync_api import sync_playwright
     except ImportError:
