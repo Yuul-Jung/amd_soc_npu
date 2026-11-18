@@ -25,7 +25,7 @@ amd_soc_npu/
 ├── README.md
 ├── index.html          ← GitHub Pages 진입점
 ├── course.json         ← 장별 메타데이터
-├── assets/education/   ← site.css · site-theme.css · site.js (공통)
+├── assets/education/   ← site.css · site.js (공통, 들여쓰기·주석 원본) · hero-bookshelf.jpg
 ├── rule_md/            ← 중앙 규칙 사본
 ├── diagrams/           ← 과정 흐름·모듈 테크트리 도면 (svg-flow-editor JSON·SVG)
 ├── docs/               ← 내부 감사·검증 기록

@@ -21,7 +21,7 @@
 | STANDARD 9 · INTEGRATION 2·5 | README·AGENTS에 중앙 규칙 링크(SHA 고정) | 통과 | README "교육용 HTML 공통 제작 규칙" 절, AGENTS 기준 목록 |
 | STANDARD 10.1 | 폭 1920·1366·1024·768·390·320 가로 넘침 없음 | 통과 | 렌더 점검. 표(최소 620px)·도면(최소 860px)은 내부 가로 스크롤, 긴 경로 줄바꿈 |
 | STANDARD 10.2 | 다크 테마·인쇄 | 해당 없음 / 미검증 | 교육용은 밝은 테마 고정. 인쇄 미검증 |
-| STANDARD 10.3 | 유지보수용 CSS·JS는 들여쓰기·주석 원본, 배포용 압축본 별도 | 실패 | `assets/education/site.css`·`site.js`가 압축본만 있음(원본 저장소에서 이관). 정본 템플릿 원본을 받아 별도 보관 필요 |
+| STANDARD 10.3 | 유지보수용 CSS·JS는 들여쓰기·주석 원본, 배포용 압축본 별도 | 통과 | `site.css`(압축 1줄 → 412줄)·`site.js`(→ 127줄)를 Prettier로 정리하고 기능별 한글 주석 추가. 정리 전후 JS acorn AST 동일, CSS PostCSS 규칙 315항목 동일(따옴표·소수 앞 0 표기만 정규화). 5.5 KB라 별도 압축본은 두지 않음. 기준 디자인 저장소(ai-agent-engineering)는 HTML 내장 방식이라 별도 원본 없음 확인. 쓰이지 않던 `site-theme.css`(외부 사진 주소) 삭제 |
 | STANDARD 10.4 | 본문 바로가기·초점 표시·reduced-motion | 통과 | 바로가기는 Tab 초점 때만 표시, `:focus-visible`, `prefers-reduced-motion` |
 | STANDARD 10.4 | JS 없이 본문 읽힘 | 통과 | 본문·코드·표는 정적 HTML, JS는 탐색·복사만 |
 | STANDARD 10.4 | 스크린리더 실제 낭독, Safari·Firefox | 미검증 | Chromium만 점검 |
@@ -43,8 +43,7 @@
 
 ## 남은 실패·미검증
 
-1. **STANDARD 10.3 (실패):** 공통 CSS·JS 유지보수용 원본. 정본 `rule_md` 템플릿에는 자산이 포함되지 않으므로(SOURCE.md 범위), 기준 디자인 저장소(`ai-agent-engineering`)의 원본을 확인해 `assets/education/src/`에 보관하는 작업이 필요하다.
-2. **STANDARD 10.2·10.4 (미검증):** 인쇄, 스크린리더, Safari·Firefox.
+1. **STANDARD 10.2·10.4 (미검증):** 인쇄, 스크린리더, Safari·Firefox.
 
 ## svg-flow-editor 내보내기 보정 (편집기 저장소 무수정)
 
