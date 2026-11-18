@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="Basys3 NPU 21장 실습 · MicroBlaze V SoC에 NPU 연결 (독립 Vivado 프로젝트)">
+<meta name="description" content="Basys3 NPU 21장 실습 · MicroBlaze V SoC에 NPU 연결">
 <meta name="generator" content="tools/guide/build_guides.py — 직접 수정 금지, chapter.json을 고친 뒤 재생성">
-<title>21장 · MicroBlaze V SoC에 NPU 연결 (독립 Vivado 프로젝트) (v02)</title>
+<title>21장 · MicroBlaze V SoC에 NPU 연결 (v02)</title>
 <link rel="stylesheet" href="assets/education/site.css">
 <style>
 .codeblock pre{max-height:780px;white-space:pre}
@@ -39,8 +39,8 @@
 <header class="hero">
   <div class="hero-inner">
     <p class="kicker">BASYS3 · NPU 고도화판 · 21장 실습 <span class="vbadge">v02</span></p>
-    <h1>제21장 · MicroBlaze V SoC에 NPU 연결 (독립 Vivado 프로젝트)</h1>
-    <p>제1부 11장에서 보드로 확인한 MicroBlaze V SoC를 새 프로젝트로 복제하고, 20장 AXI NPU를 모듈 참조로 넣어 0x44A0_0000(64KB)에 배정합니다. Vivado 없이 할 수 있는 확인(파일·모듈 계층, 주소 겹침, Top 포트와 XDC)은 Tcl 정적 검사로 먼저 끝냅니다.</p>
+    <h1>제21장 · MicroBlaze V SoC에 NPU 연결</h1>
+    <p>제1부 11장 MicroBlaze V SoC를 복제해 20장 NPU를 0x44A0_0000에 붙이고, Vivado 없이 가능한 확인을 먼저 합니다.</p>
   </div>
 </header>
 <div class="wrap">
@@ -48,7 +48,7 @@
   <main class="content" id="main-content">
     <section class="section" id="s00">
       <h2><span class="num">00</span>이 장의 위치</h2>
-      <p><b>목표:</b> 제1부 11장에서 보드로 확인한 MicroBlaze V SoC를 새 프로젝트로 복제하고, 20장 AXI NPU를 모듈 참조로 넣어 0x44A0_0000(64KB)에 배정합니다. Vivado 없이 할 수 있는 확인(파일·모듈 계층, 주소 겹침, Top 포트와 XDC)은 Tcl 정적 검사로 먼저 끝냅니다.</p>
+      <p><b>목표:</b> 제1부 11장 MicroBlaze V SoC를 복제해 20장 NPU를 0x44A0_0000에 붙이고, Vivado 없이 가능한 확인을 먼저 합니다.</p>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>구분</th><th>파일</th></tr></thead>
         <tbody>

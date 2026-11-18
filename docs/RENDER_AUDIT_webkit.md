@@ -20,7 +20,24 @@
 | ch10_npu_core_v05.html | 통과 | 헤더 213px · 코드 박스 7 |
 | ch11_uart_register_v05.html | 통과 | 헤더 213px · 코드 박스 8 |
 | ch12_integrated_npu_v05.html | 통과 | 헤더 213px · 코드 박스 20 |
-| ch13_mnist_8x8_v02.html | 통과 | 헤더 213px · 코드 박스 7 |
+| ch13_mnist_8x8_v02.html | 통과 | 헤더 213px · 코드 박스 9 |
 | ch14_group10_v02.html | 통과 | 헤더 213px · 코드 박스 7 |
+| ch15_dense_64x10_v02.html | 통과 | 헤더 213px · 코드 박스 9 |
+| ch16_mlp_64_8_10_v02.html | 통과 | 헤더 213px · 코드 박스 8 |
+| ch17_tiled_784_v02.html | 통과 | 헤더 213px · 코드 박스 7 |
+| ch18_precision_v02.html | 통과 | 헤더 213px · 코드 박스 10 |
+| ch19_pe_compare_v02.html | 통과 | 헤더 213px · 코드 박스 7 |
+| ch20_axi_lite_v02.html | 통과 | 헤더 213px · 코드 박스 6 |
+| ch21_soc_bd_v02.html | 통과 | 헤더 213px · 코드 박스 7 |
+| ch22_vitis_driver_v02.html | 통과 | 헤더 213px · 코드 박스 16 |
+| ch23_cpu_vs_npu_v02.html | 통과 | 헤더 213px · 코드 박스 9 |
+| ch24_resource_timing_v02.html | 통과 | 헤더 213px · 코드 박스 6 |
+| ch25_power_energy_v02.html | 통과 | 헤더 213px · 코드 박스 6 |
+| ch26_tiny_cnn_v02.html | 통과 | 헤더 213px · 코드 박스 7 |
+| ch27_npu_system_v02.html | 통과 | 헤더 213px · 코드 박스 16 |
+| ch28_handwriting_v02.html | 통과 | 헤더 213px · 코드 박스 15 |
+| ch29_sensor_ai_v02.html | 통과 | 헤더 213px · 코드 박스 7 |
+| ch30_motor_interlock_v02.html | 통과 | 헤더 213px · 코드 박스 7 |
+| ch31_secure_frame_v02.html | 통과 | 헤더 213px · 코드 박스 11 |
 
 다른 브라우저 결과: `docs/RENDER_AUDIT*_firefox.md`·`*_webkit.md`. 인쇄·접근성: `docs/A11Y_PRINT_AUDIT.md`.

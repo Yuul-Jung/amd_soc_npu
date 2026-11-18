@@ -40,7 +40,7 @@
   <div class="hero-inner">
     <p class="kicker">BASYS3 · NPU 고도화판 · 26장 실습 <span class="vbadge">v02</span></p>
     <h1>제26장 · 3×3 소형 CNN 경로 (합성곱·풀링·Dense)</h1>
-    <p>기존 NPU를 고치지 않고 옆에 소형 CNN 경로를 더합니다. 8×8 입력에 3×3 필터 4개로 합성곱(ReLU·정수 양자화)을 하고 2×2 최대 풀링으로 36특징을 만든 뒤, 15장 Dense와 16장 argmax로 10분류합니다. 새 TB와 함께 15·16·20장 회귀를 다시 돌립니다.</p>
+    <p>기존 NPU를 고치지 않고 3×3 합성곱·2×2 풀링·Dense로 이어지는 소형 CNN 경로를 더하고 회귀를 다시 돌립니다.</p>
   </div>
 </header>
 <div class="wrap">
@@ -48,7 +48,7 @@
   <main class="content" id="main-content">
     <section class="section" id="s00">
       <h2><span class="num">00</span>이 장의 위치</h2>
-      <p><b>목표:</b> 기존 NPU를 고치지 않고 옆에 소형 CNN 경로를 더합니다. 8×8 입력에 3×3 필터 4개로 합성곱(ReLU·정수 양자화)을 하고 2×2 최대 풀링으로 36특징을 만든 뒤, 15장 Dense와 16장 argmax로 10분류합니다. 새 TB와 함께 15·16·20장 회귀를 다시 돌립니다.</p>
+      <p><b>목표:</b> 기존 NPU를 고치지 않고 3×3 합성곱·2×2 풀링·Dense로 이어지는 소형 CNN 경로를 더하고 회귀를 다시 돌립니다.</p>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>구분</th><th>파일</th></tr></thead>
         <tbody>

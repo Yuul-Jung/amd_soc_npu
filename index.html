@@ -43,7 +43,7 @@ table td,.section td{vertical-align:middle}
     <section class="section" id="intro">
       <h2><span class="num">00</span>교육과정 개요</h2>
       <p>이 교재는 <code>Yuul-Jung/amd_soc_rtl</code> 제3부를 기반으로 고도화한 독립 NPU 교육과정입니다. 00~12장에서 MAC·DSP·BRAM·4PE·UART 기반 소형 4분류 NPU를 단계별로 제작합니다. 13~19장에서는 8×8 입력의 10분류 정수 MLP를 구현하고, 20~27장에서는 AXI4-Lite·MicroBlaze V SoC로 통합하며, 28~31장에서는 숫자 인식·센서 융합·모터 제어·보안 UART 종합 과제로 마무리합니다.</p>
-      <p><strong>현재 상태:</strong> 00~12장 안내서 v05 (전체 코드 원문 수록, RTL 시뮬레이션 통과, Vivado 합성·보드 미검증) · 13~14장 안내서 v02 (RTL 시뮬레이션 통과, Vivado 미검증) · 15~31장은 코드 작성 중이며 안내서는 코드와 시뮬레이션 증거가 들어온 뒤 생성 · 장별 CI 게이트.</p>
+      <p><strong>현재 상태:</strong> 00~12장 안내서 v05 · 13~31장 안내서 v02. RTL 장(13~20·26·29·30)은 Icarus 시뮬레이션 통과, 21·24·25장은 Tcl·해석기 정적 검사, 22·23·27·28·31장은 PC 시험과 펌웨어 기록의 RTL 재생까지 확인했습니다. Vivado 합성·Vitis 빌드·보드는 아직 실행하지 않았습니다(⚠ 미검증).</p>
     </section>
 
     <section class="section" id="techtree">

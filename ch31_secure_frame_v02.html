@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="Basys3 NPU 31장 실습 · 응용 4: AES-CTR·HMAC 인증 틀과 모델 커밋 (소프트웨어)">
+<meta name="description" content="Basys3 NPU 31장 실습 · 응용 4: 인증 틀과 모델 커밋">
 <meta name="generator" content="tools/guide/build_guides.py — 직접 수정 금지, chapter.json을 고친 뒤 재생성">
-<title>31장 · 응용 4: AES-CTR·HMAC 인증 틀과 모델 커밋 (소프트웨어) (v02)</title>
+<title>31장 · 응용 4: 인증 틀과 모델 커밋 (v02)</title>
 <link rel="stylesheet" href="assets/education/site.css">
 <style>
 .codeblock pre{max-height:780px;white-space:pre}
@@ -39,8 +39,8 @@
 <header class="hero">
   <div class="hero-inner">
     <p class="kicker">BASYS3 · NPU 고도화판 · 31장 실습 <span class="vbadge">v02</span></p>
-    <h1>제31장 · 응용 4: AES-CTR·HMAC 인증 틀과 모델 커밋 (소프트웨어)</h1>
-    <p>PC가 모델·그림을 AES-128-CTR로 암호화하고 HMAC-SHA256 태그와 단조 증가 카운터를 붙여 보내면, 보드 쪽 C 수신기가 재전송·변조·다른 키·되감기를 거부하고, 모델은 전체 해시가 맞을 때만 한 번에 바꿉니다(커밋). 암호는 CPU 소프트웨어로만 하며 FPGA 암호 RTL은 만들지 않았습니다.</p>
+    <h1>제31장 · 응용 4: 인증 틀과 모델 커밋</h1>
+    <p>AES-CTR·HMAC 인증 틀로 재전송·변조를 거부하고 모델은 해시가 맞을 때만 교체합니다(소프트웨어, 보드 미실행).</p>
   </div>
 </header>
 <div class="wrap">
@@ -48,7 +48,7 @@
   <main class="content" id="main-content">
     <section class="section" id="s00">
       <h2><span class="num">00</span>이 장의 위치</h2>
-      <p><b>목표:</b> PC가 모델·그림을 AES-128-CTR로 암호화하고 HMAC-SHA256 태그와 단조 증가 카운터를 붙여 보내면, 보드 쪽 C 수신기가 재전송·변조·다른 키·되감기를 거부하고, 모델은 전체 해시가 맞을 때만 한 번에 바꿉니다(커밋). 암호는 CPU 소프트웨어로만 하며 FPGA 암호 RTL은 만들지 않았습니다.</p>
+      <p><b>목표:</b> AES-CTR·HMAC 인증 틀로 재전송·변조를 거부하고 모델은 해시가 맞을 때만 교체합니다(소프트웨어, 보드 미실행).</p>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>구분</th><th>파일</th></tr></thead>
         <tbody>
