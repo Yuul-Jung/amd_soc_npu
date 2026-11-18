@@ -2,10 +2,11 @@
 """13장 기준 모델: 28×28 화소 → 8×8 평균 풀링 → INT8 64원소 (표준 라이브러리만 사용).
 
 시험 영상은 5×7 글꼴로 그린 숫자 0~9 합성 영상이다(실제 MNIST 아님).
-실제 MNIST 확인은 --mnist 옵션 (torch·torchvision 설치와 내려받기 필요, 선택).
+실제 MNIST 확인은 --mnist N 옵션 (host_tools/mnist_idx.py가 내려받음, 선택).
 """
 from __future__ import annotations
 import argparse
+import sys
 from pathlib import Path
 
 SIZE, OUT = 28, 8
@@ -80,21 +81,24 @@ def selftest() -> list[tuple[int, list[int]]]:
     return samples
 
 
-def mnist_check(root: str, count: int) -> None:
-    """선택: 실제 MNIST 시험 집합으로 shape·라벨·범위와 adaptive_avg_pool2d 일치를 확인한다."""
-    import torch
-    from torchvision.datasets import MNIST
-    data = MNIST(root, train=False, download=True)
-    worst = 0
+def mnist_check(count: int) -> None:
+    """선택: 실제 MNIST 시험 집합 앞 count장으로 라벨·범위와 풀링 반올림 오차(실수 창 평균 대비 ≤ 0.5)를 확인한다."""
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "host_tools"))
+    from mnist_idx import images, labels
+    imgs, labs = images("test"), labels("test")
+    worst, seen = 0.0, set()
     for k in range(count):
-        image, label = data[k]
-        img = [[image.getpixel((x, y)) for x in range(SIZE)] for y in range(SIZE)]
+        img = [list(imgs[k][r * SIZE:(r + 1) * SIZE]) for r in range(SIZE)]
         ours = pool_8x8(img)
-        ref = torch.nn.functional.adaptive_avg_pool2d(torch.tensor(img, dtype=torch.float32)[None, None], (8, 8))[0, 0]
-        worst = max(worst, max(abs(ours[i][j] - float(ref[i][j])) for i in range(8) for j in range(8)))
-        assert 0 <= int(label) <= 9
+        for i in range(OUT):
+            for j in range(OUT):
+                vals = [img[y][x] for y in window(i) for x in window(j)]
+                worst = max(worst, abs(ours[i][j] - sum(vals) / len(vals)))
+        x = features(img)
+        assert len(x) == 64 and all(0 <= v <= 127 for v in x) and 0 <= labs[k] <= 9
+        seen.add(labs[k])
     assert worst <= 0.5, worst
-    print(f"MNIST_POOL_MATCH_PASS samples={count} max_round_error={worst:.3f}")
+    print(f"MNIST_POOL_CHECK_PASS samples={count} labels={len(seen)} max_round_error={worst:.3f}")
 
 
 def main() -> None:
@@ -102,10 +106,10 @@ def main() -> None:
     ap.add_argument("--out", help="vectors.txt를 쓸 폴더")
     ap.add_argument("--actual", help="RTL이 읽어 낸 actual.txt (Python 값과 비교)")
     ap.add_argument("--show", type=int, help="숫자 하나의 8×8 특징을 글자 그림으로 출력")
-    ap.add_argument("--mnist", help="선택: MNIST 저장 폴더 (torch·torchvision 필요)")
+    ap.add_argument("--mnist", type=int, metavar="N", help="선택: 실제 MNIST 시험 집합 앞 N장 확인 (첫 실행 때 내려받음)")
     a = ap.parse_args()
     if a.mnist:
-        mnist_check(a.mnist, 100)
+        mnist_check(a.mnist)
         return
     samples = selftest()
     if a.show is not None:

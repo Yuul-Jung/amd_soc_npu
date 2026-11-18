@@ -11,7 +11,8 @@
     "module": "npu10_input_loader"
   },
   "keep": [
-    "ch04/rtl/bram_sync_buffer.v"
+    "ch04/rtl/bram_sync_buffer.v",
+    "host_tools/mnist_idx.py"
   ],
   "new": [
     "ch13/rtl/npu10_input_loader.v"
@@ -22,7 +23,7 @@
   "ref": [
     "ch13/reference/mnist8x8_reference.py"
   ],
-  "prep_note": "기준 모델은 표준 라이브러리만 씁니다. 실제 MNIST 100장으로 풀링을 대조하려면 선택으로 <code>python3 ch13/reference/mnist8x8_reference.py --mnist data/mnist</code>를 실행합니다 — torch·torchvision과 인터넷 연결 필요, ⚠ 미검증",
+  "prep_note": "기준 모델은 표준 라이브러리만 씁니다. 실제 MNIST 확인(선택)은 첫 실행 때 시험 집합(약 1.6MB)을 <code>data/mnist/</code>에 내려받고 SHA-256을 확인합니다(<code>host_tools/mnist_idx.py</code>)",
   "tb_note": "기준 모델(Python)이 숫자 0~9 합성 영상(5×7 글꼴, 실제 MNIST 아님)에서 64원소 벡터를 만들고, TB는 적재·읽기 결과를 파일로 돌려줍니다.",
   "run": "bash ch13/scripts/run_sim.sh",
   "run_note": "기준 모델 자체 시험 → 숫자 7의 8×8 특징 그림 → RTL 시뮬레이션 → Python 비교",
@@ -178,5 +179,13 @@
       ]
     ],
     "diagram": "ch13/diagrams/ch13_input_loader_fsm"
-  }
+  },
+  "extra_runs": [
+    {
+      "title": "선택: 실제 MNIST 1000장으로 풀링 확인",
+      "cmd": "python3 ch13/reference/mnist8x8_reference.py --mnist 1000",
+      "pattern": "MNIST_POOL_CHECK_PASS",
+      "log": "ch13/validation/mnist_check_*.log"
+    }
+  ]
 }

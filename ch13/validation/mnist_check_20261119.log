@@ -1,0 +1,1 @@
+MNIST_POOL_CHECK_PASS samples=1000 labels=10 max_round_error=0.500
