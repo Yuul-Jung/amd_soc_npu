@@ -137,8 +137,8 @@
       "id": "ch16",
       "number": 16,
       "title": "64→8→10 다층 MLP",
-      "file": "ch16_mlp64_8_10_v02.html",
-      "html_status": "TODO",
+      "file": "ch16_mlp_64_8_10_v02.html",
+      "html_status": "DONE",
       "rtl_status": "TODO"
     },
     {

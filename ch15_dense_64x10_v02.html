@@ -608,7 +608,7 @@ vivado -mode batch -nojournal -source tools/vivado/ooc_timing.tcl -tclargs ch15
       </table></div>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>다음 장으로 넘기는 파일</th><th>사용처</th></tr></thead>
-        <tbody><tr><td><code>ch15/rtl/npu_dense.v</code></td><td>16장 은닉층(64→8)·출력층(8→10) 두 인스턴스 (수정 금지)</td></tr><tr><td><code>ch15/rtl/npu_dense_core.v</code></td><td>17장 타일 실행 (len_i·읽기 포트로 784원소를 13번에 나눠 계산)</td></tr><tr><td><code>ch15/reference/dense_reference.py</code></td><td>16장 기준 모델의 사례 생성·검증합 계산</td></tr></tbody>
+        <tbody><tr><td><code>ch15/rtl/npu_dense.v</code></td><td>16장 <code>npu_mlp_64_8_10</code>의 은닉층(64→8)·출력층(8→10) 두 인스턴스 (수정 금지)</td></tr><tr><td><code>ch15/rtl/npu_dense_core.v</code></td><td>17장 타일 실행 (len_i·읽기 포트로 784원소를 13번에 나눠 계산)</td></tr><tr><td><code>ch15/reference/dense_reference.py</code></td><td>16장 기준 모델의 사례 생성·검증합 계산</td></tr></tbody>
       </table></div>
       <p>검증 게이트 (<code>ch15/validation/</code> 증거 파일 기준으로 자동 표시):</p>
       <div class="gate-row">
@@ -736,6 +736,12 @@ window.COURSE={
    "number": 15,
    "title": "Dense 64→10 공통 블록",
    "file": "ch15_dense_64x10_v02.html"
+  },
+  {
+   "id": "ch16",
+   "number": 16,
+   "title": "2층 신경망 64→8→10",
+   "file": "ch16_mlp_64_8_10_v02.html"
   }
  ]
 };

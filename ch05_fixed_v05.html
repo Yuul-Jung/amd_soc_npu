@@ -314,11 +314,11 @@ vivado -mode batch -nojournal -source tools/vivado/ooc_timing.tcl -tclargs ch05
       <p>누적 보고 (이전 결과 → 추가 RTL → 시험 벡터 → 시뮬레이션 → 합성/보드 → 인계):</p>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>이전 결과</th><th>추가 RTL</th><th>시험 벡터</th><th>시뮬레이션</th><th>합성 / 보드</th><th>인계</th></tr></thead>
-        <tbody><tr><td>없음 (첫 장)</td><td><code>fixed_quantizer.v</code></td><td><code>tb_fixed_quantizer.sv</code><br><code>fixed_reference.py</code></td><td>통과</td><td>⚠ 대기 / 미실시</td><td>1건 (아래 표)</td></tr></tbody>
+        <tbody><tr><td>없음 (첫 장)</td><td><code>fixed_quantizer.v</code></td><td><code>tb_fixed_quantizer.sv</code><br><code>fixed_reference.py</code></td><td>통과</td><td>⚠ 대기 / 미실시</td><td>2건 (아래 표)</td></tr></tbody>
       </table></div>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>다음 장으로 넘기는 파일</th><th>사용처</th></tr></thead>
-        <tbody><tr><td><code>ch05/rtl/fixed_quantizer.v</code></td><td>06장 precision_compare · 09장 dense_layer4 (수정 금지)</td></tr></tbody>
+        <tbody><tr><td><code>ch05/rtl/fixed_quantizer.v</code></td><td>06장 precision_compare · 09장 dense_layer4 (수정 금지)</td></tr><tr><td><code>ch05/rtl/fixed_quantizer.v</code></td><td>16장 은닉층 ReLU 뒤 반올림 시프트·INT8 포화 (SHIFT=10, 수정 금지)</td></tr></tbody>
       </table></div>
       <p>검증 게이트 (<code>ch05/validation/</code> 증거 파일 기준으로 자동 표시):</p>
       <div class="gate-row">
@@ -446,6 +446,12 @@ window.COURSE={
    "number": 15,
    "title": "Dense 64→10 공통 블록",
    "file": "ch15_dense_64x10_v02.html"
+  },
+  {
+   "id": "ch16",
+   "number": 16,
+   "title": "2층 신경망 64→8→10",
+   "file": "ch16_mlp_64_8_10_v02.html"
   }
  ]
 };
