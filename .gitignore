@@ -1,0 +1,7 @@
+# Vivado·시뮬레이션 산출물 (증거는 chNN/validation/ 에 텍스트로 저장)
+build/
+mini_npu/build/
+.Xil/
+*.jou
+vivado*.log
+xsim.dir/

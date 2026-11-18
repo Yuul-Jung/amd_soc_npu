@@ -54,11 +54,14 @@ amd_soc_npu/
 | `HTML_PASS` | 링크·탐색·모바일·코드복사 정상 |
 | `HOST_MODEL_PASS` | Python 기준 정수 모델 단위 시험 통과 |
 | `RTL_SIM_PASS` | Icarus/Verilator RTL 시뮬레이션 통과 |
-| `SYNTH_TIMING_PASS` | Vivado 합성·타이밍 통과 |
+| `SYNTH_TIMING_PASS` | Vivado 합성·배치·배선 후 WNS≥0·WHS≥0 (00~10장 OOC 100 MHz, 12장 통합 Top + DRC 0) |
+| `TIMING_SIM_PASS` | 12장 배선 후 넷리스트 + SDF(slow) xsim 시뮬레이션 통과 |
 | `BOARD_PASS` | 실물 Basys3 동작 확인 |
 
 - 위 게이트는 서로 대체할 수 없다.
 - 각 장 `validation/` 폴더에 증거 파일을 보관한다.
+- Vivado 게이트는 Vivado 설치 PC(VS Code)에서 `bash tools/run_vivado_all.sh`로 실행하고, 생성된 `validation/vivado_*` 파일을 커밋해야 확정한다. 오픈소스 도구 결과로 대체하지 않는다.
+- 현재 실물 보드 확인은 하지 않는다(`BOARD_PASS` 미실시 표기).
 
 ## 동결 SoC 하드웨어 사양 (ch20~ch31 AXI 연동 기준)
 로컬메모리 0x0000_0000 · GPIO LED/SW 0x4000_0000 · GPIO BTN 0x4001_0000
