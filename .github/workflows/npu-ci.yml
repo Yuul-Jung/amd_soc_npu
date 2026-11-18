@@ -21,14 +21,14 @@ jobs:
         run: python3 tools/guide/build_guides.py --check
 
   rtl-sim-ch00-ch12:
-    name: RTL 시뮬레이션 ch00~ch22
+    name: RTL 시뮬레이션 ch00~ch23
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Install Icarus Verilog
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y iverilog ripgrep tcl python3-numpy   # rg: ch04·batch, tcl: ch21 정적 검사, numpy: ch18 PC 비교
+          sudo apt-get install -y iverilog ripgrep tcl python3-numpy clang lld llvm   # rg: ch04·batch, tcl: ch21, numpy: ch18 PC, clang·lld·llvm: ch22~ RV32 컴파일·역어셈블
       - name: Run ch00 UART Echo
         run: bash ch00/scripts/run_sim.sh
       - name: Run ch01 MAC
@@ -73,6 +73,8 @@ jobs:
         run: bash ch21/scripts/run_check.sh
       - name: Run ch22 Driver trace replay
         run: bash ch22/scripts/run_sim.sh
+      - name: Run ch23 CPU reference
+        run: bash ch23/scripts/run_sim.sh
 
   host-model:
     name: Python 기준 정수 모델 단위 시험
