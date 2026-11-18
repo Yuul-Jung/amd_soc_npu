@@ -1,0 +1,8 @@
+MODEL_HEADER_DONE samples=4 classes=[7, 2, 4, 4] labels=[7, 2, 9, 9]
+VITIS_BUILD_DONE
+#define XPAR_P3_NPU_0_BASEADDR 0x44a00000
+#define XPAR_P3_NPU_0_HIGHADDR 0x44a00fff
+   text	   data	    bss	    dec	    hex	filename
+  26856	    204	   3512	  30572	   776c	npu_app.elf
+8805a761979ff2e7103d15546747bbe1ff68a1ad6ab06231c09e5ad545b1efb9  ws/npu_app/build/npu_app.elf
+VITIS_ELF_PASS (빌드만, 실물 실행은 사용자와 함께)

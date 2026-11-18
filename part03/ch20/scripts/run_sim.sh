@@ -13,6 +13,6 @@ iverilog -g2012 -Wall -s tb_p3_npu_axi_lite -o "$build_dir/sim" \
   "$part03/ch02/rtl/dsp_multiplier.v" "$part03/mini_npu/rtl/npu_dsp_mac_lane.v" \
   "$part03/ch04/rtl/bram_sync_buffer.v" "$part03/ch14/rtl/p3_group10_core.v" \
   "$part03/ch17/rtl/p3_tile784_10.v" "$chapter_dir/rtl/p3_npu_axi_lite.v" \
-  "$chapter_dir/tb/tb_p3_npu_axi_lite.sv"
+  -I"$chapter_dir/tb" "$chapter_dir/tb/tb_p3_npu_axi_lite.sv"
 vvp "$build_dir/sim" +VECTORS="$build_dir/vectors.txt" +ACTUAL="$build_dir/actual.txt"
 python3 "$chapter_dir/reference/axi_reference.py" --out "$build_dir" --actual "$build_dir/actual.txt"

@@ -1,0 +1,14 @@
+Python 3.12.3
+gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+Icarus Verilog version 12.0 (stable) ()
+MODEL_HEADER_DONE samples=4 classes=[7, 2, 4, 4] labels=[7, 2, 9, 9]
+part03/mini_npu/rtl/npu_dsp_mac_lane.v:2: warning: timescale for npu_dsp_mac_lane inherited from another file.
+part03/ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
+CPU_TIE_SELFTEST pairs=9 bad=0
+SAMPLE 0 index=0 label=7 npu_class=7 cpu_class=7 expect=7 scores_match=1 rc=0
+SAMPLE 1 index=1 label=2 npu_class=2 cpu_class=2 expect=2 scores_match=1 rc=0
+SAMPLE 2 index=92 label=9 npu_class=4 cpu_class=4 expect=4 scores_match=1 rc=0
+SAMPLE 3 index=1640 label=9 npu_class=4 cpu_class=4 expect=4 scores_match=1 rc=0
+NPU_APP_DONE samples=4 failures=0
+RTL_SIM_PASS DRIVER_BRIDGE axi_writes=35917 axi_reads=3781 irq_rising=4
+PYTHON_RTL_COMPARE_PASS c_driver_cosim npu=cpu=python_scores class_match=1

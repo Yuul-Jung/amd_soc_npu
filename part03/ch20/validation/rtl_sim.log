@@ -4,5 +4,5 @@ PYTHON_AXI_VECTORS_PASS inferences=7 regs=15 seed=2020
 part03/mini_npu/rtl/npu_dsp_mac_lane.v:2: warning: timescale for npu_dsp_mac_lane inherited from another file.
 part03/ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
 RTL_SIM_PASS AXI_NPU inferences=7 axi_writes=67451 axi_reads=7012 slverr=16
-part03/ch20/tb/tb_p3_npu_axi_lite.sv:401: $finish called at 2909360000 (1ps)
+part03/ch20/tb/tb_p3_npu_axi_lite.sv:338: $finish called at 2909360000 (1ps)
 PYTHON_RTL_COMPARE_PASS inferences=7 scores_via_axi=10 class=1 overflow=1 bit_exact=1
