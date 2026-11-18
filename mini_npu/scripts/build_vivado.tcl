@@ -1,22 +1,22 @@
-# (추가) 제3부 12장: 기존 성공 프로젝트를 수정하지 않는 독립 Vivado 프로젝트.
-# 실행: vivado -mode batch -source part03/mini_npu/scripts/build_vivado.tcl
-set project_root [file normalize [file join [file dirname [info script]] ../../..]]
-set design_root [file join $project_root part03 mini_npu]
+# (추가) 12장: 기존 성공 프로젝트를 수정하지 않는 독립 Vivado 프로젝트.
+# 실행: vivado -mode batch -source mini_npu/scripts/build_vivado.tcl
+set project_root [file normalize [file join [file dirname [info script]] ../..]]
+set design_root [file join $project_root mini_npu]
 set build_dir [file join $design_root build]
 file mkdir $build_dir
 create_project -force p3_uart_npu $build_dir -part xc7a35tcpg236-1
 set_property target_language Verilog [current_project]
 foreach file [list \
-  part03/common/rtl/uart_rx.v \
-  part03/common/rtl/uart_tx.v \
-  part03/common/rtl/uart_core.v \
-  part03/ch02/rtl/dsp_multiplier.v \
-  part03/mini_npu/rtl/npu_dsp_mac_lane.v \
-  part03/mini_npu/rtl/npu_engine4.v \
-  part03/mini_npu/rtl/uart_npu_command_controller.v \
-  part03/mini_npu/rtl/npu_display_controller.v \
-  part03/mini_npu/rtl/npu_reset_controller.v \
-  part03/mini_npu/rtl/basys3_npu_top.v \
+  common/rtl/uart_rx.v \
+  common/rtl/uart_tx.v \
+  common/rtl/uart_core.v \
+  ch02/rtl/dsp_multiplier.v \
+  mini_npu/rtl/npu_dsp_mac_lane.v \
+  mini_npu/rtl/npu_engine4.v \
+  mini_npu/rtl/uart_npu_command_controller.v \
+  mini_npu/rtl/npu_display_controller.v \
+  mini_npu/rtl/npu_reset_controller.v \
+  mini_npu/rtl/basys3_npu_top.v \
 ] {
   add_files -norecurse [file join $project_root $file]
 }
