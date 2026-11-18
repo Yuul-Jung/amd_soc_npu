@@ -28,7 +28,7 @@ amd_soc_npu/
 ├── assets/education/   ← site.css · site-theme.css · site.js (공통)
 ├── rule_md/            ← 중앙 규칙 사본
 ├── docs/               ← 내부 감사·검증 기록
-├── tools/              ← 정적 검사·SHA 확인 스크립트
+├── tools/              ← 정적 검사 · guide/(안내서 생성기) · vivado/(OOC 합성)
 ├── host_tools/         ← Python 기준 정수 모델
 ├── .github/workflows/  ← CI (정적 검사·RTL 시뮬레이션)
 └── ch{NN}/             ← 장별 디렉터리
@@ -36,14 +36,17 @@ amd_soc_npu/
     ├── tb/             ← 테스트벤치
     ├── reference/      ← Python 기준 모델
     ├── scripts/        ← run_sim.sh
-    ├── validation/     ← 시뮬레이션 로그·SHA
+    ├── validation/     ← 시뮬레이션·Vivado 증거 (rtl_sim_*, vivado_ooc_*, vivado_impl_timesim_*, board_*)
+    ├── chapter.json    ← 안내서 내용의 단일 원본
     └── docs/README.md  ← 장 개요
 ```
 
 ## HTML 교재 제작
 - STANDARD.md: 책장 사진 1800×380, `#F1F2EE` 바탕, `#4635B1` 강조, 좌측 탐색, 860px 모바일 메뉴, 이전/다음/INDEX.
 - 버전 규칙: ch00~ch12는 현재 v05(실습 절차형), ch13~ch31은 v02부터 시작.
-- 실습 안내서 절 구성: 00 위치(유지·작성 파일) → 01 구조도(실제 포트·인스턴스) → 02 준비 → 03 RTL → 04 TB·기준 모델 → 05 실행(실제 로그) → 06 판정 → 07 코드 읽기 → 08 보드 → 09 검증·인계. 설명 문단은 최소화한다.
+- 실습 안내서 절 구성: 00 위치(유지·작성 파일) → 01 구조도(실제 포트·인스턴스) → 02 준비 → 03 RTL → 04 TB·기준 모델 → 05 실행(실제 로그) → 06 판정 → 07 코드 읽기 → 08 합성·타이밍·보드 → 09 검증·인계. 설명 문단은 최소화한다.
+- **안내서 HTML·`index.html`·`docs/GUIDE_STATUS.md`는 직접 수정하지 않는다.** 내용은 `chNN/chapter.json`, 코드는 원본 파일, 게이트 배지는 `validation/` 증거에서 `python3 tools/guide/build_guides.py`가 만든다. CI가 `--check`로 어긋남을 막는다.
+- 역할 분담: 코드·실행·증거·`chapter.json`은 VS Code Claude, 생성기·안내서 관리는 웹 Claude. 상세는 [docs/VSCODE_HANDOFF.md](docs/VSCODE_HANDOFF.md).
 - `window.COURSE` 탐색에는 실제 존재하는 장 파일만 넣는다.
 - 원본에 없는 하드웨어 실행 결과·GUI 캡처를 성공 사례처럼 조작하지 않는다.
 - 미검증 항목은 `⚠ 미검증` 뱃지를 명시한다.

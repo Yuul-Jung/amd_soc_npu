@@ -8,14 +8,15 @@
 
 | 구간 | 장 | 내용 | 상태 |
 |---|---|---|---|
-| UART 준비 | 00 | UART Echo RTL | HTML v04 · RTL 기존 로그 보존 |
-| 독립 RTL | 01~12 | MAC·DSP·BRAM·4PE·통합 NPU | HTML v04 · RTL 기존 로그 보존 |
+| UART 준비 | 00 | UART Echo RTL | 안내서 v05 · RTL_SIM 통과 |
+| 독립 RTL | 01~12 | MAC·DSP·BRAM·4PE·통합 NPU | 안내서 v05 · RTL_SIM 통과 · Vivado 실행 대기 |
 | 10분류 정수 | 13~19 | 8×8·MLP·784 타일·INT8/16 | HTML v02 · RTL 신규 구현 |
 | AXI·SoC | 20~27 | AXI4-Lite·MBV·Vitis·성능 | HTML v02 · RTL 신규 구현 |
 | 종합 과제 | 28~31 | MNIST·센서·모터·보안 UART | HTML v02 · RTL 신규 구현 |
 
 ## 고도화 내용
-- **HTML**: ch00~12를 v03→v04로, ch13~31을 v01→v02로 품질 향상
+- **안내서**: ch00~12 v05 실습 절차형(생성기 `tools/guide/build_guides.py`), ch13~31 v02 예정 — 장별 현황은 [docs/GUIDE_STATUS.md](docs/GUIDE_STATUS.md)
+- **분담**: 코드·Vivado 실행은 VS Code, 안내서 관리는 생성기 — [docs/VSCODE_HANDOFF.md](docs/VSCODE_HANDOFF.md)
 - **RTL**: ch13~31에 Verilog 구현 및 테스트벤치 신규 추가
 - **검증**: 장별 `validation/` 폴더에 시뮬레이션 로그·SHA 관리
 - **CI**: GitHub Actions 정적 검사 자동화
