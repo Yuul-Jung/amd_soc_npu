@@ -1,3 +1,4 @@
+# 실행 환경: Icarus Verilog version 12.0 (stable) · Python 3.12.3 · 2026-11-18
 <repo>/mini_npu/rtl/npu_dsp_mac_lane.v:2: warning: timescale for npu_dsp_mac_lane inherited from another file.
 <repo>/mini_npu/../ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
 <repo>/mini_npu/rtl/npu_engine4.v:4: warning: timescale for npu_engine4 inherited from another file.

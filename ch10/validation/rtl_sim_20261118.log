@@ -1,0 +1,8 @@
+PYTHON_NPU_SELF_TEST_PASS INT16/40 datasets=22 inferences=44 seed=310
+RTL_SIM_PASS NPU INT16/40 datasets=22 inferences=44
+tb/tb_npu_core.sv:68: $finish called at 67016000 (1ps)
+PYTHON_RTL_COMPARE_PASS cycles=44
+PYTHON_NPU_SELF_TEST_PASS INT8/32 datasets=22 inferences=44 seed=310
+RTL_SIM_PASS NPU INT8/32 datasets=22 inferences=44
+tb/tb_npu_core.sv:68: $finish called at 67016000 (1ps)
+PYTHON_RTL_COMPARE_PASS cycles=44

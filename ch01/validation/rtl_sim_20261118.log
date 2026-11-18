@@ -1,0 +1,15 @@
+Simulation artifacts: <tmp>
+Python 3.13.18
+Icarus Verilog version 12.0 (stable) ()
+PYTHON_SELF_TEST_PASS configurations=INT8/32,INT16/40
+PYTHON_VECTORS INT16/40 cycles=35304 seed=317
+RTL_SIM_PASS INT16/40 cycles=35304
+tb/tb_mac_core.sv:66: $finish called at 353046000 (1ps)
+PYTHON_SELF_TEST_PASS configurations=INT8/32,INT16/40
+PYTHON_RTL_COMPARE_PASS cycles=35304
+PYTHON_SELF_TEST_PASS configurations=INT8/32,INT16/40
+PYTHON_VECTORS INT8/32 cycles=133224 seed=309
+RTL_SIM_PASS INT8/32 cycles=133224
+tb/tb_mac_core.sv:66: $finish called at 1332246000 (1ps)
+PYTHON_SELF_TEST_PASS configurations=INT8/32,INT16/40
+PYTHON_RTL_COMPARE_PASS cycles=133224
