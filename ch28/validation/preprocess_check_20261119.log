@@ -1,0 +1,2 @@
+PREPROCESS_CHECK original=90.8% moved_scaled_then_preprocessed=86.7% images=1000
+PREPROCESS_HOST_PASS

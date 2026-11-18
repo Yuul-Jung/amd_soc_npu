@@ -1,0 +1,13 @@
+      <h3>8-1. 보드에서 손글씨 분류 (27장 하드웨어 그대로)</h3>
+      <p>⚠ 미검증 — 보드에서 실행하지 않았습니다. 하드웨어는 27장 비트스트림을 그대로 쓰고 펌웨어만 바꿉니다.</p>
+      <table>
+        <thead><tr><th>순서</th><th>조작</th><th>성공 기준</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>27장 플랫폼에 애플리케이션 <code>digit_app</code> → <code>src</code>에 22장 드라이버 5개, 27장 <code>board_io.h</code>·<code>board_io_mbv.c</code>, 이 장 <code>sw/</code> 6개, 27장 모델 헤더</td><td>빌드 성공</td></tr>
+          <tr><td>2</td><td><code>xparameters.h</code>에서 UART Lite 기준 주소 확인 → 다르면 <code>uart_io_mbv.c</code>의 <code>UART_BASE</code></td><td>—</td></tr>
+          <tr><td>3</td><td>Run → 터미널 프로그램은 <b>닫는다</b> (PC 프로그램이 같은 포트를 씀)</td><td>LED 모두 꺼짐</td></tr>
+          <tr><td>4</td><td>PC: <code>pip install pyserial</code> → <code>python3 ch28/host/digit_client.py --port /dev/ttyUSB1 ch28/host/samples/*.pgm</code></td><td>세 줄 모두 <code>SAME</code>, 7세그먼트에 마지막 클래스</td></tr>
+          <tr><td>5</td><td>그림판 등으로 28×28보다 큰 흑백 손글씨를 그려 PGM으로 저장해 같은 명령</td><td><code>SAME</code> (보드 = PC 정수 계산)</td></tr>
+        </tbody>
+      </table>
+      <p>포트 이름은 PC마다 다릅니다(리눅스 <code>/dev/ttyUSB*</code>, 윈도 <code>COM*</code>). Basys3는 USB 포트 두 개 중 번호가 큰 쪽이 UART인 경우가 많습니다(⚠ 미확인).</p>
