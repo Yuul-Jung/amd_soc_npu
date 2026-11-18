@@ -102,8 +102,8 @@ def parse_instances(path, origin):
     return out
 
 
-CLK_RE = re.compile(r"^clk\w*$")
-RST_RE = re.compile(r"^(resetn|rst\w*|reset\w*|btnC)$")
+CLK_RE = re.compile(r"^(clk\w*|s_axi_aclk|\w*_aclk)$")
+RST_RE = re.compile(r"^(resetn|rst\w*|reset\w*|btnC|\w*_aresetn)$")
 
 
 def port_kind(name, board):
