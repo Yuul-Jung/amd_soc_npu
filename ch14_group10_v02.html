@@ -505,7 +505,7 @@ vivado -mode batch -nojournal -source tools/vivado/ooc_timing.tcl -tclargs ch14
       </table></div>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>다음 장으로 넘기는 파일</th><th>사용처</th></tr></thead>
-        <tbody><tr><td><code>ch14/rtl/npu10_group_scheduler.v</code></td><td>15장 Dense 64→10이 가중치·Bias 적재 경로와 점수 10개를 그대로 사용 (수정 금지)</td></tr><tr><td><code>ch14/reference/group10_reference.py</code></td><td>15장 기준 모델이 사례 생성 방식(형판·무작위·동점)을 재사용</td></tr></tbody>
+        <tbody><tr><td><code>ch14/rtl/npu10_group_scheduler.v</code></td><td>15장 <code>npu_dense</code>가 이 그룹 실행(4+4+2, 마지막 차선 무효)을 입력·가중치 읽기 포트 구조로 나눠 다시 씀. 4PE·MAC·BRAM은 같은 파일 재사용</td></tr><tr><td><code>ch14/reference/group10_reference.py</code></td><td>15장 기준 모델이 같은 정수 함수(<code>linear_64x10</code>)로 점수를 계산</td></tr></tbody>
       </table></div>
       <p>검증 게이트 (<code>ch14/validation/</code> 증거 파일 기준으로 자동 표시):</p>
       <div class="gate-row">
@@ -627,6 +627,12 @@ window.COURSE={
    "number": 14,
    "title": "4PE 그룹·10개 출력",
    "file": "ch14_group10_v02.html"
+  },
+  {
+   "id": "ch15",
+   "number": 15,
+   "title": "Dense 64→10 공통 블록",
+   "file": "ch15_dense_64x10_v02.html"
   }
  ]
 };

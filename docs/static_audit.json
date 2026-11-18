@@ -1,7 +1,7 @@
 {
   "kind": "STATIC_AUDIT_ONLY",
-  "checks": 383,
-  "link_checks": 103,
+  "checks": 395,
+  "link_checks": 110,
   "errors": [],
   "rtl_simulation": "NOT_EXECUTED_BY_THIS_SCRIPT",
   "synthesis": "NOT_RUN",

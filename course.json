@@ -129,8 +129,8 @@
       "id": "ch15",
       "number": 15,
       "title": "64→10 정수 MLP",
-      "file": "ch15_mlp64_10_v02.html",
-      "html_status": "TODO",
+      "file": "ch15_dense_64x10_v02.html",
+      "html_status": "DONE",
       "rtl_status": "TODO"
     },
     {

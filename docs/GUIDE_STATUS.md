@@ -21,7 +21,7 @@
 | 12 | 통합 NPU Top | [ch12_integrated_npu_v05.html](../ch12_integrated_npu_v05.html) | ✅ | ✅ | ⏳ | ⏳ | ⏳ |
 | 13 | 8×8 손글씨·10분류 준비 | [ch13_mnist_8x8_v02.html](../ch13_mnist_8x8_v02.html) | ✅ | ✅ | ⏳ | — | ⏳ |
 | 14 | 4PE 그룹·10개 출력 | [ch14_group10_v02.html](../ch14_group10_v02.html) | ✅ | ✅ | ⏳ | — | ⏳ |
-| 15 | 64→10 정수 MLP | chapter.json 대기 | | | | | |
+| 15 | Dense 64→10 공통 블록 | [ch15_dense_64x10_v02.html](../ch15_dense_64x10_v02.html) | ✅ | ✅ | ⏳ | — | ⏳ |
 | 16 | 64→8→10 다층 MLP | chapter.json 대기 | | | | | |
 | 17 | 784픽셀 분할 누산 | chapter.json 대기 | | | | | |
 | 18 | INT8·INT16 정밀도 비교 | chapter.json 대기 | | | | | |
