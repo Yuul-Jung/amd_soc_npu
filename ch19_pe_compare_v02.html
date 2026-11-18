@@ -381,6 +381,7 @@ def main():
             for k, label, x in cases:
                 f.write(f"{k} {label} " + " ".join(map(str, x)) + "\n")
     if a.actual:
+        seen = 0
         for ln in open(a.actual):
             try:
                 p = list(map(int, ln.split()))
@@ -389,7 +390,10 @@ def main():
             k = p[0]; s = scores(cases[k][2], w, b)
             if p[1:] != s + [argmax_lowest(s)]:
                 raise SystemExit(f"PYTHON_RTL_COMPARE_FAIL npe={a.npe} case={k}")
-        print(f"PYTHON_RTL_COMPARE_PASS npe={a.npe} cases={CASES} scores={10 * CASES}")
+            seen += 1
+        if seen == 0:
+            raise SystemExit("PYTHON_RTL_COMPARE_FAIL RTL 결과 없음")
+        print(f"PYTHON_RTL_COMPARE_PASS npe={a.npe} cases={seen} scores={10 * seen}")
     if a.cycles:
         meas = {int(k): int(v) for k, v in (c.split("=") for c in a.cycles)}
         base = sum(3 * n for n in LENS)                   # 그룹 1회의 원소 클록 합
@@ -476,7 +480,7 @@ vivado -mode batch -nojournal -source tools/vivado/ooc_timing.tcl -tclargs ch19
       </table></div>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>다음 장으로 넘기는 파일</th><th>사용처</th></tr></thead>
-        <tbody><tr><td><code>ch19/rtl/npu_tiled_784_npe.v</code></td><td>20장 AXI4-Lite 래퍼가 감싸는 연산 코어 (NPE=4, 수정 금지)</td></tr><tr><td><code>ch19/reference/pe_compare.py</code></td><td>23장 CPU·NPU 시간 비교에서 NPU 사이클 식</td></tr></tbody>
+        <tbody><tr><td><code>ch19/rtl/npu_tiled_784_npe.v</code></td><td>20장 AXI4-Lite 래퍼 <code>npu_axi_lite</code>가 감싸는 연산 코어 (NPE=4, 7,185클록) (수정 금지)</td></tr><tr><td><code>ch19/reference/pe_compare.py</code></td><td>23장 CPU·NPU 시간 비교에서 NPU 사이클 식</td></tr></tbody>
       </table></div>
       <p>검증 게이트 (<code>ch19/validation/</code> 증거 파일 기준으로 자동 표시):</p>
       <div class="gate-row">
@@ -628,6 +632,12 @@ window.COURSE={
    "number": 19,
    "title": "1·4·8PE 사이클 비교",
    "file": "ch19_pe_compare_v02.html"
+  },
+  {
+   "id": "ch20",
+   "number": 20,
+   "title": "AXI4-Lite 레지스터",
+   "file": "ch20_axi_lite_v02.html"
   }
  ]
 };

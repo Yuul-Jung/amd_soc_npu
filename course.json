@@ -169,8 +169,8 @@
       "id": "ch20",
       "number": 20,
       "title": "AXI4-Lite NPU 제어 IP",
-      "file": "ch20_axi_npu_control_v02.html",
-      "html_status": "TODO",
+      "file": "ch20_axi_lite_v02.html",
+      "html_status": "DONE",
       "rtl_status": "TODO"
     },
     {

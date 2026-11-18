@@ -1,0 +1,634 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Basys3 NPU 20장 실습 · AXI4-Lite 슬레이브와 레지스터 맵">
+<meta name="generator" content="tools/guide/build_guides.py — 직접 수정 금지, chapter.json을 고친 뒤 재생성">
+<title>20장 · AXI4-Lite 슬레이브와 레지스터 맵 (v02)</title>
+<link rel="stylesheet" href="assets/education/site.css">
+<style>
+.codeblock pre{max-height:780px;white-space:pre}
+.section svg{width:100%;height:auto}
+.vbadge{display:inline-block;padding:.15em .6em;border-radius:4px;font-size:.78em;font-weight:700;background:#d4edda;color:#155724;vertical-align:middle}
+.gate-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:10px}
+.gate{border:1px solid var(--line,#e0e0e0);border-radius:6px;padding:10px 14px;overflow-wrap:anywhere}
+.gate b{display:block;font:600 11px var(--mono,monospace);letter-spacing:.04em;margin-bottom:4px}
+.gate span{font-size:13px}
+.gate.pass{border-color:#2d8a52;background:#f0fbf4}
+.gate.todo{border-color:#b08900;background:#fffbe6}
+.gate.fail{border-color:#b3261e;background:#fdeceb}
+.gate.na{border-color:#c8c8c8;background:#f6f6f6;color:#666}
+.table-wrap{overflow-x:auto}
+.table-wrap>table{min-width:620px}
+.figure-wrap{overflow-x:auto}
+.figure-wrap svg{min-width:860px}
+.section :not(pre)>code{overflow-wrap:anywhere}
+.codebar{gap:8px}
+.codebar span{min-width:0;overflow-wrap:anywhere}
+.hero p{max-width:none}
+.access-skip{position:absolute;left:-9999px;top:0}
+.access-skip:focus{left:12px;top:12px;z-index:1003;background:#fff;color:#15171c;padding:6px 10px}
+.nw code{white-space:nowrap;overflow-wrap:normal}
+</style>
+</head>
+<body data-chapter="ch20">
+<a class="access-skip" href="#main-content">본문 바로가기</a>
+<button type="button" class="mobile-menu" id="mobile-menu" aria-controls="course-nav" aria-expanded="false">☰ 장·목차</button>
+<div class="shade" id="shade"></div>
+<header class="hero">
+  <div class="hero-inner">
+    <p class="kicker">BASYS3 · NPU 고도화판 · 20장 실습 <span class="vbadge">v02</span></p>
+    <h1>제20장 · AXI4-Lite 슬레이브와 레지스터 맵</h1>
+    <p>19장 연산 코어(NPE=4)를 AXI4-Lite 슬레이브로 감싸 CPU가 레지스터로 입력·모델을 쓰고, 시작·상태·클래스·점수를 읽게 합니다. 별도 TB에서 AW·W 순서 독립, WSTRB, 미해결 쓰기 2개, B·R 역압력을 확인합니다.</p>
+  </div>
+</header>
+<div class="wrap">
+  <nav class="toc" id="course-nav" aria-label="전체 장과 절 탐색"></nav>
+  <main class="content" id="main-content">
+    <section class="section" id="s00">
+      <h2><span class="num">00</span>이 장의 위치</h2>
+      <p><b>목표:</b> 19장 연산 코어(NPE=4)를 AXI4-Lite 슬레이브로 감싸 CPU가 레지스터로 입력·모델을 쓰고, 시작·상태·클래스·점수를 읽게 합니다. 별도 TB에서 AW·W 순서 독립, WSTRB, 미해결 쓰기 2개, B·R 역압력을 확인합니다.</p>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>구분</th><th>파일</th></tr></thead>
+        <tbody>
+          <tr><td>유지 (이전 장, 수정 없음)</td><td><ul><li><code>ch01/rtl/mac_core.v</code> <small>(01장)</small></li><li><code>ch04/rtl/bram_sync_buffer.v</code> <small>(04장)</small></li><li><code>ch07/rtl/vector_dot_core.v</code> <small>(07장)</small></li><li><code>ch16/rtl/npu_argmax.v</code> <small>(16장)</small></li><li><code>ch19/rtl/npu_tiled_784_npe.v</code> <small>(19장)</small></li><li><code>ch19/reference/pe_compare.py</code> <small>(19장)</small></li><li><code>ch18/model/model_int8.txt</code> <small>(18장)</small></li></ul></td></tr>
+          <tr><td>이번 장 작성</td><td><ul><li><code>ch20/rtl/npu_axi_lite.v</code></li></ul></td></tr>
+        </tbody>
+      </table></div>
+      <p>전체 누적 관계: <a href="index.html#techtree">INDEX · 01 전체 테크트리</a> (00~31장 흐름 · 00~12장 모듈 재사용 도면)</p>
+      <p>실습 순서: 01 구조 확인 → 02 준비 → 03 RTL 작성 → 04 테스트벤치·기준 모델 작성 → 05 시뮬레이션 → 06 결과 판정 → 08 합성·타이밍(Vivado) → 09 인계.</p>
+    </section>
+    <section class="section" id="s01">
+      <h2><span class="num">01</span>구조도</h2>
+      <div class="figure-wrap" tabindex="0" role="region" aria-label="도면 (가로 스크롤 가능)"><svg viewBox="0 0 1027 363" role="img" aria-label="npu_axi_lite 실제 포트와 하위 모듈 구조">
+      <rect x="297" y="30" width="480" height="293" rx="10" fill="#fff" stroke="#4635b1" stroke-width="2"/>
+      <text x="537" y="54" font-size="18" font-weight="700" text-anchor="middle">npu_axi_lite</text>
+      <text x="537" y="72" font-size="13" text-anchor="middle" fill="#555">ch20/rtl/npu_axi_lite.v · 구현 도식</text>
+      <text x="269" y="64" font-size="14" font-family="monospace" text-anchor="end">s_axi_aclk</text>
+      <path d="M273 60 H297" stroke="#4635b1" stroke-width="1.5" stroke-dasharray="4 3"/><path d="M297 60 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="269" y="87" font-size="14" font-family="monospace" text-anchor="end">s_axi_aresetn</text>
+      <path d="M273 83 H297" stroke="#4635b1" stroke-width="1.5" stroke-dasharray="4 3"/><path d="M297 83 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="269" y="110" font-size="14" font-family="monospace" text-anchor="end">s_axi_awaddr[ADDR_WIDTH-1:0]</text>
+      <path d="M273 106 H297" stroke="#4635b1" stroke-width="1.5"/><path d="M297 106 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="269" y="133" font-size="14" font-family="monospace" text-anchor="end">s_axi_awvalid</text>
+      <path d="M273 129 H297" stroke="#4635b1" stroke-width="1.5"/><path d="M297 129 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="269" y="156" font-size="14" font-family="monospace" text-anchor="end">s_axi_wdata[31:0]</text>
+      <path d="M273 152 H297" stroke="#4635b1" stroke-width="1.5"/><path d="M297 152 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="269" y="179" font-size="14" font-family="monospace" text-anchor="end">s_axi_wstrb[3:0]</text>
+      <path d="M273 175 H297" stroke="#4635b1" stroke-width="1.5"/><path d="M297 175 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="269" y="202" font-size="14" font-family="monospace" text-anchor="end">s_axi_wvalid</text>
+      <path d="M273 198 H297" stroke="#4635b1" stroke-width="1.5"/><path d="M297 198 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="269" y="225" font-size="14" font-family="monospace" text-anchor="end">s_axi_bready</text>
+      <path d="M273 221 H297" stroke="#4635b1" stroke-width="1.5"/><path d="M297 221 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="269" y="248" font-size="14" font-family="monospace" text-anchor="end">s_axi_araddr[ADDR_WIDTH-1:0]</text>
+      <path d="M273 244 H297" stroke="#4635b1" stroke-width="1.5"/><path d="M297 244 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="269" y="271" font-size="14" font-family="monospace" text-anchor="end">s_axi_arvalid</text>
+      <path d="M273 267 H297" stroke="#4635b1" stroke-width="1.5"/><path d="M297 267 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="269" y="294" font-size="14" font-family="monospace" text-anchor="end">s_axi_rready</text>
+      <path d="M273 290 H297" stroke="#4635b1" stroke-width="1.5"/><path d="M297 290 l-7 -4 v8 z" fill="#4635b1"/>
+      <path d="M777 60 H801" stroke="#4635b1" stroke-width="1.5"/><path d="M801 60 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="805" y="65" font-size="14" font-family="monospace">s_axi_awready</text>
+      <path d="M777 83 H801" stroke="#4635b1" stroke-width="1.5"/><path d="M801 83 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="805" y="88" font-size="14" font-family="monospace">s_axi_wready</text>
+      <path d="M777 106 H801" stroke="#4635b1" stroke-width="1.5"/><path d="M801 106 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="805" y="111" font-size="14" font-family="monospace">s_axi_bresp[1:0]</text>
+      <path d="M777 129 H801" stroke="#4635b1" stroke-width="1.5"/><path d="M801 129 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="805" y="134" font-size="14" font-family="monospace">s_axi_bvalid</text>
+      <path d="M777 152 H801" stroke="#4635b1" stroke-width="1.5"/><path d="M801 152 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="805" y="157" font-size="14" font-family="monospace">s_axi_arready</text>
+      <path d="M777 175 H801" stroke="#4635b1" stroke-width="1.5"/><path d="M801 175 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="805" y="180" font-size="14" font-family="monospace">s_axi_rdata[31:0]</text>
+      <path d="M777 198 H801" stroke="#4635b1" stroke-width="1.5"/><path d="M801 198 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="805" y="203" font-size="14" font-family="monospace">s_axi_rresp[1:0]</text>
+      <path d="M777 221 H801" stroke="#4635b1" stroke-width="1.5"/><path d="M801 221 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="805" y="226" font-size="14" font-family="monospace">s_axi_rvalid</text>
+      <path d="M777 244 H801" stroke="#4635b1" stroke-width="1.5"/><path d="M801 244 l-7 -4 v8 z" fill="#4635b1"/>
+      <text x="805" y="249" font-size="14" font-family="monospace">irq_o</text>
+      <rect x="317" y="88" width="440" height="28" rx="5" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="5 3"/>
+      <text x="329" y="107" font-size="14" font-family="monospace">npu_tiled_784_npe  (core)</text>
+      <text x="745" y="107" font-size="12" text-anchor="end" fill="#4635b1">ch19 재사용</text>
+      <rect x="297" y="338" width="16" height="12" fill="#edeafa" stroke="#4635b1"/><text x="319" y="349" font-size="13">이번 장 신규</text>
+      <rect x="417" y="338" width="16" height="12" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="4 2"/><text x="439" y="349" font-size="13">이전 장 파일 재사용(수정 없음)</text>
+      <text x="647" y="349" font-size="13">왼쪽 input · 오른쪽 output · 점선 = 클록·리셋</text>
+      </svg></div>
+      <p>구현 도식: 포트 이름·폭과 하위 인스턴스는 <code>ch20/rtl/npu_axi_lite.v</code> 선언에서 자동으로 가져왔습니다.</p>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>방향</th><th>포트</th><th>폭</th><th>구분</th><th>설명</th></tr></thead>
+        <tbody><tr><td>input</td><td class="nw"><code>s_axi_aclk</code></td><td class="nw"><code>1</code></td><td class="nw">클록</td><td>AXI 클록 (100MHz)</td></tr><tr><td>input</td><td class="nw"><code>s_axi_aresetn</code></td><td class="nw"><code>1</code></td><td class="nw">리셋</td><td>AXI 동기 리셋 (Active-Low)</td></tr><tr><td>input</td><td class="nw"><code>s_axi_awaddr</code></td><td class="nw"><code>[ADDR_WIDTH-1:0]</code></td><td class="nw">데이터·제어</td><td>쓰기 주소 (바이트 주소, 하위 8비트)</td></tr><tr><td>input</td><td class="nw"><code>s_axi_awvalid</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>쓰기 주소 유효</td></tr><tr><td>input</td><td class="nw"><code>s_axi_wdata</code></td><td class="nw"><code>[31:0]</code></td><td class="nw">데이터·제어</td><td>쓰기 데이터</td></tr><tr><td>input</td><td class="nw"><code>s_axi_wstrb</code></td><td class="nw"><code>[3:0]</code></td><td class="nw">데이터·제어</td><td>쓰기 바이트 선택 (비트 k = 바이트 k)</td></tr><tr><td>input</td><td class="nw"><code>s_axi_wvalid</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>쓰기 데이터 유효</td></tr><tr><td>input</td><td class="nw"><code>s_axi_bready</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>마스터가 쓰기 응답 받음</td></tr><tr><td>input</td><td class="nw"><code>s_axi_araddr</code></td><td class="nw"><code>[ADDR_WIDTH-1:0]</code></td><td class="nw">데이터·제어</td><td>읽기 주소</td></tr><tr><td>input</td><td class="nw"><code>s_axi_arvalid</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>읽기 주소 유효</td></tr><tr><td>input</td><td class="nw"><code>s_axi_rready</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>마스터가 읽기 데이터 받음</td></tr><tr><td>output</td><td class="nw"><code>s_axi_awready</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>쓰기 주소 받을 수 있음</td></tr><tr><td>output</td><td class="nw"><code>s_axi_wready</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>쓰기 데이터 받을 수 있음</td></tr><tr><td>output</td><td class="nw"><code>s_axi_bresp</code></td><td class="nw"><code>[1:0]</code></td><td class="nw">데이터·제어</td><td>쓰기 응답 코드 (항상 00 OKAY)</td></tr><tr><td>output</td><td class="nw"><code>s_axi_bvalid</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>쓰기 응답 유효 (BREADY까지 유지)</td></tr><tr><td>output</td><td class="nw"><code>s_axi_arready</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>읽기 주소 받을 수 있음</td></tr><tr><td>output</td><td class="nw"><code>s_axi_rdata</code></td><td class="nw"><code>[31:0]</code></td><td class="nw">데이터·제어</td><td>읽기 데이터 (RREADY까지 유지)</td></tr><tr><td>output</td><td class="nw"><code>s_axi_rresp</code></td><td class="nw"><code>[1:0]</code></td><td class="nw">데이터·제어</td><td>읽기 응답 코드 (항상 00 OKAY)</td></tr><tr><td>output</td><td class="nw"><code>s_axi_rvalid</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>읽기 데이터 유효</td></tr><tr><td>output</td><td class="nw"><code>irq_o</code></td><td class="nw"><code>1</code></td><td class="nw">데이터·제어</td><td>인터럽트 (DONE 또는 ERROR, 레벨)</td></tr></tbody>
+      </table></div>
+    </section>
+    <section class="section" id="s02">
+      <h2><span class="num">02</span>준비</h2>
+      <ol>
+        <li>VS Code에서 저장소 루트(<code>amd_soc_npu/</code>)를 엽니다.</li>
+        <li>도구를 확인합니다.</li>
+      </ol>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 도구 확인</span></div>
+        <pre tabindex="0"><code>sudo apt install -y iverilog python3 ripgrep   # 처음 한 번
+iverilog -V 2&gt;&amp;1 | head -1      # Icarus Verilog version 12.0 이상
+python3 --version</code></pre></div>
+      <ol start="3"><li>00절 '유지' 파일이 이전 장 결과 그대로 있는지 확인합니다 (기준 모델은 19장 <code>pe_compare.py</code>(18장 실제 MNIST INT8 모델)를 그대로 씁니다).</li></ol>
+    </section>
+    <section class="section" id="s03">
+      <h2><span class="num">03</span>RTL 작성</h2>
+      <p>아래 파일을 경로 그대로 만들고 전체 코드를 입력합니다.</p>
+      <div class="codeblock">
+        <div class="codebar"><span>ch20/rtl/npu_axi_lite.v · verilog · 원본 · RTL_SIM 통과 2026-11-19</span></div>
+        <pre tabindex="0"><code class="language-verilog">`timescale 1ns/1ps
+`default_nettype none
+// 20장 AXI4-Lite 슬레이브: 19장 연산 코어(NPE=4)를 CPU가 레지스터로 다루게 한다.
+// 쓰기 주소(AW)와 쓰기 데이터(W)는 순서와 관계없이 따로 받아 두고, 둘이 모이면 한 번 쓰고 B 응답을 낸다.
+// 읽기(AR)는 다음 클록에 R 응답. B·R은 READY가 올 때까지 VALID·데이터를 유지한다 (역압력).
+//
+// 레지스터 (바이트 주소, 32비트)
+//   0x00 CTRL    W  bit0 START(1 쓰면 시작), bit1 CLR(DONE·ERROR 지움)
+//   0x04 STATUS  R  bit0 BUSY, bit1 DONE(유지), bit2 ERROR(유지)
+//   0x08 CLASS   R  [3:0] 결과 클래스
+//   0x0C CYCLES  R  [15:0] 마지막 추론 클록 수
+//   0x10 X_ADDR  RW [9:0] 다음 입력 주소 (X_DATA 쓰기마다 +1)
+//   0x14 X_DATA  W  [7:0] 입력 값 → x[X_ADDR]
+//   0x18 W_ADDR  RW [19:16] 클래스, [9:0] 원소 주소 (W_DATA 쓰기마다 원소 +1)
+//   0x1C W_DATA  W  [7:0] 가중치 → w[클래스][원소]
+//   0x20 B_SEL   RW [3:0] Bias 클래스 (B_DATA 쓰기마다 +1)
+//   0x24 B_DATA  W  [31:0] Bias → b[B_SEL]
+//   0x28 ID      R  0x4E505531 ("NPU1")
+//   0x2C LENGTH  R  784 (입력 원소 수)
+//   0x40~0x64 SCORE0~9 R 점수 (signed 32비트)
+// WSTRB: 바이트 단위로 적용. X_DATA·W_DATA는 바이트 0(WSTRB[0])이 켜져 있을 때만 쓴다.
+module npu_axi_lite #(
+    parameter integer ADDR_WIDTH = 8
+) (
+    input  wire                  s_axi_aclk,
+    input  wire                  s_axi_aresetn,
+    input  wire [ADDR_WIDTH-1:0] s_axi_awaddr,
+    input  wire                  s_axi_awvalid,
+    output wire                  s_axi_awready,
+    input  wire           [31:0] s_axi_wdata,
+    input  wire            [3:0] s_axi_wstrb,
+    input  wire                  s_axi_wvalid,
+    output wire                  s_axi_wready,
+    output wire            [1:0] s_axi_bresp,
+    output reg                   s_axi_bvalid,
+    input  wire                  s_axi_bready,
+    input  wire [ADDR_WIDTH-1:0] s_axi_araddr,
+    input  wire                  s_axi_arvalid,
+    output wire                  s_axi_arready,
+    output reg            [31:0] s_axi_rdata,
+    output wire            [1:0] s_axi_rresp,
+    output reg                   s_axi_rvalid,
+    input  wire                  s_axi_rready,
+    output wire                  irq_o                    // DONE 또는 ERROR (레벨)
+);
+    wire clk = s_axi_aclk, rn = s_axi_aresetn;
+    assign s_axi_bresp = 2'b00;                           // 항상 OKAY
+    assign s_axi_rresp = 2'b00;
+
+    // ── 쓰기: AW·W를 따로 받아 둔다 (한 번에 하나씩)
+    reg aw_full, w_full;
+    reg [ADDR_WIDTH-1:0] aw_q;
+    reg [31:0] wd_q; reg [3:0] ws_q;
+    assign s_axi_awready = !aw_full &amp;&amp; !s_axi_bvalid;
+    assign s_axi_wready  = !w_full &amp;&amp; !s_axi_bvalid;
+    wire do_write = aw_full &amp;&amp; w_full &amp;&amp; !s_axi_bvalid;
+
+    // ── 읽기: 다음 클록에 응답, RREADY까지 유지
+    assign s_axi_arready = !s_axi_rvalid;
+
+    // ── 레지스터
+    reg [9:0] x_addr; reg [3:0] w_cls; reg [9:0] w_addr; reg [3:0] b_sel;
+    reg done_st, err_st;
+    reg start_p, x_we, w_we, b_we;
+    reg [7:0] x_d, w_d; reg [31:0] b_d; reg [9:0] x_a, w_a; reg [3:0] w_n, b_n;
+
+    wire busy, done, error; wire [3:0] cls; wire [319:0] scores; wire [15:0] cycles;
+    npu_tiled_784_npe #(.NPE(4), .ACC_WIDTH(32)) core (
+        .clk(clk), .resetn(rn), .x_wr_en_i(x_we), .x_addr_i(x_a), .x_data_i(x_d),
+        .w_wr_en_i(w_we), .w_neuron_i(w_n), .w_addr_i(w_a), .w_data_i(w_d),
+        .b_wr_en_i(b_we), .b_neuron_i(b_n), .b_data_i(b_d), .start_i(start_p), .busy_o(busy),
+        .scores_o(scores), .done_o(done), .error_o(error), .class_o(cls), .cycles_o(cycles));
+    assign irq_o = done_st | err_st;
+
+    // 바이트 단위 WSTRB 적용
+    function [31:0] merge(input [31:0] old, input [31:0] nw, input [3:0] st);
+        integer k;
+        begin
+            for (k = 0; k &lt; 4; k = k + 1) merge[k*8 +: 8] = st[k] ? nw[k*8 +: 8] : old[k*8 +: 8];
+        end
+    endfunction
+    wire [5:0] wreg = aw_q[7:2];
+    wire [31:0] x_addr_m = merge({22'd0, x_addr}, wd_q, ws_q);
+    wire [31:0] w_addr_m = merge({12'd0, w_cls, 6'd0, w_addr}, wd_q, ws_q);
+    wire [31:0] b_sel_m  = merge({28'd0, b_sel}, wd_q, ws_q);
+
+    always @(posedge clk) begin
+        if (!rn) begin
+            aw_full &lt;= 0; w_full &lt;= 0; s_axi_bvalid &lt;= 0; aw_q &lt;= 0; wd_q &lt;= 0; ws_q &lt;= 0;
+            x_addr &lt;= 0; w_cls &lt;= 0; w_addr &lt;= 0; b_sel &lt;= 0; done_st &lt;= 0; err_st &lt;= 0;
+            start_p &lt;= 0; x_we &lt;= 0; w_we &lt;= 0; b_we &lt;= 0;
+            x_d &lt;= 0; w_d &lt;= 0; b_d &lt;= 0; x_a &lt;= 0; w_a &lt;= 0; w_n &lt;= 0; b_n &lt;= 0;
+        end else begin
+            start_p &lt;= 0; x_we &lt;= 0; w_we &lt;= 0; b_we &lt;= 0;
+            if (s_axi_awvalid &amp;&amp; s_axi_awready) begin aw_q &lt;= s_axi_awaddr; aw_full &lt;= 1; end
+            if (s_axi_wvalid &amp;&amp; s_axi_wready) begin wd_q &lt;= s_axi_wdata; ws_q &lt;= s_axi_wstrb; w_full &lt;= 1; end
+            if (s_axi_bvalid &amp;&amp; s_axi_bready) s_axi_bvalid &lt;= 0;
+            if (done) done_st &lt;= 1;
+            if (error) err_st &lt;= 1;
+            if (do_write) begin
+                aw_full &lt;= 0; w_full &lt;= 0; s_axi_bvalid &lt;= 1;
+                case (wreg)
+                    6'h00: begin
+                        if (ws_q[0] &amp;&amp; wd_q[0] &amp;&amp; !busy) begin start_p &lt;= 1; done_st &lt;= 0; err_st &lt;= 0; end
+                        if (ws_q[0] &amp;&amp; wd_q[1]) begin done_st &lt;= 0; err_st &lt;= 0; end
+                    end
+                    6'h04: x_addr &lt;= x_addr_m[9:0];
+                    6'h05: if (ws_q[0]) begin x_we &lt;= 1; x_a &lt;= x_addr; x_d &lt;= wd_q[7:0]; x_addr &lt;= x_addr + 10'd1; end
+                    6'h06: begin w_cls &lt;= w_addr_m[19:16]; w_addr &lt;= w_addr_m[9:0]; end
+                    6'h07: if (ws_q[0]) begin w_we &lt;= 1; w_n &lt;= w_cls; w_a &lt;= w_addr; w_d &lt;= wd_q[7:0]; w_addr &lt;= w_addr + 10'd1; end
+                    6'h08: b_sel &lt;= b_sel_m[3:0];
+                    6'h09: begin b_we &lt;= 1; b_n &lt;= b_sel; b_d &lt;= merge(32'd0, wd_q, ws_q); b_sel &lt;= b_sel + 4'd1; end
+                    default: ;                                // 읽기 전용·없는 주소: 무시 (OKAY)
+                endcase
+            end
+        end
+    end
+
+    // 읽기 응답
+    wire [5:0] rreg = s_axi_araddr[7:2];
+    reg [31:0] rmux;
+    always @(*) begin
+        case (rreg)
+            6'h01: rmux = {29'd0, err_st, done_st, busy};
+            6'h02: rmux = {28'd0, cls};
+            6'h03: rmux = {16'd0, cycles};
+            6'h04: rmux = {22'd0, x_addr};
+            6'h06: rmux = {12'd0, w_cls, 6'd0, w_addr};
+            6'h08: rmux = {28'd0, b_sel};
+            6'h0A: rmux = 32'h4E505531;
+            6'h0B: rmux = 32'd784;
+            default: rmux = (rreg &gt;= 6'h10 &amp;&amp; rreg &lt;= 6'h19) ? scores[(rreg - 6'h10)*32 +: 32] : 32'd0;
+        endcase
+    end
+    always @(posedge clk) begin
+        if (!rn) begin s_axi_rvalid &lt;= 0; s_axi_rdata &lt;= 0; end
+        else begin
+            if (s_axi_arvalid &amp;&amp; s_axi_arready) begin s_axi_rvalid &lt;= 1; s_axi_rdata &lt;= rmux; end
+            else if (s_axi_rvalid &amp;&amp; s_axi_rready) s_axi_rvalid &lt;= 0;
+        end
+    end
+endmodule
+`default_nettype wire</code></pre>
+      </div>
+    </section>
+    <section class="section" id="s04">
+      <h2><span class="num">04</span>테스트벤치·기준 모델 작성</h2>
+      <p>테스트벤치는 출력을 자동 판정합니다. TB의 AXI 마스터 태스크가 쓰기마다 순서(AW·W 동시, AW 먼저, W 먼저)를 돌려 가며 쓰고, BREADY·RREADY를 0~2클록 무작위로 늦춥니다. 감시기는 VALID 유지·데이터 안정·응답 수를 매 클록 확인합니다. 모델 7,840개와 입력 784개를 모두 레지스터 쓰기로 적재해 2장을 추론합니다.</p>
+      <div class="codeblock">
+        <div class="codebar"><span>ch20/tb/tb_npu_axi_lite.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-19</span></div>
+        <pre tabindex="0"><code class="language-systemverilog">`timescale 1ns/1ps
+// 20장 TB: AXI4-Lite 마스터 태스크로 레지스터를 읽고 쓴다.
+//  · 쓰기 순서 3가지(AW·W 동시, AW 먼저, W 먼저)를 번갈아 쓰고, BREADY·RREADY를 무작위로 늦춘다 (역압력)
+//  · 감시기: B·R은 READY 전까지 VALID·데이터 유지, B 응답 수 ≤ AW·W 수
+//  · WSTRB 부분 쓰기, ID·LENGTH, 실제 MNIST INT8 모델로 추론 2장 (점수·클래스는 Python 비교)
+module tb_npu_axi_lite;
+    reg clk=0, rn=0;
+    reg [7:0] awaddr=0, araddr=0; reg awvalid=0, wvalid=0, bready=0, arvalid=0, rready=0;
+    reg [31:0] wdata=0; reg [3:0] wstrb=0;
+    wire awready, wready, bvalid, arready, rvalid, irq; wire [1:0] bresp, rresp; wire [31:0] rdata;
+    npu_axi_lite dut(.s_axi_aclk(clk), .s_axi_aresetn(rn), .s_axi_awaddr(awaddr), .s_axi_awvalid(awvalid),
+        .s_axi_awready(awready), .s_axi_wdata(wdata), .s_axi_wstrb(wstrb), .s_axi_wvalid(wvalid), .s_axi_wready(wready),
+        .s_axi_bresp(bresp), .s_axi_bvalid(bvalid), .s_axi_bready(bready), .s_axi_araddr(araddr), .s_axi_arvalid(arvalid),
+        .s_axi_arready(arready), .s_axi_rdata(rdata), .s_axi_rresp(rresp), .s_axi_rvalid(rvalid), .s_axi_rready(rready),
+        .irq_o(irq));
+    always #5 clk = ~clk;
+
+    // ── 감시기
+    integer n_aw = 0, n_w = 0, n_b = 0, n_r = 0, viol = 0;
+    reg pb = 0, pr = 0; reg [31:0] prd = 0;
+    always @(posedge clk) if (rn) begin
+        if (awvalid &amp;&amp; awready) n_aw = n_aw + 1;
+        if (wvalid &amp;&amp; wready) n_w = n_w + 1;
+        if (bvalid &amp;&amp; bready) n_b = n_b + 1;
+        if (rvalid &amp;&amp; rready) n_r = n_r + 1;
+        if (pb &amp;&amp; !bvalid) begin viol = viol + 1; $display("VIOLATION BVALID가 BREADY 전에 내려감"); end
+        if (pr &amp;&amp; (!rvalid || rdata !== prd)) begin viol = viol + 1; $display("VIOLATION R이 RREADY 전에 바뀜"); end
+        if (n_b &gt; n_aw || n_b &gt; n_w) begin viol = viol + 1; $display("VIOLATION AW·W 없이 B 응답"); end
+        if (bresp !== 2'b00 || rresp !== 2'b00) begin viol = viol + 1; $display("VIOLATION 응답 코드"); end
+        pb = bvalid &amp;&amp; !bready; pr = rvalid &amp;&amp; !rready; prd = rdata;
+    end
+
+    reg [15:0] lfsr = 16'h2020;
+    function integer rnd(input integer m); begin
+        lfsr = {lfsr[14:0], lfsr[15] ^ lfsr[13] ^ lfsr[12] ^ lfsr[10]}; rnd = lfsr % m; end endfunction
+
+    integer mode = 0, modes [0:2];
+    // AW·W 채널을 각자 독립된 프로세스로 구동: 한쪽을 gap클록 늦게 올리고, 각자 핸드셰이크 즉시 내린다.
+    task drive_aw(input [7:0] a, input integer delay); begin
+        repeat (delay) @(negedge clk);
+        @(negedge clk); awaddr = a; awvalid = 1;
+        @(posedge clk); while (!awready) @(posedge clk);
+        @(negedge clk); awvalid = 0;
+    end endtask
+    task drive_w(input [31:0] d, input [3:0] s, input integer delay); begin
+        repeat (delay) @(negedge clk);
+        @(negedge clk); wdata = d; wstrb = s; wvalid = 1;
+        @(posedge clk); while (!wready) @(posedge clk);
+        @(negedge clk); wvalid = 0;
+    end endtask
+    task axi_write(input [7:0] a, input [31:0] d, input [3:0] s); integer gap; begin
+        gap = 1 + rnd(3);
+        fork
+            drive_aw(a, mode == 2 ? gap : 0);      // mode 2: W 먼저
+            drive_w(d, s, mode == 1 ? gap : 0);    // mode 1: AW 먼저
+        join
+        modes[mode] = modes[mode] + 1; mode = (mode + 1) % 3;
+        while (!bvalid) @(negedge clk);
+        repeat (rnd(3)) @(negedge clk);                    // BREADY 늦추기
+        bready = 1; @(negedge clk); bready = 0;
+    end endtask
+
+    task axi_read(input [7:0] a, output [31:0] d); begin
+        @(negedge clk); araddr = a; arvalid = 1;
+        while (!(arvalid &amp;&amp; arready)) @(posedge clk);
+        @(negedge clk); arvalid = 0;
+        while (!rvalid) @(negedge clk);
+        repeat (rnd(3)) @(negedge clk);                    // RREADY 늦추기
+        d = rdata; rready = 1; @(negedge clk); rready = 0;
+    end endtask
+
+    integer f, o, k, c, v, n, label, cases = 0, ncases, polls;
+    reg [31:0] r; string vp, ap;
+
+    initial begin
+        modes[0] = 0; modes[1] = 0; modes[2] = 0;
+        if (!$value$plusargs("VECTORS=%s", vp) || !$value$plusargs("ACTUAL=%s", ap) || !$value$plusargs("NCASES=%d", ncases))
+            $fatal(1, "인자");
+        f = $fopen(vp, "r"); o = $fopen(ap, "w"); if (!f || !o) $fatal(1, "파일 열기");
+        repeat (3) @(negedge clk); rn = 1;
+        axi_read(8'h28, r); if (r !== 32'h4E505531) $fatal(1, "ID %h", r);
+        axi_read(8'h2C, r); if (r !== 784) $fatal(1, "LENGTH %0d", r);
+        // WSTRB: 바이트 0만 → 0x055, 바이트 1만 → 0x355, X_DATA를 WSTRB 0으로 쓰면 무시
+        axi_write(8'h10, 32'hFFFF_FF55, 4'b0001); axi_write(8'h10, 32'hFFFF_0300, 4'b0010);
+        axi_read(8'h10, r); if (r !== 32'h355) $fatal(1, "WSTRB X_ADDR %h", r);
+        axi_write(8'h14, 32'h7, 4'b0000); axi_read(8'h10, r); if (r !== 32'h355) $fatal(1, "WSTRB 0 X_DATA가 주소를 바꿈");
+        // 미해결 쓰기 2개: AW1·AW2를 먼저 연달아 보내고 W1·W2를 뒤에 보낸다 → 슬레이브는 B1 전까지 AW2를 받지 않아야 함
+        fork
+            begin drive_aw(8'h10, 0); drive_aw(8'h20, 0); end
+            begin drive_w(32'h12, 4'b1111, 3); drive_w(32'h5, 4'b0001, 0); end
+            begin repeat (2) begin while (!bvalid) @(negedge clk); repeat (4) @(negedge clk); bready = 1; @(negedge clk); bready = 0; end end
+        join
+        axi_read(8'h10, r); if (r !== 32'h12) $fatal(1, "미해결 쓰기 1 X_ADDR %h", r);
+        axi_read(8'h20, r); if (r !== 32'h5) $fatal(1, "미해결 쓰기 2 B_SEL %h", r);
+        // 모델 적재: 클래스마다 W_ADDR 설정 후 W_DATA 784번, B_SEL=0 후 B_DATA 10번
+        for (c = 0; c &lt; 10; c = c + 1) begin
+            axi_write(8'h18, c &lt;&lt; 16, 4'b1111);
+            for (k = 0; k &lt; 784; k = k + 1) begin if ($fscanf(f, "%d", v) != 1) $fatal(1, "w"); axi_write(8'h1C, v, 4'b0001); end
+        end
+        axi_read(8'h18, r); if (r !== {12'd0, 4'd9, 6'd0, 10'd784}) $fatal(1, "W_ADDR 자동 증가 %h", r);
+        axi_write(8'h20, 0, 4'b0001);
+        for (c = 0; c &lt; 10; c = c + 1) begin if ($fscanf(f, "%d", v) != 1) $fatal(1, "b"); axi_write(8'h24, v, 4'b1111); end
+        while (cases &lt; ncases &amp;&amp; $fscanf(f, "%d %d", n, label) == 2) begin
+            axi_write(8'h10, 0, 4'b1111);
+            for (k = 0; k &lt; 784; k = k + 1) begin if ($fscanf(f, "%d", v) != 1) $fatal(1, "x"); axi_write(8'h14, v, 4'b0001); end
+            axi_write(8'h00, 1, 4'b0001);                         // START
+            polls = 0;
+            do begin axi_read(8'h04, r); polls = polls + 1; end while (!r[1] &amp;&amp; !r[2]);
+            if (r[2] || !irq) $fatal(1, "case %0d: ERROR 또는 irq 없음", n);
+            $fwrite(o, "%0d", n);
+            for (c = 0; c &lt; 10; c = c + 1) begin axi_read(8'h40 + 4 * c, r); $fwrite(o, " %0d", $signed(r)); end
+            axi_read(8'h08, r); $fwrite(o, " %0d\n", r);
+            axi_read(8'h0C, r); if (r !== 7185) $fatal(1, "CYCLES %0d", r);
+            axi_write(8'h00, 2, 4'b0001); axi_read(8'h04, r);     // CLR → DONE 0
+            if (r[1] || irq) $fatal(1, "CLR 후 DONE 남음");
+            cases = cases + 1;
+        end
+        if (viol != 0) $fatal(1, "AXI 규칙 위반 %0d", viol);
+        $display("AXI_PROTOCOL_PASS writes=%0d reads=%0d aw_first=%0d w_first=%0d same=%0d violations=0", n_b, n_r, modes[1], modes[2], modes[0]);
+        $display("RTL_SIM_PASS NPU_AXI_LITE cases=%0d wstrb=3 outstanding=2 id=NPU1 cycles=7185", cases);
+        $fclose(o); $finish;
+    end
+    initial begin #900000000; $fatal(1, "시간 초과"); end
+endmodule</code></pre>
+      </div>
+    </section>
+    <section class="section" id="s05">
+      <h2><span class="num">05</span>시뮬레이션 실행</h2>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 저장소 루트에서 실행</span></div>
+        <pre tabindex="0"><code>bash ch20/scripts/run_sim.sh   # AXI 규칙 시험 → 레지스터로 모델·입력 적재 → 추론 2장 → Python 점수·클래스 비교</code></pre></div>
+      <p>기대 출력 (Icarus Verilog 12.0 · 2026-11-19 실제 실행 로그 발췌, 출처 <code>ch20/validation/rtl_sim_20261119.log</code>):</p>
+      <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
+        <pre tabindex="0"><code>Icarus Verilog version 12.0 (stable) ()
+AXI_PROTOCOL_PASS writes=9440 reads=3623 aw_first=3146 w_first=3146 same=3146 violations=0
+RTL_SIM_PASS NPU_AXI_LITE cases=2 wstrb=3 outstanding=2 id=NPU1 cycles=7185
+PYTHON_RTL_COMPARE_PASS npe=4 cases=2 scores=20</code></pre></div>
+    </section>
+    <section class="section" id="s06">
+      <h2><span class="num">06</span>결과 판정</h2>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
+        <tbody><tr><td><code>AXI_PROTOCOL_PASS writes=9440 … violations=0</code></td><td>쓰기 9,440번(순서 3가지 각 3,146번)과 읽기 3,623번에서 VALID가 READY 전에 내려가거나 데이터가 바뀐 적 없음</td></tr><tr><td><code>RTL_SIM_PASS NPU_AXI_LITE cases=2 wstrb=3 outstanding=2</code></td><td>ID·LENGTH, WSTRB 부분 쓰기 3종, AW 두 개를 W보다 먼저 보낸 미해결 쓰기, CLR 후 DONE·irq 0</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS npe=4 cases=2 scores=20</code></td><td>레지스터로 읽은 점수 20개와 클래스가 Python과 같음</td></tr></tbody>
+      </table></div>
+      <p><b>실패 시:</b> TB의 <code>$fatal</code> 메시지에 표시된 cycle 번호와 기대값/실제값을 확인하고, 03절 코드와 한 줄씩 대조합니다. 하나라도 실패하면 다음 장으로 넘어가지 않습니다.</p>
+    </section>
+    <section class="section" id="s07">
+      <h2><span class="num">07</span>코드 읽기 포인트</h2>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>위치</th><th>내용</th></tr></thead>
+        <tbody><tr><td>레지스터 맵</td><td><code>0x00 CTRL</code>(START·CLR) · <code>0x04 STATUS</code>(BUSY·DONE·ERROR) · <code>0x08 CLASS</code> · <code>0x0C CYCLES</code> · <code>0x10/0x14 X_ADDR/X_DATA</code> · <code>0x18/0x1C W_ADDR/W_DATA</code> · <code>0x20/0x24 B_SEL/B_DATA</code> · <code>0x28 ID</code>=0x4E505531 · <code>0x2C LENGTH</code>=784 · <code>0x40~0x64 SCORE0~9</code>. 22장 드라이버가 이 표를 그대로 씁니다.</td></tr>
+<tr><td>AW·W 독립</td><td><code>aw_full</code>·<code>w_full</code>로 따로 받아 두고, 둘 다 찼을 때 한 번 씁니다. B 응답 중이거나 이미 받아 둔 채널은 READY를 내립니다. 그래서 AW를 두 번 먼저 보내도 둘째는 첫 B가 끝날 때까지 기다립니다.</td></tr>
+<tr><td>역압력</td><td>BVALID·RVALID는 READY가 올 때까지 유지되고 RDATA도 바뀌지 않습니다. 감시기가 이것을 매 클록 확인합니다.</td></tr>
+<tr><td>WSTRB</td><td>주소 레지스터는 켜진 바이트만 바꿉니다(<code>merge</code>). X_DATA·W_DATA는 바이트 0이 꺼져 있으면 쓰지 않고 주소도 늘리지 않습니다.</td></tr>
+<tr><td>자동 증가</td><td>X_DATA·W_DATA·B_DATA를 쓸 때마다 주소가 1씩 늘어 784개를 주소 재설정 없이 연속으로 씁니다. 연산 중 쓰기는 19장 코어가 무시합니다.</td></tr>
+<tr><td>인터럽트</td><td><code>irq_o</code> = DONE | ERROR(레벨)입니다. 21장 블록 설계에서 인터럽트 제어기에 연결할 수 있게 내 두었습니다. 22장 드라이버는 STATUS 폴링을 기본으로 씁니다.</td></tr></tbody>
+      </table></div>
+    </section>
+    <section class="section" id="s08">
+      <h2><span class="num">08</span>합성·타이밍·보드</h2>
+      <p>Vivado가 설치된 PC의 VS Code 터미널에서 이 장 모듈만 Out-of-Context(OOC)로 합성·배치·배선하고 100 MHz 타이밍을 확인합니다.</p>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · Vivado 배치 (저장소 루트)</span></div>
+        <pre tabindex="0"><code>source /tools/Xilinx/Vivado/&lt;버전&gt;/settings64.sh   # 설치 경로에 맞게 변경
+vivado -mode batch -nojournal -source tools/vivado/ooc_timing.tcl -tclargs ch20
+# 기대: SYNTH_TIMING_PASS ch20 npu_axi_lite WNS=… WHS=… LUT=… FF=… DSP48E1=… RAMB=…</code></pre></div>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>판정 항목</th><th>기준</th><th>확인 위치</th></tr></thead>
+        <tbody>
+          <tr><td>Setup / Hold</td><td><code>WNS ≥ 0</code> · <code>WHS ≥ 0</code> (clk 10.000 ns)</td><td><code>build/vivado/ch20/timing_route.rpt</code></td></tr>
+          <tr><td>자원</td><td>19장 NPE=4 + 레지스터 (보고서로 확인) — 기대값 · 실행 전 ⚠ 미검증</td><td><code>build/vivado/ch20/route_util.rpt</code></td></tr>
+        </tbody>
+      </table></div>
+      <p>OOC 결과는 입출력 핀 지연을 포함하지 않으므로 보드 Top 타이밍을 대신하지 않습니다. 증거 저장은 <code>bash tools/run_vivado_all.sh ooc</code>(→ <code>ch20/validation/vivado_ooc_YYYYMMDD.txt</code>). 보드 확인은 <a href="ch12_integrated_npu_v05.html#s08">12장 · 08</a>에서 통합 Top으로 진행합니다.</p>
+    </section>
+    <section class="section" id="s09">
+      <h2><span class="num">09</span>검증 현황·인계</h2>
+      <p>누적 보고 (이전 결과 → 추가 RTL → 시험 벡터 → 시뮬레이션 → 합성/보드 → 인계):</p>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>이전 결과</th><th>추가 RTL</th><th>시험 벡터</th><th>시뮬레이션</th><th>합성 / 보드</th><th>인계</th></tr></thead>
+        <tbody><tr><td>01장 · 04장 · 07장 · 16장 · 18장 · 19장</td><td><code>npu_axi_lite.v</code></td><td><code>tb_npu_axi_lite.sv</code></td><td>통과</td><td>⚠ 대기 / 미실시</td><td>2건 (아래 표)</td></tr></tbody>
+      </table></div>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>다음 장으로 넘기는 파일</th><th>사용처</th></tr></thead>
+        <tbody><tr><td><code>ch20/rtl/npu_axi_lite.v</code></td><td>21장 블록 설계의 사용자 RTL 모듈 (주소 0x44A0_0000, 64KB) (수정 금지)</td></tr><tr><td><code>레지스터 맵</code></td><td>22장 C 드라이버 <code>npu_regs.h</code></td></tr></tbody>
+      </table></div>
+      <p>검증 게이트 (<code>ch20/validation/</code> 증거 파일 기준으로 자동 표시):</p>
+      <div class="gate-row">
+        <div class="gate pass">
+          <b>HTML_PASS</b>
+          <span>v02 · 생성기·정적 검사</span>
+        </div>
+        <div class="gate na">
+          <b>HOST_MODEL_PASS</b>
+          <span>해당 없음 (Python 기준 모델 없음)</span>
+        </div>
+        <div class="gate pass">
+          <b>RTL_SIM_PASS</b>
+          <span>RTL_SIM_PASS NPU_AXI_LITE cases=2 wstrb=3 outstanding=2 id=N… · Icarus Verilog 12.0 · 2026-11-19</span>
+        </div>
+        <div class="gate todo">
+          <b>SYNTH_TIMING_PASS</b>
+          <span>⚠ 미검증 · VS Code Vivado 실행 대기 (08절)</span>
+        </div>
+        <div class="gate todo">
+          <b>BOARD_PASS</b>
+          <span>⚠ 미실시 · 현재 실물 보드 확인 불가</span>
+        </div>
+      </div>
+    </section>
+    <div class="chapter-links" id="chapter-links"></div>
+  </main>
+</div>
+<script>
+window.COURSE={
+ "title": "Basys3 소형 NPU 실습 (고도화판)",
+ "chapters": [
+  {
+   "id": "ch00",
+   "number": 0,
+   "title": "UART Echo",
+   "file": "ch00_uart_echo_v05.html"
+  },
+  {
+   "id": "ch01",
+   "number": 1,
+   "title": "DSP 추론 MAC 누산",
+   "file": "ch01_mac_v05.html"
+  },
+  {
+   "id": "ch02",
+   "number": 2,
+   "title": "DSP48E1 타깃 곱셈",
+   "file": "ch02_dsp_v05.html"
+  },
+  {
+   "id": "ch03",
+   "number": 3,
+   "title": "MAC 2단계 파이프라인",
+   "file": "ch03_mac_pipeline_v05.html"
+  },
+  {
+   "id": "ch04",
+   "number": 4,
+   "title": "BRAM 동기 버퍼",
+   "file": "ch04_bram_v05.html"
+  },
+  {
+   "id": "ch05",
+   "number": 5,
+   "title": "Fixed-Point Quantizer",
+   "file": "ch05_fixed_v05.html"
+  },
+  {
+   "id": "ch06",
+   "number": 6,
+   "title": "INT8·INT16 정밀도 비교",
+   "file": "ch06_precision_v05.html"
+  },
+  {
+   "id": "ch07",
+   "number": 7,
+   "title": "벡터 내적",
+   "file": "ch07_vector_dot_v05.html"
+  },
+  {
+   "id": "ch08",
+   "number": 8,
+   "title": "4PE 병렬 어레이",
+   "file": "ch08_pe4_v05.html"
+  },
+  {
+   "id": "ch09",
+   "number": 9,
+   "title": "Dense 4뉴런 레이어",
+   "file": "ch09_dense_v05.html"
+  },
+  {
+   "id": "ch10",
+   "number": 10,
+   "title": "4뉴런 NPU Core",
+   "file": "ch10_npu_core_v05.html"
+  },
+  {
+   "id": "ch11",
+   "number": 11,
+   "title": "UART 모델 적재 컨트롤러",
+   "file": "ch11_uart_register_v05.html"
+  },
+  {
+   "id": "ch12",
+   "number": 12,
+   "title": "통합 NPU Top",
+   "file": "ch12_integrated_npu_v05.html"
+  },
+  {
+   "id": "ch13",
+   "number": 13,
+   "title": "8×8 손글씨·10분류 준비",
+   "file": "ch13_mnist_8x8_v02.html"
+  },
+  {
+   "id": "ch14",
+   "number": 14,
+   "title": "4PE 그룹·10개 출력",
+   "file": "ch14_group10_v02.html"
+  },
+  {
+   "id": "ch15",
+   "number": 15,
+   "title": "Dense 64→10 공통 블록",
+   "file": "ch15_dense_64x10_v02.html"
+  },
+  {
+   "id": "ch16",
+   "number": 16,
+   "title": "2층 신경망 64→8→10",
+   "file": "ch16_mlp_64_8_10_v02.html"
+  },
+  {
+   "id": "ch17",
+   "number": 17,
+   "title": "784원소 타일 실행",
+   "file": "ch17_tiled_784_v02.html"
+  },
+  {
+   "id": "ch18",
+   "number": 18,
+   "title": "Float32 · INT8 · INT16 정밀도",
+   "file": "ch18_precision_v02.html"
+  },
+  {
+   "id": "ch19",
+   "number": 19,
+   "title": "1·4·8PE 사이클 비교",
+   "file": "ch19_pe_compare_v02.html"
+  },
+  {
+   "id": "ch20",
+   "number": 20,
+   "title": "AXI4-Lite 레지스터",
+   "file": "ch20_axi_lite_v02.html"
+  }
+ ]
+};
+</script>
+<script defer src="assets/education/site.js"></script>
+</body>
+</html>
