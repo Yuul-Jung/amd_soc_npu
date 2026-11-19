@@ -739,7 +739,7 @@ endmodule
 `default_nettype wire</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>p03/constraints/basys3_p03.xdc · xdc · 원본 · ⚠ 미검증 (Vivado 미실행)</span></div>
+        <div class="codebar"><span>p03/constraints/basys3_p03.xdc · xdc · 원본 · Vivado 실행 통과</span></div>
         <pre tabindex="0"><code class="language-xdc"># 3장 보드 Top (basys3_p03_top) 핀. Basys-3-Master.xdc 이름·핀 그대로 (12장 basys3_npu.xdc와 같은 핀, 스위치 없음).
 set_property -dict { PACKAGE_PIN W5 IOSTANDARD LVCMOS33 } [get_ports clk]
 set_property -dict { PACKAGE_PIN U18 IOSTANDARD LVCMOS33 } [get_ports btnC]
@@ -776,7 +776,7 @@ set_property -dict { PACKAGE_PIN L1 IOSTANDARD LVCMOS33 } [get_ports {led[15]}]
 create_clock -name sys_clk_pin -period 10.000 -waveform {0 5} [get_ports clk]</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>p03/vivado/build_p03.tcl · tcl · 원본 · ⚠ 미검증 (Vivado 미실행)</span></div>
+        <div class="codebar"><span>p03/vivado/build_p03.tcl · tcl · 원본 · Vivado 실행 통과</span></div>
         <pre tabindex="0"><code class="language-tcl"># 3장 보드 Top (8×8 MNIST, CPU 없음): STAGE 1~4 각각 합성 → 구현 → 타이밍 판정 → 비트스트림.
 # STAGE = 끝낸 서브젝트 수 (1 = 3-1 프레임 … 4 = 3-4 MLP). 서브젝트 모듈은 VS Code 판 part03/ 파일 그대로.
 # 실행 (저장소 루트): vivado -mode batch -nojournal -source p03/vivado/build_p03.tcl
@@ -1679,7 +1679,7 @@ if __name__ == "__main__":
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
         <tbody><tr><td><code>RTL_SIM_PASS FRAME64 frames=36 short=2 long=3</code></td><td>정상 36·짧은 2·긴 3 프레임 판정</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS bit_exact=1</code></td><td>저장된 64원소가 Python 기준과 비트 단위로 같음</td></tr><tr><td>장 Top STAGE=1 시뮬레이션</td><td>위 '보드에서 볼 것' 응답과 바이트 단위로 같음 · 통과</td></tr>
-        <tr><td>장 Top STAGE=1 합성·타이밍</td><td>⚠ 미검증 (VS Code Vivado 실행 대기)</td></tr></tbody>
+        <tr><td>장 Top STAGE=1 합성·타이밍</td><td>통과 · WNS=3.282 WHS=0.036 DRC_ERRORS=0 LUT=503 FF=316 DSP48E1=0 RAMB18=0</td></tr></tbody>
       </table></div>
       <div class="gate-row">
         <div class="gate pass">
@@ -2293,7 +2293,7 @@ if __name__ == "__main__":
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
         <tbody><tr><td><code>RTL_SIM_PASS GROUP10 start_to_done_cycles=206</code></td><td>3그룹(4+4+2) 처리 206클록, 오류 4종 확인</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS scores=10 class=1</code></td><td>점수 10개와 클래스가 Python 기준과 같음</td></tr><tr><td>장 Top STAGE=2 시뮬레이션</td><td>위 '보드에서 볼 것' 응답과 바이트 단위로 같음 · 통과</td></tr>
-        <tr><td>장 Top STAGE=2 합성·타이밍</td><td>⚠ 미검증 (VS Code Vivado 실행 대기)</td></tr></tbody>
+        <tr><td>장 Top STAGE=2 합성·타이밍</td><td>통과 · WNS=0.741 WHS=0.024 DRC_ERRORS=0 LUT=1703 FF=1751 DSP48E1=4 RAMB18=4</td></tr></tbody>
       </table></div>
       <div class="gate-row">
         <div class="gate pass">
@@ -2617,7 +2617,7 @@ if __name__ == "__main__":
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
         <tbody><tr><td><code>RTL_SIM_PASS DENSE 64x10 / 64x8 / 8x10</code></td><td>세 모양 각 20프레임, 처리 206·138·38클록</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS bit_exact=1 (×3)</code></td><td>세 모양 모두 Python 기준과 같음</td></tr><tr><td>장 Top STAGE=3 시뮬레이션</td><td>위 '보드에서 볼 것' 응답과 바이트 단위로 같음 · 통과</td></tr>
-        <tr><td>장 Top STAGE=3 합성·타이밍</td><td>⚠ 미검증 (VS Code Vivado 실행 대기)</td></tr></tbody>
+        <tr><td>장 Top STAGE=3 합성·타이밍</td><td>통과 · WNS=0.857 WHS=0.022 DRC_ERRORS=0 LUT=2796 FF=2848 DSP48E1=12 RAMB18=12</td></tr></tbody>
       </table></div>
       <div class="gate-row">
         <div class="gate pass">
@@ -3164,7 +3164,7 @@ if __name__ == "__main__":
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
         <tbody><tr><td><code>RTL_SIM_PASS MLP64_8_10 start_to_done_cycles=180</code></td><td>1층 138 + 은닉 저장 + 2층 38 = 180클록, 오류 5종</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS hidden=8 scores=10 class=1</code></td><td>은닉 8개·점수 10개·클래스가 Python 기준과 같음</td></tr><tr><td>장 Top STAGE=4 시뮬레이션</td><td>위 '보드에서 볼 것' 응답과 바이트 단위로 같음 · 통과</td></tr>
-        <tr><td>장 Top STAGE=4 합성·타이밍</td><td>⚠ 미검증 (VS Code Vivado 실행 대기)</td></tr></tbody>
+        <tr><td>장 Top STAGE=4 합성·타이밍</td><td>통과 · WNS=0.710 WHS=0.024 DRC_ERRORS=0 LUT=4331 FF=4013 DSP48E1=20 RAMB18=20</td></tr></tbody>
       </table></div>
       <div class="gate-row">
         <div class="gate pass">
@@ -3213,7 +3213,10 @@ P03_TOP_RTL_SIM_PASS stage=4 cases=1299 bytes=6597
 RTL_SIM_PASS stages=4</code></pre></div>
       <div class="codeblock"><div class="codebar"><span>Vivado (VS Code) · STAGE 1~4 비트스트림</span></div>
         <pre tabindex="0"><code>vivado -mode batch -nojournal -source p03/vivado/build_p03.tcl
-⚠ Vivado 실행 기록 없음 (VS Code: build_p03.tcl → p03/validation/vivado_impl_YYYYMMDD.txt)</code></pre></div>
+SYNTH_TIMING_PASS p03 basys3_p03_top STAGE=1 WNS=3.282 WHS=0.036 DRC_ERRORS=0 LUT=503 FF=316 DSP48E1=0 RAMB18=0
+SYNTH_TIMING_PASS p03 basys3_p03_top STAGE=2 WNS=0.741 WHS=0.024 DRC_ERRORS=0 LUT=1703 FF=1751 DSP48E1=4 RAMB18=4
+SYNTH_TIMING_PASS p03 basys3_p03_top STAGE=3 WNS=0.857 WHS=0.022 DRC_ERRORS=0 LUT=2796 FF=2848 DSP48E1=12 RAMB18=12
+SYNTH_TIMING_PASS p03 basys3_p03_top STAGE=4 WNS=0.710 WHS=0.024 DRC_ERRORS=0 LUT=4331 FF=4013 DSP48E1=20 RAMB18=20</code></pre></div>
       <details class="full"><summary>장 Top 테스트벤치·기준 모델 (전체 코드)</summary>
       <div class="codeblock">
         <div class="codebar"><span>p03/tb/tb_p03_top.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-19</span></div>
@@ -3547,7 +3550,7 @@ if __name__ == "__main__":
       <h2><span class="num">08</span> 누적 보고·인계</h2>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>서브젝트</th><th>구 장</th><th>추가 RTL</th><th>시뮬레이션 (단독 + 장 Top)</th><th>합성 (장 Top STAGE)</th><th>보드</th></tr></thead>
-        <tbody><tr><td>3-1</td><td>13장</td><td><code>p3_frame64_buffer.v</code></td><td>통과</td><td>⚠ 미검증</td><td>⚠ 미검증</td></tr><tr><td>3-2</td><td>14장</td><td><code>p3_group10_core.v</code></td><td>통과</td><td>⚠ 미검증</td><td>⚠ 미검증</td></tr><tr><td>3-3</td><td>15장</td><td></td><td>통과</td><td>⚠ 미검증</td><td>⚠ 미검증</td></tr><tr><td>3-4</td><td>16장</td><td><code>p3_relu_requant.v</code><br><code>p3_mlp_64_8_10.v</code></td><td>통과</td><td>⚠ 미검증</td><td>⚠ 미검증</td></tr></tbody>
+        <tbody><tr><td>3-1</td><td>13장</td><td><code>p3_frame64_buffer.v</code></td><td>통과</td><td>통과</td><td>⚠ 미검증</td></tr><tr><td>3-2</td><td>14장</td><td><code>p3_group10_core.v</code></td><td>통과</td><td>통과</td><td>⚠ 미검증</td></tr><tr><td>3-3</td><td>15장</td><td></td><td>통과</td><td>통과</td><td>⚠ 미검증</td></tr><tr><td>3-4</td><td>16장</td><td><code>p3_relu_requant.v</code><br><code>p3_mlp_64_8_10.v</code></td><td>통과</td><td>통과</td><td>⚠ 미검증</td></tr></tbody>
       </table></div>
       <p>※ = 구 장 단독 실습 파일이라 장 Top 빌드(<code>p03/vivado/build_p03.tcl</code>)에는 들어가지 않음.</p>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
@@ -3568,9 +3571,9 @@ if __name__ == "__main__":
           <b>RTL_SIM_PASS</b>
           <span>장 Top STAGE 1~4 · Icarus Verilog 12.0 · 2026-11-19</span>
         </div>
-        <div class="gate todo">
+        <div class="gate pass">
           <b>SYNTH_TIMING_PASS</b>
-          <span>⚠ 미검증 · VS Code Vivado 실행 대기 (build_p03.tcl)</span>
+          <span>STAGE 1~4 비트스트림 · 2026-11-19</span>
         </div>
         <div class="gate todo">
           <b>BOARD_PASS</b>

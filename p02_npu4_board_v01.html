@@ -1068,7 +1068,7 @@ endmodule
 `default_nettype wire</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>p02/constraints/basys3_p02.xdc · xdc · 원본 · ⚠ 미검증 (Vivado 미실행)</span></div>
+        <div class="codebar"><span>p02/constraints/basys3_p02.xdc · xdc · 원본 · Vivado 실행 실패</span></div>
         <pre tabindex="0"><code class="language-xdc"># 2장 보드 Top (basys3_p02_top) 핀. Basys-3-Master.xdc 이름·핀 그대로 (12장 basys3_npu.xdc와 같은 핀 + sw[3:2]).
 set_property -dict { PACKAGE_PIN W5 IOSTANDARD LVCMOS33 } [get_ports clk]
 set_property -dict { PACKAGE_PIN U18 IOSTANDARD LVCMOS33 } [get_ports btnC]
@@ -1107,7 +1107,7 @@ set_property -dict { PACKAGE_PIN W17 IOSTANDARD LVCMOS33 } [get_ports {sw[3]}]
 create_clock -name sys_clk_pin -period 10.000 -waveform {0 5} [get_ports clk]</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>p02/vivado/build_p02.tcl · tcl · 원본 · ⚠ 미검증 (Vivado 미실행)</span></div>
+        <div class="codebar"><span>p02/vivado/build_p02.tcl · tcl · 원본 · Vivado 실행 실패</span></div>
         <pre tabindex="0"><code class="language-tcl"># 2장 보드 Top (4뉴런 NPU 보드): STAGE 1~8 각각 합성 → 구현 → 타이밍 판정 → 비트스트림.
 # STAGE = 끝낸 서브젝트 수 (1 = 2-1 BRAM … 8 = 2-8 통합). 서브젝트마다 보드에서 확인할 비트스트림을 만든다.
 # 실행 (저장소 루트): vivado -mode batch -nojournal -source p02/vivado/build_p02.tcl
@@ -1473,7 +1473,7 @@ if __name__ == '__main__':
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
         <tbody><tr><td><code>RTL_SIM_PASS BRAM W=16 A=8 cycles=1016</code></td><td>16비트·256깊이 설정 통과</td></tr><tr><td><code>RTL_SIM_PASS BRAM W=8 A=3 cycles=520</code></td><td>8비트·8깊이 설정 통과</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS</code></td><td>RTL 출력 파일과 Python 기준값이 모든 사이클에서 일치</td></tr><tr><td>장 Top STAGE=1 시뮬레이션</td><td>위 '보드에서 볼 것' 응답과 바이트 단위로 같음 · 통과</td></tr>
-        <tr><td>장 Top STAGE=1 합성·타이밍</td><td>⚠ 미검증 (VS Code Vivado 실행 대기)</td></tr></tbody>
+        <tr><td>장 Top STAGE=1 합성·타이밍</td><td>통과 · WNS=3.247 WHS=0.070 DRC_ERRORS=0 LUT=571 FF=394 DSP48E1=0 RAMB18=5</td></tr></tbody>
       </table></div>
       <div class="gate-row">
         <div class="gate pass">
@@ -1679,7 +1679,7 @@ if __name__=='__main__':
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
         <tbody><tr><td><code>RTL_SIM_PASS FIXED IW=32 OW=8 SHIFT=8 cycles=2035</code></td><td>INT8 출력 설정 통과</td></tr><tr><td><code>RTL_SIM_PASS FIXED IW=32 OW=16 SHIFT=4 cycles=2035</code></td><td>INT16 출력 설정 통과</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS</code></td><td>RTL 출력 파일과 Python 기준값이 모든 사이클에서 일치</td></tr><tr><td>장 Top STAGE=2 시뮬레이션</td><td>위 '보드에서 볼 것' 응답과 바이트 단위로 같음 · 통과</td></tr>
-        <tr><td>장 Top STAGE=2 합성·타이밍</td><td>⚠ 미검증 (VS Code Vivado 실행 대기)</td></tr></tbody>
+        <tr><td>장 Top STAGE=2 합성·타이밍</td><td>통과 · WNS=1.255 WHS=0.059 DRC_ERRORS=0 LUT=752 FF=440 DSP48E1=0 RAMB18=5</td></tr></tbody>
       </table></div>
       <div class="gate-row">
         <div class="gate pass">
@@ -1873,7 +1873,7 @@ if __name__=='__main__':
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
         <tbody><tr><td><code>RTL_SIM_PASS DOT INT16/40 cases=78</code></td><td>길이 0·최대·오류·연속 트랜잭션 포함 78건 통과</td></tr><tr><td><code>RTL_SIM_PASS DOT INT8/32 cases=78</code></td><td>INT8 설정 통과</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS</code></td><td>RTL 출력 파일과 Python 기준값이 모든 사이클에서 일치</td></tr><tr><td>장 Top STAGE=3 시뮬레이션</td><td>위 '보드에서 볼 것' 응답과 바이트 단위로 같음 · 통과</td></tr>
-        <tr><td>장 Top STAGE=3 합성·타이밍</td><td>⚠ 미검증 (VS Code Vivado 실행 대기)</td></tr></tbody>
+        <tr><td>장 Top STAGE=3 합성·타이밍</td><td>통과 · WNS=1.494 WHS=0.024 DRC_ERRORS=0 LUT=952 FF=566 DSP48E1=1 RAMB18=5</td></tr></tbody>
       </table></div>
       <div class="gate-row">
         <div class="gate pass">
@@ -2069,7 +2069,7 @@ if __name__=='__main__':
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
         <tbody><tr><td><code>RTL_SIM_PASS PE4 INT16/40 cases=26</code></td><td>4개 PE 결과·합산 26건 통과</td></tr><tr><td><code>RTL_SIM_PASS PE4 INT8/32 cases=26</code></td><td>INT8 설정 통과</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS</code></td><td>RTL 출력 파일과 Python 기준값이 모든 사이클에서 일치</td></tr><tr><td>장 Top STAGE=4 시뮬레이션</td><td>위 '보드에서 볼 것' 응답과 바이트 단위로 같음 · 통과</td></tr>
-        <tr><td>장 Top STAGE=4 합성·타이밍</td><td>⚠ 미검증 (VS Code Vivado 실행 대기)</td></tr></tbody>
+        <tr><td>장 Top STAGE=4 합성·타이밍</td><td>통과 · WNS=1.157 WHS=0.024 DRC_ERRORS=0 LUT=1426 FF=1260 DSP48E1=5 RAMB18=5</td></tr></tbody>
       </table></div>
       <div class="gate-row">
         <div class="gate pass">
@@ -2270,7 +2270,7 @@ if __name__=='__main__':
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
         <tbody><tr><td><code>RTL_SIM_PASS DENSE4 INT16/40 cases=46</code></td><td>Bias·ReLU·포화 포함 46건 통과</td></tr><tr><td><code>RTL_SIM_PASS DENSE4 INT8/32 cases=46</code></td><td>INT8 설정 통과</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS</code></td><td>RTL 출력 파일과 Python 기준값이 모든 사이클에서 일치</td></tr><tr><td>장 Top STAGE=5 시뮬레이션</td><td>위 '보드에서 볼 것' 응답과 바이트 단위로 같음 · 통과</td></tr>
-        <tr><td>장 Top STAGE=5 합성·타이밍</td><td>⚠ 미검증 (VS Code Vivado 실행 대기)</td></tr></tbody>
+        <tr><td>장 Top STAGE=5 합성·타이밍</td><td>통과 · WNS=1.078 WHS=0.017 DRC_ERRORS=0 LUT=2083 FF=2181 DSP48E1=9 RAMB18=5</td></tr></tbody>
       </table></div>
       <div class="gate-row">
         <div class="gate pass">
@@ -2514,7 +2514,7 @@ if __name__=='__main__':
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
         <tbody><tr><td><code>RTL_SIM_PASS NPU INT16/40 datasets=22 inferences=44</code></td><td>22개 데이터셋·44회 추론 통과</td></tr><tr><td><code>RTL_SIM_PASS NPU INT8/32 datasets=22 inferences=44</code></td><td>INT8 설정 통과</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS</code></td><td>RTL 출력 파일과 Python 기준값이 모든 사이클에서 일치</td></tr><tr><td>장 Top STAGE=6 시뮬레이션</td><td>위 '보드에서 볼 것' 응답과 바이트 단위로 같음 · 통과</td></tr>
-        <tr><td>장 Top STAGE=6 합성·타이밍</td><td>⚠ 미검증 (VS Code Vivado 실행 대기)</td></tr></tbody>
+        <tr><td>장 Top STAGE=6 합성·타이밍</td><td>통과 · WNS=0.852 WHS=0.022 DRC_ERRORS=0 LUT=2616 FF=3137 DSP48E1=13 RAMB18=10</td></tr></tbody>
       </table></div>
       <div class="gate-row">
         <div class="gate pass">
@@ -2932,7 +2932,7 @@ if __name__ == "__main__":
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
         <tbody><tr><td><code>INTEGRATED_UART_RTL_SIM_PASS classes=6 model_edit=1 invalid_length=1</code></td><td>6개 표본 분류 · Bias 변경 후 분류 변화 · 잘못된 길이 거부</td></tr><tr><td><code>PC_GOLDEN_COMPARE_PASS predictions=6 model_edit=1</code></td><td>mini_npu/outputs/predictions.csv가 PC 기준 모델과 일치</td></tr><tr><td>장 Top STAGE=7 시뮬레이션</td><td>위 '보드에서 볼 것' 응답과 바이트 단위로 같음 · 통과</td></tr>
-        <tr><td>장 Top STAGE=7 합성·타이밍</td><td>⚠ 미검증 (VS Code Vivado 실행 대기)</td></tr></tbody>
+        <tr><td>장 Top STAGE=7 합성·타이밍</td><td>통과 · WNS=0.160 WHS=0.021 DRC_ERRORS=0 LUT=3032 FF=3362 DSP48E1=13 RAMB18=10</td></tr></tbody>
       </table></div>
       <div class="gate-row">
         <div class="gate pass">
@@ -2969,7 +2969,7 @@ if __name__ == "__main__":
       <h3>추가 코드 (구 12장 그대로)</h3>
       <p>※ <code>npu_reset_controller.v</code>·<code>basys3_npu_top.v</code>는 구 12장 단독 실습용이라 2장 Top 빌드에는 넣지 않습니다.</p>
       <div class="codeblock">
-        <div class="codebar"><span>mini_npu/rtl/npu_dsp_mac_lane.v · verilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <div class="codebar"><span>mini_npu/rtl/npu_dsp_mac_lane.v · verilog · 원본 · RTL_SIM 통과 2026-11-19</span></div>
         <pre tabindex="0"><code class="language-verilog">// (추가) 02장 등록 DSP 곱을 다음 에지에 누산한다. 곱을 다시 수행하지 않는다.
 module npu_dsp_mac_lane #(
     parameter integer DATA_WIDTH=16,
@@ -2997,7 +2997,7 @@ module npu_dsp_mac_lane #(
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>mini_npu/rtl/npu_engine4.v · verilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <div class="codebar"><span>mini_npu/rtl/npu_engine4.v · verilog · 원본 · RTL_SIM 통과 2026-11-19</span></div>
         <pre tabindex="0"><code class="language-verilog">// (추가) 04장 BRAM 구조 + 02장 DSP 레지스터 곱 + 4개 누산기 통합.
 // 12장 최종 경로는 기존 ch07 벡터 닷의 곱 경로를 중복 사용하지 않는다.
 // 메모리 쓰기는 IDLE에서만 허용하며 Reset 시 유효 비트만 지운다.
@@ -3014,7 +3014,7 @@ module npu_engine4(
     output reg [1:0] class_o,
     output reg [163:0] scores_o
 );
-    localparam [2:0] IDLE=0,READ=1,ISSUE=2,DRAIN1=3,DRAIN2=4;
+    localparam [2:0] IDLE=0,READ=1,ISSUE=2,DRAIN1=3,DRAIN2=4,CMP1=5,CMP2=6;
     reg [2:0] state;
     reg [6:0] length_q;
     reg [5:0] index_q;
@@ -3056,19 +3056,18 @@ module npu_engine4(
     wire signed [40:0] score1=$signed({acc1[39],acc1})+$signed({bias1[39],bias1});
     wire signed [40:0] score2=$signed({acc2[39],acc2})+$signed({bias2[39],bias2});
     wire signed [40:0] score3=$signed({acc3[39],acc3})+$signed({bias3[39],bias3});
-    reg [1:0] best_class;
-    reg signed [40:0] best_score;
-    always @*begin
-        best_class=0;best_score=score0;
-        if(score1&gt;best_score)begin best_score=score1;best_class=1;end
-        if(score2&gt;best_score)begin best_score=score2;best_class=2;end
-        if(score3&gt;best_score)begin best_score=score3;best_class=3;end
-    end
+    // (수정 2026-11-19) argmax를 두 클록 토너먼트로 나눈다. 종전에는 누산값 + Bias 덧셈과 41비트 비교 3번을
+    // 한 클록에 직렬로 해 2장 누적 Top(STAGE 8)에서 WNS -1.952 ns (28단). 동점 규칙(앞 번호)은 그대로.
+    //   DRAIN2: 점수 등록 → CMP1: (0,1)·(2,3) 쌍의 승자 등록 → CMP2: 두 승자 비교, class_o·done
+    wire signed [40:0] s0=scores_o[40:0],s1=scores_o[81:41],s2=scores_o[122:82],s3=scores_o[163:123];
+    reg [1:0] w01_q,w23_q;
+    reg signed [40:0] v01_q,v23_q;
 
     always @(posedge clk)begin
         if(!resetn)begin
             state&lt;=IDLE;busy_o&lt;=0;done_o&lt;=0;error_o&lt;=0;
             class_o&lt;=0;scores_o&lt;=0;length_q&lt;=0;index_q&lt;=0;
+            w01_q&lt;=0;w23_q&lt;=0;v01_q&lt;=0;v23_q&lt;=0;
             x_seen&lt;=0;w0_seen&lt;=0;w1_seen&lt;=0;w2_seen&lt;=0;w3_seen&lt;=0;
             bias0&lt;=0;bias1&lt;=0;bias2&lt;=0;bias3&lt;=0;
             x_sample&lt;=0;w_sample0&lt;=0;w_sample1&lt;=0;w_sample2&lt;=0;w_sample3&lt;=0;
@@ -3111,7 +3110,16 @@ module npu_engine4(
                 DRAIN1:state&lt;=DRAIN2;
                 DRAIN2:begin
                     scores_o&lt;={score3,score2,score1,score0};
-                    class_o&lt;=best_class;done_o&lt;=1;busy_o&lt;=0;state&lt;=IDLE;
+                    state&lt;=CMP1;
+                end
+                CMP1:begin
+                    if(s1&gt;s0)begin w01_q&lt;=1;v01_q&lt;=s1;end else begin w01_q&lt;=0;v01_q&lt;=s0;end
+                    if(s3&gt;s2)begin w23_q&lt;=3;v23_q&lt;=s3;end else begin w23_q&lt;=2;v23_q&lt;=s2;end
+                    state&lt;=CMP2;
+                end
+                CMP2:begin
+                    class_o&lt;=(v23_q&gt;v01_q) ? w23_q : w01_q;
+                    done_o&lt;=1;busy_o&lt;=0;state&lt;=IDLE;
                 end
                 default:begin state&lt;=IDLE;busy_o&lt;=0;error_o&lt;=1;end
             endcase
@@ -3120,7 +3128,7 @@ module npu_engine4(
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>mini_npu/rtl/npu_display_controller.v · verilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <div class="codebar"><span>mini_npu/rtl/npu_display_controller.v · verilog · 원본 · RTL_SIM 통과 2026-11-19</span></div>
         <pre tabindex="0"><code class="language-verilog">// (추가) FND와 LED 표현 정책은 Top이 아닌 Controller에서 처리.
 module npu_display_controller(
     input wire clk,resetn,
@@ -3171,7 +3179,7 @@ module npu_display_controller(
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>mini_npu/rtl/npu_reset_controller.v · verilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <div class="codebar"><span>mini_npu/rtl/npu_reset_controller.v · verilog · 원본 · RTL_SIM 통과 2026-11-19</span></div>
         <pre tabindex="0"><code class="language-verilog">// (추가) Basys3 btnC 비동기 Assertion, 동기 Release Reset.
 module npu_reset_controller(
     input wire clk,btnC,
@@ -3185,7 +3193,7 @@ module npu_reset_controller(
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>mini_npu/rtl/basys3_npu_top.v · verilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <div class="codebar"><span>mini_npu/rtl/basys3_npu_top.v · verilog · 원본 · RTL_SIM 통과 2026-11-19</span></div>
         <pre tabindex="0"><code class="language-verilog">// (추가) 12장 Basys3 Shell: 전원·UART·코어·Controller·FND 모듈 연결만 담당.
 module basys3_npu_top(
     input wire clk,btnC,uart_rxd,
@@ -3394,7 +3402,7 @@ echo "TIMING_SIM_PASS ch12 basys3_npu_top post-route SDF(slow) classes=6 model_e
       <h3>시뮬레이션 기대 화면</h3>
       <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 서브젝트 단독 시험</span></div>
         <pre tabindex="0"><code>bash ch12/scripts/run_sim.sh</code></pre></div>
-      <div class="codeblock"><div class="codebar"><span>기대 출력 (Icarus Verilog 12.0 · 2026-11-18 · 출처 ch12/validation/rtl_sim_20261118.log)</span></div>
+      <div class="codeblock"><div class="codebar"><span>기대 출력 (Icarus Verilog 12.0 · 2026-11-19 · 출처 ch12/validation/rtl_sim_20261119.log)</span></div>
         <pre tabindex="0"><code>| 단계 | 실제 결과 | 로그 |
 |---|---|---|
 | ch00 | RTL_SIM_PASS | … |
@@ -3413,7 +3421,7 @@ echo "TIMING_SIM_PASS ch12 basys3_npu_top post-route SDF(slow) classes=6 model_e
 중요: SYNTH_TIMING_PASS, BOARD_PASS를 뜻하지 않음.</code></pre></div>
       <details class="full"><summary>이 서브젝트의 테스트벤치·기준 모델 (전체 코드 3개)</summary>
       <div class="codeblock">
-        <div class="codebar"><span>mini_npu/tb/tb_npu_engine4.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <div class="codebar"><span>mini_npu/tb/tb_npu_engine4.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-19</span></div>
         <pre tabindex="0"><code class="language-systemverilog">// (추가) 실제 DSP 등록 곱→BRAM→4PE 누적 NPU 정수 독립 검증.
 `timescale 1ns/1ps
 module tb_npu_engine4;
@@ -3488,7 +3496,7 @@ module tb_npu_engine4;
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>mini_npu/tb/tb_uart_core_fifo.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <div class="codebar"><span>mini_npu/tb/tb_uart_core_fifo.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-19</span></div>
         <pre tabindex="0"><code class="language-systemverilog">// (추가) uart_core 16바이트 RX/TX FIFO 적대적 경계 시험.
 // Empty/Full, 동시 Push/Pop, Ready/Valid, Reset 초기화, 연속 수신 손실, Overrun, Framing, 전송 중단.
 // 실제 직렬 비트파형으로 RX를 구동하고 TX 핀을 독립 uart_rx로 복조해 순서·값을 비교한다.
@@ -3802,7 +3810,7 @@ module tb_uart_core_fifo;
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>mini_npu/tb/tb_npu_uart_adversarial.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <div class="codebar"><span>mini_npu/tb/tb_npu_uart_adversarial.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-19</span></div>
         <pre tabindex="0"><code class="language-systemverilog">// (추가) 11·12장 통합 Top 적대적 UART 시험(실제 RX 핀 구동, TX 핀 복조).
 // 잘못된 명령·주소·길이, CR/LF 무시, 응답 전송 중 다음 명령 수신(FIFO 버퍼링),
 // 연속 명령 폭주, 응답 전송 중 Reset, 명령 중단(Timeout 부재 관측), Framing error.
@@ -3999,7 +4007,7 @@ endmodule</code></pre>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
         <tbody><tr><td><code>결과 표 13행이 모두 RTL_SIM_PASS</code></td><td>ch00~ch10 · dsp_engine · ch11_ch12</td></tr><tr><td><code>UART_FIFO_ADVERSARIAL_SIM_PASS tests=11</code></td><td>FIFO Full·Reset·Framing·동시 Push/Pop</td></tr><tr><td><code>NPU_UART_ADVERSARIAL_SIM_PASS tests=8</code></td><td>잘못된 명령·필드, 응답 중 명령, 응답 중 Reset</td></tr><tr><td>장 Top STAGE=8 시뮬레이션</td><td>위 '보드에서 볼 것' 응답과 바이트 단위로 같음 · 통과</td></tr>
-        <tr><td>장 Top STAGE=8 합성·타이밍</td><td>⚠ 미검증 (VS Code Vivado 실행 대기)</td></tr></tbody>
+        <tr><td>장 Top STAGE=8 합성·타이밍</td><td>✗ WNS=-1.952 WHS=0.028 DRC_ERRORS=0 LUT=4326 FF=4144 DSP48E1=17 RAMB18=1…</td></tr></tbody>
       </table></div>
       <div class="gate-row">
         <div class="gate pass">
@@ -4008,7 +4016,7 @@ endmodule</code></pre>
         </div>
         <div class="gate pass">
           <b>RTL_SIM_PASS</b>
-          <span>회귀 결과 표 13단계 모두 RTL_SIM_PASS · Icarus Verilog 12.0 · 2026-11-18</span>
+          <span>회귀 결과 표 13단계 모두 RTL_SIM_PASS · Icarus Verilog 12.0 · 2026-11-19</span>
         </div>
         <div class="gate todo">
           <b>SYNTH_TIMING_PASS</b>
@@ -4056,7 +4064,14 @@ P02_TOP_RTL_SIM_PASS stage=8 cases=54 bytes=730
 RTL_SIM_PASS stages=8</code></pre></div>
       <div class="codeblock"><div class="codebar"><span>Vivado (VS Code) · STAGE 1~4 비트스트림</span></div>
         <pre tabindex="0"><code>vivado -mode batch -nojournal -source p02/vivado/build_p02.tcl
-⚠ Vivado 실행 기록 없음 (VS Code: build_p02.tcl → p02/validation/vivado_impl_YYYYMMDD.txt)</code></pre></div>
+SYNTH_TIMING_PASS p02 basys3_p02_top STAGE=1 WNS=3.247 WHS=0.070 DRC_ERRORS=0 LUT=571 FF=394 DSP48E1=0 RAMB18=5
+SYNTH_TIMING_PASS p02 basys3_p02_top STAGE=2 WNS=1.255 WHS=0.059 DRC_ERRORS=0 LUT=752 FF=440 DSP48E1=0 RAMB18=5
+SYNTH_TIMING_PASS p02 basys3_p02_top STAGE=3 WNS=1.494 WHS=0.024 DRC_ERRORS=0 LUT=952 FF=566 DSP48E1=1 RAMB18=5
+SYNTH_TIMING_PASS p02 basys3_p02_top STAGE=4 WNS=1.157 WHS=0.024 DRC_ERRORS=0 LUT=1426 FF=1260 DSP48E1=5 RAMB18=5
+SYNTH_TIMING_PASS p02 basys3_p02_top STAGE=5 WNS=1.078 WHS=0.017 DRC_ERRORS=0 LUT=2083 FF=2181 DSP48E1=9 RAMB18=5
+SYNTH_TIMING_PASS p02 basys3_p02_top STAGE=6 WNS=0.852 WHS=0.022 DRC_ERRORS=0 LUT=2616 FF=3137 DSP48E1=13 RAMB18=10
+SYNTH_TIMING_PASS p02 basys3_p02_top STAGE=7 WNS=0.160 WHS=0.021 DRC_ERRORS=0 LUT=3032 FF=3362 DSP48E1=13 RAMB18=10
+SYNTH_TIMING_FAIL p02 basys3_p02_top STAGE=8 WNS=-1.952 WHS=0.028 DRC_ERRORS=0 LUT=4326 FF=4144 DSP48E1=17 RAMB18=15</code></pre></div>
       <details class="full"><summary>장 Top 테스트벤치·기준 모델 (전체 코드)</summary>
       <div class="codeblock">
         <div class="codebar"><span>p02/tb/tb_p02_top.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-19</span></div>
@@ -4420,7 +4435,7 @@ if __name__ == "__main__":
       <h2><span class="num">12</span> 누적 보고·인계</h2>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>서브젝트</th><th>구 장</th><th>추가 RTL</th><th>시뮬레이션 (단독 + 장 Top)</th><th>합성 (장 Top STAGE)</th><th>보드</th></tr></thead>
-        <tbody><tr><td>2-1</td><td>04장</td><td><code>bram_sync_buffer.v</code></td><td>통과</td><td>⚠ 미검증</td><td>⚠ 미검증</td></tr><tr><td>2-2</td><td>05장</td><td><code>fixed_quantizer.v</code></td><td>통과</td><td>⚠ 미검증</td><td>⚠ 미검증</td></tr><tr><td>2-3</td><td>07장</td><td><code>vector_dot_core.v</code></td><td>통과</td><td>⚠ 미검증</td><td>⚠ 미검증</td></tr><tr><td>2-4</td><td>08장</td><td><code>pe_array4.v</code></td><td>통과</td><td>⚠ 미검증</td><td>⚠ 미검증</td></tr><tr><td>2-5</td><td>09장</td><td><code>dense_layer4.v</code></td><td>통과</td><td>⚠ 미검증</td><td>⚠ 미검증</td></tr><tr><td>2-6</td><td>10장</td><td><code>npu_core.v</code></td><td>통과</td><td>⚠ 미검증</td><td>⚠ 미검증</td></tr><tr><td>2-7</td><td>11장</td><td><code>uart_npu_command_controller.v</code></td><td>통과</td><td>⚠ 미검증</td><td>⚠ 미검증</td></tr><tr><td>2-8</td><td>12장</td><td><code>npu_dsp_mac_lane.v</code><br><code>npu_engine4.v</code><br><code>npu_display_controller.v</code><br><code>npu_reset_controller.v</code> ※<br><code>basys3_npu_top.v</code> ※</td><td>통과</td><td>⚠ 미검증</td><td>⚠ 미검증</td></tr></tbody>
+        <tbody><tr><td>2-1</td><td>04장</td><td><code>bram_sync_buffer.v</code></td><td>통과</td><td>통과</td><td>⚠ 미검증</td></tr><tr><td>2-2</td><td>05장</td><td><code>fixed_quantizer.v</code></td><td>통과</td><td>통과</td><td>⚠ 미검증</td></tr><tr><td>2-3</td><td>07장</td><td><code>vector_dot_core.v</code></td><td>통과</td><td>통과</td><td>⚠ 미검증</td></tr><tr><td>2-4</td><td>08장</td><td><code>pe_array4.v</code></td><td>통과</td><td>통과</td><td>⚠ 미검증</td></tr><tr><td>2-5</td><td>09장</td><td><code>dense_layer4.v</code></td><td>통과</td><td>통과</td><td>⚠ 미검증</td></tr><tr><td>2-6</td><td>10장</td><td><code>npu_core.v</code></td><td>통과</td><td>통과</td><td>⚠ 미검증</td></tr><tr><td>2-7</td><td>11장</td><td><code>uart_npu_command_controller.v</code></td><td>통과</td><td>통과</td><td>⚠ 미검증</td></tr><tr><td>2-8</td><td>12장</td><td><code>npu_dsp_mac_lane.v</code><br><code>npu_engine4.v</code><br><code>npu_display_controller.v</code><br><code>npu_reset_controller.v</code> ※<br><code>basys3_npu_top.v</code> ※</td><td>통과</td><td>⚠ 미검증</td><td>⚠ 미검증</td></tr></tbody>
       </table></div>
       <p>※ = 구 장 단독 실습 파일이라 장 Top 빌드(<code>p02/vivado/build_p02.tcl</code>)에는 들어가지 않음.</p>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
@@ -4441,9 +4456,9 @@ if __name__ == "__main__":
           <b>RTL_SIM_PASS</b>
           <span>장 Top STAGE 1~8 · Icarus Verilog 12.0 · 2026-11-19</span>
         </div>
-        <div class="gate todo">
+        <div class="gate fail">
           <b>SYNTH_TIMING_PASS</b>
-          <span>⚠ 미검증 · VS Code Vivado 실행 대기 (build_p02.tcl)</span>
+          <span>✗ SYNTH_TIMING_FAIL p02 basys3_p02_top STAGE=8 WNS=-1.952 WHS=0.028 DRC_…</span>
         </div>
         <div class="gate todo">
           <b>BOARD_PASS</b>
