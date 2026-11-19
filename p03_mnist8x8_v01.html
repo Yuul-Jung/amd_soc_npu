@@ -1,0 +1,3611 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Basys3 NPU 3장 프로젝트 · 8×8 MNIST (CPU 없음)">
+<meta name="generator" content="tools/guide/build_projects.py — 직접 수정 금지, project.json·chapter.json을 고친 뒤 재생성">
+<title>3장 · 8×8 MNIST (CPU 없음) (v01)</title>
+<link rel="stylesheet" href="assets/education/site.css">
+<style>
+.codeblock pre{max-height:780px;white-space:pre}
+.section svg{width:100%;height:auto}
+.vbadge{display:inline-block;padding:.15em .6em;border-radius:4px;font-size:.78em;font-weight:700;background:#d4edda;color:#155724;vertical-align:middle}
+.gate-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:10px}
+.gate{border:1px solid var(--line,#e0e0e0);border-radius:6px;padding:10px 14px;overflow-wrap:anywhere}
+.gate b{display:block;font:600 11px var(--mono,monospace);letter-spacing:.04em;margin-bottom:4px}
+.gate span{font-size:13px}
+.gate.pass{border-color:#2d8a52;background:#f0fbf4}
+.gate.todo{border-color:#b08900;background:#fffbe6}
+.gate.fail{border-color:#b3261e;background:#fdeceb}
+.gate.na{border-color:#c8c8c8;background:#f6f6f6;color:#666}
+.table-wrap{overflow-x:auto}
+.table-wrap>table{min-width:620px}
+.figure-wrap{overflow-x:auto}
+.figure-wrap svg{min-width:860px}
+.section :not(pre)>code{overflow-wrap:anywhere}
+.codebar{gap:8px}
+.codebar span{min-width:0;overflow-wrap:anywhere}
+.hero p{max-width:none}
+.access-skip{position:absolute;left:-9999px;top:0}
+.access-skip:focus{left:12px;top:12px;z-index:1003;background:#fff;color:#15171c;padding:6px 10px}
+.nw code{white-space:nowrap;overflow-wrap:normal}
+</style>
+<style>
+.road{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;list-style:none;padding:0;margin:12px 0}
+.road li{border:1px solid #c9c4ea;border-radius:6px;padding:8px 6px;font-size:13px;text-align:center;background:#fff;min-width:0;word-break:keep-all;overflow-wrap:anywhere}
+.road li b{display:block;font-size:12px;color:#4635b1}
+.road li.now{background:#4635b1;color:#fff;border-color:#4635b1}
+.road li.now b{color:#fff}
+.road li.plan{color:#595959;border-style:dashed}
+.steps{list-style:none;padding:0;margin:12px 0;display:grid;gap:6px}
+.steps li{display:grid;grid-template-columns:4.2em 1fr auto;gap:10px;align-items:center;border-left:6px solid #c9c4ea;background:#fff;padding:8px 12px;border-radius:0 6px 6px 0}
+.steps li.done{border-left-color:#2d8a52}
+.steps li.demo{border-left-color:#4635b1;font-weight:600}
+.steps .code{font:700 15px var(--mono,monospace);color:#4635b1}
+.steps li>span{min-width:0;overflow-wrap:anywhere}
+.steps li code{word-break:break-all}
+.steps .st{font-size:13px;white-space:nowrap}
+.verdict{border:1px solid #c9c4ea;border-radius:6px;padding:8px 12px;background:#faf9ff;margin:10px 0}
+details.full{margin:10px 0}
+td.nw,th.nw{white-space:nowrap}
+details.full>summary{cursor:pointer;font-weight:600}
+@media (max-width:860px){.road{grid-template-columns:repeat(4,minmax(0,1fr))}.steps li{grid-template-columns:3.6em 1fr}.steps .st{grid-column:2}}
+</style>
+</head>
+<body data-chapter="p03">
+<a class="access-skip" href="#main-content">본문 바로가기</a>
+<button type="button" class="mobile-menu" id="mobile-menu" aria-controls="course-nav" aria-expanded="false">☰ 장·목차</button>
+<div class="shade" id="shade"></div>
+<header class="hero">
+  <div class="hero-inner">
+    <p class="kicker">BASYS3 · NPU 고도화판 · 3장 프로젝트 · 2일 <span class="vbadge">v01</span></p>
+    <h1>제3장 · 8×8 MNIST (CPU 없음)</h1>
+    <p>PC 8×8 손글씨 → 프레임 → 4PE 10분류 → MLP 64→8→10 → 보드 클래스. 서브젝트 4개.</p>
+  </div>
+</header>
+<div class="wrap">
+  <nav class="toc" id="course-nav" aria-label="전체 장과 절 탐색"></nav>
+  <main class="content" id="main-content">
+    <section class="section" id="s00">
+      <h2><span class="num">00</span> 장 목표·진행 위치</h2>
+      <p><b>장 시연 (보드):</b> PC가 MNIST 시험 숫자를 8×8로 줄여 보내면 보드가 CPU 없이 4PE 코어로 0~9를 고르고, UART에 은닉값·점수, LED·7세그먼트에 클래스를 띄운다.</p>
+      <p>편성: 2일 · 서브젝트 4개 · 서브젝트마다 보드 확인 1번 + 장 시연.</p>
+      <ol class="road" aria-label="전체 장에서 지금 위치"><li class=""><a href="p01_uart_calc_v01.html"><b>1장</b>UART 계산기</a></li><li class=""><a href="p02_npu4_board_v01.html"><b>2장</b>4뉴런 NPU 보드</a></li><li class="now" aria-current="step"><b>3장</b>8×8 MNIST (CPU 없음)</li><li class="plan"><b>4장</b>784 가속기 설계 공간</li><li class="plan"><b>5장</b>MicroBlaze V SoC</li><li class="plan"><b>6장</b>응용 확장</li><li class="plan"><b>7장</b>종합과제</li></ol>
+      <ol class="steps" aria-label="이 장의 서브젝트와 진행 상태"><li class=""><span class="code">3-1</span><span><a href="#s3_1">8×8 입력 프레임</a> <small>(구 13장 · 1일 오전)</small><br>숫자 그림 64바이트 → <code>F:OK</code>, 화소 되읽기 <code>p 36</code> → <code>P:17</code>. 63바이트는 <code>F:SHORT</code>, 65바이트는 <code>F:LONG</code>, 프레임 없을 때 <code>p</code>는 <code>ERR</code>.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">3-2</span><span><a href="#s3_2">4PE 3그룹 10분류 코어</a> <small>(구 14장 · 1일 오후)</small><br>선형 모델 650개 명령을 적재한 뒤 숫자 7·0·3 그림마다 <code>R</code> → <code>R7</code>·<code>R0</code>·<code>R5</code>와 점수 10개. 숫자 3을 5로 잘못 고르는 것도 그대로 보인다 (정확도 91.3%).</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">3-3</span><span><a href="#s3_3">64→10·64→8·8→10 Dense</a> <small>(구 15장 · 2일 오전)</small><br>같은 코어를 모양만 바꿔: <code>H</code> → 64→8 점수 8개(MLP 1층 원시값), <code>G</code> → 8→10 (프레임 앞 8원소). 새 연산 RTL 없음.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">3-4</span><span><a href="#s3_4">MLP 64→8→10</a> <small>(구 16장 · 2일 오후)</small><br><code>Z 9</code>(은닉 shift) 뒤 숫자 0~9 그림마다 <code>M</code> → 은닉 8개·점수 10개·클래스. 10개 중 9개 맞음(숫자 5 → 6).</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class="demo"><span class="code">시연</span><span><a href="#demo">장 시연</a><br>PC가 MNIST 시험 숫자를 8×8로 줄여 보내면 보드가 CPU 없이 4PE 코어로 0~9를 고르고, UART에 은닉값·점수, LED·7세그먼트에 클래스를 띄운다.</span><span class="st">보드 ⚠ 미실시</span></li></ol>
+    </section>
+    <section class="section" id="s01">
+      <h2><span class="num">01</span> 최종 구조도·가져오는 파일</h2>
+      <div class="figure-wrap" tabindex="0" role="region" aria-label="도면 (가로 스크롤 가능)"><svg viewBox="0 0 980 360" role="img" aria-label="basys3_p03_top 실제 포트와 하위 모듈 구조">
+<rect x="250" y="30" width="480" height="270" rx="10" fill="#fff" stroke="#4635b1" stroke-width="2"/>
+<text x="490" y="54" font-size="18" font-weight="700" text-anchor="middle">basys3_p03_top</text>
+<text x="490" y="72" font-size="13" text-anchor="middle" fill="#555">p03/rtl/basys3_p03_top.v · 구현 도식</text>
+<text x="222" y="64" font-size="14" font-family="monospace" text-anchor="end">clk</text>
+<path d="M226 60 H250" stroke="#4635b1" stroke-width="1.5" stroke-dasharray="4 3"/><path d="M250 60 l-7 -4 v8 z" fill="#4635b1"/>
+<text x="222" y="87" font-size="14" font-family="monospace" text-anchor="end">btnC</text>
+<path d="M226 83 H250" stroke="#4635b1" stroke-width="1.5" stroke-dasharray="4 3"/><path d="M250 83 l-7 -4 v8 z" fill="#4635b1"/>
+<text x="222" y="110" font-size="14" font-family="monospace" text-anchor="end">uart_rxd</text>
+<path d="M226 106 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 106 l-7 -4 v8 z" fill="#4635b1"/>
+<path d="M730 60 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 60 l-7 -4 v8 z" fill="#4635b1"/>
+<text x="758" y="65" font-size="14" font-family="monospace">uart_txd</text>
+<path d="M730 83 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 83 l-7 -4 v8 z" fill="#4635b1"/>
+<text x="758" y="88" font-size="14" font-family="monospace">led[15:0]</text>
+<path d="M730 106 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 106 l-7 -4 v8 z" fill="#4635b1"/>
+<text x="758" y="111" font-size="14" font-family="monospace">seg[6:0]</text>
+<path d="M730 129 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 129 l-7 -4 v8 z" fill="#4635b1"/>
+<text x="758" y="134" font-size="14" font-family="monospace">an[3:0]</text>
+<path d="M730 152 H754" stroke="#4635b1" stroke-width="1.5"/><path d="M754 152 l-7 -4 v8 z" fill="#4635b1"/>
+<text x="758" y="157" font-size="14" font-family="monospace">dp</text>
+<rect x="270" y="88" width="440" height="28" rx="5" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="5 3"/>
+<text x="282" y="107" font-size="14" font-family="monospace">uart_core  (uart)</text>
+<text x="698" y="107" font-size="12" text-anchor="end" fill="#4635b1">1-1 (1장에서 가져옴)</text>
+<rect x="270" y="124" width="440" height="28" rx="5" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="5 3"/>
+<text x="282" y="143" font-size="14" font-family="monospace">p01_reset_sync  (rst)</text>
+<text x="698" y="143" font-size="12" text-anchor="end" fill="#4635b1">1장에서 가져옴</text>
+<rect x="270" y="161" width="440" height="28" rx="5" fill="#edeafa" stroke="#4635b1"/>
+<text x="282" y="180" font-size="14" font-family="monospace">p03_console  (con)</text>
+<text x="698" y="180" font-size="12" text-anchor="end" fill="#4635b1">장 뼈대 (제공)</text>
+<rect x="270" y="198" width="440" height="28" rx="5" fill="#edeafa" stroke="#4635b1"/>
+<text x="282" y="217" font-size="14" font-family="monospace">p03_bank  (bank)</text>
+<text x="698" y="217" font-size="12" text-anchor="end" fill="#4635b1">장 뼈대 (제공)</text>
+<rect x="270" y="235" width="440" height="28" rx="5" fill="#edeafa" stroke="#4635b1"/>
+<text x="282" y="254" font-size="14" font-family="monospace">p03_view  (view_out)</text>
+<text x="698" y="254" font-size="12" text-anchor="end" fill="#4635b1">장 뼈대 (제공)</text>
+<rect x="250" y="315" width="16" height="12" fill="#edeafa" stroke="#4635b1"/><text x="272" y="326" font-size="13">장 뼈대 (제공)</text>
+<rect x="370" y="315" width="16" height="12" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="4 2"/><text x="392" y="326" font-size="13">서브젝트에서 작성</text>
+<text x="600" y="326" font-size="13">왼쪽 input · 오른쪽 output · 점선 = 클록·리셋</text>
+<text x="250" y="346" font-size="13">이 모듈의 포트는 Basys3 외부 핀입니다 (XDC 핀 배정).</text>
+</svg></div>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>방향</th><th>포트</th><th>폭</th><th>구분</th><th>설명</th></tr></thead>
+        <tbody><tr><td>input</td><td class="nw"><code>clk</code></td><td class="nw"><code>1</code></td><td class="nw">클록</td><td>보드 100 MHz 발진기 (W5)</td></tr><tr><td>input</td><td class="nw"><code>btnC</code></td><td class="nw"><code>1</code></td><td class="nw">리셋</td><td>가운데 버튼, 누르면 리셋 (Active-High). 가중치 BRAM은 남고 Bias·프레임은 지워진다</td></tr><tr><td>input</td><td class="nw"><code>uart_rxd</code></td><td class="nw"><code>1</code></td><td class="nw">보드 핀</td><td>USB-UART에서 들어오는 직렬 입력 (B18), 115200 bps 8N1</td></tr><tr><td>output</td><td class="nw"><code>uart_txd</code></td><td class="nw"><code>1</code></td><td class="nw">보드 핀</td><td>PC로 나가는 직렬 출력 (A18)</td></tr><tr><td>output</td><td class="nw"><code>led</code></td><td class="nw"><code>[15:0]</code></td><td class="nw">보드 핀</td><td>[9:0] 마지막 클래스 원-핫, [13] 긴 프레임, [14] 짧은 프레임, [15] 프레임 보관 중</td></tr><tr><td>output</td><td class="nw"><code>seg</code></td><td class="nw"><code>[6:0]</code></td><td class="nw">보드 핀</td><td>7세그먼트 a~g (active-low): 클래스 또는 읽은 화소 16진수</td></tr><tr><td>output</td><td class="nw"><code>an</code></td><td class="nw"><code>[3:0]</code></td><td class="nw">보드 핀</td><td>7세그먼트 자리 선택 (active-low)</td></tr><tr><td>output</td><td class="nw"><code>dp</code></td><td class="nw"><code>1</code></td><td class="nw">보드 핀</td><td>소수점 (항상 끔)</td></tr></tbody>
+      </table></div>
+      <p>장 Top은 배선만 합니다. 기능은 하위 모듈에 있고, 서브젝트 모듈은 <code>STAGE</code>(끝낸 서브젝트 수)에 따라 하나씩 들어옵니다.</p>
+      <p>8×8 MNIST 묶음: 3-1 프레임 버퍼의 읽기 포트 하나를 화소 읽기와 코어 넷이 나눠 쓴다. 3-3의 두 코어와 3-4 MLP는 같은 p3_group10_core를 모양만 바꿔 쓴다.</p>
+      <div class="figure-wrap" tabindex="0" role="region" aria-label="도면 (가로 스크롤 가능)"><svg viewBox="0 0 1026 524" role="img" aria-label="p03_bank 실제 포트와 하위 모듈 구조">
+<rect x="250" y="30" width="526" height="454" rx="10" fill="#fff" stroke="#4635b1" stroke-width="2"/>
+<text x="513" y="54" font-size="18" font-weight="700" text-anchor="middle">p03_bank</text>
+<text x="513" y="72" font-size="13" text-anchor="middle" fill="#555">p03/rtl/p03_bank.v · 구현 도식</text>
+<text x="222" y="64" font-size="14" font-family="monospace" text-anchor="end">clk</text>
+<path d="M226 60 H250" stroke="#4635b1" stroke-width="1.5" stroke-dasharray="4 3"/><path d="M250 60 l-7 -4 v8 z" fill="#4635b1"/>
+<text x="222" y="87" font-size="14" font-family="monospace" text-anchor="end">resetn</text>
+<path d="M226 83 H250" stroke="#4635b1" stroke-width="1.5" stroke-dasharray="4 3"/><path d="M250 83 l-7 -4 v8 z" fill="#4635b1"/>
+<text x="222" y="110" font-size="14" font-family="monospace" text-anchor="end">s_data_i[7:0]</text>
+<path d="M226 106 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 106 l-7 -4 v8 z" fill="#4635b1"/>
+<text x="222" y="133" font-size="14" font-family="monospace" text-anchor="end">s_valid_i</text>
+<path d="M226 129 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 129 l-7 -4 v8 z" fill="#4635b1"/>
+<text x="222" y="156" font-size="14" font-family="monospace" text-anchor="end">s_last_i</text>
+<path d="M226 152 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 152 l-7 -4 v8 z" fill="#4635b1"/>
+<text x="222" y="179" font-size="14" font-family="monospace" text-anchor="end">frame_ack_i</text>
+<path d="M226 175 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 175 l-7 -4 v8 z" fill="#4635b1"/>
+<text x="222" y="202" font-size="14" font-family="monospace" text-anchor="end">px_rd_i</text>
+<path d="M226 198 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 198 l-7 -4 v8 z" fill="#4635b1"/>
+<text x="222" y="225" font-size="14" font-family="monospace" text-anchor="end">px_addr_i[5:0]</text>
+<path d="M226 221 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 221 l-7 -4 v8 z" fill="#4635b1"/>
+<text x="222" y="248" font-size="14" font-family="monospace" text-anchor="end">w_wr_i</text>
+<path d="M226 244 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 244 l-7 -4 v8 z" fill="#4635b1"/>
+<text x="222" y="271" font-size="14" font-family="monospace" text-anchor="end">b_wr_i</text>
+<path d="M226 267 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 267 l-7 -4 v8 z" fill="#4635b1"/>
+<text x="222" y="294" font-size="14" font-family="monospace" text-anchor="end">layer_i[1:0]</text>
+<path d="M226 290 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 290 l-7 -4 v8 z" fill="#4635b1"/>
+<text x="222" y="317" font-size="14" font-family="monospace" text-anchor="end">class_i[3:0]</text>
+<path d="M226 313 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 313 l-7 -4 v8 z" fill="#4635b1"/>
+<text x="222" y="340" font-size="14" font-family="monospace" text-anchor="end">addr_i[5:0]</text>
+<path d="M226 336 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 336 l-7 -4 v8 z" fill="#4635b1"/>
+<text x="222" y="363" font-size="14" font-family="monospace" text-anchor="end">w_i[7:0]</text>
+<path d="M226 359 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 359 l-7 -4 v8 z" fill="#4635b1"/>
+<text x="222" y="386" font-size="14" font-family="monospace" text-anchor="end">b_i[23:0]</text>
+<path d="M226 382 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 382 l-7 -4 v8 z" fill="#4635b1"/>
+<text x="222" y="409" font-size="14" font-family="monospace" text-anchor="end">shift_i[4:0]</text>
+<path d="M226 405 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 405 l-7 -4 v8 z" fill="#4635b1"/>
+<text x="222" y="432" font-size="14" font-family="monospace" text-anchor="end">run_sel_i[1:0]</text>
+<path d="M226 428 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 428 l-7 -4 v8 z" fill="#4635b1"/>
+<text x="222" y="455" font-size="14" font-family="monospace" text-anchor="end">run_i</text>
+<path d="M226 451 H250" stroke="#4635b1" stroke-width="1.5"/><path d="M250 451 l-7 -4 v8 z" fill="#4635b1"/>
+<path d="M776 60 H800" stroke="#4635b1" stroke-width="1.5"/><path d="M800 60 l-7 -4 v8 z" fill="#4635b1"/>
+<text x="804" y="65" font-size="14" font-family="monospace">s_ready_o</text>
+<path d="M776 83 H800" stroke="#4635b1" stroke-width="1.5"/><path d="M800 83 l-7 -4 v8 z" fill="#4635b1"/>
+<text x="804" y="88" font-size="14" font-family="monospace">frame_valid_o</text>
+<path d="M776 106 H800" stroke="#4635b1" stroke-width="1.5"/><path d="M800 106 l-7 -4 v8 z" fill="#4635b1"/>
+<text x="804" y="111" font-size="14" font-family="monospace">err_short_o</text>
+<path d="M776 129 H800" stroke="#4635b1" stroke-width="1.5"/><path d="M800 129 l-7 -4 v8 z" fill="#4635b1"/>
+<text x="804" y="134" font-size="14" font-family="monospace">err_long_o</text>
+<path d="M776 152 H800" stroke="#4635b1" stroke-width="1.5"/><path d="M800 152 l-7 -4 v8 z" fill="#4635b1"/>
+<text x="804" y="157" font-size="14" font-family="monospace">px_data_o[7:0]</text>
+<path d="M776 175 H800" stroke="#4635b1" stroke-width="1.5"/><path d="M800 175 l-7 -4 v8 z" fill="#4635b1"/>
+<text x="804" y="180" font-size="14" font-family="monospace">px_valid_o</text>
+<path d="M776 198 H800" stroke="#4635b1" stroke-width="1.5"/><path d="M800 198 l-7 -4 v8 z" fill="#4635b1"/>
+<text x="804" y="203" font-size="14" font-family="monospace">run_done_o</text>
+<path d="M776 221 H800" stroke="#4635b1" stroke-width="1.5"/><path d="M800 221 l-7 -4 v8 z" fill="#4635b1"/>
+<text x="804" y="226" font-size="14" font-family="monospace">run_err_o</text>
+<path d="M776 244 H800" stroke="#4635b1" stroke-width="1.5"/><path d="M800 244 l-7 -4 v8 z" fill="#4635b1"/>
+<text x="804" y="249" font-size="14" font-family="monospace">class_o[3:0]</text>
+<path d="M776 267 H800" stroke="#4635b1" stroke-width="1.5"/><path d="M800 267 l-7 -4 v8 z" fill="#4635b1"/>
+<text x="804" y="272" font-size="14" font-family="monospace">scores_o[249:0]</text>
+<path d="M776 290 H800" stroke="#4635b1" stroke-width="1.5"/><path d="M800 290 l-7 -4 v8 z" fill="#4635b1"/>
+<text x="804" y="295" font-size="14" font-family="monospace">hidden_o[63:0]</text>
+<rect x="270" y="88" width="486" height="28" rx="5" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="5 3"/>
+<text x="282" y="107" font-size="14" font-family="monospace">p3_frame64_buffer  (u_frame)</text>
+<text x="744" y="107" font-size="12" text-anchor="end" fill="#4635b1">3-1 (구 13장)</text>
+<rect x="270" y="124" width="486" height="28" rx="5" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="5 3"/>
+<text x="282" y="143" font-size="14" font-family="monospace">p3_group10_core ×3  (u_c10 · u_h8 · u_o10)</text>
+<text x="744" y="143" font-size="12" text-anchor="end" fill="#4635b1">3-2 (구 14장)</text>
+<rect x="270" y="161" width="486" height="28" rx="5" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="5 3"/>
+<text x="282" y="180" font-size="14" font-family="monospace">p3_mlp_64_8_10  (u_mlp)</text>
+<text x="744" y="180" font-size="12" text-anchor="end" fill="#4635b1">3-4 (구 16장)</text>
+<rect x="250" y="499" width="16" height="12" fill="#edeafa" stroke="#4635b1"/><text x="272" y="510" font-size="13">장 뼈대 (제공)</text>
+<rect x="370" y="499" width="16" height="12" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="4 2"/><text x="392" y="510" font-size="13">서브젝트에서 작성</text>
+<text x="600" y="510" font-size="13">왼쪽 input · 오른쪽 output · 점선 = 클록·리셋</text>
+</svg></div>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>구분</th><th>파일</th></tr></thead>
+        <tbody>
+          <tr><td>이전 장에서 가져오는 파일</td><td><ul><li><code>common/rtl/uart_rx.v · uart_tx.v · uart_core.v (1-1)</code></li><li><code>p01/rtl/p01_reset_sync.v · p01_hex4_display.v (1장 뼈대)</code></li><li><code>part03/ch02/rtl/dsp_multiplier.v (1-3과 같은 파일, VS Code 판 사본)</code></li><li><code>part03/mini_npu/rtl/npu_dsp_mac_lane.v (2-8과 같은 파일, VS Code 판 사본)</code></li></ul></td></tr>
+          <tr><td>3-1 8×8 입력 프레임</td><td><code>part03/ch13/rtl/p3_frame64_buffer.v</code></td></tr><tr><td>3-2 4PE 3그룹 10분류 코어</td><td><code>part03/ch14/rtl/p3_group10_core.v</code></td></tr><tr><td>3-3 64→10·64→8·8→10 Dense</td><td></td></tr><tr><td>3-4 MLP 64→8→10</td><td><code>part03/ch16/rtl/p3_relu_requant.v</code><br><code>part03/ch16/rtl/p3_mlp_64_8_10.v</code></td></tr>
+          <tr><td>장 뼈대 (02절에서 입력)</td><td><code>p03/rtl/p03_console.v</code><br><code>p03/rtl/p03_bank.v</code><br><code>p03/rtl/p03_view.v</code><br><code>p03/rtl/basys3_p03_top.v</code><br><code>p03/constraints/basys3_p03.xdc</code><br><code>p03/vivado/build_p03.tcl</code><br><code>p03/host/p03_send.py</code><br><code>p03/model/train_p03.py</code></td></tr>
+        </tbody>
+      </table></div>
+    </section>
+    <section class="section" id="s02">
+      <h2><span class="num">02</span> 준비 · 장 뼈대</h2>
+      <ol>
+        <li>VS Code에서 저장소 루트(<code>amd_soc_npu/</code>)를 엽니다. 도구: <code>iverilog</code> 12 이상, <code>python3</code>, Vivado 2024.2 (합성·비트스트림), 보드 터미널(115200 8N1) 또는 <code>pip install pyserial</code>.</li>
+        <li>아래 장 뼈대 파일을 경로 그대로 입력합니다. 서브젝트 모듈은 각 서브젝트 절에서 씁니다.</li>
+        <li>서브젝트 코드는 VS Code 판(브랜치 vscode/part03-ch13-31, 커밋 9203bfa)의 part03/ch13~16을 고치지 않고 가져왔다. 시뮬레이션 증거도 그 판의 로그다.</li>
+        <li>STAGE 값 = 끝낸 서브젝트 수: 3-1만 끝냈으면 1, 3-4까지 끝냈으면 4. 아직 없는 모듈은 들어가지 않으므로 빌드가 됩니다.</li>
+      </ol>
+      <div class="codeblock">
+        <div class="codebar"><span>p03/rtl/p03_console.v · verilog · 원본 · RTL_SIM 통과 2026-11-19</span></div>
+        <pre tabindex="0"><code class="language-verilog">// 3장 디버그 콘솔: 8×8 MNIST 서브젝트를 UART 명령으로 확인한다. 1·2장과 같은 형식 (1바이트 명령 + 바이너리).
+//
+//   명령 페이로드                      응답                                         서브젝트 (STAGE)
+//   S    없음                          "I"                                          모두
+//   F    n (1~80) + 화소 n바이트        "F:OK" / "F:SHORT" (n&lt;64) / "F:LONG" (n&gt;64)   3-1 (1)  n번째 바이트에 last
+//   p    addr                          "P:" 2자리 (프레임 없으면 "ERR")              3-1 (1)
+//   W    층 class addr v(int8)          "OK"                                         3-2 (2)  층 0 = 64→10, 1 = 64→8, 2 = 8→10
+//   B    층 class b2 b1 b0 (int24)      "OK"                                         3-2 (2)
+//   R    없음                          "R" 클래스 ":" 점수 7자리 ×10                3-2 (2)  64→10
+//   H    없음                          "H" 클래스 ":" 점수 7자리 ×8                 3-3 (3)  64→8
+//   G    없음                          "G" 클래스 ":" 점수 7자리 ×10                3-3 (3)  8→10 (프레임 앞 8원소)
+//   Z    shift (0~31)                  "OK"                                         3-4 (4)
+//   M    없음                          "M" 클래스 ":" 은닉 2자리 ×8 " " 점수 ×10     3-4 (4)  MLP
+//   그 밖 (CR·LF 제외) "?",  범위 밖 "ERR",  코어 오류(프레임 없음 등) "ERR". 끝은 모두 \r\n
+// 층 1은 3-3 64→8 코어와 3-4 MLP 1층에, 층 2는 3-3 8→10 코어와 MLP 2층에 함께 쓴다.
+`timescale 1ns/1ps
+`default_nettype none
+module p03_console #(
+    parameter integer STAGE = 4
+) (
+    input  wire               clk,
+    input  wire               resetn,
+    input  wire [7:0]         rx_data_i,
+    input  wire               rx_valid_i,
+    output wire               rx_ready_o,
+    output reg  [7:0]         tx_data_o,
+    output reg                tx_valid_o,
+    input  wire               tx_ready_i,
+    // 묶음으로
+    output wire [7:0]         s_data_o,
+    output wire               s_valid_o,
+    output wire               s_last_o,
+    input  wire               s_ready_i,
+    input  wire               frame_valid_i,
+    output reg                frame_ack_o,
+    input  wire               err_short_i,
+    input  wire               err_long_i,
+    output reg                px_rd_o,
+    output reg  [5:0]         px_addr_o,
+    input  wire signed [7:0]  px_data_i,
+    input  wire               px_valid_i,
+    output reg                w_wr_o,
+    output reg                b_wr_o,
+    output reg  [1:0]         layer_o,
+    output reg  [3:0]         class_o,
+    output reg  [5:0]         addr_o,
+    output reg  signed [7:0]  w_o,
+    output reg  signed [23:0] b_o,
+    output reg  [4:0]         shift_o,
+    output reg  [1:0]         run_sel_o,
+    output reg                run_o,
+    input  wire               run_done_i,
+    input  wire               run_err_i,
+    input  wire [3:0]         run_class_i,
+    input  wire [249:0]       run_scores_i,
+    input  wire [63:0]        run_hidden_i,
+    // 표시
+    output reg  [15:0]        view_o,
+    output reg  [3:0]         cls_o,
+    output reg                cls_ok_o,
+    output reg                fshort_o,
+    output reg                flong_o
+);
+    localparam [3:0] S_IDLE = 4'd0, S_RECV = 4'd1, S_ISSUE = 4'd2, S_ACK = 4'd3, S_STREAM = 4'd4,
+                     S_FWAIT = 4'd5, S_PX = 4'd6, S_RUN = 4'd7, S_LOAD = 4'd8, S_SEND = 4'd9;
+    localparam integer MSG_MAX = 104;
+
+    reg [3:0] state;
+    reg [7:0] opc;
+    reg [7:0] pl [0:4];
+    reg [2:0] need, got;
+    reg [6:0] n_left;
+    reg       e_short, e_long;
+    reg [1:0] fw;
+    reg [7:0] msg [0:MSG_MAX-1];
+    reg [6:0] msg_len, idx;
+    integer   k, p;
+
+    function [7:0] hex(input [3:0] n);
+        hex = (n &lt; 4'd10) ? (8'h30 + {4'd0, n}) : (8'h37 + {4'd0, n});
+    endfunction
+
+    function [2:0] plen(input [7:0] c);
+        case (c)
+            "S":     plen = 3'd0;
+            "F":     plen = 3'd1;
+            "p":     plen = 3'd1;
+            "W":     plen = (STAGE &gt;= 2) ? 3'd4 : 3'd7;
+            "B":     plen = (STAGE &gt;= 2) ? 3'd5 : 3'd7;
+            "R":     plen = (STAGE &gt;= 2) ? 3'd0 : 3'd7;
+            "H":     plen = (STAGE &gt;= 3) ? 3'd0 : 3'd7;
+            "G":     plen = (STAGE &gt;= 3) ? 3'd0 : 3'd7;
+            "Z":     plen = (STAGE &gt;= 4) ? 3'd1 : 3'd7;
+            "M":     plen = (STAGE &gt;= 4) ? 3'd0 : 3'd7;
+            default: plen = 3'd7;
+        endcase
+    endfunction
+
+    // 층별 범위: 층 0 class&lt;10·addr&lt;64, 층 1 class&lt;8·addr&lt;64, 층 2 class&lt;10·addr&lt;8. 3-2 빌드에는 층 0만
+    wire [7:0] lay = pl[0], cl = pl[1], ad = pl[2];
+    wire layer_ok = (lay == 8'd0) || (lay &lt;= 8'd2 &amp;&amp; STAGE &gt;= 3);
+    wire wb_ok = layer_ok &amp;&amp; (lay == 8'd1 ? cl &lt; 8'd8 : cl &lt; 8'd10);
+    wire fields_ok =
+        (opc == "F") ? (pl[0] &gt;= 8'd1 &amp;&amp; pl[0] &lt;= 8'd80) :
+        (opc == "p") ? (pl[0] &lt; 8'd64) :
+        (opc == "W") ? (wb_ok &amp;&amp; (lay == 8'd2 ? ad &lt; 8'd8 : ad &lt; 8'd64)) :
+        (opc == "B") ? wb_ok :
+        (opc == "Z") ? (pl[0] &lt; 8'd32) : 1'b1;
+
+    // 프레임 바이트는 UART에서 묶음으로 바로 흘린다 (묶음의 ready로 흐름 제어)
+    assign s_data_o   = rx_data_i;
+    assign s_valid_o  = (state == S_STREAM) &amp;&amp; rx_valid_i;
+    assign s_last_o   = (n_left == 7'd1);
+    assign rx_ready_o = (state == S_IDLE) || (state == S_RECV) || (state == S_STREAM &amp;&amp; s_ready_i);
+    wire   rx_take    = rx_valid_i &amp;&amp; rx_ready_o;
+
+    task put_err;
+        begin
+            msg[0] &lt;= "E"; msg[1] &lt;= "R"; msg[2] &lt;= "R"; msg[3] &lt;= 8'h0D; msg[4] &lt;= 8'h0A; msg_len &lt;= 7'd5;
+        end
+    endtask
+
+    always @(posedge clk) begin
+        if (!resetn) begin
+            state &lt;= S_IDLE; opc &lt;= 8'd0; need &lt;= 3'd0; got &lt;= 3'd0; n_left &lt;= 7'd0;
+            e_short &lt;= 1'b0; e_long &lt;= 1'b0; fw &lt;= 2'd0; msg_len &lt;= 7'd0; idx &lt;= 7'd0;
+            tx_data_o &lt;= 8'd0; tx_valid_o &lt;= 1'b0; frame_ack_o &lt;= 1'b0; px_rd_o &lt;= 1'b0; px_addr_o &lt;= 6'd0;
+            w_wr_o &lt;= 1'b0; b_wr_o &lt;= 1'b0; layer_o &lt;= 2'd0; class_o &lt;= 4'd0; addr_o &lt;= 6'd0;
+            w_o &lt;= 8'sd0; b_o &lt;= 24'sd0; shift_o &lt;= 5'd0; run_sel_o &lt;= 2'd0; run_o &lt;= 1'b0;
+            view_o &lt;= 16'd0; cls_o &lt;= 4'd0; cls_ok_o &lt;= 1'b0; fshort_o &lt;= 1'b0; flong_o &lt;= 1'b0;
+        end else begin
+            frame_ack_o &lt;= 1'b0; px_rd_o &lt;= 1'b0; w_wr_o &lt;= 1'b0; b_wr_o &lt;= 1'b0; run_o &lt;= 1'b0;
+            case (state)
+                S_IDLE: if (rx_take &amp;&amp; rx_data_i != 8'h0D &amp;&amp; rx_data_i != 8'h0A) begin
+                    opc &lt;= rx_data_i; got &lt;= 3'd0; need &lt;= plen(rx_data_i);
+                    if (plen(rx_data_i) == 3'd7) begin
+                        msg[0] &lt;= "?"; msg[1] &lt;= 8'h0D; msg[2] &lt;= 8'h0A; msg_len &lt;= 7'd3; state &lt;= S_LOAD;
+                    end else if (plen(rx_data_i) == 3'd0) begin
+                        state &lt;= S_ISSUE;
+                    end else begin
+                        state &lt;= S_RECV;
+                    end
+                end
+                S_RECV: if (rx_take) begin
+                    pl[got] &lt;= rx_data_i;
+                    if (got + 3'd1 == need) state &lt;= S_ISSUE;
+                    else got &lt;= got + 3'd1;
+                end
+                S_ISSUE: begin
+                    if (!fields_ok) begin
+                        put_err; state &lt;= S_LOAD;
+                    end else case (opc)
+                        "S": begin msg[0] &lt;= "I"; msg[1] &lt;= 8'h0D; msg[2] &lt;= 8'h0A; msg_len &lt;= 7'd3; state &lt;= S_LOAD; end
+                        "F": begin                // 들고 있는 프레임은 먼저 놓는다
+                            n_left &lt;= pl[0][6:0]; e_short &lt;= 1'b0; e_long &lt;= 1'b0;
+                            frame_ack_o &lt;= frame_valid_i; state &lt;= S_ACK;
+                        end
+                        "p": begin
+                            if (!frame_valid_i) begin put_err; state &lt;= S_LOAD; end
+                            else begin px_rd_o &lt;= 1'b1; px_addr_o &lt;= pl[0][5:0]; state &lt;= S_PX; end
+                        end
+                        "W", "B": begin
+                            layer_o &lt;= pl[0][1:0]; class_o &lt;= pl[1][3:0];
+                            if (opc == "W") begin addr_o &lt;= pl[2][5:0]; w_o &lt;= pl[3]; w_wr_o &lt;= 1'b1; end
+                            else begin b_o &lt;= {pl[2], pl[3], pl[4]}; b_wr_o &lt;= 1'b1; end
+                            msg[0] &lt;= "O"; msg[1] &lt;= "K"; msg[2] &lt;= 8'h0D; msg[3] &lt;= 8'h0A; msg_len &lt;= 7'd4; state &lt;= S_LOAD;
+                        end
+                        "Z": begin
+                            shift_o &lt;= pl[0][4:0];
+                            msg[0] &lt;= "O"; msg[1] &lt;= "K"; msg[2] &lt;= 8'h0D; msg[3] &lt;= 8'h0A; msg_len &lt;= 7'd4; state &lt;= S_LOAD;
+                        end
+                        default: begin            // R H G M
+                            run_sel_o &lt;= (opc == "R") ? 2'd0 : (opc == "H") ? 2'd1 : (opc == "G") ? 2'd2 : 2'd3;
+                            run_o &lt;= 1'b1; state &lt;= S_RUN;
+                        end
+                    endcase
+                end
+                S_ACK: state &lt;= S_STREAM;         // ack가 들어간 다음 클록부터 FILL
+                S_STREAM: begin
+                    if (err_short_i) e_short &lt;= 1'b1;
+                    if (err_long_i)  e_long  &lt;= 1'b1;
+                    if (rx_take) begin
+                        if (n_left == 7'd1) begin fw &lt;= 2'd0; state &lt;= S_FWAIT; end
+                        n_left &lt;= n_left - 7'd1;
+                    end
+                end
+                S_FWAIT: begin                    // 마지막 바이트 뒤 판정이 나올 때까지 2클록
+                    if (err_short_i) e_short &lt;= 1'b1;
+                    if (err_long_i)  e_long  &lt;= 1'b1;
+                    fw &lt;= fw + 2'd1;
+                    if (fw == 2'd2) begin
+                        msg[0] &lt;= "F"; msg[1] &lt;= ":";
+                        if (frame_valid_i &amp;&amp; !e_long) begin
+                            msg[2] &lt;= "O"; msg[3] &lt;= "K"; msg[4] &lt;= 8'h0D; msg[5] &lt;= 8'h0A; msg_len &lt;= 7'd6;
+                        end else if (e_long) begin
+                            msg[2] &lt;= "L"; msg[3] &lt;= "O"; msg[4] &lt;= "N"; msg[5] &lt;= "G"; msg[6] &lt;= 8'h0D; msg[7] &lt;= 8'h0A; msg_len &lt;= 7'd8;
+                        end else begin
+                            msg[2] &lt;= "S"; msg[3] &lt;= "H"; msg[4] &lt;= "O"; msg[5] &lt;= "R"; msg[6] &lt;= "T"; msg[7] &lt;= 8'h0D; msg[8] &lt;= 8'h0A; msg_len &lt;= 7'd9;
+                        end
+                        fshort_o &lt;= !frame_valid_i &amp;&amp; !e_long;
+                        flong_o  &lt;= e_long;
+                        state &lt;= S_LOAD;
+                    end
+                end
+                S_PX: if (px_valid_i) begin
+                    msg[0] &lt;= "P"; msg[1] &lt;= ":"; msg[2] &lt;= hex(px_data_i[7:4]); msg[3] &lt;= hex(px_data_i[3:0]);
+                    msg[4] &lt;= 8'h0D; msg[5] &lt;= 8'h0A; msg_len &lt;= 7'd6;
+                    view_o &lt;= {{8{px_data_i[7]}}, px_data_i};
+                    state &lt;= S_LOAD;
+                end
+                S_RUN: if (run_done_i) begin
+                    if (run_err_i) begin
+                        put_err;
+                    end else begin
+                        msg[0] &lt;= opc; msg[1] &lt;= hex(run_class_i); msg[2] &lt;= ":";
+                        view_o &lt;= {12'd0, run_class_i}; cls_o &lt;= run_class_i; cls_ok_o &lt;= 1'b1;
+                        if (opc == "M") begin
+                            for (k = 0; k &lt; 8; k = k + 1) begin
+                                msg[3 + 2*k] &lt;= hex(run_hidden_i[8*k + 4 +: 4]);
+                                msg[4 + 2*k] &lt;= hex(run_hidden_i[8*k +: 4]);
+                            end
+                            msg[19] &lt;= " ";
+                            for (p = 0; p &lt; 10; p = p + 1) begin
+                                for (k = 0; k &lt; 7; k = k + 1)
+                                    msg[20 + 8*p + k] &lt;= hex((k == 0) ? {{3{run_scores_i[25*p + 24]}}, run_scores_i[25*p + 24]}
+                                                                     : run_scores_i[25*p + 4*(6-k) +: 4]);
+                                if (p &lt; 9) msg[27 + 8*p] &lt;= ",";
+                            end
+                            msg[99] &lt;= 8'h0D; msg[100] &lt;= 8'h0A; msg_len &lt;= 7'd101;
+                        end else begin
+                            for (p = 0; p &lt; 10; p = p + 1) begin
+                                for (k = 0; k &lt; 7; k = k + 1)
+                                    msg[3 + 8*p + k] &lt;= hex((k == 0) ? {{3{run_scores_i[25*p + 24]}}, run_scores_i[25*p + 24]}
+                                                                    : run_scores_i[25*p + 4*(6-k) +: 4]);
+                                if (p &lt; 9) msg[10 + 8*p] &lt;= ",";
+                            end
+                            if (opc == "H") begin         // 8개
+                                msg[66] &lt;= 8'h0D; msg[67] &lt;= 8'h0A; msg_len &lt;= 7'd68;
+                            end else begin
+                                msg[82] &lt;= 8'h0D; msg[83] &lt;= 8'h0A; msg_len &lt;= 7'd84;
+                            end
+                        end
+                    end
+                    state &lt;= S_LOAD;
+                end
+                S_LOAD: begin
+                    tx_data_o &lt;= msg[0]; tx_valid_o &lt;= 1'b1; idx &lt;= 7'd0; state &lt;= S_SEND;
+                end
+                S_SEND: if (tx_valid_o &amp;&amp; tx_ready_i) begin
+                    if (idx + 7'd1 == msg_len) begin
+                        tx_valid_o &lt;= 1'b0; state &lt;= S_IDLE;
+                    end else begin
+                        tx_data_o &lt;= msg[idx + 7'd1]; idx &lt;= idx + 7'd1;
+                    end
+                end
+                default: state &lt;= S_IDLE;
+            endcase
+        end
+    end
+endmodule
+`default_nettype wire</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>p03/rtl/p03_bank.v · verilog · 원본 · RTL_SIM 통과 2026-11-19</span></div>
+        <pre tabindex="0"><code class="language-verilog">// 3장 8×8 MNIST 묶음: 서브젝트 모듈(VS Code 판 구13~16장)을 STAGE만큼 쌓는다. 모듈 파일은 고치지 않는다.
+//   3-1 (STAGE&gt;=1) p3_frame64_buffer: 64원소 INT8 프레임 (구 13장)
+//   3-2 (STAGE&gt;=2) p3_group10_core 64→10: 4PE 3그룹, 점수·argmax (구 14장)        → 층 0
+//   3-3 (STAGE&gt;=3) p3_group10_core #(64,8)·#(8,10): 같은 코어를 모양만 바꿔 (구 15장) → 층 1·2
+//   3-4 (STAGE&gt;=4) p3_mlp_64_8_10: 1층 → ReLU·재양자화 → 2층 (구 16장)             → 층 1·2를 함께 받음
+// 프레임 버퍼 읽기 포트 하나를 콘솔(화소 읽기)과 코어들이 나눠 쓴다. 한 번에 하나만 돈다.
+`timescale 1ns/1ps
+`default_nettype none
+module p03_bank #(
+    parameter integer STAGE = 4
+) (
+    input  wire               clk,
+    input  wire               resetn,
+    // 프레임 스트림 (콘솔)
+    input  wire [7:0]         s_data_i,
+    input  wire               s_valid_i,
+    input  wire               s_last_i,
+    output wire               s_ready_o,
+    output wire               frame_valid_o,
+    input  wire               frame_ack_i,
+    output wire               err_short_o,
+    output wire               err_long_o,
+    // 화소 읽기 (콘솔)
+    input  wire               px_rd_i,
+    input  wire [5:0]         px_addr_i,
+    output wire signed [7:0]  px_data_o,
+    output wire               px_valid_o,
+    // 가중치·Bias 쓰기. layer 0 = 64→10, 1 = 64→8 (MLP 1층), 2 = 8→10 (MLP 2층)
+    input  wire               w_wr_i,
+    input  wire               b_wr_i,
+    input  wire [1:0]         layer_i,
+    input  wire [3:0]         class_i,
+    input  wire [5:0]         addr_i,
+    input  wire signed [7:0]  w_i,
+    input  wire signed [23:0] b_i,
+    input  wire [4:0]         shift_i,
+    // 실행. sel 0 = 64→10, 1 = 64→8, 2 = 8→10, 3 = MLP
+    input  wire [1:0]         run_sel_i,
+    input  wire               run_i,
+    output reg                run_done_o,
+    output reg                run_err_o,
+    output reg  [3:0]         class_o,
+    output reg  [249:0]       scores_o,
+    output reg  [63:0]        hidden_o
+);
+    // ---------------- 3-1: 프레임 버퍼 ----------------
+    wire               rd_en, rd_valid;
+    wire [5:0]         rd_addr;
+    wire signed [7:0]  rd_data;
+    p3_frame64_buffer u_frame (
+        .clk(clk), .resetn(resetn), .s_data_i(s_data_i), .s_valid_i(s_valid_i), .s_last_i(s_last_i),
+        .s_ready_o(s_ready_o), .frame_valid_o(frame_valid_o), .frame_ack_i(frame_ack_i),
+        .rd_en_i(rd_en), .rd_addr_i(rd_addr), .rd_data_o(rd_data), .rd_valid_o(rd_valid),
+        .err_short_o(err_short_o), .err_long_o(err_long_o));
+    assign px_data_o  = rd_data;
+    assign px_valid_o = rd_valid;
+
+    // 코어 출력 묶음: [0] 64→10, [1] 64→8, [2] 8→10, [3] MLP
+    wire [3:0]   c_rd, c_done, c_err;
+    wire [5:0]   c_addr [0:3];
+    wire [3:0]   c_cls  [0:3];
+    wire [249:0] c_sc   [0:3];
+    wire [63:0]  mlp_hidden;
+    wire [3:0]   start = {4{run_i}} &amp; (4'b0001 &lt;&lt; run_sel_i);
+
+    assign rd_en   = px_rd_i | (|c_rd);
+    assign rd_addr = px_rd_i ? px_addr_i : c_rd[0] ? c_addr[0] : c_rd[1] ? c_addr[1] : c_rd[2] ? c_addr[2] : c_addr[3];
+
+    // ---------------- 3-2: 64→10 코어 ----------------
+    generate if (STAGE &gt;= 2) begin : g_c10
+        p3_group10_core #(.IN_LEN(64), .OUT_N(10)) u_c10 (
+            .clk(clk), .resetn(resetn), .start_i(start[0]), .x_valid_i(frame_valid_o),
+            .x_rd_en_o(c_rd[0]), .x_rd_addr_o(c_addr[0]), .x_rd_data_i(rd_data),
+            .w_wr_en_i(w_wr_i &amp;&amp; layer_i == 2'd0), .b_wr_en_i(b_wr_i &amp;&amp; layer_i == 2'd0),
+            .wr_class_i(class_i), .wr_addr_i(addr_i), .w_data_i(w_i), .b_data_i(b_i),
+            .load_ready_o(), .busy_o(), .done_o(c_done[0]), .error_o(c_err[0]), .class_o(c_cls[0]),
+            .scores_o(c_sc[0]));
+    end else begin : g_no_c10
+        assign c_rd[0] = 1'b0; assign c_addr[0] = 6'd0; assign c_done[0] = 1'b0; assign c_err[0] = 1'b0;
+        assign c_cls[0] = 4'd0; assign c_sc[0] = 250'd0;
+    end endgenerate
+
+    // ---------------- 3-3: 64→8·8→10 (같은 코어, 파라미터만) ----------------
+    generate if (STAGE &gt;= 3) begin : g_shapes
+        wire [199:0] sc8;
+        p3_group10_core #(.IN_LEN(64), .OUT_N(8)) u_h8 (
+            .clk(clk), .resetn(resetn), .start_i(start[1]), .x_valid_i(frame_valid_o),
+            .x_rd_en_o(c_rd[1]), .x_rd_addr_o(c_addr[1]), .x_rd_data_i(rd_data),
+            .w_wr_en_i(w_wr_i &amp;&amp; layer_i == 2'd1), .b_wr_en_i(b_wr_i &amp;&amp; layer_i == 2'd1),
+            .wr_class_i(class_i), .wr_addr_i(addr_i), .w_data_i(w_i), .b_data_i(b_i),
+            .load_ready_o(), .busy_o(), .done_o(c_done[1]), .error_o(c_err[1]), .class_o(c_cls[1]),
+            .scores_o(sc8));
+        assign c_sc[1] = {50'd0, sc8};
+        p3_group10_core #(.IN_LEN(8), .OUT_N(10)) u_o10 (
+            .clk(clk), .resetn(resetn), .start_i(start[2]), .x_valid_i(frame_valid_o),
+            .x_rd_en_o(c_rd[2]), .x_rd_addr_o(c_addr[2]), .x_rd_data_i(rd_data),
+            .w_wr_en_i(w_wr_i &amp;&amp; layer_i == 2'd2), .b_wr_en_i(b_wr_i &amp;&amp; layer_i == 2'd2),
+            .wr_class_i(class_i), .wr_addr_i(addr_i), .w_data_i(w_i), .b_data_i(b_i),
+            .load_ready_o(), .busy_o(), .done_o(c_done[2]), .error_o(c_err[2]), .class_o(c_cls[2]),
+            .scores_o(c_sc[2]));
+    end else begin : g_no_shapes
+        assign c_rd[2:1] = 2'd0; assign c_addr[1] = 6'd0; assign c_addr[2] = 6'd0;
+        assign c_done[2:1] = 2'd0; assign c_err[2:1] = 2'd0;
+        assign c_cls[1] = 4'd0; assign c_cls[2] = 4'd0; assign c_sc[1] = 250'd0; assign c_sc[2] = 250'd0;
+    end endgenerate
+
+    // ---------------- 3-4: MLP 64→8→10 ----------------
+    generate if (STAGE &gt;= 4) begin : g_mlp
+        p3_mlp_64_8_10 u_mlp (
+            .clk(clk), .resetn(resetn), .start_i(start[3]), .shift_i(shift_i), .x_valid_i(frame_valid_o),
+            .x_rd_en_o(c_rd[3]), .x_rd_addr_o(c_addr[3]), .x_rd_data_i(rd_data),
+            .wr_layer_i(layer_i == 2'd2), .w_wr_en_i(w_wr_i &amp;&amp; layer_i != 2'd0),
+            .b_wr_en_i(b_wr_i &amp;&amp; layer_i != 2'd0), .wr_class_i(class_i), .wr_addr_i(addr_i),
+            .w_data_i(w_i), .b_data_i(b_i), .load_ready_o(), .busy_o(), .done_o(c_done[3]),
+            .error_o(c_err[3]), .class_o(c_cls[3]), .scores_o(c_sc[3]), .hidden_o(mlp_hidden));
+    end else begin : g_no_mlp
+        assign c_rd[3] = 1'b0; assign c_addr[3] = 6'd0; assign c_done[3] = 1'b0; assign c_err[3] = 1'b0;
+        assign c_cls[3] = 4'd0; assign c_sc[3] = 250'd0; assign mlp_hidden = 64'd0;
+    end endgenerate
+
+    // ---------------- 실행 결과 ----------------
+    reg       running;
+    reg [1:0] sel_q;
+    wire      avail = (run_sel_i == 2'd0 &amp;&amp; STAGE &gt;= 2) || ((run_sel_i == 2'd1 || run_sel_i == 2'd2) &amp;&amp; STAGE &gt;= 3) ||
+                      (run_sel_i == 2'd3 &amp;&amp; STAGE &gt;= 4);
+    always @(posedge clk) begin
+        if (!resetn) begin
+            running &lt;= 1'b0; sel_q &lt;= 2'd0; run_done_o &lt;= 1'b0; run_err_o &lt;= 1'b0;
+            class_o &lt;= 4'd0; scores_o &lt;= 250'd0; hidden_o &lt;= 64'd0;
+        end else begin
+            run_done_o &lt;= 1'b0; run_err_o &lt;= 1'b0;
+            if (run_i) begin
+                sel_q &lt;= run_sel_i;
+                if (!avail) begin                  // 이 STAGE에 아직 없는 코어
+                    run_err_o &lt;= 1'b1; run_done_o &lt;= 1'b1;
+                end else begin
+                    running &lt;= 1'b1;
+                end
+            end else if (running &amp;&amp; (c_done[sel_q] || c_err[sel_q])) begin
+                running &lt;= 1'b0;
+                run_done_o &lt;= 1'b1;
+                run_err_o  &lt;= c_err[sel_q];
+                class_o    &lt;= c_cls[sel_q];
+                scores_o   &lt;= c_sc[sel_q];
+                hidden_o   &lt;= mlp_hidden;
+            end
+        end
+    end
+endmodule
+`default_nettype wire</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>p03/rtl/p03_view.v · verilog · 원본 · RTL_SIM 통과 2026-11-19</span></div>
+        <pre tabindex="0"><code class="language-verilog">// 3장 LED·7세그먼트.
+//   LED[9:0]  마지막 실행(R·H·G·M)의 클래스 원-핫 (실행 전 꺼짐)
+//   LED[13]   마지막 프레임이 길었음 (F:LONG),  LED[14] 짧았음 (F:SHORT),  LED[15] 프레임을 들고 있음
+//   7세그먼트 콘솔 마지막 값 16진수 4자리 (실행 = 클래스, p = 화소) — 1장 p01_hex4_display
+`timescale 1ns/1ps
+`default_nettype none
+module p03_view #(
+    parameter integer REFRESH_BITS = 18
+) (
+    input  wire        clk,
+    input  wire        resetn,
+    input  wire [15:0] value_i,
+    input  wire [3:0]  class_i,
+    input  wire        class_ok_i,
+    input  wire        frame_valid_i,
+    input  wire        fshort_i,
+    input  wire        flong_i,
+    output wire [15:0] led_o,
+    output wire [6:0]  seg_o,
+    output wire [3:0]  an_o,
+    output wire        dp_o
+);
+    wire [9:0] onehot = class_ok_i ? (10'd1 &lt;&lt; class_i) : 10'd0;
+    assign led_o = {frame_valid_i, fshort_i, flong_i, 3'd0, onehot};
+
+    p01_hex4_display #(.REFRESH_BITS(REFRESH_BITS)) u_hex (
+        .clk(clk), .resetn(resetn), .value_i(value_i), .seg_o(seg_o), .an_o(an_o), .dp_o(dp_o));
+endmodule
+`default_nettype wire</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>p03/rtl/basys3_p03_top.v · verilog · 원본 · RTL_SIM 통과 2026-11-19</span></div>
+        <pre tabindex="0"><code class="language-verilog">// 3장 보드 Top: 8×8 MNIST (CPU 없음). 인스턴스와 배선만 둔다 (기능은 하위 모듈).
+//   PC가 손글씨 숫자를 8×8 INT8 프레임으로 보내면 보드가 4PE 코어로 0~9를 고른다.
+//   3-1 프레임 → 3-2 64→10 코어 → 3-3 64→8·8→10 → 3-4 MLP 64→8→10. STAGE = 끝낸 서브젝트 수 (1~4).
+`timescale 1ns/1ps
+`default_nettype none
+module basys3_p03_top #(
+    parameter integer CLK_HZ       = 100000000,
+    parameter integer BAUD         = 115200,
+    parameter integer REFRESH_BITS = 18,
+    parameter integer STAGE        = 4
+) (
+    input  wire        clk,
+    input  wire        btnC,
+    input  wire        uart_rxd,
+    output wire        uart_txd,
+    output wire [15:0] led,
+    output wire [6:0]  seg,
+    output wire [3:0]  an,
+    output wire        dp
+);
+    wire               resetn, fe, ov;
+    wire [7:0]         rx_data, tx_data, s_data;
+    wire               rx_valid, rx_ready, tx_valid, tx_ready;
+    wire               s_valid, s_last, s_ready, frame_valid, frame_ack, err_short, err_long;
+    wire               px_rd, px_valid;
+    wire [5:0]         px_addr, addr;
+    wire signed [7:0]  px_data, w;
+    wire               w_wr, b_wr, run, run_done, run_err;
+    wire [1:0]         layer, run_sel;
+    wire [3:0]         cls_wr, run_class, cls;
+    wire signed [23:0] b;
+    wire [4:0]         shift;
+    wire [249:0]       run_scores;
+    wire [63:0]        run_hidden;
+    wire [15:0]        view;
+    wire               cls_ok, fshort, flong;
+
+    p01_reset_sync rst (.clk(clk), .btnC(btnC), .resetn(resetn));
+
+    uart_core #(.CLK_HZ(CLK_HZ), .BAUD(BAUD)) uart (
+        .clk(clk), .resetn(resetn), .uart_rxd_i(uart_rxd), .uart_txd_o(uart_txd),
+        .rx_out_data(rx_data), .rx_out_valid(rx_valid), .rx_out_ready(rx_ready),
+        .tx_in_data(tx_data), .tx_in_valid(tx_valid), .tx_in_ready(tx_ready),
+        .rx_framing_error_o(fe), .rx_overrun_o(ov));
+
+    p03_console #(.STAGE(STAGE)) con (
+        .clk(clk), .resetn(resetn),
+        .rx_data_i(rx_data), .rx_valid_i(rx_valid), .rx_ready_o(rx_ready),
+        .tx_data_o(tx_data), .tx_valid_o(tx_valid), .tx_ready_i(tx_ready),
+        .s_data_o(s_data), .s_valid_o(s_valid), .s_last_o(s_last), .s_ready_i(s_ready),
+        .frame_valid_i(frame_valid), .frame_ack_o(frame_ack), .err_short_i(err_short), .err_long_i(err_long),
+        .px_rd_o(px_rd), .px_addr_o(px_addr), .px_data_i(px_data), .px_valid_i(px_valid),
+        .w_wr_o(w_wr), .b_wr_o(b_wr), .layer_o(layer), .class_o(cls_wr), .addr_o(addr), .w_o(w), .b_o(b),
+        .shift_o(shift), .run_sel_o(run_sel), .run_o(run), .run_done_i(run_done), .run_err_i(run_err),
+        .run_class_i(run_class), .run_scores_i(run_scores), .run_hidden_i(run_hidden),
+        .view_o(view), .cls_o(cls), .cls_ok_o(cls_ok), .fshort_o(fshort), .flong_o(flong));
+
+    p03_bank #(.STAGE(STAGE)) bank (
+        .clk(clk), .resetn(resetn),
+        .s_data_i(s_data), .s_valid_i(s_valid), .s_last_i(s_last), .s_ready_o(s_ready),
+        .frame_valid_o(frame_valid), .frame_ack_i(frame_ack), .err_short_o(err_short), .err_long_o(err_long),
+        .px_rd_i(px_rd), .px_addr_i(px_addr), .px_data_o(px_data), .px_valid_o(px_valid),
+        .w_wr_i(w_wr), .b_wr_i(b_wr), .layer_i(layer), .class_i(cls_wr), .addr_i(addr), .w_i(w), .b_i(b),
+        .shift_i(shift), .run_sel_i(run_sel), .run_i(run), .run_done_o(run_done), .run_err_o(run_err),
+        .class_o(run_class), .scores_o(run_scores), .hidden_o(run_hidden));
+
+    p03_view #(.REFRESH_BITS(REFRESH_BITS)) view_out (
+        .clk(clk), .resetn(resetn), .value_i(view), .class_i(cls), .class_ok_i(cls_ok),
+        .frame_valid_i(frame_valid), .fshort_i(fshort), .flong_i(flong),
+        .led_o(led), .seg_o(seg), .an_o(an), .dp_o(dp));
+endmodule
+`default_nettype wire</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>p03/constraints/basys3_p03.xdc · xdc · 원본 · ⚠ 미검증 (Vivado 미실행)</span></div>
+        <pre tabindex="0"><code class="language-xdc"># 3장 보드 Top (basys3_p03_top) 핀. Basys-3-Master.xdc 이름·핀 그대로 (12장 basys3_npu.xdc와 같은 핀, 스위치 없음).
+set_property -dict { PACKAGE_PIN W5 IOSTANDARD LVCMOS33 } [get_ports clk]
+set_property -dict { PACKAGE_PIN U18 IOSTANDARD LVCMOS33 } [get_ports btnC]
+set_property -dict { PACKAGE_PIN B18 IOSTANDARD LVCMOS33 } [get_ports uart_rxd]
+set_property -dict { PACKAGE_PIN A18 IOSTANDARD LVCMOS33 } [get_ports uart_txd]
+set_property -dict { PACKAGE_PIN V7 IOSTANDARD LVCMOS33 } [get_ports dp]
+set_property -dict { PACKAGE_PIN W7 IOSTANDARD LVCMOS33 } [get_ports {seg[0]}]
+set_property -dict { PACKAGE_PIN W6 IOSTANDARD LVCMOS33 } [get_ports {seg[1]}]
+set_property -dict { PACKAGE_PIN U8 IOSTANDARD LVCMOS33 } [get_ports {seg[2]}]
+set_property -dict { PACKAGE_PIN V8 IOSTANDARD LVCMOS33 } [get_ports {seg[3]}]
+set_property -dict { PACKAGE_PIN U5 IOSTANDARD LVCMOS33 } [get_ports {seg[4]}]
+set_property -dict { PACKAGE_PIN V5 IOSTANDARD LVCMOS33 } [get_ports {seg[5]}]
+set_property -dict { PACKAGE_PIN U7 IOSTANDARD LVCMOS33 } [get_ports {seg[6]}]
+set_property -dict { PACKAGE_PIN U2 IOSTANDARD LVCMOS33 } [get_ports {an[0]}]
+set_property -dict { PACKAGE_PIN U4 IOSTANDARD LVCMOS33 } [get_ports {an[1]}]
+set_property -dict { PACKAGE_PIN V4 IOSTANDARD LVCMOS33 } [get_ports {an[2]}]
+set_property -dict { PACKAGE_PIN W4 IOSTANDARD LVCMOS33 } [get_ports {an[3]}]
+set_property -dict { PACKAGE_PIN U16 IOSTANDARD LVCMOS33 } [get_ports {led[0]}]
+set_property -dict { PACKAGE_PIN E19 IOSTANDARD LVCMOS33 } [get_ports {led[1]}]
+set_property -dict { PACKAGE_PIN U19 IOSTANDARD LVCMOS33 } [get_ports {led[2]}]
+set_property -dict { PACKAGE_PIN V19 IOSTANDARD LVCMOS33 } [get_ports {led[3]}]
+set_property -dict { PACKAGE_PIN W18 IOSTANDARD LVCMOS33 } [get_ports {led[4]}]
+set_property -dict { PACKAGE_PIN U15 IOSTANDARD LVCMOS33 } [get_ports {led[5]}]
+set_property -dict { PACKAGE_PIN U14 IOSTANDARD LVCMOS33 } [get_ports {led[6]}]
+set_property -dict { PACKAGE_PIN V14 IOSTANDARD LVCMOS33 } [get_ports {led[7]}]
+set_property -dict { PACKAGE_PIN V13 IOSTANDARD LVCMOS33 } [get_ports {led[8]}]
+set_property -dict { PACKAGE_PIN V3 IOSTANDARD LVCMOS33 } [get_ports {led[9]}]
+set_property -dict { PACKAGE_PIN W3 IOSTANDARD LVCMOS33 } [get_ports {led[10]}]
+set_property -dict { PACKAGE_PIN U3 IOSTANDARD LVCMOS33 } [get_ports {led[11]}]
+set_property -dict { PACKAGE_PIN P3 IOSTANDARD LVCMOS33 } [get_ports {led[12]}]
+set_property -dict { PACKAGE_PIN N3 IOSTANDARD LVCMOS33 } [get_ports {led[13]}]
+set_property -dict { PACKAGE_PIN P1 IOSTANDARD LVCMOS33 } [get_ports {led[14]}]
+set_property -dict { PACKAGE_PIN L1 IOSTANDARD LVCMOS33 } [get_ports {led[15]}]
+create_clock -name sys_clk_pin -period 10.000 -waveform {0 5} [get_ports clk]</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>p03/vivado/build_p03.tcl · tcl · 원본 · ⚠ 미검증 (Vivado 미실행)</span></div>
+        <pre tabindex="0"><code class="language-tcl"># 3장 보드 Top (8×8 MNIST, CPU 없음): STAGE 1~4 각각 합성 → 구현 → 타이밍 판정 → 비트스트림.
+# STAGE = 끝낸 서브젝트 수 (1 = 3-1 프레임 … 4 = 3-4 MLP). 서브젝트 모듈은 VS Code 판 part03/ 파일 그대로.
+# 실행 (저장소 루트): vivado -mode batch -nojournal -source p03/vivado/build_p03.tcl
+#   한 단계만: vivado -mode batch -nojournal -source p03/vivado/build_p03.tcl -tclargs 3
+# 결과: build/vivado/p03_s&lt;STAGE&gt;/ (timing_route.rpt, util_route.rpt, drc_route.rpt, basys3_p03_top.bit)
+#       p03/validation/vivado_impl_YYYYMMDD.txt (증거, 커밋 대상. 한 줄씩: SYNTH_TIMING_PASS|FAIL p03 basys3_p03_top STAGE=n WNS=… …)
+# 판정: 배선 후 setup WNS &gt;= 0, hold WHS &gt;= 0, DRC Error 0
+
+set root  [file normalize [file join [file dirname [info script]] ../..]]
+set part  xc7a35tcpg236-1
+set top   basys3_p03_top
+set base  [file join $root build vivado]
+file mkdir $base
+set stages [expr {[llength $argv] ? $argv : {1 2 3 4}}]
+
+set rtl {
+    common/rtl/uart_rx.v
+    common/rtl/uart_tx.v
+    common/rtl/uart_core.v
+    p01/rtl/p01_reset_sync.v
+    p01/rtl/p01_hex4_display.v
+    part03/ch02/rtl/dsp_multiplier.v
+    part03/mini_npu/rtl/npu_dsp_mac_lane.v
+    part03/ch13/rtl/p3_frame64_buffer.v
+    part03/ch14/rtl/p3_group10_core.v
+    part03/ch16/rtl/p3_relu_requant.v
+    part03/ch16/rtl/p3_mlp_64_8_10.v
+    p03/rtl/p03_bank.v
+    p03/rtl/p03_console.v
+    p03/rtl/p03_view.v
+    p03/rtl/basys3_p03_top.v
+}
+
+proc worst_slack {kind} {
+    set p [get_timing_paths -quiet -$kind -max_paths 1 -nworst 1]
+    if {[llength $p] == 0} { return NA }
+    return [format %.3f [get_property SLACK $p]]
+}
+proc count_ref {pattern} {
+    return [llength [get_cells -quiet -hierarchical -filter "IS_PRIMITIVE &amp;&amp; REF_NAME =~ $pattern"]]
+}
+
+set day [clock format [clock seconds] -format %Y%m%d]
+set fh [open [file join $root p03 validation vivado_impl_$day.txt] w]
+puts $fh "# [clock format [clock seconds] -format {%Y-%m-%d %H:%M}] · [version -short] · $part"
+set all_ok 1
+foreach s $stages {
+    set out [file join $base p03_s$s]
+    file mkdir $out
+    close_project -quiet
+    create_project -in_memory -part $part
+    foreach f $rtl { read_verilog [file join $root $f] }
+    read_xdc [file join $root p03 constraints basys3_p03.xdc]
+
+    synth_design -top $top -part $part -generic STAGE=$s
+    opt_design
+    place_design
+    phys_opt_design
+    route_design
+    report_utilization    -file [file join $out util_route.rpt]
+    report_timing_summary -max_paths 10 -report_unconstrained -file [file join $out timing_route.rpt]
+    report_drc -name drc_route -file [file join $out drc_route.rpt]
+
+    set wns  [worst_slack setup]
+    set whs  [worst_slack hold]
+    set derr [llength [get_drc_violations -quiet -name drc_route -filter {SEVERITY == "Error"}]]
+    set res  "LUT=[count_ref LUT*] FF=[count_ref FD*] DSP48E1=[count_ref DSP48E1] RAMB18=[count_ref RAMB18*]"
+    set ok   [expr {$wns ne "NA" &amp;&amp; $wns &gt;= 0 &amp;&amp; $whs ne "NA" &amp;&amp; $whs &gt;= 0 &amp;&amp; $derr == 0}]
+
+    set_property CFGBVS VCCO [current_design]
+    set_property CONFIG_VOLTAGE 3.3 [current_design]
+    write_bitstream -force [file join $out ${top}.bit]
+
+    set tag  [expr {$ok ? "SYNTH_TIMING_PASS" : "SYNTH_TIMING_FAIL"}]
+    set line "$tag p03 $top STAGE=$s WNS=$wns WHS=$whs DRC_ERRORS=$derr $res"
+    puts $fh $line
+    puts $line
+    if {!$ok} { set all_ok 0 }
+}
+close $fh
+if {!$all_ok} { error "P03_IMPL_TIMING_FAILED" }</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>p03/host/p03_send.py · python · 원본 · RTL_SIM 통과 2026-11-19</span></div>
+        <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
+"""3장 8×8 MNIST 보드 PC 쪽 도구: 명령을 바이트로 바꿔 보내고 응답을 출력한다.
+
+  python3 p03/host/p03_send.py --dry digit 0          # 보낼 바이트만 (시험 #0, 숫자 7)
+  python3 p03/host/p03_send.py /dev/ttyUSB1 load linear   # 64→10 모델 650개 명령 적재 (3-2)
+  python3 p03/host/p03_send.py /dev/ttyUSB1 load mlp      # 64→8·8→10 + shift (3-3·3-4)
+  python3 p03/host/p03_send.py COM3 digit 18          # 시험 #18 그림을 8×8로 줄여 F 64 전송
+  python3 p03/host/p03_send.py COM3 M                 # MLP 추론
+  (pip install pyserial 필요. 115200 8N1. MNIST는 host_tools/mnist_idx.py가 data/mnist에 받는다)
+
+명령 (p03/rtl/p03_console.v): S | F 화소… | p addr | W 층 class addr v | B 층 class v | R | H | G | Z shift | M
+"""
+import json
+import struct
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+INT = lambda s: int(s, 0)
+
+
+def frame(px):
+    return b"F" + bytes([len(px)]) + bytes(v &amp; 0xFF for v in px)
+
+
+def W(L, c, a, v):
+    return b"W" + bytes([L, c, a, v &amp; 0xFF])
+
+
+def B(L, c, v):
+    return b"B" + bytes([L, c]) + (v &amp; 0xFFFFFF).to_bytes(3, "big")
+
+
+def model():
+    return json.loads((ROOT / "p03" / "model" / "p03_models.json").read_text(encoding="utf-8"))
+
+
+def encode(args):
+    """명령 하나 → [(바이트, 설명)] (load는 여러 개)."""
+    op, a = args[0], args[1:]
+    if op in ("S", "R", "H", "G", "M"):
+        return [(op.encode(), op)]
+    if op == "p":
+        return [(b"p" + bytes([INT(a[0])]), "p")]
+    if op == "Z":
+        return [(b"Z" + bytes([INT(a[0])]), "Z")]
+    if op == "W":
+        return [(W(*map(INT, a)), "W")]
+    if op == "B":
+        return [(B(*map(INT, a)), "B")]
+    if op == "F":
+        return [(frame([INT(v) for v in a]), "F")]
+    if op == "digit":
+        sys.path.insert(0, str(ROOT / "host_tools"))
+        sys.path.insert(0, str(ROOT))
+        sys.path.insert(0, str(ROOT / "p03" / "model"))
+        from mnist_idx import images, labels
+        from train_p03 import to8x8
+        k = INT(a[0])
+        return [(frame(to8x8(images("test")[k])), f"시험 #{k}, 숫자 {labels('test')[k]}")]
+    if op == "load":
+        m = model()
+        if a[0] == "linear":
+            L = [(0, m["linear"]["w"], m["linear"]["b"])]
+            shift = None
+        else:
+            L = [(1, m["mlp"]["w1"], m["mlp"]["b1"]), (2, m["mlp"]["w2"], m["mlp"]["b2"])]
+            shift = m["mlp"]["shift"]
+        out = []
+        for layer, w, b in L:
+            out += [(W(layer, c, i, v), "W") for c, row in enumerate(w) for i, v in enumerate(row)]
+            out += [(B(layer, c, v), "B") for c, v in enumerate(b)]
+        if shift is not None:
+            out.append((b"Z" + bytes([shift]), "Z"))
+        return out
+    raise SystemExit("모르는 명령: " + op)
+
+
+def main(argv):
+    if len(argv) &lt; 2:
+        raise SystemExit(__doc__)
+    port, cmds = argv[0], encode(argv[1:])
+    if port == "--dry":
+        for data, note in cmds[:3]:
+            print("TX", data.hex(" "), "#", note)
+        if len(cmds) &gt; 3:
+            print(f"... 모두 {len(cmds)}개 명령")
+        return 0
+    import serial                           # pyserial (보드에서만 필요)
+    bad = 0
+    with serial.Serial(port, 115200, timeout=2) as s:
+        for data, note in cmds:
+            s.write(data)
+            reply = s.read_until(b"\n").decode("ascii", "replace")
+            if len(cmds) == 1 or not reply.startswith("OK"):
+                print(note, "→", repr(reply))
+            bad += not reply.strip() or reply.startswith(("ERR", "?"))
+    if len(cmds) &gt; 1:
+        print(f"{len(cmds)}개 명령, 실패 {bad}개")
+    return 1 if bad else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>p03/model/train_p03.py · python · 원본 · RTL_SIM 통과 2026-11-19</span></div>
+        <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
+"""3장 8×8 MNIST 모델 학습·INT8 양자화·정수 평가 (PC, numpy).
+
+  python3 p03/model/train_p03.py            # 학습 → p03/model/p03_models.json, 평가 줄 출력
+
+전처리 (보드와 같음, 정수만):
+  28×28 → 가운데 24×24 → 3×3 칸 평균 (합 + 4) // 9 → 0..255 → 13장 규칙 sat_int8(round_shift_away(p, 1)) → 0..127
+모델 두 개 (같은 입력):
+  선형 64→10        : 3-2 서브젝트 (p3_group10_core 64→10). 점수 = x·W + b
+  MLP 64→8→10       : 3-4 서브젝트 (p3_mlp_64_8_10). 은닉 = sat_int8(round_shift_away(ReLU(x·W1 + b1), shift))
+양자화: 가중치 대칭 INT8 (최댓값 = ±127), Bias는 누산 단위 signed 24비트로 반올림·포화.
+정수 평가는 part03/host_tools/p3_integer_reference.py의 linear_64x10 · mlp_64_8_10 · argmax_lowest만 쓴다
+(RTL과 비트 단위로 같은 규칙). 학습은 float32, 고정 seed.
+"""
+import json
+import sys
+from pathlib import Path
+
+import numpy as np
+
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / "host_tools"))
+from mnist_idx import images, labels, SHA256                       # noqa: E402
+from part03.host_tools.p3_integer_reference import (                # noqa: E402
+    sat_int8, round_shift_away, linear_64x10, mlp_64_8_10, argmax_lowest)
+
+SEED = 303
+OUT = ROOT / "p03" / "model" / "p03_models.json"
+
+
+def to8x8(img784):
+    """28×28 화소 → 8×8 INT8 (0..127). 정수 연산만."""
+    a = np.frombuffer(img784, dtype=np.uint8).reshape(28, 28)[2:26, 2:26].astype(np.int64)
+    s = a.reshape(8, 3, 8, 3).sum(axis=(1, 3))
+    avg = (s + 4) // 9
+    return [sat_int8(round_shift_away(int(v), 1)) for v in avg.reshape(64)]
+
+
+def load(split):
+    xs = np.array([to8x8(im) for im in images(split)], dtype=np.int64)
+    return xs, np.array(labels(split), dtype=np.int64)
+
+
+def sat(v, bits):
+    lo, hi = -(1 &lt;&lt; (bits - 1)), (1 &lt;&lt; (bits - 1)) - 1
+    return max(lo, min(hi, v))
+
+
+def rnd(v):
+    """절반은 0에서 먼 쪽 (Python round의 짝수 반올림을 쓰지 않는다)."""
+    return int(np.sign(v) * np.floor(abs(v) + 0.5))
+
+
+def qweights(w):
+    s = float(np.abs(w).max()) / 127.0
+    return [[sat(rnd(v / s), 8) for v in row] for row in w], s
+
+
+def softmax_ce(logits, y):
+    z = logits - logits.max(axis=1, keepdims=True)
+    p = np.exp(z)
+    p /= p.sum(axis=1, keepdims=True)
+    g = p.copy()
+    g[np.arange(len(y)), y] -= 1
+    return g / len(y)
+
+
+def adam_train(params, grad_fn, x, y, epochs, lr, rng):
+    m = [np.zeros_like(p) for p in params]
+    v = [np.zeros_like(p) for p in params]
+    t = 0
+    for _ in range(epochs):
+        order = rng.permutation(len(x))
+        for i in range(0, len(x), 128):
+            idx = order[i:i + 128]
+            grads = grad_fn(params, x[idx], y[idx])
+            t += 1
+            for k, (p, g) in enumerate(zip(params, grads)):
+                m[k] = 0.9 * m[k] + 0.1 * g
+                v[k] = 0.999 * v[k] + 0.001 * g * g
+                p -= lr * (m[k] / (1 - 0.9 ** t)) / (np.sqrt(v[k] / (1 - 0.999 ** t)) + 1e-8)
+    return params
+
+
+def main():
+    rng = np.random.default_rng(SEED)
+    xtr, ytr = load("train")
+    xte, yte = load("test")
+    ftr, fte = xtr.astype(np.float32) / 127.0, xte.astype(np.float32) / 127.0
+
+    # ── 선형 64→10 ──
+    W = rng.normal(0, 0.05, (64, 10)).astype(np.float32)
+    b = np.zeros(10, np.float32)
+
+    def g_lin(ps, x, y):
+        W, b = ps
+        g = softmax_ce(x @ W + b, y)
+        return [x.T @ g, g.sum(axis=0)]
+
+    W, b = adam_train([W, b], g_lin, ftr, ytr, 8, 0.01, rng)
+    f_lin = float(((fte @ W + b).argmax(axis=1) == yte).mean())
+    wq, sw = qweights(W.T)                                          # wq[class][i]
+    bq = [sat(rnd(float(v) / ((1 / 127.0) * sw)), 24) for v in b]
+
+    # ── MLP 64→8→10 ──
+    W1 = rng.normal(0, 0.2, (64, 8)).astype(np.float32)
+    b1 = np.zeros(8, np.float32)
+    W2 = rng.normal(0, 0.3, (8, 10)).astype(np.float32)
+    b2 = np.zeros(10, np.float32)
+
+    def g_mlp(ps, x, y):
+        W1, b1, W2, b2 = ps
+        h_pre = x @ W1 + b1
+        h = np.maximum(h_pre, 0)
+        g = softmax_ce(h @ W2 + b2, y)
+        gh = (g @ W2.T) * (h_pre &gt; 0)
+        return [x.T @ gh, gh.sum(axis=0), h.T @ g, g.sum(axis=0)]
+
+    W1, b1, W2, b2 = adam_train([W1, b1, W2, b2], g_mlp, ftr, ytr, 15, 0.005, rng)
+    h_te = np.maximum(fte @ W1 + b1, 0)
+    f_mlp = float(((h_te @ W2 + b2).argmax(axis=1) == yte).mean())
+
+    w1q, s1 = qweights(W1.T)                                        # w1q[hidden][i]
+    b1q = [sat(rnd(float(v) / ((1 / 127.0) * s1)), 24) for v in b1]
+    # 은닉 shift: 학습 데이터 은닉 누산의 99.9 백분위가 127 안에 들어오는 가장 작은 shift
+    acc = np.maximum(xtr[:5000] @ np.array(w1q).T + np.array(b1q), 0)
+    p999 = float(np.percentile(acc, 99.9))
+    shift = next(s for s in range(32) if p999 / (1 &lt;&lt; s) &lt;= 127)
+    h_unit = (1 / 127.0) * s1 * (1 &lt;&lt; shift)                        # 은닉 정수 1의 실수 크기
+    w2q, s2 = qweights(W2.T)                                        # w2q[class][hidden]
+    b2q = [sat(rnd(float(v) / (h_unit * s2)), 24) for v in b2]
+
+    # ── 정수 평가 (RTL 규칙 함수) ──
+    q_lin = sum(argmax_lowest(linear_64x10(list(x), wq, bq)) == y for x, y in zip(xte.tolist(), yte))
+    q_mlp = sum(argmax_lowest(mlp_64_8_10(list(x), w1q, b1q, w2q, b2q, shift)) == y
+                for x, y in zip(xte.tolist(), yte))
+    n = len(yte)
+    res = {
+        "preprocess": "28x28 -&gt; center 24x24 -&gt; 3x3 mean (sum+4)//9 -&gt; sat_int8(round_shift_away(p,1)), row-major 64",
+        "seed": SEED,
+        "dataset_sha256": SHA256,
+        "linear": {"w": wq, "b": bq, "float_test_acc": round(f_lin, 4), "int8_test_acc": round(q_lin / n, 4)},
+        "mlp": {"w1": w1q, "b1": b1q, "w2": w2q, "b2": b2q, "shift": shift,
+                "float_test_acc": round(f_mlp, 4), "int8_test_acc": round(q_mlp / n, 4)},
+    }
+    OUT.write_text(json.dumps(res, separators=(",", ":")) + "\n", encoding="utf-8")
+    print(f"P03_TRAIN_LINEAR float={f_lin:.4f} int8={q_lin / n:.4f} test={n}")
+    print(f"P03_TRAIN_MLP float={f_mlp:.4f} int8={q_mlp / n:.4f} shift={shift} test={n}")
+    print(f"P03_MODEL_WRITTEN {OUT.relative_to(ROOT)}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())</code></pre>
+      </div>
+    </section>
+    <section class="section" id="s3_1">
+      <h2><span class="num">03</span> 서브젝트 3-1 · 8×8 입력 프레임 <small>(구 13장)</small></h2>
+      <p class="verdict"><b>학습목표 (보드):</b> 숫자 그림 64바이트 → <code>F:OK</code>, 화소 되읽기 <code>p 36</code> → <code>P:17</code>. 63바이트는 <code>F:SHORT</code>, 65바이트는 <code>F:LONG</code>, 프레임 없을 때 <code>p</code>는 <code>ERR</code>.</p>
+      <h3>보드에서 볼 것</h3>
+      <ol>
+        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다: <code>vivado -mode batch -nojournal -source p03/vivado/build_p03.tcl -tclargs 1</code> → <code>build/vivado/p03_s1/basys3_p03_top.bit</code></li>
+        <li>Hardware Manager로 보드에 내려받고 <code>python3 p03/host/p03_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다 (115200 8N1). 3장 Top은 스위치를 쓰지 않습니다. 모델 적재는 PC 도구의 <code>load linear</code>·<code>load mlp</code>, 숫자 전송은 <code>digit 시험번호</code>.</li>
+      </ol>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>순서</th><th>PC 명령 (<code>p03_send.py</code>)</th><th>보드 응답 (UART)</th></tr></thead>
+        <tbody><tr><td>1</td><td class="nw"><code>S</code></td><td class="nw"><code>I\r\n</code></td></tr><tr><td>2</td><td class="nw"><code>F 64 (시험 #0, 숫자 7)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td>3</td><td class="nw"><code>p 0</code></td><td class="nw"><code>P:00\r\n</code></td></tr><tr><td>4</td><td class="nw"><code>p 27</code></td><td class="nw"><code>P:00\r\n</code></td></tr><tr><td>5</td><td class="nw"><code>p 36</code></td><td class="nw"><code>P:17\r\n</code></td></tr><tr><td>6</td><td class="nw"><code>F 63 (짧은 프레임)</code></td><td class="nw"><code>F:SHORT\r\n</code></td></tr><tr><td>7</td><td class="nw"><code>p 0</code></td><td class="nw"><code>ERR\r\n</code></td></tr><tr><td>8</td><td class="nw"><code>F 65 (긴 프레임)</code></td><td class="nw"><code>F:LONG\r\n</code></td></tr><tr><td>9</td><td class="nw"><code>F 64 (시험 #0, 숫자 7)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td>10</td><td class="nw"><code>R</code></td><td class="nw"><code>?\r\n</code></td></tr></tbody>
+      </table></div>
+      <p>끝난 뒤 LED: <code>0x8000</code> (LED[9:0] 마지막 클래스 원-핫, LED15 프레임 보관, LED14 짧은 프레임, LED13 긴 프레임. 7세그먼트는 클래스 또는 읽은 화소). 응답 출처: 장 Top 시뮬레이션 STAGE=1 (<code>p03/validation/rtl_sim_20261119.log</code>, 바이트 단위 대조).</p>
+      <h3>추가 코드 (구 13장 그대로, VS Code 판)</h3>
+
+      <div class="codeblock">
+        <div class="codebar"><span>part03/ch13/rtl/p3_frame64_buffer.v · verilog · 원본 · RTL_SIM 통과 날짜 미기록</span></div>
+        <pre tabindex="0"><code class="language-verilog">`timescale 1ns/1ps
+// (추가) 13장: 8×8(64원소) signed INT8 입력 프레임 수신 버퍼.
+// 바이트 스트림(valid/ready/last)을 행 우선 순서(addr=row*8+col)로 저장한다.
+// 정확히 64번째 바이트에 last가 있어야 유효 프레임. 짧은/긴 프레임은 버리고 오류 펄스를 낸다.
+// 유효 프레임은 frame_ack_i까지 유지되며, 그동안 s_ready_o=0(Busy)으로 다음 입력을 막는다.
+module p3_frame64_buffer(
+    input wire clk,
+    input wire resetn,
+    input wire [7:0] s_data_i,
+    input wire s_valid_i,
+    input wire s_last_i,
+    output wire s_ready_o,
+    output wire frame_valid_o,
+    input wire frame_ack_i,
+    input wire rd_en_i,
+    input wire [5:0] rd_addr_i,
+    output reg signed [7:0] rd_data_o,
+    output reg rd_valid_o,
+    output reg err_short_o,
+    output reg err_long_o
+);
+    localparam [1:0] FILL=2'd0, DROP=2'd1, FULL=2'd2;
+    reg [1:0] state;
+    reg [5:0] count_q;
+    reg signed [7:0] mem [0:63];
+
+    assign s_ready_o = resetn &amp;&amp; (state != FULL);
+    assign frame_valid_o = (state == FULL);
+    wire accept = s_valid_i &amp;&amp; s_ready_o;
+
+    // 저장 배열은 Reset 없이 동기 쓰기·동기 읽기(1클록 지연)로 메모리 추론을 허용한다.
+    always @(posedge clk) begin
+        if (accept &amp;&amp; state == FILL)
+            mem[count_q] &lt;= s_data_i;
+        if (rd_en_i)
+            rd_data_o &lt;= mem[rd_addr_i];
+    end
+
+    always @(posedge clk) begin
+        if (!resetn) begin
+            state &lt;= FILL;
+            count_q &lt;= 6'd0;
+            rd_valid_o &lt;= 1'b0;
+            err_short_o &lt;= 1'b0;
+            err_long_o &lt;= 1'b0;
+        end else begin
+            err_short_o &lt;= 1'b0;
+            err_long_o &lt;= 1'b0;
+            // 읽기 데이터는 유효 프레임 보관 중 요청한 경우에만 유효로 표시한다.
+            rd_valid_o &lt;= rd_en_i &amp;&amp; (state == FULL);
+            case (state)
+                FILL: if (accept) begin
+                    if (s_last_i) begin
+                        count_q &lt;= 6'd0;
+                        if (count_q == 6'd63)
+                            state &lt;= FULL;
+                        else
+                            err_short_o &lt;= 1'b1;
+                    end else if (count_q == 6'd63) begin
+                        // 64번째에 last가 없으면 긴 프레임: 다음 last까지 버리고 재동기화.
+                        count_q &lt;= 6'd0;
+                        err_long_o &lt;= 1'b1;
+                        state &lt;= DROP;
+                    end else begin
+                        count_q &lt;= count_q + 6'd1;
+                    end
+                end
+                DROP: if (accept &amp;&amp; s_last_i)
+                    state &lt;= FILL;
+                FULL: if (frame_ack_i)
+                    state &lt;= FILL;
+                default: state &lt;= FILL;
+            endcase
+        end
+    end
+endmodule</code></pre>
+      </div>
+      <h3>시뮬레이션 기대 화면</h3>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 서브젝트 단독 시험</span></div>
+        <pre tabindex="0"><code>bash part03/ch13/scripts/run_sim.sh</code></pre></div>
+      <div class="codeblock"><div class="codebar"><span>기대 출력 (Icarus Verilog 12.0 · 날짜 미기록 · 출처 part03/ch13/validation/rtl_sim.log)</span></div>
+        <pre tabindex="0"><code>PYTHON_FRAME64_SELF_TEST_PASS items=2664 frames=36 short=2 long=3 seed=1313
+RTL_SIM_PASS FRAME64 frames=36 short=2 long=3
+PYTHON_RTL_COMPARE_PASS frames=36 bit_exact=1</code></pre></div>
+      <details class="full"><summary>이 서브젝트의 테스트벤치·기준 모델 (전체 코드 3개)</summary>
+      <div class="codeblock">
+        <div class="codebar"><span>part03/ch13/tb/tb_p3_frame64_buffer.sv · systemverilog · 원본 · RTL_SIM 통과 날짜 미기록</span></div>
+        <pre tabindex="0"><code class="language-systemverilog">// (추가) 13장 p3_frame64_buffer 자동 판정 테스트벤치.
+// Python이 만든 스트림(D 데이터/R Reset/Q FULL 중 Reset)을 무작위 valid 간격으로 넣고,
+// 유효 프레임을 1클록 지연 읽기 포트로 64개 모두 읽어 actual 파일에 기록한다(Python이 비트 단위 비교).
+// 매 클록 Ready/Valid·Busy·읽기 지연 규칙을 검사한다.
+`timescale 1ns/1ps
+module tb_p3_frame64_buffer;
+    reg clk = 0, resetn = 0;
+    reg [7:0] s_data = 0;
+    reg s_valid = 0, s_last = 0, frame_ack = 0, rd_en = 0;
+    reg [5:0] rd_addr = 0;
+    wire s_ready, frame_valid, rd_valid, err_short, err_long;
+    wire signed [7:0] rd_data;
+    always #5 clk = ~clk;
+
+    p3_frame64_buffer dut(
+        .clk(clk), .resetn(resetn),
+        .s_data_i(s_data), .s_valid_i(s_valid), .s_last_i(s_last), .s_ready_o(s_ready),
+        .frame_valid_o(frame_valid), .frame_ack_i(frame_ack),
+        .rd_en_i(rd_en), .rd_addr_i(rd_addr), .rd_data_o(rd_data), .rd_valid_o(rd_valid),
+        .err_short_o(err_short), .err_long_o(err_long));
+
+    integer seed = 13, n_short = 0, n_long = 0, n_frames = 0, out_fd;
+    reg drop_flag = 0, reading = 0;
+    reg prev_rd_req = 0, prev_stall = 0;
+    reg [7:0] prev_data;
+    reg prev_last;
+
+    // 규칙 검사: Busy 중 ready=0, valid 유지 중 데이터 불변, 읽기 1클록 지연
+    always @(posedge clk) begin
+        if (resetn) begin
+            if (frame_valid &amp;&amp; s_ready) $fatal(1, "s_ready high while frame held");
+            if (rd_valid !== prev_rd_req) $fatal(1, "rd_valid latency/state rule broken");
+            if (err_short) n_short = n_short + 1;
+            if (err_long) n_long = n_long + 1;
+            if (err_short &amp;&amp; err_long) $fatal(1, "both error pulses");
+        end
+        if (prev_stall &amp;&amp; (!s_valid || s_data !== prev_data || s_last !== prev_last))
+            $fatal(1, "TB changed stalled stream beat");
+        prev_rd_req = resetn &amp;&amp; rd_en &amp;&amp; frame_valid;
+        prev_stall = s_valid &amp;&amp; !s_ready &amp;&amp; resetn;
+        prev_data = s_data;
+        prev_last = s_last;
+    end
+
+    // 소비자: 유효 프레임을 읽고 기록한 뒤 무작위 지연 후 ack
+    reg [7:0] frame_buf [0:63];
+    integer a, wait_n;
+    initial begin
+        forever begin
+            @(negedge clk);
+            if (resetn &amp;&amp; frame_valid &amp;&amp; !drop_flag &amp;&amp; !reading) begin
+                reading = 1;
+                // 주소 a 요청 -&gt; 다음 상승 에지에서 mem[a] 출력 -&gt; 다음 하강 에지에서 수집
+                for (a = 0; a &lt; 64; a = a + 1) begin
+                    rd_en = 1; rd_addr = a;
+                    @(negedge clk);
+                    if (rd_valid !== 1'b1) $fatal(1, "rd_valid missing addr=%0d", a);
+                    frame_buf[a] = rd_data;
+                end
+                rd_en = 0;
+                for (a = 0; a &lt; 64; a = a + 1) begin
+                    $fwrite(out_fd, "%02x", frame_buf[a]);
+                    if (a &lt; 63) $fwrite(out_fd, " ");
+                end
+                $fwrite(out_fd, "\n");
+                n_frames = n_frames + 1;
+                // Busy 유지 확인: ack 전까지 frame_valid 유지
+                wait_n = $urandom(seed) % 12;
+                repeat (wait_n) begin
+                    @(negedge clk);
+                    if (!frame_valid) $fatal(1, "frame dropped before ack");
+                end
+                frame_ack = 1;
+                @(negedge clk);
+                frame_ack = 0;
+                if (frame_valid) $fatal(1, "frame_valid not cleared by ack");
+                reading = 0;
+            end else if (!reading) begin
+                // 유효 프레임이 없을 때 무작위 읽기 요청: rd_valid가 올라오면 안 된다(검사기에서 판정)
+                rd_en = $urandom(seed) % 2;
+                rd_addr = $urandom(seed);
+            end
+        end
+    end
+
+    // 생산자: 스트림 파일 재생
+    reg [8*8-1:0] kind;
+    integer fd, rc, val, last, gap, guard;
+    reg [8*256-1:0] stream_path, actual_path;
+    task automatic pulse_reset;
+        begin
+            @(negedge clk);
+            s_valid = 0; s_last = 0;
+            resetn = 0;
+            repeat (3) @(negedge clk);
+            if (frame_valid) $fatal(1, "frame_valid during reset");
+            if (s_ready) $fatal(1, "s_ready high during reset");
+            resetn = 1;
+            @(negedge clk);
+            if (!s_ready || frame_valid) $fatal(1, "bad state after reset");
+        end
+    endtask
+    initial begin
+        if (!$value$plusargs("STREAM=%s", stream_path)) $fatal(1, "+STREAM required");
+        if (!$value$plusargs("ACTUAL=%s", actual_path)) $fatal(1, "+ACTUAL required");
+        fd = $fopen(stream_path, "r");
+        out_fd = $fopen(actual_path, "w");
+        if (fd == 0 || out_fd == 0) $fatal(1, "cannot open files");
+        repeat (4) @(negedge clk);
+        resetn = 1;
+        @(negedge clk);
+        while (!$feof(fd)) begin
+            rc = $fscanf(fd, "%s %h %d\n", kind, val, last);
+            if (rc != 3) begin
+                if (!$feof(fd)) $fatal(1, "bad stream line");
+            end else if (kind == "R") begin
+                pulse_reset;
+            end else if (kind == "Q") begin
+                // 직전 프레임은 소비자가 먼저 읽기 시작하도록 한 클록 이상 기다린 뒤 표시
+                @(negedge clk);
+                while (frame_valid || reading) @(negedge clk);
+                drop_flag = 1;
+            end else begin
+                gap = $urandom(seed) % 4;
+                repeat (gap) @(negedge clk);
+                s_data = val; s_last = last; s_valid = 1;
+                guard = 0;
+                while (!s_ready) begin
+                    @(negedge clk);
+                    guard = guard + 1;
+                    if (guard &gt; 5000) $fatal(1, "stream stalled forever");
+                end
+                @(negedge clk);
+                s_valid = 0; s_last = 0;
+                if (drop_flag &amp;&amp; last) begin
+                    // Q: 완성 프레임을 ack 없이 Reset으로 폐기
+                    @(negedge clk);
+                    if (!frame_valid) $fatal(1, "Q frame not completed");
+                    pulse_reset;
+                    drop_flag = 0;
+                end
+            end
+        end
+        // 마지막 프레임 소비 대기
+        guard = 0;
+        while (frame_valid || reading) begin
+            @(negedge clk);
+            guard = guard + 1;
+            if (guard &gt; 5000) $fatal(1, "final frame not consumed");
+        end
+        repeat (5) @(negedge clk);
+        $fwrite(out_fd, "ERR %0d %0d\n", n_short, n_long);
+        $fclose(out_fd);
+        $display("RTL_SIM_PASS FRAME64 frames=%0d short=%0d long=%0d", n_frames, n_short, n_long);
+        $finish;
+    end
+    initial begin #20000000; $fatal(1, "TB timeout"); end
+endmodule</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>part03/ch13/reference/frame64_reference.py · python · 원본 · RTL_SIM 통과 날짜 미기록</span></div>
+        <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
+"""13장: 8×8 INT8 입력 프레임 계약 기준모델·시험 벡터 생성·RTL 결과 비교.
+
+계산 규칙은 host_tools/p3_integer_reference.py의 함수만 조합한다.
+- 픽셀 양자화: sat_int8(round_shift_away(pixel_u8, 1))  (0..255 -&gt; 0..127)
+- 저장 순서: addr = row*8 + col (행 우선)
+- 프레임 규칙: 64번째 바이트에만 last. 짧으면 err_short, 길면 err_long 후 다음 last까지 버림.
+"""
+import argparse
+import random
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+from part03.host_tools.p3_integer_reference import sat_int8, round_shift_away  # noqa: E402
+
+# 0~9 숫자 8×8 비트맵(1=획). 실제 MNIST 다운샘플이 아닌 데이터 계약 시험용 합성 숫자.
+GLYPHS = {
+    0: ["..####..", ".#....#.", "#......#", "#......#",
+        "#......#", "#......#", ".#....#.", "..####.."],
+    1: ["...##...", "..###...", ".#.##...", "...##...",
+        "...##...", "...##...", "...##...", ".######."],
+    2: ["..####..", ".#....#.", "......#.", ".....#..",
+        "....#...", "...#....", "..#.....", ".######."],
+    3: [".#####..", "......#.", "......#.", "..####..",
+        "......#.", "......#.", "......#.", ".#####.."],
+    4: ["....##..", "...#.#..", "..#..#..", ".#...#..",
+        "########", ".....#..", ".....#..", ".....#.."],
+    5: [".######.", ".#......", ".#......", ".#####..",
+        "......#.", "......#.", ".#....#.", "..####.."],
+    6: ["..####..", ".#......", "#.......", "#.####..",
+        "##....#.", "#......#", ".#....#.", "..####.."],
+    7: ["########", "......#.", ".....#..", "....#...",
+        "...#....", "...#....", "...#....", "...#...."],
+    8: ["..####..", ".#....#.", ".#....#.", "..####..",
+        ".#....#.", "#......#", ".#....#.", "..####.."],
+    9: ["..####..", ".#....#.", "#......#", ".#....##",
+        "..####.#", ".......#", "......#.", "..####.."],
+}
+
+
+def quantize_pixel_u8(pixel):
+    """8비트 무부호 밝기(0..255)를 signed INT8 입력(0..127)으로 변환한다."""
+    if not 0 &lt;= pixel &lt;= 255:
+        raise ValueError("pixel must be 0..255")
+    return sat_int8(round_shift_away(pixel, 1))
+
+
+def glyph_frame(digit):
+    """획=255, 획 옆=128(회색), 배경=0 밝기를 양자화해 64원소 행 우선 벡터로 만든다."""
+    rows = GLYPHS[digit]
+    assert len(rows) == 8 and all(len(r) == 8 for r in rows)
+    out = []
+    for r in range(8):
+        for c in range(8):
+            if rows[r][c] == "#":
+                p = 255
+            elif (c &gt; 0 and rows[r][c - 1] == "#") or (c &lt; 7 and rows[r][c + 1] == "#"):
+                p = 128
+            else:
+                p = 0
+            out.append(quantize_pixel_u8(p))
+    return out
+
+
+def model(stream):
+    """RTL 계약의 기준 상태기계. 수락될 프레임 목록과 오류 횟수를 반환한다."""
+    state, buf, frames, short, long_ = "FILL", [], [], 0, 0
+    drop_next = False
+    for item in stream:
+        kind = item[0]
+        if kind == "R":
+            state, buf = "FILL", []
+            continue
+        if kind == "Q":
+            drop_next = True
+            continue
+        _, value, last = item
+        if state == "FILL":
+            buf.append(value)
+            if last:
+                if len(buf) == 64:
+                    if drop_next:
+                        drop_next = False  # FULL 상태에서 Reset되어 출력되지 않음
+                    else:
+                        frames.append(buf)
+                else:
+                    short += 1
+                buf = []
+            elif len(buf) == 64:
+                long_ += 1
+                buf, state = [], "DROP"
+        elif state == "DROP" and last:
+            state = "FILL"
+    return frames, short, long_
+
+
+def frame_items(values, last_at=None):
+    last_at = len(values) if last_at is None else last_at
+    return [("D", v, i + 1 == last_at) for i, v in enumerate(values)]
+
+
+def build_stream():
+    rng = random.Random(1313)
+    s = []
+    for d in range(10):
+        s += frame_items(glyph_frame(d))
+    # 행 우선 순서: 값 = 주소-32 (0행0열=-32, 7행7열=31)
+    s += frame_items([i - 32 for i in range(64)])
+    # 부호 경계와 모든 위치가 다른 값
+    s += frame_items([-128, 127, 0, -1] * 16)
+    s += frame_items([((i * 37) % 256) - 128 for i in range(64)])
+    # 짧은 프레임 2종(63바이트, 1바이트)
+    s += frame_items([5] * 63)
+    s += frame_items([7])
+    # 긴 프레임 2종(65바이트: 65번째 last로 재동기, 70바이트) 후 정상 프레임
+    s += frame_items([9] * 65)
+    s += frame_items([11] * 70)
+    s += frame_items([rng.randint(-128, 127) for _ in range(64)])
+    # 수신 중 Reset: 30바이트 후 Reset, 이어서 정상 프레임
+    s += frame_items([3] * 30, last_at=0)
+    s.append(("R",))
+    s += frame_items([rng.randint(-128, 127) for _ in range(64)])
+    # DROP 상태에서 Reset: last 없는 64바이트 -&gt; DROP, Reset 후 정상 프레임
+    s += frame_items([4] * 64, last_at=0)
+    s.append(("R",))
+    s += frame_items([rng.randint(-128, 127) for _ in range(64)])
+    # FULL 상태(ack 전)에서 Reset: 출력되지 않아야 함
+    s.append(("Q",))
+    s += frame_items([rng.randint(-128, 127) for _ in range(64)])
+    for _ in range(20):
+        s += frame_items([rng.randint(-128, 127) for _ in range(64)])
+    return s
+
+
+def selftest():
+    assert [quantize_pixel_u8(p) for p in (0, 1, 2, 3, 128, 254, 255)] == [0, 1, 1, 2, 64, 127, 127]
+    for bad in (-1, 256):
+        try:
+            quantize_pixel_u8(bad)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("pixel range check missing")
+    g1 = glyph_frame(1)
+    assert len(g1) == 64 and g1[3] == 127 and g1[0] == 0 and g1[2] == 64
+    assert all(0 &lt;= v &lt;= 127 for d in range(10) for v in glyph_frame(d))
+    frames, short, long_ = model(frame_items([1] * 63) + frame_items([2] * 64))
+    assert frames == [[2] * 64] and short == 1 and long_ == 0
+    frames, short, long_ = model(frame_items([1] * 66) + frame_items([2] * 64))
+    assert frames == [[2] * 64] and long_ == 1
+
+
+def generate(out):
+    selftest()
+    stream = build_stream()
+    frames, short, long_ = model(stream)
+    with (out / "stream.txt").open("w") as f:
+        for item in stream:
+            if item[0] == "D":
+                f.write(f"D {item[1] &amp; 0xff:02x} {int(item[2])}\n")
+            else:
+                f.write(f"{item[0]} 00 0\n")
+    with (out / "expected.txt").open("w") as f:
+        for fr in frames:
+            f.write(" ".join(f"{v &amp; 0xff:02x}" for v in fr) + "\n")
+        f.write(f"ERR {short} {long_}\n")
+    print(f"PYTHON_FRAME64_SELF_TEST_PASS items={len(stream)} frames={len(frames)} "
+          f"short={short} long={long_} seed=1313")
+
+
+def compare(out, actual):
+    exp = (out / "expected.txt").read_text().split("\n")
+    got = actual.read_text().split("\n")
+    if exp != got:
+        for i, (e, g) in enumerate(zip(exp, got)):
+            if e != g:
+                print(f"FAIL line {i}: expected={e[:60]} got={g[:60]}")
+                break
+        print(f"lines expected={len(exp)} got={len(got)}")
+        raise SystemExit("PYTHON_RTL_COMPARE_FAIL")
+    print(f"PYTHON_RTL_COMPARE_PASS frames={len(exp) - 2} bit_exact=1")
+
+
+if __name__ == "__main__":
+    p = argparse.ArgumentParser()
+    p.add_argument("--out", type=Path, required=True)
+    p.add_argument("--actual", type=Path)
+    a = p.parse_args()
+    if a.actual:
+        compare(a.out, a.actual)
+    else:
+        generate(a.out)</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>part03/host_tools/p3_integer_reference.py · python · 원본 · RTL_SIM 통과 날짜 미기록</span></div>
+        <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
+"""제3부 13~19/28장: PC 정수 기준모델. RTL 동작 검증 결과와 별개."""
+from __future__ import annotations
+
+
+def sat_int8(value: int) -&gt; int:
+    """부호 있는 INT8 범위 [-128, 127]로 포화한다."""
+    return max(-128, min(127, value))
+
+
+def round_shift_away(value: int, shift: int) -&gt; int:
+    """2**shift로 나눈 뒤 절반은 0에서 먼 쪽으로 반올림한다."""
+    if shift &lt; 0:
+        raise ValueError("shift must be &gt;= 0")
+    if shift == 0:
+        return value
+    magnitude = (abs(value) + (1 &lt;&lt; (shift - 1))) &gt;&gt; shift
+    return -magnitude if value &lt; 0 else magnitude
+
+
+def dot_signed(x: list[int], w: list[int]) -&gt; int:
+    if len(x) != len(w):
+        raise ValueError("vector lengths must match")
+    return sum(a * b for a, b in zip(x, w))
+
+
+def dot_tiled_64(x: list[int], w: list[int]) -&gt; int:
+    """최대 64원소씩 처리해 부분 누산을 결합한다."""
+    if len(x) != len(w):
+        raise ValueError("vector lengths must match")
+    return sum(dot_signed(x[i:i + 64], w[i:i + 64])
+               for i in range(0, len(x), 64))
+
+
+def argmax_lowest(scores: list[int]) -&gt; int:
+    if not scores:
+        raise ValueError("scores must not be empty")
+    return max(range(len(scores)), key=lambda i: (scores[i], -i))
+
+
+def linear_64x10(x: list[int], w: list[list[int]], b: list[int]) -&gt; list[int]:
+    if len(x) != 64 or len(w) != 10 or len(b) != 10:
+        raise ValueError("require 64 inputs, 10 neurons, 10 biases")
+    if any(len(row) != 64 for row in w):
+        raise ValueError("each weight row must contain 64 values")
+    return [dot_signed(x, row) + bias for row, bias in zip(w, b)]
+
+
+def mlp_64_8_10(x: list[int], w1: list[list[int]], b1: list[int],
+                w2: list[list[int]], b2: list[int], shift: int) -&gt; list[int]:
+    if len(x) != 64 or len(w1) != 8 or len(b1) != 8:
+        raise ValueError("first layer shape must be 64 -&gt; 8")
+    if any(len(row) != 64 for row in w1):
+        raise ValueError("first layer weight width must be 64")
+    if len(w2) != 10 or len(b2) != 10 or any(len(row) != 8 for row in w2):
+        raise ValueError("second layer shape must be 8 -&gt; 10")
+    hidden = [sat_int8(round_shift_away(max(0, dot_signed(x, w) + b), shift))
+              for w, b in zip(w1, b1)]
+    return [dot_signed(hidden, w) + b for w, b in zip(w2, b2)]
+
+
+def selftest() -&gt; None:
+    assert [round_shift_away(x, 1) for x in (-5, -3, -1, 0, 1, 3, 5)] == \
+           [-3, -2, -1, 0, 1, 2, 3]
+    assert sat_int8(999) == 127 and sat_int8(-999) == -128
+    assert argmax_lowest([-3, 2, 2, -1]) == 1
+    x = [((i * 7) % 255) - 127 for i in range(784)]
+    w = [((i * 11) % 255) - 127 for i in range(784)]
+    assert dot_tiled_64(x, w) == dot_signed(x, w)
+    assert len([x[i:i + 64] for i in range(0, len(x), 64)]) == 13
+    x64 = [1] * 64
+    w64 = [[1 if j == i else 0 for j in range(64)] for i in range(10)]
+    assert linear_64x10(x64, w64, [0] * 10) == [1] * 10
+    w1 = [[1 if j == i else 0 for j in range(64)] for i in range(8)]
+    w2 = [[1 if j == (i % 8) else 0 for j in range(8)] for i in range(10)]
+    assert mlp_64_8_10(x64, w1, [0] * 8, w2, [0] * 10, 0) == [1] * 10
+    try:
+        linear_64x10(x64, [[0] * 63] * 10, [0] * 10)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("shape validation missing")
+    print("P3_INTEGER_REFERENCE_HOST_PASS cases=9")
+
+
+if __name__ == "__main__":
+    selftest()</code></pre>
+      </div>
+      </details>
+      <h3>판정 줄</h3>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
+        <tbody><tr><td><code>RTL_SIM_PASS FRAME64 frames=36 short=2 long=3</code></td><td>정상 36·짧은 2·긴 3 프레임 판정</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS bit_exact=1</code></td><td>저장된 64원소가 Python 기준과 비트 단위로 같음</td></tr><tr><td>장 Top STAGE=1 시뮬레이션</td><td>위 '보드에서 볼 것' 응답과 바이트 단위로 같음 · 통과</td></tr>
+        <tr><td>장 Top STAGE=1 합성·타이밍</td><td>⚠ 미검증 (VS Code Vivado 실행 대기)</td></tr></tbody>
+      </table></div>
+      <div class="gate-row">
+        <div class="gate pass">
+          <b>HOST_MODEL_PASS</b>
+          <span>PYTHON_FRAME64_SELF_TEST_PASS items=2664 frames=36 short=2 long=3 seed=1313</span>
+        </div>
+        <div class="gate pass">
+          <b>RTL_SIM_PASS</b>
+          <span>RTL_SIM_PASS FRAME64 frames=36 short=2 long=3 · Icarus Verilog 12.0 · 날짜 미기록</span>
+        </div>
+        <div class="gate todo">
+          <b>SYNTH_TIMING_PASS</b>
+          <span>⚠ 미검증 · VS Code Vivado 실행 대기 (구 장 OOC)</span>
+        </div>
+        <div class="gate todo">
+          <b>BOARD_PASS</b>
+          <span>⚠ 미실시 · 현재 실물 보드 확인 불가</span>
+        </div>
+      </div>
+    </section>
+    <section class="section" id="s3_2">
+      <h2><span class="num">04</span> 서브젝트 3-2 · 4PE 3그룹 10분류 코어 <small>(구 14장)</small></h2>
+      <p class="verdict"><b>학습목표 (보드):</b> 선형 모델 650개 명령을 적재한 뒤 숫자 7·0·3 그림마다 <code>R</code> → <code>R7</code>·<code>R0</code>·<code>R5</code>와 점수 10개. 숫자 3을 5로 잘못 고르는 것도 그대로 보인다 (정확도 91.3%).</p>
+      <h3>보드에서 볼 것</h3>
+      <ol>
+        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다: <code>vivado -mode batch -nojournal -source p03/vivado/build_p03.tcl -tclargs 2</code> → <code>build/vivado/p03_s2/basys3_p03_top.bit</code></li>
+        <li>Hardware Manager로 보드에 내려받고 <code>python3 p03/host/p03_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다 (115200 8N1). 3장 Top은 스위치를 쓰지 않습니다. 모델 적재는 PC 도구의 <code>load linear</code>·<code>load mlp</code>, 숫자 전송은 <code>digit 시험번호</code>.</li>
+      </ol>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>순서</th><th>PC 명령 (<code>p03_send.py</code>)</th><th>보드 응답 (UART)</th></tr></thead>
+        <tbody><tr><td>1</td><td class="nw"><code>python3 … load linear (650개 명령)</code></td><td class="nw"><code>OK\r\n ×650</code></td></tr><tr><td>2</td><td class="nw"><code>F 64 (시험 #0, 숫자 7)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td>3</td><td class="nw"><code>R</code></td><td class="nw"><code>R7:000020E,FFFA34A,FFFF7E6,000189D,FFFD57A,FFFFA11,FFF9757,0005A9D,FFFEF87,00019AD\r\n</code></td></tr><tr><td>4</td><td class="nw"><code>F 64 (시험 #3, 숫자 0)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td>5</td><td class="nw"><code>R</code></td><td class="nw"><code>R0:00056AD,FFF5019,FFFF949,FFFE232,FFFB09F,00003AF,FFFF540,FFFE539,FFFE907,FFFE320\r\n</code></td></tr><tr><td>6</td><td class="nw"><code>F 64 (시험 #18, 숫자 3)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td>7</td><td class="nw"><code>R</code></td><td class="nw"><code>R5:FFFBEBD,FFFB224,FFFEC1F,FFFFEC3,FFFC97C,0000227,FFFE567,FFFB01B,FFFF259,FFF953F\r\n</code></td></tr></tbody>
+      </table></div>
+      <p>끝난 뒤 LED: <code>0x8020</code> (LED[9:0] 마지막 클래스 원-핫, LED15 프레임 보관, LED14 짧은 프레임, LED13 긴 프레임. 7세그먼트는 클래스 또는 읽은 화소). 응답 출처: 장 Top 시뮬레이션 STAGE=2 (<code>p03/validation/rtl_sim_20261119.log</code>, 바이트 단위 대조).</p>
+      <h3>추가 코드 (구 14장 그대로, VS Code 판)</h3>
+
+      <div class="codeblock">
+        <div class="codebar"><span>part03/ch14/rtl/p3_group10_core.v · verilog · 원본 · RTL_SIM 통과 날짜 미기록</span></div>
+        <pre tabindex="0"><code class="language-verilog">`timescale 1ns/1ps
+// (추가) 14장: 4PE를 3그룹(4+4+2)으로 재사용하는 64입력·10분류 정수 Dense 코어.
+// class = 4*group + lane. group 2의 lane 2·3은 무효이므로 valid를 막아 누산하지 않고 점수에도 쓰지 않는다.
+// x는 13장 p3_frame64_buffer 읽기 포트(1클록 지연)에서 읽는다.
+// 가중치는 lane별 bank(bank l = class l, l+4, l+8)에 저장해 매 클록 4개를 병렬로 읽는다.
+// score[c] = sum_i x[i]*W[c][i] + bias[c] (signed 25비트, 정수 기준모델 linear_64x10과 동일)
+// class_o = 최대 점수 class, 동점이면 낮은 번호(argmax_lowest)
+// (변경) 15장 Dense 계층 재사용을 위해 입력 길이·출력 수를 파라미터로 둔다. 기본값 64→10이 14장 동작이다.
+// (변경) 18장 정밀도 비교를 위해 데이터·누산·Bias·점수 폭을 파라미터로 둔다.
+//   기본값 DATA_W 8 / ACC_W 24 / BIAS_W 24 / SCORE_W 25가 14장 INT8 동작이다.
+//   INT16 예: DATA_W 16 / ACC_W 38(64항 최악 2^36) / SCORE_W ≥ max(ACC_W, BIAS_W) + 1.
+module p3_group10_core #(
+    parameter integer IN_LEN = 64,
+    parameter integer OUT_N = 10,
+    parameter integer DATA_W = 8,
+    parameter integer ACC_W = 24,
+    parameter integer BIAS_W = 24,
+    parameter integer SCORE_W = 25
+)(
+    input wire clk,
+    input wire resetn,
+    input wire start_i,
+    input wire x_valid_i,
+    output wire x_rd_en_o,
+    output wire [5:0] x_rd_addr_o,
+    input wire signed [DATA_W-1:0] x_rd_data_i,
+    input wire w_wr_en_i,
+    input wire b_wr_en_i,
+    input wire [3:0] wr_class_i,
+    input wire [5:0] wr_addr_i,
+    input wire signed [DATA_W-1:0] w_data_i,
+    input wire signed [BIAS_W-1:0] b_data_i,
+    output wire load_ready_o,
+    output reg busy_o,
+    output reg done_o,
+    output reg error_o,
+    output reg [3:0] class_o,
+    output wire [OUT_N*SCORE_W-1:0] scores_o
+);
+    localparam [2:0] IDLE=3'd0, CLEAR=3'd1, RUN=3'd2, DRAIN=3'd3, CAPT=3'd4, FINISH=3'd5;
+    reg [2:0] state;
+    reg [1:0] group_q;
+    reg [5:0] idx_q;
+    reg drain_q;
+    reg issue_q;
+
+    // lane별 가중치 bank: 주소 = group*64 + index
+    reg signed [DATA_W-1:0] bank0 [0:191];
+    reg signed [DATA_W-1:0] bank1 [0:191];
+    reg signed [DATA_W-1:0] bank2 [0:191];
+    reg signed [DATA_W-1:0] bank3 [0:191];
+    reg signed [DATA_W-1:0] w_q0, w_q1, w_q2, w_q3;
+    reg signed [BIAS_W-1:0] bias [0:OUT_N-1];
+    reg signed [SCORE_W-1:0] score_q [0:OUT_N-1];
+    // (변경) 마지막 그룹 번호: 출력 수를 4개 차선으로 나눈 그룹 수 - 1
+    localparam [1:0] LAST_GROUP = (OUT_N - 1) / 4;
+
+    assign load_ready_o = resetn &amp;&amp; !busy_o;
+    assign x_rd_en_o = (state == RUN);
+    assign x_rd_addr_o = idx_q;
+
+    // (변경) class = 4*group + lane &lt; OUT_N 인 차선만 유효(10분류: group 2는 lane 0·1만)
+    wire [3:0] lane_en = {({group_q, 2'd3} &lt; OUT_N), ({group_q, 2'd2} &lt; OUT_N),
+                          ({group_q, 2'd1} &lt; OUT_N), ({group_q, 2'd0} &lt; OUT_N)};
+    wire lane_clear = (state == CLEAR);
+    wire signed [ACC_W-1:0] acc0, acc1, acc2, acc3;
+    npu_dsp_mac_lane #(.DATA_WIDTH(DATA_W), .ACC_WIDTH(ACC_W)) lane0(.clk(clk), .resetn(resetn),
+        .clear_i(lane_clear), .valid_i(issue_q &amp;&amp; lane_en[0]),
+        .x_i(x_rd_data_i), .w_i(w_q0), .acc_o(acc0));
+    npu_dsp_mac_lane #(.DATA_WIDTH(DATA_W), .ACC_WIDTH(ACC_W)) lane1(.clk(clk), .resetn(resetn),
+        .clear_i(lane_clear), .valid_i(issue_q &amp;&amp; lane_en[1]),
+        .x_i(x_rd_data_i), .w_i(w_q1), .acc_o(acc1));
+    npu_dsp_mac_lane #(.DATA_WIDTH(DATA_W), .ACC_WIDTH(ACC_W)) lane2(.clk(clk), .resetn(resetn),
+        .clear_i(lane_clear), .valid_i(issue_q &amp;&amp; lane_en[2]),
+        .x_i(x_rd_data_i), .w_i(w_q2), .acc_o(acc2));
+    npu_dsp_mac_lane #(.DATA_WIDTH(DATA_W), .ACC_WIDTH(ACC_W)) lane3(.clk(clk), .resetn(resetn),
+        .clear_i(lane_clear), .valid_i(issue_q &amp;&amp; lane_en[3]),
+        .x_i(x_rd_data_i), .w_i(w_q3), .acc_o(acc3));
+
+    // 쓰기 수락: Busy가 아니고 class 0..9일 때만
+    wire wr_any = w_wr_en_i || b_wr_en_i;
+    wire wr_ok = load_ready_o &amp;&amp; (wr_class_i &lt; OUT_N);
+    wire [7:0] wr_bank_addr = {wr_class_i[3:2], wr_addr_i};
+    wire [7:0] rd_bank_addr = {group_q, idx_q};
+
+    // 가중치 bank: Reset 없는 동기 쓰기·동기 읽기(BRAM 추론 후보, 실제 매핑은 합성으로 확인)
+    always @(posedge clk) begin
+        if (w_wr_en_i &amp;&amp; wr_ok) begin
+            case (wr_class_i[1:0])
+                2'd0: bank0[wr_bank_addr] &lt;= w_data_i;
+                2'd1: bank1[wr_bank_addr] &lt;= w_data_i;
+                2'd2: bank2[wr_bank_addr] &lt;= w_data_i;
+                2'd3: bank3[wr_bank_addr] &lt;= w_data_i;
+            endcase
+        end
+        if (state == RUN) begin
+            w_q0 &lt;= bank0[rd_bank_addr];
+            w_q1 &lt;= bank1[rd_bank_addr];
+            w_q2 &lt;= bank2[rd_bank_addr];
+            w_q3 &lt;= bank3[rd_bank_addr];
+        end
+    end
+
+    // (변경) 19장 타이밍 결함 수정: 10개 점수를 한 클록에 직렬 비교(9단)하던 argmax를 누적형으로 바꾼다.
+    //   CAPT에서 lane 쌍(0·1, 2·3)의 승자를 레지스터에 저장하고(1단), 다음 CLEAR에서 두 승자와
+    //   누적 최대값(best_s_q)을 비교해 합친다(2단). 마지막 그룹은 FINISH에서 합친다.
+    //   class_o·done 시점과 동점 규칙(낮은 번호)은 그대로.
+    integer k;
+    reg have_best_q;
+    reg [3:0] best_c_q;
+    reg signed [SCORE_W-1:0] best_s_q;
+    reg signed [SCORE_W-1:0] s01, s23;   // 직전 CAPT 그룹의 lane 쌍 승자
+    reg [3:0] c01, c23;
+    reg v23_q;                           // lane 2 유효(lane 0은 항상 유효)
+    // lane 쌍 비교(CAPT): 높은 번호는 엄격히 클 때만 이긴다(동점 = 낮은 번호)
+    wire signed [SCORE_W-1:0] ns0 = add_bias(acc0, bias[{group_q, 2'd0}]);
+    wire signed [SCORE_W-1:0] ns1 = add_bias(acc1, bias[{group_q, 2'd1}]);
+    wire signed [SCORE_W-1:0] ns2 = add_bias(acc2, bias[{group_q, 2'd2}]);
+    wire signed [SCORE_W-1:0] ns3 = add_bias(acc3, bias[{group_q, 2'd3}]);
+    wire take1 = lane_en[1] &amp;&amp; (ns1 &gt; ns0);
+    wire take3 = lane_en[3] &amp;&amp; (ns3 &gt; ns2);
+    wire take23 = v23_q &amp;&amp; (s23 &gt; s01);
+    wire signed [SCORE_W-1:0] grp_s = take23 ? s23 : s01;
+    wire [3:0] grp_c = take23 ? c23 : c01;
+    // 누적값은 앞 그룹(낮은 번호)이므로 그룹 최대가 엄격히 클 때만 바꾼다
+    wire take_grp = !have_best_q || (grp_s &gt; best_s_q);
+    wire [3:0] best_class = take_grp ? grp_c : best_c_q;
+
+    genvar g;
+    generate
+        for (g = 0; g &lt; OUT_N; g = g + 1) begin : pack
+            assign scores_o[g*SCORE_W +: SCORE_W] = score_q[g];
+        end
+    endgenerate
+
+    // 누산값(ACC_W)과 Bias(BIAS_W)를 SCORE_W로 부호 확장해 더한다(기본 24+24 → 25비트).
+    function signed [SCORE_W-1:0] add_bias(input signed [ACC_W-1:0] acc, input signed [BIAS_W-1:0] b);
+        add_bias = acc + b;
+    endfunction
+
+    always @(posedge clk) begin
+        if (!resetn) begin
+            state &lt;= IDLE;
+            group_q &lt;= 2'd0;
+            idx_q &lt;= 6'd0;
+            drain_q &lt;= 1'b0;
+            issue_q &lt;= 1'b0;
+            busy_o &lt;= 1'b0;
+            done_o &lt;= 1'b0;
+            error_o &lt;= 1'b0;
+            class_o &lt;= 4'd0;
+            for (k = 0; k &lt; OUT_N; k = k + 1) begin
+                bias[k] &lt;= {BIAS_W{1'b0}};
+                score_q[k] &lt;= {SCORE_W{1'b0}};
+            end
+        end else begin
+            done_o &lt;= 1'b0;
+            error_o &lt;= 1'b0;
+            issue_q &lt;= (state == RUN);
+            // Busy 중 쓰기, 범위 밖 class 쓰기는 무시하고 오류 펄스
+            if (wr_any &amp;&amp; !wr_ok)
+                error_o &lt;= 1'b1;
+            if (b_wr_en_i &amp;&amp; wr_ok)
+                bias[wr_class_i] &lt;= b_data_i;
+            case (state)
+                IDLE: if (start_i) begin
+                    if (!x_valid_i || wr_any) begin
+                        error_o &lt;= 1'b1;
+                    end else begin
+                        busy_o &lt;= 1'b1;
+                        group_q &lt;= 2'd0;
+                        have_best_q &lt;= 1'b0;
+                        state &lt;= CLEAR;
+                    end
+                end
+                CLEAR: begin
+                    // 직전 그룹(group_q - 1) 점수를 누적 최대값에 합친다
+                    if (group_q != 2'd0) begin
+                        have_best_q &lt;= 1'b1;
+                        if (take_grp) begin
+                            best_s_q &lt;= grp_s;
+                            best_c_q &lt;= grp_c;
+                        end
+                    end
+                    idx_q &lt;= 6'd0;
+                    state &lt;= RUN;
+                end
+                RUN: begin
+                    if (idx_q == IN_LEN - 1) begin
+                        drain_q &lt;= 1'b0;
+                        state &lt;= DRAIN;
+                    end
+                    idx_q &lt;= idx_q + 6'd1;
+                end
+                // 마지막 곱: issue_q 다음 에지에서 DSP 등록, 그다음 에지에서 누산 완료
+                DRAIN: begin
+                    drain_q &lt;= 1'b1;
+                    if (drain_q)
+                        state &lt;= CAPT;
+                end
+                CAPT: begin
+                    if (lane_en[0]) score_q[{group_q, 2'd0}] &lt;= add_bias(acc0, bias[{group_q, 2'd0}]);
+                    if (lane_en[1]) score_q[{group_q, 2'd1}] &lt;= add_bias(acc1, bias[{group_q, 2'd1}]);
+                    if (lane_en[2]) score_q[{group_q, 2'd2}] &lt;= add_bias(acc2, bias[{group_q, 2'd2}]);
+                    if (lane_en[3]) score_q[{group_q, 2'd3}] &lt;= add_bias(acc3, bias[{group_q, 2'd3}]);
+                    // argmax 1단: lane 쌍 승자. 무효 lane은 lane_en으로 제외되므로 값은 상관없다
+                    s01 &lt;= take1 ? ns1 : ns0;
+                    c01 &lt;= take1 ? {group_q, 2'd1} : {group_q, 2'd0};
+                    s23 &lt;= take3 ? ns3 : ns2;
+                    c23 &lt;= take3 ? {group_q, 2'd3} : {group_q, 2'd2};
+                    v23_q &lt;= lane_en[2];
+                    if (group_q == LAST_GROUP) begin
+                        state &lt;= FINISH;
+                    end else begin
+                        group_q &lt;= group_q + 2'd1;
+                        state &lt;= CLEAR;
+                    end
+                end
+                FINISH: begin
+                    class_o &lt;= best_class;
+                    done_o &lt;= 1'b1;
+                    busy_o &lt;= 1'b0;
+                    state &lt;= IDLE;
+                end
+                default: begin
+                    state &lt;= IDLE;
+                    busy_o &lt;= 1'b0;
+                end
+            endcase
+            // Busy 중 start는 무시하고 오류 표시
+            if (start_i &amp;&amp; state != IDLE)
+                error_o &lt;= 1'b1;
+        end
+    end
+    // synthesis translate_off
+    initial begin
+        if (IN_LEN &lt; 1 || IN_LEN &gt; 64 || OUT_N &lt; 1 || OUT_N &gt; 12)
+            $fatal(1, "Require 1&lt;=IN_LEN&lt;=64 and 1&lt;=OUT_N&lt;=12");
+        if (SCORE_W &lt; ((ACC_W &gt; BIAS_W) ? ACC_W : BIAS_W) + 1)
+            $fatal(1, "Require SCORE_W &gt;= max(ACC_W, BIAS_W) + 1");
+    end
+    // synthesis translate_on
+endmodule</code></pre>
+      </div>
+      <h3>시뮬레이션 기대 화면</h3>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 서브젝트 단독 시험</span></div>
+        <pre tabindex="0"><code>bash part03/ch14/scripts/run_sim.sh</code></pre></div>
+      <div class="codeblock"><div class="codebar"><span>기대 출력 (Icarus Verilog 12.0 · 날짜 미기록 · 출처 part03/ch14/validation/rtl_sim.log)</span></div>
+        <pre tabindex="0"><code>PYTHON_GROUP10_SELF_TEST_PASS cases=41 groups=4+4+2 seed=1414
+RTL_SIM_PASS GROUP10 cases=41 start_to_done_cycles=206 errors_checked=4
+PYTHON_RTL_COMPARE_PASS cases=41 scores=10 class=1 bit_exact=1</code></pre></div>
+      <details class="full"><summary>이 서브젝트의 테스트벤치·기준 모델 (전체 코드 2개)</summary>
+      <div class="codeblock">
+        <div class="codebar"><span>part03/ch14/tb/tb_p3_group10_core.sv · systemverilog · 원본 · RTL_SIM 통과 날짜 미기록</span></div>
+        <pre tabindex="0"><code class="language-systemverilog">// (추가) 14장 p3_group10_core 자동 판정 테스트벤치.
+// 13장 p3_frame64_buffer 실제 RTL과 연결: 스트림 → 프레임 버퍼 → 4PE 3그룹 → 10점수·Class.
+// Python 벡터(가중치·Bias·입력)를 쓰기 포트로 적재하고 결과를 actual에 기록한다(Python이 비트 단위 비교).
+// 추가 판정: 프레임 없는 start 거부, Busy 중 쓰기·start 거부, 범위 밖 class 거부, Busy 중 Reset 후 재실행,
+// done 1클록 펄스, 처리 클록 수 일정, x 읽기는 프레임 보관 중에만.
+`timescale 1ns/1ps
+module tb_p3_group10_core;
+    reg clk = 0, resetn = 0;
+    always #5 clk = ~clk;
+
+    reg [7:0] s_data = 0;
+    reg s_valid = 0, s_last = 0, frame_ack = 0;
+    wire s_ready, frame_valid, x_rd_valid, err_short, err_long;
+    wire x_rd_en;
+    wire [5:0] x_rd_addr;
+    wire signed [7:0] x_rd_data;
+    reg start = 0, w_wr = 0, b_wr = 0;
+    reg [3:0] wr_class = 0;
+    reg [5:0] wr_addr = 0;
+    reg signed [7:0] w_data = 0;
+    reg signed [23:0] b_data = 0;
+    wire load_ready, busy, done, error;
+    wire [3:0] cls;
+    wire [249:0] scores;
+
+    p3_frame64_buffer buffer(
+        .clk(clk), .resetn(resetn),
+        .s_data_i(s_data), .s_valid_i(s_valid), .s_last_i(s_last), .s_ready_o(s_ready),
+        .frame_valid_o(frame_valid), .frame_ack_i(frame_ack),
+        .rd_en_i(x_rd_en), .rd_addr_i(x_rd_addr), .rd_data_o(x_rd_data), .rd_valid_o(x_rd_valid),
+        .err_short_o(err_short), .err_long_o(err_long));
+    p3_group10_core core(
+        .clk(clk), .resetn(resetn), .start_i(start), .x_valid_i(frame_valid),
+        .x_rd_en_o(x_rd_en), .x_rd_addr_o(x_rd_addr), .x_rd_data_i(x_rd_data),
+        .w_wr_en_i(w_wr), .b_wr_en_i(b_wr), .wr_class_i(wr_class), .wr_addr_i(wr_addr),
+        .w_data_i(w_data), .b_data_i(b_data), .load_ready_o(load_ready),
+        .busy_o(busy), .done_o(done), .error_o(error), .class_o(cls), .scores_o(scores));
+
+    // 상시 규칙 검사
+    integer n_error = 0, n_done = 0;
+    reg prev_done = 0;
+    always @(posedge clk) begin
+        if (resetn) begin
+            if (x_rd_en &amp;&amp; !frame_valid) $fatal(1, "core read x without held frame");
+            if (done &amp;&amp; prev_done) $fatal(1, "done longer than 1 clock");
+            if (load_ready === busy) $fatal(1, "load_ready must be !busy");
+            if (err_short || err_long) $fatal(1, "unexpected frame error");
+            if (error) n_error = n_error + 1;
+            if (done) n_done = n_done + 1;
+        end
+        prev_done = done;
+    end
+
+    integer x [0:63];
+    integer w [0:9][0:63];
+    integer b [0:9];
+    integer tmp, vf, af, rc, ncase, cidx, i, c, cyc, cyc_ref, err_before;
+    reg [8*256-1:0] vpath, apath;
+
+    task automatic load_model;
+        begin
+            for (c = 0; c &lt; 10; c = c + 1)
+                for (i = 0; i &lt; 64; i = i + 1) begin
+                    @(negedge clk);
+                    w_wr = 1; wr_class = c; wr_addr = i; w_data = w[c][i];
+                end
+            for (c = 0; c &lt; 10; c = c + 1) begin
+                @(negedge clk);
+                w_wr = 0; b_wr = 1; wr_class = c; b_data = b[c];
+            end
+            @(negedge clk);
+            w_wr = 0; b_wr = 0;
+        end
+    endtask
+    task automatic send_frame;
+        integer k;
+        begin
+            for (k = 0; k &lt; 64; k = k + 1) begin
+                @(negedge clk);
+                s_data = x[k]; s_valid = 1; s_last = (k == 63);
+                while (!s_ready) @(negedge clk);
+            end
+            @(negedge clk);
+            s_valid = 0; s_last = 0;
+            if (!frame_valid) $fatal(1, "frame not held after 64 bytes");
+        end
+    endtask
+    task automatic pulse_start;
+        begin
+            @(negedge clk);
+            start = 1;
+            @(negedge clk);
+            start = 0;
+        end
+    endtask
+    task automatic expect_error(input [8*40-1:0] what);
+        begin
+            @(negedge clk);
+            if (n_error != err_before + 1) $fatal(1, "missing error pulse: %0s", what);
+            err_before = n_error;
+        end
+    endtask
+
+    initial begin
+        if (!$value$plusargs("VECTORS=%s", vpath)) $fatal(1, "+VECTORS required");
+        if (!$value$plusargs("ACTUAL=%s", apath)) $fatal(1, "+ACTUAL required");
+        vf = $fopen(vpath, "r");
+        af = $fopen(apath, "w");
+        rc = $fscanf(vf, "%d", ncase);
+        repeat (4) @(negedge clk);
+        resetn = 1;
+        @(negedge clk);
+        cyc_ref = -1;
+        err_before = 0;
+
+        // 프레임 없이 start → 거부
+        pulse_start;
+        if (busy) $fatal(1, "started without frame");
+        expect_error("start without frame");
+        // 범위 밖 class 쓰기 → 거부
+        @(negedge clk); w_wr = 1; wr_class = 10; wr_addr = 0; w_data = 5;
+        @(negedge clk); w_wr = 0;
+        expect_error("class 10 write");
+
+        for (cidx = 0; cidx &lt; ncase; cidx = cidx + 1) begin
+            // Icarus는 배열 원소에 직접 $fscanf할 수 없어 임시 변수로 읽는다.
+            for (i = 0; i &lt; 64; i = i + 1) begin rc = $fscanf(vf, "%d", tmp); x[i] = tmp; end
+            for (c = 0; c &lt; 10; c = c + 1)
+                for (i = 0; i &lt; 64; i = i + 1) begin rc = $fscanf(vf, "%d", tmp); w[c][i] = tmp; end
+            for (c = 0; c &lt; 10; c = c + 1) begin rc = $fscanf(vf, "%d", tmp); b[c] = tmp; end
+            load_model;
+            send_frame;
+
+            if (cidx == 1) begin
+                // Busy 중 Reset: 프레임·Bias 소실 → 재적재 후 재실행
+                pulse_start;
+                repeat (50) @(negedge clk);
+                if (!busy) $fatal(1, "not busy before reset test");
+                resetn = 0;
+                repeat (3) @(negedge clk);
+                resetn = 1;
+                @(negedge clk);
+                if (busy || frame_valid) $fatal(1, "reset did not clear busy/frame");
+                load_model;
+                send_frame;
+            end
+
+            pulse_start;
+            cyc = 1;
+            if (cidx == 0) begin
+                // Busy 중 쓰기와 start는 무시·오류. 결과는 Python 기대값 그대로여야 한다.
+                @(negedge clk); w_wr = 1; wr_class = 0; wr_addr = 0; w_data = 99;
+                @(negedge clk); w_wr = 0;
+                @(negedge clk); start = 1;
+                @(negedge clk); start = 0;
+                // 오류 펄스는 다음 상승 에지에서 계수되므로 한 클록 더 기다린다.
+                @(negedge clk);
+                cyc = cyc + 5;
+                if (n_error != err_before + 2) $fatal(1, "busy write/start not rejected");
+                err_before = n_error;
+            end
+            while (!done) begin
+                @(negedge clk);
+                cyc = cyc + 1;
+                if (cyc &gt; 1000) $fatal(1, "core timeout");
+            end
+            if (busy) $fatal(1, "busy after done");
+            if (cyc_ref &lt; 0) cyc_ref = cyc;
+            else if (cyc != cyc_ref) $fatal(1, "cycle count changed %0d vs %0d", cyc, cyc_ref);
+            for (c = 0; c &lt; 10; c = c + 1)
+                $fwrite(af, "%0d ", $signed(scores[c*25 +: 25]));
+            $fwrite(af, "C%0d\n", cls);
+            @(negedge clk);
+            frame_ack = 1;
+            @(negedge clk);
+            frame_ack = 0;
+            if (n_error != err_before) $fatal(1, "unexpected error pulse in case %0d", cidx);
+        end
+        $fclose(af);
+        $display("RTL_SIM_PASS GROUP10 cases=%0d start_to_done_cycles=%0d errors_checked=%0d",
+            ncase, cyc_ref, n_error);
+        $finish;
+    end
+    initial begin #50000000; $fatal(1, "TB timeout"); end
+endmodule</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>part03/ch14/reference/group10_reference.py · python · 원본 · RTL_SIM 통과 날짜 미기록</span></div>
+        <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
+"""14장: 4PE 3그룹(4+4+2) 10분류 코어 기준모델·시험 벡터 생성·RTL 결과 비교.
+
+점수와 Class는 host_tools/p3_integer_reference.py의 linear_64x10, argmax_lowest로 계산한다.
+그룹 스케줄(class = 4*group + lane, group 2는 lane 0·1만 유효)은 group_schedule()로 별도 확인한다.
+"""
+import argparse
+import random
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+from part03.host_tools.p3_integer_reference import linear_64x10, argmax_lowest  # noqa: E402
+
+BIAS_MIN, BIAS_MAX = -(1 &lt;&lt; 23), (1 &lt;&lt; 23) - 1
+
+
+def group_schedule():
+    """(group, lane, class) 목록. 유효 차선만 포함한다."""
+    return [(g, l, 4 * g + l) for g in range(3) for l in range(4) if 4 * g + l &lt; 10]
+
+
+def expected(x, w, b):
+    for v in x + [e for row in w for e in row]:
+        if not -128 &lt;= v &lt;= 127:
+            raise ValueError("x/w must be INT8")
+    for v in b:
+        if not BIAS_MIN &lt;= v &lt;= BIAS_MAX:
+            raise ValueError("bias must be signed 24-bit")
+    scores = linear_64x10(x, w, b)
+    for s in scores:
+        assert -(1 &lt;&lt; 24) &lt;= s &lt; (1 &lt;&lt; 24), "score exceeds 25-bit contract"
+    return scores, argmax_lowest(scores)
+
+
+def onehot(c, i):
+    return int(c == i)
+
+
+def build_cases():
+    rng = random.Random(1414)
+    ramp = [i - 32 for i in range(64)]
+    cases = []
+    # ① class 매핑: W[c][c]=1 → score[c] = x[c] = c-32 (+bias c*1000)
+    cases.append((ramp, [[onehot(c, i) for i in range(64)] for c in range(10)],
+                  [c * 1000 for c in range(10)]))
+    # ② 모든 점수 음수: 무효 차선(점수 0)이 섞이면 class가 틀어진다
+    cases.append(([1] * 64, [[-1 - c] * 64 for c in range(10)], [0] * 10))
+    # ③ 그룹 경계 동점: class 3과 7, 8이 같은 최대값 → 3
+    w = [[0] * 64 for _ in range(10)]
+    b = [-5, -4, -3, 50, -9, 0, 1, 50, 50, -50]
+    cases.append(([0] * 64, w, b))
+    # ④ 마지막 유효 차선(class 9)만 최대
+    b = [-(1 &lt;&lt; 23)] * 9 + [-(1 &lt;&lt; 23) + 1]
+    cases.append(([0] * 64, [[0] * 64 for _ in range(10)], b))
+    # ⑤ 누산 극값: (-128)*(-128)*64 = 1048576, (-128)*127*64 = -1040384, Bias 극값
+    w = [[-128] * 64 if c % 2 == 0 else [127] * 64 for c in range(10)]
+    b = [BIAS_MAX, BIAS_MIN, 0, 0, BIAS_MAX, BIAS_MIN, -1, 1, BIAS_MAX, BIAS_MIN]
+    cases.append(([-128] * 64, w, b))
+    cases.append(([127] * 64, w, b))
+    # ⑥ 무작위 30개
+    for _ in range(30):
+        x = [rng.randint(-128, 127) for _ in range(64)]
+        w = [[rng.randint(-128, 127) for _ in range(64)] for _ in range(10)]
+        b = [rng.randint(BIAS_MIN, BIAS_MAX) for _ in range(10)]
+        cases.append((x, w, b))
+    # (추가) 19장 argmax 트리: 각 비교 단의 동점(lane 쌍 0·1, 2·3, 그룹 1의 4·5, 6·7, 그룹 2의 8·9) → 낮은 번호
+    z = [[0] * 64 for _ in range(10)]
+    for pair in ((0, 1), (2, 3), (4, 5), (6, 7), (8, 9)):
+        b = [-100 - c for c in range(10)]
+        b[pair[0]] = b[pair[1]] = 77
+        cases.append(([0] * 64, z, b))
+    return cases
+
+
+def selftest():
+    sched = group_schedule()
+    assert [c for _, _, c in sched] == list(range(10))
+    assert [len([s for s in sched if s[0] == g]) for g in range(3)] == [4, 4, 2]
+    s, c = expected([1] * 64, [[-1 - k] * 64 for k in range(10)], [0] * 10)
+    assert c == 0 and max(s) &lt; 0
+    s, c = expected([0] * 64, [[0] * 64] * 10, [-5, -4, -3, 50, -9, 0, 1, 50, 50, -50])
+    assert c == 3
+    try:
+        expected([0] * 64, [[0] * 64] * 10, [1 &lt;&lt; 23] + [0] * 9)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("bias range check missing")
+
+
+def generate(out):
+    selftest()
+    cases = build_cases()
+    with (out / "vectors.txt").open("w") as vf, (out / "expected.txt").open("w") as ef:
+        vf.write(f"{len(cases)}\n")
+        for x, w, b in cases:
+            scores, cls = expected(x, w, b)
+            vf.write(" ".join(map(str, x)) + "\n")
+            for row in w:
+                vf.write(" ".join(map(str, row)) + "\n")
+            vf.write(" ".join(map(str, b)) + "\n")
+            ef.write(" ".join(map(str, scores)) + f" C{cls}\n")
+    print(f"PYTHON_GROUP10_SELF_TEST_PASS cases={len(cases)} groups=4+4+2 seed=1414")
+
+
+def compare(out, actual):
+    exp = (out / "expected.txt").read_text().splitlines()
+    got = actual.read_text().splitlines()
+    if exp != got:
+        for i, (e, g) in enumerate(zip(exp, got)):
+            if e != g:
+                print(f"FAIL case {i}:\n  expected={e}\n  got     ={g}")
+                break
+        print(f"cases expected={len(exp)} got={len(got)}")
+        raise SystemExit("PYTHON_RTL_COMPARE_FAIL")
+    print(f"PYTHON_RTL_COMPARE_PASS cases={len(exp)} scores=10 class=1 bit_exact=1")
+
+
+if __name__ == "__main__":
+    p = argparse.ArgumentParser()
+    p.add_argument("--out", type=Path, required=True)
+    p.add_argument("--actual", type=Path)
+    a = p.parse_args()
+    if a.actual:
+        compare(a.out, a.actual)
+    else:
+        generate(a.out)</code></pre>
+      </div>
+      </details>
+      <h3>판정 줄</h3>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
+        <tbody><tr><td><code>RTL_SIM_PASS GROUP10 start_to_done_cycles=206</code></td><td>3그룹(4+4+2) 처리 206클록, 오류 4종 확인</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS scores=10 class=1</code></td><td>점수 10개와 클래스가 Python 기준과 같음</td></tr><tr><td>장 Top STAGE=2 시뮬레이션</td><td>위 '보드에서 볼 것' 응답과 바이트 단위로 같음 · 통과</td></tr>
+        <tr><td>장 Top STAGE=2 합성·타이밍</td><td>⚠ 미검증 (VS Code Vivado 실행 대기)</td></tr></tbody>
+      </table></div>
+      <div class="gate-row">
+        <div class="gate pass">
+          <b>HOST_MODEL_PASS</b>
+          <span>PYTHON_GROUP10_SELF_TEST_PASS cases=41 groups=4+4+2 seed=1414</span>
+        </div>
+        <div class="gate pass">
+          <b>RTL_SIM_PASS</b>
+          <span>RTL_SIM_PASS GROUP10 cases=41 start_to_done_cycles=206 error… · Icarus Verilog 12.0 · 날짜 미기록</span>
+        </div>
+        <div class="gate todo">
+          <b>SYNTH_TIMING_PASS</b>
+          <span>⚠ 미검증 · VS Code Vivado 실행 대기 (구 장 OOC)</span>
+        </div>
+        <div class="gate todo">
+          <b>BOARD_PASS</b>
+          <span>⚠ 미실시 · 현재 실물 보드 확인 불가</span>
+        </div>
+      </div>
+    </section>
+    <section class="section" id="s3_3">
+      <h2><span class="num">05</span> 서브젝트 3-3 · 64→10·64→8·8→10 Dense <small>(구 15장)</small></h2>
+      <p class="verdict"><b>학습목표 (보드):</b> 같은 코어를 모양만 바꿔: <code>H</code> → 64→8 점수 8개(MLP 1층 원시값), <code>G</code> → 8→10 (프레임 앞 8원소). 새 연산 RTL 없음.</p>
+      <h3>보드에서 볼 것</h3>
+      <ol>
+        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다: <code>vivado -mode batch -nojournal -source p03/vivado/build_p03.tcl -tclargs 3</code> → <code>build/vivado/p03_s3/basys3_p03_top.bit</code></li>
+        <li>Hardware Manager로 보드에 내려받고 <code>python3 p03/host/p03_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다 (115200 8N1). 3장 Top은 스위치를 쓰지 않습니다. 모델 적재는 PC 도구의 <code>load linear</code>·<code>load mlp</code>, 숫자 전송은 <code>digit 시험번호</code>.</li>
+      </ol>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>순서</th><th>PC 명령 (<code>p03_send.py</code>)</th><th>보드 응답 (UART)</th></tr></thead>
+        <tbody><tr><td>1</td><td class="nw"><code>python3 … load mlp (610개 명령)</code></td><td class="nw"><code>OK\r\n ×610</code></td></tr><tr><td>2</td><td class="nw"><code>F 64 (시험 #18, 숫자 3)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td>3</td><td class="nw"><code>H</code></td><td class="nw"><code>H4:000429E,0001A45,000420A,0003618,0004984,0003F12,FFFEB90,00001C4\r\n</code></td></tr><tr><td>4</td><td class="nw"><code>G</code></td><td class="nw"><code>G7:000006D,000037A,000000C,00002FE,FFFFB2A,00001EB,0000267,00004DD,FFFFE7E,FFFF6E3\r\n</code></td></tr></tbody>
+      </table></div>
+      <p>끝난 뒤 LED: <code>0x8080</code> (LED[9:0] 마지막 클래스 원-핫, LED15 프레임 보관, LED14 짧은 프레임, LED13 긴 프레임. 7세그먼트는 클래스 또는 읽은 화소). 응답 출처: 장 Top 시뮬레이션 STAGE=3 (<code>p03/validation/rtl_sim_20261119.log</code>, 바이트 단위 대조).</p>
+      <h3>추가 코드 (구 15장 그대로, VS Code 판)</h3>
+      <p>새 RTL 파일이 없습니다. 3-2 <code>p3_group10_core</code>를 <code>IN_LEN</code>·<code>OUT_N</code> 파라미터만 바꿔 씁니다 (장 Top의 <code>u_h8</code>·<code>u_o10</code>).</p>
+
+      <h3>시뮬레이션 기대 화면</h3>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 서브젝트 단독 시험</span></div>
+        <pre tabindex="0"><code>bash part03/ch15/scripts/run_sim.sh</code></pre></div>
+      <div class="codeblock"><div class="codebar"><span>기대 출력 (Icarus Verilog 12.0 · 날짜 미기록 · 출처 part03/ch15/validation/rtl_sim.log)</span></div>
+        <pre tabindex="0"><code>PYTHON_DENSE_SELF_TEST_PASS shape=64x10 ops=5238 frames=20
+RTL_SIM_PASS DENSE 64x10 frames=20 w_writes=5127 b_writes=91 cycles=206
+PYTHON_RTL_COMPARE_PASS frames=20 bit_exact=1
+PYTHON_DENSE_SELF_TEST_PASS shape=64x8 ops=4196 frames=20
+RTL_SIM_PASS DENSE 64x8 frames=20 w_writes=4103 b_writes=73 cycles=138
+PYTHON_RTL_COMPARE_PASS frames=20 bit_exact=1
+PYTHON_DENSE_SELF_TEST_PASS shape=8x10 ops=758 frames=20
+RTL_SIM_PASS DENSE 8x10 frames=20 w_writes=647 b_writes=91 cycles=38
+PYTHON_RTL_COMPARE_PASS frames=20 bit_exact=1</code></pre></div>
+      <details class="full"><summary>이 서브젝트의 테스트벤치·기준 모델 (전체 코드 2개)</summary>
+      <div class="codeblock">
+        <div class="codebar"><span>part03/ch15/tb/tb_p3_dense_layer.sv · systemverilog · 원본 · RTL_SIM 통과 날짜 미기록</span></div>
+        <pre tabindex="0"><code class="language-systemverilog">// (추가) 15장 정수 Dense 계층 자동 판정 테스트벤치(64→10 분류기, 64→8, 8→10).
+// 14장 p3_group10_core를 IN_LEN/OUT_N 파라미터로 재사용하고, x는 13장 p3_frame64_buffer에서 읽는다.
+// 명령 파일(W/B/F)을 순서대로 실행해 모델을 유지·부분 갱신하며 프레임마다 점수·Class를 기록한다.
+`timescale 1ns/1ps
+module tb_p3_dense_layer;
+    parameter integer IN_LEN = 64;
+    parameter integer OUT_N = 10;
+    localparam integer GROUPS = (OUT_N - 1) / 4 + 1;
+    localparam integer EXPECT_CYCLES = GROUPS * (IN_LEN + 4) + 2;
+
+    reg clk = 0, resetn = 0;
+    always #5 clk = ~clk;
+    reg [7:0] s_data = 0;
+    reg s_valid = 0, s_last = 0, frame_ack = 0;
+    wire s_ready, frame_valid, x_rd_valid, err_short, err_long;
+    wire x_rd_en;
+    wire [5:0] x_rd_addr;
+    wire signed [7:0] x_rd_data;
+    reg start = 0, w_wr = 0, b_wr = 0;
+    reg [3:0] wr_class = 0;
+    reg [5:0] wr_addr = 0;
+    reg signed [7:0] w_data = 0;
+    reg signed [23:0] b_data = 0;
+    wire load_ready, busy, done, error;
+    wire [3:0] cls;
+    wire [OUT_N*25-1:0] scores;
+
+    p3_frame64_buffer buffer(
+        .clk(clk), .resetn(resetn),
+        .s_data_i(s_data), .s_valid_i(s_valid), .s_last_i(s_last), .s_ready_o(s_ready),
+        .frame_valid_o(frame_valid), .frame_ack_i(frame_ack),
+        .rd_en_i(x_rd_en), .rd_addr_i(x_rd_addr), .rd_data_o(x_rd_data), .rd_valid_o(x_rd_valid),
+        .err_short_o(err_short), .err_long_o(err_long));
+    p3_group10_core #(.IN_LEN(IN_LEN), .OUT_N(OUT_N)) dense(
+        .clk(clk), .resetn(resetn), .start_i(start), .x_valid_i(frame_valid),
+        .x_rd_en_o(x_rd_en), .x_rd_addr_o(x_rd_addr), .x_rd_data_i(x_rd_data),
+        .w_wr_en_i(w_wr), .b_wr_en_i(b_wr), .wr_class_i(wr_class), .wr_addr_i(wr_addr),
+        .w_data_i(w_data), .b_data_i(b_data), .load_ready_o(load_ready),
+        .busy_o(busy), .done_o(done), .error_o(error), .class_o(cls), .scores_o(scores));
+
+    always @(posedge clk) if (resetn) begin
+        if (error) $fatal(1, "unexpected error pulse");
+        if (err_short || err_long) $fatal(1, "unexpected frame error");
+        if (x_rd_en &amp;&amp; x_rd_addr &gt;= IN_LEN) $fatal(1, "read beyond IN_LEN");
+        if (x_rd_en &amp;&amp; !frame_valid) $fatal(1, "read without frame");
+        if (busy &amp;&amp; (w_wr || b_wr)) $fatal(1, "TB wrote while busy");
+    end
+
+    reg [8*8-1:0] tag;
+    integer f_ops, f_act, rc, p1, p2, p3, k, v, cyc, n_frames = 0, n_w = 0, n_b = 0;
+    reg signed [7:0] xbuf [0:63];
+    reg [8*256-1:0] ops_path, act_path;
+
+    initial begin
+        if (!$value$plusargs("OPS=%s", ops_path)) $fatal(1, "+OPS required");
+        if (!$value$plusargs("ACTUAL=%s", act_path)) $fatal(1, "+ACTUAL required");
+        f_ops = $fopen(ops_path, "r");
+        f_act = $fopen(act_path, "w");
+        repeat (4) @(negedge clk);
+        resetn = 1;
+        tag = "";
+        while (tag != "E") begin
+            rc = $fscanf(f_ops, "%s %d %d %d", tag, p1, p2, p3);
+            if (rc != 4) $fatal(1, "bad op line");
+            if (tag == "W") begin
+                @(negedge clk);
+                w_wr = 1; wr_class = p1; wr_addr = p2; w_data = p3;
+                @(negedge clk);
+                w_wr = 0;
+                n_w = n_w + 1;
+            end else if (tag == "B") begin
+                @(negedge clk);
+                b_wr = 1; wr_class = p1; b_data = p3;
+                @(negedge clk);
+                b_wr = 0;
+                n_b = n_b + 1;
+            end else if (tag == "F") begin
+                for (k = 0; k &lt; 64; k = k + 1) begin
+                    rc = $fscanf(f_ops, "%d", v);
+                    xbuf[k] = v;
+                end
+                // 13장 스트림 계약으로 64바이트 전송
+                for (k = 0; k &lt; 64; k = k + 1) begin
+                    @(negedge clk);
+                    s_data = xbuf[k]; s_valid = 1; s_last = (k == 63);
+                    while (!s_ready) @(negedge clk);
+                end
+                @(negedge clk);
+                s_valid = 0; s_last = 0;
+                start = 1;
+                @(negedge clk);
+                start = 0;
+                cyc = 1;
+                while (!done) begin
+                    @(negedge clk);
+                    cyc = cyc + 1;
+                    if (cyc &gt; 1000) $fatal(1, "dense timeout");
+                end
+                if (cyc != EXPECT_CYCLES) $fatal(1, "cycles %0d expected %0d", cyc, EXPECT_CYCLES);
+                for (k = 0; k &lt; OUT_N; k = k + 1)
+                    $fwrite(f_act, "%0d ", $signed(scores[k*25 +: 25]));
+                $fwrite(f_act, "C%0d\n", cls);
+                frame_ack = 1;
+                @(negedge clk);
+                frame_ack = 0;
+                n_frames = n_frames + 1;
+            end
+        end
+        $fclose(f_act);
+        $display("RTL_SIM_PASS DENSE %0dx%0d frames=%0d w_writes=%0d b_writes=%0d cycles=%0d",
+            IN_LEN, OUT_N, n_frames, n_w, n_b, EXPECT_CYCLES);
+        $finish;
+    end
+    initial begin #200000000; $fatal(1, "TB timeout"); end
+endmodule</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>part03/ch15/reference/dense_reference.py · python · 원본 · RTL_SIM 통과 날짜 미기록</span></div>
+        <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
+"""15장: 정수 Dense 계층(64→10, 64→8, 8→10) 기준모델·시험 명령 생성·RTL 결과 비교.
+
+점수 = dot_signed(x, W[c]) + bias[c], Class = argmax_lowest (host_tools 규칙 그대로).
+64→10은 linear_64x10 결과와 동일함을 함께 확인한다.
+명령: W c a v (가중치 쓰기) / B c v (Bias 쓰기) / F x... (프레임 입력 후 추론)
+모델은 명령 사이에 유지된다(부분 갱신·다중 프레임 검증).
+"""
+import argparse
+import random
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+from part03.host_tools.p3_integer_reference import (  # noqa: E402
+    dot_signed, linear_64x10, argmax_lowest,
+)
+
+BIAS_MIN, BIAS_MAX = -(1 &lt;&lt; 23), (1 &lt;&lt; 23) - 1
+
+
+def dense(x, w, b):
+    scores = [dot_signed(x, row) + bias for row, bias in zip(w, b)]
+    if len(x) == 64 and len(w) == 10:
+        assert scores == linear_64x10(x, w, b)
+    for s in scores:
+        assert -(1 &lt;&lt; 24) &lt;= s &lt; (1 &lt;&lt; 24), "score exceeds 25-bit contract"
+    return scores
+
+
+def build_ops(n_in, n_out, seed):
+    rng = random.Random(seed)
+    i8 = lambda: rng.randint(-128, 127)  # noqa: E731
+    ops = []
+
+    def full_model(wfun, bfun):
+        for c in range(n_out):
+            for a in range(n_in):
+                ops.append(("W", c, a, wfun(c, a)))
+        for c in range(n_out):
+            ops.append(("B", c, bfun(c)))
+
+    def frame(xs=None):
+        ops.append(("F", xs if xs is not None else [i8() for _ in range(n_in)]))
+
+    # ① 무작위 모델 1회 적재 후 4프레임(모델 유지)
+    full_model(lambda c, a: i8(), lambda c: rng.randint(BIAS_MIN, BIAS_MAX))
+    for _ in range(4):
+        frame()
+    # ② 부분 갱신: 가중치 5개 + Bias 1개, 같은 주소 2회 쓰기(마지막 값 유효)
+    for _ in range(5):
+        ops.append(("W", rng.randrange(n_out), rng.randrange(n_in), i8()))
+    ops.append(("W", n_out - 1, n_in - 1, 77))
+    ops.append(("W", n_out - 1, n_in - 1, -77))
+    ops.append(("B", rng.randrange(n_out), rng.randint(BIAS_MIN, BIAS_MAX)))
+    frame()
+    frame()
+    # ③ Bias만 전부 갱신
+    for c in range(n_out):
+        ops.append(("B", c, rng.randint(-1000, 1000)))
+    frame()
+    # ④ 극값: W=-128, x=-128 / x=127, Bias 극값 교대
+    full_model(lambda c, a: -128, lambda c: BIAS_MAX if c % 2 else BIAS_MIN)
+    frame([-128] * n_in)
+    frame([127] * n_in)
+    # ⑤ 부호 혼합 누산: 짝수 class W=+127, 홀수 class W=-128, x 부호 교대
+    full_model(lambda c, a: 127 if c % 2 == 0 else -128, lambda c: 0)
+    frame([127 if a % 2 == 0 else -128 for a in range(n_in)])
+    # ⑥ 새 무작위 모델 5개 × 2프레임
+    for _ in range(5):
+        full_model(lambda c, a: i8(), lambda c: rng.randint(BIAS_MIN, BIAS_MAX))
+        frame()
+        frame()
+    return ops
+
+
+def run_model(ops, n_in, n_out):
+    w = [[None] * n_in for _ in range(n_out)]
+    b = [0] * n_out  # RTL Bias는 Reset 시 0
+    out = []
+    for op in ops:
+        if op[0] == "W":
+            _, c, a, v = op
+            w[c][a] = v
+        elif op[0] == "B":
+            _, c, v = op
+            b[c] = v
+        else:
+            assert all(v is not None for row in w for v in row), "weights not fully loaded"
+            scores = dense(op[1], w, b)
+            out.append((scores, argmax_lowest(scores)))
+    return out
+
+
+def selftest():
+    assert dense([1, -2], [[3, 4], [-1, -1]], [10, -10]) == [5, -9]
+    x = [i - 32 for i in range(64)]
+    w = [[int(j == i) for j in range(64)] for i in range(10)]
+    assert dense(x, w, [0] * 10) == [-32 + i for i in range(10)]
+    ops = [("W", 0, 0, 2), ("W", 1, 0, 3), ("F", [5]), ("W", 1, 0, -3), ("B", 0, 1), ("F", [5])]
+    assert run_model(ops, 1, 2) == [([10, 15], 1), ([11, -15], 0)]
+
+
+def generate(out, n_in, n_out):
+    selftest()
+    ops = build_ops(n_in, n_out, seed=1500 + n_in * 16 + n_out)
+    results = run_model(ops, n_in, n_out)
+    with (out / "ops.txt").open("w") as f:
+        for op in ops:
+            if op[0] == "W":
+                f.write(f"W {op[1]} {op[2]} {op[3]}\n")
+            elif op[0] == "B":
+                f.write(f"B {op[1]} 0 {op[2]}\n")
+            else:
+                padded = op[1] + [0] * (64 - n_in)  # 13장 프레임은 항상 64원소
+                f.write("F 0 0 0 " + " ".join(map(str, padded)) + "\n")
+        f.write("E 0 0 0\n")
+    with (out / "expected.txt").open("w") as f:
+        for scores, cls in results:
+            f.write(" ".join(map(str, scores)) + f" C{cls}\n")
+    print(f"PYTHON_DENSE_SELF_TEST_PASS shape={n_in}x{n_out} ops={len(ops)} frames={len(results)}")
+
+
+def compare(out, actual):
+    exp = (out / "expected.txt").read_text().splitlines()
+    got = actual.read_text().splitlines()
+    if exp != got:
+        for i, (e, g) in enumerate(zip(exp, got)):
+            if e != g:
+                print(f"FAIL frame {i}:\n  expected={e}\n  got     ={g}")
+                break
+        print(f"frames expected={len(exp)} got={len(got)}")
+        raise SystemExit("PYTHON_RTL_COMPARE_FAIL")
+    print(f"PYTHON_RTL_COMPARE_PASS frames={len(exp)} bit_exact=1")
+
+
+if __name__ == "__main__":
+    p = argparse.ArgumentParser()
+    p.add_argument("--out", type=Path, required=True)
+    p.add_argument("--in-len", type=int, default=64)
+    p.add_argument("--out-n", type=int, default=10)
+    p.add_argument("--actual", type=Path)
+    a = p.parse_args()
+    if a.actual:
+        compare(a.out, a.actual)
+    else:
+        generate(a.out, a.in_len, a.out_n)</code></pre>
+      </div>
+      </details>
+      <h3>판정 줄</h3>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
+        <tbody><tr><td><code>RTL_SIM_PASS DENSE 64x10 / 64x8 / 8x10</code></td><td>세 모양 각 20프레임, 처리 206·138·38클록</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS bit_exact=1 (×3)</code></td><td>세 모양 모두 Python 기준과 같음</td></tr><tr><td>장 Top STAGE=3 시뮬레이션</td><td>위 '보드에서 볼 것' 응답과 바이트 단위로 같음 · 통과</td></tr>
+        <tr><td>장 Top STAGE=3 합성·타이밍</td><td>⚠ 미검증 (VS Code Vivado 실행 대기)</td></tr></tbody>
+      </table></div>
+      <div class="gate-row">
+        <div class="gate pass">
+          <b>HOST_MODEL_PASS</b>
+          <span>PYTHON_DENSE_SELF_TEST_PASS shape=64x10 ops=5238 frames=20</span>
+        </div>
+        <div class="gate pass">
+          <b>RTL_SIM_PASS</b>
+          <span>RTL_SIM_PASS DENSE 64x10 frames=20 w_writes=5127 b_writes=91… 외 2건 · Icarus Verilog 12.0 · 날짜 미기록</span>
+        </div>
+        <div class="gate todo">
+          <b>SYNTH_TIMING_PASS</b>
+          <span>⚠ 미검증 · VS Code Vivado 실행 대기 (구 장 OOC)</span>
+        </div>
+        <div class="gate todo">
+          <b>BOARD_PASS</b>
+          <span>⚠ 미실시 · 현재 실물 보드 확인 불가</span>
+        </div>
+      </div>
+    </section>
+    <section class="section" id="s3_4">
+      <h2><span class="num">06</span> 서브젝트 3-4 · MLP 64→8→10 <small>(구 16장)</small></h2>
+      <p class="verdict"><b>학습목표 (보드):</b> <code>Z 9</code>(은닉 shift) 뒤 숫자 0~9 그림마다 <code>M</code> → 은닉 8개·점수 10개·클래스. 10개 중 9개 맞음(숫자 5 → 6).</p>
+      <h3>보드에서 볼 것</h3>
+      <ol>
+        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다: <code>vivado -mode batch -nojournal -source p03/vivado/build_p03.tcl -tclargs 4</code> → <code>build/vivado/p03_s4/basys3_p03_top.bit</code></li>
+        <li>Hardware Manager로 보드에 내려받고 <code>python3 p03/host/p03_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다 (115200 8N1). 3장 Top은 스위치를 쓰지 않습니다. 모델 적재는 PC 도구의 <code>load linear</code>·<code>load mlp</code>, 숫자 전송은 <code>digit 시험번호</code>.</li>
+      </ol>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>순서</th><th>PC 명령 (<code>p03_send.py</code>)</th><th>보드 응답 (UART)</th></tr></thead>
+        <tbody><tr><td>1</td><td class="nw"><code>Z 9</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>2</td><td class="nw"><code>F 64 (시험 #3, 숫자 0)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td>3</td><td class="nw"><code>M</code></td><td class="nw"><code>M0:45060C0A1500001F 0000C5A,FFFE009,FFFFF1D,FFFFAE6,FFFF486,000007B,FFFFC4A,FFFFF78,FFFFC5B,FFFF89E\r\n</code></td></tr><tr><td>4</td><td class="nw"><code>F 64 (시험 #2, 숫자 1)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td>5</td><td class="nw"><code>M</code></td><td class="nw"><code>M1:000D0F0010100006 FFFF877,0000796,00000B4,FFFFF92,FFFFBCE,FFFFEFB,FFFFE8F,FFFFFC3,FFFFF66,FFFFA59\r\n</code></td></tr><tr><td>6</td><td class="nw"><code>F 64 (시험 #1, 숫자 2)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td>7</td><td class="nw"><code>M</code></td><td class="nw"><code>M2:112F3F503000001A 000038F,FFFFFD0,0000FEB,000041B,FFFD02E,00008ED,000020E,FFFCFA6,0000726,FFFCEFA\r\n</code></td></tr><tr><td>8</td><td class="nw"><code>F 64 (시험 #18, 숫자 3)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td>9</td><td class="nw"><code>M</code></td><td class="nw"><code>M3:210D211B25200001 FFFF86C,FFFFA94,FFFFE0D,000027F,FFFF7C7,0000238,FFFFF97,FFFF0DC,00000C9,FFFF074\r\n</code></td></tr><tr><td>10</td><td class="nw"><code>F 64 (시험 #4, 숫자 4)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td>11</td><td class="nw"><code>M</code></td><td class="nw"><code>M4:370206002818000A FFFFBE7,FFFED06,FFFFC0A,FFFFA34,0000659,FFFFE5D,FFFFDD2,FFFFCC3,FFFFB77,000025A\r\n</code></td></tr><tr><td>12</td><td class="nw"><code>F 64 (시험 #8, 숫자 5)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td>13</td><td class="nw"><code>M</code></td><td class="nw"><code>M6:4C1A0E06360B0000 FFFFEF0,FFFE924,FFFFCA8,FFFF1FD,000058A,00001DA,0000897,FFFED9D,FFFFF5F,FFFF911\r\n</code></td></tr><tr><td>14</td><td class="nw"><code>F 64 (시험 #11, 숫자 6)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td>15</td><td class="nw"><code>M</code></td><td class="nw"><code>M6:36153105300C0007 FFFFDCB,FFFF145,0000059,FFFFCEF,FFFFB26,FFFFE0F,00008CA,FFFF814,0000269,FFFEC2C\r\n</code></td></tr><tr><td>16</td><td class="nw"><code>F 64 (시험 #0, 숫자 7)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td>17</td><td class="nw"><code>M</code></td><td class="nw"><code>M7:210000070323002D 00000BF,FFFF0D4,FFFFC87,00001DA,FFFEF33,FFFFB31,FFFEAF5,0000C9A,FFFFC18,0000316\r\n</code></td></tr><tr><td>18</td><td class="nw"><code>F 64 (시험 #61, 숫자 8)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td>19</td><td class="nw"><code>M</code></td><td class="nw"><code>M8:4E2E110E36280022 FFFFA44,FFFEB0A,FFFFCCA,FFFF1CF,FFFF268,FFFFBB8,FFFF8F5,FFFEFEA,000036E,FFFF7B3\r\n</code></td></tr><tr><td>20</td><td class="nw"><code>F 64 (시험 #7, 숫자 9)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td>21</td><td class="nw"><code>M</code></td><td class="nw"><code>M9:2B10000C2C3B0011 FFFEFFA,FFFF898,FFFF9B7,FFFFA9D,FFFFF84,FFFFC5B,FFFF2C8,FFFF6BC,FFFFE2D,000052D\r\n</code></td></tr></tbody>
+      </table></div>
+      <p>끝난 뒤 LED: <code>0x8200</code> (LED[9:0] 마지막 클래스 원-핫, LED15 프레임 보관, LED14 짧은 프레임, LED13 긴 프레임. 7세그먼트는 클래스 또는 읽은 화소). 응답 출처: 장 Top 시뮬레이션 STAGE=4 (<code>p03/validation/rtl_sim_20261119.log</code>, 바이트 단위 대조).</p>
+      <h3>추가 코드 (구 16장 그대로, VS Code 판)</h3>
+
+      <div class="codeblock">
+        <div class="codebar"><span>part03/ch16/rtl/p3_relu_requant.v · verilog · 원본 · RTL_SIM 통과 날짜 미기록</span></div>
+        <pre tabindex="0"><code class="language-verilog">`timescale 1ns/1ps
+// (추가) 16장: 은닉층 출력 재양자화 = sat_int8(round_shift_away(max(0, score), shift)).
+// ReLU 이후 값은 0 이상이므로 절반 반올림은 (v + 2^(shift-1)) &gt;&gt; shift 와 같다(shift=0이면 그대로).
+// 조합 회로. 입력 signed 25비트 점수, 출력 signed INT8(0..127).
+module p3_relu_requant(
+    input wire signed [24:0] score_i,
+    input wire [4:0] shift_i,
+    output wire signed [7:0] q_o
+);
+    // ReLU: 음수는 0
+    wire [24:0] relu = score_i[24] ? 25'd0 : score_i;
+    // 반올림 가산값: shift=0이면 0
+    wire [32:0] half = (shift_i == 5'd0) ? 33'd0 : (33'd1 &lt;&lt; (shift_i - 5'd1));
+    wire [32:0] rounded = ({8'd0, relu} + half) &gt;&gt; shift_i;
+    // INT8 상한 포화(ReLU 이후이므로 하한 -128은 발생하지 않음)
+    assign q_o = (rounded &gt; 33'd127) ? 8'sd127 : $signed(rounded[7:0]);
+endmodule</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>part03/ch16/rtl/p3_mlp_64_8_10.v · verilog · 원본 · RTL_SIM 통과 날짜 미기록</span></div>
+        <pre tabindex="0"><code class="language-verilog">`timescale 1ns/1ps
+// (추가) 16장: 64→8→10 정수 MLP. 14장 코어를 두 계층으로 재사용한다.
+//   1층: p3_group10_core #(64, 8)  x = 13장 프레임 버퍼(외부 읽기 포트)
+//   재양자화: p3_relu_requant × 8  hidden = sat_int8(round_shift_away(max(0, s1), shift))
+//   2층: p3_group10_core #(8, 10)  x = 내부 은닉 레지스터(1클록 지연 읽기)
+// 가중치·Bias 쓰기는 wr_layer_i(0=1층, 1=2층)로 선택하며, MLP 동작 중에는 두 계층 모두 쓰기를 막는다.
+// shift_i는 start 시점에 래치한다.
+module p3_mlp_64_8_10(
+    input wire clk,
+    input wire resetn,
+    input wire start_i,
+    input wire [4:0] shift_i,
+    input wire x_valid_i,
+    output wire x_rd_en_o,
+    output wire [5:0] x_rd_addr_o,
+    input wire signed [7:0] x_rd_data_i,
+    input wire wr_layer_i,
+    input wire w_wr_en_i,
+    input wire b_wr_en_i,
+    input wire [3:0] wr_class_i,
+    input wire [5:0] wr_addr_i,
+    input wire signed [7:0] w_data_i,
+    input wire signed [23:0] b_data_i,
+    output wire load_ready_o,
+    output reg busy_o,
+    output reg done_o,
+    output wire error_o,
+    output reg [3:0] class_o,
+    output wire [249:0] scores_o,
+    output wire [63:0] hidden_o
+);
+    localparam [2:0] IDLE=3'd0, L1=3'd1, L2_START=3'd2, L2=3'd3;
+    reg [2:0] state;
+    reg [4:0] shift_q;
+    reg start1_q, start2_q, error_q;
+    reg signed [7:0] hidden [0:7];
+    reg signed [7:0] hid_rd_data;
+
+    assign load_ready_o = resetn &amp;&amp; !busy_o;
+    // MLP 동작 중에는 어느 계층에도 쓰기를 전달하지 않는다.
+    wire wr_any = w_wr_en_i || b_wr_en_i;
+    wire w1_wr = w_wr_en_i &amp;&amp; !wr_layer_i &amp;&amp; load_ready_o;
+    wire b1_wr = b_wr_en_i &amp;&amp; !wr_layer_i &amp;&amp; load_ready_o;
+    wire w2_wr = w_wr_en_i &amp;&amp; wr_layer_i &amp;&amp; load_ready_o;
+    wire b2_wr = b_wr_en_i &amp;&amp; wr_layer_i &amp;&amp; load_ready_o;
+
+    wire done1, err1, done2, err2;
+    wire [3:0] class2;
+    wire [199:0] scores1;
+    wire h_rd_en;
+    wire [5:0] h_rd_addr;
+
+    p3_group10_core #(.IN_LEN(64), .OUT_N(8)) layer1(
+        .clk(clk), .resetn(resetn), .start_i(start1_q), .x_valid_i(x_valid_i),
+        .x_rd_en_o(x_rd_en_o), .x_rd_addr_o(x_rd_addr_o), .x_rd_data_i(x_rd_data_i),
+        .w_wr_en_i(w1_wr), .b_wr_en_i(b1_wr), .wr_class_i(wr_class_i), .wr_addr_i(wr_addr_i),
+        .w_data_i(w_data_i), .b_data_i(b_data_i), .load_ready_o(),
+        .busy_o(), .done_o(done1), .error_o(err1), .class_o(), .scores_o(scores1));
+    p3_group10_core #(.IN_LEN(8), .OUT_N(10)) layer2(
+        .clk(clk), .resetn(resetn), .start_i(start2_q), .x_valid_i(1'b1),
+        .x_rd_en_o(h_rd_en), .x_rd_addr_o(h_rd_addr), .x_rd_data_i(hid_rd_data),
+        .w_wr_en_i(w2_wr), .b_wr_en_i(b2_wr), .wr_class_i(wr_class_i), .wr_addr_i(wr_addr_i),
+        .w_data_i(w_data_i), .b_data_i(b_data_i), .load_ready_o(),
+        .busy_o(), .done_o(done2), .error_o(err2), .class_o(class2), .scores_o(scores_o));
+
+    wire signed [7:0] q [0:7];
+    genvar g;
+    generate
+        for (g = 0; g &lt; 8; g = g + 1) begin : requant
+            p3_relu_requant rq(.score_i(scores1[g*25 +: 25]), .shift_i(shift_q), .q_o(q[g]));
+            assign hidden_o[g*8 +: 8] = hidden[g];
+        end
+    endgenerate
+
+    // 2층 x 읽기: 13장 버퍼와 같은 1클록 지연 계약
+    always @(posedge clk)
+        if (h_rd_en)
+            hid_rd_data &lt;= hidden[h_rd_addr[2:0]];
+
+    assign error_o = error_q || err1 || err2;
+
+    integer k;
+    always @(posedge clk) begin
+        if (!resetn) begin
+            state &lt;= IDLE;
+            shift_q &lt;= 5'd0;
+            start1_q &lt;= 1'b0;
+            start2_q &lt;= 1'b0;
+            error_q &lt;= 1'b0;
+            busy_o &lt;= 1'b0;
+            done_o &lt;= 1'b0;
+            class_o &lt;= 4'd0;
+            for (k = 0; k &lt; 8; k = k + 1)
+                hidden[k] &lt;= 8'sd0;
+        end else begin
+            start1_q &lt;= 1'b0;
+            start2_q &lt;= 1'b0;
+            done_o &lt;= 1'b0;
+            error_q &lt;= 1'b0;
+            // 동작 중 쓰기·start, 프레임 없는 start는 무시하고 오류 펄스
+            if (wr_any &amp;&amp; !load_ready_o)
+                error_q &lt;= 1'b1;
+            case (state)
+                IDLE: if (start_i) begin
+                    if (!x_valid_i || wr_any) begin
+                        error_q &lt;= 1'b1;
+                    end else begin
+                        shift_q &lt;= shift_i;
+                        busy_o &lt;= 1'b1;
+                        start1_q &lt;= 1'b1;
+                        state &lt;= L1;
+                    end
+                end
+                L1: if (done1) begin
+                    // 1층 점수가 확정된 클록에 재양자화 결과를 은닉 레지스터로 저장
+                    for (k = 0; k &lt; 8; k = k + 1)
+                        hidden[k] &lt;= q[k];
+                    state &lt;= L2_START;
+                end
+                L2_START: begin
+                    start2_q &lt;= 1'b1;
+                    state &lt;= L2;
+                end
+                L2: if (done2) begin
+                    class_o &lt;= class2;
+                    done_o &lt;= 1'b1;
+                    busy_o &lt;= 1'b0;
+                    state &lt;= IDLE;
+                end
+                default: begin
+                    state &lt;= IDLE;
+                    busy_o &lt;= 1'b0;
+                end
+            endcase
+            if (start_i &amp;&amp; state != IDLE)
+                error_q &lt;= 1'b1;
+        end
+    end
+endmodule</code></pre>
+      </div>
+      <h3>시뮬레이션 기대 화면</h3>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 서브젝트 단독 시험</span></div>
+        <pre tabindex="0"><code>bash part03/ch16/scripts/run_sim.sh</code></pre></div>
+      <div class="codeblock"><div class="codebar"><span>기대 출력 (Icarus Verilog 12.0 · 날짜 미기록 · 출처 part03/ch16/validation/rtl_sim.log)</span></div>
+        <pre tabindex="0"><code>PYTHON_MLP_SELF_TEST_PASS ops=4933 frames=27 seed=1616
+RTL_SIM_PASS MLP64_8_10 frames=27 start_to_done_cycles=180 errors_checked=5
+PYTHON_RTL_COMPARE_PASS frames=27 hidden=8 scores=10 class=1 bit_exact=1</code></pre></div>
+      <details class="full"><summary>이 서브젝트의 테스트벤치·기준 모델 (전체 코드 2개)</summary>
+      <div class="codeblock">
+        <div class="codebar"><span>part03/ch16/tb/tb_p3_mlp_64_8_10.sv · systemverilog · 원본 · RTL_SIM 통과 날짜 미기록</span></div>
+        <pre tabindex="0"><code class="language-systemverilog">// (추가) 16장 64→8→10 정수 MLP 자동 판정 테스트벤치.
+// 13장 프레임 버퍼 + p3_mlp_64_8_10. 명령(W/B/S/F)으로 두 계층 모델과 shift를 적재·유지하며,
+// 프레임마다 은닉 8개·출력 점수 10개·Class를 기록한다(Python mlp_64_8_10과 비트 단위 비교).
+// 추가 판정: 프레임 없는 start, 1층 범위 밖 class(8) 쓰기, 2층 동작 중 1층 쓰기 차단(결과 불변),
+// 동작 중 start 거부, done 1클록, 처리 클록 수 일정.
+`timescale 1ns/1ps
+module tb_p3_mlp_64_8_10;
+    reg clk = 0, resetn = 0;
+    always #5 clk = ~clk;
+    reg [7:0] s_data = 0;
+    reg s_valid = 0, s_last = 0, frame_ack = 0;
+    wire s_ready, frame_valid, x_rd_valid, err_short, err_long;
+    wire x_rd_en;
+    wire [5:0] x_rd_addr;
+    wire signed [7:0] x_rd_data;
+    reg start = 0, wr_layer = 0, w_wr = 0, b_wr = 0;
+    reg [4:0] shift = 0;
+    reg [3:0] wr_class = 0;
+    reg [5:0] wr_addr = 0;
+    reg signed [7:0] w_data = 0;
+    reg signed [23:0] b_data = 0;
+    wire load_ready, busy, done, error;
+    wire [3:0] cls;
+    wire [249:0] scores;
+    wire [63:0] hidden;
+
+    p3_frame64_buffer buffer(
+        .clk(clk), .resetn(resetn),
+        .s_data_i(s_data), .s_valid_i(s_valid), .s_last_i(s_last), .s_ready_o(s_ready),
+        .frame_valid_o(frame_valid), .frame_ack_i(frame_ack),
+        .rd_en_i(x_rd_en), .rd_addr_i(x_rd_addr), .rd_data_o(x_rd_data), .rd_valid_o(x_rd_valid),
+        .err_short_o(err_short), .err_long_o(err_long));
+    p3_mlp_64_8_10 mlp(
+        .clk(clk), .resetn(resetn), .start_i(start), .shift_i(shift), .x_valid_i(frame_valid),
+        .x_rd_en_o(x_rd_en), .x_rd_addr_o(x_rd_addr), .x_rd_data_i(x_rd_data),
+        .wr_layer_i(wr_layer), .w_wr_en_i(w_wr), .b_wr_en_i(b_wr), .wr_class_i(wr_class),
+        .wr_addr_i(wr_addr), .w_data_i(w_data), .b_data_i(b_data), .load_ready_o(load_ready),
+        .busy_o(busy), .done_o(done), .error_o(error), .class_o(cls),
+        .scores_o(scores), .hidden_o(hidden));
+
+    integer n_error = 0, err_before = 0;
+    reg prev_done = 0;
+    always @(posedge clk) begin
+        if (resetn) begin
+            if (error) n_error = n_error + 1;
+            if (done &amp;&amp; prev_done) $fatal(1, "done longer than 1 clock");
+            if (load_ready === busy) $fatal(1, "load_ready must be !busy");
+            if (x_rd_en &amp;&amp; !frame_valid) $fatal(1, "layer1 read without frame");
+            if (err_short || err_long) $fatal(1, "unexpected frame error");
+        end
+        prev_done = done;
+    end
+
+    task automatic write_op(input integer layer, input integer is_bias, input integer c,
+                            input integer a, input integer v);
+        begin
+            @(negedge clk);
+            wr_layer = layer; wr_class = c; wr_addr = a;
+            if (is_bias) begin b_wr = 1; b_data = v; end
+            else begin w_wr = 1; w_data = v; end
+            @(negedge clk);
+            w_wr = 0; b_wr = 0;
+        end
+    endtask
+    task automatic check_error(input [8*40-1:0] what);
+        begin
+            @(negedge clk);
+            if (n_error != err_before + 1) $fatal(1, "missing error: %0s", what);
+            err_before = n_error;
+        end
+    endtask
+
+    reg [8*8-1:0] tag;
+    integer p4_shift = 0;
+    reg signed [7:0] w_before;
+    reg signed [23:0] b_before;
+    integer f_ops, f_act, rc, p1, p2, p3, p4, k, v, cyc, cyc_ref = -1, n_frames = 0;
+    reg signed [7:0] xbuf [0:63];
+    reg [8*256-1:0] ops_path, act_path;
+    initial begin
+        if (!$value$plusargs("OPS=%s", ops_path)) $fatal(1, "+OPS required");
+        if (!$value$plusargs("ACTUAL=%s", act_path)) $fatal(1, "+ACTUAL required");
+        f_ops = $fopen(ops_path, "r");
+        f_act = $fopen(act_path, "w");
+        repeat (4) @(negedge clk);
+        resetn = 1;
+        @(negedge clk);
+        // 프레임 없는 start
+        start = 1; @(negedge clk); start = 0;
+        check_error("start without frame");
+        if (busy) $fatal(1, "started without frame");
+        // 1층은 8출력이므로 class 8 쓰기는 거부
+        write_op(0, 0, 8, 0, 5);
+        check_error("layer1 class 8 write");
+        tag = "";
+        while (tag != "E") begin
+            rc = $fscanf(f_ops, "%s %d %d %d %d", tag, p1, p2, p3, p4);
+            if (rc != 5) $fatal(1, "bad op line");
+            if (tag == "W") write_op(p1, 0, p2, p3, p4);
+            else if (tag == "B") write_op(p1, 1, p2, 0, p4);
+            else if (tag == "S") begin shift = p4; p4_shift = p4; end
+            else if (tag == "F") begin
+                for (k = 0; k &lt; 64; k = k + 1) begin
+                    rc = $fscanf(f_ops, "%d", v);
+                    xbuf[k] = v;
+                end
+                for (k = 0; k &lt; 64; k = k + 1) begin
+                    @(negedge clk);
+                    s_data = xbuf[k]; s_valid = 1; s_last = (k == 63);
+                    while (!s_ready) @(negedge clk);
+                end
+                @(negedge clk);
+                s_valid = 0; s_last = 0;
+                start = 1;
+                @(negedge clk);
+                start = 0;
+                // shift는 start 시점에 래치되어야 한다: 동작 중 입력을 반전해도 결과 불변
+                shift = ~p4_shift;
+                cyc = 1;
+                if (n_frames == 0) begin
+                    // 2층 동작 구간까지 기다린 뒤 1층 가중치·Bias 쓰기 시도: 차단되어야 결과 불변
+                    while (!mlp.layer2.busy_o) begin @(negedge clk); cyc = cyc + 1; end
+                    // 화이트박스: 차단된 쓰기 전후 1층 bank0[0]·bias[0] 불변 확인
+                    w_before = mlp.layer1.bank0[0];
+                    b_before = mlp.layer1.bias[0];
+                    @(negedge clk); wr_layer = 0; w_wr = 1; wr_class = 0; wr_addr = 0;
+                    w_data = ~w_before;
+                    @(negedge clk); w_wr = 0; b_wr = 1; b_data = 12345;
+                    @(negedge clk); b_wr = 0; start = 1;
+                    @(negedge clk); start = 0;
+                    @(negedge clk);
+                    cyc = cyc + 5;
+                    if (n_error != err_before + 3) $fatal(1, "busy writes/start not rejected");
+                    if (mlp.layer1.bank0[0] !== w_before || mlp.layer1.bias[0] !== b_before)
+                        $fatal(1, "layer1 model modified by write during MLP busy");
+                    err_before = n_error;
+                end
+                while (!done) begin
+                    @(negedge clk);
+                    cyc = cyc + 1;
+                    if (cyc &gt; 2000) $fatal(1, "MLP timeout");
+                end
+                if (busy) $fatal(1, "busy after done");
+                shift = p4_shift;
+                if (cyc_ref &lt; 0) cyc_ref = cyc;
+                else if (cyc != cyc_ref) $fatal(1, "cycle count changed %0d vs %0d", cyc, cyc_ref);
+                $fwrite(f_act, "H");
+                for (k = 0; k &lt; 8; k = k + 1)
+                    $fwrite(f_act, " %0d", $signed(hidden[k*8 +: 8]));
+                $fwrite(f_act, " S");
+                for (k = 0; k &lt; 10; k = k + 1)
+                    $fwrite(f_act, " %0d", $signed(scores[k*25 +: 25]));
+                $fwrite(f_act, " C%0d\n", cls);
+                frame_ack = 1;
+                @(negedge clk);
+                frame_ack = 0;
+                n_frames = n_frames + 1;
+                if (n_error != err_before) $fatal(1, "unexpected error in frame %0d", n_frames);
+            end
+        end
+        $fclose(f_act);
+        $display("RTL_SIM_PASS MLP64_8_10 frames=%0d start_to_done_cycles=%0d errors_checked=%0d",
+            n_frames, cyc_ref, n_error);
+        $finish;
+    end
+    initial begin #200000000; $fatal(1, "TB timeout"); end
+endmodule</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>part03/ch16/reference/mlp_reference.py · python · 원본 · RTL_SIM 통과 날짜 미기록</span></div>
+        <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
+"""16장: 64→8→10 정수 MLP 기준모델·시험 명령 생성·RTL 결과 비교.
+
+최종 점수는 host_tools의 mlp_64_8_10(x, w1, b1, w2, b2, shift), Class는 argmax_lowest.
+진단용 은닉값은 같은 규칙 sat_int8(round_shift_away(max(0, dot_signed + b1), shift))을 함수 조합으로 계산해
+mlp_64_8_10 출력과 일치하는지 교차 확인한다(계산 규칙 변경 없음).
+명령: W L c a v / B L c v (L=0 1층, L=1 2층) / S shift / F x[64]
+"""
+import argparse
+import random
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+from part03.host_tools.p3_integer_reference import (  # noqa: E402
+    sat_int8, round_shift_away, dot_signed, argmax_lowest, mlp_64_8_10,
+)
+
+BIAS_MIN, BIAS_MAX = -(1 &lt;&lt; 23), (1 &lt;&lt; 23) - 1
+
+
+def hidden_of(x, w1, b1, shift):
+    return [sat_int8(round_shift_away(max(0, dot_signed(x, w) + b), shift)) for w, b in zip(w1, b1)]
+
+
+def infer(x, w1, b1, w2, b2, shift):
+    scores = mlp_64_8_10(x, w1, b1, w2, b2, shift)
+    h = hidden_of(x, w1, b1, shift)
+    assert scores == [dot_signed(h, w) + b for w, b in zip(w2, b2)]
+    for s in scores:
+        assert -(1 &lt;&lt; 24) &lt;= s &lt; (1 &lt;&lt; 24)
+    return h, scores, argmax_lowest(scores)
+
+
+def build_ops():
+    rng = random.Random(1616)
+    i8 = lambda: rng.randint(-128, 127)  # noqa: E731
+    ops = []
+
+    def load(w1f, b1f, w2f, b2f):
+        for c in range(8):
+            for a in range(64):
+                ops.append(("W", 0, c, a, w1f(c, a)))
+            ops.append(("B", 0, c, b1f(c)))
+        for c in range(10):
+            for a in range(8):
+                ops.append(("W", 1, c, a, w2f(c, a)))
+            ops.append(("B", 1, c, b2f(c)))
+
+    def rand_x():
+        return [i8() for _ in range(64)]
+
+    # ① 무작위 모델, 여러 shift(0=포화 다수, 큰 shift=0 다수)
+    load(lambda c, a: i8(), lambda c: rng.randint(-50000, 50000),
+         lambda c, a: i8(), lambda c: rng.randint(-5000, 5000))
+    # 첫 프레임을 같은 입력으로 2회: TB가 첫 프레임 2층 동작 중 1층 쓰기를 시도하므로
+    # 차단이 실패하면 두 번째 결과가 달라진다(shift 12: 포화·0 아닌 은닉값 다수).
+    x0 = rand_x()
+    ops.append(("S", 12))
+    ops.append(("F", x0))
+    ops.append(("F", x0))
+    for s in (0, 1, 4, 8, 14, 16, 20, 24, 31):
+        ops.append(("S", s))
+        ops.append(("F", rand_x()))
+    # ② ReLU 경계: 은닉 c의 1층 점수를 Bias로 정확히 지정(-1, 0, 1, 254, 255, 256, 257, 큰 음수)
+    #    W1=0이므로 점수 = Bias. shift=1: 1→1(0.5 반올림), 255→128→127 포화, 254→127
+    load(lambda c, a: 0, lambda c: [-1, 0, 1, 254, 255, 256, 257, -(1 &lt;&lt; 23)][c],
+         lambda c, a: int(a == c % 8), lambda c: c)
+    ops.append(("S", 1))
+    ops.append(("F", rand_x()))
+    ops.append(("S", 0))
+    ops.append(("F", rand_x()))
+    # ③ 2층 단독 최대·동점: 은닉 고정(W1=0, B1=200, shift=3 → 25), 2층 class 4·9 동점 → 4
+    load(lambda c, a: 0, lambda c: 200,
+         lambda c, a: 1 if c in (4, 9) else 0, lambda c: 0)
+    ops.append(("S", 3))
+    ops.append(("F", rand_x()))
+    # ④ 전부 음수 출력: 은닉 모두 0 → 점수 = B2(전부 음수, class 6 최대)
+    load(lambda c, a: -1, lambda c: -10, lambda c, a: i8(),
+         lambda c: -100 + (90 if c == 6 else 0) - c)
+    ops.append(("S", 0))
+    ops.append(("F", [127] * 64))
+    # ⑤ 무작위 모델 4개 × shift 무작위 3프레임
+    for _ in range(4):
+        load(lambda c, a: i8(), lambda c: rng.randint(BIAS_MIN, BIAS_MAX),
+             lambda c, a: i8(), lambda c: rng.randint(BIAS_MIN, BIAS_MAX))
+        for _ in range(3):
+            ops.append(("S", rng.randint(6, 18)))
+            ops.append(("F", rand_x()))
+    return ops
+
+
+def run_model(ops):
+    w1 = [[None] * 64 for _ in range(8)]
+    w2 = [[None] * 8 for _ in range(10)]
+    b1, b2 = [0] * 8, [0] * 10
+    shift, out = 0, []
+    for op in ops:
+        if op[0] == "W":
+            _, layer, c, a, v = op
+            (w1 if layer == 0 else w2)[c][a] = v
+        elif op[0] == "B":
+            _, layer, c, v = op
+            (b1 if layer == 0 else b2)[c] = v
+        elif op[0] == "S":
+            shift = op[1]
+        else:
+            out.append(infer(op[1], w1, b1, w2, b2, shift))
+    return out
+
+
+def selftest():
+    x = [0] * 64
+    w1 = [[0] * 64 for _ in range(8)]
+    b1 = [-1, 0, 1, 254, 255, 256, 257, -(1 &lt;&lt; 23)]
+    assert hidden_of(x, w1, b1, 1) == [0, 0, 1, 127, 127, 127, 127, 0]
+    assert hidden_of(x, w1, [3, 5, 6, 7, 2, 1, 0, 9], 2) == [1, 1, 2, 2, 1, 0, 0, 2]
+    assert hidden_of(x, w1, [200] * 8, 3) == [25] * 8
+
+
+def generate(out):
+    selftest()
+    ops = build_ops()
+    results = run_model(ops)
+    with (out / "ops.txt").open("w") as f:
+        for op in ops:
+            if op[0] == "W":
+                f.write(f"W {op[1]} {op[2]} {op[3]} {op[4]}\n")
+            elif op[0] == "B":
+                f.write(f"B {op[1]} {op[2]} 0 {op[3]}\n")
+            elif op[0] == "S":
+                f.write(f"S 0 0 0 {op[1]}\n")
+            else:
+                f.write("F 0 0 0 0 " + " ".join(map(str, op[1])) + "\n")
+        f.write("E 0 0 0 0\n")
+    with (out / "expected.txt").open("w") as f:
+        for h, scores, cls in results:
+            f.write("H " + " ".join(map(str, h)) + " S " + " ".join(map(str, scores)) + f" C{cls}\n")
+    print(f"PYTHON_MLP_SELF_TEST_PASS ops={len(ops)} frames={len(results)} seed=1616")
+
+
+def compare(out, actual):
+    exp = (out / "expected.txt").read_text().splitlines()
+    got = actual.read_text().splitlines()
+    if exp != got:
+        for i, (e, g) in enumerate(zip(exp, got)):
+            if e != g:
+                print(f"FAIL frame {i}:\n  expected={e}\n  got     ={g}")
+                break
+        print(f"frames expected={len(exp)} got={len(got)}")
+        raise SystemExit("PYTHON_RTL_COMPARE_FAIL")
+    print(f"PYTHON_RTL_COMPARE_PASS frames={len(exp)} hidden=8 scores=10 class=1 bit_exact=1")
+
+
+if __name__ == "__main__":
+    p = argparse.ArgumentParser()
+    p.add_argument("--out", type=Path, required=True)
+    p.add_argument("--actual", type=Path)
+    a = p.parse_args()
+    if a.actual:
+        compare(a.out, a.actual)
+    else:
+        generate(a.out)</code></pre>
+      </div>
+      </details>
+      <h3>판정 줄</h3>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
+        <tbody><tr><td><code>RTL_SIM_PASS MLP64_8_10 start_to_done_cycles=180</code></td><td>1층 138 + 은닉 저장 + 2층 38 = 180클록, 오류 5종</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS hidden=8 scores=10 class=1</code></td><td>은닉 8개·점수 10개·클래스가 Python 기준과 같음</td></tr><tr><td>장 Top STAGE=4 시뮬레이션</td><td>위 '보드에서 볼 것' 응답과 바이트 단위로 같음 · 통과</td></tr>
+        <tr><td>장 Top STAGE=4 합성·타이밍</td><td>⚠ 미검증 (VS Code Vivado 실행 대기)</td></tr></tbody>
+      </table></div>
+      <div class="gate-row">
+        <div class="gate pass">
+          <b>HOST_MODEL_PASS</b>
+          <span>PYTHON_MLP_SELF_TEST_PASS ops=4933 frames=27 seed=1616</span>
+        </div>
+        <div class="gate pass">
+          <b>RTL_SIM_PASS</b>
+          <span>RTL_SIM_PASS MLP64_8_10 frames=27 start_to_done_cycles=180 e… · Icarus Verilog 12.0 · 날짜 미기록</span>
+        </div>
+        <div class="gate todo">
+          <b>SYNTH_TIMING_PASS</b>
+          <span>⚠ 미검증 · VS Code Vivado 실행 대기 (구 장 OOC)</span>
+        </div>
+        <div class="gate todo">
+          <b>BOARD_PASS</b>
+          <span>⚠ 미실시 · 현재 실물 보드 확인 불가</span>
+        </div>
+      </div>
+    </section>
+    <section class="section" id="demo">
+      <h2><span class="num">07</span> 장 시연</h2>
+      <p>STAGE=4 비트스트림 하나로 모든 서브젝트를 차례로 보여 줍니다. 아래 응답은 장 Top 시뮬레이션이 바이트 단위로 대조한 값입니다.</p>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th class="nw">서브젝트</th><th>PC 명령</th><th>보드 응답</th></tr></thead>
+        <tbody><tr><td class="nw">3-1</td><td class="nw"><code>S</code></td><td class="nw"><code>I\r\n</code></td></tr><tr><td class="nw">3-1</td><td class="nw"><code>F 64 (시험 #0, 숫자 7)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td class="nw">3-1</td><td class="nw"><code>p 0</code></td><td class="nw"><code>P:00\r\n</code></td></tr><tr><td class="nw">3-1</td><td class="nw"><code>p 27</code></td><td class="nw"><code>P:00\r\n</code></td></tr><tr><td class="nw">3-1</td><td class="nw"><code>p 36</code></td><td class="nw"><code>P:17\r\n</code></td></tr><tr><td class="nw">3-1</td><td class="nw"><code>F 63 (짧은 프레임)</code></td><td class="nw"><code>F:SHORT\r\n</code></td></tr><tr><td class="nw">3-1</td><td class="nw"><code>p 0</code></td><td class="nw"><code>ERR\r\n</code></td></tr><tr><td class="nw">3-1</td><td class="nw"><code>F 65 (긴 프레임)</code></td><td class="nw"><code>F:LONG\r\n</code></td></tr><tr><td class="nw">3-1</td><td class="nw"><code>F 64 (시험 #0, 숫자 7)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td class="nw">3-2</td><td class="nw"><code>python3 … load linear (650개 명령)</code></td><td class="nw"><code>OK\r\n ×650</code></td></tr><tr><td class="nw">3-2</td><td class="nw"><code>F 64 (시험 #0, 숫자 7)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td class="nw">3-2</td><td class="nw"><code>R</code></td><td class="nw"><code>R7:000020E,FFFA34A,FFFF7E6,000189D,FFFD57A,FFFFA11,FFF9757,0005A9D,FFFEF87,00019AD\r\n</code></td></tr><tr><td class="nw">3-2</td><td class="nw"><code>F 64 (시험 #3, 숫자 0)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td class="nw">3-2</td><td class="nw"><code>R</code></td><td class="nw"><code>R0:00056AD,FFF5019,FFFF949,FFFE232,FFFB09F,00003AF,FFFF540,FFFE539,FFFE907,FFFE320\r\n</code></td></tr><tr><td class="nw">3-2</td><td class="nw"><code>F 64 (시험 #18, 숫자 3)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td class="nw">3-2</td><td class="nw"><code>R</code></td><td class="nw"><code>R5:FFFBEBD,FFFB224,FFFEC1F,FFFFEC3,FFFC97C,0000227,FFFE567,FFFB01B,FFFF259,FFF953F\r\n</code></td></tr><tr><td class="nw">3-3</td><td class="nw"><code>python3 … load mlp (610개 명령)</code></td><td class="nw"><code>OK\r\n ×610</code></td></tr><tr><td class="nw">3-3</td><td class="nw"><code>F 64 (시험 #18, 숫자 3)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td class="nw">3-3</td><td class="nw"><code>H</code></td><td class="nw"><code>H4:000429E,0001A45,000420A,0003618,0004984,0003F12,FFFEB90,00001C4\r\n</code></td></tr><tr><td class="nw">3-3</td><td class="nw"><code>G</code></td><td class="nw"><code>G7:000006D,000037A,000000C,00002FE,FFFFB2A,00001EB,0000267,00004DD,FFFFE7E,FFFF6E3\r\n</code></td></tr><tr><td class="nw">3-4</td><td class="nw"><code>Z 9</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">3-4</td><td class="nw"><code>F 64 (시험 #3, 숫자 0)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td class="nw">3-4</td><td class="nw"><code>M</code></td><td class="nw"><code>M0:45060C0A1500001F 0000C5A,FFFE009,FFFFF1D,FFFFAE6,FFFF486,000007B,FFFFC4A,FFFFF78,FFFFC5B,FFFF89E\r\n</code></td></tr><tr><td class="nw">3-4</td><td class="nw"><code>F 64 (시험 #2, 숫자 1)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td class="nw">3-4</td><td class="nw"><code>M</code></td><td class="nw"><code>M1:000D0F0010100006 FFFF877,0000796,00000B4,FFFFF92,FFFFBCE,FFFFEFB,FFFFE8F,FFFFFC3,FFFFF66,FFFFA59\r\n</code></td></tr><tr><td class="nw">3-4</td><td class="nw"><code>F 64 (시험 #1, 숫자 2)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td class="nw">3-4</td><td class="nw"><code>M</code></td><td class="nw"><code>M2:112F3F503000001A 000038F,FFFFFD0,0000FEB,000041B,FFFD02E,00008ED,000020E,FFFCFA6,0000726,FFFCEFA\r\n</code></td></tr><tr><td class="nw">3-4</td><td class="nw"><code>F 64 (시험 #18, 숫자 3)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td class="nw">3-4</td><td class="nw"><code>M</code></td><td class="nw"><code>M3:210D211B25200001 FFFF86C,FFFFA94,FFFFE0D,000027F,FFFF7C7,0000238,FFFFF97,FFFF0DC,00000C9,FFFF074\r\n</code></td></tr><tr><td class="nw">3-4</td><td class="nw"><code>F 64 (시험 #4, 숫자 4)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td class="nw">3-4</td><td class="nw"><code>M</code></td><td class="nw"><code>M4:370206002818000A FFFFBE7,FFFED06,FFFFC0A,FFFFA34,0000659,FFFFE5D,FFFFDD2,FFFFCC3,FFFFB77,000025A\r\n</code></td></tr><tr><td class="nw">3-4</td><td class="nw"><code>F 64 (시험 #8, 숫자 5)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td class="nw">3-4</td><td class="nw"><code>M</code></td><td class="nw"><code>M6:4C1A0E06360B0000 FFFFEF0,FFFE924,FFFFCA8,FFFF1FD,000058A,00001DA,0000897,FFFED9D,FFFFF5F,FFFF911\r\n</code></td></tr><tr><td class="nw">3-4</td><td class="nw"><code>F 64 (시험 #11, 숫자 6)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td class="nw">3-4</td><td class="nw"><code>M</code></td><td class="nw"><code>M6:36153105300C0007 FFFFDCB,FFFF145,0000059,FFFFCEF,FFFFB26,FFFFE0F,00008CA,FFFF814,0000269,FFFEC2C\r\n</code></td></tr><tr><td class="nw">3-4</td><td class="nw"><code>F 64 (시험 #0, 숫자 7)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td class="nw">3-4</td><td class="nw"><code>M</code></td><td class="nw"><code>M7:210000070323002D 00000BF,FFFF0D4,FFFFC87,00001DA,FFFEF33,FFFFB31,FFFEAF5,0000C9A,FFFFC18,0000316\r\n</code></td></tr><tr><td class="nw">3-4</td><td class="nw"><code>F 64 (시험 #61, 숫자 8)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td class="nw">3-4</td><td class="nw"><code>M</code></td><td class="nw"><code>M8:4E2E110E36280022 FFFFA44,FFFEB0A,FFFFCCA,FFFF1CF,FFFF268,FFFFBB8,FFFF8F5,FFFEFEA,000036E,FFFF7B3\r\n</code></td></tr><tr><td class="nw">3-4</td><td class="nw"><code>F 64 (시험 #7, 숫자 9)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td class="nw">3-4</td><td class="nw"><code>M</code></td><td class="nw"><code>M9:2B10000C2C3B0011 FFFEFFA,FFFF898,FFFF9B7,FFFFA9D,FFFFF84,FFFFC5B,FFFF2C8,FFFF6BC,FFFFE2D,000052D\r\n</code></td></tr></tbody>
+      </table></div>
+      <p>끝난 뒤 LED: <code>0x8200</code> (LED[9:0] 마지막 클래스 원-핫, LED15 프레임 보관, LED14 짧은 프레임, LED13 긴 프레임. 7세그먼트는 클래스 또는 읽은 화소). btnC를 누르면 처음 상태로 돌아갑니다.</p>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>PC 결과 (모델·데이터)</th><th>값 · 출처 로그</th></tr></thead>
+        <tbody><tr><td>8×8 선형 64→10 (3-2), MNIST 시험 10,000장</td><td><code>float=0.9132 int8=0.9130 test=10000</code> · <code>p03/validation/pc_train_20261119.log</code></td></tr><tr><td>8×8 MLP 64→8→10 (3-4), MNIST 시험 10,000장</td><td><code>float=0.9085 int8=0.9087 shift=9 test=10000</code> · <code>p03/validation/pc_train_20261119.log</code></td></tr><tr><td>장 시연 숫자 0~9 (시험 세트 숫자별 첫 그림)</td><td><code>9/10 (MLP, t10k 숫자별 첫 그림)</code> · <code>p03/validation/rtl_sim_20261119.log</code></td></tr></tbody>
+      </table></div>
+      <p>은닉층이 8개뿐이라 MLP가 선형보다 정확하지 않습니다. 4장(784 입력)에서 입력 크기를 늘리면 차이가 납니다 (⚠ 4장 전환 때 확인).</p>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 장 Top 시뮬레이션 (STAGE 1~4)</span></div>
+        <pre tabindex="0"><code>bash p03/scripts/run_sim.sh</code></pre></div>
+      <div class="codeblock"><div class="codebar"><span>기대 출력 (Icarus Verilog 12.0 · 2026-11-19 · 출처 p03/validation/rtl_sim_20261119.log)</span></div>
+        <pre tabindex="0"><code>PYTHON_P03_SELF_TEST_PASS
+PYTHON_P03_VECTORS stage=1 cases=10 final_led=0x8000
+PYTHON_P03_VECTORS stage=2 cases=665 final_led=0x8020
+PYTHON_P03_VECTORS stage=3 cases=1278 final_led=0x8080
+PYTHON_P03_VECTORS stage=4 cases=1299 final_led=0x8200
+P03_TOP_RTL_SIM_PASS stage=1 cases=10 bytes=58
+P03_TOP_RTL_SIM_PASS stage=2 cases=665 bytes=2925
+P03_TOP_RTL_SIM_PASS stage=3 cases=1278 bytes=5523
+P03_TOP_RTL_SIM_PASS stage=4 cases=1299 bytes=6597
+RTL_SIM_PASS stages=4</code></pre></div>
+      <div class="codeblock"><div class="codebar"><span>Vivado (VS Code) · STAGE 1~4 비트스트림</span></div>
+        <pre tabindex="0"><code>vivado -mode batch -nojournal -source p03/vivado/build_p03.tcl
+⚠ Vivado 실행 기록 없음 (VS Code: build_p03.tcl → p03/validation/vivado_impl_YYYYMMDD.txt)</code></pre></div>
+      <details class="full"><summary>장 Top 테스트벤치·기준 모델 (전체 코드)</summary>
+      <div class="codeblock">
+        <div class="codebar"><span>p03/tb/tb_p03_top.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-19</span></div>
+        <pre tabindex="0"><code class="language-systemverilog">// 3장 보드 Top 시험: UART 핀으로 명령을 보내고 TX 핀을 복조해 기준 모델(p03_cases_sN.txt)과 바이트 단위로 대조한다.
+// 3장 Top에는 스위치 입력이 없다 (사례 파일의 sw 칸은 늘 0).
+// 시뮬레이션 시간을 줄이려고 BAUD 6.25 Mbps(CPB 16), REFRESH_BITS 6으로 돌린다. 보드 Top 기본값은 115200 bps.
+`timescale 1ns/1ps
+module tb_p03_top;
+    parameter integer STAGE = 4;                  // run_sim.sh가 1~4로 바꿔 네 번 돌린다
+    localparam integer CLK_HZ = 100000000, BAUD = 6250000;
+    localparam integer CPB = (CLK_HZ + BAUD / 2) / BAUD;
+    reg clk = 0, btnC = 1, rxd = 1;
+    reg [1:0] sw = 2'd0;
+    wire txd, dp;
+    wire [15:0] led;
+    wire [6:0] seg;
+    wire [3:0] an;
+    always #5 clk = ~clk;
+
+    basys3_p03_top #(.CLK_HZ(CLK_HZ), .BAUD(BAUD), .REFRESH_BITS(6), .STAGE(STAGE)) dut (
+        .clk(clk), .btnC(btnC), .uart_rxd(rxd), .uart_txd(txd),
+        .led(led), .seg(seg), .an(an), .dp(dp));
+
+    // TX 핀 복조 (00장 uart_rx 그대로)
+    wire [7:0] got;
+    wire got_valid, fe, ov;
+    reg mon_resetn = 0;
+    uart_rx #(.CLK_HZ(CLK_HZ), .BAUD(BAUD)) mon (
+        .clk(clk), .resetn(mon_resetn), .rx_i(txd), .out_data_o(got), .out_valid_o(got_valid),
+        .out_ready_i(1'b1), .framing_error_o(fe), .overrun_o(ov));
+
+    reg [7:0] rxq [0:255];
+    integer rx_wr = 0;
+    always @(posedge clk) if (got_valid) begin
+        rxq[rx_wr[7:0]] = got;
+        rx_wr = rx_wr + 1;
+    end
+
+    task automatic send_byte(input [7:0] b);
+        integer k;
+        begin
+            @(negedge clk); rxd = 0; repeat (CPB) @(negedge clk);
+            for (k = 0; k &lt; 8; k = k + 1) begin rxd = b[k]; repeat (CPB) @(negedge clk); end
+            rxd = 1; repeat (CPB) @(negedge clk);
+        end
+    endtask
+
+    integer fd, n_tx, n_rx, i, v, sel, cases = 0, rx_rd = 0, t, code;
+    reg [8*8-1:0] subj;
+    reg [8*200-1:0] line;
+    reg [7:0] tx [0:127];
+    reg [7:0] exp [0:127];
+    reg [15:0] led_exp;
+    reg [8*4-1:0] tag;
+
+    initial begin
+        fd = $fopen($sformatf("p03/tb/p03_cases_s%0d.txt", STAGE), "r");
+        if (fd == 0) $fatal(1, "p03_cases_s%0d.txt 없음: python3 p03/reference/p03_model.py 먼저", STAGE);
+        code = $fgets(line, fd);                         // 머리 줄
+        repeat (5) @(posedge clk);
+        btnC = 0; mon_resetn = 1;
+        repeat (10) @(posedge clk);
+        forever begin
+            code = $fscanf(fd, "%s", subj);
+            if (code != 1) $fatal(1, "사례 파일 끝에 END 줄 없음");
+            if (subj == "END") begin
+                code = $fscanf(fd, "%h", v); led_exp = v;
+                repeat (20) @(posedge clk);
+                if (led !== led_exp) $fatal(1, "LED=%04h 기대 %04h", led, led_exp);
+                if (fe || ov) $fatal(1, "TX 복조 오류 fe=%0d ov=%0d", fe, ov);
+                $display("P03_BOARD_TOP_LED_PASS stage=%0d led=0x%04h", STAGE, led);
+                $display("P03_TOP_RTL_SIM_PASS stage=%0d cases=%0d bytes=%0d", STAGE, cases, rx_wr);
+                $finish;
+            end
+            code = $fscanf(fd, "%h %h", sel, n_tx);
+            for (i = 0; i &lt; n_tx; i = i + 1) begin code = $fscanf(fd, "%h", v); tx[i] = v; end
+            code = $fscanf(fd, "%h", n_rx);
+            for (i = 0; i &lt; n_rx; i = i + 1) begin code = $fscanf(fd, "%h", v); exp[i] = v; end
+            sw = sel;
+            repeat (8) @(posedge clk);                    // 스위치 2FF 동기화 대기
+            for (i = 0; i &lt; n_tx; i = i + 1) send_byte(tx[i]);
+            t = 0;
+            while (rx_wr - rx_rd &lt; n_rx) begin
+                @(posedge clk); t = t + 1;
+                if (t &gt; 40 * CPB * (n_rx + 2)) $fatal(1, "%0s 응답 시간 초과: %0d/%0d 바이트", subj, rx_wr - rx_rd, n_rx);
+            end
+            for (i = 0; i &lt; n_rx; i = i + 1)
+                if (rxq[(rx_rd + i) % 256] !== exp[i])
+                    $fatal(1, "%0s 응답 %0d번째 바이트 %02h 기대 %02h", subj, i, rxq[(rx_rd + i) % 256], exp[i]);
+            $write("P03_CASE_PASS stage=%0d %0s sw=%0d rx=\"", STAGE, subj, sel);
+            for (i = 0; i &lt; n_rx; i = i + 1)
+                if (exp[i] == 8'h0D) $write("\\r"); else if (exp[i] == 8'h0A) $write("\\n"); else $write("%c", exp[i]);
+            $display("\"");
+            rx_rd = rx_rd + n_rx;
+            cases = cases + 1;
+        end
+    end
+
+    // 7세그먼트: an이 켠 자리에 led의 그 자리 16진수가 보여야 한다 (한 번 확인)
+    initial begin
+        #200000;
+        if (an == 4'b1111) $fatal(1, "7세그먼트 자리가 하나도 켜지지 않음");
+    end
+endmodule</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>p03/reference/p03_model.py · python · 원본 · RTL_SIM 통과 2026-11-19</span></div>
+        <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
+"""3장 8×8 MNIST 보드 기준 모델.
+
+명령 순서를 정하고 보드가 돌려줄 응답을 계산해 p03/tb/p03_cases_s{STAGE}.txt (STAGE 1~4)로 쓴다.
+같은 줄 순서로 p03/tb/p03_case_labels_s{STAGE}.txt에 안내서 표시용 설명을 쓴다.
+계산은 서브젝트(VS Code 판 구 15·16장) 기준 모델 함수 dense · infer · argmax_lowest를 그대로 쓴다.
+시연 프레임: MNIST t10k에서 숫자 0~9마다 첫 그림 (p03/model/train_p03.py의 to8x8 전처리).
+
+  python3 p03/reference/p03_model.py
+"""
+import json
+import struct
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / "host_tools"))
+sys.path.insert(0, str(ROOT / "p03" / "model"))
+sys.path.insert(0, str(ROOT / "part03" / "ch15" / "reference"))
+sys.path.insert(0, str(ROOT / "part03" / "ch16" / "reference"))
+from part03.host_tools.p3_integer_reference import argmax_lowest   # noqa: E402
+from dense_reference import dense                                   # noqa: E402  (3-3 구15장)
+from mlp_reference import infer                                     # noqa: E402  (3-4 구16장)
+from mnist_idx import images, labels                                # noqa: E402
+from train_p03 import to8x8                                         # noqa: E402
+
+CASES_OUT = ROOT / "p03" / "tb" / "p03_cases_s%d.txt"
+LABELS_OUT = ROOT / "p03" / "tb" / "p03_case_labels_s%d.txt"
+MODEL = json.loads((ROOT / "p03" / "model" / "p03_models.json").read_text(encoding="utf-8"))
+CRLF = "\r\n"
+NEED = {"S": 0, "F": 1, "p": 1, "W": 4, "B": 5, "R": 0, "H": 0, "G": 0, "Z": 1, "M": 0}
+MIN_STAGE = {"W": 2, "B": 2, "R": 2, "H": 3, "G": 3, "Z": 4, "M": 4}
+SHAPE = {0: (10, 64), 1: (8, 64), 2: (10, 8)}          # 층 → (class 수, 입력 수)
+
+
+def h(v, n):
+    return format(v &amp; ((1 &lt;&lt; (4 * n)) - 1), "0%dX" % n)
+
+
+class Board:
+    def __init__(self, stage):
+        self.stage = stage
+        self.frame = None                    # 들고 있는 프레임 (64 INT8)
+        self.w = {L: [[None] * n_in for _ in range(n_out)] for L, (n_out, n_in) in SHAPE.items()}
+        self.b = {L: [0] * n_out for L, (n_out, _) in SHAPE.items()}
+        self.shift = 0
+        self.view, self.cls, self.cls_ok, self.fshort, self.flong = 0, 0, False, False, False
+
+    def step(self, data):
+        c = chr(data[0])
+        if c in "\r\n":
+            return ""
+        if c not in NEED or self.stage &lt; MIN_STAGE.get(c, 1):
+            return "?" + CRLF
+        p = data[1:1 + NEED[c]]
+        if c == "S":
+            return "I" + CRLF
+        if c == "F":
+            n = p[0]
+            if not 1 &lt;= n &lt;= 80:
+                return "ERR" + CRLF
+            px = [struct.unpack("b", bytes([v]))[0] for v in data[2:]]
+            assert len(px) == n
+            self.frame = px if n == 64 else None
+            self.fshort, self.flong = n &lt; 64, n &gt; 64
+            return "F:" + ("OK" if n == 64 else "SHORT" if n &lt; 64 else "LONG") + CRLF
+        if c == "p":
+            if p[0] &gt;= 64 or self.frame is None:
+                return "ERR" + CRLF
+            v = self.frame[p[0]]
+            self.view = v &amp; 0xFFFF
+            return "P:" + h(v, 2) + CRLF
+        if c in "WB":
+            L, cl = p[0], p[1]
+            if L &gt; 2 or (L &gt; 0 and self.stage &lt; 3) or cl &gt;= SHAPE[L][0]:
+                return "ERR" + CRLF
+            if c == "W":
+                if p[2] &gt;= SHAPE[L][1]:
+                    return "ERR" + CRLF
+                self.w[L][cl][p[2]] = struct.unpack("b", bytes([p[3]]))[0]
+            else:
+                v = int.from_bytes(bytes(p[2:5]), "big")
+                self.b[L][cl] = v - (1 &lt;&lt; 24) if v &gt;&gt; 23 else v
+            return "OK" + CRLF
+        if c == "Z":
+            if p[0] &gt;= 32:
+                return "ERR" + CRLF
+            self.shift = p[0]
+            return "OK" + CRLF
+        if self.frame is None:                # 프레임 없는 start → 코어 error_o
+            return "ERR" + CRLF
+        x = self.frame
+        if c == "M":
+            hid, scores, cls = infer(x, self.w[1], self.b[1], self.w[2], self.b[2], self.shift)
+            body = "".join(h(v, 2) for v in hid) + " " + ",".join(h(s, 7) for s in scores)
+        else:
+            L = {"R": 0, "H": 1, "G": 2}[c]
+            xin = x[:SHAPE[L][1]]
+            for row in self.w[L]:
+                assert None not in row, "안 쓴 가중치"
+            scores = dense(xin, self.w[L], self.b[L])
+            cls = argmax_lowest(scores)
+            body = ",".join(h(s, 7) for s in scores)
+        self.view, self.cls, self.cls_ok = cls, cls, True
+        return c + "%X:" % cls + body + CRLF
+
+    def led(self):
+        onehot = (1 &lt;&lt; self.cls) if self.cls_ok else 0
+        return onehot | (int(self.frame is not None) &lt;&lt; 15) | (int(self.fshort) &lt;&lt; 14) | (int(self.flong) &lt;&lt; 13)
+
+
+def frame(px):
+    return [ord("F"), len(px)] + [v &amp; 0xFF for v in px]
+
+
+def W(L, c, a, v):
+    return [ord("W"), L, c, a, v &amp; 0xFF]
+
+
+def B(L, c, v):
+    return [ord("B"), L, c] + list((v &amp; 0xFFFFFF).to_bytes(3, "big"))
+
+
+def load(L, w, b):
+    """층 L 가중치·Bias 전체를 쓰는 명령 목록 (PC 도구 'load'와 같은 순서)."""
+    out = [W(L, c, i, v) for c, row in enumerate(w) for i, v in enumerate(row)]
+    return out + [B(L, c, v) for c, v in enumerate(b)]
+
+
+def demo_frames():
+    imgs, labs = images("test"), labels("test")
+    first = {}
+    for k, lab in enumerate(labs):
+        first.setdefault(lab, k)
+        if len(first) == 10:
+            break
+    return [(d, first[d], to8x8(imgs[first[d]])) for d in range(10)]
+
+
+def build_cases():
+    demo = demo_frames()
+    lin, mlp = MODEL["linear"], MODEL["mlp"]
+    cases = []                               # (서브젝트, 바이트, 설명)
+    add = lambda s, d, t="": cases.append((s, d, t))
+    d7, d0, d3 = demo[7], demo[0], demo[3]
+    add("3-1", [ord("S")])
+    add("3-1", frame(d7[2]), f"F 64 (시험 #{d7[1]}, 숫자 7)")
+    add("3-1", [ord("p"), 0]); add("3-1", [ord("p"), 27]); add("3-1", [ord("p"), 36])
+    add("3-1", frame(d7[2][:63]), "F 63 (짧은 프레임)")
+    add("3-1", [ord("p"), 0])
+    add("3-1", frame(d7[2] + [0]), "F 65 (긴 프레임)")
+    add("3-1", frame(d7[2]), f"F 64 (시험 #{d7[1]}, 숫자 7)")
+    for cmd in load(0, lin["w"], lin["b"]):
+        add("3-2", cmd, "load linear")
+    for d, k, px in (d7, d0, d3):
+        add("3-2", frame(px), f"F 64 (시험 #{k}, 숫자 {d})")
+        add("3-2", [ord("R")])
+    for cmd in load(1, mlp["w1"], mlp["b1"]) + load(2, mlp["w2"], mlp["b2"]):
+        add("3-3", cmd, "load mlp")
+    add("3-3", frame(d3[2]), f"F 64 (시험 #{d3[1]}, 숫자 3)")
+    add("3-3", [ord("H")]); add("3-3", [ord("G")])
+    add("3-4", [ord("Z"), mlp["shift"]])
+    for d, k, px in demo:
+        add("3-4", frame(px), f"F 64 (시험 #{k}, 숫자 {d})")
+        add("3-4", [ord("M")])
+    return cases
+
+
+def self_test():
+    b = Board(4)
+    assert b.step([ord("M")]) == "ERR\r\n"                       # 프레임 없음
+    assert b.step(frame([1] * 63)) == "F:SHORT\r\n" and b.frame is None
+    assert b.step(frame([1] * 64)) == "F:OK\r\n"
+    assert b.step([ord("p"), 5]) == "P:01\r\n"
+    assert b.step(W(2, 0, 8, 1)) == "ERR\r\n"                   # 8→10 층은 주소 0~7
+    assert b.step(B(1, 8, 0)) == "ERR\r\n"                      # 64→8 층은 class 0~7
+    assert Board(2).step(W(1, 0, 0, 1)) == "ERR\r\n"            # 3-2 빌드에는 층 0만
+    assert Board(1).step([ord("R")]) == "?\r\n"
+    assert h(-1, 7) == "FFFFFFF"
+    print("PYTHON_P03_SELF_TEST_PASS")
+
+
+def main():
+    self_test()
+    cases = build_cases()
+    for stage in range(1, 5):
+        b = Board(stage)
+        lines = ["# subject sw n_tx tx... n_rx rx... (16진수). p03_model.py가 만든다. 직접 고치지 않는다."]
+        labs = []
+        sel = [x for x in cases if int(x[0][2]) &lt;= stage]
+        if stage == 1:
+            sel = sel + [("3-1", [ord("R")], "")]                   # 3-1 빌드에는 코어가 없다 → '?'
+        for subj, data, text in sel:
+            resp = b.step(data).encode()
+            lines.append(" ".join([subj, "0", "%x" % len(data)] + ["%02x" % v for v in data]
+                                  + ["%x" % len(resp)] + ["%02x" % v for v in resp]))
+            labs.append(text)
+        lines.append("END %04x" % b.led())
+        CASES_OUT.with_name(CASES_OUT.name % stage).write_text("\n".join(lines) + "\n", encoding="utf-8")
+        LABELS_OUT.with_name(LABELS_OUT.name % stage).write_text("\n".join(labs) + "\n", encoding="utf-8")
+        print("PYTHON_P03_VECTORS stage=%d cases=%d final_led=0x%04X" % (stage, len(sel), b.led()))
+    b = Board(4)
+    hits = 0
+    for subj, data, text in cases:
+        r = b.step(data)
+        if subj == "3-4" and r.startswith("M"):
+            d = int(prev.split("숫자 ")[1].rstrip(")"))
+            hits += int(r[1], 16) == d
+            print(f"PYTHON_P03_DEMO {prev} → 클래스 {r[1]}")
+        prev = text
+    print(f"PYTHON_P03_DEMO_HITS {hits}/10 (MLP, t10k 숫자별 첫 그림)")
+    for k in ("linear", "mlp"):
+        print(f"PYTHON_P03_MODEL {k} int8_test_acc={MODEL[k]['int8_test_acc']} float_test_acc={MODEL[k]['float_test_acc']}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())</code></pre>
+      </div>
+      </details>
+    </section>
+    <section class="section" id="s_report">
+      <h2><span class="num">08</span> 누적 보고·인계</h2>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>서브젝트</th><th>구 장</th><th>추가 RTL</th><th>시뮬레이션 (단독 + 장 Top)</th><th>합성 (장 Top STAGE)</th><th>보드</th></tr></thead>
+        <tbody><tr><td>3-1</td><td>13장</td><td><code>p3_frame64_buffer.v</code></td><td>통과</td><td>⚠ 미검증</td><td>⚠ 미검증</td></tr><tr><td>3-2</td><td>14장</td><td><code>p3_group10_core.v</code></td><td>통과</td><td>⚠ 미검증</td><td>⚠ 미검증</td></tr><tr><td>3-3</td><td>15장</td><td></td><td>통과</td><td>⚠ 미검증</td><td>⚠ 미검증</td></tr><tr><td>3-4</td><td>16장</td><td><code>p3_relu_requant.v</code><br><code>p3_mlp_64_8_10.v</code></td><td>통과</td><td>⚠ 미검증</td><td>⚠ 미검증</td></tr></tbody>
+      </table></div>
+      <p>※ = 구 장 단독 실습 파일이라 장 Top 빌드(<code>p03/vivado/build_p03.tcl</code>)에는 들어가지 않음.</p>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>다음 장으로 넘기는 파일</th><th>사용처</th></tr></thead>
+        <tbody><tr><td><code>part03/ch14/rtl/p3_group10_core.v</code></td><td>4장 784 가속기(구 17장 p3_tile784_10)가 64원소 타일 코어로 그대로 쓴다 (VS Code 판)</td></tr><tr><td><code>part03/ch13/rtl/p3_frame64_buffer.v</code></td><td>4장 구 17·18장 시뮬레이션이 타일 입력 연결에 쓴다 (VS Code 판 run_sim.sh)</td></tr><tr><td><code>p03/model/train_p03.py · p03/host/p03_send.py</code></td><td>4장 784 입력 모델 학습·전송으로 확장 (4장 전환 때)</td></tr></tbody>
+      </table></div>
+      <p>장 게이트 (<code>p03/validation/</code> 증거 기준 자동 표시):</p>
+      <div class="gate-row">
+        <div class="gate pass">
+          <b>HTML_PASS</b>
+          <span>v01 · 생성기</span>
+        </div>
+        <div class="gate pass">
+          <b>HOST_MODEL_PASS</b>
+          <span>PYTHON_P03_SELF_TEST_PASS</span>
+        </div>
+        <div class="gate pass">
+          <b>RTL_SIM_PASS</b>
+          <span>장 Top STAGE 1~4 · Icarus Verilog 12.0 · 2026-11-19</span>
+        </div>
+        <div class="gate todo">
+          <b>SYNTH_TIMING_PASS</b>
+          <span>⚠ 미검증 · VS Code Vivado 실행 대기 (build_p03.tcl)</span>
+        </div>
+        <div class="gate todo">
+          <b>BOARD_PASS</b>
+          <span>⚠ 미실시 · 실물 보드 확인 대기</span>
+        </div>
+      </div>
+    </section>
+    <div class="chapter-links" id="chapter-links"></div>
+  </main>
+</div>
+<script>
+window.COURSE={
+ "title": "Basys3 소형 NPU 실습 (프로젝트판)",
+ "chapters": [
+  {
+   "id": "p01",
+   "number": 1,
+   "title": "UART 계산기",
+   "file": "p01_uart_calc_v01.html"
+  },
+  {
+   "id": "p02",
+   "number": 2,
+   "title": "4뉴런 NPU 보드",
+   "file": "p02_npu4_board_v01.html"
+  },
+  {
+   "id": "p03",
+   "number": 3,
+   "title": "8×8 MNIST (CPU 없음)",
+   "file": "p03_mnist8x8_v01.html"
+  }
+ ]
+};
+</script>
+<script defer src="assets/education/site.js"></script>
+</body>
+</html>

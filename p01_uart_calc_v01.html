@@ -48,6 +48,7 @@
 .steps .st{font-size:13px;white-space:nowrap}
 .verdict{border:1px solid #c9c4ea;border-radius:6px;padding:8px 12px;background:#faf9ff;margin:10px 0}
 details.full{margin:10px 0}
+td.nw,th.nw{white-space:nowrap}
 details.full>summary{cursor:pointer;font-weight:600}
 @media (max-width:860px){.road{grid-template-columns:repeat(4,minmax(0,1fr))}.steps li{grid-template-columns:3.6em 1fr}.steps .st{grid-column:2}}
 </style>
@@ -70,7 +71,7 @@ details.full>summary{cursor:pointer;font-weight:600}
       <h2><span class="num">00</span> 장 목표·진행 위치</h2>
       <p><b>장 시연 (보드):</b> PC가 보낸 두 수의 곱이 누산되어 UART·LED·7세그먼트로 돌아오고, sw로 코어를 바꿔도 값은 같고 응답 지연만 달라진다.</p>
       <p>편성: 1일 · 서브젝트 4개 · 서브젝트마다 보드 확인 1번 + 장 시연.</p>
-      <ol class="road" aria-label="전체 장에서 지금 위치"><li class="now" aria-current="step"><b>1장</b>UART 계산기</li><li class=""><a href="p02_npu4_board_v01.html"><b>2장</b>4뉴런 NPU 보드</a></li><li class="plan"><b>3장</b>8×8 MNIST (CPU 없음)</li><li class="plan"><b>4장</b>784 가속기 설계 공간</li><li class="plan"><b>5장</b>MicroBlaze V SoC</li><li class="plan"><b>6장</b>응용 확장</li><li class="plan"><b>7장</b>종합과제</li></ol>
+      <ol class="road" aria-label="전체 장에서 지금 위치"><li class="now" aria-current="step"><b>1장</b>UART 계산기</li><li class=""><a href="p02_npu4_board_v01.html"><b>2장</b>4뉴런 NPU 보드</a></li><li class=""><a href="p03_mnist8x8_v01.html"><b>3장</b>8×8 MNIST (CPU 없음)</a></li><li class="plan"><b>4장</b>784 가속기 설계 공간</li><li class="plan"><b>5장</b>MicroBlaze V SoC</li><li class="plan"><b>6장</b>응용 확장</li><li class="plan"><b>7장</b>종합과제</li></ol>
       <ol class="steps" aria-label="이 장의 서브젝트와 진행 상태"><li class=""><span class="code">1-1</span><span><a href="#s1_1">UART 에코</a> <small>(구 00장 · 오전)</small><br>보낸 글자가 그대로 돌아오고, <code>S</code>에는 준비 신호 <code>I</code>가 온다. MAC 코어가 아직 없어 <code>M</code>도 에코.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">1-2</span><span><a href="#s1_2">MAC 누산</a> <small>(구 01장 · 오전)</small><br><code>M 3 4</code>를 두 번 보내면 12 → 24(0x18)로 누산되고, LED·7세그먼트에 <code>0018</code>이 보인다. 지연 <code>L:1</code>.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">1-3</span><span><a href="#s1_3">DSP48E1 곱셈</a> <small>(구 02장 · 오후)</small><br>sw0을 올리면 DSP 코어(<code>L:2</code>), 내리면 1-2 코어(<code>L:1</code>). 두 코어의 누산값은 같다. 보고서에서 DSP48E1이 늘어난다.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">1-4</span><span><a href="#s1_4">MAC 파이프라인</a> <small>(구 03장 · 오후)</small><br>sw1을 올리면 파이프라인 코어(<code>L:2</code>). 음수 경계값 −32768×32767도 40비트 누산이 맞고, 마지막 LED·7세그먼트는 <code>7D45</code>.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class="demo"><span class="code">시연</span><span><a href="#demo">장 시연</a><br>PC가 보낸 두 수의 곱이 누산되어 UART·LED·7세그먼트로 돌아오고, sw로 코어를 바꿔도 값은 같고 응답 지연만 달라진다.</span><span class="st">보드 ⚠ 미실시</span></li></ol>
     </section>
     <section class="section" id="s01">
@@ -1985,10 +1986,11 @@ if __name__ == "__main__":
       <h2><span class="num">07</span> 장 시연</h2>
       <p>STAGE=4 비트스트림 하나로 모든 서브젝트를 차례로 보여 줍니다. 아래 응답은 장 Top 시뮬레이션이 바이트 단위로 대조한 값입니다.</p>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
-        <thead><tr><th>서브젝트</th><th>sw[1:0]</th><th>PC 명령</th><th>보드 응답</th></tr></thead>
-        <tbody><tr><td>1-1</td><td class="nw"><code>00</code></td><td class="nw"><code>Z</code></td><td class="nw"><code>Z</code></td></tr><tr><td>1-1</td><td class="nw"><code>00</code></td><td class="nw"><code>5</code></td><td class="nw"><code>5</code></td></tr><tr><td>1-1</td><td class="nw"><code>00</code></td><td class="nw"><code>S</code></td><td class="nw"><code>I\r\n</code></td></tr><tr><td>1-2</td><td class="nw"><code>00</code></td><td class="nw"><code>C</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>1-2</td><td class="nw"><code>00</code></td><td class="nw"><code>M 3 4</code></td><td class="nw"><code>A:000000000C L:1\r\n</code></td></tr><tr><td>1-2</td><td class="nw"><code>00</code></td><td class="nw"><code>M 3 4</code></td><td class="nw"><code>A:0000000018 L:1\r\n</code></td></tr><tr><td>1-3</td><td class="nw"><code>00</code></td><td class="nw"><code>C</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>1-3</td><td class="nw"><code>01</code></td><td class="nw"><code>M 3 4</code></td><td class="nw"><code>A:000000000C L:2\r\n</code></td></tr><tr><td>1-3</td><td class="nw"><code>00</code></td><td class="nw"><code>M 3 4</code></td><td class="nw"><code>A:0000000018 L:1\r\n</code></td></tr><tr><td>1-3</td><td class="nw"><code>01</code></td><td class="nw"><code>M -2 5</code></td><td class="nw"><code>A:000000000E L:2\r\n</code></td></tr><tr><td>1-4</td><td class="nw"><code>00</code></td><td class="nw"><code>C</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>1-4</td><td class="nw"><code>10</code></td><td class="nw"><code>M -32768 32767</code></td><td class="nw"><code>A:FFC0008000 L:2\r\n</code></td></tr><tr><td>1-4</td><td class="nw"><code>10</code></td><td class="nw"><code>M 100 -7</code></td><td class="nw"><code>A:FFC0007D44 L:2\r\n</code></td></tr><tr><td>1-4</td><td class="nw"><code>00</code></td><td class="nw"><code>M 32767 32767</code></td><td class="nw"><code>A:FFFFFF7D45 L:1\r\n</code></td></tr></tbody>
+        <thead><tr><th class="nw">서브젝트</th><th>sw[1:0]</th><th>PC 명령</th><th>보드 응답</th></tr></thead>
+        <tbody><tr><td class="nw">1-1</td><td class="nw"><code>00</code></td><td class="nw"><code>Z</code></td><td class="nw"><code>Z</code></td></tr><tr><td class="nw">1-1</td><td class="nw"><code>00</code></td><td class="nw"><code>5</code></td><td class="nw"><code>5</code></td></tr><tr><td class="nw">1-1</td><td class="nw"><code>00</code></td><td class="nw"><code>S</code></td><td class="nw"><code>I\r\n</code></td></tr><tr><td class="nw">1-2</td><td class="nw"><code>00</code></td><td class="nw"><code>C</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">1-2</td><td class="nw"><code>00</code></td><td class="nw"><code>M 3 4</code></td><td class="nw"><code>A:000000000C L:1\r\n</code></td></tr><tr><td class="nw">1-2</td><td class="nw"><code>00</code></td><td class="nw"><code>M 3 4</code></td><td class="nw"><code>A:0000000018 L:1\r\n</code></td></tr><tr><td class="nw">1-3</td><td class="nw"><code>00</code></td><td class="nw"><code>C</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">1-3</td><td class="nw"><code>01</code></td><td class="nw"><code>M 3 4</code></td><td class="nw"><code>A:000000000C L:2\r\n</code></td></tr><tr><td class="nw">1-3</td><td class="nw"><code>00</code></td><td class="nw"><code>M 3 4</code></td><td class="nw"><code>A:0000000018 L:1\r\n</code></td></tr><tr><td class="nw">1-3</td><td class="nw"><code>01</code></td><td class="nw"><code>M -2 5</code></td><td class="nw"><code>A:000000000E L:2\r\n</code></td></tr><tr><td class="nw">1-4</td><td class="nw"><code>00</code></td><td class="nw"><code>C</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">1-4</td><td class="nw"><code>10</code></td><td class="nw"><code>M -32768 32767</code></td><td class="nw"><code>A:FFC0008000 L:2\r\n</code></td></tr><tr><td class="nw">1-4</td><td class="nw"><code>10</code></td><td class="nw"><code>M 100 -7</code></td><td class="nw"><code>A:FFC0007D44 L:2\r\n</code></td></tr><tr><td class="nw">1-4</td><td class="nw"><code>00</code></td><td class="nw"><code>M 32767 32767</code></td><td class="nw"><code>A:FFFFFF7D45 L:1\r\n</code></td></tr></tbody>
       </table></div>
       <p>끝난 뒤 LED: <code>0x7D45</code> (누산값 아래 16비트, 7세그먼트도 같은 값 16진수 4자리). btnC를 누르면 처음 상태로 돌아갑니다.</p>
+
       <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 장 Top 시뮬레이션 (STAGE 1~4)</span></div>
         <pre tabindex="0"><code>bash p01/scripts/run_sim.sh</code></pre></div>
       <div class="codeblock"><div class="codebar"><span>기대 출력 (Icarus Verilog 12.0 · 2026-11-19 · 출처 p01/validation/rtl_sim_20261119.log)</span></div>
@@ -2283,6 +2285,12 @@ window.COURSE={
    "number": 2,
    "title": "4뉴런 NPU 보드",
    "file": "p02_npu4_board_v01.html"
+  },
+  {
+   "id": "p03",
+   "number": 3,
+   "title": "8×8 MNIST (CPU 없음)",
+   "file": "p03_mnist8x8_v01.html"
   }
  ]
 };
