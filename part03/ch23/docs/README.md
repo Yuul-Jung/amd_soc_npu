@@ -3,7 +3,7 @@
 ## 1. 측정 방법
 
 ```text
-basys3_soc11_top (21장 SoC, 변경 없음)
+basys3_soc21_top (21장 SoC, (변경) 안 A 동결 주소맵 — 클록 수는 이전과 같음)
   MicroBlaze V ── bench.elf ──┬─ cpu_infer()   : 784×10 MAC 정수 추론(22장 C, 같은 데이터)
                               ├─ npu_set_bias(): Bias 10개 적재(모델당 1회)
                               └─ npu_infer()   : 13타일 W·X 레지스터 쓰기 + TILE_GO + 폴링 + 점수 읽기
