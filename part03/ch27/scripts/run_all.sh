@@ -37,7 +37,7 @@ step package_ip_ch20 fpga bash "$part03/ch20/scripts/package_ip.sh"
 step soc_build_ch21 fpga bash "$part03/ch21/scripts/build_soc.sh"
 step vitis_ch22 fpga bash "$part03/ch22/scripts/build_vitis.sh"
 step synth_ch26 fpga bash "$part03/ch26/scripts/run_synth.sh"
-step soc_build_ch28 fpga bash "$part03/ch28/scripts/build_soc.sh"
+step sw_build_ch28 fpga bash "$part03/ch28/scripts/build_sw.sh"   # (변경) 안 A: 21장 XSA로 ELF만
 step synth_ch29 fpga bash "$part03/ch29/scripts/run_synth.sh"
 step sw_build_ch29 fpga bash "$part03/ch29/scripts/build_sw.sh"
 step synth_ch30 fpga bash "$part03/ch30/scripts/run_synth.sh"

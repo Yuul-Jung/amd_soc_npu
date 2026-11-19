@@ -11,7 +11,7 @@ PC의 손글씨 이미지 → Python 전처리 → UART 프레임 → MicroBlaze
 | 전처리 | 28×28 8비트 회색조, MNIST 극성(흰 글씨·검은 바탕). `x_q = round_half_away(pixel·127/255)` ∈ 0..127 (18장과 같은 규칙). 다른 크기는 거부(임의 축소 없음), `--invert`로 극성만 뒤집을 수 있음 |
 | 역할 분담 | MicroBlaze V: 프레임 수신·검사, NPU 레지스터 적재·완료 확인, 결과 전송·표시. NPU RTL: 10개 점수의 MAC 전부. CPU 정수 추론은 대조용으로만 실행 |
 | 표시 규칙 | Class는 NPU DONE·rc=0·MODEL_ID 일치·NPU 점수=CPU 점수일 때만 표시. 아니면 오류 표시 |
-| FND 하드웨어 | 21장 SoC 복제본에 AXI GPIO 1(32비트) + `p3_fnd_scan`(BD 모듈 참조) 추가. 21장 결과물·제1부 원본은 그대로 |
+| 표시 하드웨어 | (변경) 안 A: 21장 SoC의 표준 7세그먼트 IP `ip06_seg7`(0x4006_0000)를 그대로 쓴다. 28장 BD(AXI GPIO 1 + `p3_fnd_scan`)는 폐지, Bitstream·XSA는 21장 것 |
 
 ## 2. UART 규약 (115200 8N1)
 
@@ -38,6 +38,8 @@ PC → 보드 프레임: `'P' '3' CMD PAYLOAD CRC16` — CRC16/CCITT-FALSE(0x102
 
 FND 워드(AXI GPIO 1): `[15:0]` 자리별 nibble(자리 0 = 오른쪽), `[19:16]` 자리 켜짐, `[23:20]` 점. `p3_fnd_scan`이 자리당 2^17클록(1.31 ms)씩 돌아가며 Low 활성으로 구동한다.
 
+(변경) 안 A: 응용·호스트는 위 표시 워드를 그대로 쓰고, 보드 I/O(`sw/digit_io_xil.c`)가 `common/sw/p3_seg7.h`로 SEG7 레지스터(VALUE = `[15:0]`, MODE BLANK = 꺼진 자리, DP = `[23:20]`)에 옮겨 쓴다. 숫자 모양·자리 순서·Low 활성은 `p3_fnd_scan`과 같고, 자리 전환은 자리당 2^16클록(0.66 ms)이다.
+
 ## 4. 파일
 
 | 파일 | 내용 |
@@ -48,11 +50,10 @@ FND 워드(AXI GPIO 1): `[15:0]` 자리별 nibble(자리 0 = 오른쪽), `[19:16
 | `host/p3_digit_host.py` | PC 호스트: 이미지·MNIST·표본 → 프레임 → 보드(`--port`) 또는 협동 시뮬레이션(`--cosim`) → CSV·UART 원문 로그, `--error-suite` |
 | `sw/digit_app.c`·`digit_app.h`·`digit_io.h`·`digit_io_xil.c`·`main.c` | MicroBlaze V 펌웨어(22장 드라이버 재사용). 플랫폼 경계는 `digit_io.h` 세 함수 |
 | `host/digit_io_host.c`·`digit_cosim_main.c` | 같은 펌웨어의 PC 빌드(표준 입출력 = UART, 22장 FIFO 브리지 = NPU RTL) |
-| `rtl/p3_fnd_scan.v`·`rtl/basys3_soc28_top.v` | FND 스캔, 28장 Top |
-| `tb/tb_p3_fnd_scan.sv`·`tb/tb_soc28_uart.sv` | FND 핀 시험, SoC 전체 UART 시험 |
-| `constraints/basys3_soc28.xdc` | 21장 활성 줄 + seg/dp/an 12핀 |
-| `synth/soc28_bd.tcl`·`synth/soc28_uart_sim.tcl` | BD 변경·구현·XSA, SoC xsim |
-| `scripts/run_sim.sh`·`build_soc.sh`·`run_soc_sim.sh` | PC 검증, Vivado+Vitis 빌드, SoC xsim |
+| `rtl/p3_fnd_scan.v` | FND 스캔 RTL(안 A 뒤로는 RTL 시험용으로만 남김, SoC에는 넣지 않음) |
+| `tb/tb_p3_fnd_scan.sv`·`tb/tb_soc28_uart.sv` | FND 핀 시험, SoC 전체 UART 시험(안 A: `basys3_soc21_top`) |
+| `synth/soc28_uart_sim.tcl` | SoC xsim(21장 SoC 복제본 + 28장 ELF) |
+| `scripts/run_sim.sh`·`build_sw.sh`·`run_soc_sim.sh` | PC 검증, Vitis ELF(21장 XSA), SoC xsim |
 
 `ch22/vitis/vitis_build.py`는 플랫폼 이름을 `P3_PLAT_NAME`으로 바꿀 수 있게만 했다(기본값 그대로, 22·23장 동작 동일).
 
@@ -60,7 +61,7 @@ FND 워드(AXI GPIO 1): `[15:0]` 자리별 nibble(자리 0 = 오른쪽), `[19:16
 
 ```bash
 bash part03/ch28/scripts/run_sim.sh                                   # PC: 기준모델·FND RTL·종단간 협동 시뮬레이션·변이 (약 1분)
-VIVADO_SETTINGS=… VITIS_SETTINGS=… bash part03/ch28/scripts/build_soc.sh   # 21장 build 필요, 약 25분
+VITIS_SETTINGS=… bash part03/ch28/scripts/build_sw.sh                    # 21장 build 필요, ELF만(약 1분)
 VIVADO_SETTINGS=… bash part03/ch28/scripts/run_soc_sim.sh                 # SoC xsim, 수 시간
 # 보드(사용자와 함께): 비트스트림·ELF 적재 후
 python3 part03/ch28/host/p3_digit_host.py --port /dev/ttyUSB1 --error-suite \
@@ -79,9 +80,9 @@ python3 part03/ch28/host/p3_digit_host.py --port /dev/ttyUSB1 --images my_digit.
 | 정확도(표본 22장, 두 근거 따로) | PC 골든 19/22, RTL 장치 19/22. 틀린 3장(index 8: 5→6, 33: 4→0, 63: 3→2)은 골든도 같은 답 → `MODEL_MISCLASS`(모델 한계, 하드웨어 불일치 아님). 18장 t10k 전체 INT8 정확도 92.56%와는 표본 구성이 달라 비교하지 않는다 |
 | 오류 시험 11종 | CRC 1비트 반전, 모델 ID 불일치, 화소 범위, 미정의 명령, 잡음 뒤 잘못된 명령(junk=5), 잡음 뒤 정상 프레임(junk=4), 짧은 프레임 시간 초과, 시간 초과 뒤 정상, **가중치 미적재(NPU ERR_CODE 9) 후 ABORT 복구**, 복구 뒤 정상, 식별 — 모두 기대 응답·표시 |
 | 펌웨어 변이 8종 | 표시 class·오류 코드 표시·CRC 검사·범위 검사·모델 ID 검사·자체 시험 복구·잡음 계수·재동기 제거 → **8/8 검출** |
-| Vivado 구현 | WNS +0.420 ns, WHS +0.020 ns, Bitstream·XSA (`validation/soc_summary.md`) |
-| Vitis ELF | 32,912 B, xparameters: NPU 0x44A0_0000, GPIO1 0x4001_0000, UART 0x4060_0000 |
-| SoC 전체 xsim | **PASS 15/15** — 실제 MicroBlaze V + 보드용 ELF(9179c509c9e7dbaa) + UART 비트 단위 프레임. 부팅 29.9 ms, 이미지 40 응답 완료 155.9 ms(시뮬레이션 시간), 점수 10개 골든 일치, FND·LED 핀 일치. 실행 시간 2시간 48분(2026-11-19). 1차 판정은 11/15 FAIL이었는데, `xil_printf`가 16진수를 대문자로 찍는 것을 검사기가 소문자 문자열로 비교했기 때문이다. 검사기를 정수 비교로 고치고 같은 기록으로 다시 판정했다 (`validation/soc_sim_20261119.log`, `soc_sim_20261119_recheck.log`) |
+| Vivado 구현 | (변경) 안 A: 28장 전용 구현 없음. 21장 Bitstream·XSA 사용(`ch21/validation/soc_summary.md`, WNS +0.374 ns) |
+| Vitis ELF | 36,276 B(스택 4 KB), SHA-256 077ca88b0cf043a9, `ELF_MEM_PASS`, xparameters: NPU 0x44A0_0000, SEG7 0x4006_0000, UART 0x4002_0000 (`validation/build_sw.log`) |
+| SoC 전체 xsim | **안 A 하드웨어로 재실행 중(NOT_COMPLETE)** — `validation/soc_sim_mapA_20261119.log`. 이전 하드웨어(AXI GPIO 1 + p3_fnd_scan)에서는 PASS 15/15였다(`validation/soc_sim_20261119*.log`) |
 | **Basys3 실물** | **NOT_RUN** — `ch27/docs/BOARD_CHECKLIST.md` 28장 항목, 사용자와 함께 |
 
 ## 7. 알려진 한계

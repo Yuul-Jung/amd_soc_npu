@@ -12,7 +12,8 @@ module tb_soc28_uart;
     wire [6:0] seg;
     wire [3:0] an;
     always #5 clk = ~clk;   // Basys3 W5 100 MHz
-    basys3_soc28_top dut(.clk(clk), .btnC(btnC), .sw(sw), .led(led), .RsRx(rx), .RsTx(tx),
+    // (변경) 안 A: 21장 SoC Top(표준 7세그먼트 IP, BTN GPIO). 버튼은 누르지 않는다.
+    basys3_soc21_top dut(.clk(clk), .btnC(btnC), .btn(4'b0000), .sw(sw), .led(led), .RsRx(rx), .RsTx(tx),
                          .seg(seg), .dp(dp), .an(an));
 
     integer of, lines = 0, nbytes = 0, i, k;

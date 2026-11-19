@@ -1,9 +1,10 @@
 /* (추가) 28장: MicroBlaze V 플랫폼 경계. AXI UART Lite(stdin/stdout과 같은 장치) 폴링 수신,
- * AXI GPIO 0 채널 1 = LED[15:0], AXI GPIO 1 채널 1 = FND 표시 워드(28장 SoC에서 추가, Top의 p3_fnd_scan이 구동).
+ * AXI GPIO 0 채널 1 = LED[15:0], 표시 워드 → 표준 7세그먼트 IP(ip06_seg7). (변경) 안 A: 21장 SoC로 옮기며 AXI GPIO 1·p3_fnd_scan을 대체.
  */
 #include "xparameters.h"
 #include "xil_io.h"
 #include "xuartlite_l.h"
+#include "p3_seg7.h"
 #include "digit_io.h"
 
 #ifndef DIGIT_RX_POLLS
@@ -11,7 +12,6 @@
 #endif
 #define UART_BASE XPAR_AXI_UARTLITE_0_BASEADDR
 #define LED_GPIO  XPAR_AXI_GPIO_0_BASEADDR
-#define FND_GPIO  XPAR_AXI_GPIO_1_BASEADDR
 
 int dio_getc(int wait_forever)
 {
@@ -25,7 +25,7 @@ int dio_getc(int wait_forever)
 
 void dio_display(uint32_t fnd_word, uint32_t led)
 {
-    Xil_Out32(FND_GPIO, fnd_word);
+    p3_seg7_write(p3_seg7_from_fnd_word(fnd_word));   /* (변경) 안 A: 표준 7세그먼트 IP */
     Xil_Out32(LED_GPIO, led);
 }
 
