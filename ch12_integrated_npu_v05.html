@@ -123,7 +123,7 @@ python3 --version</code></pre></div>
       <h2><span class="num">03</span>RTL 작성</h2>
       <p>아래 파일을 경로 그대로 만들고 전체 코드를 입력합니다.</p>
       <div class="codeblock">
-        <div class="codebar"><span>mini_npu/rtl/npu_dsp_mac_lane.v · verilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <div class="codebar"><span>mini_npu/rtl/npu_dsp_mac_lane.v · verilog · 원본 · RTL_SIM 통과 2026-11-19</span></div>
         <pre tabindex="0"><code class="language-verilog">// (추가) 02장 등록 DSP 곱을 다음 에지에 누산한다. 곱을 다시 수행하지 않는다.
 module npu_dsp_mac_lane #(
     parameter integer DATA_WIDTH=16,
@@ -151,7 +151,7 @@ module npu_dsp_mac_lane #(
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>mini_npu/rtl/npu_engine4.v · verilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <div class="codebar"><span>mini_npu/rtl/npu_engine4.v · verilog · 원본 · RTL_SIM 통과 2026-11-19</span></div>
         <pre tabindex="0"><code class="language-verilog">// (추가) 04장 BRAM 구조 + 02장 DSP 레지스터 곱 + 4개 누산기 통합.
 // 12장 최종 경로는 기존 ch07 벡터 닷의 곱 경로를 중복 사용하지 않는다.
 // 메모리 쓰기는 IDLE에서만 허용하며 Reset 시 유효 비트만 지운다.
@@ -168,7 +168,7 @@ module npu_engine4(
     output reg [1:0] class_o,
     output reg [163:0] scores_o
 );
-    localparam [2:0] IDLE=0,READ=1,ISSUE=2,DRAIN1=3,DRAIN2=4;
+    localparam [2:0] IDLE=0,READ=1,ISSUE=2,DRAIN1=3,DRAIN2=4,CMP1=5,CMP2=6;
     reg [2:0] state;
     reg [6:0] length_q;
     reg [5:0] index_q;
@@ -210,19 +210,18 @@ module npu_engine4(
     wire signed [40:0] score1=$signed({acc1[39],acc1})+$signed({bias1[39],bias1});
     wire signed [40:0] score2=$signed({acc2[39],acc2})+$signed({bias2[39],bias2});
     wire signed [40:0] score3=$signed({acc3[39],acc3})+$signed({bias3[39],bias3});
-    reg [1:0] best_class;
-    reg signed [40:0] best_score;
-    always @*begin
-        best_class=0;best_score=score0;
-        if(score1&gt;best_score)begin best_score=score1;best_class=1;end
-        if(score2&gt;best_score)begin best_score=score2;best_class=2;end
-        if(score3&gt;best_score)begin best_score=score3;best_class=3;end
-    end
+    // (수정 2026-11-19) argmax를 두 클록 토너먼트로 나눈다. 종전에는 누산값 + Bias 덧셈과 41비트 비교 3번을
+    // 한 클록에 직렬로 해 2장 누적 Top(STAGE 8)에서 WNS -1.952 ns (28단). 동점 규칙(앞 번호)은 그대로.
+    //   DRAIN2: 점수 등록 → CMP1: (0,1)·(2,3) 쌍의 승자 등록 → CMP2: 두 승자 비교, class_o·done
+    wire signed [40:0] s0=scores_o[40:0],s1=scores_o[81:41],s2=scores_o[122:82],s3=scores_o[163:123];
+    reg [1:0] w01_q,w23_q;
+    reg signed [40:0] v01_q,v23_q;
 
     always @(posedge clk)begin
         if(!resetn)begin
             state&lt;=IDLE;busy_o&lt;=0;done_o&lt;=0;error_o&lt;=0;
             class_o&lt;=0;scores_o&lt;=0;length_q&lt;=0;index_q&lt;=0;
+            w01_q&lt;=0;w23_q&lt;=0;v01_q&lt;=0;v23_q&lt;=0;
             x_seen&lt;=0;w0_seen&lt;=0;w1_seen&lt;=0;w2_seen&lt;=0;w3_seen&lt;=0;
             bias0&lt;=0;bias1&lt;=0;bias2&lt;=0;bias3&lt;=0;
             x_sample&lt;=0;w_sample0&lt;=0;w_sample1&lt;=0;w_sample2&lt;=0;w_sample3&lt;=0;
@@ -265,7 +264,16 @@ module npu_engine4(
                 DRAIN1:state&lt;=DRAIN2;
                 DRAIN2:begin
                     scores_o&lt;={score3,score2,score1,score0};
-                    class_o&lt;=best_class;done_o&lt;=1;busy_o&lt;=0;state&lt;=IDLE;
+                    state&lt;=CMP1;
+                end
+                CMP1:begin
+                    if(s1&gt;s0)begin w01_q&lt;=1;v01_q&lt;=s1;end else begin w01_q&lt;=0;v01_q&lt;=s0;end
+                    if(s3&gt;s2)begin w23_q&lt;=3;v23_q&lt;=s3;end else begin w23_q&lt;=2;v23_q&lt;=s2;end
+                    state&lt;=CMP2;
+                end
+                CMP2:begin
+                    class_o&lt;=(v23_q&gt;v01_q) ? w23_q : w01_q;
+                    done_o&lt;=1;busy_o&lt;=0;state&lt;=IDLE;
                 end
                 default:begin state&lt;=IDLE;busy_o&lt;=0;error_o&lt;=1;end
             endcase
@@ -274,7 +282,7 @@ module npu_engine4(
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>mini_npu/rtl/npu_display_controller.v · verilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <div class="codebar"><span>mini_npu/rtl/npu_display_controller.v · verilog · 원본 · RTL_SIM 통과 2026-11-19</span></div>
         <pre tabindex="0"><code class="language-verilog">// (추가) FND와 LED 표현 정책은 Top이 아닌 Controller에서 처리.
 module npu_display_controller(
     input wire clk,resetn,
@@ -325,7 +333,7 @@ module npu_display_controller(
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>mini_npu/rtl/npu_reset_controller.v · verilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <div class="codebar"><span>mini_npu/rtl/npu_reset_controller.v · verilog · 원본 · RTL_SIM 통과 2026-11-19</span></div>
         <pre tabindex="0"><code class="language-verilog">// (추가) Basys3 btnC 비동기 Assertion, 동기 Release Reset.
 module npu_reset_controller(
     input wire clk,btnC,
@@ -339,7 +347,7 @@ module npu_reset_controller(
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>mini_npu/rtl/basys3_npu_top.v · verilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <div class="codebar"><span>mini_npu/rtl/basys3_npu_top.v · verilog · 원본 · RTL_SIM 통과 2026-11-19</span></div>
         <pre tabindex="0"><code class="language-verilog">// (추가) 12장 Basys3 Shell: 전원·UART·코어·Controller·FND 모듈 연결만 담당.
 module basys3_npu_top(
     input wire clk,btnC,uart_rxd,
@@ -550,7 +558,7 @@ echo "TIMING_SIM_PASS ch12 basys3_npu_top post-route SDF(slow) classes=6 model_e
       <h2><span class="num">04</span>테스트벤치·기준 모델 작성</h2>
       <p>테스트벤치는 출력을 자동 판정합니다. 실제 UART 비트파형을 TB가 만들고 TX를 다시 복조해 판정합니다.</p>
       <div class="codeblock">
-        <div class="codebar"><span>mini_npu/tb/tb_npu_engine4.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <div class="codebar"><span>mini_npu/tb/tb_npu_engine4.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-19</span></div>
         <pre tabindex="0"><code class="language-systemverilog">// (추가) 실제 DSP 등록 곱→BRAM→4PE 누적 NPU 정수 독립 검증.
 `timescale 1ns/1ps
 module tb_npu_engine4;
@@ -625,7 +633,7 @@ module tb_npu_engine4;
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>mini_npu/tb/tb_uart_core_fifo.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <div class="codebar"><span>mini_npu/tb/tb_uart_core_fifo.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-19</span></div>
         <pre tabindex="0"><code class="language-systemverilog">// (추가) uart_core 16바이트 RX/TX FIFO 적대적 경계 시험.
 // Empty/Full, 동시 Push/Pop, Ready/Valid, Reset 초기화, 연속 수신 손실, Overrun, Framing, 전송 중단.
 // 실제 직렬 비트파형으로 RX를 구동하고 TX 핀을 독립 uart_rx로 복조해 순서·값을 비교한다.
@@ -939,7 +947,7 @@ module tb_uart_core_fifo;
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>mini_npu/tb/tb_npu_uart_adversarial.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <div class="codebar"><span>mini_npu/tb/tb_npu_uart_adversarial.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-19</span></div>
         <pre tabindex="0"><code class="language-systemverilog">// (추가) 11·12장 통합 Top 적대적 UART 시험(실제 RX 핀 구동, TX 핀 복조).
 // 잘못된 명령·주소·길이, CR/LF 무시, 응답 전송 중 다음 명령 수신(FIFO 버퍼링),
 // 연속 명령 폭주, 응답 전송 중 Reset, 명령 중단(Timeout 부재 관측), Framing error.
@@ -1136,7 +1144,7 @@ endmodule</code></pre>
       <h2><span class="num">05</span>시뮬레이션 실행</h2>
       <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 저장소 루트에서 실행</span></div>
         <pre tabindex="0"><code>bash ch12/scripts/run_sim.sh   # 00~12장 전체 회귀 시뮬레이션 (단계별 결과 표 출력)</code></pre></div>
-      <p>기대 출력 (Icarus Verilog 12.0 · 2026-11-18 실제 실행 로그 발췌, 출처 <code>ch12/validation/rtl_sim_20261118.log</code>):</p>
+      <p>기대 출력 (Icarus Verilog 12.0 · 2026-11-19 실제 실행 로그 발췌, 출처 <code>ch12/validation/rtl_sim_20261119.log</code>):</p>
       <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
         <pre tabindex="0"><code>| 단계 | 실제 결과 | 로그 |
 |---|---|---|
@@ -1157,7 +1165,7 @@ endmodule</code></pre>
       <p>적대적 시험:</p>
       <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal</span></div>
         <pre tabindex="0"><code>bash mini_npu/scripts/run_adversarial.sh   # 적대적 시험</code></pre></div>
-      <div class="codeblock"><div class="codebar"><span>기대 출력 (출처 ch12/validation/rtl_sim_20261118.log)</span></div>
+      <div class="codeblock"><div class="codebar"><span>기대 출력 (출처 ch12/validation/rtl_sim_20261119.log)</span></div>
         <pre tabindex="0"><code>UART_FIFO_ADVERSARIAL_SIM_PASS tests=11
 NPU_UART_ADVERSARIAL_SIM_PASS tests=8 responses=43</code></pre></div>
     </section>
@@ -1273,7 +1281,7 @@ picocom -b 115200 -d 8 -p n -y n -f n /dev/ttyUSB1   # n은 실제 번호로 변
         </div>
         <div class="gate pass">
           <b>RTL_SIM_PASS</b>
-          <span>회귀 결과 표 13단계 모두 RTL_SIM_PASS · Icarus Verilog 12.0 · 2026-11-18</span>
+          <span>회귀 결과 표 13단계 모두 RTL_SIM_PASS · Icarus Verilog 12.0 · 2026-11-19</span>
         </div>
         <div class="gate todo">
           <b>SYNTH_TIMING_PASS</b>
