@@ -9,7 +9,7 @@
 
 | 항목 | 결정 |
 |---|---|
-| 하드웨어 | **28장 Bitstream·XSA 그대로**(MicroBlaze V + 20장 NPU + AXI GPIO 0 LED + AXI GPIO 1 FND). 29장은 ELF만 새로 만든다 |
+| 하드웨어 | (변경) 안 A: **21장 Bitstream·XSA 그대로**(MicroBlaze V + 20장 NPU + AXI GPIO 0 LED + 표준 7세그먼트 IP `ip06_seg7`, 동결 주소맵). 29장은 ELF만 새로 만든다 |
 | 센서(제2부 IP 기준) | 온도 DS18B20(int16, 1/16 °C), 진동 XADC(12비트 코드), 거리 HC-SR04(cm). 창 8표본(100 ms 간격) + 센서별 age_ms |
 | 입력 경로 | 이 장은 **PC가 만든 가상 센서 값**을 UART로 보낸다. 실제 센서를 Pmod에 연결하는 것은 3.3 V 변환·전원 검토 뒤 사용자와 함께 한다(HC-SR04 Echo 5 V) |
 | 규칙 먼저 | 센서별 결측·지연(> 500 ms) → UNKNOWN, 범위 밖·진동 고착 → FAULT. 하나라도 걸리면 **NPU를 실행하지 않는다** |
@@ -72,8 +72,8 @@
 ```bash
 bash part03/ch29/scripts/run_sim.sh                                     # PC 검증(수 분)
 VIVADO_SETTINGS=… bash part03/ch29/scripts/run_synth.sh                  # 정책 RTL OOC
-VITIS_SETTINGS=… bash part03/ch29/scripts/build_sw.sh                    # 28장 XSA로 ELF
-# 보드(사용자와 함께): 28장 비트스트림 + 29장 sensor_app.elf 적재 뒤, 실행 중 btnC(Reset)를 누르라는 안내에 따른다
+VITIS_SETTINGS=… bash part03/ch29/scripts/build_sw.sh                    # 21장 XSA로 ELF
+# 보드(사용자와 함께): 21장 비트스트림 + 29장 sensor_app.elf 적재 뒤, 실행 중 btnC(Reset)를 누르라는 안내에 따른다
 python3 part03/ch29/host/p3_sensor_host.py --port /dev/ttyUSB1 --limit 200 --csv b29.csv --log b29_uart.log
 ```
 
@@ -90,7 +90,7 @@ python3 part03/ch29/host/p3_sensor_host.py --port /dev/ttyUSB1 --limit 200 --csv
 | 정책 RTL OOC 배선 | LUT 16, FF 8, WNS +6.711 ns @100 MHz (`validation/synth_ooc_summary.md`) |
 | 종단간 협동 시뮬레이션 | 109/109 검사 PASS: 부팅, 식별, 정책 시나리오(전이·래치·ACK·센서 고장 주입 7종), 시험셋 60창(골든 57/60, 장치 57/60), 오류 시험 9종 (`validation/rtl_cosim.csv`) |
 | 펌웨어 변이 12종 | 부팅 상태, 즉시 하향, 래치 제거, ACK 무조건, 하향 최소값, 결측·지연·고착 검사 제거, guard보다 NPU 먼저, 링크 감시 제거, 연속 오류 무시, 특징 눈금 → **12/12 검출** |
-| Vitis ELF | 28장 XSA(2bffbd6f…) 그대로, `sensor_app.elf` 39,080 B(스택 4 KB 포함), SHA-256 77594dcb8a326a09, 우리 소스 경고 0, `ELF_MEM_PASS` (`validation/build_sw.log`). 31장에서 -O0 최대 호출 깊이 약 960 B를 측정해 스택을 1 KB → 4 KB로 늘렸다 |
+| Vitis ELF | (변경) 안 A: 21장 XSA(24abeb3a…) 그대로, `sensor_app.elf` 39,372 B(스택 4 KB 포함), SHA-256 9afada1f03b17611, `ELF_MEM_PASS`, SEG7 0x4006_0000·UART 0x4002_0000 (`validation/build_sw.log`). 31장에서 -O0 최대 호출 깊이 약 960 B를 측정해 스택을 1 KB → 4 KB로 늘렸다 |
 | **Basys3 실물** | **NOT_RUN** — `ch27/docs/BOARD_CHECKLIST.md` B14~B17, 사용자와 함께 |
 | 실제 센서 연결 | **NOT_RUN** — 레벨 변환·전원 검토 뒤 사용자와 함께 |
 

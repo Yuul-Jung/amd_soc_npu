@@ -1,10 +1,10 @@
-HW (28장 그대로) 2bffbd6f36c2eb21 soc28_digit.xsa, 0bce54899fac58a3 basys3_soc28_top.bit
+HW (21장 그대로) 24abeb3abba14b83 soc21_npu.xsa, fca1368c017c50b6 basys3_soc21_top.bit
 SENSOR_HEADER_DONE model_id=18496ca4 w=[-110, -127, -63, -66, -117, -92]...
 #define XPAR_AXI_GPIO_0_BASEADDR 0x40000000
-#define XPAR_AXI_GPIO_1_BASEADDR 0x40010000
-#define XPAR_AXI_UARTLITE_0_BASEADDR 0x40600000
+#define XPAR_AXI_UARTLITE_0_BASEADDR 0x40020000
+#define XPAR_IP06_SEG7_BASEADDR 0x40060000
 #define XPAR_P3_NPU_0_BASEADDR 0x44a00000
-ELF sensor_app text=31344 data=204 bss=7532 total=39080 sha256=77594dcb8a326a09
-ELF_MEM stack=4096 heap=2052 stack_end=39080 lmb=65536
+ELF sensor_app text=31636 data=204 bss=7532 total=39372 sha256=9afada1f03b17611
+ELF_MEM stack=4096 heap=2052 stack_end=39376 lmb=65536
 ELF_MEM_PASS
 SENSOR_SW_BUILD_PASS (빌드만, 실물 실행은 사용자와 함께)

@@ -18,7 +18,7 @@ MicroBlaze V가 MAC → Replay → Nonce → 복호 → 스테이징 검사 → 
 | Replay | seq > last_seq만 수락. 인증된 메시지는 내용이 틀려도 seq를 소비(같은 메시지 재사용 차단). 인증 실패는 소비하지 않음(위조 seq로 정상 메시지를 막지 못함) |
 | 커밋 | 뱅크 2개(활성·스테이징). 복호는 스테이징에만, 검사(길이·magic·차원·model_id·Bias 40비트·w ≠ -128) 통과 뒤 NPU Bias 재적재가 성공해야 활성 뱅크 전환. 실패하면 이전 모델 유지 |
 | 대상 모델 | 29장 6특징→3상태 모델(blob 54바이트). 모델 A = 29장 모델(부팅 기본), 모델 B = 같은 구조·다른 seed(`train_model_b.py`) |
-| 하드웨어 | 28장 Bitstream·XSA 그대로(펌웨어만). 암호 RTL은 단독 검증·OOC까지(SoC 결합은 하지 않음) |
+| 하드웨어 | (변경) 안 A: 21장 Bitstream·XSA 그대로(펌웨어만). 암호 RTL은 단독 검증·OOC까지(SoC 결합은 하지 않음) |
 
 ## 2. 보안 프레임 (`'P' '3' 'M' PAYLOAD CRC16`, 정수 LE)
 
@@ -61,7 +61,7 @@ MicroBlaze V가 MAC → Replay → Nonce → 복호 → 스테이징 검사 → 
 | 종단간 협동 시뮬레이션 | 35/35 검사 PASS(모델 B 적재·추론, 거부 시나리오, A 재적재), 로그 키 노출 검사 `KEY_NOT_IN_LOGS_PASS` (`validation/rtl_cosim.csv`) |
 | 펌웨어 변이 7종 | MAC 생략, Replay, nonce 바인딩, 인증 실패 시 seq 소비, 헤더·blob ID, 길이 한계 → **7/7 검출** |
 | 암호 RTL OOC 배선 | AES: LUT 554, FF 270, BRAM 5, WNS +1.829 ns / SHA-256: LUT 1,394, FF 1,044, **WNS +0.117 ns** @100 MHz (`validation/synth_ooc_summary.md`) |
-| Vitis ELF | 28장 XSA·Bitstream 그대로, `secure_app.elf` 61,264 B, SHA-256 f62f051390c36c82, 스택 끝 61,272 ≤ 65,536, `ELF_MEM_PASS` (`validation/build_sw.log`) |
+| Vitis ELF | (변경) 안 A: 21장 XSA·Bitstream 그대로, `secure_app.elf` 61,556 B, SHA-256 624f4cedec58e289, 스택 끝 61,560 ≤ 65,536, `ELF_MEM_PASS` (`validation/build_sw.log`) |
 | **Basys3 실물** | **NOT_RUN** — `ch27/docs/BOARD_CHECKLIST.md` B25~B26, 사용자와 함께 |
 
 > **SHA-256 타이밍 주의:** 100 MHz 배선 여유가 +0.117 ns뿐이다. 배치·배선 결과는 실행마다 달라질 수 있으므로 **빌드할 때마다 `run_synth.sh` 결과의 WNS를 다시 확인한다.** 음수가 나오면 라운드 덧셈을 파이프라인으로 나눈다.
