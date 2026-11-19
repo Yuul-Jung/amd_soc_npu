@@ -12,10 +12,6 @@
     "file": "p01/rtl/basys3_p01_top.v",
     "module": "basys3_p01_top"
   },
-  "bank": {
-    "file": "p01/rtl/p01_mac_bank.v",
-    "module": "p01_mac_bank"
-  },
   "skeleton": [
     "p01/rtl/p01_reset_sync.v",
     "p01/rtl/p01_calc_controller.v",
@@ -100,5 +96,17 @@
       "p01/host/p01_send.py",
       "PC에서 바이너리 명령 보내기. 2장에서 적재 명령용으로 확장 (2장 전환 때)"
     ]
+  ],
+  "sw_label": "sw[1:0]",
+  "sw_bits": 2,
+  "host": "p01/host/p01_send.py",
+  "vivado_tcl": "p01/vivado/build_p01.tcl",
+  "led_note": "누산값 아래 16비트, 7세그먼트도 같은 값 16진수 4자리",
+  "figures": [
+    {
+      "file": "p01/rtl/p01_mac_bank.v",
+      "module": "p01_mac_bank",
+      "note": "MAC 묶음: 1-2·1-3·1-4 코어가 같은 입력을 받고 sw[1:0]으로 고른 코어의 결과만 나간다."
+    }
   ]
 }

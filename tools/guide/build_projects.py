@@ -9,7 +9,7 @@
   pNN/project.json          장 목표·서브젝트·장 뼈대 파일
   chNN/chapter.json         서브젝트 내용 (구 장, 코드·시험·판정)
   pNN/validation/, chNN/validation/   게이트 증거
-보드 기대 화면은 pNN 장 Top 시뮬레이션 로그(P01_CASE_PASS 줄)에서만 가져온다.
+보드 기대 화면은 pNN 장 Top 시뮬레이션 로그(PNN_CASE_PASS 줄)와 사례 파일(pNN/tb/pNN_cases_sN.txt)에서만 가져온다.
 페이지 HTML은 직접 수정하지 않는다.
 """
 import glob, json, os, re, sys, types
@@ -32,6 +32,8 @@ EXTRA_CSS = """<style>
 .steps li.done{border-left-color:#2d8a52}
 .steps li.demo{border-left-color:#4635b1;font-weight:600}
 .steps .code{font:700 15px var(--mono,monospace);color:#4635b1}
+.steps li>span{min-width:0;overflow-wrap:anywhere}
+.steps li code{word-break:break-all}
 .steps .st{font-size:13px;white-space:nowrap}
 .verdict{border:1px solid #c9c4ea;border-radius:6px;padding:8px 12px;background:#faf9ff;margin:10px 0}
 details.full{margin:10px 0}
@@ -60,6 +62,7 @@ class ProjectEvidence:
     """장 Top 증거: RTL 로그(STAGE 1~4)와 Vivado 요약."""
 
     def __init__(self, p):
+        self.tag = p["id"].upper()
         self.rtl_path = bg.latest(p["evidence"]["rtl_log"])
         self.lines = bg.log_lines(self.rtl_path)
         self.tool = bg.sim_tool(self.lines)
@@ -83,29 +86,68 @@ class ProjectEvidence:
         """(sw, 응답 문자열) — 장 Top 시뮬레이션이 실제로 대조한 줄."""
         out = []
         for ln in self.lines:
-            m = re.match(r'P01_CASE_PASS stage=(\d+) (\S+) sw=(\d+) rx="(.*)"$', ln.strip())
+            m = re.match(self.tag + r'_CASE_PASS stage=(\d+) (\S+) sw=(\d+) rx="(.*)"$', ln.strip())
             if m and int(m.group(1)) == stage and (subj is None or m.group(2) == subj):
                 out.append((m.group(2), int(m.group(3)), m.group(4)))
         return out
 
 
+def s16(b):
+    return int.from_bytes(b, "big", signed=True)
+
+
+def decode(b):
+    """보낼 바이트 → PC 도구(pNN_send.py) 명령 꼴. 1장·2장 명령 형식을 모두 안다."""
+    c, n = chr(b[0]), len(b)
+    if c == "M" and n == 5:
+        return f"M {s16(b[1:3])} {s16(b[3:5])}"
+    if c == "X" and n == 4:
+        return f"X {b[1]} {s16(b[2:4])}"
+    if c == "W" and n == 5:
+        return f"W {b[1]} {b[2]} {s16(b[3:5])}"
+    if c == "x" and n == 2:
+        return f"x {b[1]}"
+    if c == "w" and n == 3:
+        return f"w {b[1]} {b[2]}"
+    if c == "Q" and n == 5:
+        return f"Q {s16(b[1:5])}"
+    if c == "B" and n == 7:
+        return f"B {b[1]} {s16(b[2:7])}"
+    if c in "DPLNR" and n == 2:
+        return f"{c} {b[1]}"
+    return b.decode("ascii")
+
+
+def case_file(p, stage):
+    return rd(f"{p['id']}/tb/{p['id']}_cases_s{stage}.txt").splitlines()
+
+
 def case_tx(p, stage, subj=None):
-    """사례 파일의 보낼 바이트 → p01_send.py 명령 꼴."""
+    """사례 파일의 보낼 바이트 → PC 도구 명령 꼴."""
     out = []
-    for ln in rd(f"{p['id']}/tb/{p['id']}_cases_s{stage}.txt").splitlines():
+    for ln in case_file(p, stage):
         f = ln.split()
         if not f or f[0].startswith("#") or f[0] == "END":
             continue
         if subj and f[0] != subj:
             continue
         n = int(f[2], 16)
-        b = bytes(int(x, 16) for x in f[3:3 + n])
-        if b[:1] == b"M" and n == 5:
-            a, c = int.from_bytes(b[1:3], "big", signed=True), int.from_bytes(b[3:5], "big", signed=True)
-            out.append(f"M {a} {c}")
-        else:
-            out.append(b.decode("ascii"))
+        out.append(decode(bytes(int(x, 16) for x in f[3:3 + n])))
     return out
+
+
+def end_led(p, stage):
+    for ln in case_file(p, stage):
+        if ln.startswith("END "):
+            return ln.split()[1].upper()
+    return "????"
+
+
+def top_sources(p):
+    """장 Top 빌드에 실제로 들어가는 RTL (Vivado Tcl의 set rtl 목록)."""
+    t = rd(p["vivado_tcl"])
+    m = re.search(r"set rtl \{([^}]*)\}", t)
+    return set(m.group(1).split()) if m else set()
 
 
 def gate(cls, name, note):
@@ -116,7 +158,7 @@ def project_gates(p, e):
     g = [gate("pass", "HTML_PASS", f"{p['version']} · 생성기")]
     g.append(gate("pass", "HOST_MODEL_PASS", e.host) if e.host else gate("todo", "HOST_MODEL_PASS", "⚠ 기준 모델 기록 없음"))
     if e.rtl_ok:
-        g.append(gate("pass", "RTL_SIM_PASS", f"장 Top STAGE 1~4 · {e.tool} · {bg.file_date(e.rtl_path)}"))
+        g.append(gate("pass", "RTL_SIM_PASS", f"장 Top STAGE 1~{len(p['subjects'])} · {e.tool} · {bg.file_date(e.rtl_path)}"))
     elif e.rtl_path:
         g.append(gate("fail", "RTL_SIM_PASS", f"✗ {e.rtl_path}"))
     else:
@@ -126,7 +168,7 @@ def project_gates(p, e):
     elif any(v.startswith("SYNTH_TIMING_FAIL") for v in e.viv):
         g.append(gate("fail", "SYNTH_TIMING_PASS", "✗ " + bg.short(next(v for v in e.viv if "FAIL" in v), 70)))
     else:
-        g.append(gate("todo", "SYNTH_TIMING_PASS", "⚠ 미검증 · VS Code Vivado 실행 대기 (build_p01.tcl)"))
+        g.append(gate("todo", "SYNTH_TIMING_PASS", "⚠ 미검증 · VS Code Vivado 실행 대기 (" + os.path.basename(p["vivado_tcl"]) + ")"))
     g.append(gate("pass", "BOARD_PASS", e.board_path) if e.board else gate("todo", "BOARD_PASS", "⚠ 미실시 · 실물 보드 확인 대기"))
     return g
 
@@ -165,21 +207,26 @@ def board_table(p, e, s):
     tx = case_tx(p, s["stage"], s["code"])
     rx = e.cases(s["stage"], s["code"])
     if not rx or len(tx) != len(rx):
-        return "      <p>⚠ 장 Top 시뮬레이션 기록 없음 — <code>bash p01/scripts/run_sim.sh</code> 실행 뒤 다시 생성</p>"
-    rows = "".join(f"<tr><td>{i+1}</td><td class=\"nw\"><code>{sw:02b}</code></td><td class=\"nw\"><code>{esc(t)}</code></td>"
+        return f"      <p>⚠ 장 Top 시뮬레이션 기록 없음 — <code>{p['run']}</code> 실행 뒤 다시 생성</p>"
+    rows = "".join(f"<tr><td>{i+1}</td><td class=\"nw\"><code>{sw:0{p['sw_bits']}b}</code></td><td class=\"nw\"><code>{esc(t)}</code></td>"
                    f"<td class=\"nw\"><code>{esc(r)}</code></td></tr>" for i, (t, (_, sw, r)) in enumerate(zip(tx, rx)))
-    last = next((r for _, _, r in reversed(rx) if r.startswith("A:")), None)
-    led = last[8:12] if last else "0000"
+    led = end_led(p, s["stage"])
+    note = s.get("led_note", p["led_note"])
     return f"""      <table>
-        <thead><tr><th>순서</th><th>sw[1:0]</th><th>PC 명령 (<code>p01_send.py</code>)</th><th>보드 응답 (UART)</th></tr></thead>
+        <thead><tr><th>순서</th><th>{p['sw_label']}</th><th>PC 명령 (<code>{os.path.basename(p['host'])}</code>)</th><th>보드 응답 (UART)</th></tr></thead>
         <tbody>{rows}</tbody>
       </table>
-      <p>끝난 뒤 LED·7세그먼트: <code>{led}</code> (누산값 아래 16비트). 응답 출처: 장 Top 시뮬레이션 STAGE={s['stage']} (<code>{e.rtl_path}</code>, 바이트 단위 대조).</p>"""
+      <p>끝난 뒤 LED: <code>0x{led}</code> ({note}). 응답 출처: 장 Top 시뮬레이션 STAGE={s['stage']} (<code>{e.rtl_path}</code>, 바이트 단위 대조).</p>"""
 
 
 def subject_section(p, e, s, c, ce):
     n, k = s["stage"], s["ch"]
-    build = f"vivado -mode batch -nojournal -source p01/vivado/build_p01.tcl -tclargs {n}"
+    used = top_sources(p)
+    unused = [x for x in c["new"] if x.endswith((".v", ".sv")) and x not in used]
+    unused_note = (f'      <p>※ {"·".join(f"<code>{os.path.basename(x)}</code>" for x in unused)}는 구 {int(k[2:]):02d}장 단독 실습용이라 '
+                   f'{p["number"]}장 Top 빌드에는 넣지 않습니다.</p>') if unused else ""
+    build = f"vivado -mode batch -nojournal -source {p['vivado_tcl']} -tclargs {n}"
+    top = p["top"]["module"]
     syn = e.stage_synth(n)
     syn_txt = (("통과 · " if syn.startswith("SYNTH_TIMING_PASS") else "✗ ") + bg.short(syn.split(" ", 4)[-1], 70)) if syn \
         else "⚠ 미검증 (VS Code Vivado 실행 대기)"
@@ -192,11 +239,12 @@ def subject_section(p, e, s, c, ce):
     return f"""      <p class="verdict"><b>학습목표 (보드):</b> {s['see']}</p>
       <h3>보드에서 볼 것</h3>
       <ol>
-        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다: <code>{build}</code> → <code>build/vivado/p01_s{n}/basys3_p01_top.bit</code></li>
-        <li>Hardware Manager로 보드에 내려받고 터미널(115200 8N1) 또는 <code>python3 p01/host/p01_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다.</li>
+        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다: <code>{build}</code> → <code>build/vivado/{p['id']}_s{n}/{top}.bit</code></li>
+        <li>Hardware Manager로 보드에 내려받고 <code>python3 {p['host']} &lt;포트&gt; …</code>로 아래 순서대로 보냅니다 (115200 8N1). {p.get('sw_note', '')}</li>
       </ol>
 {board_table(p, e, s)}
       <h3>추가 코드 (구 {int(k[2:]):02d}장 그대로)</h3>
+{unused_note}
 {chr(10).join(bg.code(x, ce) for x in c["new"])}
       <h3>시뮬레이션 기대 화면</h3>
       <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 서브젝트 단독 시험</span></div>
@@ -213,7 +261,7 @@ def subject_section(p, e, s, c, ce):
 {bg.gate_row(subj_gates)}"""
 
 
-def build(p, course, chs_by_id, all_chs, pages):
+def build(p, course, chs_by_id, all_chs, pages, all_projects):
     e = ProjectEvidence(p)
     subj = [(s, chs_by_id[s["ch"]], bg.Evidence(chs_by_id[s["ch"]], chs_by_id)) for s in p["subjects"]]
     state = {}
@@ -224,18 +272,26 @@ def build(p, course, chs_by_id, all_chs, pages):
         state[s["code"]] = (rtl, "pass" if e.board else "todo")
 
     # 구조도: 장 Top과 MAC 묶음. 모듈 출처를 서브젝트 번호로 표시한다.
-    pseudo = {"id": p["id"], "new": [x for x in p["skeleton"] if x.endswith(".v")]}
-    origin = bg.module_origin(all_chs + [pseudo])
+    pseudos = [{"id": q["id"], "new": [x for x in q["skeleton"] if x.endswith(".v")]} for q in all_projects]
+    origin = bg.module_origin(all_chs + pseudos)
     ch2code = {s["ch"]: s["code"] for s in p["subjects"]}
 
     def relabel(svg):
         for ch, code in ch2code.items():
             svg = svg.replace(f"{ch} 재사용", f"{code} (구 {int(ch[2:]):02d}장)")
+        for q in all_projects:
+            svg = svg.replace(f"{q['id']} 재사용", f"{q['number']}장에서 가져옴")
+            if q["id"] != p["id"]:
+                for qs in q["subjects"]:
+                    svg = svg.replace(f"{qs['ch']} 재사용", f"{qs['code']} ({q['number']}장에서 가져옴)")
+        svg = re.sub(r"ch(\d\d) 재사용", lambda m: f"구 {m.group(1)}장 (이전 장)", svg)
         return (svg.replace(">이번 장 신규<", ">장 뼈대 (제공)<")
                    .replace(">이전 장 파일 재사용(수정 없음)<", ">서브젝트에서 작성<"))
 
     fig_top = relabel(bg.svg_block(p["id"], p["top"]["file"], p["top"]["module"], origin, board=True))
-    fig_bank = relabel(bg.svg_block(p["id"], p["bank"]["file"], p["bank"]["module"], origin, board=False))
+    figs = "\n".join(f'      <p>{f["note"]}</p>\n'
+                      f'      <div class="figure-wrap">{relabel(bg.svg_block(p["id"], f["file"], f["module"], origin, board=False))}</div>'
+                      for f in p["figures"])
     top_c = {"id": p["id"], "top": p["top"], "port_notes": p["port_notes"]}
 
     imports = "".join(f"<li><code>{x}</code></li>" for x in p["imports"]) or "<li>없음 (첫 장)</li>"
@@ -246,9 +302,9 @@ def build(p, course, chs_by_id, all_chs, pages):
 {road(course, p, pages)}
 {steps(p, e, state)}"""
     s01 = f"""      <div class="figure-wrap">{fig_top}</div>
-      <p>장 Top은 배선만 합니다. 기능은 하위 모듈에 있고, 서브젝트 코어는 MAC 묶음 안에서 <code>STAGE</code>(끝낸 서브젝트 수)에 따라 하나씩 들어옵니다.</p>
-      <div class="figure-wrap">{fig_bank}</div>
 {bg.port_table(top_c, True)}
+      <p>장 Top은 배선만 합니다. 기능은 하위 모듈에 있고, 서브젝트 모듈은 <code>STAGE</code>(끝낸 서브젝트 수)에 따라 하나씩 들어옵니다.</p>
+{figs}
       <table>
         <thead><tr><th>구분</th><th>파일</th></tr></thead>
         <tbody>
@@ -259,8 +315,8 @@ def build(p, course, chs_by_id, all_chs, pages):
       </table>"""
     s02 = f"""      <ol>
         <li>VS Code에서 저장소 루트(<code>amd_soc_npu/</code>)를 엽니다. 도구: <code>iverilog</code> 12 이상, <code>python3</code>, Vivado 2024.2 (합성·비트스트림), 보드 터미널(115200 8N1) 또는 <code>pip install pyserial</code>.</li>
-        <li>아래 장 뼈대 파일을 경로 그대로 입력합니다. 서브젝트 코어(<code>mac_core</code> 등)는 각 서브젝트 절에서 씁니다.</li>
-        <li>STAGE 값: 1-1만 끝냈으면 1, 1-4까지 끝냈으면 4. 아직 없는 코어는 들어가지 않으므로 빌드가 됩니다.</li>
+        <li>아래 장 뼈대 파일을 경로 그대로 입력합니다. 서브젝트 모듈은 각 서브젝트 절에서 씁니다.</li>
+        <li>STAGE 값 = 끝낸 서브젝트 수: {p['subjects'][0]['code']}만 끝냈으면 1, {p['subjects'][-1]['code']}까지 끝냈으면 {len(p['subjects'])}. 아직 없는 모듈은 들어가지 않으므로 빌드가 됩니다.</li>
       </ol>
 {chr(10).join(bg.code(x, e) for x in p['skeleton'])}"""
     secs = [("장 목표·진행 위치", s00, "s00"), ("최종 구조도·가져오는 파일", s01, "s01"), ("준비 · 장 뼈대", s02, "s02")]
@@ -269,28 +325,29 @@ def build(p, course, chs_by_id, all_chs, pages):
 
     full = e.cases(len(p["subjects"]))
     tx = case_tx(p, len(p["subjects"]))
-    rows = "".join(f"<tr><td>{subj_code}</td><td class=\"nw\"><code>{sw:02b}</code></td><td class=\"nw\"><code>{esc(t)}</code></td><td class=\"nw\"><code>{esc(r)}</code></td></tr>"
+    rows = "".join(f"<tr><td>{subj_code}</td><td class=\"nw\"><code>{sw:0{p['sw_bits']}b}</code></td><td class=\"nw\"><code>{esc(t)}</code></td><td class=\"nw\"><code>{esc(r)}</code></td></tr>"
                    for t, (subj_code, sw, r) in zip(tx, full))
-    viv = "\n".join(e.viv) or "⚠ Vivado 실행 기록 없음 (VS Code: build_p01.tcl → p01/validation/vivado_impl_YYYYMMDD.txt)"
+    viv = "\n".join(e.viv) or f"⚠ Vivado 실행 기록 없음 (VS Code: {os.path.basename(p['vivado_tcl'])} → {p['id']}/validation/vivado_impl_YYYYMMDD.txt)"
     demo = f"""      <p>STAGE=4 비트스트림 하나로 모든 서브젝트를 차례로 보여 줍니다. 아래 응답은 장 Top 시뮬레이션이 바이트 단위로 대조한 값입니다.</p>
       <table>
-        <thead><tr><th>서브젝트</th><th>sw[1:0]</th><th>PC 명령</th><th>보드 응답</th></tr></thead>
+        <thead><tr><th>서브젝트</th><th>{p['sw_label']}</th><th>PC 명령</th><th>보드 응답</th></tr></thead>
         <tbody>{rows}</tbody>
       </table>
-      <p>끝난 뒤 LED·7세그먼트: <code>{next((r[8:12] for _, _, r in reversed(full) if r.startswith("A:")), "0000")}</code>. btnC를 누르면 0으로 돌아갑니다.</p>
+      <p>끝난 뒤 LED: <code>0x{end_led(p, len(p["subjects"]))}</code> ({p["subjects"][-1].get("led_note", p["led_note"])}). btnC를 누르면 처음 상태로 돌아갑니다.</p>
       <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 장 Top 시뮬레이션 (STAGE 1~4)</span></div>
         <pre><code>{esc(p['run'])}</code></pre></div>
       <div class="codeblock"><div class="codebar"><span>기대 출력 ({e.tool} · {bg.file_date(e.rtl_path)} · 출처 {e.rtl_path})</span></div>
-        <pre><code>{esc(bg.excerpt(e.lines, r"^(PYTHON_P01_(SELF|VEC)|P01_TOP|RTL_SIM)"))}</code></pre></div>
+        <pre><code>{esc(bg.excerpt(e.lines, rf"^(PYTHON_{e.tag}_(SELF|VEC)|{e.tag}_TOP|RTL_SIM)"))}</code></pre></div>
       <div class="codeblock"><div class="codebar"><span>Vivado (VS Code) · STAGE 1~4 비트스트림</span></div>
-        <pre><code>vivado -mode batch -nojournal -source p01/vivado/build_p01.tcl
+        <pre><code>vivado -mode batch -nojournal -source {p['vivado_tcl']}
 {esc(viv)}</code></pre></div>
       <details class="full"><summary>장 Top 테스트벤치·기준 모델 (전체 코드)</summary>
 {chr(10).join(bg.code(x, e) for x in p['tb'] + p['ref'])}
       </details>"""
     secs.append(("장 시연", demo, "demo"))
 
-    rep = "".join(f"<tr><td>{s['code']}</td><td>{int(s['ch'][2:]):02d}장</td><td>{'<br>'.join(f'<code>{os.path.basename(x)}</code>' for x in c['new'] if x.endswith(('.v', '.sv')))}</td>"
+    used = top_sources(p)
+    rep = "".join(f"<tr><td>{s['code']}</td><td>{int(s['ch'][2:]):02d}장</td><td>{'<br>'.join(f'<code>{os.path.basename(x)}</code>' + ('' if x in used else ' ※') for x in c['new'] if x.endswith(('.v', '.sv')))}</td>"
                   f"<td>{WORD[state[s['code']][0]]}</td><td>{'통과' if e.stage_synth(s['stage']) and e.stage_synth(s['stage']).startswith('SYNTH_TIMING_PASS') else '⚠ 미검증'}</td>"
                   f"<td>{WORD[state[s['code']][1]]}</td></tr>" for s, c, _ in subj)
     hand = "".join(f"<tr><td><code>{a}</code></td><td>{b}</td></tr>" for a, b in p["handoff"])
@@ -298,6 +355,7 @@ def build(p, course, chs_by_id, all_chs, pages):
         <thead><tr><th>서브젝트</th><th>구 장</th><th>추가 RTL</th><th>시뮬레이션 (단독 + 장 Top)</th><th>합성 (장 Top STAGE)</th><th>보드</th></tr></thead>
         <tbody>{rep}</tbody>
       </table>
+      <p>※ = 구 장 단독 실습 파일이라 장 Top 빌드(<code>{p['vivado_tcl']}</code>)에는 들어가지 않음.</p>
       <table>
         <thead><tr><th>다음 장으로 넘기는 파일</th><th>사용처</th></tr></thead>
         <tbody>{hand}</tbody>
@@ -328,7 +386,7 @@ def main(check):
     chs = bg.load_chapters()
     by_id = {c["id"]: c for c in chs}
     pages = {p["id"]: pfname(p) for p in projects}
-    outputs = {pfname(p): build(p, course, by_id, chs, pages) for p in projects}
+    outputs = {pfname(p): build(p, course, by_id, chs, pages, projects) for p in projects}
     stale = [os.path.relpath(f, ROOT) for p in projects for f in glob.glob(os.path.join(ROOT, f"{p['id']}_*_v*.html"))
              if os.path.basename(f) != pfname(p)]
     if check:
