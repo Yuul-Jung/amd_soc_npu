@@ -69,6 +69,8 @@ jobs:
         run: bash p04/scripts/run_sim.sh
       - name: Run part03 ch20·ch22 (VS Code 판 사본, 5장 서브젝트 AXI IP·C 드라이버 협동 시뮬레이션)
         run: for c in 20 22; do bash part03/ch$c/scripts/run_sim.sh; done
+      - name: Run part03 ch26·ch31 (6장 서브젝트, 짧은 것만 — 28~30장 협동 시뮬레이션은 6~13분이라 수동)
+        run: for c in 26 31; do bash part03/ch$c/scripts/run_sim.sh; done
       - name: Run ch13 Input Loader
         run: bash ch13/scripts/run_sim.sh
       - name: Run ch14 Group10 Scheduler

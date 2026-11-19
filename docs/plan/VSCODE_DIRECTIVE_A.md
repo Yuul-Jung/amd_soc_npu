@@ -61,6 +61,9 @@
 8-1. **(2장 STAGE 8 재실행)** 웹이 12장 `mini_npu/rtl/npu_engine4.v`의 argmax를 두 클록 토너먼트로 고쳤다 (임계 경로 `u_e4/lane1/acc_o_reg → class_o_reg`, WNS −1.952 ns 대응, 00~12장 회귀·적대 시험 PASS, 2장 Top 8단계 PASS). `restructure/projects`를 받아 `vivado -mode batch -nojournal -source p02/vivado/build_p02.tcl -tclargs 8`을 다시 돌리고, 결과 줄을 `p02/validation/vivado_impl_YYYYMMDD.txt`에 추가해 커밋한다 (STAGE 1~7 줄은 그대로 둔다).
 8-2. **(25장 전력 재실행)** `part03/ch25/validation/power_summary.md`는 2026-11-18(안 A 이전) 21장 SoC 기준이다. 안 A 비트스트림으로 `bash part03/ch25/scripts/run_power.sh`를 다시 돌려 `power.log`·`power_summary.md`를 갱신하고 커밋한다 (5장 페이지 5-6이 ⚠로 표시 중).
 9. **보드 점검표** `ch27/docs/BOARD_CHECKLIST.md`: 비트스트림·XSA·ELF SHA를 새 값으로, 7세그먼트·BTN 항목을 서브젝트마다 하나 이상 넣는다. 모두 `NOT_RUN` 유지.
+10. **(6장, 웹 결정 2026-11-19)** 6장 페이지가 ⚠로 표시 중인 두 가지.
+   - **28장 안 A SoC xsim**: `ch28/validation/soc_sim_mapA_20261119.log`가 프레임 송신 중에 끝나 판정 줄이 없다. `bash part03/ch28/scripts/run_soc_sim.sh`를 끝까지 돌려 `SOC28_RTL_SIM_PASS checks=…`를 남긴다 (시간 제한이 원인이면 제한만 늘린다).
+   - **30장 SoC 안 A 재빌드**: 30장은 핀(JB Pmod·`estop_ok`)과 `p3_motor_safety` RTL이 필요해 ELF만으로는 안 된다(판단 결과: 별도 비트스트림 유지). 21장 블록 설계(안 A 그대로) + `p3_motor_safety_bd`를 **0x4007_0000**(빈 칸, 64 KB)에 붙이고, 인터럽트를 쓰면 **In4**(C 시리즈 확장 예약 첫 칸)로. 다른 주소·인터럽트는 바꾸지 않는다. 검사: `ADDR_MAP_A_PASS`(21장 8줄 + 모터 1줄), 안전 코어 핀 XDC, WNS·WHS ≥ 0. 펌웨어 모터 주소는 `xparameters.h`만. 점검표 B18~B23a 기대값·SHA를 새 빌드로 갱신 (모두 NOT_RUN 유지).
 
 ## 4. 지킬 것
 
@@ -95,6 +98,8 @@
 | 2장 Top STAGE 1~8 | | `p02/validation/vivado_impl_*.txt` | WNS·WHS·LUT·DSP·RAMB18 |
 | 3장 Top STAGE 1~4 | | `p03/validation/vivado_impl_*.txt` | WNS·WHS·LUT·DSP·RAMB18 |
 | 4장 Top STAGE 1~4 | | `p04/validation/vivado_impl_*.txt` | WNS·WHS·LUT·DSP·RAMB18 |
+| 28장 안 A SoC xsim (10) | | `soc_sim_mapA_*.log` | checks |
+| 30장 안 A SoC (10) | | `build_soc_*.log` | 모터 주소·WNS·WHS·SHA |
 | 판단 필요 | | | |
 
 마지막 커밋 해시와 브랜치 이름을 적는다.
