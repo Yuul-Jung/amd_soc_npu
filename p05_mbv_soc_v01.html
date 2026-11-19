@@ -71,7 +71,7 @@ details.full>summary{cursor:pointer;font-weight:600}
       <h2><span class="num">00</span> 장 목표·진행 위치</h2>
       <p><b>장 시연 (보드):</b> 21장 비트스트림 하나에 MicroBlaze V와 NPU가 함께 있고, C 드라이버가 그림 4장을 NPU로 분류해 UART·LED·7세그먼트에 띄운다. 같은 추론을 CPU만으로 하면 1,816,547클록, NPU로 하면 1,080,161클록.</p>
       <p>편성: 2일 · 서브젝트 7개 · 비트스트림은 5-2에서 한 번 만들고, 이후 서브젝트는 ELF만 바꿔 보드에서 확인합니다.</p>
-      <ol class="road" aria-label="전체 장에서 지금 위치"><li class=""><a href="p01_uart_calc_v01.html"><b>1장</b>UART 계산기</a></li><li class=""><a href="p02_npu4_board_v01.html"><b>2장</b>4뉴런 NPU 보드</a></li><li class=""><a href="p03_mnist8x8_v01.html"><b>3장</b>8×8 MNIST (CPU 없음)</a></li><li class=""><a href="p04_tile784_v01.html"><b>4장</b>784 가속기 설계 공간</a></li><li class="now" aria-current="step"><b>5장</b>MicroBlaze V SoC</li><li class="plan"><b>6장</b>응용 확장</li><li class="plan"><b>7장</b>종합과제</li></ol>
+      <ol class="road" aria-label="전체 장에서 지금 위치"><li class=""><a href="p01_uart_calc_v01.html"><b>1장</b>UART 계산기</a></li><li class=""><a href="p02_npu4_board_v01.html"><b>2장</b>4뉴런 NPU 보드</a></li><li class=""><a href="p03_mnist8x8_v01.html"><b>3장</b>8×8 MNIST (CPU 없음)</a></li><li class=""><a href="p04_tile784_v01.html"><b>4장</b>784 가속기 설계 공간</a></li><li class="now" aria-current="step"><b>5장</b>MicroBlaze V SoC</li><li class=""><a href="p06_npu_apps_v01.html"><b>6장</b>응용 확장</a></li><li class="plan"><b>7장</b>종합과제</li></ol>
       <ol class="steps" aria-label="이 장의 서브젝트와 진행 상태"><li class=""><span class="code">5-1</span><span><a href="#s5_1">AXI4-Lite NPU IP</a> <small>(구 20장 · 1일 오전)</small><br>보드 확인은 5-2 비트스트림으로 한다. 여기서는 AXI 버스로 레지스터 15개를 읽고 써서 784 추론 7번이 Python과 비트 단위로 같고, 없는 주소는 SLVERR(16건)인 것을 시뮬레이션으로 본다.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">5-2</span><span><a href="#s5_2">MicroBlaze V SoC 연결 (동결 주소맵)</a> <small>(구 21장 · 1일 오전)</small><br>21장 비트스트림을 내려받으면 DONE LED. XSDB로 7세그먼트 ID <code>mrd 0x4006FFF0</code> → <code>53454737</code>, 버튼을 누른 채 <code>mrd 0x40010000</code> → U·D·L·R = <code>8</code>·<code>4</code>·<code>2</code>·<code>1</code>.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">5-3</span><span><a href="#s5_3">C 드라이버와 표시</a> <small>(구 22장 · 1일 오후)</small><br><code>npu_app.elf</code>: 그림 4장(시험 0·1·92·1640)을 NPU로 분류해 CPU 계산과 점수까지 같고(<code>scores_match=1</code>), 끝나면 7세그먼트 <code>03 4</code>·LED4. #92는 4장과 같이 INT8에서 4.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">5-4</span><span><a href="#s5_4">CPU·NPU 추론 시간</a> <small>(구 23장 · 1일 오후)</small><br><code>bench_board.elf</code>: 같은 그림을 CPU 정수 계산으로 1,816,547클록, NPU로 1,080,161클록(Bias 적재 3,076 포함) — 1.68배. 리셋 뒤 다시 돌려도 같은 값.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">5-5</span><span><a href="#s5_5">자원·타이밍 스윕</a> <small>(구 24장 · 2일 오전)</small><br>보드 없음. 클록 주기를 10 → 8 → 7 → 6 ns로 줄여 배선: 20장 AXI NPU IP는 10 ns 통과·8 ns 실패로 Fmax 약 105 MHz, 4PE INT8 코어는 146 MHz.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">5-6</span><span><a href="#s5_6">전력·추론당 에너지</a> <small>(구 25장 · 2일 오전)</small><br>보드 없음(Basys3에 전력 측정 회로가 없다). Vivado 추정: 추론당 CPU 4.541 mJ · NPU 2.733 mJ (1.66배). ⚠ 안 A 이전 SoC 빌드 기준이라 재실행 대기.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">5-7</span><span><a href="#s5_7">시스템 통합·보드 점검표</a> <small>(구 27장 · 2일 오후)</small><br><code>run_all.sh</code> 한 번으로 13~31장 회귀를 돌리고(LEVEL=sim PASS), 보드 점검표 B1~B7을 한 자리에서 실행한다 — 장 시연.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class="demo"><span class="code">시연</span><span><a href="#demo">장 시연</a><br>21장 비트스트림 하나에 MicroBlaze V와 NPU가 함께 있고, C 드라이버가 그림 4장을 NPU로 분류해 UART·LED·7세그먼트에 띄운다. 같은 추론을 CPU만으로 하면 1,816,547클록, NPU로 하면 1,080,161클록.</span><span class="st">보드 ⚠ 미실시</span></li></ol>
     </section>
     <section class="section" id="s01">
@@ -2934,7 +2934,7 @@ cat "$summary"
         </div>
         <div class="gate todo">
           <b>BOARD_PASS</b>
-          <span>⚠ 미실시 · 보드 점검표 B1~B8 대기</span>
+          <span>⚠ 미실시 · 보드 점검표 B1~B7 대기</span>
         </div>
       </div>
     </section>
@@ -2974,6 +2974,12 @@ window.COURSE={
    "number": 5,
    "title": "MicroBlaze V SoC",
    "file": "p05_mbv_soc_v01.html"
+  },
+  {
+   "id": "p06",
+   "number": 6,
+   "title": "응용 확장",
+   "file": "p06_npu_apps_v01.html"
   }
  ]
 };

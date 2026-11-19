@@ -71,7 +71,7 @@ details.full>summary{cursor:pointer;font-weight:600}
       <h2><span class="num">00</span> 장 목표·진행 위치</h2>
       <p><b>장 시연 (보드):</b> PC가 28×28 원본 손글씨를 타일 13개로 나눠 보내면 보드가 3장 코어로 784 입력을 누산해 분류한다. 같은 그림이 INT8에서는 4, INT16에서는 9(정답)로 갈리고, 1PE·4PE·8PE 클록 수가 보드에서 나온다.</p>
       <p>편성: 1일 · 서브젝트 4개 · 서브젝트마다 보드 확인 1번 + 장 시연.</p>
-      <ol class="road" aria-label="전체 장에서 지금 위치"><li class=""><a href="p01_uart_calc_v01.html"><b>1장</b>UART 계산기</a></li><li class=""><a href="p02_npu4_board_v01.html"><b>2장</b>4뉴런 NPU 보드</a></li><li class=""><a href="p03_mnist8x8_v01.html"><b>3장</b>8×8 MNIST (CPU 없음)</a></li><li class="now" aria-current="step"><b>4장</b>784 가속기 설계 공간</li><li class=""><a href="p05_mbv_soc_v01.html"><b>5장</b>MicroBlaze V SoC</a></li><li class="plan"><b>6장</b>응용 확장</li><li class="plan"><b>7장</b>종합과제</li></ol>
+      <ol class="road" aria-label="전체 장에서 지금 위치"><li class=""><a href="p01_uart_calc_v01.html"><b>1장</b>UART 계산기</a></li><li class=""><a href="p02_npu4_board_v01.html"><b>2장</b>4뉴런 NPU 보드</a></li><li class=""><a href="p03_mnist8x8_v01.html"><b>3장</b>8×8 MNIST (CPU 없음)</a></li><li class="now" aria-current="step"><b>4장</b>784 가속기 설계 공간</li><li class=""><a href="p05_mbv_soc_v01.html"><b>5장</b>MicroBlaze V SoC</a></li><li class=""><a href="p06_npu_apps_v01.html"><b>6장</b>응용 확장</a></li><li class="plan"><b>7장</b>종합과제</li></ol>
       <ol class="steps" aria-label="이 장의 서브젝트와 진행 상태"><li class=""><span class="code">4-1</span><span><a href="#s4_1">INT8·INT16 정밀도 비교</a> <small>(구 06장 · 오전)</small><br>같은 32비트 값을 두 정밀도로: 768 → <code>Q:03,0030</code>, 65536 → INT8은 <code>7F</code>로 포화(넘침 1), INT16은 <code>1000</code>으로 정확.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">4-2</span><span><a href="#s4_2">784 입력 13타일 누산 (INT8)</a> <small>(구 17장 · 오전)</small><br>시험 #92(숫자 9)를 타일 13개로: 타일마다 가중치 640개 + x 64개를 싣고 <code>T</code> → <code>T0</code>…<code>TB</code>, 마지막에 <code>C4</code> (INT8은 4로 틀림). 시작 전 <code>T</code>는 <code>E1</code>.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">4-3</span><span><a href="#s4_3">INT8·INT16 MNIST 정밀도</a> <small>(구 18장 · 오후)</small><br>같은 그림을 INT16 엔진으로: 가중치·x가 2바이트라 보낼 양이 두 배, 결과 <code>C9</code> (정답). LED가 4번에서 9번으로 옮겨 간다.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">4-4</span><span><a href="#s4_4">PE 병렬도·메모리 구조</a> <small>(구 19장 · 오후)</small><br>같은 타일 하나를 4PE <code>K4:00CE</code>(206클록), 8PE <code>K8:008A</code>(138), 1PE는 class마다 가중치를 다시 실어 <code>K1:0046</code>(70) × 10. 세 구성의 점수는 같다.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class="demo"><span class="code">시연</span><span><a href="#demo">장 시연</a><br>PC가 28×28 원본 손글씨를 타일 13개로 나눠 보내면 보드가 3장 코어로 784 입력을 누산해 분류한다. 같은 그림이 INT8에서는 4, INT16에서는 9(정답)로 갈리고, 1PE·4PE·8PE 클록 수가 보드에서 나온다.</span><span class="st">보드 ⚠ 미실시</span></li></ol>
     </section>
     <section class="section" id="s01">
@@ -3499,6 +3499,12 @@ window.COURSE={
    "number": 5,
    "title": "MicroBlaze V SoC",
    "file": "p05_mbv_soc_v01.html"
+  },
+  {
+   "id": "p06",
+   "number": 6,
+   "title": "응용 확장",
+   "file": "p06_npu_apps_v01.html"
   }
  ]
 };
