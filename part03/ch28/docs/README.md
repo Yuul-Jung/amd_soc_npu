@@ -81,7 +81,7 @@ python3 part03/ch28/host/p3_digit_host.py --port /dev/ttyUSB1 --images my_digit.
 | 펌웨어 변이 8종 | 표시 class·오류 코드 표시·CRC 검사·범위 검사·모델 ID 검사·자체 시험 복구·잡음 계수·재동기 제거 → **8/8 검출** |
 | Vivado 구현 | WNS +0.420 ns, WHS +0.020 ns, Bitstream·XSA (`validation/soc_summary.md`) |
 | Vitis ELF | 32,912 B, xparameters: NPU 0x44A0_0000, GPIO1 0x4001_0000, UART 0x4060_0000 |
-| SoC 전체 xsim | **NOT_COMPLETE** — 1차 실행은 부팅 응답(`READY`·`DISP fnd=000FF16C`)까지만 받고 중단됨. 재실행 결과를 `validation/soc_uart_sim.log`로 남긴 뒤 이 행을 갱신한다 |
+| SoC 전체 xsim | **PASS 15/15** — 실제 MicroBlaze V + 보드용 ELF(9179c509c9e7dbaa) + UART 비트 단위 프레임. 부팅 29.9 ms, 이미지 40 응답 완료 155.9 ms(시뮬레이션 시간), 점수 10개 골든 일치, FND·LED 핀 일치. 실행 시간 2시간 48분(2026-11-19). 1차 판정은 11/15 FAIL이었는데, `xil_printf`가 16진수를 대문자로 찍는 것을 검사기가 소문자 문자열로 비교했기 때문이다. 검사기를 정수 비교로 고치고 같은 기록으로 다시 판정했다 (`validation/soc_sim_20261119.log`, `soc_sim_20261119_recheck.log`) |
 | **Basys3 실물** | **NOT_RUN** — `ch27/docs/BOARD_CHECKLIST.md` 28장 항목, 사용자와 함께 |
 
 ## 7. 알려진 한계

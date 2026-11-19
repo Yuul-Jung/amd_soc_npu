@@ -22,7 +22,7 @@
 | 25 | 전력·에너지 | 2674513 | Vivado report_power + 구간별 SAIF | CPU 4.541 mJ vs NPU 2.733 mJ/추론(1.66배), SAIF 매칭 13% |
 | 26 | 3×3 합성곱(선택) | 505be9e | RTL sim + OOC 배선 | 936출력 일치, WNS +4.647 |
 | 27 | 통합 실행기·인계 | e148ccd | `run_all.sh` LEVEL=sim PASS | 이 문서, 실물 점검표 |
-| 28 | 손글씨 숫자 인식 시스템(종합 1) | c7fbcb3 | 호스트↔펌웨어↔NPU RTL 협동 sim + Vivado 칩 전체·Bitstream + Vitis ELF (SoC xsim 재실행 중) | 22장 점수 골든 일치, 오류 시험 11·변이 8, WNS +0.420 |
+| 28 | 손글씨 숫자 인식 시스템(종합 1) | c7fbcb3 | 호스트↔펌웨어↔NPU RTL 협동 sim + Vivado 칩 전체·Bitstream + Vitis ELF + SoC 전체 xsim PASS 15/15 | 22장 점수 골든 일치, 오류 시험 11·변이 8, WNS +0.420 |
 | 29 | 센서 융합 상태 감시(종합 2) | 5d22429 (+ 최종 회귀) | 정책 RTL sim·OOC 배선 + 호스트↔펌웨어↔NPU RTL 협동 sim + Vitis ELF(28장 Bitstream 재사용) | 정책 RTL 4070클록 일치·변이 4, 협동 109검사·변이 12, 합성 데이터 INT8 95.67% |
 
 ## 2. 재현

@@ -1,0 +1,19 @@
+RECHECK 2026-11-19 13:11:36 soc_sim_check.py(16진수 대소문자 무관 비교) on build/sim/record.txt of soc_sim_20261119.log
+SOCCHK ready_line PASS :: P3_DIGIT READY model=F16C4F12 model_ok=1 mode=784x8 tiles=13 bias_rc=0
+SOCCHK boot_disp PASS :: ['DISP fnd=000FF16C led=0000']
+SOCCHK boot_fnd_digit0 PASS :: pin=(14, 70, 1) expect=(14, 70, 1)
+SOCCHK boot_fnd_digit1 PASS :: pin=(13, 2, 1) expect=(13, 2, 1)
+SOCCHK boot_fnd_digit2 PASS :: pin=(11, 121, 1) expect=(11, 121, 1)
+SOCCHK boot_fnd_digit3 PASS :: pin=(7, 14, 1) expect=(7, 14, 1)
+SOCCHK boot_led_pin PASS :: [0]
+SOCCHK result_line PASS :: RESULT img=40 model=F16C4F12 npu_class=7 cpu_class=7 match=1 rc=0 status=00000C12 junk=0 scores=-34082,-171877,-20186,44571,-67625,-20574,-141553,112746,-23315,13460
+SOCCHK scores_eq_golden PASS :: [-34082, -171877, -20186, 44571, -67625, -20574, -141553, 112746, -23315, 13460] vs [-34082, -171877, -20186, 44571, -67625, -20574, -141553, 112746, -23315, 13460]
+SOCCHK result_disp PASS :: ['DISP fnd=000D2807 led=8080']
+SOCCHK result_fnd_digit0 PASS :: pin=(14, 120, 1) expect=(14, 120, 1)
+SOCCHK result_fnd_digit1 PASS :: pin=None expect=None
+SOCCHK result_fnd_digit2 PASS :: pin=(11, 0, 1) expect=(11, 0, 1)
+SOCCHK result_fnd_digit3 PASS :: pin=(7, 36, 1) expect=(7, 36, 1)
+SOCCHK result_led_pin PASS :: [32896]
+SOC_TIMELINE boot_done_ms=29.858 send_start_ms=40.344 response_done_ms=155.933 end_ms=166.419
+SOC28_RTL_SIM_PASS checks=15/15
+EXIT=0

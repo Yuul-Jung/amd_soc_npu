@@ -50,6 +50,14 @@ def check_fnd(name, block, word, results):
         results.append((f"{name}_fnd_digit{d}", block.get(d) == exp, f"pin={block.get(d)} expect={exp}"))
 
 
+def hx(v):
+    """(변경) xil_printf는 %x를 대문자로, PC printf는 소문자로 찍는다. 문자열 대신 정수로 비교한다."""
+    try:
+        return int(v, 16)
+    except (TypeError, ValueError):
+        return None
+
+
 def check(rec, exp_path):
     e = json.loads(exp_path.read_text())
     raw = [l.replace("\x00", "").strip() for l in rec.read_text(errors="replace").splitlines()]
@@ -61,23 +69,23 @@ def check(rec, exp_path):
     led = [int(parse_kv(l)["led"], 16) for l in raw if l.startswith("PIN")]
     results = []
     ready = parse_kv(uart[0]) if uart and uart[0].startswith("P3_DIGIT READY") else {}
-    results.append(("ready_line", ready.get("model") == f"{e['model_id']:08x}" and ready.get("model_ok") == "1"
+    results.append(("ready_line", hx(ready.get("model")) == e["model_id"] and ready.get("model_ok") == "1"
                     and ready.get("bias_rc") == "0", uart[0] if uart else None))
     bw, bl = fnd_boot(e["model_id"])
     d0 = parse_kv(uart[1]) if len(uart) > 1 else {}
-    results.append(("boot_disp", d0.get("fnd") == f"{bw:08x}" and d0.get("led") == f"{bl:04x}", uart[1:2]))
+    results.append(("boot_disp", hx(d0.get("fnd")) == bw and hx(d0.get("led")) == bl, uart[1:2]))
     check_fnd("boot", boot_fnd, bw, results)
     results.append(("boot_led_pin", led[:1] == [bl], led[:1]))
     r = parse_kv(uart[2]) if len(uart) > 2 else {}
     scores = [int(v) for v in r.get("scores", "").split(",") if v]
     results.append(("result_line", uart[2].startswith("RESULT") and r.get("match") == "1" and r.get("rc") == "0"
                     and int(r.get("img", -1)) == e["img_id"] and int(r.get("npu_class", -1)) == e["class"]
-                    and int(r.get("cpu_class", -1)) == e["class"] and r.get("model") == f"{e['model_id']:08x}",
+                    and int(r.get("cpu_class", -1)) == e["class"] and hx(r.get("model")) == e["model_id"],
                     uart[2] if len(uart) > 2 else None))
     results.append(("scores_eq_golden", scores == e["scores"], f"{scores} vs {e['scores']}"))
     rw, rl = fnd_result(e["img_id"], e["class"])
     d1 = parse_kv(uart[3]) if len(uart) > 3 else {}
-    results.append(("result_disp", d1.get("fnd") == f"{rw:08x}" and d1.get("led") == f"{rl:04x}", uart[3:4]))
+    results.append(("result_disp", hx(d1.get("fnd")) == rw and hx(d1.get("led")) == rl, uart[3:4]))
     check_fnd("result", resp_fnd, rw, results)
     results.append(("result_led_pin", led[1:2] == [rl], led[1:2]))
     for name, ok, info in results:
