@@ -1,30 +1,68 @@
+START 2026-11-19 16:20:27
 BUSIF s_axi xilinx.com:interface:aximm:1.0
 BUSIF s_axi_aresetn xilinx.com:signal:reset:1.0
 BUSIF s_axi_aclk xilinx.com:signal:clock:1.0
 BUSIF irq_o xilinx.com:signal:interrupt:1.0
 ADDRBLOCK reg0 range=0x1000
 IP_PACKAGE_DONE
+CRITICAL WARNING: [filemgmt 20-742] The top module "basys3_soc11_top" specified for this project can not be validated. The current project is using automatic hierarchy update mode, and hence a new suitable replacement top will be automatically selected. If this is not desired, please change the hierarchy update mode to one of the manual compile order modes first, and then set top to any desired value.
 BD soc11_integration
 CHECK_PASS SmartConnect NUM_MI 4 in original
 ADDR SEG_p3_npu_0_reg0 0x44A00000 0x00001000
-ADDR SEG_axi_uartlite_0_Reg 0x40600000 0x00010000
+ADDR SEG_ip06_seg7_reg0 0x40060000 0x00010000
+ADDR SEG_axi_uartlite_0_Reg 0x40020000 0x00010000
 ADDR SEG_dlmb_bram_if_cntlr_Mem 0x00000000 0x00010000
 ADDR SEG_axi_gpio_0_Reg 0x40000000 0x00010000
-ADDR SEG_axi_timer_0_Reg 0x41C00000 0x00010000
-ADDR SEG_axi_intc_0_Reg 0x41200000 0x00010000
+ADDR SEG_axi_timer_0_Reg 0x40030000 0x00010000
+ADDR SEG_axi_intc_0_Reg 0x40040000 0x00010000
+ADDR SEG_axi_gpio_btn_Reg 0x40010000 0x00010000
 CHECK_PASS data address segments do not overlap
 CHECK_PASS NPU base 0x44A00000
+ADDR_MAP_A dlmb_bram_if_cntlr 0x00000000 0x00010000 expect 0x00000000 65536 OK
+ADDR_MAP_A axi_gpio_0 0x40000000 0x00010000 expect 0x40000000 65536 OK
+ADDR_MAP_A axi_gpio_btn 0x40010000 0x00010000 expect 0x40010000 65536 OK
+ADDR_MAP_A axi_uartlite_0 0x40020000 0x00010000 expect 0x40020000 65536 OK
+ADDR_MAP_A axi_timer_0 0x40030000 0x00010000 expect 0x40030000 65536 OK
+ADDR_MAP_A axi_intc_0 0x40040000 0x00010000 expect 0x40040000 65536 OK
+ADDR_MAP_A ip06_seg7 0x40060000 0x00010000 expect 0x40060000 65536 OK
+ADDR_MAP_A p3_npu_0 0x44A00000 0x00001000 expect 0x44A00000 4096 OK
+ADDR_MAP_A_PASS
+CHECK_PASS address map A
+IRQ_MAP_A In0 axi_timer_0/interrupt expect axi_timer_0/interrupt OK
+IRQ_MAP_A In1 axi_uartlite_0/interrupt expect axi_uartlite_0/interrupt OK
+IRQ_MAP_A In2 irq_zero/dout expect irq_zero/dout OK
+IRQ_MAP_A In3 axi_gpio_btn/ip2intc_irpt expect axi_gpio_btn/ip2intc_irpt OK
+IRQ_MAP_A In4 irq_zero/dout expect irq_zero/dout OK
+IRQ_MAP_A In5 irq_zero/dout expect irq_zero/dout OK
+IRQ_MAP_A In6 irq_zero/dout expect irq_zero/dout OK
+IRQ_MAP_A In7 irq_zero/dout expect irq_zero/dout OK
+IRQ_MAP_A In8 irq_zero/dout expect irq_zero/dout OK
+IRQ_MAP_A In9 irq_zero/dout expect irq_zero/dout OK
+IRQ_MAP_A In10 irq_zero/dout expect irq_zero/dout OK
+IRQ_MAP_A In11 irq_zero/dout expect irq_zero/dout OK
+IRQ_MAP_A In12 p3_npu_0/irq_o expect p3_npu_0/irq_o OK
+IRQ_MAP_A In13 irq_zero/dout expect irq_zero/dout OK
+IRQ_MAP_A In14 irq_zero/dout expect irq_zero/dout OK
+IRQ_MAP_A In15 irq_zero/dout expect irq_zero/dout OK
+IRQ_MAP_A_PASS
+CHECK_PASS irq map A
+CHECK_PASS BD port seg
+CHECK_PASS BD port dp
+CHECK_PASS BD port an
+CHECK_PASS BD interface port btn
 CHECK_PASS NPU clock = SmartConnect clock
 CHECK_PASS NPU reset = peripheral_aresetn
 CHECK_PASS irq_concat -> axi_intc intr
-CHECK_PASS user top basys3_soc11_top kept
+CHECK_PASS user top basys3_soc21_top
 CRITICAL WARNING: [Constraints 18-1056] Clock 'sys_clk_pin' completely overrides clock 'clk'.
+CRITICAL WARNING: [Synth 8-6895] The reference checkpoint build/soc21_npu/soc11_user_top.srcs/utils_1/imports/synth_1/soc01_mb_bram_wrapper.dcp is not suitable for use with incremental synthesis for this design. Please regenerate the checkpoint for this design with -incremental_synth switch in the same Vivado session that synth_design has been run. Synthesis will continue with the default flow
 CHECK_PASS synth_1 complete
 CRITICAL WARNING: [Constraints 18-1055] Clock 'sys_clk_pin' completely overrides clock 'clk', which is referenced by one or more other constraints. Any constraints that refer to the overridden clock will be ignored.
 CHECK_PASS impl_1 + bitstream complete
-TIMING WNS=0.219 WHS=0.021
+TIMING WNS=0.374 WHS=0.034
 CHECK_PASS post-route setup/hold met
 SOC21_BUILD_DONE
 ORIGINAL_PROJECT_UNCHANGED tree_sha=7225b730e4ff1ff5
-da4edc6164b2ea8806052997407494a6f0a0d2ffbbd480107e882899f150a1fb  out/soc21_npu.xsa
-881216da5ddd04b49ab3771dfdad919ea7284c995c9cdc9394d868ad0854cbe0  out/basys3_soc11_top.bit
+24abeb3abba14b83d191bed42bde01d91ede0f62b2859d4eba59e31159ec458d  out/soc21_npu.xsa
+fca1368c017c50b696a71e771080d77f382589916da2a1882ee1edb9bdeb3925  out/basys3_soc21_top.bit
+EXIT=0 END 2026-11-19 16:25:12
