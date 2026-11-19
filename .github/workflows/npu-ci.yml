@@ -19,6 +19,8 @@ jobs:
         run: python3 tools/check_static.py
       - name: Guide sync check (chapter.json·코드·증거 ↔ HTML)
         run: python3 tools/guide/build_guides.py --check
+      - name: Project guide sync check (project.json·chapter.json·증거 ↔ 장 페이지)
+        run: python3 tools/guide/build_projects.py --check
 
   rtl-sim-ch00-ch12:
     name: RTL 시뮬레이션 ch00~ch31
@@ -37,6 +39,8 @@ jobs:
         run: bash ch02/scripts/run_sim.sh
       - name: Run ch03 MAC Pipeline
         run: bash ch03/scripts/run_sim.sh
+      - name: Run 1장 Top (p01, STAGE 1~4)
+        run: bash p01/scripts/run_sim.sh
       - name: Run ch04 BRAM
         run: bash ch04/scripts/run_sim.sh
       - name: Run ch05 Fixed Quantizer
