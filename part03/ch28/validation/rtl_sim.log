@@ -1,0 +1,63 @@
+Python 3.12.3
+gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+Icarus Verilog version 12.0 (stable) ()
+DIGIT_REFERENCE_SELFTEST_PASS model_id=f16c4f12 frame_bytes=795
+DIGIT_HEADER_DONE model_id=f16c4f12
+FND_VECTORS words=9 rows=36
+RTL_SIM_PASS FND_SCAN vectors=36 digit_changes=9
+part03/mini_npu/rtl/npu_dsp_mac_lane.v:2: warning: timescale for npu_dsp_mac_lane inherited from another file.
+part03/ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
+C_CRC16_CHECK value=29b1 expect=29b1
+C_DIGIT_APP_EXIT frames=34
+MODEL_ID host=f16c4f12 device=f16c4f12 model_ok=1
+IMG   0 digit_samples#0 label=7 golden=7 dev=7 scores_match=1 display_ok=1 OK
+IMG   1 digit_samples#1 label=2 golden=2 dev=2 scores_match=1 display_ok=1 OK
+IMG   2 digit_samples#2 label=1 golden=1 dev=1 scores_match=1 display_ok=1 OK
+IMG   3 digit_samples#3 label=0 golden=0 dev=0 scores_match=1 display_ok=1 OK
+IMG   4 digit_samples#4 label=4 golden=4 dev=4 scores_match=1 display_ok=1 OK
+IMG   5 digit_samples#5 label=1 golden=1 dev=1 scores_match=1 display_ok=1 OK
+IMG   6 digit_samples#6 label=4 golden=4 dev=4 scores_match=1 display_ok=1 OK
+IMG   7 digit_samples#7 label=9 golden=9 dev=9 scores_match=1 display_ok=1 OK
+IMG   8 digit_samples#8 label=5 golden=6 dev=6 scores_match=1 display_ok=1 MODEL_MISCLASS
+IMG   9 digit_samples#9 label=9 golden=9 dev=9 scores_match=1 display_ok=1 OK
+IMG  10 digit_samples#10 label=0 golden=0 dev=0 scores_match=1 display_ok=1 OK
+IMG  11 digit_samples#11 label=6 golden=6 dev=6 scores_match=1 display_ok=1 OK
+IMG  12 digit_samples#15 label=5 golden=5 dev=5 scores_match=1 display_ok=1 OK
+IMG  13 digit_samples#17 label=7 golden=7 dev=7 scores_match=1 display_ok=1 OK
+IMG  14 digit_samples#18 label=3 golden=3 dev=3 scores_match=1 display_ok=1 OK
+IMG  15 digit_samples#21 label=6 golden=6 dev=6 scores_match=1 display_ok=1 OK
+IMG  16 digit_samples#30 label=3 golden=3 dev=3 scores_match=1 display_ok=1 OK
+IMG  17 digit_samples#35 label=2 golden=2 dev=2 scores_match=1 display_ok=1 OK
+IMG  18 digit_samples#61 label=8 golden=8 dev=8 scores_match=1 display_ok=1 OK
+IMG  19 digit_samples#84 label=8 golden=8 dev=8 scores_match=1 display_ok=1 OK
+IMG  20 digit_samples#33 label=4 golden=0 dev=0 scores_match=1 display_ok=1 MODEL_MISCLASS
+IMG  21 digit_samples#63 label=3 golden=2 dev=2 scores_match=1 display_ok=1 MODEL_MISCLASS
+ERRCASE crc_flip PASS :: ERROR img=-1 code=1 name=CRC detail=790 junk=0
+ERRCASE model_id PASS :: ERROR img=7 code=4 name=MODEL detail=1 junk=0
+ERRCASE pixel_range PASS :: ERROR img=7 code=5 name=RANGE detail=300 junk=0
+ERRCASE unknown_cmd PASS :: ERROR img=-1 code=3 name=CMD detail=90 junk=0
+ERRCASE junk_then_bad_cmd PASS :: ERROR img=-1 code=3 name=CMD detail=90 junk=5
+ERRCASE junk_then_good PASS :: RESULT img=7 model=f16c4f12 npu_class=7 cpu_class=7 match=1 rc=0 status=00000c12 junk=4 scores=-34082,-171877,-20186,44571,-67625,-20574,-141553,112746,-23315,13460
+ERRCASE short_frame PASS :: ERROR img=-1 code=2 name=TIMEOUT detail=397 junk=0
+ERRCASE after_timeout_good PASS :: RESULT img=7 model=f16c4f12 npu_class=7 cpu_class=7 match=1 rc=0 status=00000c12 junk=0 scores=-34082,-171877,-20186,44571,-67625,-20574,-141553,112746,-23315,13460
+ERRCASE w_missing_selftest PASS :: SELFTEST w_missing err_code=9 recovered=1 status=00009010
+ERRCASE after_selftest_good PASS :: RESULT img=7 model=f16c4f12 npu_class=7 cpu_class=7 match=1 rc=0 status=00009c12 junk=0 scores=-34082,-171877,-20186,44571,-67625,-20574,-141553,112746,-23315,13460
+ERRCASE identify PASS :: P3_DIGIT READY model=f16c4f12 model_ok=1 mode=784x8 tiles=13 junk=0
+DIGIT_HOST_SUMMARY target=rtl_cosim images=22 scores_match=22 device_eq_golden=22 display_ok=22 golden_label_acc=19/22 (86.4%) device_label_acc=19/22 (86.4%) error_suite=11/11 proc_rc=0
+DIGIT_HOST_PASS
+RTL_SIM_PASS DRIVER_BRIDGE axi_writes=224377 axi_reads=23630 irq_rising=0
+MUTANTS display_class error_display_code no_crc_check no_range_check no_model_check no_selftest_recover no_junk_count no_resync
+MUTANT display_class KILLED (ERRCASE junk_then_good FAIL :: RESULT img=7 model=f16c4f12 npu_class=7 cpu_class=7 match=1 rc=0 stat)
+MUTANT error_display_code KILLED (ERRCASE crc_flip FAIL :: ERROR img=-1 code=1 name=CRC detail=790 junk=0)
+MUTANT no_crc_check KILLED (ERRCASE crc_flip FAIL :: RESULT img=7 model=f16c4f12 npu_class=7 cpu_class=7 match=1 rc=0 status=000)
+MUTANT no_junk_count KILLED (ERRCASE junk_then_bad_cmd FAIL :: ERROR img=-1 code=3 name=CMD detail=90 junk=0)
+MUTANT no_model_check KILLED (ERRCASE model_id FAIL :: RESULT img=7 model=f16c4f13 npu_class=7 cpu_class=7 match=1 rc=0 status=000)
+<tmp>/mut_no_range_check.c: In function ‘infer’:
+<tmp>/mut_no_range_check.c:141:15: warning: comparison is always false due to limited range of data type [-Wtype-limits]
+  141 |         if (v > 255u) {                        /* 전처리 계약: 0..127 */
+      |               ^
+MUTANT no_range_check KILLED (ERRCASE pixel_range FAIL :: RESULT img=7 model=f16c4f12 npu_class=7 cpu_class=7 match=1 rc=0 status=)
+MUTANT no_resync KILLED (ERRCASE junk_then_bad_cmd FAIL :: None)
+MUTANT no_selftest_recover KILLED (ERRCASE w_missing_selftest FAIL :: SELFTEST w_missing err_code=9 recovered=0 status=00009015)
+MUTATION_SUMMARY killed=8 total=8
+PYTHON_RTL_COMPARE_PASS ch28 host->uart_frame->c_firmware->axi_npu_rtl scores=golden display=rule

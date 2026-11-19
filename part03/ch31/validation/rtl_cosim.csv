@@ -1,0 +1,36 @@
+target,step,name,ok,detail,line
+rtl_cosim,1,boot,1,,P3_SECURE READY model=18496ca4 model_ok=1 bias_rc=0 key_fp=e7950043 test_key=1 last_seq=0
+rtl_cosim,2,infer_model_a_0,1,,"INFER seq=10 model=18496ca4 guard=OK npu=0 cpu=0 match=1 scores=3219,1390,-4609"
+rtl_cosim,3,infer_model_a_1,1,,"INFER seq=11 model=18496ca4 guard=OK npu=1 cpu=1 match=1 scores=-5367,2746,2621"
+rtl_cosim,4,infer_model_a_2,1,,"INFER seq=12 model=18496ca4 guard=OK npu=2 cpu=2 match=1 scores=-6901,2402,4499"
+rtl_cosim,5,infer_model_a_3,1,,"INFER seq=13 model=18496ca4 guard=OK npu=1 cpu=1 match=1 scores=1459,1566,-3025"
+rtl_cosim,6,infer_model_a_4,1,,"INFER seq=14 model=18496ca4 guard=OK npu=1 cpu=1 match=1 scores=1695,1702,-3397"
+rtl_cosim,7,load_model_b,1,,SECURE result=COMMIT seq=1 model=b7491f99 bank=1 last_seq=1
+rtl_cosim,8,infer_model_b_0,1,,"INFER seq=20 model=b7491f99 guard=OK npu=0 cpu=0 match=1 scores=3559,1539,-5027"
+rtl_cosim,9,infer_model_b_1,1,,"INFER seq=21 model=b7491f99 guard=OK npu=1 cpu=1 match=1 scores=-5283,3217,3047"
+rtl_cosim,10,infer_model_b_2,1,,"INFER seq=22 model=b7491f99 guard=OK npu=2 cpu=2 match=1 scores=-7297,1631,3897"
+rtl_cosim,11,infer_model_b_3,1,,"INFER seq=23 model=b7491f99 guard=OK npu=0 cpu=0 match=1 scores=1671,1555,-3475"
+rtl_cosim,12,infer_model_b_4,1,,"INFER seq=24 model=b7491f99 guard=OK npu=0 cpu=0 match=1 scores=2035,1899,-3707"
+rtl_cosim,13,tamper_ciphertext,1,,SECURE result=REJECT reason=AUTH code=3 seq=2 last_seq=1 active=b7491f99
+rtl_cosim,14,tamper_tag,1,,SECURE result=REJECT reason=AUTH code=3 seq=2 last_seq=1 active=b7491f99
+rtl_cosim,15,tamper_header_seq,1,,SECURE result=REJECT reason=AUTH code=3 seq=3 last_seq=1 active=b7491f99
+rtl_cosim,16,tamper_header_model,1,,SECURE result=REJECT reason=AUTH code=3 seq=2 last_seq=1 active=b7491f99
+rtl_cosim,17,length_field_minus1,1,,SECURE result=REJECT reason=AUTH code=3 seq=2 last_seq=1 active=b7491f99
+rtl_cosim,18,length_over_256,1,,SECURE result=REJECT reason=LENGTH code=2 seq=2 last_seq=1 active=b7491f99
+rtl_cosim,19,wrong_mac_key,1,,SECURE result=REJECT reason=AUTH code=3 seq=2 last_seq=1 active=b7491f99
+rtl_cosim,20,version_2,1,,SECURE result=REJECT reason=VERSION code=1 seq=2 last_seq=1 active=b7491f99
+rtl_cosim,21,replay_seq1,1,,SECURE result=REJECT reason=REPLAY code=4 seq=1 last_seq=1 active=b7491f99
+rtl_cosim,22,nonce_not_bound,1,,SECURE result=REJECT reason=NONCE code=5 seq=2 last_seq=1 active=b7491f99
+rtl_cosim,23,forged_seq_1000,1,,SECURE result=REJECT reason=AUTH code=3 seq=1000 last_seq=1 active=b7491f99
+rtl_cosim,24,wrong_enc_key_auth_ok,1,,SECURE result=REJECT reason=MODEL code=6 seq=3 last_seq=3 active=b7491f99
+rtl_cosim,25,model_id_mismatch,1,,SECURE result=REJECT reason=MODEL code=6 seq=4 last_seq=4 active=b7491f99
+rtl_cosim,26,replay_consumed_seq3,1,,SECURE result=REJECT reason=REPLAY code=4 seq=3 last_seq=4 active=b7491f99
+rtl_cosim,27,transport_crc,1,,ERROR code=1 name=CRC detail=0 active=b7491f99
+rtl_cosim,28,cut_mid_frame,1,,ERROR code=2 name=TIMEOUT detail=0 active=b7491f99
+rtl_cosim,29,still_model_b_0,1,,"INFER seq=30 model=b7491f99 guard=OK npu=0 cpu=0 match=1 scores=1671,1555,-3475"
+rtl_cosim,30,still_model_b_1,1,,"INFER seq=31 model=b7491f99 guard=OK npu=0 cpu=0 match=1 scores=2035,1899,-3707"
+rtl_cosim,31,blob_internal_id_bad,1,,SECURE result=REJECT reason=MODEL code=6 seq=5 last_seq=5 active=b7491f99
+rtl_cosim,32,load_model_a_seq6,1,,SECURE result=COMMIT seq=6 model=18496ca4 bank=0 last_seq=6
+rtl_cosim,33,infer_model_a_again_0,1,,"INFER seq=40 model=18496ca4 guard=OK npu=1 cpu=1 match=1 scores=1459,1566,-3025"
+rtl_cosim,34,infer_model_a_again_1,1,,"INFER seq=41 model=18496ca4 guard=OK npu=1 cpu=1 match=1 scores=1695,1702,-3397"
+rtl_cosim,35,identify,1,,P3_SECURE READY model=18496ca4 key_fp=e7950043 test_key=1 last_seq=6

@@ -1,0 +1,122 @@
+P3_MOTOR READY model=18496ca4 model_ok=1 bias_rc=0
+MOTOR src=BOOT seq=-1 guard=- npu=-1 state=3 latch=0 ok=-1 op_dir=1 rec_dir=0 rec_duty=0 st=0018c000 junk=0
+DISP fnd=004f3000 led=8008
+P3_MOTOR READY model=18496ca4 model_ok=1 junk=0
+MOTOR src=FRAME seq=300 guard=OK npu=0 state=3 latch=0 ok=-1 op_dir=1 rec_dir=0 rec_duty=0 st=00184000 junk=0
+DISP fnd=004f3000 led=8008
+MOTOR src=FRAME seq=301 guard=OK npu=0 state=3 latch=0 ok=-1 op_dir=1 rec_dir=0 rec_duty=0 st=00184000 junk=0
+DISP fnd=004f3000 led=8008
+MOTOR src=FRAME seq=302 guard=OK npu=0 state=0 latch=0 ok=-1 op_dir=1 rec_dir=1 rec_duty=80 st=00184400 junk=0
+DISP fnd=004f0000 led=0001
+MOTOR src=ADVANCE seq=-1 guard=- npu=-1 state=0 latch=0 ok=-1 op_dir=1 rec_dir=1 rec_duty=80 st=00184400 junk=0
+DISP fnd=004f0000 led=0001
+MOTOR src=CLEAR seq=-1 guard=- npu=-1 state=0 latch=0 ok=-1 op_dir=1 rec_dir=0 rec_duty=0 st=00001000 junk=0
+DISP fnd=000f0000 led=0001
+MOTOR src=FRAME seq=303 guard=OK npu=0 state=0 latch=0 ok=-1 op_dir=1 rec_dir=1 rec_duty=80 st=04001500 junk=0
+DISP fnd=000f0100 led=0001
+MOTOR src=ADVANCE seq=-1 guard=- npu=-1 state=0 latch=0 ok=-1 op_dir=1 rec_dir=1 rec_duty=80 st=14001550 junk=0
+DISP fnd=000f0150 led=0001
+MOTOR src=FRAME seq=304 guard=OK npu=1 state=1 latch=0 ok=-1 op_dir=1 rec_dir=1 rec_duty=30 st=1400151e junk=0
+DISP fnd=000f111e led=8002
+MOTOR src=INJECT seq=-1 guard=- npu=-1 state=1 latch=0 ok=-1 op_dir=1 rec_dir=1 rec_duty=30 st=00216400 junk=0
+DISP fnd=004f1000 led=8002
+MOTOR src=FRAME seq=305 guard=OK npu=0 state=1 latch=0 ok=-1 op_dir=1 rec_dir=1 rec_duty=30 st=00214400 junk=0
+DISP fnd=004f1000 led=8002
+MOTOR src=FRAME seq=306 guard=OK npu=0 state=1 latch=0 ok=-1 op_dir=1 rec_dir=1 rec_duty=30 st=00214400 junk=0
+DISP fnd=004f1000 led=8002
+MOTOR src=FRAME seq=307 guard=OK npu=0 state=0 latch=0 ok=-1 op_dir=1 rec_dir=1 rec_duty=80 st=00214400 junk=0
+DISP fnd=004f0000 led=0001
+MOTOR src=ADVANCE seq=-1 guard=- npu=-1 state=0 latch=0 ok=-1 op_dir=1 rec_dir=1 rec_duty=80 st=00214400 junk=0
+DISP fnd=004f0000 led=0001
+MOTOR src=INJECT seq=-1 guard=- npu=-1 state=0 latch=0 ok=-1 op_dir=1 rec_dir=1 rec_duty=80 st=00014400 junk=0
+DISP fnd=004f0000 led=0001
+MOTOR src=FRAME seq=308 guard=OK npu=0 state=0 latch=0 ok=-1 op_dir=1 rec_dir=1 rec_duty=80 st=00014400 junk=0
+DISP fnd=004f0000 led=0001
+MOTOR src=CLEAR seq=-1 guard=- npu=-1 state=0 latch=0 ok=-1 op_dir=1 rec_dir=0 rec_duty=0 st=00001000 junk=0
+DISP fnd=000f0000 led=0001
+MOTOR src=FRAME seq=309 guard=OK npu=0 state=0 latch=0 ok=-1 op_dir=1 rec_dir=1 rec_duty=80 st=04001500 junk=0
+DISP fnd=000f0100 led=0001
+MOTOR src=ADVANCE seq=-1 guard=- npu=-1 state=0 latch=0 ok=-1 op_dir=1 rec_dir=1 rec_duty=80 st=14001550 junk=0
+DISP fnd=000f0150 led=0001
+MOTOR src=INJECT seq=-1 guard=- npu=-1 state=0 latch=0 ok=-1 op_dir=1 rec_dir=1 rec_duty=80 st=01003400 junk=0
+DISP fnd=000f0000 led=0001
+MOTOR src=DIR seq=-1 guard=- npu=-1 state=0 latch=0 ok=-1 op_dir=2 rec_dir=2 rec_duty=80 st=01003800 junk=0
+DISP fnd=000f0000 led=0001
+MOTOR src=ADVANCE seq=-1 guard=- npu=-1 state=0 latch=0 ok=-1 op_dir=2 rec_dir=2 rec_duty=80 st=19001a50 junk=0
+DISP fnd=000f0250 led=0001
+MOTOR src=INJECT seq=-1 guard=- npu=-1 state=0 latch=0 ok=-1 op_dir=2 rec_dir=2 rec_duty=80 st=18001a50 junk=0
+DISP fnd=000f0250 led=0001
+MOTOR src=DIR seq=-1 guard=- npu=-1 state=0 latch=0 ok=-1 op_dir=1 rec_dir=1 rec_duty=80 st=00003400 junk=0
+DISP fnd=000f0000 led=0001
+MOTOR src=ADVANCE seq=-1 guard=- npu=-1 state=0 latch=0 ok=-1 op_dir=1 rec_dir=1 rec_duty=80 st=00003400 junk=0
+DISP fnd=000f0000 led=0001
+MOTOR src=ADVANCE seq=-1 guard=- npu=-1 state=0 latch=0 ok=-1 op_dir=1 rec_dir=1 rec_duty=80 st=14001550 junk=0
+DISP fnd=000f0150 led=0001
+MOTOR src=FRAME seq=310 guard=OK npu=2 state=2 latch=1 ok=-1 op_dir=1 rec_dir=0 rec_duty=0 st=00003000 junk=0
+DISP fnd=000f2000 led=a004
+MOTOR src=FRAME seq=311 guard=OK npu=0 state=2 latch=1 ok=-1 op_dir=1 rec_dir=0 rec_duty=0 st=00001000 junk=0
+DISP fnd=000f2000 led=a004
+MOTOR src=FRAME seq=312 guard=OK npu=0 state=2 latch=1 ok=-1 op_dir=1 rec_dir=0 rec_duty=0 st=00001000 junk=0
+DISP fnd=000f2000 led=a004
+MOTOR src=FRAME seq=313 guard=OK npu=0 state=2 latch=1 ok=-1 op_dir=1 rec_dir=0 rec_duty=0 st=00001000 junk=0
+DISP fnd=000f2000 led=a004
+MOTOR src=ACK seq=-1 guard=- npu=-1 state=2 latch=0 ok=1 op_dir=1 rec_dir=0 rec_duty=0 st=00001000 junk=0
+DISP fnd=000f2000 led=8004
+MOTOR src=FRAME seq=314 guard=OK npu=0 state=2 latch=0 ok=-1 op_dir=1 rec_dir=0 rec_duty=0 st=00001000 junk=0
+DISP fnd=000f2000 led=8004
+MOTOR src=FRAME seq=315 guard=OK npu=0 state=2 latch=0 ok=-1 op_dir=1 rec_dir=0 rec_duty=0 st=00001000 junk=0
+DISP fnd=000f2000 led=8004
+MOTOR src=FRAME seq=316 guard=OK npu=0 state=0 latch=0 ok=-1 op_dir=1 rec_dir=1 rec_duty=80 st=04001500 junk=0
+DISP fnd=000f0100 led=0001
+MOTOR src=ADVANCE seq=-1 guard=- npu=-1 state=0 latch=0 ok=-1 op_dir=1 rec_dir=1 rec_duty=80 st=14001550 junk=0
+DISP fnd=000f0150 led=0001
+MOTOR src=FRAME seq=317 guard=UNKNOWN npu=-1 state=3 latch=0 ok=-1 op_dir=1 rec_dir=0 rec_duty=0 st=00003000 junk=0
+DISP fnd=000f3000 led=8008
+MOTOR src=FRAME seq=318 guard=OK npu=0 state=3 latch=0 ok=-1 op_dir=1 rec_dir=0 rec_duty=0 st=00001000 junk=0
+DISP fnd=000f3000 led=8008
+MOTOR src=FRAME seq=319 guard=OK npu=0 state=3 latch=0 ok=-1 op_dir=1 rec_dir=0 rec_duty=0 st=00001000 junk=0
+DISP fnd=000f3000 led=8008
+MOTOR src=FRAME seq=320 guard=OK npu=0 state=0 latch=0 ok=-1 op_dir=1 rec_dir=1 rec_duty=80 st=04001500 junk=0
+DISP fnd=000f0100 led=0001
+MOTOR src=ADVANCE seq=-1 guard=- npu=-1 state=0 latch=0 ok=-1 op_dir=1 rec_dir=1 rec_duty=80 st=14001550 junk=0
+DISP fnd=000f0150 led=0001
+MOTOR src=INJECT seq=-1 guard=- npu=-1 state=0 latch=0 ok=-1 op_dir=1 rec_dir=1 rec_duty=80 st=00426400 junk=0
+DISP fnd=004f0000 led=0001
+MOTOR src=INJECT seq=-1 guard=- npu=-1 state=0 latch=0 ok=-1 op_dir=1 rec_dir=1 rec_duty=80 st=00026400 junk=0
+DISP fnd=004f0000 led=0001
+MOTOR src=CLEAR seq=-1 guard=- npu=-1 state=0 latch=0 ok=-1 op_dir=1 rec_dir=0 rec_duty=0 st=00003000 junk=0
+DISP fnd=000f0000 led=0001
+MOTOR src=FRAME seq=321 guard=OK npu=0 state=0 latch=0 ok=-1 op_dir=1 rec_dir=1 rec_duty=80 st=04001500 junk=0
+DISP fnd=000f0100 led=0001
+MOTOR src=ADVANCE seq=-1 guard=- npu=-1 state=0 latch=0 ok=-1 op_dir=1 rec_dir=1 rec_duty=80 st=14001550 junk=0
+DISP fnd=000f0150 led=0001
+MOTOR src=INJECT seq=-1 guard=- npu=-1 state=0 latch=0 ok=-1 op_dir=1 rec_dir=1 rec_duty=80 st=00846400 junk=0
+DISP fnd=004f0000 led=0001
+MOTOR src=INJECT seq=-1 guard=- npu=-1 state=0 latch=0 ok=-1 op_dir=1 rec_dir=1 rec_duty=80 st=00046400 junk=0
+DISP fnd=004f0000 led=0001
+MOTOR src=CLEAR seq=-1 guard=- npu=-1 state=0 latch=0 ok=-1 op_dir=1 rec_dir=0 rec_duty=0 st=00003000 junk=0
+DISP fnd=000f0000 led=0001
+MOTOR src=FRAME seq=322 guard=OK npu=0 state=0 latch=0 ok=-1 op_dir=1 rec_dir=1 rec_duty=80 st=04001500 junk=0
+DISP fnd=000f0100 led=0001
+MOTOR src=ADVANCE seq=-1 guard=- npu=-1 state=0 latch=0 ok=-1 op_dir=1 rec_dir=1 rec_duty=80 st=14001550 junk=0
+DISP fnd=000f0150 led=0001
+MOTOR src=QUERY seq=-1 guard=- npu=-1 state=0 latch=0 ok=-1 op_dir=1 rec_dir=1 rec_duty=80 st=14001550 junk=0
+DISP fnd=000f0150 led=0001
+MOTOR src=ADVANCE seq=-1 guard=- npu=-1 state=0 latch=0 ok=-1 op_dir=1 rec_dir=1 rec_duty=80 st=0008c400 junk=0
+DISP fnd=004f0000 led=0001
+MOTOR src=FRAME seq=323 guard=OK npu=0 state=0 latch=0 ok=-1 op_dir=1 rec_dir=1 rec_duty=80 st=00084400 junk=0
+DISP fnd=004f0000 led=0001
+MOTOR src=CLEAR seq=-1 guard=- npu=-1 state=0 latch=0 ok=-1 op_dir=1 rec_dir=0 rec_duty=0 st=00001000 junk=0
+DISP fnd=000f0000 led=0001
+MOTOR src=FRAME seq=324 guard=OK npu=0 state=0 latch=0 ok=-1 op_dir=1 rec_dir=1 rec_duty=80 st=04001500 junk=0
+DISP fnd=000f0100 led=0001
+MOTOR src=ADVANCE seq=-1 guard=- npu=-1 state=0 latch=0 ok=-1 op_dir=1 rec_dir=1 rec_duty=80 st=14001550 junk=0
+DISP fnd=000f0150 led=0001
+ERROR seq=-1 code=1 name=CRC detail=60 junk=0 bad=1
+DISP fnd=000f0150 led=4001
+ERROR seq=-1 code=3 name=DIR detail=3 junk=0 bad=2
+DISP fnd=000f0150 led=4001
+ERROR seq=-1 code=3 name=CMD detail=74 junk=0 bad=3
+DISP fnd=000f3000 led=c008
+MOTOR src=QUERY seq=-1 guard=- npu=-1 state=3 latch=0 ok=-1 op_dir=1 rec_dir=0 rec_duty=0 st=00003000 junk=0
+DISP fnd=000f3000 led=8008
