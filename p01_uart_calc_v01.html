@@ -43,6 +43,8 @@
 .steps li.done{border-left-color:#2d8a52}
 .steps li.demo{border-left-color:#4635b1;font-weight:600}
 .steps .code{font:700 15px var(--mono,monospace);color:#4635b1}
+.steps li>span{min-width:0;overflow-wrap:anywhere}
+.steps li code{word-break:break-all}
 .steps .st{font-size:13px;white-space:nowrap}
 .verdict{border:1px solid #c9c4ea;border-radius:6px;padding:8px 12px;background:#faf9ff;margin:10px 0}
 details.full{margin:10px 0}
@@ -68,7 +70,7 @@ details.full>summary{cursor:pointer;font-weight:600}
       <h2><span class="num">00</span> 장 목표·진행 위치</h2>
       <p><b>장 시연 (보드):</b> PC가 보낸 두 수의 곱이 누산되어 UART·LED·7세그먼트로 돌아오고, sw로 코어를 바꿔도 값은 같고 응답 지연만 달라진다.</p>
       <p>편성: 1일 · 서브젝트 4개 · 서브젝트마다 보드 확인 1번 + 장 시연.</p>
-      <ol class="road" aria-label="전체 장에서 지금 위치"><li class="now" aria-current="step"><b>1장</b>UART 계산기</li><li class="plan"><b>2장</b>4뉴런 NPU 보드</li><li class="plan"><b>3장</b>8×8 MNIST (CPU 없음)</li><li class="plan"><b>4장</b>784 가속기 설계 공간</li><li class="plan"><b>5장</b>MicroBlaze V SoC</li><li class="plan"><b>6장</b>응용 확장</li><li class="plan"><b>7장</b>종합과제</li></ol>
+      <ol class="road" aria-label="전체 장에서 지금 위치"><li class="now" aria-current="step"><b>1장</b>UART 계산기</li><li class=""><a href="p02_npu4_board_v01.html"><b>2장</b>4뉴런 NPU 보드</a></li><li class="plan"><b>3장</b>8×8 MNIST (CPU 없음)</li><li class="plan"><b>4장</b>784 가속기 설계 공간</li><li class="plan"><b>5장</b>MicroBlaze V SoC</li><li class="plan"><b>6장</b>응용 확장</li><li class="plan"><b>7장</b>종합과제</li></ol>
       <ol class="steps" aria-label="이 장의 서브젝트와 진행 상태"><li class=""><span class="code">1-1</span><span><a href="#s1_1">UART 에코</a> <small>(구 00장 · 오전)</small><br>보낸 글자가 그대로 돌아오고, <code>S</code>에는 준비 신호 <code>I</code>가 온다. MAC 코어가 아직 없어 <code>M</code>도 에코.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">1-2</span><span><a href="#s1_2">MAC 누산</a> <small>(구 01장 · 오전)</small><br><code>M 3 4</code>를 두 번 보내면 12 → 24(0x18)로 누산되고, LED·7세그먼트에 <code>0018</code>이 보인다. 지연 <code>L:1</code>.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">1-3</span><span><a href="#s1_3">DSP48E1 곱셈</a> <small>(구 02장 · 오후)</small><br>sw0을 올리면 DSP 코어(<code>L:2</code>), 내리면 1-2 코어(<code>L:1</code>). 두 코어의 누산값은 같다. 보고서에서 DSP48E1이 늘어난다.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">1-4</span><span><a href="#s1_4">MAC 파이프라인</a> <small>(구 03장 · 오후)</small><br>sw1을 올리면 파이프라인 코어(<code>L:2</code>). 음수 경계값 −32768×32767도 40비트 누산이 맞고, 마지막 LED·7세그먼트는 <code>7D45</code>.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class="demo"><span class="code">시연</span><span><a href="#demo">장 시연</a><br>PC가 보낸 두 수의 곱이 누산되어 UART·LED·7세그먼트로 돌아오고, sw로 코어를 바꿔도 값은 같고 응답 지연만 달라진다.</span><span class="st">보드 ⚠ 미실시</span></li></ol>
     </section>
     <section class="section" id="s01">
@@ -115,7 +117,12 @@ details.full>summary{cursor:pointer;font-weight:600}
 <text x="600" y="326" font-size="13">왼쪽 input · 오른쪽 output · 점선 = 클록·리셋</text>
 <text x="250" y="346" font-size="13">이 모듈의 포트는 Basys3 외부 핀입니다 (XDC 핀 배정).</text>
 </svg></div>
-      <p>장 Top은 배선만 합니다. 기능은 하위 모듈에 있고, 서브젝트 코어는 MAC 묶음 안에서 <code>STAGE</code>(끝낸 서브젝트 수)에 따라 하나씩 들어옵니다.</p>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>방향</th><th>포트</th><th>폭</th><th>구분</th><th>설명</th></tr></thead>
+        <tbody><tr><td>input</td><td class="nw"><code>clk</code></td><td class="nw"><code>1</code></td><td class="nw">클록</td><td>보드 100 MHz 발진기 (W5)</td></tr><tr><td>input</td><td class="nw"><code>btnC</code></td><td class="nw"><code>1</code></td><td class="nw">리셋</td><td>가운데 버튼, 누르면 리셋 (Active-High, 놓으면 동기 해제)</td></tr><tr><td>input</td><td class="nw"><code>uart_rxd</code></td><td class="nw"><code>1</code></td><td class="nw">보드 핀</td><td>USB-UART에서 들어오는 직렬 입력 (B18), 115200 bps 8N1</td></tr><tr><td>input</td><td class="nw"><code>sw</code></td><td class="nw"><code>[1:0]</code></td><td class="nw">보드 핀</td><td>sw[1:0] 코어 선택: 00 = 1-2 mac_core, 01 = 1-3 DSP, 10·11 = 1-4 파이프라인</td></tr><tr><td>output</td><td class="nw"><code>uart_txd</code></td><td class="nw"><code>1</code></td><td class="nw">보드 핀</td><td>PC로 나가는 직렬 출력 (A18)</td></tr><tr><td>output</td><td class="nw"><code>led</code></td><td class="nw"><code>[15:0]</code></td><td class="nw">보드 핀</td><td>누산값 아래 16비트</td></tr><tr><td>output</td><td class="nw"><code>seg</code></td><td class="nw"><code>[6:0]</code></td><td class="nw">보드 핀</td><td>7세그먼트 a~g (active-low), 누산값 아래 16비트를 16진수 4자리로</td></tr><tr><td>output</td><td class="nw"><code>an</code></td><td class="nw"><code>[3:0]</code></td><td class="nw">보드 핀</td><td>7세그먼트 자리 선택 (active-low)</td></tr><tr><td>output</td><td class="nw"><code>dp</code></td><td class="nw"><code>1</code></td><td class="nw">보드 핀</td><td>소수점 (항상 끔)</td></tr></tbody>
+      </table></div>
+      <p>장 Top은 배선만 합니다. 기능은 하위 모듈에 있고, 서브젝트 모듈은 <code>STAGE</code>(끝낸 서브젝트 수)에 따라 하나씩 들어옵니다.</p>
+      <p>MAC 묶음: 1-2·1-3·1-4 코어가 같은 입력을 받고 sw[1:0]으로 고른 코어의 결과만 나간다.</p>
       <div class="figure-wrap" tabindex="0" role="region" aria-label="도면 (가로 스크롤 가능)"><svg viewBox="0 0 980 271" role="img" aria-label="p01_mac_bank 실제 포트와 하위 모듈 구조">
 <rect x="250" y="30" width="480" height="201" rx="10" fill="#fff" stroke="#4635b1" stroke-width="2"/>
 <text x="490" y="54" font-size="18" font-weight="700" text-anchor="middle">p01_mac_bank</text>
@@ -154,10 +161,6 @@ details.full>summary{cursor:pointer;font-weight:600}
 <text x="600" y="257" font-size="13">왼쪽 input · 오른쪽 output · 점선 = 클록·리셋</text>
 </svg></div>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
-        <thead><tr><th>방향</th><th>포트</th><th>폭</th><th>구분</th><th>설명</th></tr></thead>
-        <tbody><tr><td>input</td><td class="nw"><code>clk</code></td><td class="nw"><code>1</code></td><td class="nw">클록</td><td>보드 100 MHz 발진기 (W5)</td></tr><tr><td>input</td><td class="nw"><code>btnC</code></td><td class="nw"><code>1</code></td><td class="nw">리셋</td><td>가운데 버튼, 누르면 리셋 (Active-High, 놓으면 동기 해제)</td></tr><tr><td>input</td><td class="nw"><code>uart_rxd</code></td><td class="nw"><code>1</code></td><td class="nw">보드 핀</td><td>USB-UART에서 들어오는 직렬 입력 (B18), 115200 bps 8N1</td></tr><tr><td>input</td><td class="nw"><code>sw</code></td><td class="nw"><code>[1:0]</code></td><td class="nw">보드 핀</td><td>sw[1:0] 코어 선택: 00 = 1-2 mac_core, 01 = 1-3 DSP, 10·11 = 1-4 파이프라인</td></tr><tr><td>output</td><td class="nw"><code>uart_txd</code></td><td class="nw"><code>1</code></td><td class="nw">보드 핀</td><td>PC로 나가는 직렬 출력 (A18)</td></tr><tr><td>output</td><td class="nw"><code>led</code></td><td class="nw"><code>[15:0]</code></td><td class="nw">보드 핀</td><td>누산값 아래 16비트</td></tr><tr><td>output</td><td class="nw"><code>seg</code></td><td class="nw"><code>[6:0]</code></td><td class="nw">보드 핀</td><td>7세그먼트 a~g (active-low), 누산값 아래 16비트를 16진수 4자리로</td></tr><tr><td>output</td><td class="nw"><code>an</code></td><td class="nw"><code>[3:0]</code></td><td class="nw">보드 핀</td><td>7세그먼트 자리 선택 (active-low)</td></tr><tr><td>output</td><td class="nw"><code>dp</code></td><td class="nw"><code>1</code></td><td class="nw">보드 핀</td><td>소수점 (항상 끔)</td></tr></tbody>
-      </table></div>
-      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>구분</th><th>파일</th></tr></thead>
         <tbody>
           <tr><td>이전 장에서 가져오는 파일</td><td><ul><li>없음 (첫 장)</li></ul></td></tr>
@@ -170,8 +173,8 @@ details.full>summary{cursor:pointer;font-weight:600}
       <h2><span class="num">02</span> 준비 · 장 뼈대</h2>
       <ol>
         <li>VS Code에서 저장소 루트(<code>amd_soc_npu/</code>)를 엽니다. 도구: <code>iverilog</code> 12 이상, <code>python3</code>, Vivado 2024.2 (합성·비트스트림), 보드 터미널(115200 8N1) 또는 <code>pip install pyserial</code>.</li>
-        <li>아래 장 뼈대 파일을 경로 그대로 입력합니다. 서브젝트 코어(<code>mac_core</code> 등)는 각 서브젝트 절에서 씁니다.</li>
-        <li>STAGE 값: 1-1만 끝냈으면 1, 1-4까지 끝냈으면 4. 아직 없는 코어는 들어가지 않으므로 빌드가 됩니다.</li>
+        <li>아래 장 뼈대 파일을 경로 그대로 입력합니다. 서브젝트 모듈은 각 서브젝트 절에서 씁니다.</li>
+        <li>STAGE 값 = 끝낸 서브젝트 수: 1-1만 끝냈으면 1, 1-4까지 끝냈으면 4. 아직 없는 모듈은 들어가지 않으므로 빌드가 됩니다.</li>
       </ol>
       <div class="codeblock">
         <div class="codebar"><span>p01/rtl/p01_reset_sync.v · verilog · 원본 · RTL_SIM 통과 2026-11-19</span></div>
@@ -721,14 +724,15 @@ if __name__ == "__main__":
       <h3>보드에서 볼 것</h3>
       <ol>
         <li>이 서브젝트까지 넣은 비트스트림을 만듭니다: <code>vivado -mode batch -nojournal -source p01/vivado/build_p01.tcl -tclargs 1</code> → <code>build/vivado/p01_s1/basys3_p01_top.bit</code></li>
-        <li>Hardware Manager로 보드에 내려받고 터미널(115200 8N1) 또는 <code>python3 p01/host/p01_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다.</li>
+        <li>Hardware Manager로 보드에 내려받고 <code>python3 p01/host/p01_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다 (115200 8N1). </li>
       </ol>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>순서</th><th>sw[1:0]</th><th>PC 명령 (<code>p01_send.py</code>)</th><th>보드 응답 (UART)</th></tr></thead>
         <tbody><tr><td>1</td><td class="nw"><code>00</code></td><td class="nw"><code>Z</code></td><td class="nw"><code>Z</code></td></tr><tr><td>2</td><td class="nw"><code>00</code></td><td class="nw"><code>5</code></td><td class="nw"><code>5</code></td></tr><tr><td>3</td><td class="nw"><code>00</code></td><td class="nw"><code>S</code></td><td class="nw"><code>I\r\n</code></td></tr><tr><td>4</td><td class="nw"><code>00</code></td><td class="nw"><code>M</code></td><td class="nw"><code>M</code></td></tr></tbody>
       </table></div>
-      <p>끝난 뒤 LED·7세그먼트: <code>0000</code> (누산값 아래 16비트). 응답 출처: 장 Top 시뮬레이션 STAGE=1 (<code>p01/validation/rtl_sim_20261119.log</code>, 바이트 단위 대조).</p>
+      <p>끝난 뒤 LED: <code>0x0000</code> (누산값 아래 16비트, 7세그먼트도 같은 값 16진수 4자리). 응답 출처: 장 Top 시뮬레이션 STAGE=1 (<code>p01/validation/rtl_sim_20261119.log</code>, 바이트 단위 대조).</p>
       <h3>추가 코드 (구 00장 그대로)</h3>
+      <p>※ <code>uart_echo_controller.v</code>·<code>basys3_uart_echo_top.v</code>는 구 00장 단독 실습용이라 1장 Top 빌드에는 넣지 않습니다.</p>
       <div class="codeblock">
         <div class="codebar"><span>common/rtl/uart_rx.v · verilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
         <pre tabindex="0"><code class="language-verilog">// (추가) 8N1 수신. RX 2FF, start midpoint/bit center, hold/overrun.
@@ -1014,14 +1018,15 @@ endmodule</code></pre>
       <h3>보드에서 볼 것</h3>
       <ol>
         <li>이 서브젝트까지 넣은 비트스트림을 만듭니다: <code>vivado -mode batch -nojournal -source p01/vivado/build_p01.tcl -tclargs 2</code> → <code>build/vivado/p01_s2/basys3_p01_top.bit</code></li>
-        <li>Hardware Manager로 보드에 내려받고 터미널(115200 8N1) 또는 <code>python3 p01/host/p01_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다.</li>
+        <li>Hardware Manager로 보드에 내려받고 <code>python3 p01/host/p01_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다 (115200 8N1). </li>
       </ol>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>순서</th><th>sw[1:0]</th><th>PC 명령 (<code>p01_send.py</code>)</th><th>보드 응답 (UART)</th></tr></thead>
         <tbody><tr><td>1</td><td class="nw"><code>00</code></td><td class="nw"><code>C</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>2</td><td class="nw"><code>00</code></td><td class="nw"><code>M 3 4</code></td><td class="nw"><code>A:000000000C L:1\r\n</code></td></tr><tr><td>3</td><td class="nw"><code>00</code></td><td class="nw"><code>M 3 4</code></td><td class="nw"><code>A:0000000018 L:1\r\n</code></td></tr></tbody>
       </table></div>
-      <p>끝난 뒤 LED·7세그먼트: <code>0018</code> (누산값 아래 16비트). 응답 출처: 장 Top 시뮬레이션 STAGE=2 (<code>p01/validation/rtl_sim_20261119.log</code>, 바이트 단위 대조).</p>
+      <p>끝난 뒤 LED: <code>0x0018</code> (누산값 아래 16비트, 7세그먼트도 같은 값 16진수 4자리). 응답 출처: 장 Top 시뮬레이션 STAGE=2 (<code>p01/validation/rtl_sim_20261119.log</code>, 바이트 단위 대조).</p>
       <h3>추가 코드 (구 01장 그대로)</h3>
+
       <div class="codeblock">
         <div class="codebar"><span>ch01/rtl/mac_core.v · verilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
         <pre tabindex="0"><code class="language-verilog">`timescale 1ns/1ps
@@ -1314,14 +1319,15 @@ if __name__ == "__main__":
       <h3>보드에서 볼 것</h3>
       <ol>
         <li>이 서브젝트까지 넣은 비트스트림을 만듭니다: <code>vivado -mode batch -nojournal -source p01/vivado/build_p01.tcl -tclargs 3</code> → <code>build/vivado/p01_s3/basys3_p01_top.bit</code></li>
-        <li>Hardware Manager로 보드에 내려받고 터미널(115200 8N1) 또는 <code>python3 p01/host/p01_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다.</li>
+        <li>Hardware Manager로 보드에 내려받고 <code>python3 p01/host/p01_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다 (115200 8N1). </li>
       </ol>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>순서</th><th>sw[1:0]</th><th>PC 명령 (<code>p01_send.py</code>)</th><th>보드 응답 (UART)</th></tr></thead>
         <tbody><tr><td>1</td><td class="nw"><code>00</code></td><td class="nw"><code>C</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>2</td><td class="nw"><code>01</code></td><td class="nw"><code>M 3 4</code></td><td class="nw"><code>A:000000000C L:2\r\n</code></td></tr><tr><td>3</td><td class="nw"><code>00</code></td><td class="nw"><code>M 3 4</code></td><td class="nw"><code>A:0000000018 L:1\r\n</code></td></tr><tr><td>4</td><td class="nw"><code>01</code></td><td class="nw"><code>M -2 5</code></td><td class="nw"><code>A:000000000E L:2\r\n</code></td></tr></tbody>
       </table></div>
-      <p>끝난 뒤 LED·7세그먼트: <code>000E</code> (누산값 아래 16비트). 응답 출처: 장 Top 시뮬레이션 STAGE=3 (<code>p01/validation/rtl_sim_20261119.log</code>, 바이트 단위 대조).</p>
+      <p>끝난 뒤 LED: <code>0x000E</code> (누산값 아래 16비트, 7세그먼트도 같은 값 16진수 4자리). 응답 출처: 장 Top 시뮬레이션 STAGE=3 (<code>p01/validation/rtl_sim_20261119.log</code>, 바이트 단위 대조).</p>
       <h3>추가 코드 (구 02장 그대로)</h3>
+
       <div class="codeblock">
         <div class="codebar"><span>ch02/rtl/dsp_multiplier.v · verilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
         <pre tabindex="0"><code class="language-verilog">`timescale 1ns/1ps
@@ -1618,14 +1624,15 @@ if __name__ == "__main__":
       <h3>보드에서 볼 것</h3>
       <ol>
         <li>이 서브젝트까지 넣은 비트스트림을 만듭니다: <code>vivado -mode batch -nojournal -source p01/vivado/build_p01.tcl -tclargs 4</code> → <code>build/vivado/p01_s4/basys3_p01_top.bit</code></li>
-        <li>Hardware Manager로 보드에 내려받고 터미널(115200 8N1) 또는 <code>python3 p01/host/p01_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다.</li>
+        <li>Hardware Manager로 보드에 내려받고 <code>python3 p01/host/p01_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다 (115200 8N1). </li>
       </ol>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>순서</th><th>sw[1:0]</th><th>PC 명령 (<code>p01_send.py</code>)</th><th>보드 응답 (UART)</th></tr></thead>
         <tbody><tr><td>1</td><td class="nw"><code>00</code></td><td class="nw"><code>C</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>2</td><td class="nw"><code>10</code></td><td class="nw"><code>M -32768 32767</code></td><td class="nw"><code>A:FFC0008000 L:2\r\n</code></td></tr><tr><td>3</td><td class="nw"><code>10</code></td><td class="nw"><code>M 100 -7</code></td><td class="nw"><code>A:FFC0007D44 L:2\r\n</code></td></tr><tr><td>4</td><td class="nw"><code>00</code></td><td class="nw"><code>M 32767 32767</code></td><td class="nw"><code>A:FFFFFF7D45 L:1\r\n</code></td></tr></tbody>
       </table></div>
-      <p>끝난 뒤 LED·7세그먼트: <code>7D45</code> (누산값 아래 16비트). 응답 출처: 장 Top 시뮬레이션 STAGE=4 (<code>p01/validation/rtl_sim_20261119.log</code>, 바이트 단위 대조).</p>
+      <p>끝난 뒤 LED: <code>0x7D45</code> (누산값 아래 16비트, 7세그먼트도 같은 값 16진수 4자리). 응답 출처: 장 Top 시뮬레이션 STAGE=4 (<code>p01/validation/rtl_sim_20261119.log</code>, 바이트 단위 대조).</p>
       <h3>추가 코드 (구 03장 그대로)</h3>
+
       <div class="codeblock">
         <div class="codebar"><span>ch03/rtl/mac_pipeline_core.v · verilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
         <pre tabindex="0"><code class="language-verilog">`timescale 1ns/1ps
@@ -1981,7 +1988,7 @@ if __name__ == "__main__":
         <thead><tr><th>서브젝트</th><th>sw[1:0]</th><th>PC 명령</th><th>보드 응답</th></tr></thead>
         <tbody><tr><td>1-1</td><td class="nw"><code>00</code></td><td class="nw"><code>Z</code></td><td class="nw"><code>Z</code></td></tr><tr><td>1-1</td><td class="nw"><code>00</code></td><td class="nw"><code>5</code></td><td class="nw"><code>5</code></td></tr><tr><td>1-1</td><td class="nw"><code>00</code></td><td class="nw"><code>S</code></td><td class="nw"><code>I\r\n</code></td></tr><tr><td>1-2</td><td class="nw"><code>00</code></td><td class="nw"><code>C</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>1-2</td><td class="nw"><code>00</code></td><td class="nw"><code>M 3 4</code></td><td class="nw"><code>A:000000000C L:1\r\n</code></td></tr><tr><td>1-2</td><td class="nw"><code>00</code></td><td class="nw"><code>M 3 4</code></td><td class="nw"><code>A:0000000018 L:1\r\n</code></td></tr><tr><td>1-3</td><td class="nw"><code>00</code></td><td class="nw"><code>C</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>1-3</td><td class="nw"><code>01</code></td><td class="nw"><code>M 3 4</code></td><td class="nw"><code>A:000000000C L:2\r\n</code></td></tr><tr><td>1-3</td><td class="nw"><code>00</code></td><td class="nw"><code>M 3 4</code></td><td class="nw"><code>A:0000000018 L:1\r\n</code></td></tr><tr><td>1-3</td><td class="nw"><code>01</code></td><td class="nw"><code>M -2 5</code></td><td class="nw"><code>A:000000000E L:2\r\n</code></td></tr><tr><td>1-4</td><td class="nw"><code>00</code></td><td class="nw"><code>C</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>1-4</td><td class="nw"><code>10</code></td><td class="nw"><code>M -32768 32767</code></td><td class="nw"><code>A:FFC0008000 L:2\r\n</code></td></tr><tr><td>1-4</td><td class="nw"><code>10</code></td><td class="nw"><code>M 100 -7</code></td><td class="nw"><code>A:FFC0007D44 L:2\r\n</code></td></tr><tr><td>1-4</td><td class="nw"><code>00</code></td><td class="nw"><code>M 32767 32767</code></td><td class="nw"><code>A:FFFFFF7D45 L:1\r\n</code></td></tr></tbody>
       </table></div>
-      <p>끝난 뒤 LED·7세그먼트: <code>7D45</code>. btnC를 누르면 0으로 돌아갑니다.</p>
+      <p>끝난 뒤 LED: <code>0x7D45</code> (누산값 아래 16비트, 7세그먼트도 같은 값 16진수 4자리). btnC를 누르면 처음 상태로 돌아갑니다.</p>
       <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 장 Top 시뮬레이션 (STAGE 1~4)</span></div>
         <pre tabindex="0"><code>bash p01/scripts/run_sim.sh</code></pre></div>
       <div class="codeblock"><div class="codebar"><span>기대 출력 (Icarus Verilog 12.0 · 2026-11-19 · 출처 p01/validation/rtl_sim_20261119.log)</span></div>
@@ -2227,8 +2234,9 @@ if __name__ == "__main__":
       <h2><span class="num">08</span> 누적 보고·인계</h2>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>서브젝트</th><th>구 장</th><th>추가 RTL</th><th>시뮬레이션 (단독 + 장 Top)</th><th>합성 (장 Top STAGE)</th><th>보드</th></tr></thead>
-        <tbody><tr><td>1-1</td><td>00장</td><td><code>uart_rx.v</code><br><code>uart_tx.v</code><br><code>uart_core.v</code><br><code>uart_echo_controller.v</code><br><code>basys3_uart_echo_top.v</code></td><td>통과</td><td>⚠ 미검증</td><td>⚠ 미검증</td></tr><tr><td>1-2</td><td>01장</td><td><code>mac_core.v</code></td><td>통과</td><td>⚠ 미검증</td><td>⚠ 미검증</td></tr><tr><td>1-3</td><td>02장</td><td><code>dsp_multiplier.v</code></td><td>통과</td><td>⚠ 미검증</td><td>⚠ 미검증</td></tr><tr><td>1-4</td><td>03장</td><td><code>mac_pipeline_core.v</code></td><td>통과</td><td>⚠ 미검증</td><td>⚠ 미검증</td></tr></tbody>
+        <tbody><tr><td>1-1</td><td>00장</td><td><code>uart_rx.v</code><br><code>uart_tx.v</code><br><code>uart_core.v</code><br><code>uart_echo_controller.v</code> ※<br><code>basys3_uart_echo_top.v</code> ※</td><td>통과</td><td>⚠ 미검증</td><td>⚠ 미검증</td></tr><tr><td>1-2</td><td>01장</td><td><code>mac_core.v</code></td><td>통과</td><td>⚠ 미검증</td><td>⚠ 미검증</td></tr><tr><td>1-3</td><td>02장</td><td><code>dsp_multiplier.v</code></td><td>통과</td><td>⚠ 미검증</td><td>⚠ 미검증</td></tr><tr><td>1-4</td><td>03장</td><td><code>mac_pipeline_core.v</code></td><td>통과</td><td>⚠ 미검증</td><td>⚠ 미검증</td></tr></tbody>
       </table></div>
+      <p>※ = 구 장 단독 실습 파일이라 장 Top 빌드(<code>p01/vivado/build_p01.tcl</code>)에는 들어가지 않음.</p>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>다음 장으로 넘기는 파일</th><th>사용처</th></tr></thead>
         <tbody><tr><td><code>common/rtl/uart_core.v</code></td><td>2-7 UART 적재 컨트롤러(구 11장)의 송수신</td></tr><tr><td><code>ch02/rtl/dsp_multiplier.v</code></td><td>2-4 4PE(구 08장) MAC lane의 곱셈</td></tr><tr><td><code>p01/rtl/p01_calc_controller.v</code></td><td>명령 형식: 1바이트 명령 + 바이너리 페이로드, stop-and-wait. 2-7 적재 명령(X·W·B·R)이 같은 형식</td></tr><tr><td><code>p01/host/p01_send.py</code></td><td>PC에서 바이너리 명령 보내기. 2장에서 적재 명령용으로 확장 (2장 전환 때)</td></tr></tbody>
@@ -2269,6 +2277,12 @@ window.COURSE={
    "number": 1,
    "title": "UART 계산기",
    "file": "p01_uart_calc_v01.html"
+  },
+  {
+   "id": "p02",
+   "number": 2,
+   "title": "4뉴런 NPU 보드",
+   "file": "p02_npu4_board_v01.html"
   }
  ]
 };
