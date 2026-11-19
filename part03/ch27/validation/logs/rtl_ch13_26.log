@@ -8,3 +8,7 @@ PASS ch19 (RTL_SIM_PASS PE_SCALE tile_runs=52 PE1=70x10 PE4=206 PE8=138(A 138, B
 PASS ch20 (RTL_SIM_PASS AXI_NPU inferences=7 axi_writes=67451 axi_reads=7012 slverr=16)
 PASS ch22 (RTL_SIM_PASS DRIVER_BRIDGE axi_writes=35917 axi_reads=3781 irq_rising=4)
 PASS ch26 (RTL_SIM_PASS CONV3X3 frames=26 outputs_per_frame=36 latency=5 errors_checked=4)
+PASS ch28 (RTL_SIM_PASS FND_SCAN vectors=36 digit_changes=9)
+PASS ch29 (RTL_SIM_PASS ALARM_POLICY cycles=4070 fault_entries=99 ack_ok=140 hold_max_downs=50)
+PASS ch30 (RTL_SIM_PASS MOTOR_SAFETY cycles=125968 ena_cycles=10364 trip_cycles=16470)
+PASS ch31 (RTL_SIM_PASS AES128 blocks=204 kat=6 cycles_per_block=11)

@@ -2,8 +2,8 @@ Python 3.12.3
 gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
 Icarus Verilog version 12.0 (stable) ()
 MODEL_HEADER_DONE samples=4 classes=[7, 2, 4, 4] labels=[7, 2, 9, 9]
-<repo>/part03/mini_npu/rtl/npu_dsp_mac_lane.v:2: warning: timescale for npu_dsp_mac_lane inherited from another file.
-<repo>/part03/ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
+part03/mini_npu/rtl/npu_dsp_mac_lane.v:2: warning: timescale for npu_dsp_mac_lane inherited from another file.
+part03/ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
 CPU_TIE_SELFTEST pairs=9 bad=0
 SAMPLE 0 index=0 label=7 npu_class=7 cpu_class=7 expect=7 scores_match=1 rc=0
 SHOW picture=0 class=7 seg7_value=0007 seg7_mode=200 led=0080
