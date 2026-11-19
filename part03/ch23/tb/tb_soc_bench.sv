@@ -1,13 +1,17 @@
 // (추가) 23장: 21장 SoC 전체(MicroBlaze V + NPU) 행동 시뮬레이션. 벤치마크 ELF를 LMB에 연결해 실행하고,
 // 프로그램이 GPIO 데이터 레지스터에 쓰는 값(AXI 쓰기)을 기록한다. 사용자 Top basys3_soc11_top 그대로 사용.
+// (변경) 안 A: 21장 Top이 basys3_soc21_top(btn·seg·dp·an 추가)으로 바뀌어 그 Top을 쓴다. 버튼은 누르지 않는다.
 `timescale 1ns/1ps
 module tb_soc_bench;
     reg clk = 0, btnC = 1, rx = 1;
     reg [15:0] sw = 16'd0;
     wire [15:0] led;
-    wire tx;
+    wire tx, dp;
+    wire [6:0] seg;
+    wire [3:0] an;
     always #5 clk = ~clk;   // Basys3 W5 100 MHz
-    basys3_soc11_top dut(.clk(clk), .btnC(btnC), .sw(sw), .led(led), .RsRx(rx), .RsTx(tx));
+    basys3_soc21_top dut(.clk(clk), .btnC(btnC), .btn(4'b0000), .sw(sw), .led(led), .RsRx(rx), .RsTx(tx),
+                         .seg(seg), .dp(dp), .an(an));
 
     wire aclk = dut.u_soc11.soc11_integration_i.axi_gpio_0.s_axi_aclk;
     wire wv = dut.u_soc11.soc11_integration_i.axi_gpio_0.s_axi_wvalid;
