@@ -3,6 +3,7 @@
 #   필요: 21장 build_soc.sh 결과(ch21/build/soc21_npu). 그 폴더는 읽기만 하고 cp -a로 복제한다(전후 해시 확인).
 #   결과(build/, 저장소 제외): soc28 복제 프로젝트, out/*.bit, out/soc28_digit.xsa, ws/digit_app ELF
 #   요약(저장소): validation/build_soc.log 와 validation/soc_summary.md 는 이 출력으로 만든다.
+# (변경) 31장: ELF 스택 1 KB → 4 KB(part03/common/sw/p3_stack_4k.c)와 ELF 메모리 검사. 다음 실행부터 반영된다.
 set -euo pipefail
 chapter_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 part03=$(cd -- "$chapter_dir/.." && pwd)
@@ -35,10 +36,11 @@ sw22="$part03/ch22/sw"; sw="$chapter_dir/sw"
 (cd "$build" && P3_PLAT_NAME=soc28_digit_plat vitis -s "$part03/ch22/vitis/vitis_build.py" "$build/ws" "$xsa" digit_app \
   "$sw22/npu_driver.h" "$sw22/npu_driver.c" "$sw22/npu_io_xil.c" "$sw22/app.h" \
   "$sw/digit_io.h" "$sw/digit_app.h" "$sw/digit_app.c" "$sw/digit_io_xil.c" "$sw/main.c" \
-  "$build/digit_model.h" > "$build/vitis.log" 2>&1) || true
+  "$part03/common/sw/p3_stack_4k.c" "$build/digit_model.h" > "$build/vitis.log" 2>&1) || true
 grep -q "VITIS_BUILD_DONE digit_app" "$build/vitis.log" || { grep -iE "error" "$build/vitis.log" | head -20; echo "VITIS_BUILD_FAIL"; exit 1; }
 xpar=$(find "$build/ws/soc28_digit_plat/export" -name xparameters.h | head -1)
 grep -hE "XPAR_(P3_NPU_0|AXI_GPIO_1|AXI_GPIO_0|AXI_UARTLITE_0)_BASEADDR" "$xpar"
 elf=$(find "$build/ws/digit_app" -name digit_app.elf | head -1)
 echo "ELF digit_app $(sed -n 2p "$elf.size" | awk '{print "text="$1, "data="$2, "bss="$3, "total="$4}') sha256=$(sha256sum "$elf" | cut -c1-16)"
+bash "$part03/common/sw/elf_mem_check.sh" "$elf"
 echo "SOC28_BUILD_PASS (빌드만, 실물 실행은 사용자와 함께)"

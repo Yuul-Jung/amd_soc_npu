@@ -90,7 +90,7 @@ python3 part03/ch29/host/p3_sensor_host.py --port /dev/ttyUSB1 --limit 200 --csv
 | 정책 RTL OOC 배선 | LUT 16, FF 8, WNS +6.711 ns @100 MHz (`validation/synth_ooc_summary.md`) |
 | 종단간 협동 시뮬레이션 | 109/109 검사 PASS: 부팅, 식별, 정책 시나리오(전이·래치·ACK·센서 고장 주입 7종), 시험셋 60창(골든 57/60, 장치 57/60), 오류 시험 9종 (`validation/rtl_cosim.csv`) |
 | 펌웨어 변이 12종 | 부팅 상태, 즉시 하향, 래치 제거, ACK 무조건, 하향 최소값, 결측·지연·고착 검사 제거, guard보다 NPU 먼저, 링크 감시 제거, 연속 오류 무시, 특징 눈금 → **12/12 검출** |
-| Vitis ELF | 28장 XSA(2bffbd6f…) 그대로, `sensor_app.elf` 36,008 B, SHA-256 399faf9dd19296cc, 우리 소스 경고 0 (`validation/build_sw.log`) |
+| Vitis ELF | 28장 XSA(2bffbd6f…) 그대로, `sensor_app.elf` 39,080 B(스택 4 KB 포함), SHA-256 77594dcb8a326a09, 우리 소스 경고 0, `ELF_MEM_PASS` (`validation/build_sw.log`). 31장에서 -O0 최대 호출 깊이 약 960 B를 측정해 스택을 1 KB → 4 KB로 늘렸다 |
 | **Basys3 실물** | **NOT_RUN** — `ch27/docs/BOARD_CHECKLIST.md` B14~B17, 사용자와 함께 |
 | 실제 센서 연결 | **NOT_RUN** — 레벨 변환·전원 검토 뒤 사용자와 함께 |
 

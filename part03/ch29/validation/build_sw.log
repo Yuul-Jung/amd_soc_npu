@@ -4,5 +4,7 @@ SENSOR_HEADER_DONE model_id=18496ca4 w=[-110, -127, -63, -66, -117, -92]...
 #define XPAR_AXI_GPIO_1_BASEADDR 0x40010000
 #define XPAR_AXI_UARTLITE_0_BASEADDR 0x40600000
 #define XPAR_P3_NPU_0_BASEADDR 0x44a00000
-ELF sensor_app text=31344 data=204 bss=4460 total=36008 sha256=399faf9dd19296cc
+ELF sensor_app text=31344 data=204 bss=7532 total=39080 sha256=77594dcb8a326a09
+ELF_MEM stack=4096 heap=2052 stack_end=39080 lmb=65536
+ELF_MEM_PASS
 SENSOR_SW_BUILD_PASS (빌드만, 실물 실행은 사용자와 함께)
