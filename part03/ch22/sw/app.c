@@ -28,6 +28,7 @@ int app_run(uintptr_t npu_base)
             failures++;
         APP_PRINTF("SAMPLE %d index=%d label=%d npu_class=%d cpu_class=%d expect=%d scores_match=%d rc=%d\r\n",
                    s, sample_index[s], sample_label[s], ncls, ccls, sample_class[s], same, rc);
+        app_show(s, ncls);   /* (변경) 안 A: LED·7세그먼트 표시 */
         npu_clear_done(&npu);
     }
     APP_PRINTF("NPU_APP_DONE samples=%d failures=%d\r\n", MODEL_N_SAMPLES, failures);

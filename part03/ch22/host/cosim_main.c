@@ -3,6 +3,13 @@
 #include "app.h"
 #include "npu_driver.h"
 
+/* (변경) 안 A: 보드의 app_show_xil.c와 같은 값(SEG7 VALUE·MODE, LED)을 줄로 남긴다 */
+void app_show(int picture, int cls)
+{
+    printf("SHOW picture=%d class=%d seg7_value=%04x seg7_mode=%03x led=%04x\n", picture, cls,
+           (unsigned)APP_SHOW_VALUE(picture, cls), (unsigned)APP_SHOW_MODE, (unsigned)APP_SHOW_LED(cls));
+}
+
 void cosim_open(const char *cmd_path, const char *rsp_path);
 void cosim_close(void);
 
