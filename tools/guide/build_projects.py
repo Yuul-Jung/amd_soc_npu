@@ -515,8 +515,12 @@ def html_table(rows, nw=()):
 
 def checklist(p):
     """보드 점검표 1절의 B 항목 → {번호: (절차, 기대 결과, 판정)}."""
-    rows = md_table(rd(p["checklist"]), "| # | 절차")
-    return {r[0]: (r[1], r[2], r[3] if len(r) > 3 else "") for r in rows[1:]}
+    out = {}
+    for ln in rd(p["checklist"]).splitlines():          # 1절·1-28절… 표가 여러 개: B로 시작하는 줄 모두
+        cells = [c.strip() for c in ln.strip().strip("|").split("|")]
+        if ln.startswith("| B") and re.fullmatch(r"B\d+[a-z]?", cells[0]):
+            out[cells[0]] = (cells[1], cells[2], cells[3] if len(cells) > 3 else "")
+    return out
 
 
 def check_rows(p, items):
@@ -554,7 +558,8 @@ def soc_subject_gates(s, c, ce):
         gs.insert(-1, ("pass", x["name"], f"{bg.short(hit, 60)} · <code>{x['path']}</code>") if hit
                   else ("todo", x["name"], "⚠ 미검증 · 기록 없음"))
     if s.get("warn"):
-        gs.insert(-1, ("todo", "안 A 재실행", "⚠ 안 A 이전 빌드 기준 · VS Code 재실행 대기"))
+        name, note = s.get("warn_gate", ["안 A 재실행", "⚠ 안 A 이전 빌드 기준 · VS Code 재실행 대기"])
+        gs.insert(-1, ("todo", name, note))
     return gs
 
 
@@ -612,7 +617,7 @@ def build_soc(p, course, pages):
     class _E:            # steps()가 쓰는 속성
         board = board_done
     s00 = f"""      <p><b>장 시연 (보드):</b> {p['demo']}</p>
-      <p>편성: {p['days']}일 · 서브젝트 {len(p['subjects'])}개 · 비트스트림은 5-2에서 한 번 만들고, 이후 서브젝트는 ELF만 바꿔 보드에서 확인합니다.</p>
+      <p>편성: {p['days']}일 · 서브젝트 {len(p['subjects'])}개 · {p['plan_note']}</p>
 {road(course, p, pages)}
 {steps(p, _E, state)}"""
 
@@ -623,8 +628,8 @@ def build_soc(p, course, pages):
     made = "".join(f"<tr><td>{s['code']} {s['title']}</td><td>{'<br>'.join(f'<code>{x}</code>' for x in c['new'])}</td></tr>"
                    for s, c, _, _ in subj)
     imports = "".join(f"<li>{x}</li>" for x in p["imports"])
-    s01 = f"""      <div class="figure-wrap">{bg.diagram_svg(p['diagram'], p['id'] + '-socmap', '5장 SoC 주소맵과 인터럽트 구조도')}</div>
-      <p>도면 원본: <code>{p['diagram']}.json</code> (svg-flow-editor, <code>{p['skeleton'][0]}</code>가 아래 Address Editor 표에서 만든다).</p>
+    s01 = f"""      <div class="figure-wrap">{bg.diagram_svg(p['diagram'], p['id'] + '-socmap', p['diagram_label'])}</div>
+      <p>{p['diagram_note']}</p>
       <h3>주소맵 (Vivado Address Editor 실제 값 = 동결 안 A)</h3>
 {html_table(addr, nw=(0, 2, 3))}
       <h3>인터럽트 (axi_intc 16입력)</h3>
@@ -658,7 +663,7 @@ def build_soc(p, course, pages):
     results = "".join(result_row(*r) for r in p["results"])
     run_all = md_table(rd(p["evidence"]["rtl_log"]), "| 단계")
     impl = md_table(summ, "| 항목 | 값")
-    demo = f"""      <p>21장 비트스트림 하나와 ELF 두 개로 점검표 B1~B7을 차례로 실행합니다. 기대값은 협동 시뮬레이션·SoC xsim·Vivado 빌드에서 얻은 값이고, 실물 실행은 아직 하지 않았습니다.</p>
+    demo = f"""      <p>{p['demo_intro']}</p>
 {check_rows(p, p['demo_items'])}
       <table>
         <thead><tr><th>결과</th><th>값 · 출처 로그</th></tr></thead>
@@ -684,7 +689,7 @@ def build_soc(p, course, pages):
     pg = [gate("pass", "HTML_PASS", f"{p['version']} · 생성기"),
           gate("pass" if rtl_all else "todo", "RTL_SIM_PASS", "서브젝트 시뮬레이션·정적 검사 모두 통과" if rtl_all else "⚠ 미검증 서브젝트 있음"),
           gate(syn[0], "SYNTH_TIMING_PASS", syn[1]),
-          gate("todo", "BOARD_PASS", "⚠ 미실시 · 보드 점검표 B1~B8 대기")]
+          gate("todo", "BOARD_PASS", f"⚠ 미실시 · 보드 점검표 {p['demo_items'][0]}~{p['demo_items'][-1]} 대기")]
     s_last = f"""      <table>
         <thead><tr><th>서브젝트</th><th>구 장</th><th>시뮬레이션·정적 검사</th><th>Vivado</th><th>보드 점검표</th></tr></thead>
         <tbody>{rep}</tbody>
