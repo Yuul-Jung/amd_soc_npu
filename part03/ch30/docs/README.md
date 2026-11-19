@@ -63,8 +63,8 @@
 | 종단간 협동 시뮬레이션 | 62/62 검사 PASS(호스트 → 펌웨어(29장 정책) → NPU RTL + 모터 안전 RTL), 핀 불변식 위반 0 / 1,403,942클록, 방향 전환 최소 간격 3,001 ≥ 데드타임 3,000 (`validation/rtl_cosim.csv`) |
 | 펌웨어 변이 6종 | **6/6 검출** |
 | 코어 OOC 배선 | LUT 169, FF 120, DSP 0, WNS +3.699 ns @100 MHz (`validation/synth_ooc_summary.md`) |
-| **SoC 비트스트림** | **NOT_COMPLETE** — 2026-11-18 23:36 시스템 종료로 impl_1이 중단됐다. `scripts/build_soc.sh` 재실행 예정이며, 끝나면 `validation/build_soc.log`에 기록한다 |
-| 펌웨어 ELF(`motor_app`) | NOT_COMPLETE — SoC 빌드에 포함 |
+| SoC 비트스트림 | PASS — 2026-11-19 재빌드(11-18 23:36 시스템 종료로 첫 시도의 impl_1 중단). 배선 후 WNS +0.427 ns, WHS +0.022 ns, 출력 핀 IN1·IN2·ENA는 motor_safety_0에서만 구동, JB4 PULLDOWN, 입력 동기화기 ASYNC_REG 12셀. `basys3_soc30_top.bit` b0c00e3b07a9e2b4, XSA 1fbedd8afa770952 (`validation/build_soc_20261119.log`) |
+| 펌웨어 ELF(`motor_app`) | 53,456 B, SHA-256 210ff1cff2c2ab68, `ELF_MEM_PASS`, GPIO2 0x4002_0000 |
 | **Basys3 실물** | **NOT_RUN** — `ch27/docs/BOARD_CHECKLIST.md` B18~B24, 사용자와 함께 |
 
 ## 6. 알려진 한계

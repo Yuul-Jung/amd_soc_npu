@@ -53,7 +53,7 @@
 
 ## 1-30. 30장 모터 안전 (30장 비트스트림 — 모터·드라이버는 처음에는 연결하지 않는다)
 
-준비: `part03/ch30/build/out/basys3_soc30_top.bit`, ELF `motor_app.elf`(`ch30/validation/build_soc.log`의 SHA-256). **1단계는 가상 부하(LED)만**: JB에는 아무것도 꽂지 않는다.
+준비: `part03/ch30/build/out/basys3_soc30_top.bit`, ELF `motor_app.elf`(`ch30/validation/build_soc_20261119.log`의 SHA-256). **1단계는 가상 부하(LED)만**: JB에는 아무것도 꽂지 않는다.
 
 | # | 절차 | 기대 결과 | 판정 |
 |---|---|---|---|
