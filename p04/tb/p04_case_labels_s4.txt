@@ -1,0 +1,384 @@
+
+
+
+
+
+
+
+load Bias INT8
+load Bias INT8
+load Bias INT8
+load Bias INT8
+load Bias INT8
+load Bias INT8
+load Bias INT8
+load Bias INT8
+load Bias INT8
+load Bias INT8
+
+load W INT8 타일 0
+load W INT8 타일 0
+load W INT8 타일 0
+load W INT8 타일 0
+load W INT8 타일 0
+load W INT8 타일 0
+load W INT8 타일 0
+load W INT8 타일 0
+load W INT8 타일 0
+load W INT8 타일 0
+X 0 64 (INT8 타일 0 x)
+
+load W INT8 타일 1
+load W INT8 타일 1
+load W INT8 타일 1
+load W INT8 타일 1
+load W INT8 타일 1
+load W INT8 타일 1
+load W INT8 타일 1
+load W INT8 타일 1
+load W INT8 타일 1
+load W INT8 타일 1
+X 0 64 (INT8 타일 1 x)
+
+load W INT8 타일 2
+load W INT8 타일 2
+load W INT8 타일 2
+load W INT8 타일 2
+load W INT8 타일 2
+load W INT8 타일 2
+load W INT8 타일 2
+load W INT8 타일 2
+load W INT8 타일 2
+load W INT8 타일 2
+X 0 64 (INT8 타일 2 x)
+
+load W INT8 타일 3
+load W INT8 타일 3
+load W INT8 타일 3
+load W INT8 타일 3
+load W INT8 타일 3
+load W INT8 타일 3
+load W INT8 타일 3
+load W INT8 타일 3
+load W INT8 타일 3
+load W INT8 타일 3
+X 0 64 (INT8 타일 3 x)
+
+load W INT8 타일 4
+load W INT8 타일 4
+load W INT8 타일 4
+load W INT8 타일 4
+load W INT8 타일 4
+load W INT8 타일 4
+load W INT8 타일 4
+load W INT8 타일 4
+load W INT8 타일 4
+load W INT8 타일 4
+X 0 64 (INT8 타일 4 x)
+
+load W INT8 타일 5
+load W INT8 타일 5
+load W INT8 타일 5
+load W INT8 타일 5
+load W INT8 타일 5
+load W INT8 타일 5
+load W INT8 타일 5
+load W INT8 타일 5
+load W INT8 타일 5
+load W INT8 타일 5
+X 0 64 (INT8 타일 5 x)
+
+load W INT8 타일 6
+load W INT8 타일 6
+load W INT8 타일 6
+load W INT8 타일 6
+load W INT8 타일 6
+load W INT8 타일 6
+load W INT8 타일 6
+load W INT8 타일 6
+load W INT8 타일 6
+load W INT8 타일 6
+X 0 64 (INT8 타일 6 x)
+
+load W INT8 타일 7
+load W INT8 타일 7
+load W INT8 타일 7
+load W INT8 타일 7
+load W INT8 타일 7
+load W INT8 타일 7
+load W INT8 타일 7
+load W INT8 타일 7
+load W INT8 타일 7
+load W INT8 타일 7
+X 0 64 (INT8 타일 7 x)
+
+load W INT8 타일 8
+load W INT8 타일 8
+load W INT8 타일 8
+load W INT8 타일 8
+load W INT8 타일 8
+load W INT8 타일 8
+load W INT8 타일 8
+load W INT8 타일 8
+load W INT8 타일 8
+load W INT8 타일 8
+X 0 64 (INT8 타일 8 x)
+
+load W INT8 타일 9
+load W INT8 타일 9
+load W INT8 타일 9
+load W INT8 타일 9
+load W INT8 타일 9
+load W INT8 타일 9
+load W INT8 타일 9
+load W INT8 타일 9
+load W INT8 타일 9
+load W INT8 타일 9
+X 0 64 (INT8 타일 9 x)
+
+load W INT8 타일 10
+load W INT8 타일 10
+load W INT8 타일 10
+load W INT8 타일 10
+load W INT8 타일 10
+load W INT8 타일 10
+load W INT8 타일 10
+load W INT8 타일 10
+load W INT8 타일 10
+load W INT8 타일 10
+X 0 64 (INT8 타일 10 x)
+
+load W INT8 타일 11
+load W INT8 타일 11
+load W INT8 타일 11
+load W INT8 타일 11
+load W INT8 타일 11
+load W INT8 타일 11
+load W INT8 타일 11
+load W INT8 타일 11
+load W INT8 타일 11
+load W INT8 타일 11
+X 0 64 (INT8 타일 11 x)
+
+load W INT8 타일 12
+load W INT8 타일 12
+load W INT8 타일 12
+load W INT8 타일 12
+load W INT8 타일 12
+load W INT8 타일 12
+load W INT8 타일 12
+load W INT8 타일 12
+load W INT8 타일 12
+load W INT8 타일 12
+X 0 64 (INT8 타일 12 x, 16 + 0 48개)
+
+load Bias INT16
+load Bias INT16
+load Bias INT16
+load Bias INT16
+load Bias INT16
+load Bias INT16
+load Bias INT16
+load Bias INT16
+load Bias INT16
+load Bias INT16
+
+load W INT16 타일 0
+load W INT16 타일 0
+load W INT16 타일 0
+load W INT16 타일 0
+load W INT16 타일 0
+load W INT16 타일 0
+load W INT16 타일 0
+load W INT16 타일 0
+load W INT16 타일 0
+load W INT16 타일 0
+X 1 64 (INT16 타일 0 x)
+
+load W INT16 타일 1
+load W INT16 타일 1
+load W INT16 타일 1
+load W INT16 타일 1
+load W INT16 타일 1
+load W INT16 타일 1
+load W INT16 타일 1
+load W INT16 타일 1
+load W INT16 타일 1
+load W INT16 타일 1
+X 1 64 (INT16 타일 1 x)
+
+load W INT16 타일 2
+load W INT16 타일 2
+load W INT16 타일 2
+load W INT16 타일 2
+load W INT16 타일 2
+load W INT16 타일 2
+load W INT16 타일 2
+load W INT16 타일 2
+load W INT16 타일 2
+load W INT16 타일 2
+X 1 64 (INT16 타일 2 x)
+
+load W INT16 타일 3
+load W INT16 타일 3
+load W INT16 타일 3
+load W INT16 타일 3
+load W INT16 타일 3
+load W INT16 타일 3
+load W INT16 타일 3
+load W INT16 타일 3
+load W INT16 타일 3
+load W INT16 타일 3
+X 1 64 (INT16 타일 3 x)
+
+load W INT16 타일 4
+load W INT16 타일 4
+load W INT16 타일 4
+load W INT16 타일 4
+load W INT16 타일 4
+load W INT16 타일 4
+load W INT16 타일 4
+load W INT16 타일 4
+load W INT16 타일 4
+load W INT16 타일 4
+X 1 64 (INT16 타일 4 x)
+
+load W INT16 타일 5
+load W INT16 타일 5
+load W INT16 타일 5
+load W INT16 타일 5
+load W INT16 타일 5
+load W INT16 타일 5
+load W INT16 타일 5
+load W INT16 타일 5
+load W INT16 타일 5
+load W INT16 타일 5
+X 1 64 (INT16 타일 5 x)
+
+load W INT16 타일 6
+load W INT16 타일 6
+load W INT16 타일 6
+load W INT16 타일 6
+load W INT16 타일 6
+load W INT16 타일 6
+load W INT16 타일 6
+load W INT16 타일 6
+load W INT16 타일 6
+load W INT16 타일 6
+X 1 64 (INT16 타일 6 x)
+
+load W INT16 타일 7
+load W INT16 타일 7
+load W INT16 타일 7
+load W INT16 타일 7
+load W INT16 타일 7
+load W INT16 타일 7
+load W INT16 타일 7
+load W INT16 타일 7
+load W INT16 타일 7
+load W INT16 타일 7
+X 1 64 (INT16 타일 7 x)
+
+load W INT16 타일 8
+load W INT16 타일 8
+load W INT16 타일 8
+load W INT16 타일 8
+load W INT16 타일 8
+load W INT16 타일 8
+load W INT16 타일 8
+load W INT16 타일 8
+load W INT16 타일 8
+load W INT16 타일 8
+X 1 64 (INT16 타일 8 x)
+
+load W INT16 타일 9
+load W INT16 타일 9
+load W INT16 타일 9
+load W INT16 타일 9
+load W INT16 타일 9
+load W INT16 타일 9
+load W INT16 타일 9
+load W INT16 타일 9
+load W INT16 타일 9
+load W INT16 타일 9
+X 1 64 (INT16 타일 9 x)
+
+load W INT16 타일 10
+load W INT16 타일 10
+load W INT16 타일 10
+load W INT16 타일 10
+load W INT16 타일 10
+load W INT16 타일 10
+load W INT16 타일 10
+load W INT16 타일 10
+load W INT16 타일 10
+load W INT16 타일 10
+X 1 64 (INT16 타일 10 x)
+
+load W INT16 타일 11
+load W INT16 타일 11
+load W INT16 타일 11
+load W INT16 타일 11
+load W INT16 타일 11
+load W INT16 타일 11
+load W INT16 타일 11
+load W INT16 타일 11
+load W INT16 타일 11
+load W INT16 타일 11
+X 1 64 (INT16 타일 11 x)
+
+load W INT16 타일 12
+load W INT16 타일 12
+load W INT16 타일 12
+load W INT16 타일 12
+load W INT16 타일 12
+load W INT16 타일 12
+load W INT16 타일 12
+load W INT16 타일 12
+load W INT16 타일 12
+load W INT16 타일 12
+X 1 64 (INT16 타일 12 x, 16 + 0 48개)
+
+load PE4 타일 6
+load PE4 타일 6
+load PE4 타일 6
+load PE4 타일 6
+load PE4 타일 6
+load PE4 타일 6
+load PE4 타일 6
+load PE4 타일 6
+load PE4 타일 6
+load PE4 타일 6
+load PE8 타일 6
+load PE8 타일 6
+load PE8 타일 6
+load PE8 타일 6
+load PE8 타일 6
+load PE8 타일 6
+load PE8 타일 6
+load PE8 타일 6
+load PE8 타일 6
+load PE8 타일 6
+X 0 64 (INT8 타일 6 x)
+
+
+U 1 0 64 (PE1에 class 0 가중치)
+
+U 1 1 64 (PE1에 class 1 가중치)
+
+U 1 2 64 (PE1에 class 2 가중치)
+
+U 1 3 64 (PE1에 class 3 가중치)
+
+U 1 4 64 (PE1에 class 4 가중치)
+
+U 1 5 64 (PE1에 class 5 가중치)
+
+U 1 6 64 (PE1에 class 6 가중치)
+
+U 1 7 64 (PE1에 class 7 가중치)
+
+U 1 8 64 (PE1에 class 8 가중치)
+
+U 1 9 64 (PE1에 class 9 가중치)
+
