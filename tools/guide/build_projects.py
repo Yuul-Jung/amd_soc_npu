@@ -100,6 +100,13 @@ def s16(b):
 def decode(b, pid=""):
     """보낼 바이트 → PC 도구(pNN_send.py) 명령 꼴. 장마다 명령 형식이 다르다."""
     c, n = chr(b[0]), len(b)
+    if pid == "p04":
+        if c in "AK" and n == 2:
+            return f"{c} {b[1]}"
+        if c == "T" and n == 3:
+            return f"T {b[1]} {b[2]}"
+        if c == "Q" and n == 5:
+            return f"Q {s16(b[1:5])}"
     if pid == "p03":
         s8 = lambda v: v - 256 if v > 127 else v
         if c == "W" and n == 5:
@@ -126,7 +133,9 @@ def decode(b, pid=""):
         return f"B {b[1]} {s16(b[2:7])}"
     if c in "DPLNR" and n == 2:
         return f"{c} {b[1]}"
-    return b.decode("ascii")
+    if all(32 <= v < 127 for v in b):
+        return b.decode("ascii")
+    return b[:1].decode("ascii", "replace") + " " + b[1:].hex(" ")     # 해석 규칙이 없는 명령: 16진수로
 
 
 def case_file(p, stage):
@@ -176,6 +185,28 @@ def end_led(p, stage):
         if ln.startswith("END "):
             return ln.split()[1].upper()
     return "????"
+
+
+def synth_from_md(spec):
+    """VS Code 판 Vivado 요약 표(.md)에서 배선 후 WNS를 읽어 게이트로. → (cls, note)"""
+    path = spec["path"]
+    if not os.path.exists(os.path.join(ROOT, path)):
+        return "todo", "⚠ 미검증 · Vivado 기록 없음"
+    text = rd(path)
+    text = text[text.index(spec["after"]):] if spec["after"] in text else ""
+    head, wns = None, []
+    for ln in text.splitlines():
+        cells = [c.strip() for c in ln.strip().strip("|").split("|")]
+        if ln.startswith("| 구성"):
+            head = cells
+        elif head and ln.startswith("|") and cells[0] in spec["rows"]:
+            wns.append(float(cells[head.index("WNS(ns)")]))
+    if len(wns) != len(spec["rows"]):
+        return "todo", "⚠ 미검증 · Vivado 표에서 해당 구성을 찾지 못함"
+    ok = min(wns) >= 0
+    what = f"{len(wns)}구성 " if len(wns) > 1 else ""
+    return ("pass" if ok else "fail"), (f"{'' if ok else '✗ '}OOC 배선 후 {what}WNS {'최소 ' if len(wns) > 1 else ''}{min(wns):+.3f} ns"
+                                        f" ({spec['src']}) · <code>{path}</code>")
 
 
 def top_sources(p):
@@ -268,6 +299,9 @@ def subject_section(p, e, s, c, ce):
     syn_txt = (("통과 · " if syn.startswith("SYNTH_TIMING_PASS") else "✗ ") + bg.short(syn.split(" ", 4)[-1], 70)) if syn \
         else "⚠ 미검증 (VS Code Vivado 실행 대기)"
     subj_gates = [(cls, name, note.replace(" (08절)", " (구 장 OOC)")) for cls, name, note in bg.gates(c, ce) if name != "HTML_PASS"]
+    if c.get("synth_md"):
+        sc, sn = synth_from_md(c["synth_md"])
+        subj_gates = [(sc, n, sn) if n == "SYNTH_TIMING_PASS" else (cl, n, no) for cl, n, no in subj_gates]
     pat = c.get("evidence", {}).get("pattern", r"_PASS|PYTHON_VECTORS|^\|")
     chk = "".join(f"<tr><td><code>{a}</code></td><td>{b}</td></tr>" for a, b in c["checks"])
     tbref = "\n".join(bg.code(x, ce) for x in c["tb"] + c["ref"])

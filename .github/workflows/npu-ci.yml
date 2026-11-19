@@ -63,6 +63,10 @@ jobs:
         run: for c in 13 14 15 16; do bash part03/ch$c/scripts/run_sim.sh; done
       - name: Run 3장 Top (p03, STAGE 1~4, MNIST 내려받기 포함)
         run: bash p03/scripts/run_sim.sh
+      - name: Run part03 ch17~19 (VS Code 판 사본, 4장 서브젝트)
+        run: for c in 17 18 19; do bash part03/ch$c/scripts/run_sim.sh; done
+      - name: Run 4장 Top (p04, STAGE 1~4)
+        run: bash p04/scripts/run_sim.sh
       - name: Run ch13 Input Loader
         run: bash ch13/scripts/run_sim.sh
       - name: Run ch14 Group10 Scheduler
