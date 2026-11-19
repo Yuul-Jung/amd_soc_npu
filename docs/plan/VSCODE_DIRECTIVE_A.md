@@ -59,6 +59,7 @@
 7. **다시 돌릴 것**: 22 ELF → 23 SoC 시뮬(CPU·NPU 클록 값 갱신) → 25 report_power(같은 SAIF 절차) → 27 `run_all` (`LEVEL=sim`과 가능하면 `LEVEL=vivado`) → 28 ELF(21장 XSA로 플랫폼, `basys3_soc28_top`·`soc28_bd.tcl`·`axi_gpio_1`·`p3_fnd_scan`은 삭제하고 `p3_fnd_scan`은 RTL 시험용으로만 남길지 판단해 보고) → 29·30·31 ELF + `ELF_MEM_PASS`. 24장 OOC 스윕은 주소와 무관하므로 다시 돌리지 않는다.
 8. **(1장 시범, 위 작업 뒤)** 웹이 만든 1장 Top의 Vivado 실행: `git worktree add ../npu_restructure origin/restructure/projects` → 그 폴더에서 `vivado -mode batch -nojournal -source p01/vivado/build_p01.tcl` (1장 STAGE 1~4), `p02/vivado/build_p02.tcl` (2장 STAGE 1~8), `p03/vivado/build_p03.tcl`, `p04/vivado/build_p04.tcl` (3·4장 STAGE 1~4). 생기는 `p01`~`p04/validation/vivado_impl_YYYYMMDD.txt` **네 파일만** `restructure/projects`에 커밋·푸시한다. 다른 파일은 고치지 않는다. 실패하면 결과 그대로 보고.
 8-1. **(2장 STAGE 8 재실행)** 웹이 12장 `mini_npu/rtl/npu_engine4.v`의 argmax를 두 클록 토너먼트로 고쳤다 (임계 경로 `u_e4/lane1/acc_o_reg → class_o_reg`, WNS −1.952 ns 대응, 00~12장 회귀·적대 시험 PASS, 2장 Top 8단계 PASS). `restructure/projects`를 받아 `vivado -mode batch -nojournal -source p02/vivado/build_p02.tcl -tclargs 8`을 다시 돌리고, 결과 줄을 `p02/validation/vivado_impl_YYYYMMDD.txt`에 추가해 커밋한다 (STAGE 1~7 줄은 그대로 둔다).
+8-2. **(25장 전력 재실행)** `part03/ch25/validation/power_summary.md`는 2026-11-18(안 A 이전) 21장 SoC 기준이다. 안 A 비트스트림으로 `bash part03/ch25/scripts/run_power.sh`를 다시 돌려 `power.log`·`power_summary.md`를 갱신하고 커밋한다 (5장 페이지 5-6이 ⚠로 표시 중).
 9. **보드 점검표** `ch27/docs/BOARD_CHECKLIST.md`: 비트스트림·XSA·ELF SHA를 새 값으로, 7세그먼트·BTN 항목을 서브젝트마다 하나 이상 넣는다. 모두 `NOT_RUN` 유지.
 
 ## 4. 지킬 것
@@ -88,7 +89,7 @@
 | 21장 비트스트림 | | `soc_summary.md` | WNS·WHS·LUT·SHA |
 | 22~31장 ELF | | | 크기·스택 끝 |
 | 23장 클록 | | | CPU·NPU |
-| 25장 전력 | | | CPU·NPU mJ |
+| 25장 전력 (안 A 재실행, 8-2) | | | CPU·NPU mJ |
 | 27장 run_all | | | |
 | 1장 Top STAGE 1~4 | | `p01/validation/vivado_impl_*.txt` | WNS·WHS·LUT·DSP |
 | 2장 Top STAGE 1~8 | | `p02/validation/vivado_impl_*.txt` | WNS·WHS·LUT·DSP·RAMB18 |

@@ -67,6 +67,8 @@ jobs:
         run: for c in 17 18 19; do bash part03/ch$c/scripts/run_sim.sh; done
       - name: Run 4장 Top (p04, STAGE 1~4)
         run: bash p04/scripts/run_sim.sh
+      - name: Run part03 ch20·ch22 (VS Code 판 사본, 5장 서브젝트 AXI IP·C 드라이버 협동 시뮬레이션)
+        run: for c in 20 22; do bash part03/ch$c/scripts/run_sim.sh; done
       - name: Run ch13 Input Loader
         run: bash ch13/scripts/run_sim.sh
       - name: Run ch14 Group10 Scheduler
