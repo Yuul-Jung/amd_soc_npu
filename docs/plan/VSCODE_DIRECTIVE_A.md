@@ -16,7 +16,7 @@
 
 | 누가 | 브랜치 | 고치는 곳 |
 |---|---|---|
-| VS Code | `vscode/part03-ch13-31` (지금 브랜치 계속) | `part03/` 아래만 (예외: 3절 8번의 `p01/validation/vivado_impl_*.txt` 한 파일은 `restructure/projects`에) |
+| VS Code | `vscode/part03-ch13-31` (지금 브랜치 계속) | `part03/` 아래만 (예외: 3절 8번의 `p01`·`p02/validation/vivado_impl_*.txt` 두 파일은 `restructure/projects`에) |
 | 웹 Claude | `restructure/projects` | `docs/`·`tools/guide/`·`AGENTS.md` (이 파일 포함) |
 
 - `main`에는 둘 다 푸시하지 않는다. 원본 `Yuul-Jung/amd_soc_rtl`과 제1부 11장 원본 프로젝트는 고치지 않는다 (복제본만).
@@ -57,7 +57,7 @@
 5. **21장 재빌드**: `scripts/build_soc.sh` → 비트스트림·XSA. `validation/soc_summary.md`를 새 값(주소 표, WNS·WHS, LUT·FF·BRAM·DSP, SHA-256)으로 다시 쓴다. 이전 값은 Git 이력에만 남긴다.
 6. **펌웨어**: 22장부터 주소는 `xparameters.h`만 쓴다(하드코딩 금지). `rg -n '0x4060|0x41C0|0x4120|0x4001' part03`이 BD 검사 기대값 외에는 0건이어야 한다. NPU 인터럽트를 쓰는 코드는 INTC 비트 12로. 22장 드라이버에 표시 코드를 추가한다: 추론 뒤 클래스를 LED 한 개 + 7세그먼트 오른쪽 자리(VALUE), 왼쪽 두 자리는 그림 번호.
 7. **다시 돌릴 것**: 22 ELF → 23 SoC 시뮬(CPU·NPU 클록 값 갱신) → 25 report_power(같은 SAIF 절차) → 27 `run_all` (`LEVEL=sim`과 가능하면 `LEVEL=vivado`) → 28 ELF(21장 XSA로 플랫폼, `basys3_soc28_top`·`soc28_bd.tcl`·`axi_gpio_1`·`p3_fnd_scan`은 삭제하고 `p3_fnd_scan`은 RTL 시험용으로만 남길지 판단해 보고) → 29·30·31 ELF + `ELF_MEM_PASS`. 24장 OOC 스윕은 주소와 무관하므로 다시 돌리지 않는다.
-8. **(1장 시범, 위 작업 뒤)** 웹이 만든 1장 Top의 Vivado 실행: `git worktree add ../npu_restructure origin/restructure/projects` → 그 폴더에서 `vivado -mode batch -nojournal -source p01/vivado/build_p01.tcl` (STAGE 1~4 비트스트림). 생기는 `p01/validation/vivado_impl_YYYYMMDD.txt` **한 파일만** `restructure/projects`에 커밋·푸시한다. 다른 파일은 고치지 않는다. 실패하면 결과 그대로 보고.
+8. **(1장 시범, 위 작업 뒤)** 웹이 만든 1장 Top의 Vivado 실행: `git worktree add ../npu_restructure origin/restructure/projects` → 그 폴더에서 `vivado -mode batch -nojournal -source p01/vivado/build_p01.tcl` (1장 STAGE 1~4)과 `p02/vivado/build_p02.tcl` (2장 STAGE 1~8). 생기는 `p01/validation/vivado_impl_YYYYMMDD.txt`·`p02/validation/vivado_impl_YYYYMMDD.txt` **두 파일만** `restructure/projects`에 커밋·푸시한다. 다른 파일은 고치지 않는다. 실패하면 결과 그대로 보고.
 9. **보드 점검표** `ch27/docs/BOARD_CHECKLIST.md`: 비트스트림·XSA·ELF SHA를 새 값으로, 7세그먼트·BTN 항목을 서브젝트마다 하나 이상 넣는다. 모두 `NOT_RUN` 유지.
 
 ## 4. 지킬 것
@@ -88,6 +88,7 @@
 | 25장 전력 | | | CPU·NPU mJ |
 | 27장 run_all | | | |
 | 1장 Top STAGE 1~4 | | `p01/validation/vivado_impl_*.txt` | WNS·WHS·LUT·DSP |
+| 2장 Top STAGE 1~8 | | `p02/validation/vivado_impl_*.txt` | WNS·WHS·LUT·DSP·RAMB18 |
 | 판단 필요 | | | |
 
 마지막 커밋 해시와 브랜치 이름을 적는다.
