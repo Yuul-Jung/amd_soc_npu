@@ -1,0 +1,35 @@
+Python 3.12.3
+gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+Icarus Verilog version 12.0 (stable) ()
+MOTOR_REFERENCE_SELFTEST_PASS
+MOTOR_UNIT_VECTORS n=125968 ena_on=10357 invariant_violations=0
+SENSOR_HEADER_DONE model_id=18496ca4 w=[-110, -127, -63, -66, -117, -92]...
+RTL_SIM_PASS MOTOR_SAFETY cycles=125968 ena_cycles=10364 trip_cycles=16470
+RTL_MUTANTS estop_not_combinational no_reset_latch no_dead_time no_ramp clear_while_running limit_wrong_dir watchdog_stuck
+RTL_MUTANT clear_while_running KILLED
+RTL_MUTANT estop_not_combinational KILLED
+RTL_MUTANT limit_wrong_dir KILLED
+RTL_MUTANT no_dead_time KILLED
+RTL_MUTANT no_ramp KILLED
+RTL_MUTANT no_reset_latch KILLED
+RTL_MUTANT watchdog_stuck KILLED
+RTL_MUTATION_SUMMARY killed=7 total=7
+/home/jung/soc_migration/amd_soc_rtl/part03/mini_npu/rtl/npu_dsp_mac_lane.v:2: warning: timescale for npu_dsp_mac_lane inherited from another file.
+/home/jung/soc_migration/amd_soc_rtl/part03/ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
+BOOT PASS :: P3_MOTOR READY model=18496ca4 model_ok=1 bias_rc=0
+
+MOTOR_HOST_SUMMARY target=rtl_cosim checks=62/62 proc_rc=0
+MOTOR_HOST_PASS
+STEPS_PASS 61
+SAFETY_SUMMARY cycles=1403942 violations=0 ena_cycles=409039 in1_cycles=522240 in2_cycles=3625 reversals=2 min_reversal_gap=3001 dead=3000
+RTL_SIM_PASS MOTOR_BRIDGE axi_writes=215396 axi_reads=22741
+MUTANTS ignore_policy warning_full_speed clear_without_stop no_kick ignore_operator_dir display_duty
+MUTANT clear_without_stop KILLED (STEP   7 clear_reset            FAIL trip=1/0;latched=24/0;req=1/0)
+MUTANT display_duty KILLED (STEP   5 boot_normal_2          FAIL disp={'fnd': '004f0050', 'led': '0001'}/004f0000,0001)
+MUTANT ignore_operator_dir KILLED (STEP  22 reverse_off_limit      FAIL rec=1,80/2,80;req=1/2)
+MUTANT ignore_policy KILLED (STEP   3 boot_normal_0          FAIL rec=1,30/0,0)
+MUTANT no_kick KILLED (STEP   7 clear_reset            FAIL trip=1/0;latched=8/0)
+MUTANT warning_full_speed KILLED (STEP  10 warning_slow           FAIL rec=1,80/1,30;duty=80/30)
+MUTATION_SUMMARY killed=6 total=6
+PYTHON_RTL_COMPARE_PASS ch30 motor_safety_rtl=reference(cycle) host->fw(ch29 policy)->npu_rtl+motor_rtl invariants=0
+EXIT=0
