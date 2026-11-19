@@ -1,0 +1,21 @@
+Python 3.12.3
+Icarus Verilog version 12.0 (stable) ()
+PYTHON_ARCH_SELF_TEST_PASS samples=4 tile_runs=52 cycles PE1=700 PE4=206 PE8=138 load_w=640
+part03/mini_npu/rtl/npu_dsp_mac_lane.v:2: warning: timescale for npu_dsp_mac_lane inherited from another file.
+part03/ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
+RTL_SIM_PASS PE_SCALE tile_runs=52 PE1=70x10 PE4=206 PE8=138(A 138, B 70) load_w=640
+part03/ch19/tb/tb_p3_pe_scale.sv:227: $finish called at 2511130000 (1ps)
+PYTHON_RTL_COMPARE_PASS tile_runs=52 configs=PE1,PE4,PE8 partials_bit_exact=1 cycles_match_model=1 mnist_samples=4 class_match_ch18_int8=1
+| PE | 이론 하한(640 MAC) | 그룹 스케줄 발행 | lane 이용률 | 코어 사이클(타일 1개) | 784 추론 연산 사이클(13타일) | 가중치 읽기 포트 |
+|---:|---:|---:|---:|---:|---:|---:|
+| 1 | 640 | 640 | 100.0% | 700 | 9100 | 1 |
+| 4 | 160 | 192 | 83.3% | 206 | 2678 | 4 |
+| 8 | 80 | 128 | 62.5% | 138 | 1794 | 8 |
+
+가중치 읽기 포트 수에 따른 발행 클록(타일 1개, x 방송 1포트):
+
+| PE \ 포트 | 1 | 2 | 4 | 8 |
+|---:|---:|---:|---:|---:|
+| 1 | 640 | 640 | 640 | 640 |
+| 4 | 640 | 320 | 192 | 192 |
+| 8 | 640 | 320 | 192 | 128 |

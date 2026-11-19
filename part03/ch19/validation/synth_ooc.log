@@ -1,0 +1,9 @@
+Vivado 2024.2
+Synthesis finished with 0 errors, 0 critical warnings and 5 warnings.
+Synthesis finished with 0 errors, 0 critical warnings and 1 warnings.
+Synthesis finished with 0 errors, 0 critical warnings and 1 warnings.
+Synthesis finished with 0 errors, 0 critical warnings and 1 warnings.
+Synthesis finished with 0 errors, 0 critical warnings and 1 warnings.
+Synthesis finished with 0 errors, 0 critical warnings and 5 warnings.
+Synthesis finished with 0 errors, 0 critical warnings and 1 warnings.
+SYNTH_OOC_SUMMARY configs=7 wns_negative=0 routed=7 route_wns_negative=0 out=synth_ooc_summary.md
