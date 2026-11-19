@@ -1,0 +1,9 @@
+SOC_BENCH cpu_cycles=1816547 npu_bias_cycles=3076 npu_cycles=1080161 cpu_class=7 npu_class=7 scores_match=1 rc=0 sim_time_ns=29039155000
+SOC_RTL_SIM_PASS
+# puts "SOC_POWER_SIM_END"
+SOC_POWER_SIM_END
+150585706 out/cpu.saif
+149360658 out/npu.saif
+# puts "SOC_POWER_REPORT_DONE"
+SOC_POWER_REPORT_DONE
+POWER_SUMMARY cpu_mJ=4.541 npu_mJ=2.733

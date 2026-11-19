@@ -1,0 +1,9 @@
+p10.000_axi errors=0
+p10.000_cores errors=0
+p8.000_axi errors=0
+p8.000_cores errors=0
+p7.000_axi errors=0
+p7.000_cores errors=0
+p6.000_axi errors=0
+p6.000_cores errors=0
+SWEEP_SUMMARY pe4_int8=146.1MHz pe4_int16=126.4MHz tile784_int8=101.0MHz axi_npu_int8=105.0MHz
