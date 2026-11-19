@@ -46,7 +46,10 @@ amd_soc_npu/
 ## HTML 교재 제작
 - STANDARD.md: 책장 사진 1800×380, `#F1F2EE` 바탕, `#4635B1` 강조, 좌측 탐색, 860px 모바일 메뉴, 이전/다음/INDEX.
 - 버전 규칙: ch00~ch12는 현재 v05(실습 절차형), ch13~ch31은 v02부터 시작.
-- 실습 안내서 절 구성: 00 위치(유지·작성 파일) → 01 구조도(실제 포트·인스턴스) → 02 준비 → 03 RTL → 04 TB·기준 모델 → 05 실행(실제 로그) → 06 판정 → 07 코드 읽기 → 08 합성·타이밍·보드 → 09 검증·인계. 설명 문단은 최소화한다.
+- **장 = 프로젝트 = HTML 1개, 서브젝트 = 장 안의 절** (개편 설계 [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md), 2026-11-19 확정). 장마다 보드 Top 하나가 자라고 장 끝에서 보드 시연한다. 서브젝트 코드·증거 폴더는 `chNN/` 그대로 쓰고 화면에는 "3-2 그룹·argmax (구 14장)"로 표시한다.
+- 장 페이지 절 구성: 00 장 목표·진행 위치(보드 시연 한 줄, 진행 막대) → 01 최종 구조도·가져오는 파일 → 02 준비 → 서브젝트 절 n-1…n-k (각: 보드에서 볼 것 · 추가 코드 · 시뮬레이션 기대 화면 · 판정 줄) → 장 시연 → 누적 보고·인계. 설명 문단은 최소화한다.
+- 서브젝트의 학습목표는 "보드에서 무엇을 넣으면 무엇이 보이는가" 한 줄로 쓰고, 보드 확인은 서브젝트마다(최소 하루 2번) 한다.
+- (개편 전 장 단위 v05·v02 안내서와 절 구성 00~09는 브랜치 `archive/v02-ch00-31`에 보관)
 - **안내서 HTML·`index.html`·`docs/GUIDE_STATUS.md`는 직접 수정하지 않는다.** 내용은 `chNN/chapter.json`, 코드는 원본 파일, 게이트 배지는 `validation/` 증거에서 `python3 tools/guide/build_guides.py`가 만든다. CI가 `--check`로 어긋남을 막는다.
 - 역할 분담: 코드·실행·증거·`chapter.json`은 VS Code Claude, 생성기·안내서 관리는 웹 Claude. 상세는 [docs/VSCODE_HANDOFF.md](docs/VSCODE_HANDOFF.md).
 - `window.COURSE` 탐색에는 실제 존재하는 장 파일만 넣는다.
@@ -69,7 +72,7 @@ amd_soc_npu/
 - Vivado 게이트는 Vivado 설치 PC(VS Code)에서 `bash tools/run_vivado_all.sh`로 실행하고, 생성된 `validation/vivado_*` 파일을 커밋해야 확정한다. 오픈소스 도구 결과로 대체하지 않는다.
 - 현재 실물 보드 확인은 하지 않는다(`BOARD_PASS` 미실시 표기).
 
-## 동결 SoC 하드웨어 사양 (ch20~ch31 AXI 연동 기준)
+## 동결 SoC 하드웨어 사양 (5·6장 = 구 ch20~ch31 AXI 연동 기준, 안 A 확정)
 로컬메모리 0x0000_0000 · GPIO LED/SW 0x4000_0000 · GPIO BTN 0x4001_0000
 UART Lite 0x4002_0000 · Timer 0x4003_0000 · INTC 0x4004_0000
 IIC 0x4005_0000 · SEG7 0x4006_0000
