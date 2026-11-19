@@ -51,6 +51,29 @@
 | B16 | 실행 중 FND·LED를 눈으로 확인 | FAULT 래치 때 자리 3의 점과 LED13, ACK 뒤 점이 꺼지고 3회 정상 뒤 `0` | |
 | B17 | 호스트를 멈추고 링크 감시 시간을 스톱워치로 잰다 | `STATE src=LINK_TIMEOUT`이 주기적으로 나온다. 실측 주기(초)를 기록(폴링 10,000,000회) | |
 
+## 1-30. 30장 모터 안전 (30장 비트스트림 — 모터·드라이버는 처음에는 연결하지 않는다)
+
+준비: `part03/ch30/build/out/basys3_soc30_top.bit`, ELF `motor_app.elf`(`ch30/validation/build_soc.log`의 SHA-256). **1단계는 가상 부하(LED)만**: JB에는 아무것도 꽂지 않는다.
+
+| # | 절차 | 기대 결과 | 판정 |
+|---|---|---|---|
+| B18 | JB4 미연결 상태로 실행 | 비상정지 루프 열림 → LED9(트립) 켜짐, `python3 part03/ch30/host/p3_motor_host.py --port <포트> …`의 `clear_reset`이 trip=1로 남음(fail-safe) | |
+| B19 | JB4를 3.3 V(JB6 VCC)로 점퍼(NC 루프 흉내) 후 호스트 보드 단계 | `MOTOR_HOST_PASS`(부팅 트립 → 해제 → NORMAL 80 % 운전 → WARNING 30 % → NPU FAULT 정지 → 'J' 거부), LED11·12 켜짐/밝기 변화 | |
+| B20 | 운전 중 btnU 누름, 놓은 뒤 'C' 없이 프레임 계속 | LED11·12 즉시 꺼짐, LED9 켜짐, 해제 전까지 다시 켜지지 않음 | |
+| B21 | 운전 중 sw[14](정방향 리밋) 올림 → 'D' 2(REV) | 정방향 즉시 정지(트립 없음), 약 100 ms 뒤 LED10(REV) | |
+| B22 | sw[12](고장)·sw[11](과열) 각각 올렸다 내림 | 즉시 정지·트립 래치, 'C' 뒤에만 재가동 | |
+| B23 | 호스트를 멈춤(프레임 중단) | 약 0.5 s 뒤 정지·WD 래치 | |
+| B24 | **(별도, 사용자 판단)** 실제 드라이버·모터 연결 | 외부 전원·공통 GND·드라이버 입력 풀다운·전류 보호 확인 뒤에만. 이 점검표의 PASS로 대체하지 않는다 | |
+
+## 1-31. 31장 보안 모델 적재 (28장 비트스트림 그대로, ELF만 다르다)
+
+준비: `secure_app.elf`(`ch31/validation/build_sw.log`). 저장소 TEST 키로 빌드한 ELF면 호스트도 키 파일 없이, 운영 키면 `P3_KEY_FILE`로 빌드하고 호스트에 `--key-file`(둘 다 저장소 밖).
+
+| # | 절차 | 기대 결과 | 판정 |
+|---|---|---|---|
+| B25 | `python3 part03/ch31/host/p3_secure_host.py --port <포트> --csv b31.csv --log b31_uart.log`, 안내가 나오면 btnC | 부팅 `key_fp` 일치, 모든 STEP PASS(모델 B 적재·추론, 거부 17종, A 재적재), `SECURE_HOST_PASS` | |
+| B26 | 실행 뒤 btnC로 재부팅하고 `I` | `last_seq=0`(재부팅 뒤 Replay 가능 — 알려진 한계 확인) | |
+
 ## 2. 기록할 것
 
 - 각 항목의 UART 원문(사진 또는 터미널 로그), Vivado·Vitis 버전, 보드 리비전.
@@ -58,5 +81,5 @@
 
 ## 3. 이번 점검 범위 밖
 
-- 29장 실제 센서(DS18B20·XADC·HC-SR04) 연결, 30·31장 모터·보안 UART 실물 검증.
+- 29장 실제 센서(DS18B20·XADC·HC-SR04) 연결, 30장 실제 모터·드라이버 구동(B24는 사용자 판단으로 별도).
 - 클록을 100 MHz 위로 올리는 시험(24장 Fmax는 OOC 추정).
