@@ -64,6 +64,7 @@
 | 펌웨어 변이 6종 | **6/6 검출** |
 | 코어 OOC 배선 | LUT 169, FF 120, DSP 0, WNS +3.699 ns @100 MHz (`validation/synth_ooc_summary.md`) |
 | SoC 비트스트림 | PASS — 2026-11-19 재빌드(11-18 23:36 시스템 종료로 첫 시도의 impl_1 중단). 배선 후 WNS +0.427 ns, WHS +0.022 ns, 출력 핀 IN1·IN2·ENA는 motor_safety_0에서만 구동, JB4 PULLDOWN, 입력 동기화기 ASYNC_REG 12셀. `basys3_soc30_top.bit` b0c00e3b07a9e2b4, XSA 1fbedd8afa770952 (`validation/build_soc_20261119.log`) |
+| **안 A 이후 SoC** | **NOT_RUN (판단 필요)** — 위 비트스트림은 이전 주소맵(28장 SoC 위, 모터 GPIO 0x4002_0000)이다. 안 A에서 0x4002_0000은 UART이고 28장 BD가 폐지되어 `build_soc.sh`는 지금 NOT_RUN으로 끝난다. 모터 안전 코어는 하드웨어가 꼭 필요하므로("ELF만" 방침과 충돌) 21장 SoC 위에 어느 주소·SmartConnect 포트로 넣을지 결정을 기다린다 |
 | 펌웨어 ELF(`motor_app`) | 53,456 B, SHA-256 210ff1cff2c2ab68, `ELF_MEM_PASS`, GPIO2 0x4002_0000 |
 | **Basys3 실물** | **NOT_RUN** — `ch27/docs/BOARD_CHECKLIST.md` B18~B24, 사용자와 함께 |
 
