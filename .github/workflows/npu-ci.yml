@@ -59,6 +59,10 @@ jobs:
         run: bash mini_npu/scripts/run_batch_00_12.sh
       - name: Run 2장 Top (p02, STAGE 1~8)
         run: bash p02/scripts/run_sim.sh
+      - name: Run part03 ch13~16 (VS Code 판 사본, 3장 서브젝트)
+        run: for c in 13 14 15 16; do bash part03/ch$c/scripts/run_sim.sh; done
+      - name: Run 3장 Top (p03, STAGE 1~4, MNIST 내려받기 포함)
+        run: bash p03/scripts/run_sim.sh
       - name: Run ch13 Input Loader
         run: bash ch13/scripts/run_sim.sh
       - name: Run ch14 Group10 Scheduler
