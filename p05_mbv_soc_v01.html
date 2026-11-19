@@ -1,0 +1,2983 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Basys3 NPU 5장 프로젝트 · MicroBlaze V SoC">
+<meta name="generator" content="tools/guide/build_projects.py — 직접 수정 금지, project.json·chapter.json을 고친 뒤 재생성">
+<title>5장 · MicroBlaze V SoC (v01)</title>
+<link rel="stylesheet" href="assets/education/site.css">
+<style>
+.codeblock pre{max-height:780px;white-space:pre}
+.section svg{width:100%;height:auto}
+.vbadge{display:inline-block;padding:.15em .6em;border-radius:4px;font-size:.78em;font-weight:700;background:#d4edda;color:#155724;vertical-align:middle}
+.gate-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:10px}
+.gate{border:1px solid var(--line,#e0e0e0);border-radius:6px;padding:10px 14px;overflow-wrap:anywhere}
+.gate b{display:block;font:600 11px var(--mono,monospace);letter-spacing:.04em;margin-bottom:4px}
+.gate span{font-size:13px}
+.gate.pass{border-color:#2d8a52;background:#f0fbf4}
+.gate.todo{border-color:#b08900;background:#fffbe6}
+.gate.fail{border-color:#b3261e;background:#fdeceb}
+.gate.na{border-color:#c8c8c8;background:#f6f6f6;color:#666}
+.table-wrap{overflow-x:auto}
+.table-wrap>table{min-width:620px}
+.figure-wrap{overflow-x:auto}
+.figure-wrap svg{min-width:860px}
+.section :not(pre)>code{overflow-wrap:anywhere}
+.codebar{gap:8px}
+.codebar span{min-width:0;overflow-wrap:anywhere}
+.hero p{max-width:none}
+.access-skip{position:absolute;left:-9999px;top:0}
+.access-skip:focus{left:12px;top:12px;z-index:1003;background:#fff;color:#15171c;padding:6px 10px}
+.nw code{white-space:nowrap;overflow-wrap:normal}
+</style>
+<style>
+.road{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;list-style:none;padding:0;margin:12px 0}
+.road li{border:1px solid #c9c4ea;border-radius:6px;padding:8px 6px;font-size:13px;text-align:center;background:#fff;min-width:0;word-break:keep-all;overflow-wrap:anywhere}
+.road li b{display:block;font-size:12px;color:#4635b1}
+.road li.now{background:#4635b1;color:#fff;border-color:#4635b1}
+.road li.now b{color:#fff}
+.road li.plan{color:#595959;border-style:dashed}
+.steps{list-style:none;padding:0;margin:12px 0;display:grid;gap:6px}
+.steps li{display:grid;grid-template-columns:4.2em 1fr auto;gap:10px;align-items:center;border-left:6px solid #c9c4ea;background:#fff;padding:8px 12px;border-radius:0 6px 6px 0}
+.steps li.done{border-left-color:#2d8a52}
+.steps li.demo{border-left-color:#4635b1;font-weight:600}
+.steps .code{font:700 15px var(--mono,monospace);color:#4635b1}
+.steps li>span{min-width:0;overflow-wrap:anywhere}
+.steps li code{word-break:break-all}
+.steps .st{font-size:13px;white-space:nowrap}
+.verdict{border:1px solid #c9c4ea;border-radius:6px;padding:8px 12px;background:#faf9ff;margin:10px 0}
+details.full{margin:10px 0}
+td.nw,th.nw{white-space:nowrap}
+details.full>summary{cursor:pointer;font-weight:600}
+@media (max-width:860px){.road{grid-template-columns:repeat(4,minmax(0,1fr))}.steps li{grid-template-columns:3.6em 1fr}.steps .st{grid-column:2}}
+</style>
+</head>
+<body data-chapter="p05">
+<a class="access-skip" href="#main-content">본문 바로가기</a>
+<button type="button" class="mobile-menu" id="mobile-menu" aria-controls="course-nav" aria-expanded="false">☰ 장·목차</button>
+<div class="shade" id="shade"></div>
+<header class="hero">
+  <div class="hero-inner">
+    <p class="kicker">BASYS3 · NPU 고도화판 · 5장 프로젝트 · 2일 <span class="vbadge">v01</span></p>
+    <h1>제5장 · MicroBlaze V SoC</h1>
+    <p>4장 NPU를 AXI IP로 → MicroBlaze V SoC → C 드라이버 → 시간·자원·전력. 서브젝트 7개.</p>
+  </div>
+</header>
+<div class="wrap">
+  <nav class="toc" id="course-nav" aria-label="전체 장과 절 탐색"></nav>
+  <main class="content" id="main-content">
+    <section class="section" id="s00">
+      <h2><span class="num">00</span> 장 목표·진행 위치</h2>
+      <p><b>장 시연 (보드):</b> 21장 비트스트림 하나에 MicroBlaze V와 NPU가 함께 있고, C 드라이버가 그림 4장을 NPU로 분류해 UART·LED·7세그먼트에 띄운다. 같은 추론을 CPU만으로 하면 1,816,547클록, NPU로 하면 1,080,161클록.</p>
+      <p>편성: 2일 · 서브젝트 7개 · 비트스트림은 5-2에서 한 번 만들고, 이후 서브젝트는 ELF만 바꿔 보드에서 확인합니다.</p>
+      <ol class="road" aria-label="전체 장에서 지금 위치"><li class=""><a href="p01_uart_calc_v01.html"><b>1장</b>UART 계산기</a></li><li class=""><a href="p02_npu4_board_v01.html"><b>2장</b>4뉴런 NPU 보드</a></li><li class=""><a href="p03_mnist8x8_v01.html"><b>3장</b>8×8 MNIST (CPU 없음)</a></li><li class=""><a href="p04_tile784_v01.html"><b>4장</b>784 가속기 설계 공간</a></li><li class="now" aria-current="step"><b>5장</b>MicroBlaze V SoC</li><li class="plan"><b>6장</b>응용 확장</li><li class="plan"><b>7장</b>종합과제</li></ol>
+      <ol class="steps" aria-label="이 장의 서브젝트와 진행 상태"><li class=""><span class="code">5-1</span><span><a href="#s5_1">AXI4-Lite NPU IP</a> <small>(구 20장 · 1일 오전)</small><br>보드 확인은 5-2 비트스트림으로 한다. 여기서는 AXI 버스로 레지스터 15개를 읽고 써서 784 추론 7번이 Python과 비트 단위로 같고, 없는 주소는 SLVERR(16건)인 것을 시뮬레이션으로 본다.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">5-2</span><span><a href="#s5_2">MicroBlaze V SoC 연결 (동결 주소맵)</a> <small>(구 21장 · 1일 오전)</small><br>21장 비트스트림을 내려받으면 DONE LED. XSDB로 7세그먼트 ID <code>mrd 0x4006FFF0</code> → <code>53454737</code>, 버튼을 누른 채 <code>mrd 0x40010000</code> → U·D·L·R = <code>8</code>·<code>4</code>·<code>2</code>·<code>1</code>.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">5-3</span><span><a href="#s5_3">C 드라이버와 표시</a> <small>(구 22장 · 1일 오후)</small><br><code>npu_app.elf</code>: 그림 4장(시험 0·1·92·1640)을 NPU로 분류해 CPU 계산과 점수까지 같고(<code>scores_match=1</code>), 끝나면 7세그먼트 <code>03 4</code>·LED4. #92는 4장과 같이 INT8에서 4.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">5-4</span><span><a href="#s5_4">CPU·NPU 추론 시간</a> <small>(구 23장 · 1일 오후)</small><br><code>bench_board.elf</code>: 같은 그림을 CPU 정수 계산으로 1,816,547클록, NPU로 1,080,161클록(Bias 적재 3,076 포함) — 1.68배. 리셋 뒤 다시 돌려도 같은 값.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">5-5</span><span><a href="#s5_5">자원·타이밍 스윕</a> <small>(구 24장 · 2일 오전)</small><br>보드 없음. 클록 주기를 10 → 8 → 7 → 6 ns로 줄여 배선: 20장 AXI NPU IP는 10 ns 통과·8 ns 실패로 Fmax 약 105 MHz, 4PE INT8 코어는 146 MHz.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">5-6</span><span><a href="#s5_6">전력·추론당 에너지</a> <small>(구 25장 · 2일 오전)</small><br>보드 없음(Basys3에 전력 측정 회로가 없다). Vivado 추정: 추론당 CPU 4.541 mJ · NPU 2.733 mJ (1.66배). ⚠ 안 A 이전 SoC 빌드 기준이라 재실행 대기.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">5-7</span><span><a href="#s5_7">시스템 통합·보드 점검표</a> <small>(구 27장 · 2일 오후)</small><br><code>run_all.sh</code> 한 번으로 13~31장 회귀를 돌리고(LEVEL=sim PASS), 보드 점검표 B1~B7을 한 자리에서 실행한다 — 장 시연.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class="demo"><span class="code">시연</span><span><a href="#demo">장 시연</a><br>21장 비트스트림 하나에 MicroBlaze V와 NPU가 함께 있고, C 드라이버가 그림 4장을 NPU로 분류해 UART·LED·7세그먼트에 띄운다. 같은 추론을 CPU만으로 하면 1,816,547클록, NPU로 하면 1,080,161클록.</span><span class="st">보드 ⚠ 미실시</span></li></ol>
+    </section>
+    <section class="section" id="s01">
+      <h2><span class="num">01</span> 최종 구조도·주소맵</h2>
+      <div class="figure-wrap" tabindex="0" role="region" aria-label="도면 (가로 스크롤 가능)"><svg style="min-width:896px" id="p05-socmap" xmlns="http://www.w3.org/2000/svg" width="1280" height="782" viewBox="0 0 1280 782" aria-label="5장 SoC 주소맵과 인터럽트 구조도" role="img" version="1.1"><!-- 원본: p05/diagrams/soc_map.json · json-sha256: 9f8ae64489e737b7135755249399ece3463df0875f4a2601e40b75dad9def188 · 생성: svg-flow-editor (로컬 사본) · 직접 수정 금지 --><defs><marker id="p05-socmap-arrowhead-0" markerWidth="13" markerHeight="13" refX="11.375" refY="6.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 13 6.5 L 0 13 z" fill="#1F3A5F"/></marker><marker id="p05-socmap-arrowhead-1" markerWidth="13" markerHeight="13" refX="11.375" refY="6.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 13 6.5 L 0 13 z" fill="#1F3A5F"/></marker><marker id="p05-socmap-arrowhead-2" markerWidth="13" markerHeight="13" refX="11.375" refY="6.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 13 6.5 L 0 13 z" fill="#1F3A5F"/></marker><marker id="p05-socmap-arrowhead-3" markerWidth="13" markerHeight="13" refX="11.375" refY="6.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 13 6.5 L 0 13 z" fill="#1F3A5F"/></marker><marker id="p05-socmap-arrowhead-4" markerWidth="13" markerHeight="13" refX="11.375" refY="6.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 13 6.5 L 0 13 z" fill="#1F3A5F"/></marker><marker id="p05-socmap-arrowhead-5" markerWidth="13" markerHeight="13" refX="11.375" refY="6.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 13 6.5 L 0 13 z" fill="#1F3A5F"/></marker><marker id="p05-socmap-arrowhead-6" markerWidth="13" markerHeight="13" refX="11.375" refY="6.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 13 6.5 L 0 13 z" fill="#1F3A5F"/></marker><marker id="p05-socmap-arrowhead-7" markerWidth="13" markerHeight="13" refX="11.375" refY="6.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 13 6.5 L 0 13 z" fill="#1F3A5F"/></marker><marker id="p05-socmap-arrowhead-8" markerWidth="13" markerHeight="13" refX="11.375" refY="6.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 13 6.5 L 0 13 z" fill="#1F3A5F"/></marker></defs><rect x="0" y="0" width="1280" height="782" fill="#fff"/><g data-heading="title"><text x="52" y="57.52" font-size="28" font-weight="780" fill="#172439" text-anchor="start" class="heading-text" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">5장 SoC 구조 · 동결 주소맵 (안 A)</text></g><g data-heading="subtitle"><text x="52" y="101.44" font-size="16" font-weight="400" fill="#617083" text-anchor="start" class="heading-text" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">MicroBlaze V가 AXI로 주변 장치 7개를 읽고 쓴다. NPU(구 20장 IP)는 0x44A0_0000, 인터럽트 In12</text></g><g id="edges"><g data-edge="cpu-smc" class="edge"><path d="M 307.5 426 L 422.5 426" fill="none" stroke="#1F3A5F" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#p05-socmap-arrowhead-0)"/><text x="365" y="417" text-anchor="middle" font-size="15" font-weight="750" fill="#1F3A5F" class="edge-label" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">M_AXI_DP</text></g><g data-edge="cpu-lmb" class="edge"><path d="M 190 458.5 L 190 563.5" fill="none" stroke="#1F3A5F" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#p05-socmap-arrowhead-1)"/><text x="200" y="516" text-anchor="start" font-size="15" font-weight="750" fill="#1F3A5F" class="edge-label" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">LMB</text></g><g data-edge="smc-d0" class="edge"><path d="M 617.5 426 L 653.75 426 L 653.75 150 L 690 150" fill="none" stroke="#1F3A5F" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#p05-socmap-arrowhead-2)"/></g><g data-edge="smc-d1" class="edge"><path d="M 617.5 426 L 653.75 426 L 653.75 242 L 690 242" fill="none" stroke="#1F3A5F" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#p05-socmap-arrowhead-3)"/></g><g data-edge="smc-d2" class="edge"><path d="M 617.5 426 L 653.75 426 L 653.75 334 L 690 334" fill="none" stroke="#1F3A5F" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#p05-socmap-arrowhead-4)"/></g><g data-edge="smc-d3" class="edge"><path d="M 617.5 426 L 690 426" fill="none" stroke="#1F3A5F" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#p05-socmap-arrowhead-5)"/></g><g data-edge="smc-d4" class="edge"><path d="M 617.5 426 L 653.75 426 L 653.75 518 L 690 518" fill="none" stroke="#1F3A5F" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#p05-socmap-arrowhead-6)"/></g><g data-edge="smc-d5" class="edge"><path d="M 617.5 426 L 653.75 426 L 653.75 610 L 690 610" fill="none" stroke="#1F3A5F" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#p05-socmap-arrowhead-7)"/></g><g data-edge="smc-d6" class="edge"><path d="M 617.5 426 L 653.75 426 L 653.75 702 L 690 702" fill="none" stroke="#1F3A5F" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#p05-socmap-arrowhead-8)"/></g></g><g id="nodes"><g data-node="cpu" class="node"><rect x="72.5" y="393.5" width="235" height="65" fill="none" stroke="#1F3A5F" stroke-width="3" class="node-shape" pointer-events="all"/><text x="190" y="415.5" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="20" font-weight="750" fill="#172439" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">MicroBlaze V (RV32)</text><text x="190" y="439" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="15" font-weight="400" fill="#273e5e" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">100 MHz · 인터럽트 ← axi_intc_0</text></g><g data-node="lmb" class="node"><rect x="52.5" y="563.5" width="275" height="65" fill="none" stroke="#1F3A5F" stroke-width="3" class="node-shape" pointer-events="all"/><text x="190" y="585.5" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="20" font-weight="750" fill="#172439" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">LMB BRAM</text><text x="190" y="609" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="15" font-weight="400" fill="#273e5e" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">0x0000_0000 · 64 KB · 프로그램·데이터</text></g><g data-node="smc" class="node"><rect x="422.5" y="393.5" width="195" height="65" fill="none" stroke="#1F3A5F" stroke-width="3" class="node-shape" pointer-events="all"/><text x="520" y="415.5" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="20" font-weight="750" fill="#172439" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">AXI SmartConnect</text><text x="520" y="439" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="15" font-weight="400" fill="#273e5e" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">axi_smc · 마스터 1 → 7</text></g><g data-node="d0" class="node"><rect x="690" y="114" width="540" height="72" fill="none" stroke="#1F3A5F" stroke-width="3" class="node-shape" pointer-events="all"/><text x="960" y="139.5" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="20" font-weight="750" fill="#172439" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">[00] GPIO LED·SW</text><text x="960" y="163" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="15" font-weight="400" fill="#273e5e" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">axi_gpio_0 · 0x4000_0000</text></g><g data-node="d1" class="node"><rect x="690" y="206" width="540" height="72" fill="none" stroke="#1F3A5F" stroke-width="3" class="node-shape" pointer-events="all"/><text x="960" y="231.5" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="20" font-weight="750" fill="#172439" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">[01] GPIO 버튼</text><text x="960" y="255" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="15" font-weight="400" fill="#273e5e" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">axi_gpio_btn · 0x4001_0000 · In3</text></g><g data-node="d2" class="node"><rect x="690" y="298" width="540" height="72" fill="none" stroke="#1F3A5F" stroke-width="3" class="node-shape" pointer-events="all"/><text x="960" y="323.5" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="20" font-weight="750" fill="#172439" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">[02] UART Lite 115200</text><text x="960" y="347" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="15" font-weight="400" fill="#273e5e" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">axi_uartlite_0 · 0x4002_0000 · In1</text></g><g data-node="d3" class="node"><rect x="690" y="390" width="540" height="72" fill="none" stroke="#1F3A5F" stroke-width="3" class="node-shape" pointer-events="all"/><text x="960" y="415.5" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="20" font-weight="750" fill="#172439" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">[03] Timer</text><text x="960" y="439" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="15" font-weight="400" fill="#273e5e" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">axi_timer_0 · 0x4003_0000 · In0</text></g><g data-node="d4" class="node"><rect x="690" y="482" width="540" height="72" fill="none" stroke="#1F3A5F" stroke-width="3" class="node-shape" pointer-events="all"/><text x="960" y="507.5" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="20" font-weight="750" fill="#172439" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">[04] INTC</text><text x="960" y="531" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="15" font-weight="400" fill="#273e5e" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">axi_intc_0 · 0x4004_0000 · In0 Timer, In1 UART, In3 BTN, In12 NPU</text></g><g data-node="d5" class="node"><rect x="690" y="574" width="540" height="72" fill="none" stroke="#1F3A5F" stroke-width="3" class="node-shape" pointer-events="all"/><text x="960" y="599.5" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="20" font-weight="750" fill="#172439" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">[06] 7세그먼트 (ip_seg7)</text><text x="960" y="623" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="15" font-weight="400" fill="#273e5e" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">ip06_seg7 · 0x4006_0000</text></g><g data-node="d6" class="node"><rect x="690" y="666" width="540" height="72" fill="none" stroke="#4635B1" stroke-width="3.6" class="node-shape" pointer-events="all"/><text x="960" y="691.5" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="20" font-weight="750" fill="#2a1f78" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">NPU (구 20장 IP)</text><text x="960" y="715" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="15" font-weight="400" fill="#3b2d99" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">p3_npu_0 · 0x44A0_0000 · In12</text></g></g></svg></div>
+      <p>도면 원본: <code>p05/diagrams/soc_map.json</code> (svg-flow-editor, <code>p05/diagrams/make_soc_map.py</code>가 아래 Address Editor 표에서 만든다).</p>
+      <h3>주소맵 (Vivado Address Editor 실제 값 = 동결 안 A)</h3>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>인덱스</th><th>세그먼트</th><th>베이스</th><th>범위</th><th>비고</th></tr></thead>
+        <tbody><tr><td class="nw">—</td><td>dlmb_bram_if_cntlr (LMB BRAM)</td><td class="nw">0x0000_0000</td><td class="nw">64 KB</td><td>원본</td></tr><tr><td class="nw">[00]</td><td>axi_gpio_0 LED(16)/SW(16)</td><td class="nw">0x4000_0000</td><td class="nw">64 KB</td><td>원본</td></tr><tr><td class="nw">[01]</td><td><b>axi_gpio_btn</b> BTN 4비트(U·D·L·R), 인터럽트</td><td class="nw"><b>0x4001_0000</b></td><td class="nw">64 KB</td><td>신규</td></tr><tr><td class="nw">[02]</td><td>axi_uartlite_0 115200</td><td class="nw"><b>0x4002_0000</b></td><td class="nw">64 KB</td><td>0x4060_0000에서 이동</td></tr><tr><td class="nw">[03]</td><td>axi_timer_0</td><td class="nw"><b>0x4003_0000</b></td><td class="nw">64 KB</td><td>0x41C0_0000에서 이동</td></tr><tr><td class="nw">[04]</td><td>axi_intc_0 (입력 16)</td><td class="nw"><b>0x4004_0000</b></td><td class="nw">64 KB</td><td>0x4120_0000에서 이동</td></tr><tr><td class="nw">[05]</td><td>IIC</td><td class="nw">—</td><td class="nw">—</td><td>넣지 않음(자리만 비움)</td></tr><tr><td class="nw">[06]</td><td><b>ip06_seg7</b> = <code>ip_seg7</code> 1.0 (ID 0x53454737)</td><td class="nw"><b>0x4006_0000</b></td><td class="nw">64 KB</td><td>신규, 모듈 참조(<code>part03/common/rtl/ip_std</code>)</td></tr><tr><td class="nw">—</td><td>p3_npu_0 (s_axi/reg0)</td><td class="nw">0x44A0_0000</td><td class="nw">4 KB</td><td>그대로</td></tr></tbody>
+      </table></div>
+      <h3>인터럽트 (axi_intc 16입력)</h3>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>INTC 입력</th><th>연결</th></tr></thead>
+        <tbody><tr><td class="nw">In0</td><td>axi_timer_0/interrupt</td></tr><tr><td class="nw">In1</td><td>axi_uartlite_0/interrupt (예약: 연결만, 펌웨어는 켜지 않음)</td></tr><tr><td class="nw">In2</td><td>0 (IIC 예약)</td></tr><tr><td class="nw">In3</td><td>axi_gpio_btn/ip2intc_irpt</td></tr><tr><td class="nw">In4~In11</td><td>0 (C 시리즈 확장 예약)</td></tr><tr><td class="nw"><b>In12</b></td><td><b>p3_npu_0/irq_o</b> (이전 In1)</td></tr><tr><td class="nw">In13~In15</td><td>0</td></tr></tbody>
+      </table></div>
+      <h3>보드 Top 포트 (<code>part03/ch21/rtl/basys3_soc21_top.v</code>, 핀 연결만)</h3>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>방향</th><th>포트</th><th>폭</th><th>구분</th><th>설명</th></tr></thead>
+        <tbody><tr><td>input</td><td class="nw"><code>clk</code></td><td class="nw"><code>1</code></td><td class="nw">클록</td><td>Basys3 W5 외부 100 MHz (11장 clk_wiz가 100 MHz 시스템 클록으로)</td></tr><tr><td>input</td><td class="nw"><code>btnC</code></td><td class="nw"><code>1</code></td><td class="nw">리셋</td><td>SoC 리셋 (Active-High, 11장 그대로)</td></tr><tr><td>input</td><td class="nw"><code>btn</code></td><td class="nw"><code>[3:0]</code></td><td class="nw">보드 핀</td><td>btn[3]=U·[2]=D·[1]=L·[0]=R → axi_gpio_btn 0x4001_0000, INTC In3</td></tr><tr><td>input</td><td class="nw"><code>sw</code></td><td class="nw"><code>[15:0]</code></td><td class="nw">보드 핀</td><td>슬라이드 스위치 → axi_gpio_0 두 번째 채널 (0x4000_0000)</td></tr><tr><td>input</td><td class="nw"><code>RsRx</code></td><td class="nw"><code>1</code></td><td class="nw">보드 핀</td><td>USB-UART PC → FPGA (axi_uartlite 0x4002_0000)</td></tr><tr><td>output</td><td class="nw"><code>led</code></td><td class="nw"><code>[15:0]</code></td><td class="nw">보드 핀</td><td>LED 16개 ← axi_gpio_0 (22장: 클래스 LED 하나)</td></tr><tr><td>output</td><td class="nw"><code>RsTx</code></td><td class="nw"><code>1</code></td><td class="nw">보드 핀</td><td>USB-UART FPGA → PC, 115200 8N1</td></tr><tr><td>output</td><td class="nw"><code>seg</code></td><td class="nw"><code>[6:0]</code></td><td class="nw">보드 핀</td><td>7세그먼트 {g..a}, Low 활성 ← ip_seg7 0x4006_0000</td></tr><tr><td>output</td><td class="nw"><code>dp</code></td><td class="nw"><code>1</code></td><td class="nw">보드 핀</td><td>7세그먼트 점, Low 활성</td></tr><tr><td>output</td><td class="nw"><code>an</code></td><td class="nw"><code>[3:0]</code></td><td class="nw">보드 핀</td><td>자리 선택 4개, Low 활성</td></tr></tbody>
+      </table></div>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>구분</th><th>파일</th></tr></thead>
+        <tbody>
+          <tr><td>이전 장에서 가져오는 것</td><td><ul><li>4장: part03/ch17/rtl/p3_tile784_10.v → 20장 AXI IP 안에 그대로 (그 안에 3-2 p3_group10_core, 2-1 bram_sync_buffer)</li><li>part03/common/rtl/ip_std/ip_seg7.v · axil_slave.v · ip_std.v (표준 7세그먼트 IP, 동결 주소맵 [06])</li><li>제1부 11장 MicroBlaze V SoC 복제본 (원본은 고치지 않음, ORIGINAL_PROJECT_UNCHANGED)</li></ul></td></tr>
+          <tr><td>5-1 AXI4-Lite NPU IP</td><td><code>part03/ch20/rtl/p3_npu_axi_lite.v</code><br><code>part03/ch20/synth/package_ip.tcl</code></td></tr><tr><td>5-2 MicroBlaze V SoC 연결 (동결 주소맵)</td><td><code>part03/ch21/rtl/basys3_soc21_top.v</code><br><code>part03/ch21/constraints/basys3_soc21_npu.xdc</code><br><code>part03/ch21/synth/soc_npu_bd.tcl</code><br><code>part03/ch21/scripts/build_soc.sh</code></td></tr><tr><td>5-3 C 드라이버와 표시</td><td><code>part03/ch22/sw/npu_driver.h</code><br><code>part03/ch22/sw/npu_driver.c</code><br><code>part03/ch22/sw/npu_io_xil.c</code><br><code>part03/ch22/sw/app.h</code><br><code>part03/ch22/sw/app.c</code><br><code>part03/ch22/sw/app_show_xil.c</code><br><code>part03/ch22/sw/main.c</code><br><code>part03/common/sw/p3_seg7.h</code></td></tr><tr><td>5-4 CPU·NPU 추론 시간</td><td><code>part03/ch23/sw/bench.c</code><br><code>part03/ch23/synth/soc_bench_sim.tcl</code><br><code>part03/ch23/scripts/run_soc_bench.sh</code></td></tr><tr><td>5-5 자원·타이밍 스윕</td><td><code>part03/ch24/synth/sweep_cores.tcl</code><br><code>part03/ch24/synth/sweep_axi.tcl</code><br><code>part03/ch24/reference/sweep_summary.py</code><br><code>part03/ch24/scripts/run_sweep.sh</code></td></tr><tr><td>5-6 전력·추론당 에너지</td><td><code>part03/ch25/synth/soc_power_sim.tcl</code><br><code>part03/ch25/synth/soc_power_report.tcl</code><br><code>part03/ch25/reference/power_summary.py</code><br><code>part03/ch25/scripts/run_power.sh</code></td></tr><tr><td>5-7 시스템 통합·보드 점검표</td><td><code>part03/ch27/scripts/run_all.sh</code><br><code>part03/ch27/docs/BOARD_CHECKLIST.md</code></td></tr>
+          <tr><td>장 뼈대 (도면 생성)</td><td><code>p05/diagrams/make_soc_map.py</code></td></tr>
+        </tbody>
+      </table></div>
+    </section>
+    <section class="section" id="s02">
+      <h2><span class="num">02</span> 준비</h2>
+      <ol>
+        <li>Vivado 2024.2와 Vitis 2024.2 (VS Code에서 빌드). 웹에서 재현 가능한 범위는 <code>LEVEL=sim bash part03/ch27/scripts/run_all.sh</code> (Icarus·Python·C 협동 시뮬레이션).</li><li>전체 다시 만들기: <code>LEVEL=fpga SOC11_DIR=&lt;제1부 11장 폴더&gt; VIVADO_SETTINGS=… VITIS_SETTINGS=… bash part03/ch27/scripts/run_all.sh</code> (21장 비트스트림·XSA, 22·23장 ELF).</li><li>보드는 USB 케이블 하나(JTAG + USB-UART), 터미널 115200 8N1. 비트스트림은 <b>21장 것 하나</b>이고 서브젝트마다 ELF만 바꾼다.</li>
+        <li>5장 코드·빌드·증거는 모두 VS Code 판(커밋 ddaaf66)의 part03/ch20~25·27·common을 고치지 않고 가져왔다 (docs/plan/part03_snapshot.md). Vivado·Vitis 빌드는 VS Code에서 실제로 했고, 웹에서는 20·22장 시뮬레이션을 다시 돌렸다.</li>
+      </ol>
+      <div class="codeblock">
+        <div class="codebar"><span>p05/diagrams/make_soc_map.py · python · 원본</span></div>
+        <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
+"""5장 SoC 구조도 원본(svg-flow-editor JSON)을 VS Code 판 21장 빌드 요약에서 만든다.
+
+  python3 p05/diagrams/make_soc_map.py
+  python3 tools/diagram/export_svg.py --editor &lt;svg-flow-editor&gt;/index.html p05/diagrams/soc_map.json
+
+주소·인터럽트는 part03/ch21/validation/soc_summary.md (Vivado Address Editor 실제 값) 표에서만 읽는다.
+"""
+import json
+import re
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+SRC = ROOT / "part03" / "ch21" / "validation" / "soc_summary.md"
+OUT = Path(__file__).with_name("soc_map.json")
+
+PRESET = {"navy": ("#1F3A5F", "#172439", "#273e5e"), "accent": ("#4635B1", "#2a1f78", "#3b2d99"),
+          "gray": ("#6b6b6b", "#333333", "#555555")}
+
+
+def table_after(text, title_prefix):
+    """제목 줄 뒤 첫 마크다운 표의 행들 (머리·구분 줄 제외)."""
+    i = text.index(title_prefix)
+    rows = []
+    for ln in text[i:].splitlines()[1:]:
+        if ln.startswith("|"):
+            cells = [c.strip() for c in ln.strip().strip("|").split("|")]
+            if set(cells[0]) &lt;= set("-: "):
+                continue
+            rows.append(cells)
+        elif rows:
+            break
+    return rows[1:]
+
+
+ROLE = {"axi_gpio_0": "GPIO LED·SW", "axi_gpio_btn": "GPIO 버튼", "axi_uartlite_0": "UART Lite 115200",
+        "axi_timer_0": "Timer", "axi_intc_0": "INTC", "ip06_seg7": "7세그먼트 (ip_seg7)", "p3_npu_0": "NPU (구 20장 IP)"}
+
+
+def node(i, x, y, w, title, sub, preset="navy", h=72):
+    stroke, text, subc = PRESET[preset]
+    return {"id": i, "type": "rect", "x": x, "y": y, "w": w, "h": h, "title": title, "sub": sub, "fill": "none",
+            "autoFit": True, "pad": 6, "padY": 4, "fontMain": 20, "fontSub": 15, "textAlign": "center",
+            "strokeColor": stroke, "strokeWidth": 3.0 if preset != "accent" else 3.6, "textColor": text,
+            "subTextColor": subc, "preset": preset}
+
+
+def edge(a, b, fp, tp, label="", color="#1F3A5F"):
+    return {"id": f"{a}-{b}", "from": a, "to": b, "fp": fp, "tp": tp, "label": label, "route": "auto",
+            "strokeColor": color, "strokeWidth": 2.6, "arrowSize": 13, "labelFont": 15}
+
+
+def main():
+    text = SRC.read_text(encoding="utf-8")
+    amap = table_after(text, "## 주소 맵")
+    irq = table_after(text, "## 인터럽트")
+    plain = lambda s: re.sub(r"[*`]", "", s)
+    periph = []
+    for idx, seg, base, size, note in amap:
+        if base in ("—", "-") or "LMB" in seg:
+            continue
+        name = plain(seg).split(" ", 1)
+        periph.append((plain(idx), name[0], name[1] if len(name) &gt; 1 else "", plain(base), plain(size)))
+    irq_of = {}
+    for inp, conn in irq:
+        m = re.search(r"([a-z0-9_]+)/", plain(conn))
+        if m:
+            irq_of[m.group(1)] = plain(inp)
+
+    W, x_cpu, x_bus, x_dev = 1280, 190, 520, 960
+    mid = 150 + 92 * (len(periph) - 1) // 2
+    nodes = [node("cpu", x_cpu, mid, 300, "MicroBlaze V (RV32)", "100 MHz · 인터럽트 ← axi_intc_0"),
+             node("lmb", x_cpu, mid + 170, 300, "LMB BRAM", "0x0000_0000 · 64 KB · 프로그램·데이터"),
+             node("smc", x_bus, mid, 220, "AXI SmartConnect", f"axi_smc · 마스터 1 → {len(periph)}", h=96)]
+    edges = [edge("cpu", "smc", "right", "left", "M_AXI_DP"), edge("cpu", "lmb", "bottom", "top", "LMB")]
+    intc = None
+    for k, (idx, seg, desc, base, size) in enumerate(periph):
+        nid = f"d{k}"
+        is_npu = "npu" in seg
+        role = ROLE.get(seg, seg)
+        sub = f"{seg} · {base}" + (f" · {irq_of[seg]}" if seg in irq_of else "")
+        if "intc" in seg:
+            short = {"axi_timer_0": "Timer", "axi_uartlite_0": "UART", "axi_gpio_btn": "BTN", "p3_npu_0": "NPU"}
+            sub = f"{seg} · {base} · " + ", ".join(f"{v} {short.get(k, k)}" for k, v in sorted(irq_of.items(), key=lambda kv: int(kv[1][2:])))
+        title = (f"{idx} " if idx not in ("—", "-") else "") + role
+        nodes.append(node(nid, x_dev, 0, 540, title, sub, "accent" if is_npu else "navy"))
+        nodes[-1]["autoFit"] = False
+        nodes[-1]["y"] = 150 + 92 * k
+        edges.append(edge("smc", nid, "right", "left"))
+        if "intc" in seg:
+            intc = nid
+    doc = {
+        "version": 3, "chapter": "P05", "verification": "VS Code 판 21장 Vivado Address Editor 값 (soc_summary.md)",
+        "pageTitle": "5장 SoC 구조 · 동결 주소맵 (안 A)", "title": "5장 SoC 구조 · 동결 주소맵 (안 A)",
+        "subtitle": "MicroBlaze V가 AXI로 주변 장치 7개를 읽고 쓴다. NPU(구 20장 IP)는 0x44A0_0000, 인터럽트 In12",
+        "width": W, "height": 150 + 92 * (len(periph) - 1) + 80,
+        "headings": {"title": {"x": 640.0, "y": 48, "w": 1200, "h": 56, "size": 28, "align": "left", "autoFit": True},
+                     "subtitle": {"x": 640.0, "y": 96, "w": 1200, "h": 34, "size": 16, "align": "left", "autoFit": True}},
+        "settings": {"fontMain": 20, "fontSub": 15, "stroke": 3.0, "gap": 40, "pad": 6, "padY": 4, "defaultPreset": "navy"},
+        "sourceFile": str(SRC.relative_to(ROOT)), "role": "SoC 구조도",
+        "nodes": nodes, "edges": edges,
+    }
+    OUT.write_text(json.dumps(doc, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    print(f"P05_SOC_MAP_JSON nodes={len(nodes)} edges={len(edges)} periph={len(periph)}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())</code></pre>
+      </div>
+    </section>
+    <section class="section" id="s5_1">
+      <h2><span class="num">03</span> 서브젝트 5-1 · AXI4-Lite NPU IP <small>(구 20장)</small></h2>
+      <p class="verdict"><b>학습목표 (보드):</b> 보드 확인은 5-2 비트스트림으로 한다. 여기서는 AXI 버스로 레지스터 15개를 읽고 써서 784 추론 7번이 Python과 비트 단위로 같고, 없는 주소는 SLVERR(16건)인 것을 시뮬레이션으로 본다.</p>
+      <h3>보드에서 볼 것</h3>
+      <p>보드 항목 없음 — IP 하나로는 보드에 올릴 수 없다. 5-2에서 이 IP가 0x44A0_0000에 붙는다.</p>
+
+      <h3>추가 코드 (구 20장 그대로, VS Code 판)</h3>
+      <div class="codeblock">
+        <div class="codebar"><span>part03/ch20/rtl/p3_npu_axi_lite.v · verilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <pre tabindex="0"><code class="language-verilog">`timescale 1ns/1ps
+// (추가) 20장: 17장 Tile Controller(784입력·10분류 NPU)를 AXI4-Lite 제어·상태 레지스터로 감싼 Slave.
+// 데이터 경로(14장 코어·17장 컨트롤러)는 그대로 두고 버스 어댑터만 추가한다. x 타일은 04장 bram_sync_buffer.
+//
+// 레지스터(32비트, 오프셋): 0x00 CTRL  0x04 STATUS  0x08 LENGTH  0x0C CLASS  0x10 X_INDEX  0x14 X_DATA
+//   0x18 W_CLASS  0x1C W_INDEX  0x20 W_DATA  0x24 BIAS_LO  0x28 BIAS_HI  0x2C SCORE_SEL
+//   0x30 SCORE_LO  0x34 SCORE_HI  0x38 IRQ_EN. 0x3C는 미할당(SLVERR).
+// 응답 정책: 버스 수준 거부(미할당 주소, 읽기 전용 쓰기, 동작 레지스터 부분 WSTRB, 범위 초과 값,
+//   프레임 잠금 중 X_DATA)는 SLVERR이며 아무 효과도 없다. NPU 동작 오류는 STATUS.ERROR·ERR_CODE로 알린다.
+// AW와 W는 따로 도착할 수 있다: 각각 1개씩 보관했다가 둘 다 있으면 실행하고 B 응답을 BREADY까지 유지한다.
+module p3_npu_axi_lite #(
+    parameter integer DATA_W = 8,      // x·W signed 폭 (17장 기본 INT8)
+    parameter integer CORE_ACC_W = 24, // 14장 코어 lane 누산 폭
+    parameter integer PART_W = 25      // 14장 코어 점수 폭
+)(
+    input wire s_axi_aclk,
+    input wire s_axi_aresetn,
+    input wire [5:0] s_axi_awaddr,
+    input wire [2:0] s_axi_awprot,     // AXI4-Lite 인터페이스 규격용(사용하지 않음)
+    input wire s_axi_awvalid,
+    output wire s_axi_awready,
+    input wire [31:0] s_axi_wdata,
+    input wire [3:0] s_axi_wstrb,
+    input wire s_axi_wvalid,
+    output wire s_axi_wready,
+    output reg [1:0] s_axi_bresp,
+    output reg s_axi_bvalid,
+    input wire s_axi_bready,
+    input wire [5:0] s_axi_araddr,
+    input wire [2:0] s_axi_arprot,     // AXI4-Lite 인터페이스 규격용(사용하지 않음)
+    input wire s_axi_arvalid,
+    output wire s_axi_arready,
+    output reg [31:0] s_axi_rdata,
+    output reg [1:0] s_axi_rresp,
+    output reg s_axi_rvalid,
+    input wire s_axi_rready,
+    output wire irq_o                  // IRQ_EN[0] &amp;&amp; STATUS.DONE (레벨)
+);
+    localparam integer ACC_W = 41, BIAS_W = 40, SCORE_W = 42, N_IN = 784;
+    localparam [1:0] OKAY = 2'b00, SLVERR = 2'b10;
+    localparam [3:0] R_CTRL = 4'h0, R_STATUS = 4'h1, R_LENGTH = 4'h2, R_CLASS = 4'h3,
+                     R_XIDX = 4'h4, R_XDATA = 4'h5, R_WCLASS = 4'h6, R_WIDX = 4'h7,
+                     R_WDATA = 4'h8, R_BLO = 4'h9, R_BHI = 4'hA, R_SSEL = 4'hB,
+                     R_SLO = 4'hC, R_SHI = 4'hD, R_IRQEN = 4'hE;
+    // ERR_CODE: 1~6 = 17장 컨트롤러 코드, 아래는 이 어댑터가 검출하는 코드
+    localparam [3:0] ERR_NO_FRAME = 4'd4, ERR_LENGTH = 4'd8, ERR_W_MISSING = 4'd9;
+    wire clk = s_axi_aclk;
+    wire resetn = s_axi_aresetn;
+
+    // ---------------- NPU 데이터 경로 ----------------
+    reg start_q, abort_q, go_q;
+    reg [3:0] go_id_q;
+    reg x_held_q;
+    reg x_wr_q, w_wr_q, b_wr_q;
+    reg [5:0] x_wr_addr_q;
+    reg signed [DATA_W-1:0] x_wr_data_q, w_data_q;
+    reg [3:0] wr_class_q;
+    reg [5:0] wr_addr_q;
+    reg signed [BIAS_W-1:0] b_data_q;
+    wire x_rd_en, frame_ack, load_ready, busy, done, error, ovf;
+    wire [5:0] x_rd_addr;
+    wire signed [DATA_W-1:0] x_rd_data;
+    wire [2:0] npu_err_code;
+    wire [3:0] tile_idx, npu_class;
+    wire [10*SCORE_W-1:0] scores;
+
+    bram_sync_buffer #(.DATA_WIDTH(DATA_W), .ADDR_WIDTH(6)) xbuf(
+        .clk(clk), .resetn(resetn), .wr_en(x_wr_q), .rd_en(x_rd_en),
+        .wr_addr(x_wr_addr_q), .rd_addr(x_rd_addr), .wr_data(x_wr_data_q),
+        .rd_data(x_rd_data), .rd_valid());
+    p3_tile784_10 #(.ACC_W(ACC_W), .BIAS_W(BIAS_W), .SCORE_W(SCORE_W), .DATA_W(DATA_W),
+                    .CORE_ACC_W(CORE_ACC_W), .PART_W(PART_W)) npu(
+        .clk(clk), .resetn(resetn), .start_i(start_q), .abort_i(abort_q),
+        .tile_go_i(go_q), .tile_id_i(go_id_q),
+        .x_valid_i(x_held_q), .x_rd_en_o(x_rd_en), .x_rd_addr_o(x_rd_addr),
+        .x_rd_data_i(x_rd_data), .frame_ack_o(frame_ack),
+        .w_wr_en_i(w_wr_q), .b_wr_en_i(b_wr_q), .wr_class_i(wr_class_q), .wr_addr_i(wr_addr_q),
+        .w_data_i(w_data_q), .b_data_i(b_data_q), .load_ready_o(load_ready),
+        .busy_o(busy), .done_o(done), .error_o(error), .err_code_o(npu_err_code), .ovf_o(ovf),
+        .tile_idx_o(tile_idx), .tile_done_o(), .part_scores_o(),
+        .class_o(npu_class), .scores_o(scores));
+
+    // ---------------- 레지스터 ----------------
+    reg [31:0] length_q, bias_lo_q;
+    reg [5:0] x_index_q, w_index_q;
+    reg [3:0] w_class_q, score_sel_q, err_code_q;
+    reg irq_en_q, done_st_q, err_st_q;
+    reg [63:0] x_map_q;            // 현재 타일 x 주소별 쓰기 여부
+    reg [9:0] w_cnt_q;             // 현재 타일에서 수락된 W 쓰기 수
+    reg [31:0] score_hi_q;         // SCORE_LO 읽기 시점의 상위 비트(스냅샷)
+    assign irq_o = irq_en_q &amp;&amp; done_st_q;
+    wire in_load = busy &amp;&amp; load_ready;
+    wire [9:0] w_need = (tile_idx == 4'd12) ? 10'd160 : 10'd640;
+
+    // 쓰기 채널: AW·W 각각 1개 보관
+    reg aw_q, w_q;
+    reg [3:0] aw_idx_q;
+    reg [31:0] wd_q;
+    reg [3:0] ws_q;
+    assign s_axi_awready = resetn &amp;&amp; !aw_q &amp;&amp; !s_axi_bvalid;
+    assign s_axi_wready = resetn &amp;&amp; !w_q &amp;&amp; !s_axi_bvalid;
+    wire wr_exec = aw_q &amp;&amp; w_q &amp;&amp; !s_axi_bvalid;
+
+    function [31:0] merge(input [31:0] old, input [31:0] nv, input [3:0] strb);
+        integer i;
+        begin
+            for (i = 0; i &lt; 4; i = i + 1)
+                merge[8*i +: 8] = strb[i] ? nv[8*i +: 8] : old[8*i +: 8];
+        end
+    endfunction
+    // 32비트 값이 signed n비트 범위인가(상위 비트가 모두 부호와 같음)
+    function fits_signed(input [31:0] v, input integer n);
+        integer i;
+        begin
+            fits_signed = 1'b1;
+            for (i = 0; i &lt; 32; i = i + 1)
+                if (i &gt;= n - 1 &amp;&amp; v[i] != v[n-1]) fits_signed = 1'b0;
+        end
+    endfunction
+
+    wire full_strb = (ws_q == 4'hF);
+    // 설정 레지스터는 WSTRB 바이트만 바꾼 값으로 범위를 검사하고 저장한다
+    wire [31:0] xidx_m = merge({26'd0, x_index_q}, wd_q, ws_q);
+    wire [31:0] wcls_m = merge({28'd0, w_class_q}, wd_q, ws_q);
+    wire [31:0] widx_m = merge({26'd0, w_index_q}, wd_q, ws_q);
+    wire [31:0] ssel_m = merge({28'd0, score_sel_q}, wd_q, ws_q);
+    wire [31:0] irq_m = merge({31'd0, irq_en_q}, wd_q, ws_q);
+    wire [2:0] cmd = wd_q[2:0];                  // CTRL bit0 START, bit1 TILE_GO, bit2 ABORT
+    wire cmd_one = (cmd == 3'b001) || (cmd == 3'b010) || (cmd == 3'b100);
+    // 실행할 쓰기의 SLVERR 여부
+    reg wr_bad;
+    always @* begin
+        case (aw_idx_q)
+            R_CTRL: wr_bad = !full_strb || !cmd_one;
+            R_STATUS, R_LENGTH, R_BLO: wr_bad = 1'b0;
+            R_IRQEN: wr_bad = irq_m &gt; 32'd1;
+            R_XIDX: wr_bad = xidx_m &gt; 32'd63;
+            R_XDATA: wr_bad = !full_strb || x_held_q || !fits_signed(wd_q, DATA_W);
+            R_WCLASS: wr_bad = wcls_m &gt; 32'd9;
+            R_WIDX: wr_bad = widx_m &gt; 32'd63;
+            R_WDATA: wr_bad = !full_strb || !fits_signed(wd_q, DATA_W);
+            R_BHI: wr_bad = !full_strb || !fits_signed(wd_q, BIAS_W - 32);
+            R_SSEL: wr_bad = ssel_m &gt; 32'd9;
+            default: wr_bad = 1'b1;   // CLASS·SCORE_LO·SCORE_HI 읽기 전용, 0x3C 미할당
+        endcase
+    end
+
+    // 읽기 채널
+    assign s_axi_arready = resetn &amp;&amp; !s_axi_rvalid;
+    wire rd_acc = s_axi_arvalid &amp;&amp; s_axi_arready;
+    wire [3:0] ar_idx = s_axi_araddr[5:2];
+    wire [SCORE_W-1:0] sel_score = scores[score_sel_q*SCORE_W +: SCORE_W];
+    wire [31:0] status = {16'd0, err_code_q, tile_idx, 2'd0, x_held_q, load_ready,
+                          ovf, err_st_q, done_st_q, busy};
+
+    always @(posedge clk) begin
+        if (!resetn) begin
+            aw_q &lt;= 1'b0; w_q &lt;= 1'b0; aw_idx_q &lt;= 4'd0; wd_q &lt;= 32'd0; ws_q &lt;= 4'd0;
+            s_axi_bvalid &lt;= 1'b0; s_axi_bresp &lt;= OKAY;
+            s_axi_rvalid &lt;= 1'b0; s_axi_rresp &lt;= OKAY; s_axi_rdata &lt;= 32'd0;
+            start_q &lt;= 1'b0; abort_q &lt;= 1'b0; go_q &lt;= 1'b0; go_id_q &lt;= 4'd0;
+            x_held_q &lt;= 1'b0; x_wr_q &lt;= 1'b0; w_wr_q &lt;= 1'b0; b_wr_q &lt;= 1'b0;
+            x_wr_addr_q &lt;= 6'd0; x_wr_data_q &lt;= {DATA_W{1'b0}}; w_data_q &lt;= {DATA_W{1'b0}};
+            wr_class_q &lt;= 4'd0; wr_addr_q &lt;= 6'd0; b_data_q &lt;= {BIAS_W{1'b0}};
+            length_q &lt;= N_IN; bias_lo_q &lt;= 32'd0; x_index_q &lt;= 6'd0; w_index_q &lt;= 6'd0;
+            w_class_q &lt;= 4'd0; score_sel_q &lt;= 4'd0; err_code_q &lt;= 4'd0;
+            irq_en_q &lt;= 1'b0; done_st_q &lt;= 1'b0; err_st_q &lt;= 1'b0;
+            x_map_q &lt;= 64'd0; w_cnt_q &lt;= 10'd0; score_hi_q &lt;= 32'd0;
+        end else begin
+            start_q &lt;= 1'b0; abort_q &lt;= 1'b0; go_q &lt;= 1'b0;
+            x_wr_q &lt;= 1'b0; w_wr_q &lt;= 1'b0; b_wr_q &lt;= 1'b0;
+            if (s_axi_awvalid &amp;&amp; s_axi_awready) begin
+                aw_q &lt;= 1'b1;
+                aw_idx_q &lt;= s_axi_awaddr[5:2];
+            end
+            if (s_axi_wvalid &amp;&amp; s_axi_wready) begin
+                w_q &lt;= 1'b1;
+                wd_q &lt;= s_axi_wdata;
+                ws_q &lt;= s_axi_wstrb;
+            end
+            if (s_axi_bvalid &amp;&amp; s_axi_bready)
+                s_axi_bvalid &lt;= 1'b0;
+
+            // NPU 상태 반영(쓰기 실행보다 먼저: 같은 클록의 W1C·START가 우선)
+            if (done)
+                done_st_q &lt;= 1'b1;
+            if (error) begin
+                err_st_q &lt;= 1'b1;
+                err_code_q &lt;= {1'b0, npu_err_code};
+            end
+            if (frame_ack) begin
+                x_held_q &lt;= 1'b0;
+                x_map_q &lt;= 64'd0;
+                w_cnt_q &lt;= 10'd0;
+            end
+            if (w_wr_q &amp;&amp; load_ready &amp;&amp; w_cnt_q != 10'h3FF)
+                w_cnt_q &lt;= w_cnt_q + 10'd1;
+
+            if (wr_exec) begin
+                aw_q &lt;= 1'b0;
+                w_q &lt;= 1'b0;
+                s_axi_bvalid &lt;= 1'b1;
+                s_axi_bresp &lt;= wr_bad ? SLVERR : OKAY;
+                if (!wr_bad) case (aw_idx_q)
+                    R_CTRL: begin
+                        if (cmd[0]) begin
+                            if (length_q != N_IN) begin
+                                err_st_q &lt;= 1'b1;
+                                err_code_q &lt;= ERR_LENGTH;
+                            end else begin
+                                start_q &lt;= 1'b1;
+                                if (!busy) done_st_q &lt;= 1'b0;
+                            end
+                        end
+                        if (cmd[2])
+                            abort_q &lt;= 1'b1;
+                        if (cmd[1]) begin
+                            go_id_q &lt;= wd_q[11:8];
+                            if (!in_load || x_held_q) begin
+                                go_q &lt;= 1'b1;          // 상태 판정은 컨트롤러가 한다
+                            end else if (x_map_q != {64{1'b1}}) begin
+                                err_st_q &lt;= 1'b1;
+                                err_code_q &lt;= ERR_NO_FRAME;
+                            end else if (w_cnt_q &lt; w_need) begin
+                                err_st_q &lt;= 1'b1;
+                                err_code_q &lt;= ERR_W_MISSING;
+                            end else begin
+                                x_held_q &lt;= 1'b1;      // 결과 수락(frame_ack)까지 X_DATA 잠금
+                                go_q &lt;= 1'b1;
+                            end
+                        end
+                    end
+                    R_STATUS: begin                   // W1C: bit1 DONE, bit2 ERROR
+                        if (ws_q[0] &amp;&amp; wd_q[1]) done_st_q &lt;= 1'b0;
+                        if (ws_q[0] &amp;&amp; wd_q[2]) err_st_q &lt;= 1'b0;
+                    end
+                    R_LENGTH: length_q &lt;= merge(length_q, wd_q, ws_q);
+                    R_XIDX: x_index_q &lt;= xidx_m[5:0];
+                    R_XDATA: begin
+                        x_wr_q &lt;= 1'b1;
+                        x_wr_addr_q &lt;= x_index_q;
+                        x_wr_data_q &lt;= wd_q[DATA_W-1:0];
+                        x_map_q[x_index_q] &lt;= 1'b1;
+                        x_index_q &lt;= x_index_q + 6'd1;
+                    end
+                    R_WCLASS: w_class_q &lt;= wcls_m[3:0];
+                    R_WIDX: w_index_q &lt;= widx_m[5:0];
+                    R_WDATA: begin
+                        w_wr_q &lt;= 1'b1;
+                        wr_class_q &lt;= w_class_q;
+                        wr_addr_q &lt;= w_index_q;
+                        w_data_q &lt;= wd_q[DATA_W-1:0];
+                        w_index_q &lt;= w_index_q + 6'd1;
+                    end
+                    R_BLO: bias_lo_q &lt;= merge(bias_lo_q, wd_q, ws_q);
+                    R_BHI: begin                      // BIAS_LO와 합쳐 W_CLASS의 Bias로 확정
+                        b_wr_q &lt;= 1'b1;
+                        wr_class_q &lt;= w_class_q;
+                        b_data_q &lt;= {wd_q[BIAS_W-33:0], bias_lo_q};
+                    end
+                    R_SSEL: score_sel_q &lt;= ssel_m[3:0];
+                    R_IRQEN: irq_en_q &lt;= irq_m[0];
+                    default: ;
+                endcase
+            end
+
+            if (s_axi_rvalid &amp;&amp; s_axi_rready)
+                s_axi_rvalid &lt;= 1'b0;
+            if (rd_acc) begin
+                s_axi_rvalid &lt;= 1'b1;
+                s_axi_rresp &lt;= (ar_idx == 4'hF) ? SLVERR : OKAY;
+                case (ar_idx)
+                    R_STATUS: s_axi_rdata &lt;= status;
+                    R_LENGTH: s_axi_rdata &lt;= length_q;
+                    R_CLASS: s_axi_rdata &lt;= {28'd0, npu_class};
+                    R_XIDX: s_axi_rdata &lt;= {26'd0, x_index_q};
+                    R_WCLASS: s_axi_rdata &lt;= {28'd0, w_class_q};
+                    R_WIDX: s_axi_rdata &lt;= {26'd0, w_index_q};
+                    R_BLO: s_axi_rdata &lt;= bias_lo_q;
+                    R_SSEL: s_axi_rdata &lt;= {28'd0, score_sel_q};
+                    R_SLO: begin                      // 하위 32비트와 상위 비트를 같은 순간에 잡는다
+                        s_axi_rdata &lt;= sel_score[31:0];
+                        score_hi_q &lt;= {{(64-SCORE_W){sel_score[SCORE_W-1]}}, sel_score[SCORE_W-1:32]};
+                    end
+                    R_SHI: s_axi_rdata &lt;= score_hi_q;
+                    R_IRQEN: s_axi_rdata &lt;= {31'd0, irq_en_q};
+                    default: s_axi_rdata &lt;= 32'd0;    // CTRL·X_DATA·W_DATA·BIAS_HI는 쓰기 전용, 0x3C 미할당
+                endcase
+            end
+        end
+    end
+    // synthesis translate_off
+    initial begin
+        if (DATA_W &lt; 2 || DATA_W &gt; 16)
+            $fatal(1, "Require 2 &lt;= DATA_W &lt;= 16");
+    end
+    // synthesis translate_on
+endmodule</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>part03/ch20/synth/package_ip.tcl · tcl · 원본 · Vivado 실행 통과</span></div>
+        <pre tabindex="0"><code class="language-tcl"># (추가) 20장: p3_npu_axi_lite를 Vivado IP(component.xml)로 패키징한다.
+# Vivado가 원본을 IP 폴더 src/로 복사하므로 IP 폴더는 저장소에 두지 않는 빌드 산출물이다(정본은 각 장 rtl/).
+# 사용: vivado -mode batch -source package_ip.tcl -tclargs &lt;part03 경로&gt; &lt;임시 프로젝트 폴더&gt; &lt;IP 출력 폴더&gt;
+set part03 [file normalize [lindex $argv 0]]
+set work [lindex $argv 1]
+set ipdir [file normalize [lindex $argv 2]]
+create_project -force p3_npu_ip $work -part xc7a35tcpg236-1
+add_files -norecurse [list \
+  $part03/ch02/rtl/dsp_multiplier.v $part03/mini_npu/rtl/npu_dsp_mac_lane.v \
+  $part03/ch04/rtl/bram_sync_buffer.v $part03/ch14/rtl/p3_group10_core.v \
+  $part03/ch17/rtl/p3_tile784_10.v $part03/ch20/rtl/p3_npu_axi_lite.v]
+set_property top p3_npu_axi_lite [current_fileset]
+update_compile_order -fileset sources_1
+ipx::package_project -root_dir $ipdir -vendor user.org -library p3 -taxonomy /UserIP -import_files false
+set core [ipx::current_core]
+set_property name p3_npu_axi_lite $core
+set_property display_name "P3 NPU AXI4-Lite (784x10 tile NPU)" $core
+set_property description "Part03 ch20 AXI4-Lite control/status slave around ch17 tile controller" $core
+set_property version 1.0 $core
+set_property core_revision 1 $core
+# 인터럽트 출력을 interrupt 인터페이스로 묶는다(레벨, 높음 활성)
+ipx::infer_bus_interface irq_o xilinx.com:signal:interrupt_rtl:1.0 $core
+set_property value LEVEL_HIGH [ipx::add_bus_parameter SENSITIVITY [ipx::get_bus_interfaces irq_o -of_objects $core]]
+ipx::associate_bus_interfaces -busif s_axi -clock s_axi_aclk $core
+ipx::create_xgui_files $core
+ipx::update_checksums $core
+ipx::check_integrity $core
+ipx::save_core $core
+foreach bi [ipx::get_bus_interfaces -of_objects $core] { puts "BUSIF [get_property name $bi] [get_property bus_type_vlnv $bi]" }
+foreach mm [ipx::get_memory_maps -of_objects $core] {
+  foreach ab [ipx::get_address_blocks -of_objects $mm] { puts "ADDRBLOCK [get_property name $ab] range=[get_property range $ab]" }
+}
+puts "IP_PACKAGE_DONE"</code></pre>
+      </div>
+      <h3>시뮬레이션·빌드 기대 화면</h3>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 서브젝트 단독</span></div>
+        <pre tabindex="0"><code>bash part03/ch20/scripts/run_sim.sh</code></pre></div>
+      <div class="codeblock"><div class="codebar"><span>기대 출력 (2026-11-18 · 출처 part03/ch20/validation/rtl_sim.log)</span></div>
+        <pre tabindex="0"><code>PYTHON_AXI_VECTORS_PASS inferences=7 regs=15 seed=2020
+RTL_SIM_PASS AXI_NPU inferences=7 axi_writes=67451 axi_reads=7012 slverr=16
+PYTHON_RTL_COMPARE_PASS inferences=7 scores_via_axi=10 class=1 overflow=1 bit_exact=1</code></pre></div>
+      <details class="full"><summary>이 서브젝트의 테스트벤치·기준 모델 (전체 코드 3개)</summary>
+      <div class="codeblock">
+        <div class="codebar"><span>part03/ch20/tb/tb_p3_npu_axi_lite.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <pre tabindex="0"><code class="language-systemverilog">// (추가) 20장 p3_npu_axi_lite 자동 판정 테스트벤치. AXI4-Lite Master BFM으로 레지스터만 사용해 784 추론을 수행한다.
+// 프로토콜: AW·W 동시/AW 먼저/W 먼저, BREADY·RREADY 지연 중 응답 유지(상시 검사), WSTRB 병합,
+//   읽기 전용·미할당 주소·범위 초과·부분 WSTRB·프레임 잠금 중 X_DATA → SLVERR(효과 없음 확인).
+// 동작: LENGTH 오류, IDLE의 TILE_GO, x 미완성·W 미적재 TILE_GO, BUSY 중 START·Bias 쓰기, DONE·ERROR W1C,
+//   IRQ, SCORE_LO/HI 스냅샷(LO 읽은 뒤 다음 추론이 끝나도 HI는 같은 결과), 미완료 AXI 쓰기·추론 중 Reset.
+// 각 추론의 10개 점수(LO/HI)·CLASS·OVF를 actual에 기록하고 Python이 비트 단위 비교한다.
+`timescale 1ns/1ps
+module tb_p3_npu_axi_lite;
+    localparam [5:0] A_CTRL = 6'h00, A_STATUS = 6'h04, A_LENGTH = 6'h08, A_CLASS = 6'h0C,
+                     A_XIDX = 6'h10, A_XDATA = 6'h14, A_WCLASS = 6'h18, A_WIDX = 6'h1C,
+                     A_WDATA = 6'h20, A_BLO = 6'h24, A_BHI = 6'h28, A_SSEL = 6'h2C,
+                     A_SLO = 6'h30, A_SHI = 6'h34, A_IRQEN = 6'h38, A_BAD = 6'h3C;
+    localparam [1:0] OKAY = 2'b00, SLVERR = 2'b10;
+    localparam [31:0] START = 32'h1, GO = 32'h2, ABORT = 32'h4;
+
+    reg clk = 0, resetn = 0;
+    always #5 clk = ~clk;
+    reg [5:0] awaddr = 0, araddr = 0;
+    reg awvalid = 0, wvalid = 0, bready = 0, arvalid = 0, rready = 0;
+    reg [31:0] wdata = 0;
+    reg [3:0] wstrb = 0;
+    wire awready, wready, bvalid, arready, rvalid, irq;
+    wire [1:0] bresp, rresp;
+    wire [31:0] rdata;
+
+    p3_npu_axi_lite dut(
+        .s_axi_aclk(clk), .s_axi_aresetn(resetn),
+        .s_axi_awaddr(awaddr), .s_axi_awprot(3'd0), .s_axi_awvalid(awvalid), .s_axi_awready(awready),
+        .s_axi_wdata(wdata), .s_axi_wstrb(wstrb), .s_axi_wvalid(wvalid), .s_axi_wready(wready),
+        .s_axi_bresp(bresp), .s_axi_bvalid(bvalid), .s_axi_bready(bready),
+        .s_axi_araddr(araddr), .s_axi_arprot(3'd0), .s_axi_arvalid(arvalid), .s_axi_arready(arready),
+        .s_axi_rdata(rdata), .s_axi_rresp(rresp), .s_axi_rvalid(rvalid), .s_axi_rready(rready),
+        .irq_o(irq));
+
+    // 상시 검사: 응답 valid는 ready 전까지 내려가지 않고 내용이 바뀌지 않는다
+    reg pb = 0, pr = 0;
+    reg [1:0] pbresp = 0, prresp = 0;
+    reg [31:0] prdata = 0;
+    integer n_writes = 0, n_reads = 0, n_slverr = 0;
+    always @(posedge clk) begin
+        if (resetn) begin
+            if (pb &amp;&amp; !bvalid) $fatal(1, "BVALID dropped before BREADY");
+            if (pb &amp;&amp; bvalid &amp;&amp; bresp != pbresp) $fatal(1, "BRESP changed while waiting");
+            if (pr &amp;&amp; !rvalid) $fatal(1, "RVALID dropped before RREADY");
+            if (pr &amp;&amp; rvalid &amp;&amp; (rdata != prdata || rresp != prresp)) $fatal(1, "R payload changed");
+            if (dut.npu.core.error_o) $fatal(1, "core error leaked");
+            if (bvalid &amp;&amp; bready) begin n_writes = n_writes + 1; if (bresp == SLVERR) n_slverr = n_slverr + 1; end
+            if (rvalid &amp;&amp; rready) begin n_reads = n_reads + 1; if (rresp == SLVERR) n_slverr = n_slverr + 1; end
+        end
+        pb = resetn &amp;&amp; bvalid &amp;&amp; !bready; pbresp = bresp;
+        pr = resetn &amp;&amp; rvalid &amp;&amp; !rready; prresp = rresp; prdata = rdata;
+    end
+
+    // ---------------- AXI Master BFM (20장 공용) ----------------
+    `include "axi_lite_bfm.svh"
+
+    reg [1:0] resp;
+    reg [31:0] rd;
+    task automatic wr(input [5:0] a, input [31:0] d);
+        begin
+            axi_write(a, d, 4'hF, 0, 0, 0, resp);
+            if (resp != OKAY) $fatal(1, "write 0x%02h=0x%08h got SLVERR", a, d);
+        end
+    endtask
+    task automatic wr_expect(input [5:0] a, input [31:0] d, input [3:0] s, input [1:0] exp);
+        begin
+            axi_write(a, d, s, 0, 0, 0, resp);
+            if (resp != exp) $fatal(1, "write 0x%02h strb %b resp %0d != %0d", a, s, resp, exp);
+        end
+    endtask
+    task automatic rd_reg(input [5:0] a, output [31:0] d);
+        begin
+            axi_read(a, 0, d, resp);
+            if (resp != OKAY) $fatal(1, "read 0x%02h got SLVERR", a);
+        end
+    endtask
+    task automatic expect_reg(input [5:0] a, input [31:0] exp);
+        begin
+            rd_reg(a, rd);
+            if (rd != exp) $fatal(1, "reg 0x%02h = 0x%08h, expected 0x%08h", a, rd, exp);
+        end
+    endtask
+    // STATUS: bit0 BUSY, 1 DONE, 2 ERROR, 3 OVF, 4 LOAD_READY, 5 X_HELD, [11:8] TILE, [15:12] ERR_CODE
+    task automatic expect_error(input [3:0] code, input [8*40-1:0] what);
+        begin
+            rd_reg(A_STATUS, rd);
+            if (!rd[2] || rd[15:12] != code)
+                $fatal(1, "missing error %0d (STATUS 0x%08h): %0s", code, rd, what);
+            wr(A_STATUS, 32'h4);              // ERROR W1C
+            rd_reg(A_STATUS, rd);
+            if (rd[2]) $fatal(1, "ERROR not cleared by W1C");
+        end
+    endtask
+    task automatic do_reset;
+        begin
+            @(negedge clk);
+            resetn = 0; awvalid = 0; wvalid = 0; arvalid = 0; bready = 0; rready = 0;
+            repeat (3) @(negedge clk);
+            resetn = 1;
+            @(negedge clk);
+            if (bvalid || rvalid || irq || dut.npu.busy_o || dut.aw_q || dut.w_q)
+                $fatal(1, "reset did not clear AXI/NPU state");
+        end
+    endtask
+
+    // ---------------- 추론 ----------------
+    integer X [0:783];
+    integer PAD [0:47];
+    integer W [0:9][0:783];
+    reg signed [63:0] B [0:9];
+    reg signed [63:0] S [0:9];
+    reg signed [63:0] tmp64, v64;
+    integer tmp, vf, af, rc, ncase, cidx, i, c, t, len, guard;
+    reg [8*256-1:0] vpath, apath;
+
+    task automatic poll_until(input integer bit_idx, input integer value);
+        begin
+            guard = 0;
+            rd_reg(A_STATUS, rd);
+            while (rd[bit_idx] != value) begin
+                rd_reg(A_STATUS, rd);
+                guard = guard + 1;
+                if (guard &gt; 2000) $fatal(1, "STATUS bit %0d timeout (0x%08h)", bit_idx, rd);
+            end
+        end
+    endtask
+    task automatic load_bias;
+        begin
+            for (c = 0; c &lt; 10; c = c + 1) begin
+                wr(A_WCLASS, c);
+                v64 = B[c];
+                wr(A_BLO, v64[31:0]);
+                wr(A_BHI, {{24{v64[39]}}, v64[39:32]});
+            end
+        end
+    endtask
+    task automatic load_w(input integer tile, input integer n);
+        begin
+            for (c = 0; c &lt; 10; c = c + 1) begin
+                wr(A_WCLASS, c);
+                wr(A_WIDX, 0);
+                for (i = 0; i &lt; n; i = i + 1) wr(A_WDATA, W[c][64*tile + i]);
+            end
+        end
+    endtask
+    task automatic load_x(input integer tile, input integer n);
+        begin
+            wr(A_XIDX, 0);
+            for (i = 0; i &lt; 64; i = i + 1) wr(A_XDATA, (i &lt; n) ? X[64*tile + i] : PAD[i - n]);
+        end
+    endtask
+    task automatic read_scores(input integer record);
+        begin
+            for (c = 0; c &lt; 10; c = c + 1) begin
+                wr(A_SSEL, c);
+                rd_reg(A_SLO, rd);
+                v64[31:0] = rd;
+                rd_reg(A_SHI, rd);
+                v64[63:32] = rd;
+                S[c] = v64;
+                if (v64 &lt; -(64'sd1 &lt;&lt;&lt; 41) || v64 &gt;= (64'sd1 &lt;&lt;&lt; 41)) $fatal(1, "score HI not sign-extended");
+            end
+            rd_reg(A_CLASS, rd);
+            if (record) begin
+                $fwrite(af, "S");
+                for (c = 0; c &lt; 10; c = c + 1) $fwrite(af, " %0d", S[c]);
+                rd_reg(A_STATUS, tmp64[31:0]);
+                $fwrite(af, " C%0d O%0d\n", rd, tmp64[3]);
+            end
+        end
+    endtask
+    // mode 0: 정상, 1: 오류 주입, 2: 타일 5 계산 중 Reset
+    task automatic run_inference(input integer mode);
+        reg cut;
+        begin
+            cut = 0;
+            load_bias;
+            wr(A_CTRL, START);
+            rd_reg(A_STATUS, rd);
+            if (!rd[0] || rd[1]) $fatal(1, "START: BUSY not set or DONE not cleared (0x%08h)", rd);
+            if (irq) $fatal(1, "IRQ after START");
+            if (mode == 1) begin
+                wr(A_CTRL, START);
+                expect_error(4'd1, "START while BUSY");
+                wr(A_WCLASS, 0); wr(A_BLO, 1); wr(A_BHI, 0);
+                expect_error(4'd5, "Bias write during inference");
+            end
+            for (t = 0; t &lt; 13 &amp;&amp; !cut; t = t + 1) begin
+                len = (t == 12) ? 16 : 64;
+                if (mode == 1 &amp;&amp; t == 0) begin
+                    wr(A_XIDX, 0);
+                    for (i = 0; i &lt; 10; i = i + 1) wr(A_XDATA, X[i]);
+                    wr(A_CTRL, GO);
+                    expect_error(4'd4, "TILE_GO with incomplete x");
+                    load_x(t, len);
+                    wr(A_CTRL, GO);
+                    expect_error(4'd9, "TILE_GO without weights");
+                    load_w(t, len);
+                end else begin
+                    load_w(t, len);
+                    load_x(t, len);
+                end
+                wr(A_CTRL, GO | (t &lt;&lt; 8));
+                if (mode == 1 &amp;&amp; t == 1) begin
+                    // 계산 중: 프레임 잠금 → X_DATA SLVERR
+                    wr_expect(A_XDATA, 1, 4'hF, SLVERR);
+                end
+                if (mode == 2 &amp;&amp; t == 5) begin
+                    repeat (40) @(negedge clk);
+                    if (!dut.npu.core.busy_o) $fatal(1, "core not computing before reset");
+                    do_reset;
+                    cut = 1;
+                end else if (t &lt; 12) begin
+                    poll_until(5, 0);           // X_HELD 해제 = 결과 수락
+                    poll_until(4, 1);           // 다음 타일 LOAD
+                end
+            end
+            if (!cut) begin
+                poll_until(1, 1);               // DONE
+                rd_reg(A_STATUS, rd);
+                if (rd[0]) $fatal(1, "BUSY with DONE");
+                if (mode == 0 &amp;&amp; rd[2]) $fatal(1, "unexpected ERROR 0x%08h", rd);
+            end
+        end
+    endtask
+
+    reg [31:0] snap_hi, snap_lo;
+    initial begin
+        if (!$value$plusargs("VECTORS=%s", vpath)) $fatal(1, "+VECTORS required");
+        if (!$value$plusargs("ACTUAL=%s", apath)) $fatal(1, "+ACTUAL required");
+        vf = $fopen(vpath, "r");
+        af = $fopen(apath, "w");
+        rc = $fscanf(vf, "%d", ncase);
+        repeat (4) @(negedge clk);
+        resetn = 1;
+        @(negedge clk);
+
+        // ---- 프로토콜: 도착 순서·역압력·WSTRB ----
+        expect_reg(A_LENGTH, 784);
+        axi_write(A_SSEL, 3, 4'hF, 0, 0, 4, resp); if (resp != OKAY) $fatal(1, "sim write");
+        expect_reg(A_SSEL, 3);
+        axi_write(A_SSEL, 5, 4'hF, 1, 6, 0, resp); if (resp != OKAY) $fatal(1, "AW-first write");
+        expect_reg(A_SSEL, 5);
+        axi_write(A_SSEL, 7, 4'hF, 2, 6, 7, resp); if (resp != OKAY) $fatal(1, "W-first write");
+        axi_read(A_SSEL, 5, rd, resp);
+        if (rd != 7 || resp != OKAY) $fatal(1, "RREADY delay read");
+        wr_expect(A_SSEL, 32'h0000_0500, 4'b0010, SLVERR);      // 병합값 0x507 &gt; 9
+        expect_reg(A_SSEL, 7);
+        wr_expect(A_SSEL, 32'h0000_0003, 4'b0010, OKAY);        // byte1만(0) → 7 유지
+        expect_reg(A_SSEL, 7);
+        wr_expect(A_SSEL, 32'hFFFF_FF02, 4'b0001, OKAY);        // 하위 바이트만 → 2
+        expect_reg(A_SSEL, 2);
+        wr_expect(A_LENGTH, 32'h0000_0200, 4'b0010, OKAY);      // 0x310 → 0x210
+        expect_reg(A_LENGTH, 32'h210);
+        wr(A_CTRL, START);
+        expect_error(4'd8, "START with LENGTH 528");
+        if (dut.npu.busy_o) $fatal(1, "started with bad LENGTH");
+        wr(A_LENGTH, 784);
+        // ---- SLVERR 검사(효과 없음) ----
+        wr_expect(A_CLASS, 3, 4'hF, SLVERR);
+        wr_expect(A_SLO, 3, 4'hF, SLVERR);
+        wr_expect(A_SHI, 3, 4'hF, SLVERR);
+        expect_reg(A_CLASS, 0);
+        wr_expect(A_BAD, 1, 4'hF, SLVERR);
+        axi_read(A_BAD, 0, rd, resp); if (resp != SLVERR) $fatal(1, "read 0x3C not SLVERR");
+        wr_expect(A_XIDX, 64, 4'hF, SLVERR);
+        wr_expect(A_WCLASS, 10, 4'hF, SLVERR);
+        wr_expect(A_WIDX, 64, 4'hF, SLVERR);
+        wr_expect(A_XDATA, 200, 4'hF, SLVERR);                  // INT8 범위 밖
+        wr_expect(A_XDATA, 5, 4'b0001, SLVERR);                 // 동작 레지스터 부분 WSTRB
+        wr_expect(A_WDATA, -129, 4'hF, SLVERR);
+        wr_expect(A_BHI, 32'h0000_0100, 4'hF, SLVERR);          // 상위가 bit39 부호 확장이 아님
+        wr_expect(A_CTRL, START | GO, 4'hF, SLVERR);            // 명령 2개 동시
+        wr_expect(A_IRQEN, 2, 4'hF, SLVERR);
+        expect_reg(A_XIDX, 0);
+        expect_reg(A_WCLASS, 0);
+        rd_reg(A_STATUS, rd);
+        if (rd[2] || rd[0]) $fatal(1, "SLVERR changed NPU state 0x%08h", rd);
+        // ---- 동작 오류: IDLE의 TILE_GO ----
+        wr(A_CTRL, GO);
+        expect_error(4'd1, "TILE_GO in IDLE");
+        // ---- 미완료 쓰기 중 Reset: AW만 받은 상태 ----
+        @(negedge clk);
+        send_aw(A_SSEL, 0);
+        if (!dut.aw_q) $fatal(1, "AW not held");
+        do_reset;
+        // W만 보내면 쓰기가 실행되지 않아야 한다(AW 보관이 Reset으로 지워짐)
+        @(negedge clk);
+        send_w(9, 4'hF, 0);
+        repeat (10) @(negedge clk);
+        if (bvalid) $fatal(1, "write executed without AW after reset");
+        send_aw(A_SSEL, 0);
+        wait_b(0, resp);
+        if (resp != OKAY) $fatal(1, "late AW write");
+        expect_reg(A_SSEL, 9);
+
+        wr(A_IRQEN, 1);
+        for (cidx = 0; cidx &lt; ncase; cidx = cidx + 1) begin
+            for (i = 0; i &lt; 784; i = i + 1) begin rc = $fscanf(vf, "%d", tmp); X[i] = tmp; end
+            for (i = 0; i &lt; 48; i = i + 1) begin rc = $fscanf(vf, "%d", tmp); PAD[i] = tmp; end
+            for (c = 0; c &lt; 10; c = c + 1)
+                for (i = 0; i &lt; 784; i = i + 1) begin rc = $fscanf(vf, "%d", tmp); W[c][i] = tmp; end
+            for (c = 0; c &lt; 10; c = c + 1) begin rc = $fscanf(vf, "%d", tmp64); B[c] = tmp64; end
+            if (cidx == 2) begin
+                run_inference(2);               // 계산 중 Reset → 처음부터 다시
+                wr(A_IRQEN, 1);
+            end
+            if (irq &amp;&amp; cidx != 4) $fatal(1, "IRQ before DONE");
+            run_inference(cidx == 0 ? 1 : 0);
+            if (!irq) $fatal(1, "IRQ not raised at DONE");
+            if (cidx == 1) begin
+                // 앞 추론에서 LO를 읽어 둔 스냅샷: 이번 추론이 끝난 뒤에도 HI는 앞 결과여야 한다
+                rd_reg(A_SHI, rd);
+                if (rd != snap_hi) $fatal(1, "SCORE_HI snapshot broken (0x%08h vs 0x%08h)", rd, snap_hi);
+            end
+            read_scores(1);
+            if (cidx == 0) begin
+                // 스냅샷: class 0 LO를 읽어 둔 뒤 다음 추론이 끝나도 HI는 이번 결과
+                v64 = S[0];
+                wr(A_SSEL, 0);
+                rd_reg(A_SLO, snap_lo);
+                snap_hi = v64[63:32];
+            end
+            if (cidx == 1 &amp;&amp; S[0][63:32] == snap_hi)
+                $fatal(1, "snapshot test needs different HI values");
+            wr(A_IRQEN, 0);                     // DONE 유지 중 IRQ_EN=0이면 IRQ 없음
+            if (irq) $fatal(1, "IRQ ignores IRQ_EN");
+            wr(A_IRQEN, 1);
+            if (!irq) $fatal(1, "IRQ not restored by IRQ_EN");
+            if (cidx != 3) begin               // cidx 3은 DONE을 남겨 다음 START가 지우는지 확인
+                wr(A_STATUS, 32'h2);            // DONE W1C → IRQ 해제
+                if (irq) $fatal(1, "IRQ not cleared by DONE W1C");
+            end
+        end
+        $fclose(af);
+        $display("RTL_SIM_PASS AXI_NPU inferences=%0d axi_writes=%0d axi_reads=%0d slverr=%0d",
+            ncase, n_writes, n_reads, n_slverr);
+        $finish;
+    end
+    initial begin #2000000000; $fatal(1, "TB timeout"); end
+endmodule</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>part03/ch20/tb/axi_lite_bfm.svh · text · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <pre tabindex="0"><code class="language-text">// (추가) 20장: AXI4-Lite Master BFM 태스크(모듈 안에서 `include). 20장 TB와 22장 C 드라이버 브리지 TB가 함께 쓴다.
+// 필요한 모듈 신호: clk, awaddr, awvalid, awready, wdata, wstrb, wvalid, wready, bvalid, bready, bresp,
+//   araddr, arvalid, arready, rvalid, rready, rdata, rresp. 모든 구동은 negedge, 핸드셰이크는 posedge.
+    task automatic send_aw(input [5:0] a, input integer delay);
+        begin
+            repeat (delay) @(negedge clk);
+            awaddr = a; awvalid = 1;
+            while (!awready) @(negedge clk);
+            @(posedge clk); @(negedge clk);
+            awvalid = 0;
+        end
+    endtask
+    task automatic send_w(input [31:0] d, input [3:0] s, input integer delay);
+        begin
+            repeat (delay) @(negedge clk);
+            wdata = d; wstrb = s; wvalid = 1;
+            while (!wready) @(negedge clk);
+            @(posedge clk); @(negedge clk);
+            wvalid = 0;
+        end
+    endtask
+    task automatic wait_b(input integer bdelay, output [1:0] resp);
+        integer k;
+        begin
+            while (!bvalid) @(negedge clk);
+            for (k = 0; k &lt; bdelay; k = k + 1) begin
+                @(negedge clk);
+                if (!bvalid) $fatal(1, "B lost during BREADY=0");
+                if (awready || wready) $fatal(1, "new write accepted while B pending");
+            end
+            resp = bresp;
+            bready = 1;
+            @(posedge clk); @(negedge clk);
+            bready = 0;
+        end
+    endtask
+    // mode 0: 동시, 1: AW 먼저(W는 dly 뒤), 2: W 먼저(AW는 dly 뒤)
+    task automatic axi_write(input [5:0] a, input [31:0] d, input [3:0] s, input integer mode,
+                             input integer dly, input integer bdelay, output [1:0] resp);
+        begin
+            @(negedge clk);
+            fork
+                send_aw(a, mode == 2 ? dly : 0);
+                send_w(d, s, mode == 1 ? dly : 0);
+            join
+            wait_b(bdelay, resp);
+        end
+    endtask
+    task automatic axi_read(input [5:0] a, input integer rdelay, output [31:0] d, output [1:0] resp);
+        integer k;
+        begin
+            @(negedge clk);
+            araddr = a; arvalid = 1;
+            while (!arready) @(negedge clk);
+            @(posedge clk); @(negedge clk);
+            arvalid = 0;
+            while (!rvalid) @(negedge clk);
+            for (k = 0; k &lt; rdelay; k = k + 1) begin
+                @(negedge clk);
+                if (!rvalid) $fatal(1, "R lost during RREADY=0");
+            end
+            d = rdata; resp = rresp;
+            rready = 1;
+            @(posedge clk); @(negedge clk);
+            rready = 0;
+        end
+    endtask</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>part03/ch20/reference/axi_reference.py · python · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
+"""20장: AXI4-Lite NPU 제어 IP 시험 벡터·기대값 생성과 RTL 비교(표준 라이브러리).
+
+CPU가 레지스터로 전체 784 추론을 수행했을 때 읽은 10개 점수(SCORE_LO/HI)·CLASS·OVF가
+17장 기준모델 model()과 같아야 한다. 사례: 18장 MNIST INT8 표본 3개(INT8≠Float 포함),
+INT8 극값 2개(Bias ±2^39 → SCORE_HI 사용), 무작위 1개, class 0·1 동점 1개.
+"""
+import argparse
+import json
+import random
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+from part03.ch17.reference.tile784_reference import (  # noqa: E402
+    N_CLASS, N_IN, build_cases, model, padding,
+)
+from part03.ch18.reference.precision_reference import (  # noqa: E402
+    MODEL, SAMPLES, quantize_model, quantize_x,
+)
+
+ACC_W, BIAS_W = 41, 40
+REG = {"CTRL": 0x00, "STATUS": 0x04, "LENGTH": 0x08, "CLASS": 0x0C, "X_INDEX": 0x10,
+       "X_DATA": 0x14, "W_CLASS": 0x18, "W_INDEX": 0x1C, "W_DATA": 0x20, "BIAS_LO": 0x24,
+       "BIAS_HI": 0x28, "SCORE_SEL": 0x2C, "SCORE_LO": 0x30, "SCORE_HI": 0x34, "IRQ_EN": 0x38}
+
+
+def split_score(v):
+    """42비트 signed 점수 → (SCORE_LO, SCORE_HI) 32비트 부호 없는 레지스터 값."""
+    u = v &amp; ((1 &lt;&lt; 64) - 1)
+    return u &amp; 0xFFFFFFFF, u &gt;&gt; 32
+
+
+def cases(rng):
+    qm = quantize_model(json.loads(MODEL.read_text()), 8)
+    picked = []
+    for line in SAMPLES.read_text().splitlines():
+        if line.startswith("#"):
+            continue
+        v = list(map(int, line.split()))
+        picked.append((v[0], v[3], v[2], v[5:]))   # index, int8 예측, float 예측, pixels
+    mnist = [picked[0], next(p for p in picked if p[1] != p[2]), picked[1]]
+    out = [(quantize_x(px, 8), qm["w"], qm["b"]) for _, _, _, px in mnist]
+    ext = build_cases("width", BIAS_W, random.Random(1717))[:2]   # 17장 극값(Bias ±2^39)
+    out = [ext[0]] + out[:1] + [ext[1]] + out[1:]                 # 0: 극값(스냅샷 A), 1: MNIST(B)
+    out.append(([rng.randint(-128, 127) for _ in range(N_IN)],
+                [[rng.randint(-128, 127) for _ in range(N_IN)] for _ in range(N_CLASS)],
+                [rng.randint(-(1 &lt;&lt; 39), (1 &lt;&lt; 39) - 1) for _ in range(N_CLASS)]))
+    b = [-100 - c for c in range(N_CLASS)]
+    b[0] = b[1] = 5
+    out.append(([0] * N_IN, [[0] * N_IN for _ in range(N_CLASS)], b))
+    return out
+
+
+def selftest():
+    assert split_score(-1) == (0xFFFFFFFF, 0xFFFFFFFF)
+    assert split_score((1 &lt;&lt; 41) - 1) == (0xFFFFFFFF, 0x1FF)
+    assert split_score(-(1 &lt;&lt; 41)) == (0, 0xFFFFFE00)
+    assert sorted(REG.values()) == list(range(0, 0x3C, 4))
+
+
+def generate(out):
+    selftest()
+    rng = random.Random(2020)
+    cs = cases(rng)
+    with (out / "vectors.txt").open("w") as vf, (out / "expected.txt").open("w") as ef:
+        vf.write(f"{len(cs)}\n")
+        for x, w, b in cs:
+            pad = padding(rng, 8)
+            _, scores, cls, ovf = model(x, w, b, ACC_W, BIAS_W, 8)
+            vf.write(" ".join(map(str, x)) + "\n" + " ".join(map(str, pad)) + "\n")
+            for row in w:
+                vf.write(" ".join(map(str, row)) + "\n")
+            vf.write(" ".join(map(str, b)) + "\n")
+            ef.write("S " + " ".join(map(str, scores)) + f" C{cls} O{int(ovf)}\n")
+    print(f"PYTHON_AXI_VECTORS_PASS inferences={len(cs)} regs={len(REG)} seed=2020")
+
+
+def compare(out, actual):
+    exp = (out / "expected.txt").read_text().splitlines()
+    got = actual.read_text().splitlines()
+    if exp != got:
+        for i, (e, g) in enumerate(zip(exp, got)):
+            if e != g:
+                print(f"FAIL line {i}:\n  expected={e}\n  got     ={g}")
+                break
+        print(f"lines expected={len(exp)} got={len(got)}")
+        raise SystemExit("PYTHON_RTL_COMPARE_FAIL")
+    print(f"PYTHON_RTL_COMPARE_PASS inferences={len(exp)} scores_via_axi=10 class=1 overflow=1 bit_exact=1")
+
+
+if __name__ == "__main__":
+    p = argparse.ArgumentParser()
+    p.add_argument("--out", type=Path, required=True)
+    p.add_argument("--actual", type=Path)
+    a = p.parse_args()
+    if a.actual:
+        compare(a.out, a.actual)
+    else:
+        generate(a.out)</code></pre>
+      </div>
+      </details>
+      <h3>판정 줄</h3>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
+        <tbody><tr><td><code>RTL_SIM_PASS AXI_NPU inferences=7 slverr=16</code></td><td>AXI 쓰기 67,451건·읽기 7,012건으로 784 추론 7번, 없는 주소 응답 16건</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS scores_via_axi=10 class=1</code></td><td>AXI로 읽은 점수 10개·클래스가 Python 기준과 같음</td></tr></tbody>
+      </table></div>
+      <div class="gate-row">
+        <div class="gate na">
+          <b>HOST_MODEL_PASS</b>
+          <span>해당 없음 (Python 기준 모델 없음)</span>
+        </div>
+        <div class="gate pass">
+          <b>RTL_SIM_PASS</b>
+          <span>RTL_SIM_PASS AXI_NPU inferences=7 axi_writes=67451 axi_reads… · Icarus Verilog 12.0 · 2026-11-18</span>
+        </div>
+        <div class="gate pass">
+          <b>SYNTH_TIMING_PASS</b>
+          <span>OOC 배선 후 WNS +0.223 ns (OOC) · <code>part03/ch20/validation/synth_ooc_summary.md</code></span>
+        </div>
+        <div class="gate todo">
+          <b>BOARD_PASS</b>
+          <span>⚠ 미실시 · 현재 실물 보드 확인 불가</span>
+        </div>
+      </div>
+    </section>
+    <section class="section" id="s5_2">
+      <h2><span class="num">04</span> 서브젝트 5-2 · MicroBlaze V SoC 연결 (동결 주소맵) <small>(구 21장)</small></h2>
+      <p class="verdict"><b>학습목표 (보드):</b> 21장 비트스트림을 내려받으면 DONE LED. XSDB로 7세그먼트 ID <code>mrd 0x4006FFF0</code> → <code>53454737</code>, 버튼을 누른 채 <code>mrd 0x40010000</code> → U·D·L·R = <code>8</code>·<code>4</code>·<code>2</code>·<code>1</code>.</p>
+      <h3>보드에서 볼 것</h3>
+      <p>비트스트림 <code>basys3_soc21_top.bit</code>. ELF 없이 XSDB 읽기만으로 주소맵을 확인한다.</p>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>#</th><th>절차</th><th>기대 결과 (시뮬레이션·빌드 근거)</th><th>판정</th></tr></thead>
+        <tbody><tr><td class="nw">B1</td><td>Vivado Hardware Manager로 비트스트림 다운로드</td><td>DONE LED 점등, 오류 없음</td><td class="nw">⚠ 미실시</td></tr><tr><td class="nw">B4b</td><td>XSDB <code>mrd 0x4006FFF0</code></td><td><code>53454737</code>("SEG7" ID)</td><td class="nw">⚠ 미실시</td></tr><tr><td class="nw">B4c</td><td>XSDB <code>mrd 0x40010000</code>을 버튼을 누르지 않고 / btnU·btnD·btnL·btnR을 각각 누른 채로</td><td><code>0</code> / <code>8</code>·<code>4</code>·<code>2</code>·<code>1</code> (btn[3]=U … btn[0]=R)</td><td class="nw">⚠ 미실시</td></tr></tbody>
+      </table></div>
+      <h3>추가 코드 (구 21장 그대로, VS Code 판)</h3>
+      <div class="codeblock">
+        <div class="codebar"><span>part03/ch21/rtl/basys3_soc21_top.v · verilog · 원본 · 실행 기록 통과 2026-11-19</span></div>
+        <pre tabindex="0"><code class="language-verilog">// (추가) 안 A(2026-11-19) 21장 사용자 Top: 동결 주소맵 SoC(MicroBlaze V + NPU + BTN GPIO + 표준 7세그먼트 IP)의 Wrapper와 보드 핀 연결.
+// Top은 배선만 한다(MBV_SOC §4). 7세그먼트 구동은 BD 안 ip06_seg7(ip_seg7), 버튼은 axi_gpio_btn이 받는다.
+// 제1부 11장 basys3_soc11_top은 원본 그대로 두고(복제본에서 비활성), 이 파일을 Top으로 쓴다.
+module basys3_soc21_top (
+    input  wire        clk,    // Basys3 W5: 외부 100 MHz
+    input  wire        btnC,   // Basys3 U18: SoC Reset (11장 그대로)
+    input  wire [3:0]  btn,    // [3] btnU T18, [2] btnD U17, [1] btnL W19, [0] btnR T17 → axi_gpio_btn
+    input  wire [15:0] sw,
+    output wire [15:0] led,
+    input  wire        RsRx,   // USB-UART PC -&gt; FPGA
+    output wire        RsTx,   // USB-UART FPGA -&gt; PC
+    output wire [6:0]  seg,    // 7세그먼트 {g..a}, Low 활성 (ip_seg7)
+    output wire        dp,
+    output wire [3:0]  an      // 자리 선택, Low 활성
+);
+    soc11_integration_wrapper u_soc11 (
+        .clk         (clk),
+        .btnC        (btnC),
+        .btn_tri_i   (btn),
+        .sw_tri_i    (sw),
+        .led_tri_o   (led),
+        .UART_0_rxd  (RsRx),
+        .UART_0_txd  (RsTx),
+        .seg         (seg),
+        .dp          (dp),
+        .an          (an)
+    );
+endmodule</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>part03/ch21/constraints/basys3_soc21_npu.xdc · xdc · 원본 · Vivado 실행 통과</span></div>
+        <pre tabindex="0"><code class="language-xdc">## (추가) 21장: 제1부 11장 성공 프로젝트가 쓰는 Basys3 Master XDC(Digilent)의 활성 줄만 그대로 옮긴 제약.
+## 포트: clk(W5 100 MHz), btnC, sw[15:0], led[15:0], RsRx/RsTx(USB-UART). NPU는 내부 AXI라 핀이 없다.
+## (변경) 안 A: btn[3:0](U·D·L·R), 7세그먼트 seg[6:0]·dp·an[3:0]. 핀은 Basys-3-Master.xdc와 같다.
+set_property -dict { PACKAGE_PIN W5   IOSTANDARD LVCMOS33 } [get_ports clk]
+create_clock -name sys_clk_pin -period 10.00 -waveform {0 5} [get_ports clk]
+set_property -dict { PACKAGE_PIN V17   IOSTANDARD LVCMOS33 } [get_ports {sw[0]}]
+set_property -dict { PACKAGE_PIN V16   IOSTANDARD LVCMOS33 } [get_ports {sw[1]}]
+set_property -dict { PACKAGE_PIN W16   IOSTANDARD LVCMOS33 } [get_ports {sw[2]}]
+set_property -dict { PACKAGE_PIN W17   IOSTANDARD LVCMOS33 } [get_ports {sw[3]}]
+set_property -dict { PACKAGE_PIN W15   IOSTANDARD LVCMOS33 } [get_ports {sw[4]}]
+set_property -dict { PACKAGE_PIN V15   IOSTANDARD LVCMOS33 } [get_ports {sw[5]}]
+set_property -dict { PACKAGE_PIN W14   IOSTANDARD LVCMOS33 } [get_ports {sw[6]}]
+set_property -dict { PACKAGE_PIN W13   IOSTANDARD LVCMOS33 } [get_ports {sw[7]}]
+set_property -dict { PACKAGE_PIN V2    IOSTANDARD LVCMOS33 } [get_ports {sw[8]}]
+set_property -dict { PACKAGE_PIN T3    IOSTANDARD LVCMOS33 } [get_ports {sw[9]}]
+set_property -dict { PACKAGE_PIN T2    IOSTANDARD LVCMOS33 } [get_ports {sw[10]}]
+set_property -dict { PACKAGE_PIN R3    IOSTANDARD LVCMOS33 } [get_ports {sw[11]}]
+set_property -dict { PACKAGE_PIN W2    IOSTANDARD LVCMOS33 } [get_ports {sw[12]}]
+set_property -dict { PACKAGE_PIN U1    IOSTANDARD LVCMOS33 } [get_ports {sw[13]}]
+set_property -dict { PACKAGE_PIN T1    IOSTANDARD LVCMOS33 } [get_ports {sw[14]}]
+set_property -dict { PACKAGE_PIN R2    IOSTANDARD LVCMOS33 } [get_ports {sw[15]}]
+set_property -dict { PACKAGE_PIN U16   IOSTANDARD LVCMOS33 } [get_ports {led[0]}]
+set_property -dict { PACKAGE_PIN E19   IOSTANDARD LVCMOS33 } [get_ports {led[1]}]
+set_property -dict { PACKAGE_PIN U19   IOSTANDARD LVCMOS33 } [get_ports {led[2]}]
+set_property -dict { PACKAGE_PIN V19   IOSTANDARD LVCMOS33 } [get_ports {led[3]}]
+set_property -dict { PACKAGE_PIN W18   IOSTANDARD LVCMOS33 } [get_ports {led[4]}]
+set_property -dict { PACKAGE_PIN U15   IOSTANDARD LVCMOS33 } [get_ports {led[5]}]
+set_property -dict { PACKAGE_PIN U14   IOSTANDARD LVCMOS33 } [get_ports {led[6]}]
+set_property -dict { PACKAGE_PIN V14   IOSTANDARD LVCMOS33 } [get_ports {led[7]}]
+set_property -dict { PACKAGE_PIN V13   IOSTANDARD LVCMOS33 } [get_ports {led[8]}]
+set_property -dict { PACKAGE_PIN V3    IOSTANDARD LVCMOS33 } [get_ports {led[9]}]
+set_property -dict { PACKAGE_PIN W3    IOSTANDARD LVCMOS33 } [get_ports {led[10]}]
+set_property -dict { PACKAGE_PIN U3    IOSTANDARD LVCMOS33 } [get_ports {led[11]}]
+set_property -dict { PACKAGE_PIN P3    IOSTANDARD LVCMOS33 } [get_ports {led[12]}]
+set_property -dict { PACKAGE_PIN N3    IOSTANDARD LVCMOS33 } [get_ports {led[13]}]
+set_property -dict { PACKAGE_PIN P1    IOSTANDARD LVCMOS33 } [get_ports {led[14]}]
+set_property -dict { PACKAGE_PIN L1    IOSTANDARD LVCMOS33 } [get_ports {led[15]}]
+set_property -dict { PACKAGE_PIN U18   IOSTANDARD LVCMOS33 } [get_ports btnC]
+set_property -dict { PACKAGE_PIN B18   IOSTANDARD LVCMOS33 } [get_ports RsRx]
+set_property -dict { PACKAGE_PIN A18   IOSTANDARD LVCMOS33 } [get_ports RsTx]
+set_property -dict { PACKAGE_PIN T18   IOSTANDARD LVCMOS33 } [get_ports {btn[3]}]
+set_property -dict { PACKAGE_PIN U17   IOSTANDARD LVCMOS33 } [get_ports {btn[2]}]
+set_property -dict { PACKAGE_PIN W19   IOSTANDARD LVCMOS33 } [get_ports {btn[1]}]
+set_property -dict { PACKAGE_PIN T17   IOSTANDARD LVCMOS33 } [get_ports {btn[0]}]
+set_property -dict { PACKAGE_PIN W7   IOSTANDARD LVCMOS33 } [get_ports {seg[0]}]
+set_property -dict { PACKAGE_PIN W6   IOSTANDARD LVCMOS33 } [get_ports {seg[1]}]
+set_property -dict { PACKAGE_PIN U8   IOSTANDARD LVCMOS33 } [get_ports {seg[2]}]
+set_property -dict { PACKAGE_PIN V8   IOSTANDARD LVCMOS33 } [get_ports {seg[3]}]
+set_property -dict { PACKAGE_PIN U5   IOSTANDARD LVCMOS33 } [get_ports {seg[4]}]
+set_property -dict { PACKAGE_PIN V5   IOSTANDARD LVCMOS33 } [get_ports {seg[5]}]
+set_property -dict { PACKAGE_PIN U7   IOSTANDARD LVCMOS33 } [get_ports {seg[6]}]
+set_property -dict { PACKAGE_PIN V7   IOSTANDARD LVCMOS33 } [get_ports dp]
+set_property -dict { PACKAGE_PIN U2   IOSTANDARD LVCMOS33 } [get_ports {an[0]}]
+set_property -dict { PACKAGE_PIN U4   IOSTANDARD LVCMOS33 } [get_ports {an[1]}]
+set_property -dict { PACKAGE_PIN V4   IOSTANDARD LVCMOS33 } [get_ports {an[2]}]
+set_property -dict { PACKAGE_PIN W4   IOSTANDARD LVCMOS33 } [get_ports {an[3]}]
+set_property CONFIG_VOLTAGE 3.3 [current_design]
+set_property CFGBVS VCCO [current_design]
+set_property BITSTREAM.GENERAL.COMPRESS TRUE [current_design]
+set_property BITSTREAM.CONFIG.CONFIGRATE 33 [current_design]
+set_property CONFIG_MODE SPIx4 [current_design]</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>part03/ch21/synth/soc_npu_bd.tcl · tcl · 원본 · Vivado 실행 통과</span></div>
+        <pre tabindex="0"><code class="language-tcl"># (추가) 21장: 복제된 제1부 11장 MicroBlaze V 프로젝트에 20장 NPU AXI4-Lite IP를 추가하고 Bitstream·XSA까지 만든다.
+# 원본 프로젝트는 열지 않는다(build_soc.sh가 cp -a로 복제한 사본만 연다). BD 이름·사용자 Top·Wrapper 이름은 그대로.
+# (변경) 안 A(2026-11-19): 동결 주소맵(UART 0x4002·Timer 0x4003·INTC 0x4004·BTN GPIO 0x4001·SEG7 0x4006, NPU 0x44A0 그대로),
+#   표준 7세그먼트 IP ip_seg7(모듈 참조, part03/common/rtl/ip_std), BTN GPIO(인터럽트), xlconcat 16입력(NPU = In12).
+#   사용자 Top은 basys3_soc21_top(핀 연결만). 원본 Top basys3_soc11_top은 이 복제본에서만 비활성.
+# 사용: vivado -mode batch -source soc_npu_bd.tcl -tclargs &lt;복제 xpr&gt; &lt;IP repo&gt; &lt;XDC&gt; &lt;출력 폴더&gt; &lt;jobs&gt; &lt;part03 폴더&gt;
+set xpr [lindex $argv 0]
+set ip_repo [file normalize [lindex $argv 1]]
+set xdc [file normalize [lindex $argv 2]]
+set out [file normalize [lindex $argv 3]]
+set jobs [lindex $argv 4]
+set part03 [file normalize [lindex $argv 5]]
+set npu_base 0x44A00000
+set npu_range 4K
+file mkdir $out
+
+proc check {cond msg} {
+  if {[uplevel 1 [list expr $cond]]} { puts "CHECK_PASS $msg" } else { puts "CHECK_FAIL $msg"; exit 1 }
+}
+
+open_project $xpr
+# 원본의 상대 경로 XDC($PPRDIR/../../Basys-3-Master.xdc)는 사본 위치에서 맞지 않으므로 같은 활성 줄의 21장 XDC로 바꾼다
+foreach f [get_files -quiet -of_objects [get_filesets constrs_1]] { remove_files -fileset constrs_1 $f }
+add_files -fileset constrs_1 -norecurse $xdc
+set_property ip_repo_paths [list $ip_repo] [current_project]
+update_ip_catalog -rebuild
+# (변경) 안 A: 표준 IP 소스(모듈 참조)와 21장 사용자 Top
+add_files -norecurse [list $part03/common/rtl/ip_std/ip_seg7.v $part03/common/rtl/ip_std/axil_slave.v \
+  $part03/common/rtl/ip_std/ip_std.v $part03/ch21/rtl/basys3_soc21_top.v]
+set_property is_enabled false [get_files basys3_soc11_top.v]
+update_compile_order -fileset sources_1
+
+set bd_file [get_files -filter {FILE_TYPE == "Block Designs"}]
+open_bd_design $bd_file
+set bd [current_bd_design]
+puts "BD $bd"
+
+# NPU IP 추가, SmartConnect 마스터 포트 1개 추가(M04)
+set npu [create_bd_cell -type ip -vlnv user.org:p3:p3_npu_axi_lite:1.0 p3_npu_0]
+set smc [get_bd_cells axi_smc]
+set nmi [get_property CONFIG.NUM_MI $smc]
+check {$nmi == 4} "SmartConnect NUM_MI 4 in original"
+set_property CONFIG.NUM_MI 5 $smc
+connect_bd_intf_net [get_bd_intf_pins axi_smc/M04_AXI] [get_bd_intf_pins p3_npu_0/s_axi]
+
+# 클록·Reset: 기존 AXI 주변장치(GPIO)와 같은 넷에 연결
+set clk_net [get_bd_nets -of_objects [get_bd_pins axi_gpio_0/s_axi_aclk]]
+set rst_net [get_bd_nets -of_objects [get_bd_pins axi_gpio_0/s_axi_aresetn]]
+connect_bd_net -net $clk_net [get_bd_pins p3_npu_0/s_axi_aclk]
+connect_bd_net -net $rst_net [get_bd_pins p3_npu_0/s_axi_aresetn]
+
+# (변경) 안 A: BTN GPIO(4비트 입력, 인터럽트)와 표준 7세그먼트 IP(ip06_seg7). SmartConnect M05·M06
+set_property CONFIG.NUM_MI 7 $smc
+set gb [create_bd_cell -type ip -vlnv xilinx.com:ip:axi_gpio:2.0 axi_gpio_btn]
+set_property -dict [list CONFIG.C_GPIO_WIDTH 4 CONFIG.C_ALL_INPUTS 1 CONFIG.C_INTERRUPT_PRESENT 1] $gb
+connect_bd_intf_net [get_bd_intf_pins axi_smc/M05_AXI] [get_bd_intf_pins axi_gpio_btn/S_AXI]
+connect_bd_net -net $clk_net [get_bd_pins axi_gpio_btn/s_axi_aclk]
+connect_bd_net -net $rst_net [get_bd_pins axi_gpio_btn/s_axi_aresetn]
+make_bd_intf_pins_external -name btn [get_bd_intf_pins axi_gpio_btn/GPIO]
+set sg [create_bd_cell -type module -reference ip_seg7 ip06_seg7]
+connect_bd_intf_net [get_bd_intf_pins axi_smc/M06_AXI] [get_bd_intf_pins ip06_seg7/s_axi]
+connect_bd_net -net $clk_net [get_bd_pins ip06_seg7/s_axi_aclk]
+connect_bd_net -net $rst_net [get_bd_pins ip06_seg7/s_axi_aresetn]
+foreach port {seg dp an} { make_bd_pins_external -name $port [get_bd_pins ip06_seg7/$port] }
+
+# (변경) 안 A 인터럽트: xlconcat 16입력. In0 Timer, In1 UART(예약, 펌웨어는 켜지 않음), In3 BTN, In12 NPU, 나머지 상수 0
+set tmr_net [get_bd_nets -of_objects [get_bd_pins axi_timer_0/interrupt]]
+delete_bd_objs $tmr_net
+set cat [create_bd_cell -type ip -vlnv xilinx.com:ip:xlconcat:2.1 irq_concat]
+set_property CONFIG.NUM_PORTS 16 $cat
+set zero [create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant:1.1 irq_zero]
+set_property -dict [list CONFIG.CONST_WIDTH 1 CONFIG.CONST_VAL 0] $zero
+set irq_map_a {0 axi_timer_0/interrupt 1 axi_uartlite_0/interrupt 3 axi_gpio_btn/ip2intc_irpt 12 p3_npu_0/irq_o}
+for {set i 0} {$i &lt; 16} {incr i} {
+  if {[dict exists $irq_map_a $i]} { set src [dict get $irq_map_a $i] } else { set src irq_zero/dout }
+  connect_bd_net [get_bd_pins $src] [get_bd_pins irq_concat/In$i]
+}
+connect_bd_net [get_bd_pins irq_concat/dout] [get_bd_pins axi_intc_0/intr]
+
+# 주소: 사용자 IP 기본 영역 0x44A0_0000, 4 KB
+assign_bd_address -target_address_space /microblaze_riscv_0/Data [get_bd_addr_segs p3_npu_0/s_axi/reg0] \
+  -offset $npu_base -range $npu_range
+# (변경) 안 A 동결 주소맵: 기존 세그먼트를 옮기고(겹침 없는 순서) 새 블록을 배치한다
+proc data_seg {cell} {
+  return [get_bd_addr_segs -of_objects [get_bd_addr_spaces /microblaze_riscv_0/Data] -filter "NAME =~ *_${cell}_*"]
+}
+foreach {cell base} {axi_uartlite_0 0x40020000 axi_timer_0 0x40030000 axi_intc_0 0x40040000} {
+  set_property OFFSET $base [data_seg $cell]
+}
+assign_bd_address -target_address_space /microblaze_riscv_0/Data [get_bd_addr_segs axi_gpio_btn/S_AXI/Reg] \
+  -offset 0x40010000 -range 64K
+assign_bd_address -target_address_space /microblaze_riscv_0/Data [get_bd_addr_segs ip06_seg7/s_axi/*] \
+  -offset 0x40060000 -range 64K
+validate_bd_design
+save_bd_design
+
+# ---- 정적 검사: 주소 겹침·클록·Reset·인터럽트 ----
+set segs [get_bd_addr_segs -of_objects [get_bd_addr_spaces /microblaze_riscv_0/Data]]
+set rows {}
+foreach s $segs {
+  set off [get_property OFFSET $s]; set rng [get_property RANGE $s]
+  lappend rows [list [get_property NAME $s] $off $rng]
+  puts "ADDR [get_property NAME $s] $off $rng"
+}
+set overlap 0
+foreach a $rows {
+  foreach b $rows {
+    if {[lindex $a 0] ne [lindex $b 0]} {
+      set a0 [expr {[lindex $a 1]}]; set a1 [expr {$a0 + [lindex $a 2]}]
+      set b0 [expr {[lindex $b 1]}]; set b1 [expr {$b0 + [lindex $b 2]}]
+      if {$a0 &lt; $b1 &amp;&amp; $b0 &lt; $a1} { set overlap 1; puts "OVERLAP [lindex $a 0] [lindex $b 0]" }
+    }
+  }
+}
+check {$overlap == 0} "data address segments do not overlap"
+set nseg [get_bd_addr_segs -of_objects [get_bd_addr_spaces /microblaze_riscv_0/Data] -filter {NAME =~ "*p3_npu_0*"}]
+check {[get_property OFFSET $nseg] == $npu_base} "NPU base $npu_base"
+# (변경) 안 A 주소맵 대조: 셀 이름 → 베이스·범위가 지시문 2절 표와 한 줄씩 같아야 한다
+set map_a {dlmb_bram_if_cntlr 0x00000000 65536 axi_gpio_0 0x40000000 65536 axi_gpio_btn 0x40010000 65536
+  axi_uartlite_0 0x40020000 65536 axi_timer_0 0x40030000 65536 axi_intc_0 0x40040000 65536
+  ip06_seg7 0x40060000 65536 p3_npu_0 0x44A00000 4096}
+set addr_ok 1
+foreach {cell base rng} $map_a {
+  set sg [data_seg $cell]
+  if {[llength $sg] != 1} { puts "ADDR_MAP_A $cell MISSING"; set addr_ok 0; continue }
+  set ob [get_property OFFSET $sg]; set or [get_property RANGE $sg]
+  set ok [expr {$ob == $base &amp;&amp; $or == $rng}]
+  puts "ADDR_MAP_A $cell [format 0x%08X $ob] $or expect [format 0x%08X $base] $rng [expr {$ok ? "OK" : "MISMATCH"}]"
+  if {!$ok} { set addr_ok 0 }
+}
+if {[llength $segs] != [expr {[llength $map_a] / 3}]} { puts "ADDR_MAP_A extra segments: [llength $segs]"; set addr_ok 0 }
+puts [expr {$addr_ok ? "ADDR_MAP_A_PASS" : "ADDR_MAP_A_FAIL"}]
+check {$addr_ok} "address map A"
+# (변경) 안 A 인터럽트 대조: concat 입력 번호마다 구동원을 확인한다(예약 칸은 irq_zero)
+set irq_ok 1
+for {set i 0} {$i &lt; 16} {incr i} {
+  if {[dict exists $irq_map_a $i]} { set exp [dict get $irq_map_a $i] } else { set exp irq_zero/dout }
+  set net [get_bd_nets -quiet -of_objects [get_bd_pins irq_concat/In$i]]
+  set drv [expr {$net eq "" ? "" : [get_bd_pins -quiet -of_objects $net -filter {DIR == O}]}]
+  set got [string trimleft [lindex $drv 0] /]
+  set ok [expr {$got eq $exp}]
+  puts "IRQ_MAP_A In$i $got expect $exp [expr {$ok ? "OK" : "MISMATCH"}]"
+  if {!$ok} { set irq_ok 0 }
+}
+if {[get_property CONFIG.NUM_PORTS [get_bd_cells irq_concat]] != 16} { set irq_ok 0 }
+puts [expr {$irq_ok ? "IRQ_MAP_A_PASS" : "IRQ_MAP_A_FAIL"}]
+check {$irq_ok} "irq map A"
+foreach port {seg dp an} { check {[llength [get_bd_ports -quiet $port]] == 1} "BD port $port" }
+check {[llength [get_bd_intf_ports -quiet btn]] == 1} "BD interface port btn"
+check {[get_bd_nets -of_objects [get_bd_pins p3_npu_0/s_axi_aclk]] eq [get_bd_nets -of_objects [get_bd_pins axi_smc/aclk]]} "NPU clock = SmartConnect clock"
+check {[get_bd_nets -of_objects [get_bd_pins p3_npu_0/s_axi_aresetn]] eq [get_bd_nets -of_objects [get_bd_pins rst_clk_wiz_1_100M/peripheral_aresetn]]} "NPU reset = peripheral_aresetn"
+check {[get_bd_nets -of_objects [get_bd_pins irq_concat/dout]] eq [get_bd_nets -of_objects [get_bd_pins axi_intc_0/intr]]} "irq_concat -&gt; axi_intc intr"
+# 원본과 같은 IP별 OOC 합성(Hierarchical)을 유지한다. MicroBlaze V 코어는 전역 합성에서 black box가 된다.
+make_wrapper -files $bd_file -top -force
+generate_target all $bd_file
+create_ip_run [get_files $bd_file]
+export_ip_user_files -of_objects $bd_file -no_script -sync -force -quiet
+
+# (변경) 안 A: 사용자 Top은 basys3_soc21_top(핀 연결만)
+set_property top basys3_soc21_top [current_fileset]
+update_compile_order -fileset sources_1
+check {[get_property top [current_fileset]] eq "basys3_soc21_top"} "user top basys3_soc21_top"
+
+reset_run synth_1
+launch_runs synth_1 -jobs $jobs
+wait_on_run synth_1
+check {[get_property PROGRESS [get_runs synth_1]] eq "100%"} "synth_1 complete"
+launch_runs impl_1 -to_step write_bitstream -jobs $jobs
+wait_on_run impl_1
+check {[get_property PROGRESS [get_runs impl_1]] eq "100%"} "impl_1 + bitstream complete"
+open_run impl_1
+report_utilization -file $out/soc_utilization.rpt
+report_utilization -hierarchical -hierarchical_depth 3 -file $out/soc_utilization_hier.rpt
+report_timing_summary -max_paths 3 -file $out/soc_timing.rpt
+set wns [get_property SLACK [get_timing_paths -setup -max_paths 1]]
+set whs [get_property SLACK [get_timing_paths -hold -max_paths 1]]
+puts "TIMING WNS=$wns WHS=$whs"
+check {$wns &gt;= 0 &amp;&amp; $whs &gt;= 0} "post-route setup/hold met"
+write_hw_platform -fixed -include_bit -force $out/soc21_npu.xsa
+foreach f [glob -nocomplain [get_property DIRECTORY [get_runs impl_1]]/*.bit] { file copy -force $f $out/ }
+puts "SOC21_BUILD_DONE"</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>part03/ch21/scripts/build_soc.sh · bash · 원본 · 실행 기록 통과 2026-11-19</span></div>
+        <pre tabindex="0"><code class="language-bash">#!/usr/bin/env bash
+# (추가) 21장: 제1부 11장 MicroBlaze V 성공 프로젝트를 복제해 20장 NPU IP를 통합하고 Bitstream·XSA를 만든다.
+#   SOC11_DIR : 원본 프로젝트 폴더(soc11_user_top.xpr 포함). 원본은 읽기만 하고 cp -a로 build/에 복제한다.
+#   결과(build/, 저장소 제외): 복제 프로젝트, NPU IP, soc21_npu.xsa, *.bit, 보고서
+#   요약(저장소): validation/build_soc.log, validation/soc_summary.md
+# (변경) 안 A: 동결 주소맵·BTN GPIO·표준 7세그먼트 IP. ADDR_MAP_A·IRQ_MAP_A 대조 결과를 로그에 남긴다.
+set -euo pipefail
+chapter_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." &amp;&amp; pwd)
+part03=$(cd -- "$chapter_dir/.." &amp;&amp; pwd)
+if [[ -z "${SOC11_DIR:-}" || ! -f "$SOC11_DIR/soc11_user_top.xpr" ]]; then
+  echo "NOT_RUN SOC21_BUILD: SOC11_DIR=&lt;제1부 11장 soc11_user_top 폴더&gt; 필요"
+  exit 2
+fi
+if ! command -v vivado &gt;/dev/null 2&gt;&amp;1; then
+  if [[ -n "${VIVADO_SETTINGS:-}" ]]; then
+    # shellcheck disable=SC1090
+    source "$VIVADO_SETTINGS"
+  else
+    echo "NOT_RUN SOC21_BUILD: vivado 없음 (VIVADO_SETTINGS=&lt;Vivado&gt;/settings64.sh 지정)"
+    exit 2
+  fi
+fi
+build="$chapter_dir/build"
+rm -rf "$build"
+mkdir -p "$build"
+# 원본 보존 확인용: 복제 전·후 원본 파일 목록과 해시
+orig_sum() { (cd "$SOC11_DIR" &amp;&amp; find . -type f -not -path "*/.Xil/*" -print0 | sort -z | xargs -0 sha256sum | sha256sum | cut -c1-16); }
+before=$(orig_sum)
+cp -a "$SOC11_DIR" "$build/soc21_npu"
+IP_OUT="$build/ip_repo/p3_npu_axi_lite" bash "$part03/ch20/scripts/package_ip.sh"
+(cd "$build" &amp;&amp; vivado -mode batch -nojournal -log "$build/vivado.log" \
+  -source "$chapter_dir/synth/soc_npu_bd.tcl" \
+  -tclargs "$build/soc21_npu/soc11_user_top.xpr" "$build/ip_repo" \
+  "$chapter_dir/constraints/basys3_soc21_npu.xdc" "$build/out" "${JOBS:-4}" "$part03" &gt; "$build/stdout.txt") || true
+after=$(orig_sum)
+grep -E "^(BD|ADDR|OVERLAP|IRQ_MAP_A|CHECK_PASS|CHECK_FAIL|TIMING|SOC21_BUILD_DONE)|^ERROR|^CRITICAL WARNING" "$build/stdout.txt" \
+  | sed "s#$build#build#g"
+if [[ "$before" == "$after" ]]; then echo "ORIGINAL_PROJECT_UNCHANGED tree_sha=$before"; else echo "ORIGINAL_PROJECT_CHANGED"; exit 1; fi
+grep -q "^SOC21_BUILD_DONE" "$build/stdout.txt"
+sha256sum "$build/out/soc21_npu.xsa" "$build"/out/*.bit | sed "s#$build/##"</code></pre>
+      </div>
+      <h3>시뮬레이션·빌드 기대 화면</h3>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 서브젝트 단독</span></div>
+        <pre tabindex="0"><code>bash part03/ch21/scripts/build_soc.sh   # Vivado: 블록 설계 → 비트스트림·XSA (약 5분)</code></pre></div>
+      <div class="codeblock"><div class="codebar"><span>기대 출력 (2026-11-19 · 출처 part03/ch21/validation/build_soc.log)</span></div>
+        <pre tabindex="0"><code>CHECK_PASS SmartConnect NUM_MI 4 in original
+CHECK_PASS data address segments do not overlap
+CHECK_PASS NPU base 0x44A00000
+ADDR_MAP_A_PASS
+CHECK_PASS address map A
+IRQ_MAP_A_PASS
+CHECK_PASS irq map A
+CHECK_PASS BD port seg
+CHECK_PASS BD port dp
+CHECK_PASS BD port an
+CHECK_PASS BD interface port btn
+CHECK_PASS NPU clock = SmartConnect clock
+CHECK_PASS NPU reset = peripheral_aresetn
+CHECK_PASS irq_concat -&gt; axi_intc intr
+CHECK_PASS user top basys3_soc21_top
+CHECK_PASS synth_1 complete
+CHECK_PASS impl_1 + bitstream complete
+CHECK_PASS post-route setup/hold met
+ORIGINAL_PROJECT_UNCHANGED tree_sha=7225b730e4ff1ff5</code></pre></div>
+
+      <h3>판정 줄</h3>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
+        <tbody><tr><td><code>ADDR_MAP_A_PASS · IRQ_MAP_A_PASS</code></td><td>Address Editor 8줄·INTC 16입력이 동결 주소맵(안 A) 표와 같음</td></tr><tr><td><code>CHECK_PASS data address segments do not overlap</code></td><td>주소 겹침 없음, NPU 0x44A0_0000</td></tr><tr><td><code>ORIGINAL_PROJECT_UNCHANGED</code></td><td>제1부 11장 원본 폴더 SHA-256이 빌드 전후 같음</td></tr></tbody>
+      </table></div>
+      <div class="gate-row">
+        <div class="gate na">
+          <b>HOST_MODEL_PASS</b>
+          <span>해당 없음 (Python 기준 모델 없음)</span>
+        </div>
+        <div class="gate na">
+          <b>RTL_SIM_PASS</b>
+          <span>해당 없음 (RTL 시뮬레이션 대상 아님) · 정적 검사: CHECK_PASS post-route setup/hold met · 2026-11-19</span>
+        </div>
+        <div class="gate pass">
+          <b>SYNTH_TIMING_PASS</b>
+          <span>WNS +0.374 ns · WHS +0.034 ns (SoC 배선 후, 비트스트림 생성) · <code>part03/ch21/validation/soc_summary.md</code></span>
+        </div>
+        <div class="gate todo">
+          <b>BOARD_PASS</b>
+          <span>⚠ 미실시 · 현재 실물 보드 확인 불가</span>
+        </div>
+      </div>
+    </section>
+    <section class="section" id="s5_3">
+      <h2><span class="num">05</span> 서브젝트 5-3 · C 드라이버와 표시 <small>(구 22장)</small></h2>
+      <p class="verdict"><b>학습목표 (보드):</b> <code>npu_app.elf</code>: 그림 4장(시험 0·1·92·1640)을 NPU로 분류해 CPU 계산과 점수까지 같고(<code>scores_match=1</code>), 끝나면 7세그먼트 <code>03 4</code>·LED4. #92는 4장과 같이 INT8에서 4.</p>
+      <h3>보드에서 볼 것</h3>
+      <p>21장 비트스트림 + <code>npu_app.elf</code> (Vitis, 같은 XSA 플랫폼).</p>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>#</th><th>절차</th><th>기대 결과 (시뮬레이션·빌드 근거)</th><th>판정</th></tr></thead>
+        <tbody><tr><td class="nw">B2</td><td>Vitis에서 <code>npu_app.elf</code> 실행(같은 XSA 플랫폼)</td><td><code>P3 NPU driver test base=0x44a00000</code></td><td class="nw">⚠ 미실시</td></tr><tr><td class="nw">B3</td><td>이어지는 UART 4줄</td><td><code>SAMPLE 0 ... npu_class=7 cpu_class=7 expect=7 scores_match=1 rc=0</code><br><code>SAMPLE 1 ... npu_class=2 ...</code><br><code>SAMPLE 2 index=92 label=9 npu_class=4 ...</code><br><code>SAMPLE 3 index=1640 label=9 npu_class=4 ...</code> (22장 협동 시뮬레이션과 같은 줄)</td><td class="nw">⚠ 미실시</td></tr><tr><td class="nw">B4</td><td>마지막 줄</td><td><code>NPU_APP_DONE samples=4 failures=0</code></td><td class="nw">⚠ 미실시</td></tr><tr><td class="nw">B4a</td><td>실행 끝난 뒤 7세그먼트·LED를 눈으로 확인 (안 A 22장 표시)</td><td>7세그먼트 <code>03 4</code>(왼쪽 두 자리 = 그림 번호 3, 가운데 오른쪽 꺼짐, 오른쪽 = 클래스 4), LED4만 켜짐. 각 표본 직후 <code>00 7</code>·<code>01 2</code>·<code>02 4</code> 순서(협동 시뮬레이션 SHOW 줄)</td><td class="nw">⚠ 미실시</td></tr></tbody>
+      </table></div>
+      <h3>추가 코드 (구 22장 그대로, VS Code 판)</h3>
+      <div class="codeblock">
+        <div class="codebar"><span>part03/ch22/sw/npu_driver.h · c · 원본 · PC 시험 통과 2026-11-19 · 보드 ⚠ 미검증</span></div>
+        <pre tabindex="0"><code class="language-c">/* (추가) 22장: 20장 AXI4-Lite NPU 제어 IP(p3_npu_axi_lite) C 드라이버.
+ * 레지스터 접근은 npu_io_read/npu_io_write 두 함수로만 한다.
+ *   Vitis(MicroBlaze V): Xil_In32/Xil_Out32 (npu_io_xil.c)
+ *   PC 협동 시뮬레이션: FIFO로 Icarus RTL에 전달 (host/npu_io_cosim.c)
+ * 베이스 주소는 xparameters.h(Vivado Address Editor 값)에서 받는다. 드라이버에 고정하지 않는다.
+ */
+#ifndef NPU_DRIVER_H
+#define NPU_DRIVER_H
+
+#include &lt;stdint.h&gt;
+
+#define NPU_N_IN    784
+#define NPU_N_CLASS 10
+#define NPU_TILE    64
+#define NPU_N_TILE  13
+
+/* 레지스터 오프셋 (20장 docs/README.md 레지스터 맵) */
+#define NPU_CTRL      0x00u
+#define NPU_STATUS    0x04u
+#define NPU_LENGTH    0x08u
+#define NPU_CLASS     0x0Cu
+#define NPU_X_INDEX   0x10u
+#define NPU_X_DATA    0x14u
+#define NPU_W_CLASS   0x18u
+#define NPU_W_INDEX   0x1Cu
+#define NPU_W_DATA    0x20u
+#define NPU_BIAS_LO   0x24u
+#define NPU_BIAS_HI   0x28u
+#define NPU_SCORE_SEL 0x2Cu
+#define NPU_SCORE_LO  0x30u
+#define NPU_SCORE_HI  0x34u
+#define NPU_IRQ_EN    0x38u
+
+#define NPU_CTRL_START   0x1u
+#define NPU_CTRL_TILE_GO 0x2u
+#define NPU_CTRL_ABORT   0x4u
+
+#define NPU_ST_BUSY       (1u &lt;&lt; 0)
+#define NPU_ST_DONE       (1u &lt;&lt; 1)
+#define NPU_ST_ERROR      (1u &lt;&lt; 2)
+#define NPU_ST_OVF        (1u &lt;&lt; 3)
+#define NPU_ST_LOAD_READY (1u &lt;&lt; 4)
+#define NPU_ST_X_HELD     (1u &lt;&lt; 5)
+#define NPU_ST_TILE(s)    (((s) &gt;&gt; 8) &amp; 0xFu)
+#define NPU_ST_ERR_CODE(s) (((s) &gt;&gt; 12) &amp; 0xFu)
+
+/* 반환 코드 */
+#define NPU_OK          0
+#define NPU_E_TIMEOUT  -1
+#define NPU_E_HW       -2   /* STATUS.ERROR: npu_last_status()의 ERR_CODE 확인 */
+#define NPU_E_OVERFLOW -3   /* STATUS.OVF: 외부 누산 넘침(41비트 계약 위반) */
+
+typedef struct {
+    uintptr_t base;
+    uint32_t last_status;
+    uint32_t poll_limit;    /* STATUS 폴링 최대 횟수 */
+} npu_t;
+
+uint32_t npu_io_read(uintptr_t addr);
+void npu_io_write(uintptr_t addr, uint32_t value);
+
+void npu_init(npu_t *npu, uintptr_t base);
+int npu_set_bias(npu_t *npu, const int64_t bias[NPU_N_CLASS]);
+/* 784 입력 전체 추론. w는 class 우선 [10][784] INT8. scores는 42비트 signed 점수. */
+int npu_infer(npu_t *npu, const int8_t x[NPU_N_IN], const int8_t w[NPU_N_CLASS][NPU_N_IN],
+              int64_t scores[NPU_N_CLASS], int *class_id);
+void npu_irq_enable(npu_t *npu, int enable);
+void npu_clear_done(npu_t *npu);
+uint32_t npu_last_status(const npu_t *npu);
+
+/* 같은 정수 연산의 CPU 기준 구현(23장 CPU·NPU 비교에도 사용) */
+int cpu_infer(const int8_t x[NPU_N_IN], const int8_t w[NPU_N_CLASS][NPU_N_IN],
+              const int64_t bias[NPU_N_CLASS], int64_t scores[NPU_N_CLASS]);
+
+#endif</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>part03/ch22/sw/npu_driver.c · c · 원본 · PC 시험 통과 2026-11-19 · 보드 ⚠ 미검증</span></div>
+        <pre tabindex="0"><code class="language-c">/* (추가) 22장: p3_npu_axi_lite 드라이버 구현. 20장 docs/README.md의 "CPU 실행 순서"를 그대로 따른다. */
+#include "npu_driver.h"
+
+static void wr(npu_t *npu, uint32_t off, uint32_t v) { npu_io_write(npu-&gt;base + off, v); }
+static uint32_t rd(npu_t *npu, uint32_t off) { return npu_io_read(npu-&gt;base + off); }
+
+void npu_init(npu_t *npu, uintptr_t base)
+{
+    npu-&gt;base = base;
+    npu-&gt;last_status = 0;
+    npu-&gt;poll_limit = 100000u;
+    wr(npu, NPU_IRQ_EN, 0);
+    wr(npu, NPU_STATUS, NPU_ST_DONE | NPU_ST_ERROR);   /* W1C */
+}
+
+uint32_t npu_last_status(const npu_t *npu) { return npu-&gt;last_status; }
+
+void npu_irq_enable(npu_t *npu, int enable) { wr(npu, NPU_IRQ_EN, enable ? 1u : 0u); }
+
+void npu_clear_done(npu_t *npu) { wr(npu, NPU_STATUS, NPU_ST_DONE); }
+
+/* STATUS가 (s &amp; mask) == want가 될 때까지 폴링. 도중 ERROR면 실패. */
+static int wait_status(npu_t *npu, uint32_t mask, uint32_t want)
+{
+    uint32_t n;
+    for (n = 0; n &lt; npu-&gt;poll_limit; n++) {
+        uint32_t s = rd(npu, NPU_STATUS);
+        npu-&gt;last_status = s;
+        if (s &amp; NPU_ST_ERROR)
+            return NPU_E_HW;
+        if ((s &amp; mask) == want)
+            return NPU_OK;
+    }
+    return NPU_E_TIMEOUT;
+}
+
+int npu_set_bias(npu_t *npu, const int64_t bias[NPU_N_CLASS])
+{
+    int c;
+    for (c = 0; c &lt; NPU_N_CLASS; c++) {
+        uint64_t b = (uint64_t)bias[c];
+        wr(npu, NPU_W_CLASS, (uint32_t)c);
+        wr(npu, NPU_BIAS_LO, (uint32_t)b);
+        /* [39:32]를 32비트로 부호 확장 */
+        wr(npu, NPU_BIAS_HI, (uint32_t)(int32_t)(int8_t)(uint8_t)(b &gt;&gt; 32));
+    }
+    npu-&gt;last_status = rd(npu, NPU_STATUS);
+    return (npu-&gt;last_status &amp; NPU_ST_ERROR) ? NPU_E_HW : NPU_OK;
+}
+
+int npu_infer(npu_t *npu, const int8_t x[NPU_N_IN], const int8_t w[NPU_N_CLASS][NPU_N_IN],
+              int64_t scores[NPU_N_CLASS], int *class_id)
+{
+    int t, c, i, rc;
+    wr(npu, NPU_STATUS, NPU_ST_DONE | NPU_ST_ERROR);
+    wr(npu, NPU_CTRL, NPU_CTRL_START);
+    for (t = 0; t &lt; NPU_N_TILE; t++) {
+        int base = t * NPU_TILE;
+        int len = (t == NPU_N_TILE - 1) ? (NPU_N_IN - base) : NPU_TILE;
+        rc = wait_status(npu, NPU_ST_BUSY | NPU_ST_LOAD_READY, NPU_ST_BUSY | NPU_ST_LOAD_READY);
+        if (rc != NPU_OK)
+            return rc;
+        for (c = 0; c &lt; NPU_N_CLASS; c++) {
+            wr(npu, NPU_W_CLASS, (uint32_t)c);
+            wr(npu, NPU_W_INDEX, 0);
+            for (i = 0; i &lt; len; i++)
+                wr(npu, NPU_W_DATA, (uint32_t)(int32_t)w[c][base + i]);
+        }
+        wr(npu, NPU_X_INDEX, 0);
+        for (i = 0; i &lt; NPU_TILE; i++)   /* 마지막 타일의 48개는 0으로 채운다(하드웨어가 무시) */
+            wr(npu, NPU_X_DATA, (uint32_t)(int32_t)(i &lt; len ? x[base + i] : 0));
+        wr(npu, NPU_CTRL, NPU_CTRL_TILE_GO | ((uint32_t)t &lt;&lt; 8));
+        /* 결과 수락 = X_HELD 해제 */
+        rc = wait_status(npu, NPU_ST_X_HELD, 0);
+        if (rc != NPU_OK)
+            return rc;
+    }
+    rc = wait_status(npu, NPU_ST_DONE, NPU_ST_DONE);
+    if (rc != NPU_OK)
+        return rc;
+    for (c = 0; c &lt; NPU_N_CLASS; c++) {
+        uint32_t lo, hi;
+        wr(npu, NPU_SCORE_SEL, (uint32_t)c);
+        lo = rd(npu, NPU_SCORE_LO);      /* LO 먼저: HI는 이 순간의 스냅샷 */
+        hi = rd(npu, NPU_SCORE_HI);
+        scores[c] = (int64_t)(((uint64_t)hi &lt;&lt; 32) | lo);
+    }
+    *class_id = (int)rd(npu, NPU_CLASS);
+    return (npu-&gt;last_status &amp; NPU_ST_OVF) ? NPU_E_OVERFLOW : NPU_OK;
+}
+
+int cpu_infer(const int8_t x[NPU_N_IN], const int8_t w[NPU_N_CLASS][NPU_N_IN],
+              const int64_t bias[NPU_N_CLASS], int64_t scores[NPU_N_CLASS])
+{
+    int c, i, best = 0;
+    for (c = 0; c &lt; NPU_N_CLASS; c++) {
+        int64_t acc = 0;
+        for (i = 0; i &lt; NPU_N_IN; i++)
+            acc += (int32_t)x[i] * (int32_t)w[c][i];
+        scores[c] = acc + bias[c];
+        if (scores[c] &gt; scores[best])   /* 동점은 낮은 번호 */
+            best = c;
+    }
+    return best;
+}</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>part03/ch22/sw/npu_io_xil.c · c · 원본 · PC 시험 통과 2026-11-19 · 보드 ⚠ 미검증</span></div>
+        <pre tabindex="0"><code class="language-c">/* (추가) 22장: MicroBlaze V 대상 레지스터 접근(Vitis standalone BSP의 Xil_In32/Xil_Out32). */
+#include "xil_io.h"
+#include "npu_driver.h"
+
+uint32_t npu_io_read(uintptr_t addr) { return Xil_In32(addr); }
+
+void npu_io_write(uintptr_t addr, uint32_t value) { Xil_Out32(addr, value); }</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>part03/ch22/sw/app.h · c · 원본 · PC 시험 통과 2026-11-19 · 보드 ⚠ 미검증</span></div>
+        <pre tabindex="0"><code class="language-c">/* (추가) 22장: 응용 진입점과 출력 매크로. 대상에서는 xil_printf(64비트 서식 없음), PC에서는 printf. */
+#ifndef APP_H
+#define APP_H
+#include &lt;stdint.h&gt;
+#ifdef NPU_HOST_SIM
+#include &lt;stdio.h&gt;
+#define APP_PRINTF printf
+#else
+#include "xil_printf.h"
+#define APP_PRINTF xil_printf
+#endif
+int app_run(uintptr_t npu_base);
+/* (변경) 안 A: 추론 뒤 표시. 클래스 = LED 한 개 + 7세그먼트 오른쪽 자리, 왼쪽 두 자리 = 그림 번호(16진수 2자리).
+ * 보드: app_show_xil.c(SEG7·GPIO 0), PC 협동 시뮬레이션: host/cosim_main.c(SHOW 줄 출력). */
+#define APP_SHOW_VALUE(pic, cls) ((((uint32_t)(pic) &amp; 0xFFu) &lt;&lt; 8) | ((uint32_t)(cls) &amp; 0xFu))
+#define APP_SHOW_MODE            0x200u   /* BLANK: 자리 1(가운데 오른쪽) 끔 */
+#define APP_SHOW_LED(cls)        ((cls) &gt;= 0 &amp;&amp; (cls) &lt; 16 ? (1u &lt;&lt; (cls)) : 0u)
+void app_show(int picture, int cls);
+#endif</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>part03/ch22/sw/app.c · c · 원본 · PC 시험 통과 2026-11-19 · 보드 ⚠ 미검증</span></div>
+        <pre tabindex="0"><code class="language-c">/* (추가) 22장: NPU 추론 응용. MicroBlaze V(main.c)와 PC 협동 시뮬레이션(host/cosim_main.c)이 같은 코드를 쓴다.
+ * 표본마다 NPU 추론과 CPU 정수 추론을 실행해 10개 점수·Class를 서로, 그리고 18장 평가 기대값과 비교한다.
+ */
+#include "app.h"
+#include "npu_driver.h"
+#include "model_data.h"
+
+int app_run(uintptr_t npu_base)
+{
+    npu_t npu;
+    int s, c, rc, failures = 0;
+    npu_init(&amp;npu, npu_base);
+    rc = npu_set_bias(&amp;npu, model_b);
+    if (rc != NPU_OK) {
+        APP_PRINTF("NPU_BIAS_FAIL rc=%d status=0x%08x\r\n", rc, (unsigned)npu_last_status(&amp;npu));
+        return MODEL_N_SAMPLES;
+    }
+    npu_irq_enable(&amp;npu, 1);
+    for (s = 0; s &lt; MODEL_N_SAMPLES; s++) {
+        int64_t ns[NPU_N_CLASS], cs[NPU_N_CLASS];
+        int ncls = -1, ccls, same = 1;
+        rc = npu_infer(&amp;npu, sample_x[s], model_w, ns, &amp;ncls);
+        ccls = cpu_infer(sample_x[s], model_w, model_b, cs);
+        for (c = 0; c &lt; NPU_N_CLASS; c++)
+            if (ns[c] != cs[c] || ns[c] != sample_scores[s][c])
+                same = 0;
+        if (rc != NPU_OK || !same || ncls != ccls || ncls != sample_class[s])
+            failures++;
+        APP_PRINTF("SAMPLE %d index=%d label=%d npu_class=%d cpu_class=%d expect=%d scores_match=%d rc=%d\r\n",
+                   s, sample_index[s], sample_label[s], ncls, ccls, sample_class[s], same, rc);
+        app_show(s, ncls);   /* (변경) 안 A: LED·7세그먼트 표시 */
+        npu_clear_done(&amp;npu);
+    }
+    APP_PRINTF("NPU_APP_DONE samples=%d failures=%d\r\n", MODEL_N_SAMPLES, failures);
+    return failures;
+}</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>part03/ch22/sw/app_show_xil.c · c · 원본 · PC 시험 통과 2026-11-19 · 보드 ⚠ 미검증</span></div>
+        <pre tabindex="0"><code class="language-c">/* (추가) 안 A(2026-11-19): 22장 보드 표시. 클래스 = LED 한 개(AXI GPIO 0) + 7세그먼트 오른쪽 자리, 왼쪽 두 자리 = 그림 번호.
+ * 주소는 xparameters.h만 쓴다(XPAR_AXI_GPIO_0_BASEADDR, XPAR_IP06_SEG7_BASEADDR). */
+#include "xparameters.h"
+#include "xil_io.h"
+#include "p3_seg7.h"
+#include "app.h"
+
+void app_show(int picture, int cls)
+{
+    p3_seg7_regs_t r = { APP_SHOW_VALUE(picture, cls), APP_SHOW_MODE, 0u };
+    p3_seg7_write(r);
+    Xil_Out32(XPAR_AXI_GPIO_0_BASEADDR, APP_SHOW_LED(cls));
+}</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>part03/ch22/sw/main.c · c · 원본 · PC 시험 통과 2026-11-19 · 보드 ⚠ 미검증</span></div>
+        <pre tabindex="0"><code class="language-c">/* (추가) 22장: MicroBlaze V 응용 main. NPU 베이스 주소는 Vivado Address Editor 값(xparameters.h)을 쓴다. */
+#include "xparameters.h"
+#include "app.h"
+
+#ifndef NPU_BASEADDR
+#define NPU_BASEADDR XPAR_P3_NPU_0_BASEADDR
+#endif
+
+int main(void)
+{
+    APP_PRINTF("P3 NPU driver test base=0x%08x\r\n", (unsigned)NPU_BASEADDR);
+    return app_run(NPU_BASEADDR);
+}</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>part03/common/sw/p3_seg7.h · c · 원본 · PC 시험 통과 2026-11-19 · 보드 ⚠ 미검증</span></div>
+        <pre tabindex="0"><code class="language-c">/* (추가) 안 A(2026-11-19): 표준 7세그먼트 IP ip_seg7(ID "SEG7", 0x4006_0000 = XPAR_IP06_SEG7_BASEADDR) 레지스터와
+ * 28장 표시 워드(p3_fnd_scan 형식) → SEG7 레지스터 변환. 응용과 호스트 판정은 표시 워드를 그대로 쓰고,
+ * 보드 I/O 층(*_io_xil.c)만 이 변환으로 SEG7에 쓴다. 주소는 xparameters.h만 쓴다(하드코딩 금지).
+ *   표시 워드: [15:0] 자리별 16진수(자리 0 = 오른쪽 an[0]), [19:16] 자리 켜짐, [23:20] 소수점
+ *   SEG7     : VALUE [15:0] 16진수, MODE [3:0] RAW_EN·[11:8] BLANK(1 = 끔), DP [3:0]
+ */
+#ifndef P3_SEG7_H
+#define P3_SEG7_H
+#include &lt;stdint.h&gt;
+
+#define P3_SEG7_VALUE 0x0000u
+#define P3_SEG7_MODE  0x0004u
+#define P3_SEG7_RAW   0x0008u
+#define P3_SEG7_DP    0x000Cu
+#define P3_SEG7_ID    0xFFF0u
+#define P3_SEG7_ID_VALUE 0x53454737u   /* "SEG7" */
+
+/* 안 A 인터럽트 번호(axi_intc_0 입력). NPU = In12. 지금 펌웨어는 폴링만 하고 INTC를 켜지 않는다. */
+#define P3_INTC_BIT_TIMER 0
+#define P3_INTC_BIT_UART  1
+#define P3_INTC_BIT_BTN   3
+#define P3_INTC_BIT_NPU   12
+
+typedef struct { uint32_t value, mode, dp; } p3_seg7_regs_t;
+
+static inline p3_seg7_regs_t p3_seg7_from_fnd_word(uint32_t w)
+{
+    p3_seg7_regs_t r;
+    r.value = w &amp; 0xFFFFu;
+    r.mode = ((~(w &gt;&gt; 16)) &amp; 0xFu) &lt;&lt; 8;   /* 꺼진 자리 → BLANK, RAW_EN = 0 */
+    r.dp = (w &gt;&gt; 20) &amp; 0xFu;
+    return r;
+}
+
+#ifndef NPU_HOST_SIM
+#include "xparameters.h"
+#include "xil_io.h"
+#if defined(XPAR_AXI_INTC_0_NUM_INTR_INPUTS) &amp;&amp; (XPAR_AXI_INTC_0_NUM_INTR_INPUTS != 16)
+#error "안 A: axi_intc_0 입력은 16개여야 한다 (NPU = In12)"
+#endif
+#define P3_SEG7_BASE XPAR_IP06_SEG7_BASEADDR
+static inline void p3_seg7_write(p3_seg7_regs_t r)
+{
+    Xil_Out32(P3_SEG7_BASE + P3_SEG7_MODE, r.mode);
+    Xil_Out32(P3_SEG7_BASE + P3_SEG7_DP, r.dp);
+    Xil_Out32(P3_SEG7_BASE + P3_SEG7_VALUE, r.value);
+}
+#endif
+#endif</code></pre>
+      </div>
+      <h3>시뮬레이션·빌드 기대 화면</h3>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 서브젝트 단독</span></div>
+        <pre tabindex="0"><code>bash part03/ch22/scripts/run_sim.sh   # C 드라이버를 PC에서 컴파일해 RTL과 협동 시뮬레이션</code></pre></div>
+      <div class="codeblock"><div class="codebar"><span>기대 출력 (2026-11-19 · 출처 part03/ch22/validation/rtl_sim.log)</span></div>
+        <pre tabindex="0"><code>SAMPLE 0 index=0 label=7 npu_class=7 cpu_class=7 expect=7 scores_match=1 rc=0
+SHOW picture=0 class=7 seg7_value=0007 seg7_mode=200 led=0080
+SAMPLE 1 index=1 label=2 npu_class=2 cpu_class=2 expect=2 scores_match=1 rc=0
+SHOW picture=1 class=2 seg7_value=0102 seg7_mode=200 led=0004
+SAMPLE 2 index=92 label=9 npu_class=4 cpu_class=4 expect=4 scores_match=1 rc=0
+SHOW picture=2 class=4 seg7_value=0204 seg7_mode=200 led=0010
+SAMPLE 3 index=1640 label=9 npu_class=4 cpu_class=4 expect=4 scores_match=1 rc=0
+SHOW picture=3 class=4 seg7_value=0304 seg7_mode=200 led=0010
+NPU_APP_DONE samples=4 failures=0
+RTL_SIM_PASS DRIVER_BRIDGE axi_writes=35917 axi_reads=3781 irq_rising=4
+PYTHON_RTL_COMPARE_PASS c_driver_cosim npu=cpu=python_scores class_match=1</code></pre></div>
+      <details class="full"><summary>이 서브젝트의 테스트벤치·기준 모델 (전체 코드 4개)</summary>
+      <div class="codeblock">
+        <div class="codebar"><span>part03/ch22/tb/tb_p3_npu_bridge.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-19</span></div>
+        <pre tabindex="0"><code class="language-systemverilog">// (추가) 22장 C 드라이버 협동 시뮬레이션 브리지. PC에서 실행되는 C 드라이버의 레지스터 접근을 FIFO로 받아
+// 20장 AXI4-Lite BFM으로 실제 p3_npu_axi_lite RTL에 수행하고 응답을 돌려준다.
+//   명령(+CMD FIFO): "W &lt;addr hex&gt; &lt;data hex&gt;" / "R &lt;addr hex&gt;" / "Q"
+//   응답(+RSP FIFO): "B &lt;bresp&gt;" / "D &lt;rdata hex&gt; &lt;rresp&gt;"
+// 드라이버가 SLVERR을 일으키면 실패로 끝낸다(드라이버는 버스 규칙을 지켜야 한다).
+`timescale 1ns/1ps
+module tb_p3_npu_bridge;
+    reg clk = 0, resetn = 0;
+    always #5 clk = ~clk;
+    reg [5:0] awaddr = 0, araddr = 0;
+    reg awvalid = 0, wvalid = 0, bready = 0, arvalid = 0, rready = 0;
+    reg [31:0] wdata = 0;
+    reg [3:0] wstrb = 0;
+    wire awready, wready, bvalid, arready, rvalid, irq;
+    wire [1:0] bresp, rresp;
+    wire [31:0] rdata;
+
+    p3_npu_axi_lite dut(
+        .s_axi_aclk(clk), .s_axi_aresetn(resetn),
+        .s_axi_awaddr(awaddr), .s_axi_awprot(3'd0), .s_axi_awvalid(awvalid), .s_axi_awready(awready),
+        .s_axi_wdata(wdata), .s_axi_wstrb(wstrb), .s_axi_wvalid(wvalid), .s_axi_wready(wready),
+        .s_axi_bresp(bresp), .s_axi_bvalid(bvalid), .s_axi_bready(bready),
+        .s_axi_araddr(araddr), .s_axi_arprot(3'd0), .s_axi_arvalid(arvalid), .s_axi_arready(arready),
+        .s_axi_rdata(rdata), .s_axi_rresp(rresp), .s_axi_rvalid(rvalid), .s_axi_rready(rready),
+        .irq_o(irq));
+
+    `include "axi_lite_bfm.svh"
+
+    reg [8*256-1:0] cpath, rpath;
+    reg [8*8-1:0] op;
+    reg [31:0] a, d;
+    reg [1:0] resp;
+    integer cf, rf, rc, n_wr = 0, n_rd = 0, n_irq_edges = 0;
+    reg irq_q = 0;
+    always @(posedge clk) begin
+        if (irq &amp;&amp; !irq_q) n_irq_edges = n_irq_edges + 1;
+        irq_q &lt;= irq;
+    end
+    initial begin
+        if (!$value$plusargs("CMD=%s", cpath)) $fatal(1, "+CMD required");
+        if (!$value$plusargs("RSP=%s", rpath)) $fatal(1, "+RSP required");
+        repeat (4) @(negedge clk);
+        resetn = 1;
+        cf = $fopen(cpath, "r");     // 드라이버가 쓰기용으로 열 때까지 기다린다
+        rf = $fopen(rpath, "w");
+        forever begin
+            rc = $fscanf(cf, "%s", op);
+            if (rc != 1) $fatal(1, "command stream closed without Q");
+            if (op == "Q") begin
+                $display("RTL_SIM_PASS DRIVER_BRIDGE axi_writes=%0d axi_reads=%0d irq_rising=%0d", n_wr, n_rd, n_irq_edges);
+                $finish;
+            end else if (op == "W") begin
+                rc = $fscanf(cf, "%h %h", a, d);
+                axi_write(a[5:0], d, 4'hF, 0, 0, 0, resp);
+                if (resp != 2'b00) $fatal(1, "driver write 0x%02h=0x%08h got SLVERR", a, d);
+                n_wr = n_wr + 1;
+                $fwrite(rf, "B %0d\n", resp);
+                $fflush(rf);
+            end else if (op == "R") begin
+                rc = $fscanf(cf, "%h", a);
+                axi_read(a[5:0], 0, d, resp);
+                if (resp != 2'b00) $fatal(1, "driver read 0x%02h got SLVERR", a);
+                n_rd = n_rd + 1;
+                $fwrite(rf, "D %h %0d\n", d, resp);
+                $fflush(rf);
+            end else begin
+                $fatal(1, "unknown command %0s", op);
+            end
+        end
+    end
+endmodule</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>part03/ch22/host/cosim_main.c · c · 원본 · PC 시험 통과 2026-11-19 · 보드 ⚠ 미검증</span></div>
+        <pre tabindex="0"><code class="language-c">/* (추가) 22장: PC 협동 시뮬레이션 main. 같은 app_run()을 실행하고 레지스터 접근은 FIFO로 RTL에 보낸다. */
+#include &lt;stdio.h&gt;
+#include "app.h"
+#include "npu_driver.h"
+
+/* (변경) 안 A: 보드의 app_show_xil.c와 같은 값(SEG7 VALUE·MODE, LED)을 줄로 남긴다 */
+void app_show(int picture, int cls)
+{
+    printf("SHOW picture=%d class=%d seg7_value=%04x seg7_mode=%03x led=%04x\n", picture, cls,
+           (unsigned)APP_SHOW_VALUE(picture, cls), (unsigned)APP_SHOW_MODE, (unsigned)APP_SHOW_LED(cls));
+}
+
+void cosim_open(const char *cmd_path, const char *rsp_path);
+void cosim_close(void);
+
+/* CPU 기준 argmax 동점 규칙(낮은 번호) 자체 시험: x=0이면 점수 = Bias */
+static int cpu_tie_selftest(void)
+{
+    static int8_t x[NPU_N_IN], w[NPU_N_CLASS][NPU_N_IN];
+    int64_t b[NPU_N_CLASS], s[NPU_N_CLASS];
+    int c, pair, bad = 0;
+    for (pair = 0; pair &lt; NPU_N_CLASS - 1; pair++) {
+        for (c = 0; c &lt; NPU_N_CLASS; c++)
+            b[c] = -100 - c;
+        b[pair] = b[pair + 1] = 5;
+        if (cpu_infer(x, w, b, s) != pair)
+            bad++;
+    }
+    printf("CPU_TIE_SELFTEST pairs=%d bad=%d\n", NPU_N_CLASS - 1, bad);
+    return bad;
+}
+
+int main(int argc, char **argv)
+{
+    int failures;
+    if (argc != 3) {
+        fprintf(stderr, "usage: %s &lt;cmd fifo&gt; &lt;rsp fifo&gt;\n", argv[0]);
+        return 2;
+    }
+    failures = cpu_tie_selftest();
+    cosim_open(argv[1], argv[2]);
+    failures += app_run(0);
+    cosim_close();
+    return failures ? 1 : 0;
+}</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>part03/ch22/host/npu_io_cosim.c · c · 원본 · PC 시험 통과 2026-11-19 · 보드 ⚠ 미검증</span></div>
+        <pre tabindex="0"><code class="language-c">/* (추가) 22장: PC 협동 시뮬레이션용 레지스터 접근. 명령을 FIFO로 Icarus 브리지 TB에 보내고 응답을 기다린다. */
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include "npu_driver.h"
+
+static FILE *cmd_fp, *rsp_fp;
+
+void cosim_open(const char *cmd_path, const char *rsp_path)
+{
+    cmd_fp = fopen(cmd_path, "w");   /* TB가 읽기용으로 먼저 연다 */
+    rsp_fp = fopen(rsp_path, "r");
+    if (!cmd_fp || !rsp_fp) {
+        fprintf(stderr, "cosim: cannot open FIFOs\n");
+        exit(2);
+    }
+}
+
+void cosim_close(void)
+{
+    fprintf(cmd_fp, "Q\n");
+    fflush(cmd_fp);
+    fclose(cmd_fp);
+    fclose(rsp_fp);
+}
+
+void npu_io_write(uintptr_t addr, uint32_t value)
+{
+    int resp;
+    fprintf(cmd_fp, "W %lx %08x\n", (unsigned long)addr, (unsigned)value);
+    fflush(cmd_fp);
+    if (fscanf(rsp_fp, " B %d", &amp;resp) != 1 || resp != 0) {
+        fprintf(stderr, "cosim: bad write response at 0x%lx\n", (unsigned long)addr);
+        exit(3);
+    }
+}
+
+uint32_t npu_io_read(uintptr_t addr)
+{
+    unsigned v;
+    int resp;
+    fprintf(cmd_fp, "R %lx\n", (unsigned long)addr);
+    fflush(cmd_fp);
+    if (fscanf(rsp_fp, " D %x %d", &amp;v, &amp;resp) != 2 || resp != 0) {
+        fprintf(stderr, "cosim: bad read response at 0x%lx\n", (unsigned long)addr);
+        exit(3);
+    }
+    return (uint32_t)v;
+}</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>part03/ch22/reference/gen_model.py · python · 원본 · RTL_SIM 통과 2026-11-19</span></div>
+        <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
+"""22장: 18장 INT8 양자화 모델과 MNIST 표본 4개로 C 헤더(model_data.h)를 만든다(빌드 산출물, 저장소 미포함).
+
+기대 점수·Class는 17장 기준모델 model()로 계산해 헤더에 넣는다(C 응용이 NPU·CPU 결과와 비교).
+"""
+import argparse
+import json
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+from part03.ch17.reference.tile784_reference import model  # noqa: E402
+from part03.ch18.reference.precision_reference import (  # noqa: E402
+    MODEL, SAMPLES, quantize_model, quantize_x,
+)
+
+N_SAMPLES = 4
+
+
+def main():
+    p = argparse.ArgumentParser()
+    p.add_argument("--out", type=Path, required=True)
+    a = p.parse_args()
+    qm = quantize_model(json.loads(MODEL.read_text()), 8)
+    rows = [list(map(int, l.split())) for l in SAMPLES.read_text().splitlines() if not l.startswith("#")]
+    picked = rows[:2] + [r for r in rows if r[3] != r[2]][:1] + [r for r in rows if r[2] != r[1]][:1]
+    lines = ["/* 자동 생성: part03/ch22/reference/gen_model.py (18장 INT8 모델, MNIST t10k 표본) */",
+             "#ifndef MODEL_DATA_H", "#define MODEL_DATA_H", "#include &lt;stdint.h&gt;",
+             f"#define MODEL_N_SAMPLES {len(picked)}",
+             "static const int8_t model_w[10][784] = {"]
+    lines += ["  {" + ",".join(map(str, row)) + "}," for row in qm["w"]]
+    lines += ["};", "static const int64_t model_b[10] = {" + ",".join(f"{v}LL" for v in qm["b"]) + "};",
+              f"static const int8_t sample_x[{len(picked)}][784] = {{"]
+    exp = []
+    for r in picked:
+        x = quantize_x(r[5:], 8)
+        _, scores, cls, ovf = model(x, qm["w"], qm["b"], 41, 40, 8)
+        assert not ovf and cls == r[3]
+        exp.append((r[0], r[1], cls, scores))
+        lines.append("  {" + ",".join(map(str, x)) + "},")
+    lines += ["};",
+              "static const int sample_index[] = {" + ",".join(str(e[0]) for e in exp) + "};",
+              "static const int sample_label[] = {" + ",".join(str(e[1]) for e in exp) + "};",
+              "static const int sample_class[] = {" + ",".join(str(e[2]) for e in exp) + "};",
+              "static const int64_t sample_scores[][10] = {"]
+    lines += ["  {" + ",".join(f"{v}LL" for v in e[3]) + "}," for e in exp]
+    lines += ["};", "#endif", ""]
+    a.out.write_text("\n".join(lines))
+    print(f"MODEL_HEADER_DONE samples={len(picked)} classes={[e[2] for e in exp]} labels={[e[1] for e in exp]}")
+
+
+if __name__ == "__main__":
+    main()</code></pre>
+      </div>
+      </details>
+      <h3>판정 줄</h3>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
+        <tbody><tr><td><code>NPU_APP_DONE samples=4 failures=0</code></td><td>그림 4장 모두 NPU·CPU 클래스와 점수가 같음</td></tr><tr><td><code>SHOW picture=3 class=4 seg7_value=0304</code></td><td>표시: 7세그먼트 왼쪽 두 자리 그림 번호, 오른쪽 클래스, LED 클래스 하나</td></tr><tr><td><code>VITIS_ELF_PASS</code></td><td>Vitis로 ELF 빌드 (VS Code, 실물 실행은 보드 점검표)</td></tr></tbody>
+      </table></div>
+      <div class="gate-row">
+        <div class="gate na">
+          <b>HOST_MODEL_PASS</b>
+          <span>해당 없음 (Python 기준 모델 없음)</span>
+        </div>
+        <div class="gate pass">
+          <b>RTL_SIM_PASS</b>
+          <span>RTL_SIM_PASS DRIVER_BRIDGE axi_writes=35917 axi_reads=3781 i… · Icarus Verilog 12.0 · 2026-11-19</span>
+        </div>
+        <div class="gate na">
+          <b>SYNTH_TIMING_PASS</b>
+          <span>해당 없음</span>
+        </div>
+        <div class="gate pass">
+          <b>VITIS_ELF_PASS</b>
+          <span>VITIS_ELF_PASS (빌드만, 실물 실행은 사용자와 함께) · <code>part03/ch22/validation/build_vitis.log</code></span>
+        </div>
+        <div class="gate todo">
+          <b>BOARD_PASS</b>
+          <span>⚠ 미실시 · 현재 실물 보드 확인 불가</span>
+        </div>
+      </div>
+    </section>
+    <section class="section" id="s5_4">
+      <h2><span class="num">06</span> 서브젝트 5-4 · CPU·NPU 추론 시간 <small>(구 23장)</small></h2>
+      <p class="verdict"><b>학습목표 (보드):</b> <code>bench_board.elf</code>: 같은 그림을 CPU 정수 계산으로 1,816,547클록, NPU로 1,080,161클록(Bias 적재 3,076 포함) — 1.68배. 리셋 뒤 다시 돌려도 같은 값.</p>
+      <h3>보드에서 볼 것</h3>
+      <p>21장 비트스트림 + <code>bench_board.elf</code>. 값은 안 A SoC 전체 xsim(23장) 기대값.</p>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>#</th><th>절차</th><th>기대 결과 (시뮬레이션·빌드 근거)</th><th>판정</th></tr></thead>
+        <tbody><tr><td class="nw">B5</td><td><code>bench_board.elf</code> 실행</td><td><code>BENCH cpu_cycles=1816547 npu_bias_cycles=3076 npu_cycles=1080161 cpu_class=7 npu_class=7 match=1 rc=0</code> 부근(23장 SoC xsim 값). 차이가 있으면 원인 기록</td><td class="nw">⚠ 미실시</td></tr><tr><td class="nw">B6</td><td>같은 ELF 3회 반복 실행</td><td>사이클 값이 매번 같거나 차이를 기록(캐시 없음·같은 클록이면 같아야 함)</td><td class="nw">⚠ 미실시</td></tr><tr><td class="nw">B7</td><td>실행 중 btnC(Reset) 누른 뒤 다시 실행</td><td>처음부터 같은 출력</td><td class="nw">⚠ 미실시</td></tr></tbody>
+      </table></div>
+      <h3>추가 코드 (구 23장 그대로, VS Code 판)</h3>
+      <div class="codeblock">
+        <div class="codebar"><span>part03/ch23/sw/bench.c · c · 원본 · PC 시험 통과 2026-11-19 · 보드 ⚠ 미검증</span></div>
+        <pre tabindex="0"><code class="language-c">/* (추가) 23장: 같은 MicroBlaze V SoC에서 CPU 정수 추론과 NPU 추론의 클록 수를 AXI Timer로 잰다.
+ * 측정 구간
+ *   CPU      : cpu_infer() 784×10 MAC + Bias + argmax (22장 드라이버와 같은 C, 소프트웨어 곱셈)
+ *   NPU_BIAS : npu_set_bias() (모델 적재 1회분, 추론마다 반복하지 않아도 됨)
+ *   NPU      : npu_infer() 타일 13개의 W·X 레지스터 쓰기 + TILE_GO + 폴링 + 점수 읽기(종단간)
+ * 결과는 GPIO 데이터 레지스터에 순서대로 쓴다(시뮬레이션 TB가 AXI 쓰기를 기록). 보드용은 UART로도 출력.
+ * 순서: 0xBE0C0001, CPU, NPU_BIAS, NPU, cpu_class, npu_class, scores_match, rc, 0xBE0C00FF
+ */
+#include "xparameters.h"
+#include "xil_io.h"
+#include "npu_driver.h"
+#include "model_data.h"
+#include "bench_cfg.h"
+#if !BENCH_SIM
+#include "xil_printf.h"
+#endif
+
+#define TMR   XPAR_AXI_TIMER_0_BASEADDR
+#define GPIO  XPAR_AXI_GPIO_0_BASEADDR
+#define TCSR0 0x00u
+#define TLR0  0x04u
+#define TCR0  0x08u
+
+static void tmr_start(void)
+{
+    Xil_Out32(TMR + TLR0, 0);
+    Xil_Out32(TMR + TCSR0, 1u &lt;&lt; 5);                 /* LOAD0: TLR0 → TCR0 */
+    Xil_Out32(TMR + TCSR0, (1u &lt;&lt; 7) | (1u &lt;&lt; 4));   /* ENT0 + ARHT0: 위로 세는 자유 카운터 */
+}
+
+static uint32_t tmr_now(void) { return Xil_In32(TMR + TCR0); }
+
+static void report(uint32_t v) { Xil_Out32(GPIO, v); }
+
+int main(void)
+{
+    npu_t npu;
+    int64_t cs[NPU_N_CLASS], ns[NPU_N_CLASS];
+    int ccls, ncls = -1, rc, c, same = 1;
+    uint32_t t0, t_cpu, t_bias, t_npu, t_empty;
+
+    tmr_start();
+    report(0xBE0C0001u);
+    t0 = tmr_now();
+    t_empty = tmr_now() - t0;                        /* 측정 자체 비용 */
+    t0 = tmr_now();
+    ccls = cpu_infer(sample_x[0], model_w, model_b, cs);
+    t_cpu = tmr_now() - t0 - t_empty;
+    npu_init(&amp;npu, XPAR_P3_NPU_0_BASEADDR);
+    t0 = tmr_now();
+    rc = npu_set_bias(&amp;npu, model_b);
+    t_bias = tmr_now() - t0 - t_empty;
+    t0 = tmr_now();
+    rc |= npu_infer(&amp;npu, sample_x[0], model_w, ns, &amp;ncls);
+    t_npu = tmr_now() - t0 - t_empty;
+    for (c = 0; c &lt; NPU_N_CLASS; c++)
+        if (ns[c] != cs[c] || cs[c] != sample_scores[0][c])
+            same = 0;
+    report(t_cpu);
+    report(t_bias);
+    report(t_npu);
+    report((uint32_t)ccls);
+    report((uint32_t)ncls);
+    report((uint32_t)same);
+    report((uint32_t)rc);
+    report(0xBE0C00FFu);
+#if !BENCH_SIM
+    xil_printf("BENCH cpu_cycles=%u npu_bias_cycles=%u npu_cycles=%u cpu_class=%d npu_class=%d match=%d rc=%d\r\n",
+               (unsigned)t_cpu, (unsigned)t_bias, (unsigned)t_npu, ccls, ncls, same, rc);
+#endif
+    return 0;
+}</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>part03/ch23/synth/soc_bench_sim.tcl · tcl · 원본 · Vivado 실행 통과</span></div>
+        <pre tabindex="0"><code class="language-tcl"># (추가) 23장: 21장 SoC 복제 프로젝트에 TB와 벤치마크 ELF(시뮬레이션용)를 연결해 xsim 행동 시뮬레이션을 실행한다.
+# 사용: vivado -mode batch -source soc_bench_sim.tcl -tclargs &lt;복제 xpr&gt; &lt;tb_soc_bench.sv&gt; &lt;bench_sim.elf&gt;
+set xpr [lindex $argv 0]
+set tb [file normalize [lindex $argv 1]]
+set elf [file normalize [lindex $argv 2]]
+open_project $xpr
+add_files -fileset sim_1 -norecurse $tb
+set_property top tb_soc_bench [get_filesets sim_1]
+set_property top_lib xil_defaultlib [get_filesets sim_1]
+# Associate ELF: 시뮬레이션에서 microblaze_riscv_0의 LMB BRAM 초기값으로 쓴다
+add_files -fileset sim_1 -norecurse $elf
+set ef [get_files -all -of_objects [get_filesets sim_1] [file tail $elf]]
+set_property SCOPED_TO_REF soc11_integration $ef
+set_property SCOPED_TO_CELLS {microblaze_riscv_0} $ef
+set_property -name {xsim.simulate.runtime} -value {0ns} -objects [get_filesets sim_1]
+launch_simulation -simset sim_1 -mode behavioral
+run all
+puts "SOC_SIM_RUN_END"
+close_sim</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>part03/ch23/scripts/run_soc_bench.sh · bash · 원본 · RTL_SIM 통과 2026-11-19</span></div>
+        <pre tabindex="0"><code class="language-bash">#!/usr/bin/env bash
+# (추가) 23장: CPU·NPU 벤치마크 ELF 빌드(보드용·시뮬레이션용)와 SoC 전체 행동 시뮬레이션(xsim).
+#   필요: 21장 build_soc.sh 결과(ch21/build), VIVADO_SETTINGS·VITIS_SETTINGS
+#   결과: validation/soc_bench_sim.log. 보드 실측은 build/bench_board ELF로 사용자와 함께 한다.
+set -euo pipefail
+chapter_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." &amp;&amp; pwd)
+part03=$(cd -- "$chapter_dir/.." &amp;&amp; pwd)
+src_proj="$part03/ch21/build/soc21_npu"
+xsa="$part03/ch21/build/out/soc21_npu.xsa"
+if [[ ! -f "$xsa" || ! -d "$src_proj" ]]; then echo "NOT_RUN SOC_BENCH: 21장 build_soc.sh 먼저"; exit 2; fi
+# shellcheck disable=SC1090
+[[ -n "${VIVADO_SETTINGS:-}" ]] &amp;&amp; source "$VIVADO_SETTINGS"
+# shellcheck disable=SC1090
+[[ -n "${VITIS_SETTINGS:-}" ]] &amp;&amp; source "$VITIS_SETTINGS"
+command -v vivado &gt;/dev/null &amp;&amp; command -v vitis &gt;/dev/null || { echo "NOT_RUN SOC_BENCH: vivado/vitis 없음"; exit 2; }
+build="$chapter_dir/build"
+rm -rf "$build"; mkdir -p "$build/cfg_board" "$build/cfg_sim"
+export PYTHONDONTWRITEBYTECODE=1
+python3 "$part03/ch22/reference/gen_model.py" --out "$build/model_data.h"
+echo "#define BENCH_SIM 0" &gt; "$build/cfg_board/bench_cfg.h"
+echo "#define BENCH_SIM 1" &gt; "$build/cfg_sim/bench_cfg.h"
+sw22="$part03/ch22/sw"
+for v in board sim; do
+  (cd "$build" &amp;&amp; vitis -s "$part03/ch22/vitis/vitis_build.py" "$build/ws" "$xsa" "bench_$v" \
+    "$sw22/npu_driver.h" "$sw22/npu_driver.c" "$sw22/npu_io_xil.c" "$chapter_dir/sw/bench.c" \
+    "$build/model_data.h" "$build/cfg_$v/bench_cfg.h" &gt; "$build/vitis_$v.log" 2&gt;&amp;1) || true
+  grep -q "VITIS_BUILD_DONE bench_$v" "$build/vitis_$v.log" || { echo "VITIS_BUILD_FAIL bench_$v"; exit 1; }
+  elf=$(find "$build/ws/bench_$v" -name "bench_$v.elf" | head -1)
+  echo "ELF bench_$v $(sed -n 2p "$elf.size" | awk '{print "text="$1, "data="$2, "bss="$3}') sha256=$(sha256sum "$elf" | cut -c1-16)"
+done
+cp -a "$src_proj" "$build/soc23_sim"
+elf_sim=$(find "$build/ws/bench_sim" -name "bench_sim.elf" | head -1)
+(cd "$build" &amp;&amp; vivado -mode batch -nojournal -log "$build/vivado_sim.log" \
+  -source "$chapter_dir/synth/soc_bench_sim.tcl" \
+  -tclargs "$build/soc23_sim/soc11_user_top.xpr" "$chapter_dir/tb/tb_soc_bench.sv" "$elf_sim" \
+  &gt; "$build/sim_stdout.txt" 2&gt;&amp;1) || true
+grep -E "SOC_BENCH|SOC_RTL_SIM_PASS|Fatal|FATAL|^ERROR" "$build/sim_stdout.txt" | sed "s#$build#build#g"
+grep -q SOC_RTL_SIM_PASS "$build/sim_stdout.txt"</code></pre>
+      </div>
+      <h3>시뮬레이션·빌드 기대 화면</h3>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 서브젝트 단독</span></div>
+        <pre tabindex="0"><code>bash part03/ch23/scripts/run_soc_bench.sh   # Vivado xsim: 21장 SoC 전체 + bench.elf</code></pre></div>
+      <div class="codeblock"><div class="codebar"><span>기대 출력 (2026-11-19 · 출처 part03/ch23/validation/soc_bench_sim.log)</span></div>
+        <pre tabindex="0"><code>SOC_BENCH cpu_cycles=1816547 npu_bias_cycles=3076 npu_cycles=1080161 cpu_class=7 npu_class=7 scores_match=1 rc=0 sim_time_ns=29039155000
+SOC_RTL_SIM_PASS</code></pre></div>
+      <details class="full"><summary>이 서브젝트의 테스트벤치·기준 모델 (전체 코드 1개)</summary>
+      <div class="codeblock">
+        <div class="codebar"><span>part03/ch23/tb/tb_soc_bench.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-19</span></div>
+        <pre tabindex="0"><code class="language-systemverilog">// (추가) 23장: 21장 SoC 전체(MicroBlaze V + NPU) 행동 시뮬레이션. 벤치마크 ELF를 LMB에 연결해 실행하고,
+// 프로그램이 GPIO 데이터 레지스터에 쓰는 값(AXI 쓰기)을 기록한다. 사용자 Top basys3_soc11_top 그대로 사용.
+// (변경) 안 A: 21장 Top이 basys3_soc21_top(btn·seg·dp·an 추가)으로 바뀌어 그 Top을 쓴다. 버튼은 누르지 않는다.
+`timescale 1ns/1ps
+module tb_soc_bench;
+    reg clk = 0, btnC = 1, rx = 1;
+    reg [15:0] sw = 16'd0;
+    wire [15:0] led;
+    wire tx, dp;
+    wire [6:0] seg;
+    wire [3:0] an;
+    always #5 clk = ~clk;   // Basys3 W5 100 MHz
+    basys3_soc21_top dut(.clk(clk), .btnC(btnC), .btn(4'b0000), .sw(sw), .led(led), .RsRx(rx), .RsTx(tx),
+                         .seg(seg), .dp(dp), .an(an));
+
+    wire aclk = dut.u_soc11.soc11_integration_i.axi_gpio_0.s_axi_aclk;
+    wire wv = dut.u_soc11.soc11_integration_i.axi_gpio_0.s_axi_wvalid;
+    wire wr = dut.u_soc11.soc11_integration_i.axi_gpio_0.s_axi_wready;
+    wire [31:0] wd = dut.u_soc11.soc11_integration_i.axi_gpio_0.s_axi_wdata;
+    reg [31:0] v [0:15];
+    integer n = 0;
+    initial begin
+        #2000 btnC = 0;     // 버튼 Reset 해제(High 활성)
+    end
+    always @(posedge aclk) if (wv &amp;&amp; wr) begin
+        if (n == 0 &amp;&amp; wd != 32'hBE0C0001) $fatal(1, "unexpected first GPIO word %h", wd);
+        v[n] = wd;
+        n = n + 1;
+        if (wd == 32'hBE0C00FF) begin
+            if (n != 9) $fatal(1, "report length %0d", n);
+            $display("SOC_BENCH cpu_cycles=%0d npu_bias_cycles=%0d npu_cycles=%0d cpu_class=%0d npu_class=%0d scores_match=%0d rc=%0d sim_time_ns=%0t",
+                     v[1], v[2], v[3], v[4], v[5], v[6], $signed(v[7]), $time);
+            if (v[6] != 1 || v[4] != v[5] || v[7] != 0) $fatal(1, "SoC benchmark result mismatch");
+            $display("SOC_RTL_SIM_PASS");
+            $finish;
+        end
+    end
+    initial begin #50_000_000; $fatal(1, "SoC simulation timeout (n=%0d)", n); end
+endmodule</code></pre>
+      </div>
+      </details>
+      <h3>판정 줄</h3>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
+        <tbody><tr><td><code>SOC_BENCH cpu_cycles=1816547 npu_cycles=1080161</code></td><td>SoC 전체 시뮬레이션에서 잰 클록 (안 A 재빌드 뒤 같은 값)</td></tr><tr><td><code>SOC_RTL_SIM_PASS</code></td><td>CPU·NPU 클래스와 점수 일치</td></tr></tbody>
+      </table></div>
+      <div class="gate-row">
+        <div class="gate na">
+          <b>HOST_MODEL_PASS</b>
+          <span>해당 없음 (Python 기준 모델 없음)</span>
+        </div>
+        <div class="gate pass">
+          <b>RTL_SIM_PASS</b>
+          <span>SOC_RTL_SIM_PASS · Vivado 2024.2 xsim (21장 SoC 전체 + ELF) · 2026-11-19</span>
+        </div>
+        <div class="gate na">
+          <b>SYNTH_TIMING_PASS</b>
+          <span>해당 없음</span>
+        </div>
+        <div class="gate todo">
+          <b>BOARD_PASS</b>
+          <span>⚠ 미실시 · 현재 실물 보드 확인 불가</span>
+        </div>
+      </div>
+    </section>
+    <section class="section" id="s5_5">
+      <h2><span class="num">07</span> 서브젝트 5-5 · 자원·타이밍 스윕 <small>(구 24장)</small></h2>
+      <p class="verdict"><b>학습목표 (보드):</b> 보드 없음. 클록 주기를 10 → 8 → 7 → 6 ns로 줄여 배선: 20장 AXI NPU IP는 10 ns 통과·8 ns 실패로 Fmax 약 105 MHz, 4PE INT8 코어는 146 MHz.</p>
+      <h3>보드에서 볼 것</h3>
+      <p>보드 항목 없음 — Vivado 보고서(OOC 스윕)를 읽는 서브젝트다.</p>
+
+      <h3>추가 코드 (구 24장 그대로, VS Code 판)</h3>
+      <div class="codeblock">
+        <div class="codebar"><span>part03/ch24/synth/sweep_cores.tcl · tcl · 원본 · Vivado 실행 통과</span></div>
+        <pre tabindex="0"><code class="language-tcl"># (추가) 24장: 클록 주기 스윕용 구성(19장 synth_ooc.tcl에 전달). P3_CLK_PERIOD 환경 변수 주기로 합성부터 제약.
+set clk_period $::env(P3_CLK_PERIOD)
+set clk_in_synth 1
+set configs {
+  pe4_int8       p3_group10_core {IN_LEN=64 OUT_N=10}
+  pe4_int16      p3_group10_core {IN_LEN=64 OUT_N=10 DATA_W=16 ACC_W=38 BIAS_W=24 SCORE_W=39}
+  tile784_int8   p3_tile784_10   {}
+}</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>part03/ch24/synth/sweep_axi.tcl · tcl · 원본 · Vivado 실행 통과</span></div>
+        <pre tabindex="0"><code class="language-tcl"># (추가) 24장: 20장 AXI4-Lite NPU IP 클록 주기 스윕 구성.
+set clk_period $::env(P3_CLK_PERIOD)
+set clk_in_synth 1
+set clk_port s_axi_aclk
+set extra_srcs [list $part03/ch04/rtl/bram_sync_buffer.v $part03/ch20/rtl/p3_npu_axi_lite.v]
+set configs {
+  axi_npu_int8   p3_npu_axi_lite {}
+}</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>part03/ch24/reference/sweep_summary.py · python · 원본 · 실행 기록 통과 2026-11-18</span></div>
+        <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
+"""24장: 클록 주기 스윕 결과(배선 후 timing·utilization)를 표로 만든다. 19장 synth_summary의 파서를 재사용한다."""
+import argparse
+import re
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+from part03.ch19.reference.synth_summary import timing, util  # noqa: E402
+
+NAMES = {"pe4_int8": "PE4 INT8 코어", "pe4_int16": "PE4 INT16 코어",
+         "tile784_int8": "17장 Tile INT8", "axi_npu_int8": "20장 AXI NPU IP"}
+
+
+def main():
+    p = argparse.ArgumentParser()
+    p.add_argument("--build", type=Path, required=True)
+    p.add_argument("--out", type=Path, required=True)
+    a = p.parse_args()
+    res = {}
+    for d in sorted(a.build.glob("p*_*")):
+        period = float(re.match(r"p([0-9.]+)_", d.name).group(1))
+        for rt in (d / "rpt").glob("*_route_timing.rpt"):
+            key = rt.name[:-len("_route_timing.rpt")]
+            (wns, tns, fail), src, dst, dly, lvl = timing(rt.read_text())
+            u = (d / "rpt" / f"{key}_route_utilization.rpt").read_text()
+            res.setdefault(key, {})[period] = (float(wns), tns, fail, src, dst, util(u, "Slice LUTs"),
+                                              util(u, "Slice Registers"))
+    lines = ["# 24장 클록 주기 스윕 — OOC 합성·배치·배선 (Vivado 실제 실행)", "",
+             "&gt; 합성 단계부터 목표 주기로 제약. Fmax(추정) = 1000 / (주기 − WNS) MHz, 통과한 가장 짧은 주기 기준.",
+             "&gt; OOC는 칩 I/O를 포함하지 않는다. 실물 동작 주파수가 아니다.", "",
+             "| 구성 | 주기(ns) | WNS(ns) | TNS(ns) | 실패 끝점 | LUT | FF | 임계 경로 |",
+             "|---|---:|---:|---:|---:|---:|---:|---|"]
+    summary = []
+    for key in NAMES:
+        best = None
+        for period in sorted(res.get(key, {}), reverse=True):
+            wns, tns, fail, src, dst, lut, ff = res[key][period]
+            lines.append(f"| {NAMES[key]} | {period:.3f} | {wns:+.3f} | {tns} | {fail} | {lut} | {ff} | "
+                         f"`{src}` → `{dst}` |")
+            if wns &gt;= 0:
+                fmax = 1000.0 / (period - wns)
+                if best is None or period &lt; best[0]:
+                    best = (period, wns, fmax)
+        summary.append((key, best))
+    lines += ["", "| 구성 | 통과한 가장 짧은 주기 | WNS | Fmax 추정(MHz) |", "|---|---:|---:|---:|"]
+    for key, best in summary:
+        lines.append(f"| {NAMES[key]} | " + (f"{best[0]:.3f} ns | {best[1]:+.3f} | {best[2]:.1f} |"
+                                              if best else "— | — | 통과 없음 |"))
+    a.out.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    print("SWEEP_SUMMARY " + " ".join(f"{k}={b[2]:.1f}MHz" if b else f"{k}=none" for k, b in summary))
+
+
+if __name__ == "__main__":
+    main()</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>part03/ch24/scripts/run_sweep.sh · bash · 원본 · 실행 기록 통과 2026-11-18</span></div>
+        <pre tabindex="0"><code class="language-bash">#!/usr/bin/env bash
+# (추가) 24장: 주요 구성의 OOC 합성·배치·배선을 클록 주기 10/8/7/6 ns로 반복해 실제 Fmax를 찾는다.
+# 결과 보고서는 build/(저장소 제외), 요약은 validation/timing_sweep.md (reference/sweep_summary.py).
+set -euo pipefail
+chapter_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." &amp;&amp; pwd)
+part03=$(cd -- "$chapter_dir/.." &amp;&amp; pwd)
+# shellcheck disable=SC1090
+[[ -n "${VIVADO_SETTINGS:-}" ]] &amp;&amp; source "$VIVADO_SETTINGS"
+command -v vivado &gt;/dev/null || { echo "NOT_RUN SWEEP: vivado 없음"; exit 2; }
+build="$chapter_dir/build"
+rm -rf "$build"; mkdir -p "$build"
+periods=${PERIODS:-"10.000 8.000 7.000 6.000"}
+run() {  # period cfg
+  local d="$build/p$1_$2"; mkdir -p "$d"
+  (cd "$d" &amp;&amp; P3_CLK_PERIOD=$1 vivado -mode batch -nojournal -log "$d/vivado.log" \
+    -source "$part03/ch19/synth/synth_ooc.tcl" -tclargs "$part03" "$d/rpt" impl \
+    "$chapter_dir/synth/sweep_$2.tcl" &gt; "$d/stdout.txt" 2&gt;&amp;1)
+  grep -c "^ERROR" "$d/vivado.log" | sed "s/^/p$1_$2 errors=/"
+}
+for p in $periods; do
+  run "$p" cores &amp;
+  run "$p" axi &amp;
+  wait
+done
+export PYTHONDONTWRITEBYTECODE=1
+python3 "$chapter_dir/reference/sweep_summary.py" --build "$build" --out "$chapter_dir/validation/timing_sweep.md"</code></pre>
+      </div>
+      <h3>시뮬레이션·빌드 기대 화면</h3>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 서브젝트 단독</span></div>
+        <pre tabindex="0"><code>bash part03/ch24/scripts/run_sweep.sh   # Vivado OOC: 4구성 × 주기 4개</code></pre></div>
+      <div class="codeblock"><div class="codebar"><span>기대 출력 (2026-11-18 · 출처 part03/ch24/validation/timing_sweep.log)</span></div>
+        <pre tabindex="0"><code>p10.000_axi errors=0
+p10.000_cores errors=0
+p8.000_axi errors=0
+p8.000_cores errors=0
+p7.000_axi errors=0
+p7.000_cores errors=0
+p6.000_axi errors=0
+p6.000_cores errors=0
+SWEEP_SUMMARY pe4_int8=146.1MHz pe4_int16=126.4MHz tile784_int8=101.0MHz axi_npu_int8=105.0MHz</code></pre></div>
+
+      <h3>판정 줄</h3>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
+        <tbody><tr><td><code>SWEEP_SUMMARY axi_npu_int8=105.0MHz</code></td><td>통과한 가장 짧은 주기로 추정한 Fmax (OOC, 실물 주파수 아님)</td></tr></tbody>
+      </table></div>
+      <div class="gate-row">
+        <div class="gate na">
+          <b>HOST_MODEL_PASS</b>
+          <span>해당 없음 (Python 기준 모델 없음)</span>
+        </div>
+        <div class="gate na">
+          <b>RTL_SIM_PASS</b>
+          <span>해당 없음 (RTL 시뮬레이션 대상 아님) · 정적 검사: SWEEP_SUMMARY pe4_int8=146.1MHz pe4_int16=126.4MHz tile784_i… · 2026-11-18</span>
+        </div>
+        <div class="gate pass">
+          <b>SYNTH_TIMING_PASS</b>
+          <span>OOC 배선 후 WNS +0.476 ns (10 ns 스윕 첫 줄) · <code>part03/ch24/validation/timing_sweep.md</code></span>
+        </div>
+        <div class="gate todo">
+          <b>BOARD_PASS</b>
+          <span>⚠ 미실시 · 현재 실물 보드 확인 불가</span>
+        </div>
+      </div>
+    </section>
+    <section class="section" id="s5_6">
+      <h2><span class="num">08</span> 서브젝트 5-6 · 전력·추론당 에너지 <small>(구 25장)</small></h2>
+      <p class="verdict"><b>학습목표 (보드):</b> 보드 없음(Basys3에 전력 측정 회로가 없다). Vivado 추정: 추론당 CPU 4.541 mJ · NPU 2.733 mJ (1.66배). ⚠ 안 A 이전 SoC 빌드 기준이라 재실행 대기.</p>
+      <p class="verdict">⚠ 안 A 이전 빌드 기준 — 25장 전력 추정은 2026-11-18 SoC(원본 11장 주소)에서 냈다. 안 A 비트스트림(주변장치 2개 추가)으로 다시 실행할 때까지 값은 참고용이다 (VS Code 지시문 요청).</p>
+      <h3>보드에서 볼 것</h3>
+      <p>보드에서는 측정하지 않는다 (B8).</p>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>#</th><th>절차</th><th>기대 결과 (시뮬레이션·빌드 근거)</th><th>판정</th></tr></thead>
+        <tbody><tr><td class="nw">B8</td><td>(선택) Vivado Hardware Manager에서 전력 확인은 Basys3에 측정 회로가 없어 <b>하지 않는다</b></td><td>25장 값은 Vivado 추정치로만 남긴다</td><td class="nw">—</td></tr></tbody>
+      </table></div>
+      <h3>추가 코드 (구 25장 그대로, VS Code 판)</h3>
+      <div class="codeblock">
+        <div class="codebar"><span>part03/ch25/synth/soc_power_sim.tcl · tcl · 원본 · Vivado 실행 통과</span></div>
+        <pre tabindex="0"><code class="language-tcl"># (추가) 25장: 23장 SoC 시뮬레이션 프로젝트에서 CPU 추론 구간과 NPU 추론 구간의 SAIF(토글률)를 따로 기록한다.
+# 시뮬레이션은 결정적이라 23장 결과로 구간 시각을 정한다: CPU 1~18 ms, NPU 19~28.9 ms(경계 여유).
+# 사용: vivado -mode batch -source soc_power_sim.tcl -tclargs &lt;23장 복제 xpr&gt; &lt;출력 폴더&gt;
+set xpr [lindex $argv 0]
+set out [file normalize [lindex $argv 1]]
+file mkdir $out
+open_project $xpr
+launch_simulation -simset sim_1 -mode behavioral
+run 1ms
+open_saif $out/cpu.saif
+log_saif [get_objects -r /tb_soc_bench/dut/*]
+run 17ms
+close_saif
+run 1ms
+open_saif $out/npu.saif
+log_saif [get_objects -r /tb_soc_bench/dut/*]
+run 9900us
+close_saif
+run all
+puts "SOC_POWER_SIM_END"
+close_sim</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>part03/ch25/synth/soc_power_report.tcl · tcl · 원본 · Vivado 실행 통과</span></div>
+        <pre tabindex="0"><code class="language-tcl"># (추가) 25장: 21장 배선 완료 SoC에 대해 vectorless(기본 토글률)와 SAIF(구간별 실제 토글률) 전력을 보고한다.
+# 사용: vivado -mode batch -source soc_power_report.tcl -tclargs &lt;21장 복제 xpr&gt; &lt;SAIF·출력 폴더&gt;
+set xpr [lindex $argv 0]
+set out [file normalize [lindex $argv 1]]
+open_project $xpr
+open_run impl_1
+report_power -hierarchical_depth 4 -file $out/power_vectorless.rpt
+foreach mode {cpu npu} {
+  reset_switching_activity -all
+  read_saif -strip_path tb_soc_bench/dut $out/$mode.saif -out_file $out/${mode}_saif_match.rpt
+  report_power -hierarchical_depth 4 -file $out/power_$mode.rpt
+}
+puts "SOC_POWER_REPORT_DONE"</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>part03/ch25/reference/power_summary.py · python · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
+"""25장: Vivado report_power 결과(vectorless·CPU 구간 SAIF·NPU 구간 SAIF)로 전력·추론당 에너지 표를 만든다.
+
+추론 시간은 23장 SoC RTL 시뮬레이션 측정 클록(100 MHz)을 쓴다. 모든 값은 Vivado 추정치이며 보드 측정이 아니다.
+"""
+import argparse
+import re
+from pathlib import Path
+
+CLK_NS = 10.0
+CYCLES = {"cpu": 1_816_547, "npu": 1_080_161}          # 23장 validation/soc_bench_sim.log
+CELLS = ("p3_npu_0", "microblaze_riscv_0", "axi_smc", "microblaze_riscv_0_local_memory")
+
+
+def num(text, label):
+    m = re.search(r"\|\s*" + re.escape(label) + r"\s*\|\s*([0-9.]+)", text)
+    return float(m.group(1)) if m else None
+
+
+def cell_power(text, cell):
+    m = re.search(r"^\|\s+" + re.escape(cell) + r"\s+\|\s*([0-9.&lt;]+)", text, re.M)
+    return m.group(1) if m else "?"
+
+
+def confidence(text):
+    m = re.search(r"\|\s*Confidence Level\s*\|\s*(\w+)", text)
+    return m.group(1) if m else "?"
+
+
+def main():
+    p = argparse.ArgumentParser()
+    p.add_argument("--rpt", type=Path, required=True)
+    p.add_argument("--out", type=Path, required=True)
+    a = p.parse_args()
+    rows, energy = [], []
+    for mode, title in (("vectorless", "기본 토글률(vectorless)"), ("cpu", "CPU 추론 구간 SAIF"),
+                        ("npu", "NPU 추론 구간 SAIF")):
+        f = a.rpt / f"power_{mode}.rpt"
+        if not f.exists():
+            rows.append(f"| {title} | NOT_RUN | | | | | |")
+            continue
+        t = f.read_text()
+        tot, dyn, sta = num(t, "Total On-Chip Power (W)"), num(t, "Dynamic (W)"), num(t, "Device Static (W)")
+        rows.append(f"| {title} | {tot:.3f} | {dyn:.3f} | {sta:.3f} | {cell_power(t, 'p3_npu_0')} | "
+                    f"{cell_power(t, 'microblaze_riscv_0')} | {confidence(t)} |")
+        if mode in CYCLES:
+            sec = CYCLES[mode] * CLK_NS * 1e-9
+            energy.append((mode, sec, tot, dyn))
+    lines = ["# 25장 SoC 전력·추론당 에너지 추정 (Vivado 2024.2 report_power, 실제 실행)", "",
+             "&gt; 21장 배선 완료 설계. SAIF는 23장과 같은 SoC 행동 시뮬레이션의 구간별 토글률. **추정치이며 보드 전력 측정이 아니다.**",
+             "", "| 활동률 | 전체(W) | 동적(W) | 정적(W) | p3_npu_0(W) | microblaze_riscv_0(W) | 신뢰도 |",
+             "|---|---:|---:|---:|---:|---:|---|", *rows, "",
+             "| 추론 경로 | 시간(23장, 100 MHz) | 전체 전력(W) | 추론당 에너지(mJ) | 동적만(mJ) |",
+             "|---|---:|---:|---:|---:|"]
+    for mode, sec, tot, dyn in energy:
+        lines.append(f"| {'CPU 정수 추론' if mode == 'cpu' else 'NPU 종단간'} | {sec * 1e3:.3f} ms | {tot:.3f} | "
+                     f"{tot * sec * 1e3:.3f} | {dyn * sec * 1e3:.3f} |")
+    if len(energy) == 2:
+        (_, sc, tc, dc), (_, sn, tn, dn) = energy
+        lines += ["", f"- 추론당 에너지 비(CPU/NPU): 전체 {tc * sc / (tn * sn):.2f}배, 동적 {dc * sc / (dn * sn):.2f}배"]
+    log = a.rpt.parent / "vivado_pwr.log"
+    if log.exists():
+        # 로그의 절대 경로는 파일 이름만 남긴다(개인 경로 비공개)
+        match = [re.sub(r"\S*/([^/\s]+\.saif)", r"\1", l.strip()) for l in log.read_text(errors="replace").splitlines()
+                 if re.search(r"matched|annotated|SAIF", l, re.I) and "INFO" in l][:6]
+        if match:
+            lines += ["", "SAIF 매칭(Vivado 로그):", "", *[f"- `{m}`" for m in match]]
+    a.out.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    print("POWER_SUMMARY " + " ".join(f"{m}_mJ={t * s * 1e3:.3f}" for m, s, t, _ in energy))
+
+
+if __name__ == "__main__":
+    main()</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>part03/ch25/scripts/run_power.sh · bash · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <pre tabindex="0"><code class="language-bash">#!/usr/bin/env bash
+# (추가) 25장: SoC 전력 추정(Vivado report_power). vectorless + 23장 시뮬레이션 구간별 SAIF.
+#   필요: 21장 build(배선 완료 프로젝트), 23장 build(TB·ELF가 연결된 시뮬레이션 프로젝트)
+#   결과: build/(SAIF·보고서), validation/power_summary.md (reference/power_summary.py)
+set -euo pipefail
+chapter_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." &amp;&amp; pwd)
+part03=$(cd -- "$chapter_dir/.." &amp;&amp; pwd)
+p21="$part03/ch21/build/soc21_npu/soc11_user_top.xpr"
+p23="$part03/ch23/build/soc23_sim"
+[[ -f "$p21" &amp;&amp; -d "$p23" ]] || { echo "NOT_RUN POWER: 21장·23장 build 먼저"; exit 2; }
+# shellcheck disable=SC1090
+[[ -n "${VIVADO_SETTINGS:-}" ]] &amp;&amp; source "$VIVADO_SETTINGS"
+command -v vivado &gt;/dev/null || { echo "NOT_RUN POWER: vivado 없음"; exit 2; }
+build="$chapter_dir/build"
+rm -rf "$build"; mkdir -p "$build/out"
+cp -a "$p23" "$build/soc25_sim"
+(cd "$build" &amp;&amp; vivado -mode batch -nojournal -log "$build/vivado_sim.log" -source "$chapter_dir/synth/soc_power_sim.tcl" \
+  -tclargs "$build/soc25_sim/soc11_user_top.xpr" "$build/out" &gt; "$build/sim_stdout.txt" 2&gt;&amp;1) || true
+grep -E "SOC_BENCH|SOC_RTL_SIM_PASS|SOC_POWER_SIM_END|^ERROR" "$build/sim_stdout.txt"
+ls -la "$build/out"/*.saif | awk '{print $5, $9}' | sed "s#$build/##"
+(cd "$build" &amp;&amp; vivado -mode batch -nojournal -log "$build/vivado_pwr.log" -source "$chapter_dir/synth/soc_power_report.tcl" \
+  -tclargs "$p21" "$build/out" &gt; "$build/pwr_stdout.txt" 2&gt;&amp;1) || true
+grep -E "SOC_POWER_REPORT_DONE|^ERROR" "$build/pwr_stdout.txt"
+export PYTHONDONTWRITEBYTECODE=1
+python3 "$chapter_dir/reference/power_summary.py" --rpt "$build/out" --out "$chapter_dir/validation/power_summary.md"</code></pre>
+      </div>
+      <h3>시뮬레이션·빌드 기대 화면</h3>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 서브젝트 단독</span></div>
+        <pre tabindex="0"><code>bash part03/ch25/scripts/run_power.sh   # Vivado: 구간별 SAIF → report_power</code></pre></div>
+      <div class="codeblock"><div class="codebar"><span>기대 출력 (2026-11-18 · 출처 part03/ch25/validation/power.log)</span></div>
+        <pre tabindex="0"><code>SOC_RTL_SIM_PASS</code></pre></div>
+
+      <h3>판정 줄</h3>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
+        <tbody><tr><td><code>power_summary.md 추론당 에너지</code></td><td>CPU 4.541 mJ · NPU 2.733 mJ (전체 전력 기준, 추정치)</td></tr><tr><td><code>⚠ 빌드 시점</code></td><td>2026-11-18 (안 A 이전 21장 SoC). VS Code 지시문에 재실행 요청</td></tr></tbody>
+      </table></div>
+      <div class="gate-row">
+        <div class="gate na">
+          <b>HOST_MODEL_PASS</b>
+          <span>해당 없음 (Python 기준 모델 없음)</span>
+        </div>
+        <div class="gate pass">
+          <b>RTL_SIM_PASS</b>
+          <span>SOC_RTL_SIM_PASS · Vivado 2024.2 xsim (21장 SoC 전체 + ELF) · 2026-11-18</span>
+        </div>
+        <div class="gate na">
+          <b>SYNTH_TIMING_PASS</b>
+          <span>해당 없음</span>
+        </div>
+        <div class="gate todo">
+          <b>안 A 재실행</b>
+          <span>⚠ 안 A 이전 빌드 기준 · VS Code 재실행 대기</span>
+        </div>
+        <div class="gate todo">
+          <b>BOARD_PASS</b>
+          <span>⚠ 미실시 · 현재 실물 보드 확인 불가</span>
+        </div>
+      </div>
+    </section>
+    <section class="section" id="s5_7">
+      <h2><span class="num">09</span> 서브젝트 5-7 · 시스템 통합·보드 점검표 <small>(구 27장)</small></h2>
+      <p class="verdict"><b>학습목표 (보드):</b> <code>run_all.sh</code> 한 번으로 13~31장 회귀를 돌리고(LEVEL=sim PASS), 보드 점검표 B1~B7을 한 자리에서 실행한다 — 장 시연.</p>
+      <h3>보드에서 볼 것</h3>
+      <p>보드 항목은 아래 장 시연 절에 모아 둔다 (B1~B7).</p>
+
+      <h3>추가 코드 (구 27장 그대로, VS Code 판)</h3>
+      <div class="codeblock">
+        <div class="codebar"><span>part03/ch27/scripts/run_all.sh · bash · 원본 · 실행 기록 통과 2026-11-19</span></div>
+        <pre tabindex="0"><code class="language-bash">#!/usr/bin/env bash
+# (추가) 27장: 제3부 13~26장 결과를 한 번에 재현하는 실행기. 단계마다 PASS/FAIL/NOT_RUN을 표로 남긴다.
+#   LEVEL=sim  (기본) RTL·Python·C 협동 시뮬레이션만 (약 10분)
+#   LEVEL=pc   + MNIST 전체 평가 (MNIST_DIR 필요)
+#   LEVEL=fpga + Vivado OOC·SoC Bitstream·Vitis ELF (VIVADO_SETTINGS·VITIS_SETTINGS·SOC11_DIR 필요, 1시간 이상)
+#   LEVEL=full + SoC 전체 xsim(23장)·전력(25장) (수 시간)
+# 실물(Basys3)은 이 실행기가 하지 않는다 — docs/BOARD_CHECKLIST.md를 사용자와 함께 진행.
+set -uo pipefail
+part03=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." &amp;&amp; pwd)
+out="$part03/ch27/validation"
+level=${LEVEL:-sim}
+summary="$out/run_all_summary.md"
+declare -a rows
+step() {  # name level_needed command...
+  local name=$1 need=$2; shift 2
+  local order="sim pc fpga full"
+  if [[ " ${order%%$level*}$level " != *" $need "* &amp;&amp; $need != sim ]]; then
+    rows+=("| $name | NOT_RUN (LEVEL=$level) |"); echo "NOT_RUN $name"; return
+  fi
+  local log="$out/logs/$name.log"
+  mkdir -p "$out/logs"
+  if "$@" &gt; "$log" 2&gt;&amp;1; then rows+=("| $name | PASS |"); echo "PASS $name"
+  else
+    local rc=$?
+    if [[ $rc -eq 2 ]]; then rows+=("| $name | NOT_RUN (도구·데이터 없음) |"); echo "NOT_RUN $name"
+    else rows+=("| $name | **FAIL** (rc=$rc) |"); echo "FAIL $name"; fi
+  fi
+  sed -i "s#$part03#part03#g; s#${TMPDIR:-/tmp}/p3-[0-9a-z]*\.[A-Za-z0-9]*#&lt;tmp&gt;#g" "$log"
+}
+export PYTHONDONTWRITEBYTECODE=1
+step host_integer_reference sim python3 -m part03.host_tools.test_p3_integer_reference
+step rtl_ch13_26 sim bash "$part03/scripts/run_ch13_19.sh"
+step pc_eval_ch18 pc bash "$part03/ch18/scripts/run_eval.sh"
+step synth_ch19 fpga bash "$part03/ch19/scripts/run_synth.sh"
+step synth_ch20 fpga bash "$part03/ch20/scripts/run_synth.sh"
+step package_ip_ch20 fpga bash "$part03/ch20/scripts/package_ip.sh"
+step soc_build_ch21 fpga bash "$part03/ch21/scripts/build_soc.sh"
+step vitis_ch22 fpga bash "$part03/ch22/scripts/build_vitis.sh"
+step synth_ch26 fpga bash "$part03/ch26/scripts/run_synth.sh"
+step sw_build_ch28 fpga bash "$part03/ch28/scripts/build_sw.sh"   # (변경) 안 A: 21장 XSA로 ELF만
+step synth_ch29 fpga bash "$part03/ch29/scripts/run_synth.sh"
+step sw_build_ch29 fpga bash "$part03/ch29/scripts/build_sw.sh"
+step synth_ch30 fpga bash "$part03/ch30/scripts/run_synth.sh"
+step soc_build_ch30 fpga bash "$part03/ch30/scripts/build_soc.sh"
+step synth_ch31 fpga bash "$part03/ch31/scripts/run_synth.sh"
+step sw_build_ch31 fpga bash "$part03/ch31/scripts/build_sw.sh"
+step sweep_ch24 full bash "$part03/ch24/scripts/run_sweep.sh"
+step soc_sim_ch23 full bash "$part03/ch23/scripts/run_soc_bench.sh"
+step power_ch25 full bash "$part03/ch25/scripts/run_power.sh"
+step soc_sim_ch28 full bash "$part03/ch28/scripts/run_soc_sim.sh"
+{
+  echo "# 27장 run_all 결과 (LEVEL=$level, $(date -u +%Y-%m-%dT%H:%MZ), commit $(git -C "$part03" rev-parse --short HEAD))"
+  echo; echo "| 단계 | 결과 |"; echo "|---|---|"; printf '%s\n' "${rows[@]}"
+  echo; echo "실물 Basys3 검증은 포함하지 않는다(docs/BOARD_CHECKLIST.md)."
+} &gt; "$summary"
+cat "$summary"
+! grep -q "FAIL" "$summary"</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codebar"><span>part03/ch27/docs/BOARD_CHECKLIST.md · text · 원본 · 실행 기록 통과 2026-11-19</span></div>
+        <pre tabindex="0"><code class="language-text"># 제3부 Basys3 실물 일괄 점검표 (사용자와 함께 진행)
+
+&gt; 이 점검표의 항목은 아직 **실행하지 않았다(NOT_RUN)**. 아래 기대값은 RTL·SoC 시뮬레이션과 Vivado/Vitis 빌드에서 얻은 값이다.
+&gt; 외부 회로 연결 없이 Basys3 USB 케이블 하나(J4: JTAG + USB-UART)만 사용한다.
+
+## 0. 준비
+
+| 항목 | 내용 |
+|---|---|
+| 비트스트림 | `part03/ch21/build/out/basys3_soc21_top.bit` (SHA-256 fca1368c…3925, `ch21/validation/soc_summary.md`) — (변경) 안 A 동결 주소맵. **21~31장 모두 이 비트스트림 하나**(30장은 판단 대기) |
+| XSA | `part03/ch21/build/out/soc21_npu.xsa` (SHA-256 24abeb3a…458d) |
+| ELF ① | `part03/ch22/build/ws/npu_app/build/npu_app.elf` (SHA-256 bdb8cb6e…b0ce) |
+| ELF ② | `part03/ch23/build/ws/bench_board/build/bench_board.elf` (SHA-256 768c9cd9…) |
+| 재생성 | `LEVEL=fpga SOC11_DIR=&lt;제1부 11장 폴더&gt; VIVADO_SETTINGS=… VITIS_SETTINGS=… bash part03/ch27/scripts/run_all.sh` |
+| 터미널 | USB-UART 115200 bps, 8N1, 흐름 제어 없음 |
+| 주소(안 A) | GPIO0 LED/SW 0x4000_0000, BTN 0x4001_0000, UART 0x4002_0000, Timer 0x4003_0000, INTC 0x4004_0000, SEG7 0x4006_0000, NPU 0x44A0_0000 |
+| XSDB 읽기 | Vitis의 XSDB에서 `connect; targets -set -filter {name =~ "*RISC-V*" || name =~ "*MicroBlaze*"}; mrd &lt;주소&gt;` (프로그램 실행 중에도 읽기만 한다) |
+| 기존 성공 프로젝트 | 제1부·제2부 프로젝트와 `~/soc/hw/soc11_user_top`은 쓰지 않는다(복제본 빌드만 사용) |
+
+## 1. 점검 항목
+
+| # | 절차 | 기대 결과 (시뮬레이션·빌드 근거) | 판정 |
+|---|---|---|---|
+| B1 | Vivado Hardware Manager로 비트스트림 다운로드 | DONE LED 점등, 오류 없음 | |
+| B2 | Vitis에서 `npu_app.elf` 실행(같은 XSA 플랫폼) | `P3 NPU driver test base=0x44a00000` | |
+| B3 | 이어지는 UART 4줄 | `SAMPLE 0 ... npu_class=7 cpu_class=7 expect=7 scores_match=1 rc=0`&lt;br&gt;`SAMPLE 1 ... npu_class=2 ...`&lt;br&gt;`SAMPLE 2 index=92 label=9 npu_class=4 ...`&lt;br&gt;`SAMPLE 3 index=1640 label=9 npu_class=4 ...` (22장 협동 시뮬레이션과 같은 줄) | |
+| B4 | 마지막 줄 | `NPU_APP_DONE samples=4 failures=0` | |
+| B4a | 실행 끝난 뒤 7세그먼트·LED를 눈으로 확인 (안 A 22장 표시) | 7세그먼트 `03 4`(왼쪽 두 자리 = 그림 번호 3, 가운데 오른쪽 꺼짐, 오른쪽 = 클래스 4), LED4만 켜짐. 각 표본 직후 `00 7`·`01 2`·`02 4` 순서(협동 시뮬레이션 SHOW 줄) | |
+| B4b | XSDB `mrd 0x4006FFF0` | `53454737`("SEG7" ID) | |
+| B4c | XSDB `mrd 0x40010000`을 버튼을 누르지 않고 / btnU·btnD·btnL·btnR을 각각 누른 채로 | `0` / `8`·`4`·`2`·`1` (btn[3]=U … btn[0]=R) | |
+| B5 | `bench_board.elf` 실행 | `BENCH cpu_cycles=1816547 npu_bias_cycles=3076 npu_cycles=1080161 cpu_class=7 npu_class=7 match=1 rc=0` 부근(23장 SoC xsim 값). 차이가 있으면 원인 기록 | |
+| B6 | 같은 ELF 3회 반복 실행 | 사이클 값이 매번 같거나 차이를 기록(캐시 없음·같은 클록이면 같아야 함) | |
+| B7 | 실행 중 btnC(Reset) 누른 뒤 다시 실행 | 처음부터 같은 출력 | |
+| B8 | (선택) Vivado Hardware Manager에서 전력 확인은 Basys3에 측정 회로가 없어 **하지 않는다** | 25장 값은 Vivado 추정치로만 남긴다 | — |
+
+## 1-28. 28장 숫자 인식 시스템 (21장 비트스트림 그대로, ELF만 다르다)
+
+준비: (변경) 안 A: 21장 `basys3_soc21_top.bit`, ELF `part03/ch28/build/ws/digit_app/build/digit_app.elf`(SHA-256 077ca88b0cf043a9, `ch28/validation/build_sw.log`). 표시는 표준 7세그먼트 IP(이전 FND 하드웨어와 같은 모양). 호스트 도구가 시리얼 포트를 쓰므로 Vitis 터미널은 닫는다.
+
+| # | 절차 | 기대 결과 (협동 시뮬레이션·SoC xsim 근거) | 판정 |
+|---|---|---|---|
+| B9 | 21장 비트스트림 다운로드, `digit_app.elf` 실행 | 7세그먼트 `F16C`(모델 ID 상위), LED 모두 꺼짐 | |
+| B10 | `python3 part03/ch28/host/p3_digit_host.py --port &lt;포트&gt; --error-suite --csv b28.csv --log b28_uart.log` | `MODEL_ID host=f16c4f12 device=f16c4f12`, 22장 `scores_match=1 display_ok=1`, `error_suite=11/11`, `DIGIT_HOST_PASS` (`ch28/validation/rtl_cosim.csv`와 같은 class) | |
+| B11 | 마지막 정상 결과 뒤 7세그먼트·LED를 눈으로 확인 | 7세그먼트 `07 _7`(img 7, Class 7), LED7·LED15 켜짐. 오류 시험 중에는 `E`+코드·LED14 | |
+| B12 | (선택) `--mnist-dir &lt;MNIST raw&gt; --limit 200` | 장치 class = 골든 class 200/200, 정확도는 골든·장치를 따로 기록 | |
+| B13 | (선택) 직접 그린 28×28 PNG `--images a.png [--invert]` | 응답·표시가 오는지 확인(정확도 주장은 하지 않음) | |
+| B13a | 실행 중 btnU를 누른 채 XSDB `mrd 0x40010000` | `8` — 28장 펌웨어는 버튼을 쓰지 않으므로 표시·UART에 변화 없음 | |
+
+## 1-29. 29장 센서 감시 (21장 비트스트림 그대로, ELF만 다르다)
+
+준비: (변경) 안 A: 21장 `basys3_soc21_top.bit`, ELF `part03/ch29/build/ws/sensor_app/build/sensor_app.elf`(`ch29/validation/build_sw.log`의 SHA-256). 센서는 연결하지 않는다(가상 센서 값을 UART로 보냄).
+
+| # | 절차 | 기대 결과 (협동 시뮬레이션 근거) | 판정 |
+|---|---|---|---|
+| B14 | 21장 비트스트림 다운로드, `sensor_app.elf` 실행 | 7세그먼트 `3 _00`(UNKNOWN), LED3·LED15 켜짐 | |
+| B15 | `python3 part03/ch29/host/p3_sensor_host.py --port &lt;포트&gt; --limit 200 --csv b29.csv --log b29_uart.log`, 안내가 나오면 btnC | `BOOT PASS`, 모든 STEP PASS, `SENSOR_HOST_PASS` (`ch29/validation/rtl_cosim.csv`와 같은 판정) | |
+| B16 | 실행 중 7세그먼트·LED를 눈으로 확인 | FAULT 래치 때 자리 3의 점과 LED13, ACK 뒤 점이 꺼지고 3회 정상 뒤 `0` | |
+| B17 | 호스트를 멈추고 링크 감시 시간을 스톱워치로 잰다 | `STATE src=LINK_TIMEOUT`이 주기적으로 나온다. 실측 주기(초)를 기록(폴링 10,000,000회) | |
+| B17a | XSDB `mrd 0x4006FFF0`, `mrd 0x40010000`(btnL 누른 채) | `53454737`, `2` | |
+
+## 1-30. 30장 모터 안전 (30장 비트스트림 — 모터·드라이버는 처음에는 연결하지 않는다)
+
+&gt; ⚠ (변경) 안 A: 아래 비트스트림은 **이전 주소맵**(모터 GPIO 0x4002_0000)이다. 안 A에서는 그 주소가 UART라 30장 SoC를 다시 만들어야 하며, 어느 주소·포트에 넣을지 **판단 대기**다. 그때까지 B18~B24는 실행하지 않는다.
+
+준비: `part03/ch30/build/out/basys3_soc30_top.bit`, ELF `motor_app.elf`(`ch30/validation/build_soc_20261119.log`의 SHA-256). **1단계는 가상 부하(LED)만**: JB에는 아무것도 꽂지 않는다.
+
+| # | 절차 | 기대 결과 | 판정 |
+|---|---|---|---|
+| B18 | JB4 미연결 상태로 실행 | 비상정지 루프 열림 → LED9(트립) 켜짐, `python3 part03/ch30/host/p3_motor_host.py --port &lt;포트&gt; …`의 `clear_reset`이 trip=1로 남음(fail-safe) | |
+| B19 | JB4를 3.3 V(JB6 VCC)로 점퍼(NC 루프 흉내) 후 호스트 보드 단계 | `MOTOR_HOST_PASS`(부팅 트립 → 해제 → NORMAL 80 % 운전 → WARNING 30 % → NPU FAULT 정지 → 'J' 거부), LED11·12 켜짐/밝기 변화 | |
+| B20 | 운전 중 btnU 누름, 놓은 뒤 'C' 없이 프레임 계속 | LED11·12 즉시 꺼짐, LED9 켜짐, 해제 전까지 다시 켜지지 않음 | |
+| B21 | 운전 중 sw[14](정방향 리밋) 올림 → 'D' 2(REV) | 정방향 즉시 정지(트립 없음), 약 100 ms 뒤 LED10(REV) | |
+| B22 | sw[12](고장)·sw[11](과열) 각각 올렸다 내림 | 즉시 정지·트립 래치, 'C' 뒤에만 재가동 | |
+| B23 | 호스트를 멈춤(프레임 중단) | 약 0.5 s 뒤 정지·WD 래치 | |
+| B23a | (30장 SoC 재구성 뒤) 7세그먼트 표시와 BTN GPIO 읽기 | 판단 결과에 따라 기대값을 정한다 | |
+| B24 | **(별도, 사용자 판단)** 실제 드라이버·모터 연결 | 외부 전원·공통 GND·드라이버 입력 풀다운·전류 보호 확인 뒤에만. 이 점검표의 PASS로 대체하지 않는다 | |
+
+## 1-31. 31장 보안 모델 적재 (21장 비트스트림 그대로, ELF만 다르다)
+
+준비: (변경) 안 A: 21장 `basys3_soc21_top.bit`, `secure_app.elf`(SHA-256 624f4cedec58e289, `ch31/validation/build_sw.log`). 저장소 TEST 키로 빌드한 ELF면 호스트도 키 파일 없이, 운영 키면 `P3_KEY_FILE`로 빌드하고 호스트에 `--key-file`(둘 다 저장소 밖).
+
+| # | 절차 | 기대 결과 | 판정 |
+|---|---|---|---|
+| B25 | `python3 part03/ch31/host/p3_secure_host.py --port &lt;포트&gt; --csv b31.csv --log b31_uart.log`, 안내가 나오면 btnC | 부팅 `key_fp` 일치, 모든 STEP PASS(모델 B 적재·추론, 거부 17종, A 재적재), `SECURE_HOST_PASS` | |
+| B26 | 실행 뒤 btnC로 재부팅하고 `I` | `last_seq=0`(재부팅 뒤 Replay 가능 — 알려진 한계 확인) | |
+| B26a | 모델 B 적재 뒤 7세그먼트 확인, XSDB `mrd 0x40010000`(btnD 누른 채) | 7세그먼트 `b749`(모델 B ID 상위), LED0·LED13 켜짐(`DISP fnd=000fb749 led=2001`, 협동 시뮬레이션), `4` | |
+
+## 2. 기록할 것
+
+- 각 항목의 UART 원문(사진 또는 터미널 로그), Vivado·Vitis 버전, 보드 리비전.
+- FAIL이면 그 항목에서 멈추고 현상을 기록한다(추가 수정은 원인 확인 뒤 별도 커밋).
+
+## 3. 이번 점검 범위 밖
+
+- 29장 실제 센서(DS18B20·XADC·HC-SR04) 연결, 30장 실제 모터·드라이버 구동(B24는 사용자 판단으로 별도).
+- 클록을 100 MHz 위로 올리는 시험(24장 Fmax는 OOC 추정).</code></pre>
+      </div>
+      <h3>시뮬레이션·빌드 기대 화면</h3>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 서브젝트 단독</span></div>
+        <pre tabindex="0"><code>LEVEL=sim bash part03/ch27/scripts/run_all.sh</code></pre></div>
+      <div class="codeblock"><div class="codebar"><span>기대 출력 (2026-11-19 · 출처 part03/ch27/validation/run_all_summary.md)</span></div>
+        <pre tabindex="0"><code>| host_integer_reference | PASS |
+| rtl_ch13_26 | PASS |</code></pre></div>
+
+      <h3>판정 줄</h3>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
+        <tbody><tr><td><code>host_integer_reference · rtl_ch13_26 PASS</code></td><td>LEVEL=sim 회귀 (Vivado·Vitis 단계는 LEVEL=fpga에서)</td></tr></tbody>
+      </table></div>
+      <div class="gate-row">
+        <div class="gate na">
+          <b>HOST_MODEL_PASS</b>
+          <span>해당 없음 (Python 기준 모델 없음)</span>
+        </div>
+        <div class="gate na">
+          <b>RTL_SIM_PASS</b>
+          <span>해당 없음 (RTL 시뮬레이션 대상 아님) · 정적 검사: | rtl_ch13_26 | PASS | · 2026-11-19</span>
+        </div>
+        <div class="gate na">
+          <b>SYNTH_TIMING_PASS</b>
+          <span>해당 없음</span>
+        </div>
+        <div class="gate todo">
+          <b>BOARD_PASS</b>
+          <span>⚠ 미실시 · 현재 실물 보드 확인 불가</span>
+        </div>
+      </div>
+    </section>
+    <section class="section" id="demo">
+      <h2><span class="num">10</span> 장 시연</h2>
+      <p>21장 비트스트림 하나와 ELF 두 개로 점검표 B1~B7을 차례로 실행합니다. 기대값은 협동 시뮬레이션·SoC xsim·Vivado 빌드에서 얻은 값이고, 실물 실행은 아직 하지 않았습니다.</p>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>#</th><th>절차</th><th>기대 결과 (시뮬레이션·빌드 근거)</th><th>판정</th></tr></thead>
+        <tbody><tr><td class="nw">B1</td><td>Vivado Hardware Manager로 비트스트림 다운로드</td><td>DONE LED 점등, 오류 없음</td><td class="nw">⚠ 미실시</td></tr><tr><td class="nw">B2</td><td>Vitis에서 <code>npu_app.elf</code> 실행(같은 XSA 플랫폼)</td><td><code>P3 NPU driver test base=0x44a00000</code></td><td class="nw">⚠ 미실시</td></tr><tr><td class="nw">B3</td><td>이어지는 UART 4줄</td><td><code>SAMPLE 0 ... npu_class=7 cpu_class=7 expect=7 scores_match=1 rc=0</code><br><code>SAMPLE 1 ... npu_class=2 ...</code><br><code>SAMPLE 2 index=92 label=9 npu_class=4 ...</code><br><code>SAMPLE 3 index=1640 label=9 npu_class=4 ...</code> (22장 협동 시뮬레이션과 같은 줄)</td><td class="nw">⚠ 미실시</td></tr><tr><td class="nw">B4</td><td>마지막 줄</td><td><code>NPU_APP_DONE samples=4 failures=0</code></td><td class="nw">⚠ 미실시</td></tr><tr><td class="nw">B4a</td><td>실행 끝난 뒤 7세그먼트·LED를 눈으로 확인 (안 A 22장 표시)</td><td>7세그먼트 <code>03 4</code>(왼쪽 두 자리 = 그림 번호 3, 가운데 오른쪽 꺼짐, 오른쪽 = 클래스 4), LED4만 켜짐. 각 표본 직후 <code>00 7</code>·<code>01 2</code>·<code>02 4</code> 순서(협동 시뮬레이션 SHOW 줄)</td><td class="nw">⚠ 미실시</td></tr><tr><td class="nw">B4b</td><td>XSDB <code>mrd 0x4006FFF0</code></td><td><code>53454737</code>("SEG7" ID)</td><td class="nw">⚠ 미실시</td></tr><tr><td class="nw">B4c</td><td>XSDB <code>mrd 0x40010000</code>을 버튼을 누르지 않고 / btnU·btnD·btnL·btnR을 각각 누른 채로</td><td><code>0</code> / <code>8</code>·<code>4</code>·<code>2</code>·<code>1</code> (btn[3]=U … btn[0]=R)</td><td class="nw">⚠ 미실시</td></tr><tr><td class="nw">B5</td><td><code>bench_board.elf</code> 실행</td><td><code>BENCH cpu_cycles=1816547 npu_bias_cycles=3076 npu_cycles=1080161 cpu_class=7 npu_class=7 match=1 rc=0</code> 부근(23장 SoC xsim 값). 차이가 있으면 원인 기록</td><td class="nw">⚠ 미실시</td></tr><tr><td class="nw">B6</td><td>같은 ELF 3회 반복 실행</td><td>사이클 값이 매번 같거나 차이를 기록(캐시 없음·같은 클록이면 같아야 함)</td><td class="nw">⚠ 미실시</td></tr><tr><td class="nw">B7</td><td>실행 중 btnC(Reset) 누른 뒤 다시 실행</td><td>처음부터 같은 출력</td><td class="nw">⚠ 미실시</td></tr></tbody>
+      </table></div>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>결과</th><th>값 · 출처 로그</th></tr></thead>
+        <tbody><tr><td>CPU·NPU 추론 시간 (23장 SoC xsim, 안 A)</td><td><code>cpu_cycles=1816547 npu_bias_cycles=3076 npu_cycles=1080161 cpu_class=7 npu_class=7 scores_match=1 rc=0 sim_time_ns=29039155000</code> · <code>part03/ch23/validation/soc_bench_sim.log</code></td></tr><tr><td>클록 스윕 Fmax 추정 (24장 OOC)</td><td><code>pe4_int8=146.1MHz pe4_int16=126.4MHz tile784_int8=101.0MHz axi_npu_int8=105.0MHz</code> · <code>part03/ch24/validation/timing_sweep.log</code></td></tr><tr><td>22장 그림 4장 (C 드라이버 협동 시뮬레이션)</td><td><code>samples=4 failures=0</code> · <code>part03/ch22/validation/rtl_sim.log</code></td></tr></tbody>
+      </table></div>
+      <p>종단간 1.68배에 그치는 이유 (23장 README): 시간의 99% 이상이 AXI4-Lite로 가중치·입력을 한 단어씩 쓰는 데 든다(타일마다 704단어, 쓰기 1회 평균 약 115클록). 4장 마지막 서브젝트(구 19장)의 적재 병목과 같은 결론이다. 25장 에너지 추정은 안 A 이전 빌드라 ⚠ 재실행 대기.</p>
+      <h3>칩 전체 구현 결과 (21장, 배치·배선 후)</h3>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>항목</th><th>값</th></tr></thead>
+        <tbody><tr><td>Timing @100 MHz</td><td><b>WNS +0.374 ns, WHS +0.034 ns</b> (setup·hold 충족)</td></tr><tr><td>전체 LUT / FF</td><td>5,406 (25.99%) / 5,285 (12.70%)</td></tr><tr><td>전체 BRAM Tile / DSP</td><td>18.5 (37.0%) / 4</td></tr><tr><td>p3_npu_0</td><td>LUT 2,103, FF 1,975, RAMB18 5, DSP48E1 4</td></tr><tr><td>microblaze_riscv_0</td><td>LUT 1,645, FF 1,294</td></tr><tr><td>axi_smc</td><td>LUT 651, FF 683</td></tr><tr><td>ip06_seg7 / axi_gpio_btn</td><td>LUT 93, FF 179 / LUT 74, FF 109</td></tr><tr><td>XSA</td><td><code>soc21_npu.xsa</code> (-fixed -include_bit) SHA-256 24abeb3a…458d</td></tr><tr><td>Bitstream</td><td><code>basys3_soc21_top.bit</code> SHA-256 fca1368c…3925</td></tr></tbody>
+      </table></div>
+      <h3>회귀 (27장 <code>run_all.sh</code>)</h3>
+      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 저장소 루트</span></div>
+        <pre tabindex="0"><code>LEVEL=sim bash part03/ch27/scripts/run_all.sh</code></pre></div>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>단계</th><th>결과</th></tr></thead>
+        <tbody><tr><td>host_integer_reference</td><td>PASS</td></tr><tr><td>rtl_ch13_26</td><td>PASS</td></tr><tr><td>pc_eval_ch18</td><td>NOT_RUN (LEVEL=sim)</td></tr><tr><td>synth_ch19</td><td>NOT_RUN (LEVEL=sim)</td></tr><tr><td>synth_ch20</td><td>NOT_RUN (LEVEL=sim)</td></tr><tr><td>package_ip_ch20</td><td>NOT_RUN (LEVEL=sim)</td></tr><tr><td>soc_build_ch21</td><td>NOT_RUN (LEVEL=sim)</td></tr><tr><td>vitis_ch22</td><td>NOT_RUN (LEVEL=sim)</td></tr><tr><td>synth_ch26</td><td>NOT_RUN (LEVEL=sim)</td></tr><tr><td>sw_build_ch28</td><td>NOT_RUN (LEVEL=sim)</td></tr><tr><td>synth_ch29</td><td>NOT_RUN (LEVEL=sim)</td></tr><tr><td>sw_build_ch29</td><td>NOT_RUN (LEVEL=sim)</td></tr><tr><td>synth_ch30</td><td>NOT_RUN (LEVEL=sim)</td></tr><tr><td>soc_build_ch30</td><td>NOT_RUN (LEVEL=sim)</td></tr><tr><td>synth_ch31</td><td>NOT_RUN (LEVEL=sim)</td></tr><tr><td>sw_build_ch31</td><td>NOT_RUN (LEVEL=sim)</td></tr><tr><td>sweep_ch24</td><td>NOT_RUN (LEVEL=sim)</td></tr><tr><td>soc_sim_ch23</td><td>NOT_RUN (LEVEL=sim)</td></tr><tr><td>power_ch25</td><td>NOT_RUN (LEVEL=sim)</td></tr><tr><td>soc_sim_ch28</td><td>NOT_RUN (LEVEL=sim)</td></tr></tbody>
+      </table></div>
+    </section>
+    <section class="section" id="s_report">
+      <h2><span class="num">11</span> 누적 보고·인계</h2>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>서브젝트</th><th>구 장</th><th>시뮬레이션·정적 검사</th><th>Vivado</th><th>보드 점검표</th></tr></thead>
+        <tbody><tr><td>5-1</td><td>20장</td><td>통과</td><td>통과</td><td>— ⚠ 미실시</td></tr><tr><td>5-2</td><td>21장</td><td>해당 없음</td><td>통과</td><td>B1·B4b·B4c ⚠ 미실시</td></tr><tr><td>5-3</td><td>22장</td><td>통과</td><td>해당 없음</td><td>B2·B3·B4·B4a ⚠ 미실시</td></tr><tr><td>5-4</td><td>23장</td><td>통과</td><td>해당 없음</td><td>B5·B6·B7 ⚠ 미실시</td></tr><tr><td>5-5</td><td>24장</td><td>해당 없음</td><td>통과</td><td>— ⚠ 미실시</td></tr><tr><td>5-6</td><td>25장</td><td>통과</td><td>해당 없음</td><td>B8 ⚠ 미실시</td></tr><tr><td>5-7</td><td>27장</td><td>해당 없음</td><td>해당 없음</td><td>— ⚠ 미실시</td></tr></tbody>
+      </table></div>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>다음 장으로 넘기는 것</th><th>사용처</th></tr></thead>
+        <tbody><tr><td><code>21장 비트스트림 basys3_soc21_top.bit · XSA</code></td><td>6장 응용(28·29·31장)이 같은 비트스트림에 ELF만 바꿔 쓴다</td></tr><tr><td><code>part03/ch22/sw/npu_driver.c · npu_io_xil.c</code></td><td>6장 모든 응용 펌웨어의 NPU 드라이버</td></tr><tr><td><code>part03/common/sw/p3_seg7.h</code></td><td>6장 표시 (표준 7세그먼트 IP)</td></tr><tr><td><code>part03/ch27/docs/BOARD_CHECKLIST.md</code></td><td>6장 보드 항목 B9~ (28~31장)</td></tr></tbody>
+      </table></div>
+      <p>장 게이트 (증거 파일 기준 자동 표시):</p>
+      <div class="gate-row">
+        <div class="gate pass">
+          <b>HTML_PASS</b>
+          <span>v01 · 생성기</span>
+        </div>
+        <div class="gate pass">
+          <b>RTL_SIM_PASS</b>
+          <span>서브젝트 시뮬레이션·정적 검사 모두 통과</span>
+        </div>
+        <div class="gate pass">
+          <b>SYNTH_TIMING_PASS</b>
+          <span>WNS +0.374 ns · WHS +0.034 ns (21장 SoC 배선 후, 안 A) · <code>part03/ch21/validation/soc_summary.md</code></span>
+        </div>
+        <div class="gate todo">
+          <b>BOARD_PASS</b>
+          <span>⚠ 미실시 · 보드 점검표 B1~B8 대기</span>
+        </div>
+      </div>
+    </section>
+    <div class="chapter-links" id="chapter-links"></div>
+  </main>
+</div>
+<script>
+window.COURSE={
+ "title": "Basys3 소형 NPU 실습 (프로젝트판)",
+ "chapters": [
+  {
+   "id": "p01",
+   "number": 1,
+   "title": "UART 계산기",
+   "file": "p01_uart_calc_v01.html"
+  },
+  {
+   "id": "p02",
+   "number": 2,
+   "title": "4뉴런 NPU 보드",
+   "file": "p02_npu4_board_v01.html"
+  },
+  {
+   "id": "p03",
+   "number": 3,
+   "title": "8×8 MNIST (CPU 없음)",
+   "file": "p03_mnist8x8_v01.html"
+  },
+  {
+   "id": "p04",
+   "number": 4,
+   "title": "784 가속기 설계 공간",
+   "file": "p04_tile784_v01.html"
+  },
+  {
+   "id": "p05",
+   "number": 5,
+   "title": "MicroBlaze V SoC",
+   "file": "p05_mbv_soc_v01.html"
+  }
+ ]
+};
+</script>
+<script defer src="assets/education/site.js"></script>
+</body>
+</html>

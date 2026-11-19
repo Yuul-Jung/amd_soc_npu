@@ -71,7 +71,7 @@ details.full>summary{cursor:pointer;font-weight:600}
       <h2><span class="num">00</span> 장 목표·진행 위치</h2>
       <p><b>장 시연 (보드):</b> PC가 적재한 입력·가중치로 보드가 4뉴런 추론을 하고 UART에 점수, LED·7세그먼트에 클래스를 띄운다. 누적 npu_core와 12장 엔진을 sw로 바꿔 같은 클래스를 확인한다.</p>
       <p>편성: 2일 · 서브젝트 8개 · 서브젝트마다 보드 확인 1번 + 장 시연.</p>
-      <ol class="road" aria-label="전체 장에서 지금 위치"><li class=""><a href="p01_uart_calc_v01.html"><b>1장</b>UART 계산기</a></li><li class="now" aria-current="step"><b>2장</b>4뉴런 NPU 보드</li><li class=""><a href="p03_mnist8x8_v01.html"><b>3장</b>8×8 MNIST (CPU 없음)</a></li><li class=""><a href="p04_tile784_v01.html"><b>4장</b>784 가속기 설계 공간</a></li><li class="plan"><b>5장</b>MicroBlaze V SoC</li><li class="plan"><b>6장</b>응용 확장</li><li class="plan"><b>7장</b>종합과제</li></ol>
+      <ol class="road" aria-label="전체 장에서 지금 위치"><li class=""><a href="p01_uart_calc_v01.html"><b>1장</b>UART 계산기</a></li><li class="now" aria-current="step"><b>2장</b>4뉴런 NPU 보드</li><li class=""><a href="p03_mnist8x8_v01.html"><b>3장</b>8×8 MNIST (CPU 없음)</a></li><li class=""><a href="p04_tile784_v01.html"><b>4장</b>784 가속기 설계 공간</a></li><li class=""><a href="p05_mbv_soc_v01.html"><b>5장</b>MicroBlaze V SoC</a></li><li class="plan"><b>6장</b>응용 확장</li><li class="plan"><b>7장</b>종합과제</li></ol>
       <ol class="steps" aria-label="이 장의 서브젝트와 진행 상태"><li class=""><span class="code">2-1</span><span><a href="#s2_1">BRAM 동기 버퍼</a> <small>(구 04장 · 1일 오전)</small><br><code>X</code>·<code>W</code>로 쓴 값을 <code>x</code>·<code>w</code>로 되읽으면 같은 값(<code>X:0003</code>, <code>X:FFFE</code>, <code>W:0005</code>). 주소 64는 <code>ERR</code>.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">2-2</span><span><a href="#s2_2">고정소수점 양자화</a> <small>(구 05장 · 1일 오전)</small><br>32비트 → 8비트: 768 → <code>03</code>, 384(=1.5) → <code>02</code>(반올림), 65536 → <code>7F</code>와 넘침 <code>O:1</code>.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">2-3</span><span><a href="#s2_3">벡터 내적</a> <small>(구 07장 · 1일 오후)</small><br>X=(1,2,3,4)·W0=(5,6,7,8) → <code>D:0000000046</code>(70). W0[3]을 −8로 바꾸면 6. 길이 0은 <code>ERR</code>.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">2-4</span><span><a href="#s2_4">4PE 병렬 어레이</a> <small>(구 08장 · 1일 오후)</small><br>같은 X에 W0~W3 네 내적을 한 번에: <code>P:</code> 6, 10, −10(<code>…FFF6</code>), 8.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">2-5</span><span><a href="#s2_5">Dense 4뉴런 레이어</a> <small>(구 09장 · 2일 오전)</small><br>Bias를 더하고 ReLU·16비트 포화: <code>L:0006,0000,005A,7FFF O:8</code> (음수 → 0, 65544 → 7FFF와 넘침).</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">2-6</span><span><a href="#s2_6">4뉴런 NPU Core</a> <small>(구 10장 · 2일 오전)</small><br>npu_core가 자체 BRAM에서 읽어 같은 Dense를 한다: <code>N 4</code>가 <code>L 4</code>와 같은 답. 길이 2면 <code>0011,0000,0061,7FFF</code>.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">2-7</span><span><a href="#s2_7">UART 모델 적재</a> <small>(구 11장 · 2일 오후)</small><br>sw2를 올리면 11장 명령: 고정 그룹 <code>0</code>~<code>3</code> → <code>C0</code>~<code>C3</code>. 내리고 <code>x 0</code> → <code>X:FFFF</code> (11장이 쓴 값을 콘솔이 읽음).</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">2-8</span><span><a href="#s2_8">통합 NPU Top</a> <small>(구 12장 · 2일 오후)</small><br>sw3을 올리면 12장 엔진: 같은 그룹에서 음수 점수(<code>…FFE</code>, ReLU 없음)가 보이고 클래스는 같다. LED0~3에 클래스, LED14 끝남, 7세그먼트에 클래스.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class="demo"><span class="code">시연</span><span><a href="#demo">장 시연</a><br>PC가 적재한 입력·가중치로 보드가 4뉴런 추론을 하고 UART에 점수, LED·7세그먼트에 클래스를 띄운다. 누적 npu_core와 12장 엔진을 sw로 바꿔 같은 클래스를 확인한다.</span><span class="st">보드 ⚠ 미실시</span></li></ol>
     </section>
     <section class="section" id="s01">
@@ -4496,6 +4496,12 @@ window.COURSE={
    "number": 4,
    "title": "784 가속기 설계 공간",
    "file": "p04_tile784_v01.html"
+  },
+  {
+   "id": "p05",
+   "number": 5,
+   "title": "MicroBlaze V SoC",
+   "file": "p05_mbv_soc_v01.html"
   }
  ]
 };
