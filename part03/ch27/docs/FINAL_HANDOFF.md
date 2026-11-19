@@ -19,7 +19,7 @@
 | 22 | C 드라이버·Vitis | 22ea723 | C·RTL 협동 sim + Vitis ELF | NPU = CPU = Python, ELF 30.5 KB |
 | 23 | CPU 대 NPU | 3b36549 | SoC 전체 xsim(실제 MicroBlaze V) | CPU 1,816,547 / NPU 종단간 1,080,161 클록 |
 | 24 | 자원·타이밍 | fd137d6 | OOC 배선 주기 스윕 | Fmax 코어 146·Tile 101·AXI 105 MHz |
-| 25 | 전력·에너지 | 2674513 | Vivado report_power + 구간별 SAIF | CPU 4.541 mJ vs NPU 2.733 mJ/추론(1.66배), SAIF 매칭 13% |
+| 25 | 전력·에너지 | 2674513 | Vivado report_power + 구간별 SAIF | CPU 4.596 mJ vs NPU 2.765 mJ/추론(1.66배, 추정), SAIF 매칭 15% (안 A 재실행) |
 | 26 | 3×3 합성곱(선택) | 505be9e | RTL sim + OOC 배선 | 936출력 일치, WNS +4.647 |
 | 27 | 통합 실행기·인계 | e148ccd | `run_all.sh` LEVEL=sim PASS | 이 문서, 실물 점검표 |
 | 28 | 손글씨 숫자 인식 시스템(종합 1) | c7fbcb3 | 호스트↔펌웨어↔NPU RTL 협동 sim + Vivado 칩 전체·Bitstream + Vitis ELF + SoC 전체 xsim PASS 15/15 | 22장 점수 골든 일치, 오류 시험 11·변이 8, WNS +0.420 |
