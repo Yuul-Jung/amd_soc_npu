@@ -1,0 +1,20 @@
+# tb_ip_seg7 (Icarus 12.0), IP = docs/plan/handoff/ip_seg7 원본 그대로 (cmp 일치)
+OK   ID a=fff0 = 53454737
+OK   VER a=fff4 = 01000100
+OK   VALUE_reset a=0000 = 00000000
+OK   MODE_reset a=0004 = 00000000
+OK   VALUE a=0000 = 00001234
+OK   VALUE_wstrb a=0000 = 0000ab34
+OK   MODE a=0004 = 0000050a
+OK   RAW a=0008 = a5c37e81
+OK   DP a=000c = 00000005
+OK   unmapped a=0010 = 00000000
+OK   ID_readonly a=fff0 = 53454737
+OK   pin_blank0 digit=0 an=1111
+OK   pin_raw1 digit=1 seg=0000001 dp=1 an=1101
+OK   pin_raw3 digit=3 seg=1011010 dp=0 an=0111
+OK   pin_hex0_4_dp digit=0 seg=0011001 dp=0 an=1110
+OK   pin_hex1_3 digit=1 seg=0110000 dp=1 an=1101
+OK   pin_hex2_B_dp digit=2 seg=0000011 dp=0 an=1011
+OK   pin_hex3_A digit=3 seg=0001000 dp=1 an=0111
+SEG7_TB_PASS checks=18 id=53454737
