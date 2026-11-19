@@ -71,7 +71,7 @@ details.full>summary{cursor:pointer;font-weight:600}
       <h2><span class="num">00</span> 장 목표·진행 위치</h2>
       <p><b>장 시연 (보드):</b> PC가 MNIST 시험 숫자를 8×8로 줄여 보내면 보드가 CPU 없이 4PE 코어로 0~9를 고르고, UART에 은닉값·점수, LED·7세그먼트에 클래스를 띄운다.</p>
       <p>편성: 2일 · 서브젝트 4개 · 서브젝트마다 보드 확인 1번 + 장 시연.</p>
-      <ol class="road" aria-label="전체 장에서 지금 위치"><li class=""><a href="p01_uart_calc_v01.html"><b>1장</b>UART 계산기</a></li><li class=""><a href="p02_npu4_board_v01.html"><b>2장</b>4뉴런 NPU 보드</a></li><li class="now" aria-current="step"><b>3장</b>8×8 MNIST (CPU 없음)</li><li class="plan"><b>4장</b>784 가속기 설계 공간</li><li class="plan"><b>5장</b>MicroBlaze V SoC</li><li class="plan"><b>6장</b>응용 확장</li><li class="plan"><b>7장</b>종합과제</li></ol>
+      <ol class="road" aria-label="전체 장에서 지금 위치"><li class=""><a href="p01_uart_calc_v01.html"><b>1장</b>UART 계산기</a></li><li class=""><a href="p02_npu4_board_v01.html"><b>2장</b>4뉴런 NPU 보드</a></li><li class="now" aria-current="step"><b>3장</b>8×8 MNIST (CPU 없음)</li><li class=""><a href="p04_tile784_v01.html"><b>4장</b>784 가속기 설계 공간</a></li><li class="plan"><b>5장</b>MicroBlaze V SoC</li><li class="plan"><b>6장</b>응용 확장</li><li class="plan"><b>7장</b>종합과제</li></ol>
       <ol class="steps" aria-label="이 장의 서브젝트와 진행 상태"><li class=""><span class="code">3-1</span><span><a href="#s3_1">8×8 입력 프레임</a> <small>(구 13장 · 1일 오전)</small><br>숫자 그림 64바이트 → <code>F:OK</code>, 화소 되읽기 <code>p 36</code> → <code>P:17</code>. 63바이트는 <code>F:SHORT</code>, 65바이트는 <code>F:LONG</code>, 프레임 없을 때 <code>p</code>는 <code>ERR</code>.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">3-2</span><span><a href="#s3_2">4PE 3그룹 10분류 코어</a> <small>(구 14장 · 1일 오후)</small><br>선형 모델 650개 명령을 적재한 뒤 숫자 7·0·3 그림마다 <code>R</code> → <code>R7</code>·<code>R0</code>·<code>R5</code>와 점수 10개. 숫자 3을 5로 잘못 고르는 것도 그대로 보인다 (정확도 91.3%).</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">3-3</span><span><a href="#s3_3">64→10·64→8·8→10 Dense</a> <small>(구 15장 · 2일 오전)</small><br>같은 코어를 모양만 바꿔: <code>H</code> → 64→8 점수 8개(MLP 1층 원시값), <code>G</code> → 8→10 (프레임 앞 8원소). 새 연산 RTL 없음.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">3-4</span><span><a href="#s3_4">MLP 64→8→10</a> <small>(구 16장 · 2일 오후)</small><br><code>Z 9</code>(은닉 shift) 뒤 숫자 0~9 그림마다 <code>M</code> → 은닉 8개·점수 10개·클래스. 10개 중 9개 맞음(숫자 5 → 6).</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class="demo"><span class="code">시연</span><span><a href="#demo">장 시연</a><br>PC가 MNIST 시험 숫자를 8×8로 줄여 보내면 보드가 CPU 없이 4PE 코어로 0~9를 고르고, UART에 은닉값·점수, LED·7세그먼트에 클래스를 띄운다.</span><span class="st">보드 ⚠ 미실시</span></li></ol>
     </section>
     <section class="section" id="s01">
@@ -3602,6 +3602,12 @@ window.COURSE={
    "number": 3,
    "title": "8×8 MNIST (CPU 없음)",
    "file": "p03_mnist8x8_v01.html"
+  },
+  {
+   "id": "p04",
+   "number": 4,
+   "title": "784 가속기 설계 공간",
+   "file": "p04_tile784_v01.html"
   }
  ]
 };
