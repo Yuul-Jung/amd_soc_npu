@@ -1,0 +1,10 @@
+HW (21장 그대로) 0dfa2eaf38100392 soc21_npu.xsa, db889f14774dafa9 basys3_soc21_top.bit
+SENSOR_HEADER_DONE model_id=18496ca4 w=[-110, -127, -63, -66, -117, -92]...
+#define XPAR_AXI_GPIO_0_BASEADDR 0x40000000
+#define XPAR_AXI_UARTLITE_0_BASEADDR 0x40020000
+#define XPAR_IP06_SEG7_BASEADDR 0x40060000
+#define XPAR_P3_NPU_0_BASEADDR 0x44a00000
+ELF sensor_app text=31636 data=204 bss=7532 total=39372 sha256=37468b4a76667acc
+ELF_MEM stack=4096 heap=2052 stack_end=39376 lmb=65536
+ELF_MEM_PASS
+SENSOR_SW_BUILD_PASS (빌드만, 실물 실행은 사용자와 함께)
