@@ -1,6 +1,6 @@
 # 30장 NPU 기반 지능형 모터 제어 (종합 3)
 
-센서 창 → 29장 guard·NPU·경보 정책(펌웨어) → **추천**(방향·속도) → AXI GPIO 2 명령 워드 → **독립 모터 안전 코어 RTL**(명령 승인·워치독 → 인터록 → 방향·데드타임·램프·PWM) → IN1·IN2·ENA(Pmod JB) → 모터 드라이버.
+센서 창 → 29장 guard·NPU·경보 정책(펌웨어) → **추천**(방향·속도) → 모터 GPIO(`axi_gpio_motor`) 명령 워드 → **독립 모터 안전 코어 RTL**(명령 승인·워치독 → 인터록 → 방향·데드타임·램프·PWM) → IN1·IN2·ENA(Pmod JB) → 모터 드라이버.
 
 > 교육용이며 인증된 기능안전 로직이 아니다. 실제 모터는 드라이버·외부 전원·역기전력·전류 보호를 따로 두고, 사용자와 함께 연결한다.
 > NPU 검증 PASS가 실물 안전 보호를 대신하지 않는다.
@@ -21,7 +21,7 @@
 | 시험 입력 | 이 장에서는 sw[14] 정방향 리밋, sw[13] 역방향 리밋, sw[12] 고장, sw[11] 과열로 흉내 낸다(실제 전류·온도 회로는 사용자와 함께) |
 | 표시 | LED12 ENA(PWM 밝기), LED11 IN1, LED10 IN2, LED9 트립 — 코어가 직접 구동(CPU 무관). FND [3] 정책 상태, [2] 구동 방향(점 = 트립), [1:0] 실제 duty(16진) |
 
-## 2. 명령·상태 워드 (AXI GPIO 2, 0x4002_0000)
+## 2. 명령·상태 워드 (모터 GPIO `axi_gpio_motor`, 안 A 0x4007_0000 — 펌웨어는 `XPAR_AXI_GPIO_MOTOR_BASEADDR`만 쓴다)
 
 | 레지스터 | 비트 |
 |---|---|
@@ -50,7 +50,7 @@
 | `tb/tb_p3_motor_safety.sv`·`tb_p3_motor_bridge.sv` | 코어 벡터 시험, 협동 시뮬레이션 브리지(NPU + 코어 + 핀 불변식 감시) |
 | `sw/motor_app.c`·`motor_app.h`·`main.c` | 펌웨어(29장 `sensor_app.c`를 수정 없이 링크해 guard·특징·정책 재사용) |
 | `host/p3_motor_host.py`·`motor_cosim_main.c` | 호스트(협동 시뮬레이션 시나리오·보드 자동 단계) |
-| `constraints/basys3_soc30.xdc`, `synth/soc30_bd.tcl`·`synth_configs.tcl` | 28장 XDC + JB·btnU, BD 변경·구현, OOC 구성 |
+| `constraints/basys3_soc30.xdc`, `synth/soc30_bd.tcl`·`synth_configs.tcl` | (안 A) 21장 XDC + JB, BD 변경·구현(주소·인터럽트 대조), OOC 구성 |
 | `scripts/run_sim.sh`·`run_synth.sh`·`build_soc.sh` | PC 검증, 코어 OOC, SoC Bitstream·ELF |
 
 ## 5. 결과 (실제 실행)
@@ -63,9 +63,9 @@
 | 종단간 협동 시뮬레이션 | 62/62 검사 PASS(호스트 → 펌웨어(29장 정책) → NPU RTL + 모터 안전 RTL), 핀 불변식 위반 0 / 1,403,942클록, 방향 전환 최소 간격 3,001 ≥ 데드타임 3,000 (`validation/rtl_cosim.csv`) |
 | 펌웨어 변이 6종 | **6/6 검출** |
 | 코어 OOC 배선 | LUT 169, FF 120, DSP 0, WNS +3.699 ns @100 MHz (`validation/synth_ooc_summary.md`) |
-| SoC 비트스트림 | PASS — 2026-11-19 재빌드(11-18 23:36 시스템 종료로 첫 시도의 impl_1 중단). 배선 후 WNS +0.427 ns, WHS +0.022 ns, 출력 핀 IN1·IN2·ENA는 motor_safety_0에서만 구동, JB4 PULLDOWN, 입력 동기화기 ASYNC_REG 12셀. `basys3_soc30_top.bit` b0c00e3b07a9e2b4, XSA 1fbedd8afa770952 (`validation/build_soc_20261119.log`) |
-| **안 A 이후 SoC** | **NOT_RUN (판단 필요)** — 위 비트스트림은 이전 주소맵(28장 SoC 위, 모터 GPIO 0x4002_0000)이다. 안 A에서 0x4002_0000은 UART이고 28장 BD가 폐지되어 `build_soc.sh`는 지금 NOT_RUN으로 끝난다. 모터 안전 코어는 하드웨어가 꼭 필요하므로("ELF만" 방침과 충돌) 21장 SoC 위에 어느 주소·SmartConnect 포트로 넣을지 결정을 기다린다 |
-| 펌웨어 ELF(`motor_app`) | 53,456 B, SHA-256 210ff1cff2c2ab68, `ELF_MEM_PASS`, GPIO2 0x4002_0000 |
+| SoC 비트스트림 (이전 주소맵, 기록용) | PASS — 2026-11-19 재빌드(11-18 23:36 시스템 종료로 첫 시도의 impl_1 중단). 배선 후 WNS +0.427 ns, WHS +0.022 ns, 출력 핀 IN1·IN2·ENA는 motor_safety_0에서만 구동, JB4 PULLDOWN, 입력 동기화기 ASYNC_REG 12셀. `basys3_soc30_top.bit` b0c00e3b07a9e2b4, XSA 1fbedd8afa770952 (`validation/build_soc_20261119.log`) |
+| **안 A SoC (2026-11-20)** | **PASS (빌드)** — 21장 안 A SoC 복제본(`ch21/build/soc21_npu`, 전후 해시 같음) + 모터 GPIO `axi_gpio_motor` **0x4007_0000**(64 KB, SmartConnect M07) + `p3_motor_safety_bd`. 인터럽트 없음(In4 예약 0 그대로). `ADDR_MAP_A_PASS`(21장 8줄 + 모터 1줄), `IRQ_MAP_A_PASS`(21장과 같음), 배선 후 WNS +0.357 ns, WHS +0.030 ns, JB·btn·seg 핀 대조, JB4 PULLDOWN, ASYNC_REG 12셀. btnU는 btn[3](BTN GPIO)과 비상정지 입력에 함께 연결. `basys3_soc30_top.bit` 2fa4deada606d078, XSA 3f06b52665eb4c26 (`validation/build_soc_mapA_20261120.log`) |
+| 펌웨어 ELF(`motor_app`) | 53,748 B, SHA-256 68779b98af7fa07b, `ELF_MEM_PASS`(스택 끝 53,752 < 65,536), 모터 GPIO `XPAR_AXI_GPIO_MOTOR_BASEADDR` = 0x4007_0000, 표시는 표준 7세그먼트 IP(29장 `sensor_io_xil.c`) |
 | **Basys3 실물** | **NOT_RUN** — `ch27/docs/BOARD_CHECKLIST.md` B18~B24, 사용자와 함께 |
 
 ## 6. 알려진 한계

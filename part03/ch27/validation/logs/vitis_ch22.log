@@ -1,0 +1,15 @@
+MODEL_HEADER_DONE samples=4 classes=[7, 2, 4, 4] labels=[7, 2, 9, 9]
+VITIS_BUILD_DONE npu_app
+#define XPAR_AXI_GPIO_0_BASEADDR 0x40000000
+#define XPAR_AXI_GPIO_BTN_BASEADDR 0x40010000
+#define XPAR_AXI_INTC_0_BASEADDR 0x40040000
+#define XPAR_AXI_INTC_0_NUM_INTR_INPUTS 0x10
+#define XPAR_AXI_TIMER_0_BASEADDR 0x40030000
+#define XPAR_AXI_UARTLITE_0_BASEADDR 0x40020000
+#define XPAR_IP06_SEG7_BASEADDR 0x40060000
+#define XPAR_P3_NPU_0_BASEADDR 0x44a00000
+#define XPAR_P3_NPU_0_HIGHADDR 0x44a00fff
+   text	   data	    bss	    dec	    hex	filename
+  27236	    204	   3512	  30952	   78e8	npu_app.elf
+716ff5eed99d628b700b7cddba70188dd8da472a8a156d6e7fba5ec6667926fc  ws/npu_app/build/npu_app.elf
+VITIS_ELF_PASS (빌드만, 실물 실행은 사용자와 함께)

@@ -1,13 +1,15 @@
-# (추가) 30장: 28장 SoC 복제본에 모터 안전 경로를 더하고 Bitstream·XSA까지 만든다.
-#   AXI GPIO 2(듀얼: 채널 1 출력 = 명령 워드, 채널 2 입력 = 상태 워드, 0x4002_0000)
+# (추가) 30장: SoC 복제본에 모터 안전 경로를 더하고 Bitstream·XSA까지 만든다.
+# (변경) 안 A(2026-11-20): 출발점을 28장 SoC에서 21장 동결 주소맵 SoC(ch21/build/soc21_npu)로 바꾼다.
+#   21장 주소·인터럽트는 바꾸지 않고, 빈 칸 0x4007_0000(64 KB)에 모터 GPIO(axi_gpio_motor, 듀얼:
+#   채널 1 출력 = 명령 워드, 채널 2 입력 = 상태 워드)만 더한다. 모터 경로는 인터럽트를 쓰지 않는다(In4 예약 그대로 0).
 #   p3_motor_safety_bd(BD 모듈 참조, GPIO와 같은 클록·peripheral_aresetn) → 외부 포트(비상정지·고장·과열·리밋 입력,
-#   IN1·IN2·ENA·트립 출력). 사용자 Top: basys3_soc30_top(핀 연결만). 28장 결과물은 build_soc.sh가 cp -a로 복제한다.
+#   IN1·IN2·ENA·트립 출력). 사용자 Top: basys3_soc30_top(핀 연결만). 21장 결과물은 build_soc.sh가 cp -a로 복제한다.
 # 사용: vivado -mode batch -source soc30_bd.tcl -tclargs <복제 xpr> <ch30 폴더> <출력 폴더> <jobs>
 set xpr [lindex $argv 0]
 set ch [file normalize [lindex $argv 1]]
 set out [file normalize [lindex $argv 2]]
 set jobs [lindex $argv 3]
-set gpio_base 0x40020000
+set gpio_base 0x40070000
 file mkdir $out
 
 proc check {cond msg} {
@@ -18,36 +20,36 @@ open_project $xpr
 foreach f [get_files -quiet -of_objects [get_filesets constrs_1]] { remove_files -fileset constrs_1 $f }
 add_files -fileset constrs_1 -norecurse $ch/constraints/basys3_soc30.xdc
 add_files -norecurse [list $ch/rtl/p3_motor_safety.v $ch/rtl/p3_motor_safety_bd.v $ch/rtl/basys3_soc30_top.v]
-set_property is_enabled false [get_files basys3_soc28_top.v]
+set_property is_enabled false [get_files basys3_soc21_top.v]
 update_compile_order -fileset sources_1
 
 set bd_file [get_files -filter {FILE_TYPE == "Block Designs"}]
 open_bd_design $bd_file
 puts "BD [current_bd_design]"
-check {[llength [get_bd_cells -quiet fnd_scan_0]] == 1 && [llength [get_bd_cells -quiet p3_npu_0]] == 1} "28장 SoC(NPU + FND)에서 시작"
+check {[llength [get_bd_cells -quiet ip06_seg7]] == 1 && [llength [get_bd_cells -quiet p3_npu_0]] == 1 && [llength [get_bd_cells -quiet axi_gpio_btn]] == 1} "21장 안 A SoC(NPU + BTN + SEG7)에서 시작"
 
 set smc [get_bd_cells axi_smc]
-check {[get_property CONFIG.NUM_MI $smc] == 6} "SmartConnect NUM_MI 6 (28장)"
-set_property CONFIG.NUM_MI 7 $smc
-set g [create_bd_cell -type ip -vlnv xilinx.com:ip:axi_gpio:2.0 axi_gpio_2]
+check {[get_property CONFIG.NUM_MI $smc] == 7} "SmartConnect NUM_MI 7 (21장 안 A)"
+set_property CONFIG.NUM_MI 8 $smc
+set g [create_bd_cell -type ip -vlnv xilinx.com:ip:axi_gpio:2.0 axi_gpio_motor]
 set_property -dict [list CONFIG.C_IS_DUAL 1 CONFIG.C_GPIO_WIDTH 32 CONFIG.C_ALL_OUTPUTS 1 CONFIG.C_DOUT_DEFAULT 0x00000000 \
   CONFIG.C_GPIO2_WIDTH 32 CONFIG.C_ALL_INPUTS_2 1] $g
-connect_bd_intf_net [get_bd_intf_pins axi_smc/M06_AXI] [get_bd_intf_pins axi_gpio_2/S_AXI]
+connect_bd_intf_net [get_bd_intf_pins axi_smc/M07_AXI] [get_bd_intf_pins axi_gpio_motor/S_AXI]
 set clk_net [get_bd_nets -of_objects [get_bd_pins axi_gpio_0/s_axi_aclk]]
 set rst_net [get_bd_nets -of_objects [get_bd_pins axi_gpio_0/s_axi_aresetn]]
-connect_bd_net -net $clk_net [get_bd_pins axi_gpio_2/s_axi_aclk]
-connect_bd_net -net $rst_net [get_bd_pins axi_gpio_2/s_axi_aresetn]
+connect_bd_net -net $clk_net [get_bd_pins axi_gpio_motor/s_axi_aclk]
+connect_bd_net -net $rst_net [get_bd_pins axi_gpio_motor/s_axi_aresetn]
 
 set m [create_bd_cell -type module -reference p3_motor_safety_bd motor_safety_0]
 connect_bd_net -net $clk_net [get_bd_pins motor_safety_0/clk]
 connect_bd_net -net $rst_net [get_bd_pins motor_safety_0/resetn]
-connect_bd_net [get_bd_pins axi_gpio_2/gpio_io_o] [get_bd_pins motor_safety_0/cmd_i]
-connect_bd_net [get_bd_pins motor_safety_0/status_o] [get_bd_pins axi_gpio_2/gpio2_io_i]
+connect_bd_net [get_bd_pins axi_gpio_motor/gpio_io_o] [get_bd_pins motor_safety_0/cmd_i]
+connect_bd_net [get_bd_pins motor_safety_0/status_o] [get_bd_pins axi_gpio_motor/gpio2_io_i]
 foreach {pin port} {estop_ok_i estop_ok estop_btn_i estop_btn fault_i fault otemp_i otemp lim_f_i lim_f lim_r_i lim_r
                     in1_o in1 in2_o in2 ena_o ena trip_o trip} {
   make_bd_pins_external -name $port [get_bd_pins motor_safety_0/$pin]
 }
-assign_bd_address -target_address_space /microblaze_riscv_0/Data [get_bd_addr_segs axi_gpio_2/S_AXI/Reg] \
+assign_bd_address -target_address_space /microblaze_riscv_0/Data [get_bd_addr_segs axi_gpio_motor/S_AXI/Reg] \
   -offset $gpio_base -range 64K
 validate_bd_design
 save_bd_design
@@ -69,10 +71,42 @@ foreach a $rows {
   }
 }
 check {$overlap == 0} "data address segments do not overlap"
-set gseg [get_bd_addr_segs -of_objects [get_bd_addr_spaces /microblaze_riscv_0/Data] -filter {NAME =~ "*axi_gpio_2*"}]
+set gseg [get_bd_addr_segs -of_objects [get_bd_addr_spaces /microblaze_riscv_0/Data] -filter {NAME =~ "*axi_gpio_motor*"}]
 check {[get_property OFFSET $gseg] == $gpio_base} "motor GPIO base $gpio_base"
-set nseg [get_bd_addr_segs -of_objects [get_bd_addr_spaces /microblaze_riscv_0/Data] -filter {NAME =~ "*p3_npu_0*"}]
-check {[get_property OFFSET $nseg] == 0x44A00000} "NPU base unchanged 0x44A00000"
+# (변경) 안 A 주소맵 대조: 21장 8줄 + 모터 1줄이 셀 이름 → 베이스·범위로 한 줄씩 같아야 한다
+proc data_seg {cell} {
+  return [get_bd_addr_segs -of_objects [get_bd_addr_spaces /microblaze_riscv_0/Data] -filter "NAME =~ *_${cell}_*"]
+}
+set map_a {dlmb_bram_if_cntlr 0x00000000 65536 axi_gpio_0 0x40000000 65536 axi_gpio_btn 0x40010000 65536
+  axi_uartlite_0 0x40020000 65536 axi_timer_0 0x40030000 65536 axi_intc_0 0x40040000 65536
+  ip06_seg7 0x40060000 65536 axi_gpio_motor 0x40070000 65536 p3_npu_0 0x44A00000 4096}
+set addr_ok 1
+foreach {cell base rng} $map_a {
+  set sg [data_seg $cell]
+  if {[llength $sg] != 1} { puts "ADDR_MAP_A $cell MISSING"; set addr_ok 0; continue }
+  set ob [get_property OFFSET $sg]; set or [get_property RANGE $sg]
+  set ok [expr {$ob == $base && $or == $rng}]
+  puts "ADDR_MAP_A $cell [format 0x%08X $ob] $or expect [format 0x%08X $base] $rng [expr {$ok ? "OK" : "MISMATCH"}]"
+  if {!$ok} { set addr_ok 0 }
+}
+if {[llength $segs] != [expr {[llength $map_a] / 3}]} { puts "ADDR_MAP_A extra segments: [llength $segs]"; set addr_ok 0 }
+puts [expr {$addr_ok ? "ADDR_MAP_A_PASS" : "ADDR_MAP_A_FAIL"}]
+check {$addr_ok} "address map A (21장 8줄 + 모터 1줄)"
+# (변경) 안 A 인터럽트 대조: 21장과 같아야 한다(모터는 인터럽트 없음, In4 = 0)
+set irq_map_a {0 axi_timer_0/interrupt 1 axi_uartlite_0/interrupt 3 axi_gpio_btn/ip2intc_irpt 12 p3_npu_0/irq_o}
+set irq_ok 1
+for {set i 0} {$i < 16} {incr i} {
+  if {[dict exists $irq_map_a $i]} { set exp [dict get $irq_map_a $i] } else { set exp irq_zero/dout }
+  set net [get_bd_nets -quiet -of_objects [get_bd_pins irq_concat/In$i]]
+  set drv [expr {$net eq "" ? "" : [get_bd_pins -quiet -of_objects $net -filter {DIR == O}]}]
+  set got [string trimleft [lindex $drv 0] /]
+  set ok [expr {$got eq $exp}]
+  puts "IRQ_MAP_A In$i $got expect $exp [expr {$ok ? "OK" : "MISMATCH"}]"
+  if {!$ok} { set irq_ok 0 }
+}
+if {[get_property CONFIG.NUM_PORTS [get_bd_cells irq_concat]] != 16} { set irq_ok 0 }
+puts [expr {$irq_ok ? "IRQ_MAP_A_PASS" : "IRQ_MAP_A_FAIL"}]
+check {$irq_ok} "irq map A (21장과 같음)"
 check {[get_bd_nets -of_objects [get_bd_pins motor_safety_0/clk]] eq [get_bd_nets -of_objects [get_bd_pins axi_smc/aclk]]} "motor clock = SmartConnect clock"
 check {[get_bd_nets -of_objects [get_bd_pins motor_safety_0/resetn]] eq [get_bd_nets -of_objects [get_bd_pins rst_clk_wiz_1_100M/peripheral_aresetn]]} "motor reset = peripheral_aresetn"
 foreach port {estop_ok estop_btn fault otemp lim_f lim_r in1 in2 ena trip} {
@@ -83,7 +117,7 @@ foreach port {in1 in2 ena} {
   check {$drv eq "/motor_safety_0"} "BD port $port connects only to motor_safety_0 (not CPU/NPU)"
 }
 set cmd_src [get_bd_cells -of_objects [get_bd_pins -of_objects [get_bd_nets -of_objects [get_bd_pins motor_safety_0/cmd_i]]]]
-check {[lsort $cmd_src] eq [lsort {/axi_gpio_2 /motor_safety_0}]} "motor cmd_i comes only from axi_gpio_2 (CPU register)"
+check {[lsort $cmd_src] eq [lsort {/axi_gpio_motor /motor_safety_0}]} "motor cmd_i comes only from axi_gpio_motor (CPU register)"
 
 make_wrapper -files $bd_file -top -force
 generate_target all $bd_file
@@ -109,7 +143,7 @@ set wns [get_property SLACK [get_timing_paths -setup -max_paths 1]]
 set whs [get_property SLACK [get_timing_paths -hold -max_paths 1]]
 puts "TIMING WNS=$wns WHS=$whs"
 check {$wns >= 0 && $whs >= 0} "post-route setup/hold met"
-foreach {port pin} {JB[0] A14 JB[1] A16 JB[2] B15 JB4 B16 btnU T18 seg[0] W7 RsRx B18 led[15] L1 led[12] P3} {
+foreach {port pin} {JB[0] A14 JB[1] A16 JB[2] B15 JB4 B16 btn[3] T18 btn[0] T17 seg[0] W7 an[0] U2 RsRx B18 led[15] L1 led[12] P3} {
   check {[get_property PACKAGE_PIN [get_ports $port]] eq $pin} "pin $port = $pin"
 }
 check {[get_property PULLTYPE [get_ports JB4]] eq "PULLDOWN"} "JB4 estop loop PULLDOWN (open = stop)"

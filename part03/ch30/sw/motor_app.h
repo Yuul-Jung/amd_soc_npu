@@ -7,7 +7,7 @@
 #define M_FWD  1
 #define M_REV  2
 
-/* 명령 워드(AXI GPIO 2 채널 1): [6:0] duty, [9:8] dir, [12] clear 토글, [15] kick 토글 */
+/* 명령 워드(모터 GPIO axi_gpio_motor 채널 1, 안 A 0x4007_0000): [6:0] duty, [9:8] dir, [12] clear 토글, [15] kick 토글 */
 #define MOTOR_CMD(dir, duty, kick, clr) \
     ((uint32_t)(duty) | ((uint32_t)(dir) << 8) | ((uint32_t)(clr) << 12) | ((uint32_t)(kick) << 15))
 #define MOTOR_REG_CMD    0x0u   /* AXI GPIO 채널 1 DATA */
