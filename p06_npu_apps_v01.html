@@ -70,13 +70,13 @@ details.full>summary{cursor:pointer;font-weight:600}
     <section class="section" id="s00">
       <h2><span class="num">00</span> 장 목표·진행 위치</h2>
       <p><b>장 시연 (보드):</b> 5장 비트스트림에 ELF만 바꿔 PC가 보낸 28×28 손글씨를 NPU가 분류해 7세그먼트·LED에 띄우고(6-1), 고른 응용 2개(센서 감시·보안 모델 적재 등)를 같은 방식으로 시연한다.</p>
-      <p>편성: 2일 · 서브젝트 5개 · 6-1은 모두 하고, 6-2~6-5 중 2개를 골라 보드에서 확인합니다. 6-1·6-3·6-5는 5장 비트스트림에 ELF만 바꾸고, 6-4는 별도 비트스트림(⚠ 안 A 재빌드 대기), 6-2는 RTL만입니다.</p>
+      <p>편성: 2일 · 서브젝트 5개 · 6-1은 모두 하고, 6-2~6-5 중 2개를 골라 보드에서 확인합니다. 6-1·6-3·6-5는 5장 비트스트림에 ELF만 바꾸고, 6-4는 30장 비트스트림(21장 + 모터 GPIO), 6-2는 RTL만입니다.</p>
       <ol class="road" aria-label="전체 장에서 지금 위치"><li class=""><a href="p01_uart_calc_v01.html"><b>1장</b>UART 계산기</a></li><li class=""><a href="p02_npu4_board_v01.html"><b>2장</b>4뉴런 NPU 보드</a></li><li class=""><a href="p03_mnist8x8_v01.html"><b>3장</b>8×8 MNIST (CPU 없음)</a></li><li class=""><a href="p04_tile784_v01.html"><b>4장</b>784 가속기 설계 공간</a></li><li class=""><a href="p05_mbv_soc_v01.html"><b>5장</b>MicroBlaze V SoC</a></li><li class="now" aria-current="step"><b>6장</b>응용 확장</li><li class="plan"><b>7장</b>종합과제</li></ol>
-      <ol class="steps" aria-label="이 장의 서브젝트와 진행 상태"><li class=""><span class="code">6-1</span><span><a href="#s6_1">손글씨 숫자 인식 (공통)</a> <small>(구 28장 · 1일 오전)</small><br><code>digit_app.elf</code> 실행 → 7세그먼트 <code>F16C</code>. PC에서 <code>p3_digit_host.py</code>로 28×28 그림을 보내면 보드 클래스 = PC 골든 클래스(22장 모두), 마지막에 7세그먼트 <code>07 _7</code>·LED7. 깨진 프레임 11종은 거부하고 <code>E</code>+코드.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">6-2</span><span><a href="#s6_2">3×3 합성곱 (선택, RTL)</a> <small>(구 26장 · 1일 오후)</small><br>보드 없음 (AXI 래퍼가 없어 SoC에 붙지 않는다). 8×8 그림 26장을 3×3 커널로 합성곱해 6×6 출력 936개가 Python과 비트 단위로 같음을 시뮬레이션으로 본다.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">6-3</span><span><a href="#s6_3">센서 상태 감시</a> <small>(구 29장 · 1일 오후)</small><br><code>sensor_app.elf</code> 실행 → 7세그먼트 <code>3 _00</code>(UNKNOWN). PC가 가상 센서 창을 보내면 규칙 검사 → NPU 3상태 → 경보 정책 결과가 UART·7세그먼트·LED에 나오고, FAULT는 ACK 전까지 래치(점·LED13).</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">6-4</span><span><a href="#s6_4">모터 안전 (가상 부하)</a> <small>(구 30장 · 2일 오전)</small><br>보드는 ⚠ 판단 대기. 시뮬레이션에서 NPU 추천과 독립된 모터 안전 코어가 비상정지·리밋·워치독·데드타임을 지키는 것(불변식 위반 0)을 본다.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">6-5</span><span><a href="#s6_5">보안 모델 적재</a> <small>(구 31장 · 2일 오전)</small><br><code>secure_app.elf</code> 실행 뒤 PC가 AES-128-CTR로 암호화하고 HMAC-SHA-256으로 인증한 새 모델을 보내면 보드가 받아들여 7세그먼트 <code>b749</code>(모델 B). 변조·재전송 등 17종은 거부.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class="demo"><span class="code">시연</span><span><a href="#demo">장 시연</a><br>5장 비트스트림에 ELF만 바꿔 PC가 보낸 28×28 손글씨를 NPU가 분류해 7세그먼트·LED에 띄우고(6-1), 고른 응용 2개(센서 감시·보안 모델 적재 등)를 같은 방식으로 시연한다.</span><span class="st">보드 ⚠ 미실시</span></li></ol>
+      <ol class="steps" aria-label="이 장의 서브젝트와 진행 상태"><li class=""><span class="code">6-1</span><span><a href="#s6_1">손글씨 숫자 인식 (공통)</a> <small>(구 28장 · 1일 오전)</small><br><code>digit_app.elf</code> 실행 → 7세그먼트 <code>F16C</code>. PC에서 <code>p3_digit_host.py</code>로 28×28 그림을 보내면 보드 클래스 = PC 골든 클래스(22장 모두), 마지막에 7세그먼트 <code>07 _7</code>·LED7. 깨진 프레임 11종은 거부하고 <code>E</code>+코드.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">6-2</span><span><a href="#s6_2">3×3 합성곱 (선택, RTL)</a> <small>(구 26장 · 1일 오후)</small><br>보드 없음 (AXI 래퍼가 없어 SoC에 붙지 않는다). 8×8 그림 26장을 3×3 커널로 합성곱해 6×6 출력 936개가 Python과 비트 단위로 같음을 시뮬레이션으로 본다.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">6-3</span><span><a href="#s6_3">센서 상태 감시</a> <small>(구 29장 · 1일 오후)</small><br><code>sensor_app.elf</code> 실행 → 7세그먼트 <code>3 _00</code>(UNKNOWN). PC가 가상 센서 창을 보내면 규칙 검사 → NPU 3상태 → 경보 정책 결과가 UART·7세그먼트·LED에 나오고, FAULT는 ACK 전까지 래치(점·LED13).</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">6-4</span><span><a href="#s6_4">모터 안전 (가상 부하)</a> <small>(구 30장 · 2일 오전)</small><br>30장 비트스트림(21장 SoC + 모터 GPIO 0x4007_0000) + <code>motor_app.elf</code>, 모터는 연결하지 않고 LED로 본다: JB4가 열려 있으면 LED9(트립), 점퍼 뒤 호스트 단계에서 LED11·12가 NORMAL 80 % → WARNING 30 % → NPU FAULT 정지. btnU(비상정지)·리밋·고장 스위치는 즉시 정지.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">6-5</span><span><a href="#s6_5">보안 모델 적재</a> <small>(구 31장 · 2일 오전)</small><br><code>secure_app.elf</code> 실행 뒤 PC가 AES-128-CTR로 암호화하고 HMAC-SHA-256으로 인증한 새 모델을 보내면 보드가 받아들여 7세그먼트 <code>b749</code>(모델 B). 변조·재전송 등 17종은 거부.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class="demo"><span class="code">시연</span><span><a href="#demo">장 시연</a><br>5장 비트스트림에 ELF만 바꿔 PC가 보낸 28×28 손글씨를 NPU가 분류해 7세그먼트·LED에 띄우고(6-1), 고른 응용 2개(센서 감시·보안 모델 적재 등)를 같은 방식으로 시연한다.</span><span class="st">보드 ⚠ 미실시</span></li></ol>
     </section>
     <section class="section" id="s01">
       <h2><span class="num">01</span> 최종 구조도·주소맵</h2>
-      <div class="figure-wrap" tabindex="0" role="region" aria-label="도면 (가로 스크롤 가능)"><svg style="min-width:819px" id="p06-socmap" xmlns="http://www.w3.org/2000/svg" width="1170" height="640" viewBox="0 0 1170 640" aria-label="6장 응용 지도" role="img" version="1.1"><!-- 원본: p06/diagrams/app_map.json · json-sha256: 3e313a6dd3d5a64157561c3d93438f4f57a1cc974f7398ad5f356df8e7987cea · 생성: svg-flow-editor (로컬 사본) · 직접 수정 금지 --><defs><marker id="p06-socmap-arrowhead-0" markerWidth="13" markerHeight="13" refX="11.375" refY="6.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 13 6.5 L 0 13 z" fill="#1F3A5F"/></marker><marker id="p06-socmap-arrowhead-1" markerWidth="13" markerHeight="13" refX="11.375" refY="6.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 13 6.5 L 0 13 z" fill="#1F3A5F"/></marker><marker id="p06-socmap-arrowhead-2" markerWidth="13" markerHeight="13" refX="11.375" refY="6.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 13 6.5 L 0 13 z" fill="#1F3A5F"/></marker><marker id="p06-socmap-arrowhead-3" markerWidth="13" markerHeight="13" refX="11.375" refY="6.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 13 6.5 L 0 13 z" fill="#6b6b6b"/></marker><marker id="p06-socmap-arrowhead-4" markerWidth="13" markerHeight="13" refX="11.375" refY="6.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 13 6.5 L 0 13 z" fill="#1F3A5F"/></marker></defs><rect x="0" y="0" width="1170" height="640" fill="#fff"/><g data-heading="title"><text x="47" y="57.52" font-size="28" font-weight="780" fill="#172439" text-anchor="start" class="heading-text" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">6장 응용 지도 · 5장 SoC 위에 올리는 응용</text></g><g data-heading="subtitle"><text x="47" y="101.44" font-size="16" font-weight="400" fill="#617083" text-anchor="start" class="heading-text" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">보라 = 공통 서브젝트, 남색 = ELF만 교체, 회색 = 별도 비트스트림 또는 보드 없음</text></g><g id="edges"><g data-edge="pc-soc" class="edge"><path d="M 260 360 L 400 360" fill="none" stroke="#1F3A5F" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#p06-socmap-arrowhead-0)"/><text x="330" y="351" text-anchor="middle" font-size="15" font-weight="750" fill="#1F3A5F" class="edge-label" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">UART 115200</text></g><g data-edge="soc-a0" class="edge"><path d="M 720 360 L 740 360 L 740 160 L 760 160" fill="none" stroke="#1F3A5F" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#p06-socmap-arrowhead-1)"/></g><g data-edge="soc-a2" class="edge"><path d="M 720 360 L 760 360" fill="none" stroke="#1F3A5F" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#p06-socmap-arrowhead-2)"/></g><g data-edge="soc-a3" class="edge"><path d="M 720 360 L 740 360 L 740 460 L 760 460" fill="none" stroke="#6b6b6b" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#p06-socmap-arrowhead-3)"/></g><g data-edge="soc-a4" class="edge"><path d="M 720 360 L 740 360 L 740 560 L 760 560" fill="none" stroke="#1F3A5F" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#p06-socmap-arrowhead-4)"/></g></g><g id="nodes"><g data-node="pc" class="node"><rect x="20" y="324" width="240" height="72" fill="none" stroke="#1F3A5F" stroke-width="3" class="node-shape" pointer-events="all"/><text x="140" y="349.5" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="20" font-weight="750" fill="#172439" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">PC 호스트 (Python)</text><text x="140" y="373" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="15" font-weight="400" fill="#273e5e" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">그림·센서 창·모델 프레임</text></g><g data-node="soc" class="node"><rect x="400" y="312" width="320" height="96" fill="none" stroke="#1F3A5F" stroke-width="3" class="node-shape" pointer-events="all"/><text x="560" y="349.5" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="20" font-weight="750" fill="#172439" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">21장 비트스트림 (5장)</text><text x="560" y="373" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="15" font-weight="400" fill="#273e5e" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">MicroBlaze V + NPU · 동결 주소맵 안 A</text></g><g data-node="a0" class="node"><rect x="760" y="124" width="380" height="72" fill="none" stroke="#4635B1" stroke-width="3.6" class="node-shape" pointer-events="all"/><text x="950" y="149.5" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="20" font-weight="750" fill="#2a1f78" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">6-1 손글씨 숫자 인식 (공통)</text><text x="950" y="173" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="15" font-weight="400" fill="#3b2d99" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">구 28장 · ELF만 교체</text></g><g data-node="a1" class="node"><rect x="760" y="224" width="380" height="72" fill="none" stroke="#6b6b6b" stroke-width="3" class="node-shape" pointer-events="all"/><text x="950" y="249.5" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="20" font-weight="750" fill="#333333" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">6-2 3×3 합성곱 (선택, RTL)</text><text x="950" y="273" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="15" font-weight="400" fill="#555555" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">구 26장 · RTL만 · 보드 없음</text></g><g data-node="a2" class="node"><rect x="760" y="324" width="380" height="72" fill="none" stroke="#1F3A5F" stroke-width="3" class="node-shape" pointer-events="all"/><text x="950" y="349.5" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="20" font-weight="750" fill="#172439" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">6-3 센서 상태 감시</text><text x="950" y="373" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="15" font-weight="400" fill="#273e5e" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">구 29장 · ELF만 교체</text></g><g data-node="a3" class="node"><rect x="760" y="424" width="380" height="72" fill="none" stroke="#6b6b6b" stroke-width="3" class="node-shape" pointer-events="all"/><text x="950" y="449.5" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="20" font-weight="750" fill="#333333" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">6-4 모터 안전 (가상 부하)</text><text x="950" y="473" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="15" font-weight="400" fill="#555555" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">구 30장 · 별도 비트스트림 ⚠ 재빌드 대기</text></g><g data-node="a4" class="node"><rect x="760" y="524" width="380" height="72" fill="none" stroke="#1F3A5F" stroke-width="3" class="node-shape" pointer-events="all"/><text x="950" y="549.5" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="20" font-weight="750" fill="#172439" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">6-5 보안 모델 적재</text><text x="950" y="573" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="15" font-weight="400" fill="#273e5e" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">구 31장 · ELF만 교체</text></g></g></svg></div>
+      <div class="figure-wrap" tabindex="0" role="region" aria-label="도면 (가로 스크롤 가능)"><svg style="min-width:819px" id="p06-socmap" xmlns="http://www.w3.org/2000/svg" width="1170" height="640" viewBox="0 0 1170 640" aria-label="6장 응용 지도" role="img" version="1.1"><!-- 원본: p06/diagrams/app_map.json · json-sha256: b5e1f7365ad71a207e199d0c1062f069b204764625963bd798d50a643eb1e902 · 생성: svg-flow-editor (로컬 사본) · 직접 수정 금지 --><defs><marker id="p06-socmap-arrowhead-0" markerWidth="13" markerHeight="13" refX="11.375" refY="6.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 13 6.5 L 0 13 z" fill="#1F3A5F"/></marker><marker id="p06-socmap-arrowhead-1" markerWidth="13" markerHeight="13" refX="11.375" refY="6.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 13 6.5 L 0 13 z" fill="#1F3A5F"/></marker><marker id="p06-socmap-arrowhead-2" markerWidth="13" markerHeight="13" refX="11.375" refY="6.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 13 6.5 L 0 13 z" fill="#1F3A5F"/></marker><marker id="p06-socmap-arrowhead-3" markerWidth="13" markerHeight="13" refX="11.375" refY="6.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 13 6.5 L 0 13 z" fill="#6b6b6b"/></marker><marker id="p06-socmap-arrowhead-4" markerWidth="13" markerHeight="13" refX="11.375" refY="6.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 13 6.5 L 0 13 z" fill="#1F3A5F"/></marker></defs><rect x="0" y="0" width="1170" height="640" fill="#fff"/><g data-heading="title"><text x="47" y="57.52" font-size="28" font-weight="780" fill="#172439" text-anchor="start" class="heading-text" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">6장 응용 지도 · 5장 SoC 위에 올리는 응용</text></g><g data-heading="subtitle"><text x="47" y="101.44" font-size="16" font-weight="400" fill="#617083" text-anchor="start" class="heading-text" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">보라 = 공통 서브젝트, 남색 = ELF만 교체, 회색 = 별도 비트스트림 또는 보드 없음</text></g><g id="edges"><g data-edge="pc-soc" class="edge"><path d="M 260 360 L 400 360" fill="none" stroke="#1F3A5F" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#p06-socmap-arrowhead-0)"/><text x="330" y="351" text-anchor="middle" font-size="15" font-weight="750" fill="#1F3A5F" class="edge-label" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">UART 115200</text></g><g data-edge="soc-a0" class="edge"><path d="M 720 360 L 740 360 L 740 160 L 760 160" fill="none" stroke="#1F3A5F" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#p06-socmap-arrowhead-1)"/></g><g data-edge="soc-a2" class="edge"><path d="M 720 360 L 760 360" fill="none" stroke="#1F3A5F" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#p06-socmap-arrowhead-2)"/></g><g data-edge="soc-a3" class="edge"><path d="M 720 360 L 740 360 L 740 460 L 760 460" fill="none" stroke="#6b6b6b" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#p06-socmap-arrowhead-3)"/></g><g data-edge="soc-a4" class="edge"><path d="M 720 360 L 740 360 L 740 560 L 760 560" fill="none" stroke="#1F3A5F" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#p06-socmap-arrowhead-4)"/></g></g><g id="nodes"><g data-node="pc" class="node"><rect x="20" y="324" width="240" height="72" fill="none" stroke="#1F3A5F" stroke-width="3" class="node-shape" pointer-events="all"/><text x="140" y="349.5" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="20" font-weight="750" fill="#172439" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">PC 호스트 (Python)</text><text x="140" y="373" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="15" font-weight="400" fill="#273e5e" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">그림·센서 창·모델 프레임</text></g><g data-node="soc" class="node"><rect x="400" y="312" width="320" height="96" fill="none" stroke="#1F3A5F" stroke-width="3" class="node-shape" pointer-events="all"/><text x="560" y="349.5" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="20" font-weight="750" fill="#172439" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">21장 비트스트림 (5장)</text><text x="560" y="373" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="15" font-weight="400" fill="#273e5e" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">MicroBlaze V + NPU · 동결 주소맵 안 A</text></g><g data-node="a0" class="node"><rect x="760" y="124" width="380" height="72" fill="none" stroke="#4635B1" stroke-width="3.6" class="node-shape" pointer-events="all"/><text x="950" y="149.5" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="20" font-weight="750" fill="#2a1f78" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">6-1 손글씨 숫자 인식 (공통)</text><text x="950" y="173" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="15" font-weight="400" fill="#3b2d99" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">구 28장 · ELF만 교체</text></g><g data-node="a1" class="node"><rect x="760" y="224" width="380" height="72" fill="none" stroke="#6b6b6b" stroke-width="3" class="node-shape" pointer-events="all"/><text x="950" y="249.5" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="20" font-weight="750" fill="#333333" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">6-2 3×3 합성곱 (선택, RTL)</text><text x="950" y="273" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="15" font-weight="400" fill="#555555" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">구 26장 · RTL만 · 보드 없음</text></g><g data-node="a2" class="node"><rect x="760" y="324" width="380" height="72" fill="none" stroke="#1F3A5F" stroke-width="3" class="node-shape" pointer-events="all"/><text x="950" y="349.5" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="20" font-weight="750" fill="#172439" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">6-3 센서 상태 감시</text><text x="950" y="373" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="15" font-weight="400" fill="#273e5e" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">구 29장 · ELF만 교체</text></g><g data-node="a3" class="node"><rect x="760" y="424" width="380" height="72" fill="none" stroke="#6b6b6b" stroke-width="3" class="node-shape" pointer-events="all"/><text x="950" y="449.5" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="20" font-weight="750" fill="#333333" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">6-4 모터 안전 (가상 부하)</text><text x="950" y="473" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="15" font-weight="400" fill="#555555" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">구 30장 · 별도 비트스트림 (21장 + 모터 GPIO)</text></g><g data-node="a4" class="node"><rect x="760" y="524" width="380" height="72" fill="none" stroke="#1F3A5F" stroke-width="3" class="node-shape" pointer-events="all"/><text x="950" y="549.5" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="20" font-weight="750" fill="#172439" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">6-5 보안 모델 적재</text><text x="950" y="573" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="15" font-weight="400" fill="#273e5e" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">구 31장 · ELF만 교체</text></g></g></svg></div>
       <p>도면 원본: <code>p06/diagrams/app_map.json</code> (svg-flow-editor, <code>p06/diagrams/make_app_map.py</code>가 이 장 서브젝트 목록에서 만든다). 아래 주소맵·포트는 5장과 같은 21장 비트스트림이다.</p>
       <h3>주소맵 (Vivado Address Editor 실제 값 = 동결 안 A)</h3>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
@@ -152,7 +152,7 @@ def main():
     for k, s in enumerate(subs):
         kind = s["app"]
         preset = "accent" if s.get("common") else ("gray" if kind != "elf" else "navy")
-        tag = {"elf": "ELF만 교체", "own": "별도 비트스트림 ⚠ 재빌드 대기", "none": "RTL만 · 보드 없음"}[kind]
+        tag = {"elf": "ELF만 교체", "own": "별도 비트스트림 (21장 + 모터 GPIO)", "none": "RTL만 · 보드 없음"}[kind]
         nid = f"a{k}"
         nodes.append(node(nid, 950, y0 + dy * k, 380, f"{s['code']} {s['title']}", f"구 {int(s['ch'][2:]):02d}장 · {tag}", preset))
         if kind == "elf":
@@ -181,7 +181,6 @@ if __name__ == "__main__":
     <section class="section" id="s6_1">
       <h2><span class="num">03</span> 서브젝트 6-1 · 손글씨 숫자 인식 (공통) <small>(구 28장)</small></h2>
       <p class="verdict"><b>학습목표 (보드):</b> <code>digit_app.elf</code> 실행 → 7세그먼트 <code>F16C</code>. PC에서 <code>p3_digit_host.py</code>로 28×28 그림을 보내면 보드 클래스 = PC 골든 클래스(22장 모두), 마지막에 7세그먼트 <code>07 _7</code>·LED7. 깨진 프레임 11종은 거부하고 <code>E</code>+코드.</p>
-      <p class="verdict">⚠ 안 A SoC 전체 시뮬레이션(<code>soc_sim_mapA_20261119.log</code>)은 프레임 송신 중에 끝나 판정 줄이 없다. 안 A 이전 SoC로는 15/15 통과(<code>soc_sim_20261119_recheck.log</code>). C 드라이버 협동 시뮬레이션·ELF 빌드는 안 A 기준 통과.</p>
       <h3>보드에서 볼 것</h3>
       <p>5장 비트스트림 + <code>digit_app.elf</code>. PC 호스트: <code>python3 part03/ch28/host/p3_digit_host.py --port &lt;포트&gt; …</code></p>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
@@ -1185,7 +1184,7 @@ if __name__ == "__main__":
       <h3>판정 줄</h3>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
-        <tbody><tr><td><code>DIGIT_HOST_SUMMARY images=22 scores_match=22 display_ok=22</code></td><td>그림 22장: 보드(RTL) 점수·클래스·표시가 PC 골든과 같음, 라벨 정답 19/22</td></tr><tr><td><code>error_suite=11/11</code></td><td>CRC·길이·MODEL_ID·범위 오류 등 11종 거부, 이후 정상 프레임 복구</td></tr><tr><td><code>ELF_MEM_PASS</code></td><td>Vitis ELF가 LMB 64 KB 안에 들어감 (안 A 플랫폼)</td></tr></tbody>
+        <tbody><tr><td><code>DIGIT_HOST_SUMMARY images=22 scores_match=22 display_ok=22</code></td><td>그림 22장: 보드(RTL) 점수·클래스·표시가 PC 골든과 같음, 라벨 정답 19/22</td></tr><tr><td><code>error_suite=11/11</code></td><td>CRC·길이·MODEL_ID·범위 오류 등 11종 거부, 이후 정상 프레임 복구</td></tr><tr><td><code>SOC28_RTL_SIM_PASS checks=15/15</code></td><td>안 A SoC 전체 xsim: NPU 7 = CPU 7, 점수 = 기준 모델, 표준 7세그먼트 IP·LED 핀 대조 (3시간 7분)</td></tr><tr><td><code>ELF_MEM_PASS</code></td><td>Vitis ELF가 LMB 64 KB 안에 들어감 (안 A 플랫폼)</td></tr></tbody>
       </table></div>
       <div class="gate-row">
         <div class="gate pass">
@@ -1204,9 +1203,9 @@ if __name__ == "__main__":
           <b>ELF_MEM_PASS</b>
           <span>ELF_MEM_PASS · <code>part03/ch28/validation/build_sw.log</code></span>
         </div>
-        <div class="gate todo">
-          <b>SOC_SIM (안 A)</b>
-          <span>⚠ 미완료 · 안 A SoC xsim 판정 줄 없음 · VS Code 재실행 대기 (지시문 10)</span>
+        <div class="gate pass">
+          <b>SOC28_RTL_SIM_PASS</b>
+          <span>SOC28_RTL_SIM_PASS checks=15/15 · <code>part03/ch28/validation/soc_sim_mapA_20261120.log</code></span>
         </div>
         <div class="gate todo">
           <b>BOARD_PASS</b>
@@ -3238,13 +3237,12 @@ if __name__ == "__main__":
     </section>
     <section class="section" id="s6_4">
       <h2><span class="num">06</span> 서브젝트 6-4 · 모터 안전 (가상 부하) <small>(구 30장)</small></h2>
-      <p class="verdict"><b>학습목표 (보드):</b> 보드는 ⚠ 판단 대기. 시뮬레이션에서 NPU 추천과 독립된 모터 안전 코어가 비상정지·리밋·워치독·데드타임을 지키는 것(불변식 위반 0)을 본다.</p>
-      <p class="verdict">⚠ 안 A 재빌드 대기 — 기존 30장 SoC는 모터 GPIO가 0x4002_0000(안 A에서는 UART)이다. 웹 결정: 21장 블록 설계 + 안전 코어를 <b>0x4007_0000</b>(빈 칸)에 붙인 별도 비트스트림으로 다시 만든다 (VS Code 지시문 10).</p>
+      <p class="verdict"><b>학습목표 (보드):</b> 30장 비트스트림(21장 SoC + 모터 GPIO 0x4007_0000) + <code>motor_app.elf</code>, 모터는 연결하지 않고 LED로 본다: JB4가 열려 있으면 LED9(트립), 점퍼 뒤 호스트 단계에서 LED11·12가 NORMAL 80 % → WARNING 30 % → NPU FAULT 정지. btnU(비상정지)·리밋·고장 스위치는 즉시 정지.</p>
       <h3>보드에서 볼 것</h3>
-      <p>30장은 핀(JB Pmod)과 안전 코어 RTL이 필요해 5장 비트스트림에 ELF만 바꿔서는 안 된다. 기존 30장 비트스트림은 이전 주소맵이라 B18~B24는 실행하지 않는다.</p>
+      <p>30장 비트스트림 <code>basys3_soc30_top.bit</code>(안 A 재빌드) + <code>motor_app.elf</code>. 1단계는 가상 부하(LED)만. 실제 드라이버·모터(B24)는 따로, 사용자 판단.</p>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>#</th><th>절차</th><th>기대 결과 (시뮬레이션·빌드 근거)</th><th>판정</th></tr></thead>
-        <tbody><tr><td class="nw">B18</td><td>JB4 미연결 상태로 실행</td><td>비상정지 루프 열림 → LED9(트립) 켜짐, <code>python3 part03/ch30/host/p3_motor_host.py --port &lt;포트&gt; …</code>의 <code>clear_reset</code>이 trip=1로 남음(fail-safe)</td><td class="nw">⚠ 미실시</td></tr><tr><td class="nw">B19</td><td>JB4를 3.3 V(JB6 VCC)로 점퍼(NC 루프 흉내) 후 호스트 보드 단계</td><td><code>MOTOR_HOST_PASS</code>(부팅 트립 → 해제 → NORMAL 80 % 운전 → WARNING 30 % → NPU FAULT 정지 → 'J' 거부), LED11·12 켜짐/밝기 변화</td><td class="nw">⚠ 미실시</td></tr><tr><td class="nw">B20</td><td>운전 중 btnU 누름, 놓은 뒤 'C' 없이 프레임 계속</td><td>LED11·12 즉시 꺼짐, LED9 켜짐, 해제 전까지 다시 켜지지 않음</td><td class="nw">⚠ 미실시</td></tr><tr><td class="nw">B21</td><td>운전 중 sw[14](정방향 리밋) 올림 → 'D' 2(REV)</td><td>정방향 즉시 정지(트립 없음), 약 100 ms 뒤 LED10(REV)</td><td class="nw">⚠ 미실시</td></tr><tr><td class="nw">B22</td><td>sw[12](고장)·sw[11](과열) 각각 올렸다 내림</td><td>즉시 정지·트립 래치, 'C' 뒤에만 재가동</td><td class="nw">⚠ 미실시</td></tr><tr><td class="nw">B23</td><td>호스트를 멈춤(프레임 중단)</td><td>약 0.5 s 뒤 정지·WD 래치</td><td class="nw">⚠ 미실시</td></tr><tr><td class="nw">B23a</td><td>(30장 SoC 재구성 뒤) 7세그먼트 표시와 BTN GPIO 읽기</td><td>판단 결과에 따라 기대값을 정한다</td><td class="nw">⚠ 미실시</td></tr><tr><td class="nw">B24</td><td><b>(별도, 사용자 판단)</b> 실제 드라이버·모터 연결</td><td>외부 전원·공통 GND·드라이버 입력 풀다운·전류 보호 확인 뒤에만. 이 점검표의 PASS로 대체하지 않는다</td><td class="nw">⚠ 미실시</td></tr></tbody>
+        <tbody><tr><td class="nw">B18</td><td>JB4 미연결 상태로 실행</td><td>비상정지 루프 열림 → LED9(트립) 켜짐, <code>python3 part03/ch30/host/p3_motor_host.py --port &lt;포트&gt; …</code>의 <code>clear_reset</code>이 trip=1로 남음(fail-safe)</td><td class="nw">⚠ 미실시</td></tr><tr><td class="nw">B19</td><td>JB4를 3.3 V(JB6 VCC)로 점퍼(NC 루프 흉내) 후 호스트 보드 단계</td><td><code>MOTOR_HOST_PASS</code>(부팅 트립 → 해제 → NORMAL 80 % 운전 → WARNING 30 % → NPU FAULT 정지 → 'J' 거부), LED11·12 켜짐/밝기 변화</td><td class="nw">⚠ 미실시</td></tr><tr><td class="nw">B20</td><td>운전 중 btnU 누름, 놓은 뒤 'C' 없이 프레임 계속</td><td>LED11·12 즉시 꺼짐, LED9 켜짐, 해제 전까지 다시 켜지지 않음</td><td class="nw">⚠ 미실시</td></tr><tr><td class="nw">B21</td><td>운전 중 sw[14](정방향 리밋) 올림 → 'D' 2(REV)</td><td>정방향 즉시 정지(트립 없음), 약 100 ms 뒤 LED10(REV)</td><td class="nw">⚠ 미실시</td></tr><tr><td class="nw">B22</td><td>sw[12](고장)·sw[11](과열) 각각 올렸다 내림</td><td>즉시 정지·트립 래치, 'C' 뒤에만 재가동</td><td class="nw">⚠ 미실시</td></tr><tr><td class="nw">B23</td><td>호스트를 멈춤(프레임 중단)</td><td>약 0.5 s 뒤 정지·WD 래치</td><td class="nw">⚠ 미실시</td></tr><tr><td class="nw">B23a</td><td>실행 중 7세그먼트를 보고, XSDB <code>mrd 0x4006FFF0</code>·<code>mrd 0x40070008</code>·<code>mrd 0x40010000</code>(btnL 누른 채)</td><td>7세그먼트 [3] 정책 상태, [2] 구동 방향(트립이면 점), [1:0] 실제 duty 16진(램프가 끝난 뒤 B19 NORMAL FWD 80 % = <code>0150</code>, WARNING 30 % = <code>111E</code>); <code>53454737</code>; 상태 워드 [6:0] = 7세그먼트 오른쪽 두 자리 값; <code>2</code></td><td class="nw">⚠ 미실시</td></tr><tr><td class="nw">B23b</td><td>정지 상태에서 btnU를 누른 채 XSDB <code>mrd 0x40010000</code>·<code>mrd 0x40070008</code></td><td><code>8</code>(btn[3]) 그리고 상태 워드 [14] trip = 1 (같은 핀이 BTN GPIO와 비상정지에 함께 들어감), LED9 켜짐</td><td class="nw">⚠ 미실시</td></tr></tbody>
       </table></div>
       <h3>추가 코드 (구 30장 그대로, VS Code 판)</h3>
       <div class="codeblock">
@@ -3433,15 +3431,18 @@ endmodule</code></pre>
       </div>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch30/rtl/basys3_soc30_top.v · verilog · 원본 · RTL_SIM 통과 2026-11-19</span></div>
-        <pre tabindex="0"><code class="language-verilog">// (추가) 30장 사용자 Top: 28장 SoC 복제본 BD(MicroBlaze V + NPU + FND + AXI GPIO 2 + 모터 안전 코어)와 보드 핀 연결.
-// 판단 로직은 두지 않는다(핀 연결과 고정 비트 배치만). LED9..12는 코어 출력을 직접 보여 준다(CPU와 무관):
-//   LED12 ENA(PWM 밝기), LED11 IN1(FWD), LED10 IN2(REV), LED9 트립. 나머지 LED는 CPU(AXI GPIO 0).
+        <pre tabindex="0"><code class="language-verilog">// (추가) 30장 사용자 Top: 보드 핀 연결만 한다(판단 로직 없음, MBV_SOC §4).
+// (변경) 안 A(2026-11-20): 21장 동결 주소맵 SoC 복제본 BD(MicroBlaze V + NPU + BTN GPIO + 표준 7세그먼트 IP)에
+//   모터 GPIO(axi_gpio_motor, 0x4007_0000) + 모터 안전 코어를 더한 Wrapper. 7세그먼트는 BD 안 ip06_seg7이 구동한다.
+// LED9..12는 코어 출력을 직접 보여 준다(CPU와 무관): LED12 ENA(PWM 밝기), LED11 IN1(FWD), LED10 IN2(REV), LED9 트립.
+//   나머지 LED는 CPU(AXI GPIO 0).
 // Pmod JB: JB1 A14 → IN1, JB2 A16 → IN2, JB3 B15 → ENA(제2부 07장과 같은 핀), JB4 B16 ← 비상정지 루프(PULLDOWN).
-// 스위치(시험 주입용, CPU도 읽음): sw[14] 정방향 리밋, sw[13] 역방향 리밋, sw[12] 고장, sw[11] 과열. btnU = 비상정지 버튼.
+// 버튼: btn[3] = btnU는 21장처럼 axi_gpio_btn으로 가고, 같은 핀을 비상정지 버튼(estop_btn)에도 연결한다.
+// 스위치(시험 주입용, CPU도 읽음): sw[14] 정방향 리밋, sw[13] 역방향 리밋, sw[12] 고장, sw[11] 과열.
 module basys3_soc30_top (
-    input  wire        clk,
-    input  wire        btnC,
-    input  wire        btnU,
+    input  wire        clk,    // Basys3 W5: 외부 100 MHz
+    input  wire        btnC,   // Basys3 U18: SoC Reset
+    input  wire [3:0]  btn,    // [3] btnU T18(비상정지 겸용), [2] btnD U17, [1] btnL W19, [0] btnR T17
     input  wire [15:0] sw,
     output wire [15:0] led,
     input  wire        RsRx,
@@ -3449,14 +3450,15 @@ module basys3_soc30_top (
     output wire [6:0]  seg,
     output wire        dp,
     output wire [3:0]  an,
-    output wire [2:0]  JB,       // JB[0] IN1, JB[1] IN2, JB[2] ENA
-    input  wire        JB4       // 비상정지 루프(닫힘 = High)
+    output wire [2:0]  JB,     // JB[0] IN1, JB[1] IN2, JB[2] ENA
+    input  wire        JB4     // 비상정지 루프(닫힘 = High)
 );
     wire [15:0] led_cpu;
     wire in1, in2, ena, trip;
     soc11_integration_wrapper u_soc11 (
         .clk         (clk),
         .btnC        (btnC),
+        .btn_tri_i   (btn),
         .sw_tri_i    (sw),
         .led_tri_o   (led_cpu),
         .UART_0_rxd  (RsRx),
@@ -3465,7 +3467,7 @@ module basys3_soc30_top (
         .dp          (dp),
         .an          (an),
         .estop_ok    (JB4),
-        .estop_btn   (btnU),
+        .estop_btn   (btn[3]),
         .fault       (sw[12]),
         .otemp       (sw[11]),
         .lim_f       (sw[14]),
@@ -3481,9 +3483,11 @@ endmodule</code></pre>
       </div>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch30/constraints/basys3_soc30.xdc · xdc · 원본 · Vivado 실행 통과</span></div>
-        <pre tabindex="0"><code class="language-xdc">## (추가) 30장: 28장 XDC 전체(아래 그대로) + btnU·Pmod JB(모터 드라이버 IN1·IN2·ENA, 비상정지 루프 PULLDOWN).
-## (추가) 28장: 21장 XDC(같은 활성 줄) + Basys3 4자리 FND(seg[6:0], dp, an[3:0]). 핀은 Basys-3-Master.xdc와 같다.
-## 포트: clk(W5 100 MHz), btnC, sw[15:0], led[15:0], RsRx/RsTx, seg/dp/an(28장 basys3_soc28_top)
+        <pre tabindex="0"><code class="language-xdc">## (변경) 안 A(2026-11-20) 30장: 21장 XDC 전체(아래 그대로, btn[3] = btnU T18 포함) + Pmod JB(모터 드라이버 IN1·IN2·ENA, 비상정지 루프 PULLDOWN).
+## btnU는 21장처럼 btn[3](axi_gpio_btn)으로 들어가고, Top이 같은 핀을 모터 안전 코어 비상정지 입력에도 연결한다.
+## (추가) 21장: 제1부 11장 성공 프로젝트가 쓰는 Basys3 Master XDC(Digilent)의 활성 줄만 그대로 옮긴 제약.
+## 포트: clk(W5 100 MHz), btnC, sw[15:0], led[15:0], RsRx/RsTx(USB-UART). NPU는 내부 AXI라 핀이 없다.
+## (변경) 안 A: btn[3:0](U·D·L·R), 7세그먼트 seg[6:0]·dp·an[3:0]. 핀은 Basys-3-Master.xdc와 같다.
 set_property -dict { PACKAGE_PIN W5   IOSTANDARD LVCMOS33 } [get_ports clk]
 create_clock -name sys_clk_pin -period 10.00 -waveform {0 5} [get_ports clk]
 set_property -dict { PACKAGE_PIN V17   IOSTANDARD LVCMOS33 } [get_ports {sw[0]}]
@@ -3521,13 +3525,10 @@ set_property -dict { PACKAGE_PIN L1    IOSTANDARD LVCMOS33 } [get_ports {led[15]
 set_property -dict { PACKAGE_PIN U18   IOSTANDARD LVCMOS33 } [get_ports btnC]
 set_property -dict { PACKAGE_PIN B18   IOSTANDARD LVCMOS33 } [get_ports RsRx]
 set_property -dict { PACKAGE_PIN A18   IOSTANDARD LVCMOS33 } [get_ports RsTx]
-set_property CONFIG_VOLTAGE 3.3 [current_design]
-set_property CFGBVS VCCO [current_design]
-set_property BITSTREAM.GENERAL.COMPRESS TRUE [current_design]
-set_property BITSTREAM.CONFIG.CONFIGRATE 33 [current_design]
-set_property CONFIG_MODE SPIx4 [current_design]
-
-## 7-세그먼트(Low 활성)
+set_property -dict { PACKAGE_PIN T18   IOSTANDARD LVCMOS33 } [get_ports {btn[3]}]
+set_property -dict { PACKAGE_PIN U17   IOSTANDARD LVCMOS33 } [get_ports {btn[2]}]
+set_property -dict { PACKAGE_PIN W19   IOSTANDARD LVCMOS33 } [get_ports {btn[1]}]
+set_property -dict { PACKAGE_PIN T17   IOSTANDARD LVCMOS33 } [get_ports {btn[0]}]
 set_property -dict { PACKAGE_PIN W7   IOSTANDARD LVCMOS33 } [get_ports {seg[0]}]
 set_property -dict { PACKAGE_PIN W6   IOSTANDARD LVCMOS33 } [get_ports {seg[1]}]
 set_property -dict { PACKAGE_PIN U8   IOSTANDARD LVCMOS33 } [get_ports {seg[2]}]
@@ -3540,9 +3541,13 @@ set_property -dict { PACKAGE_PIN U2   IOSTANDARD LVCMOS33 } [get_ports {an[0]}]
 set_property -dict { PACKAGE_PIN U4   IOSTANDARD LVCMOS33 } [get_ports {an[1]}]
 set_property -dict { PACKAGE_PIN V4   IOSTANDARD LVCMOS33 } [get_ports {an[2]}]
 set_property -dict { PACKAGE_PIN W4   IOSTANDARD LVCMOS33 } [get_ports {an[3]}]
+set_property CONFIG_VOLTAGE 3.3 [current_design]
+set_property CFGBVS VCCO [current_design]
+set_property BITSTREAM.GENERAL.COMPRESS TRUE [current_design]
+set_property BITSTREAM.CONFIG.CONFIGRATE 33 [current_design]
+set_property CONFIG_MODE SPIx4 [current_design]
 
-## ---- 30장 추가: 비상정지 버튼, Pmod JB (Basys-3-Master.xdc 핀)
-set_property -dict { PACKAGE_PIN T18   IOSTANDARD LVCMOS33 } [get_ports btnU]
+## ---- 30장 추가: Pmod JB (Basys-3-Master.xdc 핀)
 set_property -dict { PACKAGE_PIN A14   IOSTANDARD LVCMOS33 } [get_ports {JB[0]}]
 set_property -dict { PACKAGE_PIN A16   IOSTANDARD LVCMOS33 } [get_ports {JB[1]}]
 set_property -dict { PACKAGE_PIN B15   IOSTANDARD LVCMOS33 } [get_ports {JB[2]}]
@@ -3551,16 +3556,18 @@ set_property -dict { PACKAGE_PIN B16   IOSTANDARD LVCMOS33 PULLDOWN TRUE } [get_
       </div>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch30/synth/soc30_bd.tcl · tcl · 원본 · Vivado 실행 통과</span></div>
-        <pre tabindex="0"><code class="language-tcl"># (추가) 30장: 28장 SoC 복제본에 모터 안전 경로를 더하고 Bitstream·XSA까지 만든다.
-#   AXI GPIO 2(듀얼: 채널 1 출력 = 명령 워드, 채널 2 입력 = 상태 워드, 0x4002_0000)
+        <pre tabindex="0"><code class="language-tcl"># (추가) 30장: SoC 복제본에 모터 안전 경로를 더하고 Bitstream·XSA까지 만든다.
+# (변경) 안 A(2026-11-20): 출발점을 28장 SoC에서 21장 동결 주소맵 SoC(ch21/build/soc21_npu)로 바꾼다.
+#   21장 주소·인터럽트는 바꾸지 않고, 빈 칸 0x4007_0000(64 KB)에 모터 GPIO(axi_gpio_motor, 듀얼:
+#   채널 1 출력 = 명령 워드, 채널 2 입력 = 상태 워드)만 더한다. 모터 경로는 인터럽트를 쓰지 않는다(In4 예약 그대로 0).
 #   p3_motor_safety_bd(BD 모듈 참조, GPIO와 같은 클록·peripheral_aresetn) → 외부 포트(비상정지·고장·과열·리밋 입력,
-#   IN1·IN2·ENA·트립 출력). 사용자 Top: basys3_soc30_top(핀 연결만). 28장 결과물은 build_soc.sh가 cp -a로 복제한다.
+#   IN1·IN2·ENA·트립 출력). 사용자 Top: basys3_soc30_top(핀 연결만). 21장 결과물은 build_soc.sh가 cp -a로 복제한다.
 # 사용: vivado -mode batch -source soc30_bd.tcl -tclargs &lt;복제 xpr&gt; &lt;ch30 폴더&gt; &lt;출력 폴더&gt; &lt;jobs&gt;
 set xpr [lindex $argv 0]
 set ch [file normalize [lindex $argv 1]]
 set out [file normalize [lindex $argv 2]]
 set jobs [lindex $argv 3]
-set gpio_base 0x40020000
+set gpio_base 0x40070000
 file mkdir $out
 
 proc check {cond msg} {
@@ -3571,36 +3578,36 @@ open_project $xpr
 foreach f [get_files -quiet -of_objects [get_filesets constrs_1]] { remove_files -fileset constrs_1 $f }
 add_files -fileset constrs_1 -norecurse $ch/constraints/basys3_soc30.xdc
 add_files -norecurse [list $ch/rtl/p3_motor_safety.v $ch/rtl/p3_motor_safety_bd.v $ch/rtl/basys3_soc30_top.v]
-set_property is_enabled false [get_files basys3_soc28_top.v]
+set_property is_enabled false [get_files basys3_soc21_top.v]
 update_compile_order -fileset sources_1
 
 set bd_file [get_files -filter {FILE_TYPE == "Block Designs"}]
 open_bd_design $bd_file
 puts "BD [current_bd_design]"
-check {[llength [get_bd_cells -quiet fnd_scan_0]] == 1 &amp;&amp; [llength [get_bd_cells -quiet p3_npu_0]] == 1} "28장 SoC(NPU + FND)에서 시작"
+check {[llength [get_bd_cells -quiet ip06_seg7]] == 1 &amp;&amp; [llength [get_bd_cells -quiet p3_npu_0]] == 1 &amp;&amp; [llength [get_bd_cells -quiet axi_gpio_btn]] == 1} "21장 안 A SoC(NPU + BTN + SEG7)에서 시작"
 
 set smc [get_bd_cells axi_smc]
-check {[get_property CONFIG.NUM_MI $smc] == 6} "SmartConnect NUM_MI 6 (28장)"
-set_property CONFIG.NUM_MI 7 $smc
-set g [create_bd_cell -type ip -vlnv xilinx.com:ip:axi_gpio:2.0 axi_gpio_2]
+check {[get_property CONFIG.NUM_MI $smc] == 7} "SmartConnect NUM_MI 7 (21장 안 A)"
+set_property CONFIG.NUM_MI 8 $smc
+set g [create_bd_cell -type ip -vlnv xilinx.com:ip:axi_gpio:2.0 axi_gpio_motor]
 set_property -dict [list CONFIG.C_IS_DUAL 1 CONFIG.C_GPIO_WIDTH 32 CONFIG.C_ALL_OUTPUTS 1 CONFIG.C_DOUT_DEFAULT 0x00000000 \
   CONFIG.C_GPIO2_WIDTH 32 CONFIG.C_ALL_INPUTS_2 1] $g
-connect_bd_intf_net [get_bd_intf_pins axi_smc/M06_AXI] [get_bd_intf_pins axi_gpio_2/S_AXI]
+connect_bd_intf_net [get_bd_intf_pins axi_smc/M07_AXI] [get_bd_intf_pins axi_gpio_motor/S_AXI]
 set clk_net [get_bd_nets -of_objects [get_bd_pins axi_gpio_0/s_axi_aclk]]
 set rst_net [get_bd_nets -of_objects [get_bd_pins axi_gpio_0/s_axi_aresetn]]
-connect_bd_net -net $clk_net [get_bd_pins axi_gpio_2/s_axi_aclk]
-connect_bd_net -net $rst_net [get_bd_pins axi_gpio_2/s_axi_aresetn]
+connect_bd_net -net $clk_net [get_bd_pins axi_gpio_motor/s_axi_aclk]
+connect_bd_net -net $rst_net [get_bd_pins axi_gpio_motor/s_axi_aresetn]
 
 set m [create_bd_cell -type module -reference p3_motor_safety_bd motor_safety_0]
 connect_bd_net -net $clk_net [get_bd_pins motor_safety_0/clk]
 connect_bd_net -net $rst_net [get_bd_pins motor_safety_0/resetn]
-connect_bd_net [get_bd_pins axi_gpio_2/gpio_io_o] [get_bd_pins motor_safety_0/cmd_i]
-connect_bd_net [get_bd_pins motor_safety_0/status_o] [get_bd_pins axi_gpio_2/gpio2_io_i]
+connect_bd_net [get_bd_pins axi_gpio_motor/gpio_io_o] [get_bd_pins motor_safety_0/cmd_i]
+connect_bd_net [get_bd_pins motor_safety_0/status_o] [get_bd_pins axi_gpio_motor/gpio2_io_i]
 foreach {pin port} {estop_ok_i estop_ok estop_btn_i estop_btn fault_i fault otemp_i otemp lim_f_i lim_f lim_r_i lim_r
                     in1_o in1 in2_o in2 ena_o ena trip_o trip} {
   make_bd_pins_external -name $port [get_bd_pins motor_safety_0/$pin]
 }
-assign_bd_address -target_address_space /microblaze_riscv_0/Data [get_bd_addr_segs axi_gpio_2/S_AXI/Reg] \
+assign_bd_address -target_address_space /microblaze_riscv_0/Data [get_bd_addr_segs axi_gpio_motor/S_AXI/Reg] \
   -offset $gpio_base -range 64K
 validate_bd_design
 save_bd_design
@@ -3622,10 +3629,42 @@ foreach a $rows {
   }
 }
 check {$overlap == 0} "data address segments do not overlap"
-set gseg [get_bd_addr_segs -of_objects [get_bd_addr_spaces /microblaze_riscv_0/Data] -filter {NAME =~ "*axi_gpio_2*"}]
+set gseg [get_bd_addr_segs -of_objects [get_bd_addr_spaces /microblaze_riscv_0/Data] -filter {NAME =~ "*axi_gpio_motor*"}]
 check {[get_property OFFSET $gseg] == $gpio_base} "motor GPIO base $gpio_base"
-set nseg [get_bd_addr_segs -of_objects [get_bd_addr_spaces /microblaze_riscv_0/Data] -filter {NAME =~ "*p3_npu_0*"}]
-check {[get_property OFFSET $nseg] == 0x44A00000} "NPU base unchanged 0x44A00000"
+# (변경) 안 A 주소맵 대조: 21장 8줄 + 모터 1줄이 셀 이름 → 베이스·범위로 한 줄씩 같아야 한다
+proc data_seg {cell} {
+  return [get_bd_addr_segs -of_objects [get_bd_addr_spaces /microblaze_riscv_0/Data] -filter "NAME =~ *_${cell}_*"]
+}
+set map_a {dlmb_bram_if_cntlr 0x00000000 65536 axi_gpio_0 0x40000000 65536 axi_gpio_btn 0x40010000 65536
+  axi_uartlite_0 0x40020000 65536 axi_timer_0 0x40030000 65536 axi_intc_0 0x40040000 65536
+  ip06_seg7 0x40060000 65536 axi_gpio_motor 0x40070000 65536 p3_npu_0 0x44A00000 4096}
+set addr_ok 1
+foreach {cell base rng} $map_a {
+  set sg [data_seg $cell]
+  if {[llength $sg] != 1} { puts "ADDR_MAP_A $cell MISSING"; set addr_ok 0; continue }
+  set ob [get_property OFFSET $sg]; set or [get_property RANGE $sg]
+  set ok [expr {$ob == $base &amp;&amp; $or == $rng}]
+  puts "ADDR_MAP_A $cell [format 0x%08X $ob] $or expect [format 0x%08X $base] $rng [expr {$ok ? "OK" : "MISMATCH"}]"
+  if {!$ok} { set addr_ok 0 }
+}
+if {[llength $segs] != [expr {[llength $map_a] / 3}]} { puts "ADDR_MAP_A extra segments: [llength $segs]"; set addr_ok 0 }
+puts [expr {$addr_ok ? "ADDR_MAP_A_PASS" : "ADDR_MAP_A_FAIL"}]
+check {$addr_ok} "address map A (21장 8줄 + 모터 1줄)"
+# (변경) 안 A 인터럽트 대조: 21장과 같아야 한다(모터는 인터럽트 없음, In4 = 0)
+set irq_map_a {0 axi_timer_0/interrupt 1 axi_uartlite_0/interrupt 3 axi_gpio_btn/ip2intc_irpt 12 p3_npu_0/irq_o}
+set irq_ok 1
+for {set i 0} {$i &lt; 16} {incr i} {
+  if {[dict exists $irq_map_a $i]} { set exp [dict get $irq_map_a $i] } else { set exp irq_zero/dout }
+  set net [get_bd_nets -quiet -of_objects [get_bd_pins irq_concat/In$i]]
+  set drv [expr {$net eq "" ? "" : [get_bd_pins -quiet -of_objects $net -filter {DIR == O}]}]
+  set got [string trimleft [lindex $drv 0] /]
+  set ok [expr {$got eq $exp}]
+  puts "IRQ_MAP_A In$i $got expect $exp [expr {$ok ? "OK" : "MISMATCH"}]"
+  if {!$ok} { set irq_ok 0 }
+}
+if {[get_property CONFIG.NUM_PORTS [get_bd_cells irq_concat]] != 16} { set irq_ok 0 }
+puts [expr {$irq_ok ? "IRQ_MAP_A_PASS" : "IRQ_MAP_A_FAIL"}]
+check {$irq_ok} "irq map A (21장과 같음)"
 check {[get_bd_nets -of_objects [get_bd_pins motor_safety_0/clk]] eq [get_bd_nets -of_objects [get_bd_pins axi_smc/aclk]]} "motor clock = SmartConnect clock"
 check {[get_bd_nets -of_objects [get_bd_pins motor_safety_0/resetn]] eq [get_bd_nets -of_objects [get_bd_pins rst_clk_wiz_1_100M/peripheral_aresetn]]} "motor reset = peripheral_aresetn"
 foreach port {estop_ok estop_btn fault otemp lim_f lim_r in1 in2 ena trip} {
@@ -3636,7 +3675,7 @@ foreach port {in1 in2 ena} {
   check {$drv eq "/motor_safety_0"} "BD port $port connects only to motor_safety_0 (not CPU/NPU)"
 }
 set cmd_src [get_bd_cells -of_objects [get_bd_pins -of_objects [get_bd_nets -of_objects [get_bd_pins motor_safety_0/cmd_i]]]]
-check {[lsort $cmd_src] eq [lsort {/axi_gpio_2 /motor_safety_0}]} "motor cmd_i comes only from axi_gpio_2 (CPU register)"
+check {[lsort $cmd_src] eq [lsort {/axi_gpio_motor /motor_safety_0}]} "motor cmd_i comes only from axi_gpio_motor (CPU register)"
 
 make_wrapper -files $bd_file -top -force
 generate_target all $bd_file
@@ -3662,7 +3701,7 @@ set wns [get_property SLACK [get_timing_paths -setup -max_paths 1]]
 set whs [get_property SLACK [get_timing_paths -hold -max_paths 1]]
 puts "TIMING WNS=$wns WHS=$whs"
 check {$wns &gt;= 0 &amp;&amp; $whs &gt;= 0} "post-route setup/hold met"
-foreach {port pin} {JB[0] A14 JB[1] A16 JB[2] B15 JB4 B16 btnU T18 seg[0] W7 RsRx B18 led[15] L1 led[12] P3} {
+foreach {port pin} {JB[0] A14 JB[1] A16 JB[2] B15 JB4 B16 btn[3] T18 btn[0] T17 seg[0] W7 an[0] U2 RsRx B18 led[15] L1 led[12] P3} {
   check {[get_property PACKAGE_PIN [get_ports $port]] eq $pin} "pin $port = $pin"
 }
 check {[get_property PULLTYPE [get_ports JB4]] eq "PULLDOWN"} "JB4 estop loop PULLDOWN (open = stop)"
@@ -3674,13 +3713,13 @@ puts "SOC30_BUILD_DONE"</code></pre>
       </div>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch30/sw/main.c · c · 원본 · PC 시험 통과 2026-11-19 · 보드 ⚠ 미검증</span></div>
-        <pre tabindex="0"><code class="language-c">/* (추가) 30장: MicroBlaze V main. NPU·모터 GPIO 주소는 Vivado Address Editor 값(xparameters.h, 30장 XSA). */
+        <pre tabindex="0"><code class="language-c">/* (추가) 30장: MicroBlaze V main. NPU·모터 GPIO 주소는 Vivado Address Editor 값(xparameters.h, 30장 XSA). (변경) 안 A: 모터 GPIO = axi_gpio_motor 0x4007_0000. */
 #include "xparameters.h"
 #include "motor_app.h"
 
 int main(void)
 {
-    motor_app_run(XPAR_P3_NPU_0_BASEADDR, XPAR_AXI_GPIO_2_BASEADDR, 0);   /* 돌아오지 않는다 */
+    motor_app_run(XPAR_P3_NPU_0_BASEADDR, XPAR_AXI_GPIO_MOTOR_BASEADDR, 0);   /* 돌아오지 않는다 */
     return 0;
 }</code></pre>
       </div>
@@ -3695,7 +3734,7 @@ int main(void)
 #define M_FWD  1
 #define M_REV  2
 
-/* 명령 워드(AXI GPIO 2 채널 1): [6:0] duty, [9:8] dir, [12] clear 토글, [15] kick 토글 */
+/* 명령 워드(모터 GPIO axi_gpio_motor 채널 1, 안 A 0x4007_0000): [6:0] duty, [9:8] dir, [12] clear 토글, [15] kick 토글 */
 #define MOTOR_CMD(dir, duty, kick, clr) \
     ((uint32_t)(duty) | ((uint32_t)(dir) &lt;&lt; 8) | ((uint32_t)(clr) &lt;&lt; 12) | ((uint32_t)(kick) &lt;&lt; 15))
 #define MOTOR_REG_CMD    0x0u   /* AXI GPIO 채널 1 DATA */
@@ -4761,7 +4800,7 @@ if __name__ == "__main__":
       <h3>판정 줄</h3>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
-        <tbody><tr><td><code>RTL_SIM_PASS MOTOR_SAFETY</code></td><td>안전 코어가 클록 단위 기준 모델과 같음 (트립·램프·데드타임)</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS … invariants=0</code></td><td>호스트 → 펌웨어(29장 정책) → NPU·모터 RTL에서 안전 불변식 위반 0</td></tr><tr><td><code>⚠ 비트스트림</code></td><td>이전 주소맵 기준 빌드 — 안 A 재빌드 대기</td></tr></tbody>
+        <tbody><tr><td><code>RTL_SIM_PASS MOTOR_SAFETY</code></td><td>안전 코어가 클록 단위 기준 모델과 같음 (트립·램프·데드타임)</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS … invariants=0</code></td><td>호스트 → 펌웨어(29장 정책) → NPU·모터 RTL에서 안전 불변식 위반 0</td></tr><tr><td><code>ADDR_MAP_A_PASS · IRQ_MAP_A_PASS</code></td><td>30장 SoC = 21장 8줄 + 모터 GPIO 0x4007_0000, 인터럽트는 21장과 같음 (모터는 폴링)</td></tr><tr><td><code>TIMING WNS=0.357 WHS=0.030</code></td><td>30장 SoC 배선 후, ELF_MEM_PASS (motor_app 53,748 B)</td></tr></tbody>
       </table></div>
       <div class="gate-row">
         <div class="gate pass">
@@ -4776,9 +4815,17 @@ if __name__ == "__main__":
           <b>SYNTH_TIMING_PASS</b>
           <span>OOC 배선 후 WNS +3.699 ns (OOC) · <code>part03/ch30/validation/synth_ooc_summary.md</code></span>
         </div>
-        <div class="gate todo">
-          <b>안 A 재빌드</b>
-          <span>⚠ 이전 주소맵 비트스트림 · VS Code 재빌드 대기 (지시문 10)</span>
+        <div class="gate pass">
+          <b>ADDR_MAP_A_PASS</b>
+          <span>ADDR_MAP_A_PASS · <code>part03/ch30/validation/build_soc_mapA_20261120.log</code></span>
+        </div>
+        <div class="gate pass">
+          <b>ELF_MEM_PASS</b>
+          <span>ELF_MEM_PASS · <code>part03/ch30/validation/build_soc_mapA_20261120.log</code></span>
+        </div>
+        <div class="gate pass">
+          <b>SOC_TIMING</b>
+          <span>WNS 0.357 ns · WHS 0.030 ns (30장 SoC 배선 후, 안 A) · <code>part03/ch30/validation/build_soc_mapA_20261120.log</code></span>
         </div>
         <div class="gate todo">
           <b>BOARD_PASS</b>
@@ -6642,18 +6689,18 @@ out.write_text(json.dumps(doc) + "\n")</code></pre>
         <pre tabindex="0"><code>LEVEL=sim bash part03/ch27/scripts/run_all.sh</code></pre></div>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>단계</th><th>결과</th></tr></thead>
-        <tbody><tr><td>host_integer_reference</td><td>PASS</td></tr><tr><td>rtl_ch13_26</td><td>PASS</td></tr><tr><td>pc_eval_ch18</td><td>NOT_RUN (LEVEL=sim)</td></tr><tr><td>synth_ch19</td><td>NOT_RUN (LEVEL=sim)</td></tr><tr><td>synth_ch20</td><td>NOT_RUN (LEVEL=sim)</td></tr><tr><td>package_ip_ch20</td><td>NOT_RUN (LEVEL=sim)</td></tr><tr><td>soc_build_ch21</td><td>NOT_RUN (LEVEL=sim)</td></tr><tr><td>vitis_ch22</td><td>NOT_RUN (LEVEL=sim)</td></tr><tr><td>synth_ch26</td><td>NOT_RUN (LEVEL=sim)</td></tr><tr><td>sw_build_ch28</td><td>NOT_RUN (LEVEL=sim)</td></tr><tr><td>synth_ch29</td><td>NOT_RUN (LEVEL=sim)</td></tr><tr><td>sw_build_ch29</td><td>NOT_RUN (LEVEL=sim)</td></tr><tr><td>synth_ch30</td><td>NOT_RUN (LEVEL=sim)</td></tr><tr><td>soc_build_ch30</td><td>NOT_RUN (LEVEL=sim)</td></tr><tr><td>synth_ch31</td><td>NOT_RUN (LEVEL=sim)</td></tr><tr><td>sw_build_ch31</td><td>NOT_RUN (LEVEL=sim)</td></tr><tr><td>sweep_ch24</td><td>NOT_RUN (LEVEL=sim)</td></tr><tr><td>soc_sim_ch23</td><td>NOT_RUN (LEVEL=sim)</td></tr><tr><td>power_ch25</td><td>NOT_RUN (LEVEL=sim)</td></tr><tr><td>soc_sim_ch28</td><td>NOT_RUN (LEVEL=sim)</td></tr></tbody>
+        <tbody><tr><td>host_integer_reference</td><td>PASS</td></tr><tr><td>rtl_ch13_26</td><td>PASS</td></tr><tr><td>pc_eval_ch18</td><td>PASS</td></tr><tr><td>synth_ch19</td><td>PASS</td></tr><tr><td>synth_ch20</td><td>PASS</td></tr><tr><td>package_ip_ch20</td><td>PASS</td></tr><tr><td>soc_build_ch21</td><td>PASS</td></tr><tr><td>vitis_ch22</td><td>PASS</td></tr><tr><td>synth_ch26</td><td>PASS</td></tr><tr><td>sw_build_ch28</td><td>PASS</td></tr><tr><td>synth_ch29</td><td>PASS</td></tr><tr><td>sw_build_ch29</td><td>PASS</td></tr><tr><td>synth_ch30</td><td>PASS</td></tr><tr><td>soc_build_ch30</td><td>PASS</td></tr><tr><td>synth_ch31</td><td>PASS</td></tr><tr><td>sw_build_ch31</td><td>PASS</td></tr><tr><td>sweep_ch24</td><td>NOT_RUN (LEVEL=fpga)</td></tr><tr><td>soc_sim_ch23</td><td>NOT_RUN (LEVEL=fpga)</td></tr><tr><td>power_ch25</td><td>NOT_RUN (LEVEL=fpga)</td></tr><tr><td>soc_sim_ch28</td><td>NOT_RUN (LEVEL=fpga)</td></tr></tbody>
       </table></div>
     </section>
     <section class="section" id="s_report">
       <h2><span class="num">09</span> 누적 보고·인계</h2>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>서브젝트</th><th>구 장</th><th>시뮬레이션·정적 검사</th><th>Vivado</th><th>보드 점검표</th></tr></thead>
-        <tbody><tr><td>6-1</td><td>28장</td><td>통과</td><td>해당 없음</td><td>B9·B10·B11·B12·B13·B13a ⚠ 미실시</td></tr><tr><td>6-2</td><td>26장</td><td>통과</td><td>통과</td><td>— ⚠ 미실시</td></tr><tr><td>6-3</td><td>29장</td><td>통과</td><td>통과</td><td>B14·B15·B16·B17·B17a ⚠ 미실시</td></tr><tr><td>6-4</td><td>30장</td><td>통과</td><td>통과</td><td>B18·B19·B20·B21·B22·B23·B23a·B24 ⚠ 미실시</td></tr><tr><td>6-5</td><td>31장</td><td>통과</td><td>통과</td><td>B25·B26·B26a ⚠ 미실시</td></tr></tbody>
+        <tbody><tr><td>6-1</td><td>28장</td><td>통과</td><td>해당 없음</td><td>B9·B10·B11·B12·B13·B13a ⚠ 미실시</td></tr><tr><td>6-2</td><td>26장</td><td>통과</td><td>통과</td><td>— ⚠ 미실시</td></tr><tr><td>6-3</td><td>29장</td><td>통과</td><td>통과</td><td>B14·B15·B16·B17·B17a ⚠ 미실시</td></tr><tr><td>6-4</td><td>30장</td><td>통과</td><td>통과</td><td>B18·B19·B20·B21·B22·B23·B23a·B23b ⚠ 미실시</td></tr><tr><td>6-5</td><td>31장</td><td>통과</td><td>통과</td><td>B25·B26·B26a ⚠ 미실시</td></tr></tbody>
       </table></div>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>다음 장으로 넘기는 것</th><th>사용처</th></tr></thead>
-        <tbody><tr><td><code>6-1 손글씨 전송 프로토콜 (part03/ch28)</code></td><td>7장 종합과제 기본 틀 (그림 → UART → NPU → 표시)</td></tr><tr><td><code>part03/ch26/rtl/p3_conv3x3_8x8.v</code></td><td>7장 후보: AXI 래퍼를 붙여 CNN 앞단으로</td></tr><tr><td><code>30장 안 A 재빌드 결과</code></td><td>6-4 보드 항목 B18~B24 실행 조건</td></tr></tbody>
+        <tbody><tr><td><code>6-1 손글씨 전송 프로토콜 (part03/ch28)</code></td><td>7장 종합과제 기본 틀 (그림 → UART → NPU → 표시)</td></tr><tr><td><code>part03/ch26/rtl/p3_conv3x3_8x8.v</code></td><td>7장 후보: AXI 래퍼를 붙여 CNN 앞단으로</td></tr><tr><td><code>30장 비트스트림 basys3_soc30_top.bit (0x4007_0000 모터 GPIO)</code></td><td>7장: 모터·서보를 쓰는 과제의 출발점 (주소맵 안 A + 1줄)</td></tr></tbody>
       </table></div>
       <p>장 게이트 (증거 파일 기준 자동 표시):</p>
       <div class="gate-row">

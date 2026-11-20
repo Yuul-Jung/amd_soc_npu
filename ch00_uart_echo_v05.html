@@ -405,7 +405,7 @@ vivado -mode batch -nojournal -source tools/vivado/ooc_timing.tcl -tclargs ch00
       <p>OOC 결과는 입출력 핀 지연을 포함하지 않으므로 보드 Top 타이밍을 대신하지 않습니다. 증거 저장은 <code>bash tools/run_vivado_all.sh ooc</code>(→ <code>ch00/validation/vivado_ooc_YYYYMMDD.txt</code>). 보드 확인은 <a href="ch12_integrated_npu_v05.html#s08">12장 · 08</a>에서 통합 Top으로 진행합니다.</p>
       <p><code>tools/vivado/ooc_timing.tcl</code> 전체:</p>
       <div class="codeblock">
-        <div class="codebar"><span>tools/vivado/ooc_timing.tcl · tcl · 원본 · ⚠ 미검증 (Vivado 미실행)</span></div>
+        <div class="codebar"><span>tools/vivado/ooc_timing.tcl · tcl · 원본 · Vivado 실행 통과</span></div>
         <pre tabindex="0"><code class="language-tcl"># 00~10·13~19장 단위 모듈 Out-of-Context(OOC) 합성·배치·배선·타이밍 확인.
 # 실행 (저장소 루트):
 #   vivado -mode batch -nojournal -source tools/vivado/ooc_timing.tcl            ;# 전체
@@ -452,7 +452,10 @@ set designs {
 proc worst_slack {kind} {
     set p [get_timing_paths -quiet -$kind -max_paths 1 -nworst 1]
     if {[llength $p] == 0} { return NA }
-    return [format %.3f [get_property SLACK $p]]
+    # 경로가 있어도 SLACK이 비면(제약된 레지스터 간 경로가 DSP48E1·RAMB 프리미티브 안에만 있는 설계, 예: 01·02·04장) NA
+    set s [get_property SLACK $p]
+    if {$s eq ""} { return NA }
+    return [format %.3f $s]
 }
 proc count_ref {pattern} {
     return [llength [get_cells -quiet -hierarchical -filter "IS_PRIMITIVE &amp;&amp; REF_NAME =~ $pattern"]]
@@ -510,7 +513,7 @@ if {$fail &gt; 0} { error "OOC_TIMING_FAILED count=$fail" }</code></pre>
       </div>
       <p><code>tools/run_vivado_all.sh</code> 전체:</p>
       <div class="codeblock">
-        <div class="codebar"><span>tools/run_vivado_all.sh · bash · 원본 · ⚠ 미검증 (Vivado 미실행)</span></div>
+        <div class="codebar"><span>tools/run_vivado_all.sh · bash · 원본 · Vivado 실행 통과</span></div>
         <pre tabindex="0"><code class="language-bash">#!/usr/bin/env bash
 # VS Code(Vivado 설치 PC)에서 00~13장 합성·타이밍·타이밍 시뮬레이션을 한 번에 실행하고
 # 각 장 validation/ 에 증거 로그를 남긴다. 보드 확인(BOARD_PASS)과는 별개다.
@@ -561,13 +564,16 @@ fi
 [ $status -eq 0 ] &amp;&amp; echo "VIVADO_ALL_PASS ($what)" || echo "VIVADO_ALL_FAIL ($what) — build/vivado/logs 확인"
 exit $status</code></pre>
       </div>
+      <p>실행 기록 (2026-11-20, 출처 <code>ch00/validation/vivado_ooc_20261120.txt</code>):</p>
+      <div class="codeblock"><div class="codebar"><span>Vivado 실행 결과</span></div>
+        <pre tabindex="0"><code>SYNTH_TIMING_PASS ch00 basys3_uart_echo_top WNS=4.696 WHS=0.038 LUT=196 FF=128 DSP48E1=0 RAMB=0</code></pre></div>
     </section>
     <section class="section" id="s09">
       <h2><span class="num">09</span>검증 현황·인계</h2>
       <p>누적 보고 (이전 결과 → 추가 RTL → 시험 벡터 → 시뮬레이션 → 합성/보드 → 인계):</p>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>이전 결과</th><th>추가 RTL</th><th>시험 벡터</th><th>시뮬레이션</th><th>합성 / 보드</th><th>인계</th></tr></thead>
-        <tbody><tr><td>없음 (첫 장)</td><td><code>uart_rx.v</code><br><code>uart_tx.v</code><br><code>uart_core.v</code><br><code>uart_echo_controller.v</code><br><code>basys3_uart_echo_top.v</code></td><td><code>tb_uart_echo.sv</code></td><td>통과</td><td>⚠ 대기 / 미실시</td><td>2건 (아래 표)</td></tr></tbody>
+        <tbody><tr><td>없음 (첫 장)</td><td><code>uart_rx.v</code><br><code>uart_tx.v</code><br><code>uart_core.v</code><br><code>uart_echo_controller.v</code><br><code>basys3_uart_echo_top.v</code></td><td><code>tb_uart_echo.sv</code></td><td>통과</td><td>통과 / 미실시</td><td>2건 (아래 표)</td></tr></tbody>
       </table></div>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>다음 장으로 넘기는 파일</th><th>사용처</th></tr></thead>
@@ -587,9 +593,9 @@ exit $status</code></pre>
           <b>RTL_SIM_PASS</b>
           <span>UART_ECHO_RTL_SIM_PASS decoded=2 · Icarus Verilog 12.0 · 2026-11-18</span>
         </div>
-        <div class="gate todo">
+        <div class="gate pass">
           <b>SYNTH_TIMING_PASS</b>
-          <span>⚠ 미검증 · VS Code Vivado 실행 대기 (08절)</span>
+          <span>ch00 basys3_uart_echo_top WNS=4.696 WHS=0.038 LUT=196 FF=128 DSP48E1=0… · 2026-11-20</span>
         </div>
         <div class="gate todo">
           <b>BOARD_PASS</b>

@@ -491,17 +491,20 @@ vivado -mode batch -nojournal -source tools/vivado/ooc_timing.tcl -tclargs ch14
         <thead><tr><th>판정 항목</th><th>기준</th><th>확인 위치</th></tr></thead>
         <tbody>
           <tr><td>Setup / Hold</td><td><code>WNS ≥ 0</code> · <code>WHS ≥ 0</code> (clk 10.000 ns)</td><td><code>build/vivado/ch14/timing_route.rpt</code></td></tr>
-          <tr><td>자원</td><td>DSP48E1 ≥ 4 (차선별 MAC) · RAMB 또는 LUTRAM (가중치 4개 + 입력 1개) — 기대값 · 실행 전 ⚠ 미검증</td><td><code>build/vivado/ch14/route_util.rpt</code></td></tr>
+          <tr><td>자원</td><td>DSP48E1 ≥ 4 (차선별 MAC) · RAMB 또는 LUTRAM (가중치 4개 + 입력 1개) — 기대값</td><td><code>build/vivado/ch14/route_util.rpt</code></td></tr>
         </tbody>
       </table></div>
       <p>OOC 결과는 입출력 핀 지연을 포함하지 않으므로 보드 Top 타이밍을 대신하지 않습니다. 증거 저장은 <code>bash tools/run_vivado_all.sh ooc</code>(→ <code>ch14/validation/vivado_ooc_YYYYMMDD.txt</code>). 보드 확인은 <a href="ch12_integrated_npu_v05.html#s08">12장 · 08</a>에서 통합 Top으로 진행합니다.</p>
+      <p>실행 기록 (2026-11-20, 출처 <code>ch14/validation/vivado_ooc_20261120.txt</code>):</p>
+      <div class="codeblock"><div class="codebar"><span>Vivado 실행 결과</span></div>
+        <pre tabindex="0"><code>SYNTH_TIMING_PASS ch14 npu10_group_scheduler WNS=1.280 WHS=0.098 LUT=779 FF=1005 DSP48E1=4 RAMB=5</code></pre></div>
     </section>
     <section class="section" id="s09">
       <h2><span class="num">09</span>검증 현황·인계</h2>
       <p>누적 보고 (이전 결과 → 추가 RTL → 시험 벡터 → 시뮬레이션 → 합성/보드 → 인계):</p>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>이전 결과</th><th>추가 RTL</th><th>시험 벡터</th><th>시뮬레이션</th><th>합성 / 보드</th><th>인계</th></tr></thead>
-        <tbody><tr><td>01장 · 04장 · 07장 · 08장 · 13장</td><td><code>npu10_group_scheduler.v</code></td><td><code>tb_npu10_group_scheduler.sv</code><br><code>group10_reference.py</code></td><td>통과</td><td>⚠ 대기 / 미실시</td><td>2건 (아래 표)</td></tr></tbody>
+        <tbody><tr><td>01장 · 04장 · 07장 · 08장 · 13장</td><td><code>npu10_group_scheduler.v</code></td><td><code>tb_npu10_group_scheduler.sv</code><br><code>group10_reference.py</code></td><td>통과</td><td>통과 / 미실시</td><td>2건 (아래 표)</td></tr></tbody>
       </table></div>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>다음 장으로 넘기는 파일</th><th>사용처</th></tr></thead>
@@ -521,9 +524,9 @@ vivado -mode batch -nojournal -source tools/vivado/ooc_timing.tcl -tclargs ch14
           <b>RTL_SIM_PASS</b>
           <span>RTL_SIM_PASS GROUP10 cases=24 scores=240 guards=2 cycles_per… · Icarus Verilog 12.0 · 2026-11-19</span>
         </div>
-        <div class="gate todo">
+        <div class="gate pass">
           <b>SYNTH_TIMING_PASS</b>
-          <span>⚠ 미검증 · VS Code Vivado 실행 대기 (08절)</span>
+          <span>ch14 npu10_group_scheduler WNS=1.280 WHS=0.098 LUT=779 FF=1005 DSP48E1… · 2026-11-20</span>
         </div>
         <div class="gate todo">
           <b>BOARD_PASS</b>
