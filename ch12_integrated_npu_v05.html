@@ -539,6 +539,14 @@ sed 's/^module uart_rx\([ #(]\)/module tb_uart_rx_monitor\1/' common/rtl/uart_rx
 sed 's/^\([[:space:]]*\)uart_rx tx_monitor/\1tb_uart_rx_monitor tx_monitor/' mini_npu/tb/tb_npu_uart.sv &gt; "$ts/tb_npu_uart_timesim.sv"
 grep -q '^module tb_uart_rx_monitor' "$ts/tb_uart_rx_monitor.v"
 grep -q 'tb_uart_rx_monitor tx_monitor' "$ts/tb_npu_uart_timesim.sv"
+# 진행 표시(1 ms마다 응답 수). 타이밍 시뮬레이션은 수 시간이 걸려 멈춤과 느림을 구분해야 한다.
+sed -i 's/^\([[:space:]]*\)integer scenario,exp_cls;/\1always #1000000 $display("TIMESIM_PROGRESS t=%0d ms results=%0d ack=%0d err=%0d",$time\/1000000,c_count,ack_count,err_count);\n&amp;/' "$ts/tb_npu_uart_timesim.sv"
+grep -q 'TIMESIM_PROGRESS' "$ts/tb_npu_uart_timesim.sv"
+# xsim은 SDF INTERCONNECT 대상 이름의 대괄호 이스케이프(reg\[0\])를 조용히 무시한다 → 클록 배선 지연이
+# 일부 FF에만 걸려 가짜 hold 경합(UART 수신 valid 소실)이 생긴다. 이름만 같은 규칙으로 바꾼 사본을 쓴다.
+python3 "$root/mini_npu/scripts/timesim_sanitize.py" "$net" "$impl/basys3_npu_top_timesim.sdf" \
+    "$ts/basys3_npu_top_timesim.v" "$ts/basys3_npu_top_timesim.sdf"
+net="$ts/basys3_npu_top_timesim.v"
 
 cd "$ts"
 xvlog "$net"
