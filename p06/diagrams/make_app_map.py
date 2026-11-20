@@ -40,7 +40,7 @@ def main():
     for k, s in enumerate(subs):
         kind = s["app"]
         preset = "accent" if s.get("common") else ("gray" if kind != "elf" else "navy")
-        tag = {"elf": "ELF만 교체", "own": "별도 비트스트림 ⚠ 재빌드 대기", "none": "RTL만 · 보드 없음"}[kind]
+        tag = {"elf": "ELF만 교체", "own": "별도 비트스트림 (21장 + 모터 GPIO)", "none": "RTL만 · 보드 없음"}[kind]
         nid = f"a{k}"
         nodes.append(node(nid, 950, y0 + dy * k, 380, f"{s['code']} {s['title']}", f"구 {int(s['ch'][2:]):02d}장 · {tag}", preset))
         if kind == "elf":

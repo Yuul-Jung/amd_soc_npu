@@ -330,7 +330,7 @@
       "title": "전력·추론당 에너지",
       "stage": 6,
       "when": "2일 오전",
-      "see": "보드 없음(Basys3에 전력 측정 회로가 없다). Vivado 추정: 추론당 CPU 4.541 mJ · NPU 2.733 mJ (1.66배). ⚠ 안 A 이전 SoC 빌드 기준이라 재실행 대기.",
+      "see": "보드 없음(Basys3에 전력 측정 회로가 없다). Vivado 추정(안 A 21장 SoC): 추론당 CPU 4.596 mJ · NPU 2.765 mJ (1.66배).",
       "board_items": [
         "B8"
       ],
@@ -350,25 +350,24 @@
         "checks": [
           [
             "power_summary.md 추론당 에너지",
-            "CPU 4.541 mJ · NPU 2.733 mJ (전체 전력 기준, 추정치)"
+            "CPU 4.596 mJ · NPU 2.765 mJ (전체 전력 기준, Vivado 추정치, 보드 측정 아님)"
           ],
           [
-            "⚠ 빌드 시점",
-            "2026-11-18 (안 A 이전 21장 SoC). VS Code 지시문에 재실행 요청"
+            "SAIF annotation done",
+            "23장 SoC xsim 구간별 토글률을 report_power에 적용 (안 A 비트스트림, c32d094)"
           ]
         ],
         "evidence": {
           "rtl_log": "part03/ch25/validation/power.log",
           "pattern": "_PASS",
-          "date": "2026-11-18",
+          "date": "2026-11-19",
           "tool": "Vivado 2024.2 xsim (21장 SoC 전체 + ELF)"
         },
         "vivado": {
           "mode": "none"
         },
         "vivado_ran": true
-      },
-      "warn": "⚠ 안 A 이전 빌드 기준 — 25장 전력 추정은 2026-11-18 SoC(원본 11장 주소)에서 냈다. 안 A 비트스트림(주변장치 2개 추가)으로 다시 실행할 때까지 값은 참고용이다 (VS Code 지시문 요청)."
+      }
     },
     {
       "code": "5-7",
@@ -438,7 +437,7 @@
       "NPU_APP_DONE"
     ]
   ],
-  "results_note": "종단간 1.68배에 그치는 이유 (23장 README): 시간의 99% 이상이 AXI4-Lite로 가중치·입력을 한 단어씩 쓰는 데 든다(타일마다 704단어, 쓰기 1회 평균 약 115클록). 4장 마지막 서브젝트(구 19장)의 적재 병목과 같은 결론이다. 25장 에너지 추정은 안 A 이전 빌드라 ⚠ 재실행 대기.",
+  "results_note": "종단간 1.68배에 그치는 이유 (23장 README): 시간의 99% 이상이 AXI4-Lite로 가중치·입력을 한 단어씩 쓰는 데 든다(타일마다 704단어, 쓰기 1회 평균 약 115클록). 4장 마지막 서브젝트(구 19장)의 적재 병목과 같은 결론이다.",
   "port_notes": {
     "clk": "Basys3 W5 외부 100 MHz (11장 clk_wiz가 100 MHz 시스템 클록으로)",
     "btnC": "SoC 리셋 (Active-High, 11장 그대로)",

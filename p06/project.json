@@ -16,7 +16,7 @@
   "diagram": "p06/diagrams/app_map",
   "diagram_label": "6장 응용 지도",
   "diagram_note": "도면 원본: <code>p06/diagrams/app_map.json</code> (svg-flow-editor, <code>p06/diagrams/make_app_map.py</code>가 이 장 서브젝트 목록에서 만든다). 아래 주소맵·포트는 5장과 같은 21장 비트스트림이다.",
-  "plan_note": "6-1은 모두 하고, 6-2~6-5 중 2개를 골라 보드에서 확인합니다. 6-1·6-3·6-5는 5장 비트스트림에 ELF만 바꾸고, 6-4는 별도 비트스트림(⚠ 안 A 재빌드 대기), 6-2는 RTL만입니다.",
+  "plan_note": "6-1은 모두 하고, 6-2~6-5 중 2개를 골라 보드에서 확인합니다. 6-1·6-3·6-5는 5장 비트스트림에 ELF만 바꾸고, 6-4는 30장 비트스트림(21장 + 모터 GPIO), 6-2는 RTL만입니다.",
   "soc_summary": "part03/ch21/validation/soc_summary.md",
   "checklist": "part03/ch27/docs/BOARD_CHECKLIST.md",
   "skeleton": [
@@ -71,7 +71,6 @@
         "B13a"
       ],
       "board_note": "5장 비트스트림 + <code>digit_app.elf</code>. PC 호스트: <code>python3 part03/ch28/host/p3_digit_host.py --port &lt;포트&gt; …</code>",
-      "warn": "⚠ 안 A SoC 전체 시뮬레이션(<code>soc_sim_mapA_20261119.log</code>)은 프레임 송신 중에 끝나 판정 줄이 없다. 안 A 이전 SoC로는 15/15 통과(<code>soc_sim_20261119_recheck.log</code>). C 드라이버 협동 시뮬레이션·ELF 빌드는 안 A 기준 통과.",
       "chapter": {
         "id": "part03/ch28",
         "version": "VS Code 판",
@@ -102,6 +101,10 @@
             "CRC·길이·MODEL_ID·범위 오류 등 11종 거부, 이후 정상 프레임 복구"
           ],
           [
+            "SOC28_RTL_SIM_PASS checks=15/15",
+            "안 A SoC 전체 xsim: NPU 7 = CPU 7, 점수 = 기준 모델, 표준 7세그먼트 IP·LED 핀 대조 (3시간 7분)"
+          ],
+          [
             "ELF_MEM_PASS",
             "Vitis ELF가 LMB 64 KB 안에 들어감 (안 A 플랫폼)"
           ]
@@ -121,13 +124,14 @@
             "name": "ELF_MEM_PASS",
             "path": "part03/ch28/validation/build_sw.log",
             "pattern": "ELF_MEM_PASS"
+          },
+          {
+            "name": "SOC28_RTL_SIM_PASS",
+            "path": "part03/ch28/validation/soc_sim_mapA_20261120.log",
+            "pattern": "SOC28_RTL_SIM_PASS"
           }
         ]
-      },
-      "warn_gate": [
-        "SOC_SIM (안 A)",
-        "⚠ 미완료 · 안 A SoC xsim 판정 줄 없음 · VS Code 재실행 대기 (지시문 10)"
-      ]
+      }
     },
     {
       "code": "6-2",
@@ -267,7 +271,7 @@
       "stage": 4,
       "when": "2일 오전",
       "app": "own",
-      "see": "보드는 ⚠ 판단 대기. 시뮬레이션에서 NPU 추천과 독립된 모터 안전 코어가 비상정지·리밋·워치독·데드타임을 지키는 것(불변식 위반 0)을 본다.",
+      "see": "30장 비트스트림(21장 SoC + 모터 GPIO 0x4007_0000) + <code>motor_app.elf</code>, 모터는 연결하지 않고 LED로 본다: JB4가 열려 있으면 LED9(트립), 점퍼 뒤 호스트 단계에서 LED11·12가 NORMAL 80 % → WARNING 30 % → NPU FAULT 정지. btnU(비상정지)·리밋·고장 스위치는 즉시 정지.",
       "board_items": [
         "B18",
         "B19",
@@ -276,10 +280,9 @@
         "B22",
         "B23",
         "B23a",
-        "B24"
+        "B23b"
       ],
-      "board_note": "30장은 핀(JB Pmod)과 안전 코어 RTL이 필요해 5장 비트스트림에 ELF만 바꿔서는 안 된다. 기존 30장 비트스트림은 이전 주소맵이라 B18~B24는 실행하지 않는다.",
-      "warn": "⚠ 안 A 재빌드 대기 — 기존 30장 SoC는 모터 GPIO가 0x4002_0000(안 A에서는 UART)이다. 웹 결정: 21장 블록 설계 + 안전 코어를 <b>0x4007_0000</b>(빈 칸)에 붙인 별도 비트스트림으로 다시 만든다 (VS Code 지시문 10).",
+      "board_note": "30장 비트스트림 <code>basys3_soc30_top.bit</code>(안 A 재빌드) + <code>motor_app.elf</code>. 1단계는 가상 부하(LED)만. 실제 드라이버·모터(B24)는 따로, 사용자 판단.",
       "chapter": {
         "id": "part03/ch30",
         "version": "VS Code 판",
@@ -313,8 +316,12 @@
             "호스트 → 펌웨어(29장 정책) → NPU·모터 RTL에서 안전 불변식 위반 0"
           ],
           [
-            "⚠ 비트스트림",
-            "이전 주소맵 기준 빌드 — 안 A 재빌드 대기"
+            "ADDR_MAP_A_PASS · IRQ_MAP_A_PASS",
+            "30장 SoC = 21장 8줄 + 모터 GPIO 0x4007_0000, 인터럽트는 21장과 같음 (모터는 폴링)"
+          ],
+          [
+            "TIMING WNS=0.357 WHS=0.030",
+            "30장 SoC 배선 후, ELF_MEM_PASS (motor_app 53,748 B)"
           ]
         ],
         "evidence": {
@@ -334,12 +341,25 @@
             "MOTOR_SAFETY"
           ],
           "src": "OOC"
+        },
+        "extra_gates": [
+          {
+            "name": "ADDR_MAP_A_PASS",
+            "path": "part03/ch30/validation/build_soc_mapA_20261120.log",
+            "pattern": "ADDR_MAP_A_PASS"
+          },
+          {
+            "name": "ELF_MEM_PASS",
+            "path": "part03/ch30/validation/build_soc_mapA_20261120.log",
+            "pattern": "ELF_MEM_PASS"
+          }
+        ],
+        "soc_timing": {
+          "path": "part03/ch30/validation/build_soc_mapA_20261120.log",
+          "regex": "WNS=(?P<wns>-?[\\d.]+) WHS=(?P<whs>-?[\\d.]+)",
+          "src": "30장 SoC 배선 후, 안 A"
         }
-      },
-      "warn_gate": [
-        "안 A 재빌드",
-        "⚠ 이전 주소맵 비트스트림 · VS Code 재빌드 대기 (지시문 10)"
-      ]
+      }
     },
     {
       "code": "6-5",
@@ -477,8 +497,8 @@
       "7장 후보: AXI 래퍼를 붙여 CNN 앞단으로"
     ],
     [
-      "30장 안 A 재빌드 결과",
-      "6-4 보드 항목 B18~B24 실행 조건"
+      "30장 비트스트림 basys3_soc30_top.bit (0x4007_0000 모터 GPIO)",
+      "7장: 모터·서보를 쓰는 과제의 출발점 (주소맵 안 A + 1줄)"
     ]
   ]
 }

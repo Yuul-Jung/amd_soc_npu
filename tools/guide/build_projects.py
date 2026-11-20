@@ -557,6 +557,9 @@ def soc_subject_gates(s, c, ce):
         hit = next((ln.strip() for ln in bg.log_lines(x["path"]) if re.search(x["pattern"], ln)), None)
         gs.insert(-1, ("pass", x["name"], f"{bg.short(hit, 60)} · <code>{x['path']}</code>") if hit
                   else ("todo", x["name"], "⚠ 미검증 · 기록 없음"))
+    if c.get("soc_timing"):                          # 장 Top과 다른 별도 SoC 비트스트림 (예: 30장)
+        cl, note = synth_from_grep(c["soc_timing"])
+        gs.insert(-1, (cl, "SOC_TIMING", note))
     if s.get("warn"):
         name, note = s.get("warn_gate", ["안 A 재실행", "⚠ 안 A 이전 빌드 기준 · VS Code 재실행 대기"])
         gs.insert(-1, ("todo", name, note))
