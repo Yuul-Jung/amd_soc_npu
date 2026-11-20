@@ -37,6 +37,17 @@
 
 `part03/ch13~19`·`ch04/rtl/bram_sync_buffer.v`·`host_tools`·`ch02/rtl/dsp_multiplier.v`·`mini_npu/rtl/npu_dsp_mac_lane.v`: 9203bfa 이후 **변경 없음**.
 
+## 추가 — VSCODE_HANDOFF 2절 00~12장 Vivado 게이트 (`restructure/projects`)
+
+| 항목 | 결과 | 증거 | 값 |
+|---|---|---|---|
+| OOC 합성·타이밍 (`run_vivado_all.sh ooc`) | 22/24 PASS | `chNN/validation/vivado_ooc_20261120.txt` (200eedc) | 00~10·13~20·30장 PASS (19장 NPE 1·4·8). 01·02·04장 WNS=NA (레지스터 간 경로가 DSP48E1·RAMB 안에만 있음) |
+| 도구 수정 | — | `tools/vivado/ooc_timing.tcl` (200eedc) | `worst_slack`: SLACK이 비면 NA (첫 실행에서 01·02·04장이 Tcl 오류로 FAIL로 찍혔던 원인) |
+| 웹 판 ch26 `npu_cnn3x3` | **FAIL** | `ch26/validation/vivado_ooc_20261120.txt` | WNS −0.468 ns — VS Code 판 `part03/ch26`은 OOC PASS (68fd5b6). 억지로 고치지 않음 |
+| 웹 판 ch29 `sensor_guard_ai` | **FAIL** | `ch29/validation/vivado_ooc_20261120.txt` | WNS −2.811 ns — VS Code 판 `part03/ch29`은 OOC PASS (68fd5b6). 억지로 고치지 않음 |
+| 12장 구현 | PASS | (타이밍 시뮬레이션 끝나면 `ch12/validation/vivado_impl_timesim_20261120.txt`) | WNS +1.193 · WHS +0.064, LUT 1,656 · DSP 4 · RAMB 5 |
+| 12장 배선 후 SDF 타이밍 시뮬레이션 | 실행 중 | 〃 | 리셋 해제 120 ns 시점 RAMB18 RSTRAMB setup 경고 2건(시작 때 한 번), 이후 없음 |
+
 ## 남은 것
 
 - Basys3 점검표 B1~B26 (사용자와 함께). B24 실제 모터는 사용자 판단으로 따로.
