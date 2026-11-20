@@ -20,7 +20,7 @@
 | 2장 Top STAGE 1~8 | PASS | `p02/validation/vivado_impl_20261119.txt` (7eb69ed) | STAGE 8 재실행(8-1) WNS +0.484 · WHS +0.021 (수정 전 −1.952), LUT 4,307 · DSP 17 · RAMB18 15 |
 | 3장 Top STAGE 1~4 | PASS | `p03/validation/vivado_impl_20261119.txt` | WNS 최소 +0.710, LUT 4,331 · DSP 20 (STAGE 4) |
 | 4장 Top STAGE 1~4 | PASS | `p04/validation/vivado_impl_20261119.txt` | WNS 최소 +0.224, LUT 7,400 · DSP 21 (STAGE 4) |
-| 28장 안 A SoC xsim (10) | 실행 중 | `ch28/validation/soc_sim_mapA_20261120.log` | (끝나면 갱신) |
+| 28장 안 A SoC xsim (10) | **PASS** | `ch28/validation/soc_sim_mapA_20261120.log` | `SOC28_RTL_SIM_PASS checks=15/15`, NPU 7 = CPU 7, 점수 = 기준 모델, SEG7·LED 핀 대조 |
 | 30장 안 A SoC (10) | PASS (빌드) | `ch30/validation/build_soc_mapA_20261120.log` (336d1b2) | 모터 GPIO `axi_gpio_motor` 0x4007_0000, ADDR_MAP_A 9줄·IRQ_MAP_A PASS, WNS +0.357 · WHS +0.030, bit 2fa4deada606d078 · XSA 3f06b52665eb4c26 |
 | 판단 필요 | — | — | 아래 |
 

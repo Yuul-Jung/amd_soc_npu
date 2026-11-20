@@ -82,7 +82,7 @@ python3 part03/ch28/host/p3_digit_host.py --port /dev/ttyUSB1 --images my_digit.
 | 펌웨어 변이 8종 | 표시 class·오류 코드 표시·CRC 검사·범위 검사·모델 ID 검사·자체 시험 복구·잡음 계수·재동기 제거 → **8/8 검출** |
 | Vivado 구현 | (변경) 안 A: 28장 전용 구현 없음. 21장 Bitstream·XSA 사용(`ch21/validation/soc_summary.md`, WNS +0.374 ns) |
 | Vitis ELF | 36,276 B(스택 4 KB), SHA-256 077ca88b0cf043a9, `ELF_MEM_PASS`, xparameters: NPU 0x44A0_0000, SEG7 0x4006_0000, UART 0x4002_0000 (`validation/build_sw.log`) |
-| SoC 전체 xsim | **안 A 하드웨어로 재실행 중(NOT_COMPLETE)** — `validation/soc_sim_mapA_20261119.log`. 이전 하드웨어(AXI GPIO 1 + p3_fnd_scan)에서는 PASS 15/15였다(`validation/soc_sim_20261119*.log`) |
+| SoC 전체 xsim (안 A) | **PASS 15/15** (2026-11-20, 3시간 7분) — 21장 안 A SoC 복제본 + 보드와 같은 ELF(077ca88b), UART 비트 단위 프레임(라벨 7). NPU 클래스 7 = CPU 클래스 7, 점수 10개가 기준 모델과 같음, 표준 7세그먼트 IP 핀(자리·세그먼트·점)·LED 핀 대조 PASS. 부팅 29.9 ms, 응답 완료 156.0 ms(시뮬레이션 시각) — `validation/soc_sim_mapA_20261120.log`. 11-19 mapA 로그는 세션 종료로 프레임 송신 중에 끊긴 기록. 이전 하드웨어(AXI GPIO 1 + p3_fnd_scan) PASS 15/15는 `validation/soc_sim_20261119*.log` |
 | **Basys3 실물** | **NOT_RUN** — `ch27/docs/BOARD_CHECKLIST.md` 28장 항목, 사용자와 함께 |
 
 ## 7. 알려진 한계
