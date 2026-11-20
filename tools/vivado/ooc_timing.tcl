@@ -44,7 +44,10 @@ set designs {
 proc worst_slack {kind} {
     set p [get_timing_paths -quiet -$kind -max_paths 1 -nworst 1]
     if {[llength $p] == 0} { return NA }
-    return [format %.3f [get_property SLACK $p]]
+    # 경로가 있어도 SLACK이 비면(제약된 레지스터 간 경로가 DSP48E1·RAMB 프리미티브 안에만 있는 설계, 예: 01·02·04장) NA
+    set s [get_property SLACK $p]
+    if {$s eq ""} { return NA }
+    return [format %.3f $s]
 }
 proc count_ref {pattern} {
     return [llength [get_cells -quiet -hierarchical -filter "IS_PRIMITIVE && REF_NAME =~ $pattern"]]
