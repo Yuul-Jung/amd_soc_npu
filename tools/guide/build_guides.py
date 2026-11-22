@@ -722,6 +722,27 @@ def update_index(text, chs):
     text = re.sub(r'(<section class="section" id="techtree">\s*<h2>.*?</h2>)', lambda m: m.group(1) + "\n      " + figs, text, count=1, flags=re.S)
     if ".figure-wrap{" not in text:
         text = text.replace("</style>", ".figure-wrap{overflow-x:auto}\n.figure-wrap svg{width:100%;height:auto;min-width:860px}\n</style>", 1)
+    # 00 교육과정 개요 절 맨 위에 장 프로젝트(개편판) 바로가기 — 목록은 course_projects.json·pNN/project.json (tools/guide/build_projects.py)
+    cp = json.loads(rd("course_projects.json"))
+    rows = ""
+    for q in cp["projects"]:
+        pj = os.path.join(ROOT, q["id"], "project.json")
+        if not os.path.exists(pj):
+            rows += f'<tr><td style="white-space:nowrap">{q["number"]}장</td><td>{html.escape(q["title"])}</td><td>—</td><td>{html.escape(q["subjects"])}</td><td>준비 중</td></tr>'
+            continue
+        pp = json.loads(rd(os.path.relpath(pj, ROOT)))
+        page = f'{pp["id"]}_{pp["slug"]}_{pp["version"]}.html'
+        rows += (f'<tr><td style="white-space:nowrap">{q["number"]}장</td><td><a href="{page}">{html.escape(q["title"])}</a></td><td style="white-space:nowrap">{q["days"]}일</td>'
+                 f'<td>구 {html.escape(q["subjects"])}장</td><td>{re.sub(r"<[^>]+>", "", pp["demo"])}</td></tr>')
+    pr_block = f"""<!-- projects:start -->
+      <p><strong>장 프로젝트판 (2026-11 개편)</strong> — 장마다 보드 Top 하나를 키워 가며 장 끝에서 보드 시연합니다. 아래 장 페이지가 현재 기준이고, 00~31장 안내서는 서브젝트의 단독 실습 자료로 남겨 두었습니다. 실물 보드 확인은 아직 하지 않았습니다(각 페이지 게이트 표시).</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>장</th><th>프로젝트</th><th>편성</th><th>서브젝트</th><th>장 시연 (보드)</th></tr></thead>
+        <tbody>{rows}</tbody>
+      </table></div>
+      <!-- projects:end -->"""
+    text = re.sub(r"\n?\s*<!-- projects:start -->.*?<!-- projects:end -->", "", text, flags=re.S)
+    text = re.sub(r'(<section class="section" id="intro">\s*<h2>.*?</h2>)', lambda m: m.group(1) + "\n      " + pr_block, text, count=1, flags=re.S)
     # 00 교육과정 개요 절 끝에 제1부(선수 과정) 바로가기 — 목록은 part01/course.json (tools/part01/build_part01.py)
     p1 = json.loads(rd("part01/course.json"))
     p1_links = " · ".join(f'<a href="part01/{c["file"]}">{c["number"]} {html.escape(c["title"])}</a>' for c in p1["chapters"])
