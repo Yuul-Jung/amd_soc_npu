@@ -398,7 +398,7 @@ module basys3_npu_top(
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>mini_npu/constraints/basys3_npu.xdc · xdc · 원본 · ⚠ 미검증 (Vivado 미실행)</span></div>
+        <div class="codebar"><span>mini_npu/constraints/basys3_npu.xdc · xdc · 원본 · Vivado 실행 통과</span></div>
         <pre tabindex="0"><code class="language-xdc"># Basys3 Master XDC 핀 기능을 제3부 Shell 포트명에 맞춰 선택 적용.
 set_property -dict { PACKAGE_PIN W5 IOSTANDARD LVCMOS33 } [get_ports clk]
 set_property -dict { PACKAGE_PIN U18 IOSTANDARD LVCMOS33 } [get_ports btnC]
@@ -435,7 +435,7 @@ set_property -dict { PACKAGE_PIN L1 IOSTANDARD LVCMOS33 } [get_ports {led[15]}]
 create_clock -name sys_clk_pin -period 10.000 -waveform {0 5} [get_ports clk]</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>mini_npu/scripts/vivado_impl.tcl · tcl · 원본 · ⚠ 미검증 (Vivado 미실행)</span></div>
+        <div class="codebar"><span>mini_npu/scripts/vivado_impl.tcl · tcl · 원본 · Vivado 실행 통과</span></div>
         <pre tabindex="0"><code class="language-tcl"># 12장 통합 NPU Top: 합성 → 구현 → 타이밍 판정 → 비트스트림 → 타이밍 시뮬레이션용 넷리스트.
 # 실행 (저장소 루트): vivado -mode batch -nojournal -source mini_npu/scripts/vivado_impl.tcl
 # 결과: mini_npu/build/impl/
@@ -514,7 +514,7 @@ puts $line
 if {!$ok} { error "IMPL_TIMING_FAILED" }</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>mini_npu/scripts/run_timing_sim.sh · bash · 원본 · ⚠ 미검증 (Vivado 미실행)</span></div>
+        <div class="codebar"><span>mini_npu/scripts/run_timing_sim.sh · bash · 원본 · Vivado 실행 통과</span></div>
         <pre tabindex="0"><code class="language-bash">#!/usr/bin/env bash
 # 12장 배선 후 타이밍 시뮬레이션 (Vivado xsim + SDF slow corner).
 # 입력: vivado_impl.tcl 이 만든 mini_npu/build/impl/basys3_npu_top_timesim.{v,sdf}
@@ -1274,13 +1274,17 @@ picocom -b 115200 -d 8 -p n -y n -f n /dev/ttyUSB1   # n은 실제 번호로 변
         </tbody>
       </table></div>
       <p>7행이 모두 기대와 같을 때만 <code>BOARD_PASS</code>로 기록합니다. 기록 파일은 <code>ch12/validation/board_YYYYMMDD.md</code>로 저장합니다.</p>
+      <p>실행 기록 (2026-11-22, 출처 <code>ch12/validation/vivado_impl_timesim_20261122.txt</code>):</p>
+      <div class="codeblock"><div class="codebar"><span>Vivado 실행 결과</span></div>
+        <pre tabindex="0"><code>SYNTH_TIMING_PASS ch12 basys3_npu_top WNS=1.193 WHS=0.064 DRC_ERRORS=0 LUT=1656 FF=1261 DSP48E1=4 RAMB=5
+TIMING_SIM_PASS ch12 basys3_npu_top post-route SDF(slow) classes=6 model_edit=1 invalid_length=1</code></pre></div>
     </section>
     <section class="section" id="s09">
       <h2><span class="num">09</span>검증 현황·인계</h2>
       <p>누적 보고 (이전 결과 → 추가 RTL → 시험 벡터 → 시뮬레이션 → 합성/보드 → 인계):</p>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>이전 결과</th><th>추가 RTL</th><th>시험 벡터</th><th>시뮬레이션</th><th>합성 / 보드</th><th>인계</th></tr></thead>
-        <tbody><tr><td>00장 · 02장 · 11장</td><td><code>npu_dsp_mac_lane.v</code><br><code>npu_engine4.v</code><br><code>npu_display_controller.v</code><br><code>npu_reset_controller.v</code><br><code>basys3_npu_top.v</code></td><td><code>tb_npu_engine4.sv</code><br><code>tb_uart_core_fifo.sv</code><br><code>tb_npu_uart_adversarial.sv</code></td><td>통과</td><td>⚠ 대기 · 타이밍 시뮬 ⚠ 대기 / 미실시</td><td>2건 (아래 표)</td></tr></tbody>
+        <tbody><tr><td>00장 · 02장 · 11장</td><td><code>npu_dsp_mac_lane.v</code><br><code>npu_engine4.v</code><br><code>npu_display_controller.v</code><br><code>npu_reset_controller.v</code><br><code>basys3_npu_top.v</code></td><td><code>tb_npu_engine4.sv</code><br><code>tb_uart_core_fifo.sv</code><br><code>tb_npu_uart_adversarial.sv</code></td><td>통과</td><td>통과 · 타이밍 시뮬 통과 / 미실시</td><td>2건 (아래 표)</td></tr></tbody>
       </table></div>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>다음 장으로 넘기는 파일</th><th>사용처</th></tr></thead>
@@ -1300,13 +1304,17 @@ picocom -b 115200 -d 8 -p n -y n -f n /dev/ttyUSB1   # n은 실제 번호로 변
           <b>RTL_SIM_PASS</b>
           <span>회귀 결과 표 13단계 모두 RTL_SIM_PASS · Icarus Verilog 12.0 · 2026-11-19</span>
         </div>
-        <div class="gate todo">
+        <div class="gate pass">
           <b>SYNTH_TIMING_PASS</b>
-          <span>⚠ 미검증 · VS Code Vivado 실행 대기 (08절)</span>
+          <span>ch12 basys3_npu_top WNS=1.193 WHS=0.064 DRC_ERRORS=0 LUT=1656 FF=1261 … · 2026-11-22</span>
+        </div>
+        <div class="gate pass">
+          <b>TIMING_SIM_PASS</b>
+          <span>TIMING_SIM_PASS ch12 basys3_npu_top post-route SDF(slow) classes=6 mod… · 2026-11-22</span>
         </div>
         <div class="gate todo">
-          <b>TIMING_SIM_PASS</b>
-          <span>⚠ 미검증 · 배선 후 SDF 시뮬레이션 실행 대기 (8-2)</span>
+          <b>DRC REQP-1840</b>
+          <span>⚠ 미해결 · 비동기 리셋 → BRAM 제어 핀 경고 20+건(보고서 1개), 동작 중 리셋 미검증 · <code>ch12/validation/drc_reqp1840_20261122.txt</code></span>
         </div>
         <div class="gate todo">
           <b>BOARD_PASS</b>

@@ -2956,7 +2956,7 @@ if __name__ == "__main__":
         </div>
         <div class="gate pass">
           <b>SYNTH_TIMING_PASS</b>
-          <span>장 Top STAGE 7 배선 후 WNS 0.160 ns · WHS 0.021 ns (구 장 단독 OOC 판정 없음) · 2026-11-19</span>
+          <span>ch12 basys3_npu_top WNS=1.193 WHS=0.064 DRC_ERRORS=0 LUT=1656 FF=1261 … (12장 통합 Top) · 2026-11-22</span>
         </div>
         <div class="gate todo">
           <b>BOARD_PASS</b>
@@ -3255,7 +3255,7 @@ module basys3_npu_top(
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>mini_npu/constraints/basys3_npu.xdc · xdc · 원본 · ⚠ 미검증 (Vivado 미실행)</span></div>
+        <div class="codebar"><span>mini_npu/constraints/basys3_npu.xdc · xdc · 원본 · Vivado 실행 통과</span></div>
         <pre tabindex="0"><code class="language-xdc"># Basys3 Master XDC 핀 기능을 제3부 Shell 포트명에 맞춰 선택 적용.
 set_property -dict { PACKAGE_PIN W5 IOSTANDARD LVCMOS33 } [get_ports clk]
 set_property -dict { PACKAGE_PIN U18 IOSTANDARD LVCMOS33 } [get_ports btnC]
@@ -3292,7 +3292,7 @@ set_property -dict { PACKAGE_PIN L1 IOSTANDARD LVCMOS33 } [get_ports {led[15]}]
 create_clock -name sys_clk_pin -period 10.000 -waveform {0 5} [get_ports clk]</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>mini_npu/scripts/vivado_impl.tcl · tcl · 원본 · ⚠ 미검증 (Vivado 미실행)</span></div>
+        <div class="codebar"><span>mini_npu/scripts/vivado_impl.tcl · tcl · 원본 · Vivado 실행 통과</span></div>
         <pre tabindex="0"><code class="language-tcl"># 12장 통합 NPU Top: 합성 → 구현 → 타이밍 판정 → 비트스트림 → 타이밍 시뮬레이션용 넷리스트.
 # 실행 (저장소 루트): vivado -mode batch -nojournal -source mini_npu/scripts/vivado_impl.tcl
 # 결과: mini_npu/build/impl/
@@ -3371,7 +3371,7 @@ puts $line
 if {!$ok} { error "IMPL_TIMING_FAILED" }</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>mini_npu/scripts/run_timing_sim.sh · bash · 원본 · ⚠ 미검증 (Vivado 미실행)</span></div>
+        <div class="codebar"><span>mini_npu/scripts/run_timing_sim.sh · bash · 원본 · Vivado 실행 통과</span></div>
         <pre tabindex="0"><code class="language-bash">#!/usr/bin/env bash
 # 12장 배선 후 타이밍 시뮬레이션 (Vivado xsim + SDF slow corner).
 # 입력: vivado_impl.tcl 이 만든 mini_npu/build/impl/basys3_npu_top_timesim.{v,sdf}
@@ -4048,11 +4048,15 @@ endmodule</code></pre>
         </div>
         <div class="gate pass">
           <b>SYNTH_TIMING_PASS</b>
-          <span>장 Top STAGE 8 배선 후 WNS 0.484 ns · WHS 0.021 ns (구 장 단독 OOC 판정 없음) · 2026-11-19</span>
+          <span>ch12 basys3_npu_top WNS=1.193 WHS=0.064 DRC_ERRORS=0 LUT=1656 FF=1261 … · 2026-11-22</span>
+        </div>
+        <div class="gate pass">
+          <b>TIMING_SIM_PASS</b>
+          <span>TIMING_SIM_PASS ch12 basys3_npu_top post-route SDF(slow) classes=6 mod… · 2026-11-22</span>
         </div>
         <div class="gate todo">
-          <b>TIMING_SIM_PASS</b>
-          <span>⚠ 미검증 · 배선 후 SDF 시뮬레이션 실행 대기 (8-2)</span>
+          <b>DRC REQP-1840</b>
+          <span>⚠ 미해결 · 비동기 리셋 → BRAM 제어 핀 경고 20+건(보고서 1개), 동작 중 리셋 미검증 · <code>ch12/validation/drc_reqp1840_20261122.txt</code></span>
         </div>
         <div class="gate todo">
           <b>BOARD_PASS</b>
@@ -4487,6 +4491,10 @@ if __name__ == "__main__":
         <div class="gate pass">
           <b>SYNTH_TIMING_PASS</b>
           <span>STAGE 1~8 비트스트림 · 2026-11-19</span>
+        </div>
+        <div class="gate todo">
+          <b>DRC REQP-1840</b>
+          <span>⚠ 미해결 · 비동기 리셋 → BRAM 제어 핀 경고 135+건(보고서 8개), 동작 중 리셋 미검증 · <code>p02/validation/drc_reqp1840_20261122.txt</code></span>
         </div>
         <div class="gate todo">
           <b>BOARD_PASS</b>

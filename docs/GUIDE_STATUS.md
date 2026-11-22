@@ -17,8 +17,8 @@
 | 08 | 4PE 병렬 어레이 | [ch08_pe4_v05.html](../ch08_pe4_v05.html) | ✅ | ✅ | ✅ | — | ⏳ |
 | 09 | Dense 4뉴런 레이어 | [ch09_dense_v05.html](../ch09_dense_v05.html) | ✅ | ✅ | ✅ | — | ⏳ |
 | 10 | 4뉴런 NPU Core | [ch10_npu_core_v05.html](../ch10_npu_core_v05.html) | ✅ | ✅ | ✅ | — | ⏳ |
-| 11 | UART 모델 적재 컨트롤러 | [ch11_uart_register_v05.html](../ch11_uart_register_v05.html) | ✅ | ✅ | ⏳ | — | ⏳ |
-| 12 | 통합 NPU Top | [ch12_integrated_npu_v05.html](../ch12_integrated_npu_v05.html) | ✅ | ✅ | ⏳ | ⏳ | ⏳ |
+| 11 | UART 모델 적재 컨트롤러 | [ch11_uart_register_v05.html](../ch11_uart_register_v05.html) | ✅ | ✅ | ✅ | — | ⏳ |
+| 12 | 통합 NPU Top | [ch12_integrated_npu_v05.html](../ch12_integrated_npu_v05.html) | ✅ | ✅ | ✅ | ✅ | ⏳ |
 | 13 | 8×8 손글씨·10분류 준비 | [ch13_mnist_8x8_v02.html](../ch13_mnist_8x8_v02.html) | ✅ | ✅ | ✅ | — | ⏳ |
 | 14 | 4PE 그룹·10개 출력 | [ch14_group10_v02.html](../ch14_group10_v02.html) | ✅ | ✅ | ✅ | — | ⏳ |
 | 15 | Dense 64→10 공통 블록 | [ch15_dense_64x10_v02.html](../ch15_dense_64x10_v02.html) | ✅ | ✅ | ✅ | — | ⏳ |
