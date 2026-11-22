@@ -85,6 +85,11 @@
 11-2. **(2026-11-22)** 구 11장·13~16장 단독 OOC는 돌리지 않아도 된다. 2장 2-7·2-8과 3장 서브젝트의 Vivado 게이트는 장 Top STAGE n 배선 결과로 판정하도록 생성기를 바꿨다. VS Code에 남은 Vivado 작업은 12장 SDF 시뮬레이션(11-1) 하나다.
 11. **(남은 것, 2026-11-20)** 12장 배선 후 SDF 타이밍 시뮬레이션이 끝나면 `ch12/validation/vivado_impl_timesim_20261120.txt`를 `restructure/projects`에 커밋 (2장 2-8 TIMING_SIM 게이트가 대기 중). 웹 판 `ch26`·`ch29` OOC FAIL은 고치지 않는다 (개편 장은 `part03` VS Code 판을 쓴다).
 
+12. **(REQP-1840 수정 재빌드, 사용자 승인 2026-11-22)** 브랜치 `fix/sync-reset`에 리셋 모듈 두 개를 동기 리셋으로 바꿨다 (`mini_npu/rtl/npu_reset_controller.v`, `p01/rtl/p01_reset_sync.v` — btnC 2단 동기화, 비동기 clear 없음. 다른 RTL·XDC는 그대로).
+    - 웹 확인: 00~12장 회귀·adversarial·1~4장 Top 시뮬레이션 PASS, 리셋 단위 시험 `p01/tb/tb_p01_reset_sync.sv` PASS (이전 코드는 FAIL).
+    - VS Code 할 일 (그 브랜치에서): ① p01~p04 전 STAGE `build_pNN.tcl` 재빌드 → `pNN/validation/vivado_impl_YYYYMMDD.txt` ② 12장 `vivado_impl.tcl` + `run_timing_sim.sh`(전체) ③ 각 빌드의 `report_drc`에서 REQP-1840 건수 → `drc_reqp1840_YYYYMMDD.txt` (0건이면 `count=0`으로 기록) ④ 타이밍이 나빠지면(리셋 fanout) 수치와 함께 보고. 증거만 `fix/sync-reset`에 커밋.
+    - 통과하면 웹이 `fix/sync-reset`을 main에 병합한다. 그 전까지 main의 2~4장·12장 페이지는 REQP-1840 ⚠ 미해결 표시를 유지한다.
+
 ## 5. 웹 Claude가 그동안 하는 것
 
 1장(구 00~03장) 시범 전환: 생성기를 "장 페이지 + 서브젝트 절" 구조로 바꾸고 미리보기를 만든다. VS Code 작업과 파일이 겹치지 않는다.
