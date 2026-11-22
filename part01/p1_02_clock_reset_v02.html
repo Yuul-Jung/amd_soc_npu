@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="description" content="Basys3 제1부 02장 · Clock · Reset 구조">
-<meta name="generator" content="tools/part01/build_part01.py — 직접 수정 금지">
+<meta name="generator" content="tools/guide/build_part.py — 직접 수정 금지">
 <title>제1부 02장 · Clock · Reset 구조 (v02)</title>
 <link rel="stylesheet" href="../assets/education/site.css">
 <style>
@@ -14,9 +14,11 @@
 .hero p{max-width:none}
 .hero h1,.section h2{overflow-wrap:anywhere}
 .section :not(pre)>code{overflow-wrap:anywhere}
+.section p,.section li,.section .callout,.section .cards>div,.section figcaption{overflow-wrap:anywhere}
+.section label{display:block;margin:4px 0;overflow-wrap:anywhere}
 .section img{max-width:100%;height:auto;display:block}
 .section .lead{color:var(--ink-2);font-weight:500}
-.section .minor{color:var(--ink-3);font-size:.9em}
+.section .minor:not(text){color:var(--ink-3);font-size:.9em}
 .table-wrap{overflow-x:auto;margin:12px 0}
 .table-wrap th{white-space:nowrap}
 .section .chips{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 14px;padding:0;list-style:none}
@@ -88,7 +90,7 @@ img.zoom{cursor:zoom-in}
 <figcaption>Vivado 2024.2 · Implementation 완료 후 Block Design<code>clk</code>(W5), <code>btnC</code>(U18) 포함
 </figcaption>
 </figure>
-<div aria-label="보드 입력 및 클록 잠금 배선" class="flow" tabindex="0"><table><thead><tr><th scope="col">출발 신호</th><th scope="col">도착 신호</th></tr></thead><tbody><tr><td>외부 Clock 포트 · W5 · 100 MHz</td><td>clk_wiz_1/clk_in1</td></tr><tr><td>외부 Reset 포트 · U18</td><td>clk_wiz_1/reset</td></tr><tr><td>외부 Reset 포트 · U18</td><td>rst_clk_wiz_1_100M/ext_reset_in</td></tr><tr><td>clk_wiz_1/locked</td><td>rst_clk_wiz_1_100M/dcm_locked</td></tr><tr><td>clk_wiz_1/clk_out1</td><td>rst_clk_wiz_1_100M/slowest_sync_clk</td></tr></tbody></table></div>
+<div aria-label="보드 입력 및 클록 잠금 배선" class="flow" tabindex="0"><div aria-label="표 (가로 스크롤 가능)" class="table-wrap" role="region" tabindex="0"><table><thead><tr><th scope="col">출발 신호</th><th scope="col">도착 신호</th></tr></thead><tbody><tr><td>외부 Clock 포트 · W5 · 100 MHz</td><td>clk_wiz_1/clk_in1</td></tr><tr><td>외부 Reset 포트 · U18</td><td>clk_wiz_1/reset</td></tr><tr><td>외부 Reset 포트 · U18</td><td>rst_clk_wiz_1_100M/ext_reset_in</td></tr><tr><td>clk_wiz_1/locked</td><td>rst_clk_wiz_1_100M/dcm_locked</td></tr><tr><td>clk_wiz_1/clk_out1</td><td>rst_clk_wiz_1_100M/slowest_sync_clk</td></tr></tbody></table></div></div>
     </section>
     <section class="section" id="s03">
       <h2><span class="num">03</span>Processor System Reset 설정 · 연결</h2>

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="description" content="Basys3 제1부 03장 · BRAM 프로그램 실행">
-<meta name="generator" content="tools/part01/build_part01.py — 직접 수정 금지">
+<meta name="generator" content="tools/guide/build_part.py — 직접 수정 금지">
 <title>제1부 03장 · BRAM 프로그램 실행 (v02)</title>
 <link rel="stylesheet" href="../assets/education/site.css">
 <style>
@@ -14,9 +14,11 @@
 .hero p{max-width:none}
 .hero h1,.section h2{overflow-wrap:anywhere}
 .section :not(pre)>code{overflow-wrap:anywhere}
+.section p,.section li,.section .callout,.section .cards>div,.section figcaption{overflow-wrap:anywhere}
+.section label{display:block;margin:4px 0;overflow-wrap:anywhere}
 .section img{max-width:100%;height:auto;display:block}
 .section .lead{color:var(--ink-2);font-weight:500}
-.section .minor{color:var(--ink-3);font-size:.9em}
+.section .minor:not(text){color:var(--ink-3);font-size:.9em}
 .table-wrap{overflow-x:auto;margin:12px 0}
 .table-wrap th{white-space:nowrap}
 .section .chips{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 14px;padding:0;list-style:none}
@@ -141,7 +143,7 @@ High Address = 0x00000000 + 0x4000 - 1
 <section class="section" id="s05">
 <h2><span class="num">05</span>ELF 프로그램 구조</h2>
 <p>Vitis에서 C 소스를 Build하면 MicroBlaze V용 ELF(Executable and Linkable Format, 실행·링크 정보를 포함하는 실행 파일)가 생성된다. ELF에는 명령어뿐 아니라 초기값이 있는 변수, 초기화되지 않은 변수, Vector, Stack·Heap 배치 정보가 함께 반영된다.</p>
-<div aria-label="C 소스의 MicroBlaze V ELF 생성 과정" class="flow" tabindex="0"><table><thead><tr><th scope="col">단계</th><th scope="col">결과</th></tr></thead><tbody><tr><td>main.c</td><td>C 소스</td></tr><tr><td>RISC-V GCC · Vitis 도구 체인</td><td>Compile → Assemble → Link</td></tr><tr><td>Application.elf</td><td>.text.init / .text / .rodata / .data / .bss / .heap / .stack</td></tr></tbody></table></div>
+<div aria-label="C 소스의 MicroBlaze V ELF 생성 과정" class="flow" tabindex="0"><div aria-label="표 (가로 스크롤 가능)" class="table-wrap" role="region" tabindex="0"><table><thead><tr><th scope="col">단계</th><th scope="col">결과</th></tr></thead><tbody><tr><td>main.c</td><td>C 소스</td></tr><tr><td>RISC-V GCC · Vitis 도구 체인</td><td>Compile → Assemble → Link</td></tr><tr><td>Application.elf</td><td>.text.init / .text / .rodata / .data / .bss / .heap / .stack</td></tr></tbody></table></div></div>
 </section>
 <section class="section" id="s06">
 <h2><span class="num">06</span>Linker Script와 Memory Section</h2>
@@ -292,7 +294,7 @@ read_value_3 ← 0x33333333</div>
 <section class="section" id="s13">
 <h2><span class="num">13</span>BRAM 배치 확인</h2>
 <p>Vitis의 Linker Script 또는 Memory Layout에서 Vector, Code, Data, Stack, Heap이 Local BRAM Memory Region에 배치되는지 확인한다.</p>
-<div aria-label="16 KB Local BRAM 배치 예시" class="flow" tabindex="0"><table><thead><tr><th scope="col">배치 순서</th><th scope="col">영역</th></tr></thead><tbody><tr><td>시작 · 0x00000000</td><td>.text.init / Other Vector Sections</td></tr><tr><td>명령어·상수</td><td>.text / .rodata</td></tr><tr><td>변수</td><td>.data / .sdata / .bss / .sbss</td></tr><tr><td>동적 메모리</td><td>Heap</td></tr><tr><td>상단 · 0x00003FFF</td><td>Stack</td></tr><tr><td>범위</td><td>16 KB 기준 예시</td></tr></tbody></table></div>
+<div aria-label="16 KB Local BRAM 배치 예시" class="flow" tabindex="0"><div aria-label="표 (가로 스크롤 가능)" class="table-wrap" role="region" tabindex="0"><table><thead><tr><th scope="col">배치 순서</th><th scope="col">영역</th></tr></thead><tbody><tr><td>시작 · 0x00000000</td><td>.text.init / Other Vector Sections</td></tr><tr><td>명령어·상수</td><td>.text / .rodata</td></tr><tr><td>변수</td><td>.data / .sdata / .bss / .sbss</td></tr><tr><td>동적 메모리</td><td>Heap</td></tr><tr><td>상단 · 0x00003FFF</td><td>Stack</td></tr><tr><td>범위</td><td>16 KB 기준 예시</td></tr></tbody></table></div></div>
 <p>각 Section의 정확한 시작 주소와 크기는 Build 결과와 Linker Script에 따라 달라질 수 있으므로 위 그림의 세로 배치는 개념적 구조로 사용한다.</p>
 <div class="gui-walkthrough"><h3>Linker Script 실제 설정 확인</h3><ol><li><strong>① 파일 열기</strong><p>Explorer → <code>soc03_bram_run → Sources → src → lscript.ld</code> 클릭.</p></li><li><strong>② BRAM 범위</strong><p>Region <code>lmb_bram_0</code>, Base <code>0x0</code>, Size <code>0x4000</code> → 16 KiB 확인.</p></li><li><strong>③ Stack / Heap</strong><p>Stack <code>0x400</code> (1 KiB), Heap <code>0x800</code> (2 KiB) 확인.</p></li><li><strong>④ 섹션 확인</strong><p>GUI 아래쪽의 <code>.text</code>, <code>.data</code>, <code>.bss</code> 등의 섹션이 <code>lmb_bram_0</code>에 배치되는지 스크롤하여 확인한다.</p></li><li><strong>⑤ 변경 불필요</strong><p>Application Link가 이미 성공했으므로 <code>lscript.ld</code>를 임의 수정하지 않는다. 실제 사용량은 섹션 정렬·추가 영역을 고려한 Linker 결과를 기준으로 판단한다.</p></li></ol></div><div class="fig-grid"><figure class="fig"><img alt="lmb_bram_0 · 16 KiB / Stack / Heap" class="zoom" loading="lazy" src="legacy/images/soc03/16_linker_bram.webp"/><figcaption>Local BRAM 16 KiB 배치 및 Linker 설정 확인 · 클릭하여 확대</figcaption></figure></div>
 </section>

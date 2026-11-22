@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="description" content="Basys3 제1부 01장 · MicroBlaze V + BRAM 최소 SoC">
-<meta name="generator" content="tools/part01/build_part01.py — 직접 수정 금지">
+<meta name="generator" content="tools/guide/build_part.py — 직접 수정 금지">
 <title>제1부 01장 · MicroBlaze V + BRAM 최소 SoC (v02)</title>
 <link rel="stylesheet" href="../assets/education/site.css">
 <style>
@@ -14,9 +14,11 @@
 .hero p{max-width:none}
 .hero h1,.section h2{overflow-wrap:anywhere}
 .section :not(pre)>code{overflow-wrap:anywhere}
+.section p,.section li,.section .callout,.section .cards>div,.section figcaption{overflow-wrap:anywhere}
+.section label{display:block;margin:4px 0;overflow-wrap:anywhere}
 .section img{max-width:100%;height:auto;display:block}
 .section .lead{color:var(--ink-2);font-weight:500}
-.section .minor{color:var(--ink-3);font-size:.9em}
+.section .minor:not(text){color:var(--ink-3);font-size:.9em}
 .table-wrap{overflow-x:auto;margin:12px 0}
 .table-wrap th{white-space:nowrap}
 .section .chips{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 14px;padding:0;list-style:none}
@@ -108,7 +110,7 @@ Load/Store → Data-side Bus → DLMB → BRAM → Data Read/Write</div>
     <section class="section" id="s04">
       <h2><span class="num">04</span>ILMB · DLMB · BRAM 관계</h2>
 <p>LMB(Local Memory Bus)는 FPGA 내부 Block RAM에 빠르게 접근하기 위한 간결한 Local Bus이다. AMD UG1711는 Instruction LMB와 Data LMB가 각각 LMB BRAM Interface Controller를 통해 공통 Block RAM에 연결되는 구성을 일반적인 MicroBlaze V Local Memory 구조로 설명한다.</p>
-<div aria-label="ILMB와 DLMB의 공통 BRAM 연결" class="flow" tabindex="0"><table><thead><tr><th scope="col">경로</th><th scope="col">버스와 컨트롤러</th><th scope="col">도착점</th></tr></thead><tbody><tr><td>microblaze_riscv_0 / ILMB</td><td>ilmb_v10 → lmb_bram_if_cntlr</td><td>공통 Block Memory Generator</td></tr><tr><td>microblaze_riscv_0 / DLMB</td><td>dlmb_v10 → lmb_bram_if_cntlr</td><td>공통 Block Memory Generator</td></tr></tbody></table></div>
+<div aria-label="ILMB와 DLMB의 공통 BRAM 연결" class="flow" tabindex="0"><div aria-label="표 (가로 스크롤 가능)" class="table-wrap" role="region" tabindex="0"><table><thead><tr><th scope="col">경로</th><th scope="col">버스와 컨트롤러</th><th scope="col">도착점</th></tr></thead><tbody><tr><td>microblaze_riscv_0 / ILMB</td><td>ilmb_v10 → lmb_bram_if_cntlr</td><td>공통 Block Memory Generator</td></tr><tr><td>microblaze_riscv_0 / DLMB</td><td>dlmb_v10 → lmb_bram_if_cntlr</td><td>공통 Block Memory Generator</td></tr></tbody></table></div></div>
 <div aria-label="표 (가로 스크롤 가능)" class="table-wrap" role="region" tabindex="0"><table><thead><tr><th scope="col">인터페이스</th><th scope="col">주 역할</th><th scope="col">실행 관점</th></tr></thead><tbody>
 <tr><td>ILMB</td><td>Instruction Local Memory Bus</td><td>PC가 가리키는 명령어 Fetch</td></tr>
 <tr><td>DLMB</td><td>Data Local Memory Bus</td><td>변수·Stack·Data Load/Store</td></tr>
@@ -170,7 +172,7 @@ Load/Store → Data-side Bus → DLMB → BRAM → Data Read/Write</div>
 <figcaption>AMD UG1711 2026.1 · Block Automation으로 생성한 MicroBlaze V 시스템.<br/></figcaption>
 </figure>
 <p class="callout">위 그림도 AMD UG1711 <strong>2026.1</strong></p><p>설정 창을 닫은 뒤 Vivado <strong>Diagram</strong>에서 자동 생성 구조를 확인한다.</p>
-<div aria-label="최소 시스템의 클록 메모리 리셋 디버그 연결" class="flow" tabindex="0"><table><thead><tr><th scope="col">구성</th><th scope="col">연결</th></tr></thead><tbody><tr><td>clk_wiz_* / Clocking Wizard</td><td>clk_out1 → 시스템 클록</td></tr><tr><td>microblaze_riscv_0 + Local Memory</td><td>ILMB → Local Memory / DLMB → Local Memory</td></tr><tr><td>proc_sys_reset / Processor System Reset</td><td>mb_reset → MicroBlaze V / bus_struct_reset → Bus</td></tr><tr><td>AXI 리셋</td><td>peripheral_aresetn / interconnect_aresetn → AXI 계층</td></tr><tr><td>mdm_* / MicroBlaze Debug Module V</td><td>DEBUG 인터페이스</td></tr></tbody></table></div>
+<div aria-label="최소 시스템의 클록 메모리 리셋 디버그 연결" class="flow" tabindex="0"><div aria-label="표 (가로 스크롤 가능)" class="table-wrap" role="region" tabindex="0"><table><thead><tr><th scope="col">구성</th><th scope="col">연결</th></tr></thead><tbody><tr><td>clk_wiz_* / Clocking Wizard</td><td>clk_out1 → 시스템 클록</td></tr><tr><td>microblaze_riscv_0 + Local Memory</td><td>ILMB → Local Memory / DLMB → Local Memory</td></tr><tr><td>proc_sys_reset / Processor System Reset</td><td>mb_reset → MicroBlaze V / bus_struct_reset → Bus</td></tr><tr><td>AXI 리셋</td><td>peripheral_aresetn / interconnect_aresetn → AXI 계층</td></tr><tr><td>mdm_* / MicroBlaze Debug Module V</td><td>DEBUG 인터페이스</td></tr></tbody></table></div></div>
 <h3>Local Memory Hierarchy를 펼쳐서 확인</h3>
 <p><code>microblaze_riscv_0_local_memory</code>와 같은 Hierarchical Block을 열어 <strong>ILMB Controller, DLMB Controller, Block Memory Generator</strong>가 실제로 존재하는지 확인한다.</p>
 <div class="callout"><strong>완료 확인:</strong> <code>ILMB</code>와 <code>DLMB</code>가 Local BRAM으로 연결되는지 계층 내부를 펼쳐 확인한다. 04장에서 확인한 BRAM 범위는 <code>0x00000000</code>~<code>0x00003FFF</code>(16 KiB)다. <code>M_AXI_DP</code>에는 아직 AXI 주변장치가 연결되지 않는다.</div>

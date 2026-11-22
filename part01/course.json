@@ -153,5 +153,37 @@
       "file": "p1_11_1_files_v02.html",
       "bundle_of": "p1-11"
     }
-  ]
+  ],
+  "prefix": "p1",
+  "label": "제1부",
+  "short_title": "MICROBLAZE V SOC",
+  "home_label": "제1부 학습 안내서",
+  "kicker_base": "BASYS3 · 제1부 MicroBlaze V 기본 SoC",
+  "index": {
+    "kicker": "BASYS3 · PART 01 · CHAPTER 01–11",
+    "h1": "제1부 · MicroBlaze V 기본 SoC",
+    "desc": "CPU·BRAM·AXI 주변장치 구축에서 사용자 Top 연결까지",
+    "meta": "Basys3 MicroBlaze V 기본 SoC 제1부 01~11장 학습안내서",
+    "intro": "Basys3 위에 MicroBlaze V CPU와 Local BRAM으로 가장 작은 SoC를 만들고, AXI 주변장치를 하나씩 붙여 GPIO·UART·Timer·Interrupt를 다루는 SoC로 키웁니다. 11장에서 사용자 Top을 연결해 제1부의 SoC를 완성합니다.",
+    "flow": "01~05장  MicroBlaze V · BRAM · Clock/Reset · Memory Map · AXI\n   ↓\n06~09장  AXI GPIO · UART Lite · Timer · Interrupt Controller   (07.1~09.1 C 코드 풀이)\n   ↓\n10장     GPIO · UART · Timer 통합   (10.1 C 코드 풀이)\n   ↓\n11장     사용자 Top과 1비트 GPIO",
+    "after": "각 장은 앞 장의 Vivado·Vitis 프로젝트를 새 이름으로 복제해 이어서 만듭니다. 앞 장 프로젝트는 그대로 둡니다.",
+    "env": [
+      [
+        "보드",
+        "Digilent Basys3 (Artix-7 XC7A35T · 100 MHz 클록 W5 · 리셋 btnC U18)"
+      ],
+      [
+        "도구",
+        "Vivado 2024.2 · Vitis Unified IDE 2024.2 · 시리얼 터미널(moserial)"
+      ],
+      [
+        "작업 폴더",
+        "<code>~/soc/hw</code> (Vivado 프로젝트) · <code>~/soc/sw</code> (Vitis Workspace)"
+      ],
+      [
+        "UART",
+        "115200 bps · 8N1"
+      ]
+    ]
+  }
 }
