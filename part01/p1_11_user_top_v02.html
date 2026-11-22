@@ -59,13 +59,13 @@ img.zoom{cursor:zoom-in}
 <div class="wrap">
   <nav class="toc" id="course-nav" aria-label="전체 장과 절 탐색"></nav>
   <main class="content" id="main-content">
-    <section class="section" id="overview">
-      <h2><span class="num">00</span>이 장의 목표</h2>
-      <p>Vivado에서 사용자 Top을 연결하고 Vitis에서 SW0 입력을 LED0 출력에 반영합니다. GPIO 16비트 폭과 기존 UART·Timer IP는 유지합니다.</p>
-      <ul class="chips" aria-label="핵심 용어"><li>Basys3</li><li>MicroBlaze V</li><li>Top / Wrapper</li><li>SW0 → LED0</li></ul>
-    </section>
-    <section class="section" id="s01">
-      <h2><span class="num">01</span>Vivado Top 추가 → Vitis 1비트 제어</h2>
+ <section class="section" id="overview">
+<h2><span class="num">00</span>이 장의 목표</h2>
+<p>Vivado에서 사용자 Top을 연결하고 Vitis에서 SW0 입력을 LED0 출력에 반영합니다. GPIO 16비트 폭과 기존 UART·Timer IP는 유지합니다.</p>
+<ul aria-label="핵심 용어" class="chips"><li>Basys3</li><li>MicroBlaze V</li><li>Top / Wrapper</li><li>SW0 → LED0</li></ul>
+</section>
+<section class="section" id="s01">
+<h2><span class="num">01</span>Vivado Top 추가 → Vitis 1비트 제어</h2>
 <div aria-label="표 (가로 스크롤 가능)" class="table-wrap" role="region" tabindex="0"><table><thead><tr><th>작업 환경</th><th>실습 내용</th><th>확인 결과</th></tr></thead><tbody>
 <tr><td>Vivado</td><td><code>soc11_integration.bd</code> 복제·Wrapper 생성 후 <code>basys3_soc11_top</code> 연결</td><td>11장 계층 구성·Synthesis·Bitstream</td></tr>
 <tr><td>Vitis</td><td><code>SW_LED_MASK</code>를 <code>0x00000001U</code>로 변경</td><td>SW0 → LED0, UART → LED14, Timer → LED15</td></tr>
@@ -82,9 +82,9 @@ img.zoom{cursor:zoom-in}
               ▼
      soc11_integration.bd
      (MicroBlaze V + BRAM + AXI GPIO/UART/Timer/INTC)</div>
-    </section>
-    <section class="section" id="s02">
-      <h2><span class="num">02</span>프로젝트 복제 → Wrapper 포트 확인</h2>
+</section>
+<section class="section" id="s02">
+<h2><span class="num">02</span>프로젝트 복제 → Wrapper 포트 확인</h2>
 <ol>
 <li>Vivado 2024.2를 실행하고 <strong>File → Project → Open</strong>에서 <code>~/soc/hw/soc10_integration/soc10_integration.xpr</code>을 엽니다. </li>
 <li><strong>File → Project → Save As</strong>로 프로젝트 이름을 <code>soc11_user_top</code>으로 지정합니다. 결과 경로는 <code>~/soc/hw/soc11_user_top/soc11_user_top.xpr</code>이 되도록 Project Summary에서 확인합니다. </li>
@@ -97,9 +97,9 @@ img.zoom{cursor:zoom-in}
 <li>새 XDC의 <code>get_ports</code>가 Top 포트명과 일치하는지 확인합니다. <code>clk=W5</code>, <code>btnC=U18</code>, <code>sw[13]=U1</code>, <code>led[13]=N3</code>, <code>RsRx=B18</code>, <code>RsTx=A18</code>입니다.</li>
 <li><strong>Block Design → Address Editor</strong>를 열어 GPIO, UART Lite, Timer, INTC 기존 주소 및 BRAM 64 KiB가 그대로인지 확인하고 저장합니다. </li>
 </ol>
-    </section>
-    <section class="section" id="s03">
-      <h2><span class="num">03</span>사용자 Top 추가 → Set as Top</h2>
+</section>
+<section class="section" id="s03">
+<h2><span class="num">03</span>사용자 Top 추가 → Set as Top</h2>
 <ol>
 <li><strong>Sources → Add Sources → Add or Create Design Sources</strong>에서 Verilog 파일 <code>basys3_soc11_top.v</code>를 생성합니다.</li>
 <li>아래 코드를 <code>basys3_soc11_top.v</code>에 입력합니다. 새로 생성한 <code>soc11_integration_wrapper u_soc11</code>을 연결합니다. 사용자 Top의 <code>sw</code>, <code>led</code>, <code>RsRx</code>, <code>RsTx</code>는 유지합니다.</li>
@@ -153,9 +153,9 @@ endmodule
 <li><strong>Run Synthesis → Run Implementation → Generate Bitstream</strong> 순서로 실행하고 오류·Critical Warning·Timing Summary를 기록합니다.</li>
 <li><strong>File → Export → Export Hardware</strong>에서 <strong>Include Bitstream</strong>을 선택하여 새 11장 XSA를 생성합니다. </li>
 </ol>
-    </section>
-    <section class="section" id="s04">
-      <h2><span class="num">04</span>SW0 입력을 LED0에 표시</h2>
+</section>
+<section class="section" id="s04">
+<h2><span class="num">04</span>SW0 입력을 LED0에 표시</h2>
 <h3>① 11장 XSA로 Platform 준비</h3>
 <ol>
 <li>Vivado에서 <strong>File → Export → Export Hardware</strong>로 내보낸 <strong>11장 XSA(Include Bitstream)</strong>의 파일 위치를 확인합니다. 10장 XSA를 선택하지 않습니다.</li>
@@ -573,9 +573,9 @@ int main(void)
 <tr><td>UART <code>1</code> / <code>0</code> 전송</td><td>LED14 ON / OFF</td></tr>
 <tr><td>Timer 실행 / BTNC 누름</td><td>LED15 주기적 변화 / 시스템 Reset</td></tr>
 </tbody></table></div>
-    </section>
-    <section class="section" id="s05">
-      <h2><span class="num">05</span>Basys3 보드 입출력 구성</h2>
+</section>
+<section class="section" id="s05">
+<h2><span class="num">05</span>Basys3 보드 입출력 구성</h2>
 <div aria-label="표 (가로 스크롤 가능)" class="table-wrap" role="region" tabindex="0"><table><thead><tr><th>자원</th><th>핀</th><th>11장 예제의 사용</th></tr></thead><tbody>
 <tr><td>SW0 / LED0</td><td>V17 / U16</td><td>AXI GPIO 입력 → MicroBlaze V C → AXI GPIO 출력</td></tr>
 <tr><td>SW1~15</td><td>11장 XDC</td><td>AXI GPIO 입력은 유지, 1비트 예제 출력에는 미반영</td></tr>
@@ -596,16 +596,11 @@ int main(void)
 
 UART_0_rxd → UART Lite / C → led[14] (P1)
 Timer / INTC → C           → led[15] (L1)</div>
-    </section>
-    <section class="section" id="s06">
-      <h2><span class="num">06</span>실습 파일</h2>
-<p><a href="p1_10_integration_v02.html">제1부 10장 실습 본문</a> ·
-<a href="p1_11_1_files_v02.html#f-soc10_main_c">10장 C 소스</a> ·
-<a href="p1_11_1_files_v02.html#f-p1_11_main_soc11_c">11장 1비트 C 소스</a> ·
-<a href="p1_11_1_files_v02.html#f-p1_11_basys3_soc11_top_v">11장 Top Verilog 소스</a> ·
-<a href="p1_11_1_files_v02.html#f-soc10_basys3_soc10_integrated_xdc">10장 저장소 참고 XDC</a> ·
-<a href="p1_11_1_files_v02.html#f-p1_11_basys3_soc11_top_xdc">11장 사용자 Top XDC</a></p>
-    </section>
+</section>
+<section class="section" id="s06">
+<h2><span class="num">06</span>실습 파일</h2>
+<p><a href="p1_10_integration_v02.html">제1부 10장 실습 본문</a> · 파일 전체: <a href="p1_11_1_files_v02.html">11.1 실습 파일</a></p><div aria-label="표 (가로 스크롤 가능)" class="table-wrap" role="region" tabindex="0"><table><thead><tr><th>파일</th><th>내용</th></tr></thead><tbody><tr><td><a href="p1_11_1_files_v02.html#f-soc10_main_c"><code>main.c</code></a></td><td>10장 C 소스</td></tr><tr><td><a href="p1_11_1_files_v02.html#f-p1_11_main_soc11_c"><code>main_soc11.c</code></a></td><td>11장 1비트 C 소스</td></tr><tr><td><a href="p1_11_1_files_v02.html#f-p1_11_basys3_soc11_top_v"><code>basys3_soc11_top.v</code></a></td><td>11장 Top Verilog 소스</td></tr><tr><td><a href="p1_11_1_files_v02.html#f-soc10_basys3_soc10_integrated_xdc"><code>basys3_soc10_integrated.xdc</code></a></td><td>10장 참고 XDC</td></tr><tr><td><a href="p1_11_1_files_v02.html#f-p1_11_basys3_soc11_top_xdc"><code>basys3_soc11_top.xdc</code></a></td><td>11장 사용자 Top XDC</td></tr></tbody></table></div>
+</section>
     <div class="chapter-links" id="chapter-links"></div>
   </main>
 </div>

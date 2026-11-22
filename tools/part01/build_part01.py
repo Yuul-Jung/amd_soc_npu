@@ -538,6 +538,22 @@ def attach_sources(c, doc):
         return doc
     if c["id"] in BUNDLE:
         b = BUNDLE[c["id"]]["file"]
+        soup = BeautifulSoup(doc, "html.parser")
+        # 링크만 늘어놓은 문단은 파일 표로 바꿔 무엇을 여는지 분명히 한다
+        for p in soup.find_all("p"):
+            src = [a for a in p.find_all("a") if a.get("href", "").startswith("SRC::")]
+            if len(src) < 3:
+                continue
+            other = [a for a in p.find_all("a") if a not in src]
+            rows = "".join(
+                f'<tr><td><a href="{b}#f-{a["href"][5:]}"><code>{html.escape(os.path.basename(files[a["href"][5:]]))}</code></a></td>'
+                f'<td>{html.escape(re.sub(r"저장소 ", "", a.get_text(" ", strip=True)))}</td></tr>' for a in src)
+            new = BeautifulSoup(
+                (f'<p>{"".join(str(o) for o in other)} · 파일 전체: <a href="{b}">{html.escape(BUNDLE[c["id"]]["number"])} {html.escape(BUNDLE[c["id"]]["title"])}</a></p>' if other else "")
+                + '<div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table><thead><tr><th>파일</th><th>내용</th></tr></thead><tbody>'
+                + rows + "</tbody></table></div>", "html.parser")
+            p.replace_with(new)
+        doc = str(soup)
         return re.sub(r"SRC::([A-Za-z0-9_]+)", lambda m: f"{b}#f-{m.group(1)}", doc)
     soup = BeautifulSoup(doc, "html.parser")
     extra = []
