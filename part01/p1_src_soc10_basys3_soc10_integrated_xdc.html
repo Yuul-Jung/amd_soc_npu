@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Basys3 제1부 11장 실습 파일 basys3_soc10_integrated.xdc">
+<meta name="generator" content="tools/part01/build_part01.py — 직접 수정 금지">
+<title>basys3_soc10_integrated.xdc · 제1부 11장 (v02)</title>
+<link rel="stylesheet" href="../assets/education/site.css">
+<style>
+.access-skip{position:absolute;left:-9999px;top:0}
+.access-skip:focus{left:12px;top:12px;z-index:1003;background:#fff;color:#15171c;padding:6px 10px}
+.vbadge{display:inline-block;padding:.15em .6em;border-radius:4px;font-size:.78em;font-weight:700;background:#d4edda;color:#155724;vertical-align:middle}
+.hero p{max-width:none}
+.hero h1{overflow-wrap:anywhere}
+.section :not(pre)>code{overflow-wrap:anywhere}
+.section img{max-width:100%;height:auto;display:block}
+.section .lead{color:var(--ink-2);font-weight:500}
+.section .minor{color:var(--ink-3);font-size:.9em}
+.table-wrap{overflow-x:auto;margin:12px 0}
+.table-wrap th{white-space:nowrap}
+.section .chips{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 14px;padding:0;list-style:none}
+.chips li{border:1px solid var(--line);background:#fff;padding:3px 10px;border-radius:3px;font:500 12px "IBM Plex Mono",monospace;color:var(--ink-2);margin:0}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:12px 0}
+.cards>div{border:1px solid var(--line);border-left:3px solid var(--accent);background:#fff;padding:12px 14px}
+.cards b,.cards strong{display:block;margin-bottom:4px}
+.cards small{display:block;color:var(--ink-3)}
+.callout{border:1px solid #d9d3f5;border-left:4px solid var(--accent);background:#f7f5fe;padding:12px 16px;margin:14px 0}
+.callout.warn{border-color:#f0d9a8;border-left-color:#b07a12;background:#fffaf0}
+.callout>:first-child{margin-top:0}.callout>:last-child{margin-bottom:0}
+.flow{white-space:pre-wrap;font:500 .86rem/1.7 "IBM Plex Mono",monospace;background:#fbfbf9;border:1px solid var(--line);padding:12px 16px;margin:14px 0;overflow-x:auto}
+.flow code{background:none;padding:0}
+.fig{margin:16px 0;border:1px solid var(--line);background:#fff;padding:10px}
+.fig img,.fig svg{margin:0 auto;max-width:100%;height:auto}
+.fig figcaption{font-size:.84rem;color:var(--ink-2);margin-top:8px}
+.fig-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin:14px 0}
+.fig-grid .fig{margin:0}
+.gui-walkthrough{border:1px solid var(--line);background:#fbfbf9;padding:12px 18px;margin:14px 0}
+details{border:1px solid var(--line);background:#fff;padding:8px 14px;margin:14px 0}
+summary{cursor:pointer;font-weight:600}
+.codeblock pre{max-height:780px;white-space:pre}
+img.zoom{cursor:zoom-in}
+.zoom-view{position:fixed;inset:0;z-index:2000;background:rgba(21,23,28,.86);display:flex;align-items:center;justify-content:center;padding:24px;cursor:zoom-out}
+.zoom-view img{max-width:100%;max-height:100%;background:#fff;box-shadow:0 8px 40px rgba(0,0,0,.4)}
+.codebar{gap:8px}.codebar span{min-width:0;overflow-wrap:anywhere}
+</style>
+</head>
+<body data-chapter="p1-11">
+<a class="access-skip" href="#main-content">본문 바로가기</a>
+<button type="button" class="mobile-menu" id="mobile-menu" aria-controls="course-nav" aria-expanded="false">☰ 장·목차</button>
+<div class="shade" id="shade"></div>
+<header class="hero">
+  <div class="hero-inner">
+    <p class="kicker">BASYS3 · 제1부 MicroBlaze V 기본 SoC · 11장 실습 파일 <span class="vbadge">v02</span></p>
+    <h1>basys3_soc10_integrated.xdc</h1>
+    <p>11장 · 사용자 Top과 1비트 GPIO</p>
+  </div>
+</header>
+<div class="wrap">
+  <nav class="toc" id="course-nav" aria-label="전체 장과 절 탐색"></nav>
+  <main class="content" id="main-content">
+    <section class="section" id="file">
+      <h2><span class="num">00</span>basys3_soc10_integrated.xdc</h2>
+      <p>11장 <a href="p1_11_user_top_v02.html">사용자 Top과 1비트 GPIO</a> 실습에서 사용하는 XDC 파일입니다. (46줄)</p>
+      <div class="codeblock"><div class="codebar"><span>basys3_soc10_integrated.xdc · XDC</span></div><pre tabindex="0"><code>## Clock signal
+set_property -dict { PACKAGE_PIN W5 IOSTANDARD LVCMOS33 } [get_ports clk]
+create_clock -add -name sys_clk_pin -period 10.00 -waveform {0 5} [get_ports clk]
+
+## Center Button : Reset
+set_property -dict { PACKAGE_PIN U18 IOSTANDARD LVCMOS33 } [get_ports btnC]
+
+## Basys3 Slide Switches
+set_property -dict { PACKAGE_PIN V17 IOSTANDARD LVCMOS33 } [get_ports {sw[0]}]
+set_property -dict { PACKAGE_PIN V16 IOSTANDARD LVCMOS33 } [get_ports {sw[1]}]
+set_property -dict { PACKAGE_PIN W16 IOSTANDARD LVCMOS33 } [get_ports {sw[2]}]
+set_property -dict { PACKAGE_PIN W17 IOSTANDARD LVCMOS33 } [get_ports {sw[3]}]
+set_property -dict { PACKAGE_PIN W15 IOSTANDARD LVCMOS33 } [get_ports {sw[4]}]
+set_property -dict { PACKAGE_PIN V15 IOSTANDARD LVCMOS33 } [get_ports {sw[5]}]
+set_property -dict { PACKAGE_PIN W14 IOSTANDARD LVCMOS33 } [get_ports {sw[6]}]
+set_property -dict { PACKAGE_PIN W13 IOSTANDARD LVCMOS33 } [get_ports {sw[7]}]
+set_property -dict { PACKAGE_PIN V2 IOSTANDARD LVCMOS33 } [get_ports {sw[8]}]
+set_property -dict { PACKAGE_PIN T3 IOSTANDARD LVCMOS33 } [get_ports {sw[9]}]
+set_property -dict { PACKAGE_PIN T2 IOSTANDARD LVCMOS33 } [get_ports {sw[10]}]
+set_property -dict { PACKAGE_PIN R3 IOSTANDARD LVCMOS33 } [get_ports {sw[11]}]
+set_property -dict { PACKAGE_PIN W2 IOSTANDARD LVCMOS33 } [get_ports {sw[12]}]
+set_property -dict { PACKAGE_PIN U1 IOSTANDARD LVCMOS33 } [get_ports {sw[13]}]
+set_property -dict { PACKAGE_PIN T1 IOSTANDARD LVCMOS33 } [get_ports {sw[14]}]
+set_property -dict { PACKAGE_PIN R2 IOSTANDARD LVCMOS33 } [get_ports {sw[15]}]
+
+## Basys3 LEDs
+set_property -dict { PACKAGE_PIN U16 IOSTANDARD LVCMOS33 } [get_ports {led[0]}]
+set_property -dict { PACKAGE_PIN E19 IOSTANDARD LVCMOS33 } [get_ports {led[1]}]
+set_property -dict { PACKAGE_PIN U19 IOSTANDARD LVCMOS33 } [get_ports {led[2]}]
+set_property -dict { PACKAGE_PIN V19 IOSTANDARD LVCMOS33 } [get_ports {led[3]}]
+set_property -dict { PACKAGE_PIN W18 IOSTANDARD LVCMOS33 } [get_ports {led[4]}]
+set_property -dict { PACKAGE_PIN U15 IOSTANDARD LVCMOS33 } [get_ports {led[5]}]
+set_property -dict { PACKAGE_PIN U14 IOSTANDARD LVCMOS33 } [get_ports {led[6]}]
+set_property -dict { PACKAGE_PIN V14 IOSTANDARD LVCMOS33 } [get_ports {led[7]}]
+set_property -dict { PACKAGE_PIN V13 IOSTANDARD LVCMOS33 } [get_ports {led[8]}]
+set_property -dict { PACKAGE_PIN V3 IOSTANDARD LVCMOS33 } [get_ports {led[9]}]
+set_property -dict { PACKAGE_PIN W3 IOSTANDARD LVCMOS33 } [get_ports {led[10]}]
+set_property -dict { PACKAGE_PIN U3 IOSTANDARD LVCMOS33 } [get_ports {led[11]}]
+set_property -dict { PACKAGE_PIN P3 IOSTANDARD LVCMOS33 } [get_ports {led[12]}]
+set_property -dict { PACKAGE_PIN N3 IOSTANDARD LVCMOS33 } [get_ports {led[13]}]
+set_property -dict { PACKAGE_PIN P1 IOSTANDARD LVCMOS33 } [get_ports {led[14]}]
+set_property -dict { PACKAGE_PIN L1 IOSTANDARD LVCMOS33 } [get_ports {led[15]}]
+
+## Basys3 USB-RS232 Interface
+set_property -dict { PACKAGE_PIN B18 IOSTANDARD LVCMOS33 } [get_ports RsRx]
+set_property -dict { PACKAGE_PIN A18 IOSTANDARD LVCMOS33 } [get_ports RsTx]
+</code></pre></div>
+      <p><a href="p1_11_user_top_v02.html">← 11장 사용자 Top과 1비트 GPIO(으)로 돌아가기</a></p>
+    </section>
+    <div class="chapter-links" id="chapter-links"></div>
+  </main>
+</div>
+<script>
+window.COURSE={
+ "title": "제1부 · MicroBlaze V 기본 SoC",
+ "chapters": [
+  {
+   "id": "p1-01",
+   "number": "01",
+   "title": "MicroBlaze V + BRAM 최소 SoC",
+   "file": "p1_01_microblaze_bram_v02.html"
+  },
+  {
+   "id": "p1-02",
+   "number": "02",
+   "title": "Clock · Reset 구조",
+   "file": "p1_02_clock_reset_v02.html"
+  },
+  {
+   "id": "p1-03",
+   "number": "03",
+   "title": "BRAM 프로그램 실행",
+   "file": "p1_03_bram_program_v02.html"
+  },
+  {
+   "id": "p1-04",
+   "number": "04",
+   "title": "Memory Map · MMIO",
+   "file": "p1_04_memory_map_v02.html"
+  },
+  {
+   "id": "p1-05",
+   "number": "05",
+   "title": "AXI4 · AXI4-Lite · AXI4-Stream",
+   "file": "p1_05_axi_v02.html"
+  },
+  {
+   "id": "p1-06",
+   "number": "06",
+   "title": "AXI GPIO",
+   "file": "p1_06_axi_gpio_v02.html"
+  },
+  {
+   "id": "p1-07",
+   "number": "07",
+   "title": "AXI UART Lite",
+   "file": "p1_07_axi_uartlite_v02.html"
+  },
+  {
+   "id": "p1-07-1",
+   "number": "07.1",
+   "title": "UART Echo C 코드 풀이",
+   "file": "p1_07_1_uart_echo_c_v02.html"
+  },
+  {
+   "id": "p1-08",
+   "number": "08",
+   "title": "AXI Timer",
+   "file": "p1_08_axi_timer_v02.html"
+  },
+  {
+   "id": "p1-08-1",
+   "number": "08.1",
+   "title": "AXI Timer C 코드 풀이",
+   "file": "p1_08_1_timer_c_v02.html"
+  },
+  {
+   "id": "p1-09",
+   "number": "09",
+   "title": "AXI Interrupt Controller",
+   "file": "p1_09_axi_intc_v02.html"
+  },
+  {
+   "id": "p1-09-1",
+   "number": "09.1",
+   "title": "Timer Interrupt C 코드 풀이",
+   "file": "p1_09_1_intc_c_v02.html"
+  },
+  {
+   "id": "p1-10",
+   "number": "10",
+   "title": "GPIO · UART · Timer 통합",
+   "file": "p1_10_integration_v02.html"
+  },
+  {
+   "id": "p1-10-1",
+   "number": "10.1",
+   "title": "통합 C 코드 풀이",
+   "file": "p1_10_1_integration_c_v02.html"
+  },
+  {
+   "id": "p1-11",
+   "number": "11",
+   "title": "사용자 Top과 1비트 GPIO",
+   "file": "p1_11_user_top_v02.html"
+  }
+ ]
+};
+</script>
+<script defer src="../assets/education/site.js"></script>
+<script>
+// 그림 확대: 그림을 누르면 쪽 안에서 크게 보기, 다시 누르거나 Escape로 닫기
+document.addEventListener("click", (e) => {
+  const img = e.target.closest("img.zoom");
+  const open = document.querySelector(".zoom-view");
+  if (open) { open.remove(); return; }
+  if (!img) return;
+  const v = document.createElement("div");
+  v.className = "zoom-view";
+  v.setAttribute("role", "dialog");
+  v.setAttribute("aria-label", img.alt || "그림 확대");
+  const big = document.createElement("img");
+  big.src = img.currentSrc || img.src;
+  big.alt = img.alt;
+  v.append(big);
+  document.body.append(v);
+});
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") document.querySelector(".zoom-view")?.remove(); });
+</script>
+</body>
+</html>

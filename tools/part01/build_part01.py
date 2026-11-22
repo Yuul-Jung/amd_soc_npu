@@ -103,6 +103,9 @@ BLOCKS = {"p", "div", "ol", "ul", "figure", "pre", "table", "section", "details"
 TEXT_BLOCKS = ["h2", "h3", "h4", "p", "li", "figcaption", "summary", "th", "td", "div", "strong", "span", "b", "small"]
 
 removed: dict[str, list[str]] = {}
+SOURCES: dict[str, tuple[str, dict]] = {}          # 실습 파일 보기 쪽: slug → (part01 기준 경로, 쓰는 장)
+PAGE_CH = {c["file"]: c for c in CHS}
+LANG = {".c": "C", ".h": "C", ".v": "Verilog", ".sv": "SystemVerilog", ".xdc": "XDC", ".tcl": "Tcl", ".py": "Python", ".sh": "Shell"}
 broken: list[str] = []
 
 
@@ -176,6 +179,10 @@ def new_url(raw, src_dir, tag, page):
         return BY_SRC[tgt]["file"] + frag
     rel = os.path.relpath(tgt, P1).replace(os.sep, "/")
     lrel = os.path.relpath(tgt, os.path.join(P1, "legacy")).replace(os.sep, "/")
+    if tag == "a" and TEXT_EXT.search(rel) and re.match(r"^(legacy/code|files)/", rel) and not sp.query:
+        slug = re.sub(r"[^A-Za-z0-9]+", "_", re.sub(r"^(legacy/code|files)/", "", rel)).strip("_")
+        SOURCES.setdefault(slug, (rel, PAGE_CH[page]))
+        return f"p1_src_{slug}.html"
     if tag == "a" and re.match(r"^(code|docs|validation)/", lrel) and TEXT_EXT.search(lrel) and not sp.query:
         return "legacy/source_viewer.html?file=" + quote(lrel, safe="") + frag
     return quote(rel, safe="/") + ("?" + sp.query if sp.query else "") + frag
@@ -214,6 +221,21 @@ def convert(c):
         if p.find("a") and re.fullmatch(r"[\s·←→]*", re.sub(r"(?s)<a\b.*?</a>", "", p.decode_contents())) \
                 and all(a.get("href", "").startswith("p1_") for a in p.find_all("a")) and re.search(r"[←→]", p.get_text()):
             p.decompose()
+    # 그림 링크: 이미지 파일로 넘어가지 않고 쪽 안에서 확대 (아래 ZOOM 스크립트)
+    IMG = re.compile(r"\.(webp|png|jpe?g|gif|svg|avif)$", re.I)
+    for a in main.find_all("a"):
+        href = a.get("href", "")
+        if href.startswith(("http", "#")) or not IMG.search(href.split("#")[0]):
+            continue
+        if a.find("img"):
+            a.unwrap()
+        else:
+            a.decompose()
+    for img in main.find_all("img"):
+        img["class"] = ["zoom"]
+    for cap in main.find_all("figcaption"):
+        for t in cap.find_all(string=True):
+            t.replace_with(re.sub(r"(\s*·\s*)+$", "", str(t)))
     for img in main.find_all("img"):
         img.attrs.pop("onerror", None)
         img["loading"] = "lazy"
@@ -278,6 +300,8 @@ def convert(c):
             new = ["minor"]
         elif cl & {"codeblock", "codebar", "gui-walkthrough"}:
             new = sorted(cl & {"codeblock", "codebar", "gui-walkthrough"})
+        if e.name == "img":
+            new = ["zoom"]
         if new:
             e["class"] = new
         else:
@@ -382,6 +406,7 @@ STYLE = """
 .access-skip:focus{left:12px;top:12px;z-index:1003;background:#fff;color:#15171c;padding:6px 10px}
 .vbadge{display:inline-block;padding:.15em .6em;border-radius:4px;font-size:.78em;font-weight:700;background:#d4edda;color:#155724;vertical-align:middle}
 .hero p{max-width:none}
+.hero h1{overflow-wrap:anywhere}
 .section :not(pre)>code{overflow-wrap:anywhere}
 .section img{max-width:100%;height:auto;display:block}
 .section .lead{color:var(--ink-2);font-weight:500}
@@ -408,6 +433,9 @@ STYLE = """
 details{border:1px solid var(--line);background:#fff;padding:8px 14px;margin:14px 0}
 summary{cursor:pointer;font-weight:600}
 .codeblock pre{max-height:780px;white-space:pre}
+img.zoom{cursor:zoom-in}
+.zoom-view{position:fixed;inset:0;z-index:2000;background:rgba(21,23,28,.86);display:flex;align-items:center;justify-content:center;padding:24px;cursor:zoom-out}
+.zoom-view img{max-width:100%;max-height:100%;background:#fff;box-shadow:0 8px 40px rgba(0,0,0,.4)}
 .codebar{gap:8px}.codebar span{min-width:0;overflow-wrap:anywhere}
 """
 
@@ -446,6 +474,25 @@ FOOT = """
 window.COURSE={course};
 </script>
 <script defer src="../assets/education/site.js"></script>
+<script>
+// 그림 확대: 그림을 누르면 쪽 안에서 크게 보기, 다시 누르거나 Escape로 닫기
+document.addEventListener("click", (e) => {
+  const img = e.target.closest("img.zoom");
+  const open = document.querySelector(".zoom-view");
+  if (open) { open.remove(); return; }
+  if (!img) return;
+  const v = document.createElement("div");
+  v.className = "zoom-view";
+  v.setAttribute("role", "dialog");
+  v.setAttribute("aria-label", img.alt || "그림 확대");
+  const big = document.createElement("img");
+  big.src = img.currentSrc || img.src;
+  big.alt = img.alt;
+  v.append(big);
+  document.body.append(v);
+});
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") document.querySelector(".zoom-view")?.remove(); });
+</script>
 </body>
 </html>
 """
@@ -467,7 +514,26 @@ def page_html(c, doc, desc):
                        title=html.escape(f"제1부 {c['number']}장 · {c['title']} ({VER})"), style=STYLE, chid=c["id"],
                        kicker=f"BASYS3 · 제1부 MicroBlaze V 기본 SoC · {c['number']}장", ver=VER,
                        h1=html.escape(f"제1부 {c['number']}장 · {c['title']}"), desc=html.escape(first_sentence(desc)))
-    return re.sub(r"/home/[A-Za-z0-9_.-]+", "~", head + doc + FOOT.format(course=course_js()))
+    return re.sub(r"/home/[A-Za-z0-9_.-]+", "~", head + doc + FOOT.replace("{course}", course_js()))
+
+
+def source_html(slug, rel, c):
+    """실습 파일을 공통 틀 안의 코드 박스로 보여 주는 쪽 (날것 파일·다운로드로 열리지 않게)."""
+    name = os.path.basename(rel)
+    code = rd(os.path.join(P1, rel))
+    code = re.sub(r"/home/[A-Za-z0-9_.-]+", "~", code)
+    lang = LANG.get(os.path.splitext(name)[1].lower(), "텍스트")
+    lines = code.count("\n") + (0 if code.endswith("\n") else 1)
+    doc = f"""    <section class="section" id="file">
+      <h2><span class="num">00</span>{html.escape(name)}</h2>
+      <p>{c['number']}장 <a href="{c['file']}">{html.escape(c['title'])}</a> 실습에서 사용하는 {lang} 파일입니다. ({lines}줄)</p>
+      <div class="codeblock"><div class="codebar"><span>{html.escape(name)} · {lang}</span></div><pre tabindex="0"><code>{html.escape(code)}</code></pre></div>
+      <p><a href="{c['file']}">← {c['number']}장 {html.escape(c['title'])}(으)로 돌아가기</a></p>
+    </section>"""
+    head = HEAD.format(meta=html.escape(f"Basys3 제1부 {c['number']}장 실습 파일 {name}"), title=html.escape(f"{name} · 제1부 {c['number']}장 ({VER})"),
+                       style=STYLE, chid=c["id"], kicker=f"BASYS3 · 제1부 MicroBlaze V 기본 SoC · {c['number']}장 실습 파일", ver=VER,
+                       h1=html.escape(name), desc=html.escape(f"{c['number']}장 · {c['title']}"))
+    return head + doc + FOOT.replace("{course}", course_js())
 
 
 def index_html(descs):
@@ -510,7 +576,7 @@ def index_html(descs):
     head = HEAD.format(meta="Basys3 MicroBlaze V 기본 SoC 제1부 01~11장 학습안내서", title=html.escape(f"{COURSE['title']} ({VER})"),
                        style=STYLE, chid="p1-index", kicker="BASYS3 · PART 01 · CHAPTER 01–11", ver=VER,
                        h1="제1부 · MicroBlaze V 기본 SoC", desc="CPU·BRAM·AXI 주변장치 구축에서 사용자 Top 연결까지")
-    return head + doc + FOOT.format(course=course_js())
+    return head + doc + FOOT.replace("{course}", course_js())
 
 
 def edit_log(summary):
@@ -540,10 +606,12 @@ def main(check):
             if before[k] != after[k]:
                 fails.append(f"{c['file']}: {k} 개수 {before[k]} → {after[k]}")
     outputs[os.path.join("part01", "index.html")] = index_html(descs)
+    for slug, (rel, c) in sorted(SOURCES.items()):
+        outputs[os.path.join("part01", f"p1_src_{slug}.html")] = source_html(slug, rel, c)
     outputs[os.path.join("docs", "PART01_EDIT_LOG.md")] = edit_log(summary)
     fails += [f"깨진 링크 {x}" for x in broken]
-    keep = {c["file"] for c in CHS}
-    stale = [f for f in os.listdir(P1) if re.match(r"p1_.*_v\d+\.html$", f) and f not in keep]
+    keep = {c["file"] for c in CHS} | {f"p1_src_{k}.html" for k in SOURCES}
+    stale = [f for f in os.listdir(P1) if re.match(r"p1_(.*_v\d+|src_.*)\.html$", f) and f not in keep]
     old_docs = [p for p in ("docs/PART01_MIGRATION.md",) if os.path.exists(os.path.join(ROOT, p))]
     if check:
         fails += [f"{p} 갱신 필요" for p, t in outputs.items()

@@ -12,6 +12,7 @@
 .access-skip:focus{left:12px;top:12px;z-index:1003;background:#fff;color:#15171c;padding:6px 10px}
 .vbadge{display:inline-block;padding:.15em .6em;border-radius:4px;font-size:.78em;font-weight:700;background:#d4edda;color:#155724;vertical-align:middle}
 .hero p{max-width:none}
+.hero h1{overflow-wrap:anywhere}
 .section :not(pre)>code{overflow-wrap:anywhere}
 .section img{max-width:100%;height:auto;display:block}
 .section .lead{color:var(--ink-2);font-weight:500}
@@ -38,6 +39,9 @@
 details{border:1px solid var(--line);background:#fff;padding:8px 14px;margin:14px 0}
 summary{cursor:pointer;font-weight:600}
 .codeblock pre{max-height:780px;white-space:pre}
+img.zoom{cursor:zoom-in}
+.zoom-view{position:fixed;inset:0;z-index:2000;background:rgba(21,23,28,.86);display:flex;align-items:center;justify-content:center;padding:24px;cursor:zoom-out}
+.zoom-view img{max-width:100%;max-height:100%;background:#fff;box-shadow:0 8px 40px rgba(0,0,0,.4)}
 .codebar{gap:8px}.codebar span{min-width:0;overflow-wrap:anywhere}
 </style>
 </head>
@@ -914,5 +918,24 @@ window.COURSE={
 };
 </script>
 <script defer src="../assets/education/site.js"></script>
+<script>
+// 그림 확대: 그림을 누르면 쪽 안에서 크게 보기, 다시 누르거나 Escape로 닫기
+document.addEventListener("click", (e) => {
+  const img = e.target.closest("img.zoom");
+  const open = document.querySelector(".zoom-view");
+  if (open) { open.remove(); return; }
+  if (!img) return;
+  const v = document.createElement("div");
+  v.className = "zoom-view";
+  v.setAttribute("role", "dialog");
+  v.setAttribute("aria-label", img.alt || "그림 확대");
+  const big = document.createElement("img");
+  big.src = img.currentSrc || img.src;
+  big.alt = img.alt;
+  v.append(big);
+  document.body.append(v);
+});
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") document.querySelector(".zoom-view")?.remove(); });
+</script>
 </body>
 </html>

@@ -12,6 +12,7 @@
 .access-skip:focus{left:12px;top:12px;z-index:1003;background:#fff;color:#15171c;padding:6px 10px}
 .vbadge{display:inline-block;padding:.15em .6em;border-radius:4px;font-size:.78em;font-weight:700;background:#d4edda;color:#155724;vertical-align:middle}
 .hero p{max-width:none}
+.hero h1{overflow-wrap:anywhere}
 .section :not(pre)>code{overflow-wrap:anywhere}
 .section img{max-width:100%;height:auto;display:block}
 .section .lead{color:var(--ink-2);font-weight:500}
@@ -38,6 +39,9 @@
 details{border:1px solid var(--line);background:#fff;padding:8px 14px;margin:14px 0}
 summary{cursor:pointer;font-weight:600}
 .codeblock pre{max-height:780px;white-space:pre}
+img.zoom{cursor:zoom-in}
+.zoom-view{position:fixed;inset:0;z-index:2000;background:rgba(21,23,28,.86);display:flex;align-items:center;justify-content:center;padding:24px;cursor:zoom-out}
+.zoom-view img{max-width:100%;max-height:100%;background:#fff;box-shadow:0 8px 40px rgba(0,0,0,.4)}
 .codebar{gap:8px}.codebar span{min-width:0;overflow-wrap:anywhere}
 </style>
 </head>
@@ -76,9 +80,9 @@ summary{cursor:pointer;font-weight:600}
       <h2><span class="num">02</span>Basys3 하드웨어 기준</h2>
 <p>Basys3는 Artix-7 <code>XC7A35T-1CPG236C</code>를 사용하며, 보드에는 100 MHz 단일 Oscillator가 있다. Digilent Reference Manual은 이 Clock이 FPGA의 <code>W5</code> 핀에 연결되어 있음을 명시한다.</p>
 <figure class="fig">
-<a aria-label="Basys 3 보드 콜아웃 — Reference Manual Figure 1과 동일한 구성 · 원본 보기 (새 탭)" href="legacy/images/common/basys3_board_callout.jpg" rel="noopener" target="_blank"><img alt="Basys 3 보드 콜아웃 — Reference Manual Figure 1과 동일한 구성" loading="lazy" src="legacy/images/common/basys3_board_callout.jpg"/>
-</a><figcaption>Basys 3 보드 콜아웃. FPGA, 공유 UART/JTAG USB, Push Button, 100 MHz Clock 위치를 확인한다.
-<span><a href="https://digilent.com/reference/_media/reference/programmable-logic/basys-3/basys3_rm.pdf" rel="noopener" target="_blank">Digilent Basys 3 Reference Manual</a> · Figure 1</span><br/><a aria-label="Basys 3 보드 콜아웃 — Reference Manual Figure 1과 동일한 구성 · 원본 보기 (새 탭)" href="legacy/images/common/basys3_board_callout.jpg" rel="noopener" target="_blank">크게 보기 ↗</a></figcaption>
+<img alt="Basys 3 보드 콜아웃 — Reference Manual Figure 1과 동일한 구성" class="zoom" loading="lazy" src="legacy/images/common/basys3_board_callout.jpg"/>
+<figcaption>Basys 3 보드 콜아웃. FPGA, 공유 UART/JTAG USB, Push Button, 100 MHz Clock 위치를 확인한다.
+<span><a href="https://digilent.com/reference/_media/reference/programmable-logic/basys-3/basys3_rm.pdf" rel="noopener" target="_blank">Digilent Basys 3 Reference Manual</a> · Figure 1</span><br/></figcaption>
 </figure>
 <div aria-label="표 (가로 스크롤 가능)" class="table-wrap" role="region" tabindex="0"><table><thead><tr><th scope="col">항목</th><th scope="col">Basys3 기준</th><th scope="col">SoC 01에서의 사용</th></tr></thead><tbody>
 <tr><td>FPGA</td><td><code>XC7A35T-1CPG236C</code></td><td>MicroBlaze V·BRAM·Clock/Reset IP가 모두 이 FPGA 내부에 구현된다.</td></tr>
@@ -94,8 +98,8 @@ summary{cursor:pointer;font-weight:600}
       <h2><span class="num">03</span>MicroBlaze V 내부 구조</h2>
 <p>MicroBlaze V는 AMD FPGA에 구현하도록 설계된 RISC Soft Processor이다. 내부에는 Program Counter, Instruction Decode, Register File, ALU 등이 있고 양쪽에 Instruction-side/Data-side bus interface가 있다.</p>
 <figure class="fig">
-<a aria-label="AMD UG1711 2026.1 · MicroBlaze V Processor Block Diagram. 이번 실습은 32비트 구성을 사용한다. · 원본 보기 (새 탭)" href="legacy/images/common/v_core.png" rel="noopener" target="_blank"><img alt="AMD UG1711 2026.1 · MicroBlaze V Processor Block Diagram. 이번 실습은 32비트 구성을 사용한다." loading="lazy" src="legacy/images/common/v_core.png"/>
-</a><figcaption>AMD UG1711 2026.1 · MicroBlaze V Processor Block Diagram. 이번 실습은 32비트 구성을 사용한다.<br/><a aria-label="AMD UG1711 2026.1 · MicroBlaze V Processor Block Diagram. 이번 실습은 32비트 구성을 사용한다. · 원본 보기 (새 탭)" href="legacy/images/common/v_core.png" rel="noopener" target="_blank">크게 보기 ↗</a></figcaption>
+<img alt="AMD UG1711 2026.1 · MicroBlaze V Processor Block Diagram. 이번 실습은 32비트 구성을 사용한다." class="zoom" loading="lazy" src="legacy/images/common/v_core.png"/>
+<figcaption>AMD UG1711 2026.1 · MicroBlaze V Processor Block Diagram. 이번 실습은 32비트 구성을 사용한다.<br/></figcaption>
 </figure>
 <div aria-label="03절 신호 및 실행 흐름" class="flow" tabindex="0">PC → Instruction-side Bus → ILMB → BRAM → Instruction Fetch
 Load/Store → Data-side Bus → DLMB → BRAM → Data Read/Write</div>
@@ -143,8 +147,8 @@ Load/Store → Data-side Bus → DLMB → BRAM → Data Read/Write</div>
       <h2><span class="num">08</span>Run Block Automation — 최소 시스템 자동 구성</h2>
 <p>MicroBlaze V를 추가하면 Designer Assistance가 활성화된다. <strong>Run Block Automation</strong>을 실행한다.</p>
 <figure class="fig">
-<a aria-label="AMD UG1711 2026.1 · MicroBlaze V Run Block Automation. 본문 설정표에 맞춰 구성한다. · 원본 보기 (새 탭)" href="legacy/images/common/v_automation.png" rel="noopener" target="_blank"><img alt="AMD UG1711 2026.1 · MicroBlaze V Run Block Automation. 본문 설정표에 맞춰 구성한다." loading="lazy" src="legacy/images/common/v_automation.png"/>
-</a><figcaption>AMD UG1711 2026.1 · MicroBlaze V Run Block Automation. 본문 설정표에 맞춰 구성한다.<br/><a aria-label="AMD UG1711 2026.1 · MicroBlaze V Run Block Automation. 본문 설정표에 맞춰 구성한다. · 원본 보기 (새 탭)" href="legacy/images/common/v_automation.png" rel="noopener" target="_blank">크게 보기 ↗</a></figcaption>
+<img alt="AMD UG1711 2026.1 · MicroBlaze V Run Block Automation. 본문 설정표에 맞춰 구성한다." class="zoom" loading="lazy" src="legacy/images/common/v_automation.png"/>
+<figcaption>AMD UG1711 2026.1 · MicroBlaze V Run Block Automation. 본문 설정표에 맞춰 구성한다.<br/></figcaption>
 </figure>
 <p class="callout">위 그림은 AMD UG1711 <strong>2026.1</strong> 아래 표의 학습용 설정값을 기준으로 2024.2 화면에서 항목을 확인한다.</p><h3>Vivado 2024.2 설정값</h3>
 <div aria-label="표 (가로 스크롤 가능)" class="table-wrap" role="region" tabindex="0"><table><thead><tr><th scope="col">항목</th><th scope="col">설정</th><th scope="col">이유</th></tr></thead><tbody>
@@ -162,8 +166,8 @@ Load/Store → Data-side Bus → DLMB → BRAM → Data Read/Write</div>
     <section class="section" id="s09">
       <h2><span class="num">09</span>Block Automation 이후 구조</h2>
 <figure class="fig">
-<a aria-label="AMD UG1711 2026.1 · Block Automation으로 생성한 MicroBlaze V 시스템. · 원본 보기 (새 탭)" href="legacy/images/common/v_system.png" rel="noopener" target="_blank"><img alt="AMD UG1711 2026.1 · Block Automation으로 생성한 MicroBlaze V 시스템." loading="lazy" src="legacy/images/common/v_system.png"/>
-</a><figcaption>AMD UG1711 2026.1 · Block Automation으로 생성한 MicroBlaze V 시스템.<br/><a aria-label="AMD UG1711 2026.1 · Block Automation으로 생성한 MicroBlaze V 시스템. · 원본 보기 (새 탭)" href="legacy/images/common/v_system.png" rel="noopener" target="_blank">크게 보기 ↗</a></figcaption>
+<img alt="AMD UG1711 2026.1 · Block Automation으로 생성한 MicroBlaze V 시스템." class="zoom" loading="lazy" src="legacy/images/common/v_system.png"/>
+<figcaption>AMD UG1711 2026.1 · Block Automation으로 생성한 MicroBlaze V 시스템.<br/></figcaption>
 </figure>
 <p class="callout">위 그림도 AMD UG1711 <strong>2026.1</strong></p><p>설정 창을 닫은 뒤 Vivado <strong>Diagram</strong>에서 자동 생성 구조를 확인한다.</p>
 <div aria-label="최소 시스템의 클록 메모리 리셋 디버그 연결" class="flow" tabindex="0"><table><thead><tr><th scope="col">구성</th><th scope="col">연결</th></tr></thead><tbody><tr><td>clk_wiz_* / Clocking Wizard</td><td>clk_out1 → 시스템 클록</td></tr><tr><td>microblaze_riscv_0 + Local Memory</td><td>ILMB → Local Memory / DLMB → Local Memory</td></tr><tr><td>proc_sys_reset / Processor System Reset</td><td>mb_reset → MicroBlaze V / bus_struct_reset → Bus</td></tr><tr><td>AXI 리셋</td><td>peripheral_aresetn / interconnect_aresetn → AXI 계층</td></tr><tr><td>mdm_* / MicroBlaze Debug Module V</td><td>DEBUG 인터페이스</td></tr></tbody></table></div>
@@ -333,5 +337,24 @@ window.COURSE={
 };
 </script>
 <script defer src="../assets/education/site.js"></script>
+<script>
+// 그림 확대: 그림을 누르면 쪽 안에서 크게 보기, 다시 누르거나 Escape로 닫기
+document.addEventListener("click", (e) => {
+  const img = e.target.closest("img.zoom");
+  const open = document.querySelector(".zoom-view");
+  if (open) { open.remove(); return; }
+  if (!img) return;
+  const v = document.createElement("div");
+  v.className = "zoom-view";
+  v.setAttribute("role", "dialog");
+  v.setAttribute("aria-label", img.alt || "그림 확대");
+  const big = document.createElement("img");
+  big.src = img.currentSrc || img.src;
+  big.alt = img.alt;
+  v.append(big);
+  document.body.append(v);
+});
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") document.querySelector(".zoom-view")?.remove(); });
+</script>
 </body>
 </html>

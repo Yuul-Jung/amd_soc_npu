@@ -12,6 +12,7 @@
 .access-skip:focus{left:12px;top:12px;z-index:1003;background:#fff;color:#15171c;padding:6px 10px}
 .vbadge{display:inline-block;padding:.15em .6em;border-radius:4px;font-size:.78em;font-weight:700;background:#d4edda;color:#155724;vertical-align:middle}
 .hero p{max-width:none}
+.hero h1{overflow-wrap:anywhere}
 .section :not(pre)>code{overflow-wrap:anywhere}
 .section img{max-width:100%;height:auto;display:block}
 .section .lead{color:var(--ink-2);font-weight:500}
@@ -38,6 +39,9 @@
 details{border:1px solid var(--line);background:#fff;padding:8px 14px;margin:14px 0}
 summary{cursor:pointer;font-weight:600}
 .codeblock pre{max-height:780px;white-space:pre}
+img.zoom{cursor:zoom-in}
+.zoom-view{position:fixed;inset:0;z-index:2000;background:rgba(21,23,28,.86);display:flex;align-items:center;justify-content:center;padding:24px;cursor:zoom-out}
+.zoom-view img{max-width:100%;max-height:100%;background:#fff;box-shadow:0 8px 40px rgba(0,0,0,.4)}
 .codebar{gap:8px}.codebar span{min-width:0;overflow-wrap:anywhere}
 </style>
 </head>
@@ -131,7 +135,7 @@ summary{cursor:pointer;font-weight:600}
 <li><h3>W 채널 — 쓰기 데이터 전달</h3><p><code>WVALID &amp;&amp; WREADY</code>인 상승 에지에 데이터와 <code>WSTRB</code>가 수락된다.</p></li>
 <li><h3>B 채널 — 처리 결과 반환</h3><p>Slave가 주소와 데이터를 모두 받아 해당 쓰기 전송을 처리하면 <code>BRESP</code>와 <code>BVALID</code>를 제공한다. <code>BVALID &amp;&amp; BREADY</code>인 상승 에지에 응답이 전달된다.</p></li></ol>
 <p><strong>주의:</strong> AW와 W는 서로 독립 채널이므로 주소가 먼저, 데이터가 먼저, 또는 둘이 같은 상승 에지에 수락될 수 있다. 아래 그림은 그중 한 가지 가능한 전송 파형이다. AW와 W가 반드시 정해진 순서로 도착해야 하는 것은 아니다.</p>
-<figure class="fig"><a aria-label="AXI 파형 원본 이미지 열기" href="legacy/images/common/original_13.png" rel="noopener" target="_blank"><img alt="AMD PG203 AXI4-Lite 쓰기 트랜잭션 공식 파형. AWVALID AWREADY WVALID WREADY BVALID BREADY 신호 표시" loading="lazy" src="legacy/images/common/original_13.png"/></a><figcaption>AXI4-Lite 쓰기 전송 공식 파형 예시. 주소·데이터 수락 후 쓰기 응답이 전달된다.<span><a href="https://docs.amd.com/r/en-US/pg203-cmac-usplus/User-Side-AXI4-Lite-Write/Read-Transactions" rel="noopener" target="_blank">AMD PG203 · User Side AXI4-Lite Write/Read Transactions</a> (특정 IP의 예시 파형)</span></figcaption></figure>
+<figure class="fig"><img alt="AMD PG203 AXI4-Lite 쓰기 트랜잭션 공식 파형. AWVALID AWREADY WVALID WREADY BVALID BREADY 신호 표시" class="zoom" loading="lazy" src="legacy/images/common/original_13.png"/><figcaption>AXI4-Lite 쓰기 전송 공식 파형 예시. 주소·데이터 수락 후 쓰기 응답이 전달된다.<span><a href="https://docs.amd.com/r/en-US/pg203-cmac-usplus/User-Side-AXI4-Lite-Write/Read-Transactions" rel="noopener" target="_blank">AMD PG203 · User Side AXI4-Lite Write/Read Transactions</a> (특정 IP의 예시 파형)</span></figcaption></figure>
 <div class="flow">AW 수락 + W 수락 → BVALID 응답 → BVALID ∧ BREADY 상승 에지</div>
 <p>그림의 <code>AXI_AWADDR</code>, <code>AXI_WDATA</code> 등은 해당 문서의 신호 표기다. Vivado에서 실제 IP를 연결하면 <code>M_AXI_DP_AWADDR</code>, <code>s_axi_awaddr</code>처럼 접두사가 달라질 수 있다.</p>
     </section>
@@ -139,7 +143,7 @@ summary{cursor:pointer;font-weight:600}
       <h2><span class="num">08</span>Read Transaction과 공식 파형</h2>
 <p><strong>Read Transaction(리드 트랜잭션, 한 번의 읽기 요청과 응답)</strong>은 읽기 주소(AR)와 읽기 데이터·응답(R)의 두 채널로 수행한다.</p>
 <ol><li><h3>AR 채널 — 읽기 주소 수락</h3><p>Master가 <code>ARADDR</code>와 <code>ARVALID</code>를 제공하고, <code>ARVALID &amp;&amp; ARREADY</code>인 상승 에지에 Slave가 주소를 수락한다.</p></li><li><h3>R 채널 — 읽기 데이터 반환</h3><p>Slave가 <code>RDATA</code>, <code>RRESP</code>, <code>RVALID</code>를 제공하며, <code>RVALID &amp;&amp; RREADY</code>인 상승 에지에 Master가 데이터를 수락한다.</p></li></ol>
-<figure class="fig"><a aria-label="AXI 파형 원본 이미지 열기" href="legacy/images/common/original_14.png" rel="noopener" target="_blank"><img alt="AMD PG203 AXI4-Lite 읽기 트랜잭션 공식 파형. ARVALID ARREADY RVALID RREADY 신호 표시" loading="lazy" src="legacy/images/common/original_14.png"/></a><figcaption>AXI4-Lite 읽기 전송 공식 파형 예시. 주소를 수락한 뒤 읽기 데이터와 응답을 반환한다.<span><a href="https://docs.amd.com/r/en-US/pg203-cmac-usplus/User-Side-AXI4-Lite-Write/Read-Transactions" rel="noopener" target="_blank">AMD PG203 · User Side AXI4-Lite Write/Read Transactions</a> (특정 IP의 예시 파형)</span></figcaption></figure>
+<figure class="fig"><img alt="AMD PG203 AXI4-Lite 읽기 트랜잭션 공식 파형. ARVALID ARREADY RVALID RREADY 신호 표시" class="zoom" loading="lazy" src="legacy/images/common/original_14.png"/><figcaption>AXI4-Lite 읽기 전송 공식 파형 예시. 주소를 수락한 뒤 읽기 데이터와 응답을 반환한다.<span><a href="https://docs.amd.com/r/en-US/pg203-cmac-usplus/User-Side-AXI4-Lite-Write/Read-Transactions" rel="noopener" target="_blank">AMD PG203 · User Side AXI4-Lite Write/Read Transactions</a> (특정 IP의 예시 파형)</span></figcaption></figure>
 <p>Master가 <code>RREADY</code>를 0으로 유지하면 Slave는 완료되지 않은 R 채널 전송의 <code>RVALID</code>, <code>RDATA</code>, <code>RRESP</code>를 유지해야 한다. <strong>읽기에서는 B 채널을 사용하지 않는다.</strong></p>
 <div class="flow">ARVALID ∧ ARREADY 상승 에지 → RVALID ∧ RREADY 상승 에지</div>
     </section>
@@ -174,7 +178,7 @@ summary{cursor:pointer;font-weight:600}
 <tr><td><code>TLAST</code></td><td>패킷 또는 응용별 전송 경계의 마지막 Beat 표시(선택 신호)</td></tr>
 <tr><td><code>TKEEP</code>, <code>TUSER</code></td><td>유효 바이트 표시·사용자 정의 부가 정보(구성에 따른 선택 신호)</td></tr>
 </tbody></table></div>
-<figure class="fig"><a aria-label="AXI 파형 원본 이미지 열기" href="legacy/images/common/original_15.png" rel="noopener" target="_blank"><img alt="AMD AXI4-Stream 공식 파형 aclk tvalid tready tdata D1 D2 D3 D4 tlast" loading="lazy" src="legacy/images/common/original_15.png"/></a><figcaption>AXI4-Stream 공식 핸드셰이크 파형. <code>TVALID</code>와 <code>TREADY</code>가 같은 상승 에지에 1인 곳에서 D1, D2, D3, D4가 차례로 전달된다.<span><a href="https://docs.amd.com/r/en-US/pg256-sdfec-integrated-block/AXI4-Stream-Interface" rel="noopener" target="_blank">AMD PG256 · AXI4-Stream Interface</a></span></figcaption></figure>
+<figure class="fig"><img alt="AMD AXI4-Stream 공식 파형 aclk tvalid tready tdata D1 D2 D3 D4 tlast" class="zoom" loading="lazy" src="legacy/images/common/original_15.png"/><figcaption>AXI4-Stream 공식 핸드셰이크 파형. <code>TVALID</code>와 <code>TREADY</code>가 같은 상승 에지에 1인 곳에서 D1, D2, D3, D4가 차례로 전달된다.<span><a href="https://docs.amd.com/r/en-US/pg256-sdfec-integrated-block/AXI4-Stream-Interface" rel="noopener" target="_blank">AMD PG256 · AXI4-Stream Interface</a></span></figcaption></figure>
 <p>수신 측이 <code>TREADY</code>를 0으로 내리면 Backpressure(백프레셔, 수신 측의 전송 지연)가 발생한다. 이때 전송이 아직 완료되지 않은 Source는 <code>TVALID</code>와 데이터 및 관련 부가 신호를 유지한다. <code>TLAST</code>는 '마지막 바이트'가 아니라 <strong>마지막 전송 Beat</strong>를 나타낸다.</p>
     </section>
     <section class="section" id="s12">
@@ -297,5 +301,24 @@ window.COURSE={
 };
 </script>
 <script defer src="../assets/education/site.js"></script>
+<script>
+// 그림 확대: 그림을 누르면 쪽 안에서 크게 보기, 다시 누르거나 Escape로 닫기
+document.addEventListener("click", (e) => {
+  const img = e.target.closest("img.zoom");
+  const open = document.querySelector(".zoom-view");
+  if (open) { open.remove(); return; }
+  if (!img) return;
+  const v = document.createElement("div");
+  v.className = "zoom-view";
+  v.setAttribute("role", "dialog");
+  v.setAttribute("aria-label", img.alt || "그림 확대");
+  const big = document.createElement("img");
+  big.src = img.currentSrc || img.src;
+  big.alt = img.alt;
+  v.append(big);
+  document.body.append(v);
+});
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") document.querySelector(".zoom-view")?.remove(); });
+</script>
 </body>
 </html>

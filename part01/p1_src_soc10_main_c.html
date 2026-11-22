@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Basys3 제1부 11장 실습 파일 main.c">
+<meta name="generator" content="tools/part01/build_part01.py — 직접 수정 금지">
+<title>main.c · 제1부 11장 (v02)</title>
+<link rel="stylesheet" href="../assets/education/site.css">
+<style>
+.access-skip{position:absolute;left:-9999px;top:0}
+.access-skip:focus{left:12px;top:12px;z-index:1003;background:#fff;color:#15171c;padding:6px 10px}
+.vbadge{display:inline-block;padding:.15em .6em;border-radius:4px;font-size:.78em;font-weight:700;background:#d4edda;color:#155724;vertical-align:middle}
+.hero p{max-width:none}
+.hero h1{overflow-wrap:anywhere}
+.section :not(pre)>code{overflow-wrap:anywhere}
+.section img{max-width:100%;height:auto;display:block}
+.section .lead{color:var(--ink-2);font-weight:500}
+.section .minor{color:var(--ink-3);font-size:.9em}
+.table-wrap{overflow-x:auto;margin:12px 0}
+.table-wrap th{white-space:nowrap}
+.section .chips{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 14px;padding:0;list-style:none}
+.chips li{border:1px solid var(--line);background:#fff;padding:3px 10px;border-radius:3px;font:500 12px "IBM Plex Mono",monospace;color:var(--ink-2);margin:0}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:12px 0}
+.cards>div{border:1px solid var(--line);border-left:3px solid var(--accent);background:#fff;padding:12px 14px}
+.cards b,.cards strong{display:block;margin-bottom:4px}
+.cards small{display:block;color:var(--ink-3)}
+.callout{border:1px solid #d9d3f5;border-left:4px solid var(--accent);background:#f7f5fe;padding:12px 16px;margin:14px 0}
+.callout.warn{border-color:#f0d9a8;border-left-color:#b07a12;background:#fffaf0}
+.callout>:first-child{margin-top:0}.callout>:last-child{margin-bottom:0}
+.flow{white-space:pre-wrap;font:500 .86rem/1.7 "IBM Plex Mono",monospace;background:#fbfbf9;border:1px solid var(--line);padding:12px 16px;margin:14px 0;overflow-x:auto}
+.flow code{background:none;padding:0}
+.fig{margin:16px 0;border:1px solid var(--line);background:#fff;padding:10px}
+.fig img,.fig svg{margin:0 auto;max-width:100%;height:auto}
+.fig figcaption{font-size:.84rem;color:var(--ink-2);margin-top:8px}
+.fig-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin:14px 0}
+.fig-grid .fig{margin:0}
+.gui-walkthrough{border:1px solid var(--line);background:#fbfbf9;padding:12px 18px;margin:14px 0}
+details{border:1px solid var(--line);background:#fff;padding:8px 14px;margin:14px 0}
+summary{cursor:pointer;font-weight:600}
+.codeblock pre{max-height:780px;white-space:pre}
+img.zoom{cursor:zoom-in}
+.zoom-view{position:fixed;inset:0;z-index:2000;background:rgba(21,23,28,.86);display:flex;align-items:center;justify-content:center;padding:24px;cursor:zoom-out}
+.zoom-view img{max-width:100%;max-height:100%;background:#fff;box-shadow:0 8px 40px rgba(0,0,0,.4)}
+.codebar{gap:8px}.codebar span{min-width:0;overflow-wrap:anywhere}
+</style>
+</head>
+<body data-chapter="p1-11">
+<a class="access-skip" href="#main-content">본문 바로가기</a>
+<button type="button" class="mobile-menu" id="mobile-menu" aria-controls="course-nav" aria-expanded="false">☰ 장·목차</button>
+<div class="shade" id="shade"></div>
+<header class="hero">
+  <div class="hero-inner">
+    <p class="kicker">BASYS3 · 제1부 MicroBlaze V 기본 SoC · 11장 실습 파일 <span class="vbadge">v02</span></p>
+    <h1>main.c</h1>
+    <p>11장 · 사용자 Top과 1비트 GPIO</p>
+  </div>
+</header>
+<div class="wrap">
+  <nav class="toc" id="course-nav" aria-label="전체 장과 절 탐색"></nav>
+  <main class="content" id="main-content">
+    <section class="section" id="file">
+      <h2><span class="num">00</span>main.c</h2>
+      <p>11장 <a href="p1_11_user_top_v02.html">사용자 Top과 1비트 GPIO</a> 실습에서 사용하는 C 파일입니다. (344줄)</p>
+      <div class="codeblock"><div class="codebar"><span>main.c · C</span></div><pre tabindex="0"><code>#include &quot;xparameters.h&quot;
+#include &quot;xgpio.h&quot;
+#include &quot;xuartlite_l.h&quot;
+#include &quot;xtmrctr.h&quot;
+#include &quot;xstatus.h&quot;
+#include &quot;xil_types.h&quot;
+#include &quot;xil_exception.h&quot;
+
+#ifdef SDT
+#include &quot;xinterrupt_wrap.h&quot;
+#else
+#include &quot;xintc.h&quot;
+#endif
+
+/*
+ * SoC 10 - MicroBlaze V + GPIO + UART + Timer + AXI INTC Integration
+ *
+ * GPIO Channel 1 : LED[15:0] output
+ * GPIO Channel 2 : SW[15:0] input
+ *
+ * LED ownership:
+ *   LED[13:0] : SW[13:0] mirror
+ *   LED14     : UART command control (&#x27;1&#x27; = ON, &#x27;0&#x27; = OFF)
+ *   LED15     : Timer interrupt heartbeat
+ *
+ * UART : Polling, 115200 8N1
+ * Timer: 100 MHz, 0.5 s interval, Down Count + Auto Reload + Interrupt
+ * IRQ  : AXI Timer -&gt; AXI INTC -&gt; MicroBlaze V
+ */
+
+#define GPIO_LED_CHANNEL        1U
+#define GPIO_SW_CHANNEL         2U
+
+#define SW_LED_MASK             0x00003FFFU
+#define UART_LED_MASK           0x00004000U
+#define HEARTBEAT_LED_MASK      0x00008000U
+
+#define TIMER0                  0U
+#define TIMER_TICKS_500MS       50000000U
+#define TIMER_RESET_VALUE       (TIMER_TICKS_500MS - 2U)
+
+#ifndef SDT
+#define GPIO_DEVICE_ID          XPAR_GPIO_0_DEVICE_ID
+#define TIMER_DEVICE_ID         XPAR_TMRCTR_0_DEVICE_ID
+#define INTC_DEVICE_ID          XPAR_INTC_0_DEVICE_ID
+#define TIMER_INTERRUPT_ID      XPAR_INTC_0_TMRCTR_0_VEC_ID
+#define UART_BASEADDR           XPAR_UARTLITE_0_BASEADDR
+#else
+#define GPIO_BASEADDR           XPAR_XGPIO_0_BASEADDR
+#define TIMER_BASEADDR          XPAR_XTMRCTR_0_BASEADDR
+#define UART_BASEADDR           XPAR_XUARTLITE_0_BASEADDR
+#endif
+
+static XGpio Gpio;
+static XTmrCtr Timer;
+
+#ifndef SDT
+static XIntc Intc;
+#endif
+
+volatile u32 interrupt_count = 0U;
+volatile u32 switch_value    = 0U;
+volatile u32 led_state       = 0U;
+volatile u8  last_uart_rx    = 0U;
+
+static u32 uart_led_state = 0U;
+
+static void UartPutChar(u8 ch)
+{
+    XUartLite_SendByte(UART_BASEADDR, ch);
+}
+
+static void UartPutString(const char *text)
+{
+    while (*text != &#x27;\0&#x27;) {
+        UartPutChar((u8)*text);
+        text++;
+    }
+}
+
+static void UartPutHexNibble(u8 value)
+{
+    value &amp;= 0x0FU;
+
+    if (value &lt; 10U) {
+        UartPutChar((u8)(&#x27;0&#x27; + value));
+    } else {
+        UartPutChar((u8)(&#x27;A&#x27; + (value - 10U)));
+    }
+}
+
+static void UartPutHex16(u16 value)
+{
+    int shift;
+
+    for (shift = 12; shift &gt;= 0; shift -= 4) {
+        UartPutHexNibble((u8)(value &gt;&gt; shift));
+    }
+}
+
+static void UartPutHex32(u32 value)
+{
+    int shift;
+
+    for (shift = 28; shift &gt;= 0; shift -= 4) {
+        UartPutHexNibble((u8)(value &gt;&gt; shift));
+    }
+}
+
+static void PrintHelp(void)
+{
+    UartPutString(&quot;\r\nCommands\r\n&quot;);
+    UartPutString(&quot;  1 : LED14 ON\r\n&quot;);
+    UartPutString(&quot;  0 : LED14 OFF\r\n&quot;);
+    UartPutString(&quot;  r : Read status\r\n&quot;);
+    UartPutString(&quot;  h : Help\r\n&quot;);
+}
+
+static void PrintStatus(void)
+{
+    UartPutString(&quot;\r\nSW=0x&quot;);
+    UartPutHex16((u16)switch_value);
+    UartPutString(&quot; LED=0x&quot;);
+    UartPutHex16((u16)led_state);
+    UartPutString(&quot; IRQ=0x&quot;);
+    UartPutHex32(interrupt_count);
+    UartPutString(&quot;\r\n&quot;);
+}
+
+static void TimerCallback(void *CallBackRef, u8 TmrCtrNumber)
+{
+    (void)CallBackRef;
+    (void)TmrCtrNumber;
+    interrupt_count++;
+}
+
+static int InitGpio(void)
+{
+#ifndef SDT
+    return XGpio_Initialize(&amp;Gpio, GPIO_DEVICE_ID);
+#else
+    return XGpio_Initialize(&amp;Gpio, GPIO_BASEADDR);
+#endif
+}
+
+static int InitTimer(void)
+{
+    int status;
+
+#ifndef SDT
+    status = XTmrCtr_Initialize(&amp;Timer, TIMER_DEVICE_ID);
+#else
+    status = XTmrCtr_Initialize(&amp;Timer, TIMER_BASEADDR);
+#endif
+
+    if (status != XST_SUCCESS) {
+        return XST_FAILURE;
+    }
+
+    status = XTmrCtr_SelfTest(&amp;Timer, TIMER0);
+    if (status != XST_SUCCESS) {
+        return XST_FAILURE;
+    }
+
+    XTmrCtr_SetHandler(&amp;Timer, TimerCallback, &amp;Timer);
+    XTmrCtr_SetOptions(
+        &amp;Timer,
+        TIMER0,
+        XTC_DOWN_COUNT_OPTION |
+        XTC_AUTO_RELOAD_OPTION |
+        XTC_INT_MODE_OPTION
+    );
+    XTmrCtr_SetResetValue(&amp;Timer, TIMER0, TIMER_RESET_VALUE);
+
+    return XST_SUCCESS;
+}
+
+static int SetupInterruptSystem(void)
+{
+    int status;
+
+#ifndef SDT
+    status = XIntc_Initialize(&amp;Intc, INTC_DEVICE_ID);
+    if (status != XST_SUCCESS) {
+        return XST_FAILURE;
+    }
+
+    status = XIntc_Connect(
+        &amp;Intc,
+        TIMER_INTERRUPT_ID,
+        (XInterruptHandler)XTmrCtr_InterruptHandler,
+        (void *)&amp;Timer
+    );
+    if (status != XST_SUCCESS) {
+        return XST_FAILURE;
+    }
+
+    status = XIntc_Start(&amp;Intc, XIN_REAL_MODE);
+    if (status != XST_SUCCESS) {
+        return XST_FAILURE;
+    }
+
+    XIntc_Enable(&amp;Intc, TIMER_INTERRUPT_ID);
+
+    Xil_ExceptionInit();
+    Xil_ExceptionRegisterHandler(
+        XIL_EXCEPTION_ID_INT,
+        (Xil_ExceptionHandler)XIntc_InterruptHandler,
+        &amp;Intc
+    );
+    Xil_ExceptionEnable();
+#else
+    status = XSetupInterruptSystem(
+        &amp;Timer,
+        (XInterruptHandler)XTmrCtr_InterruptHandler,
+        Timer.Config.IntrId,
+        Timer.Config.IntrParent,
+        XINTERRUPT_DEFAULT_PRIORITY
+    );
+
+    if (status != XST_SUCCESS) {
+        return XST_FAILURE;
+    }
+#endif
+
+    return XST_SUCCESS;
+}
+
+static void InitUart(void)
+{
+    /* RX/TX FIFO clear. UART interrupt remains disabled. */
+    XUartLite_WriteReg(
+        UART_BASEADDR,
+        XUL_CONTROL_REG_OFFSET,
+        0x03U
+    );
+}
+
+static void HandleUartCommand(void)
+{
+    if (XUartLite_IsReceiveEmpty(UART_BASEADDR)) {
+        return;
+    }
+
+    last_uart_rx = XUartLite_RecvByte(UART_BASEADDR);
+
+    switch (last_uart_rx) {
+    case &#x27;1&#x27;:
+        uart_led_state = UART_LED_MASK;
+        UartPutString(&quot;\r\nLED14=ON\r\n&quot;);
+        break;
+
+    case &#x27;0&#x27;:
+        uart_led_state = 0U;
+        UartPutString(&quot;\r\nLED14=OFF\r\n&quot;);
+        break;
+
+    case &#x27;r&#x27;:
+    case &#x27;R&#x27;:
+        PrintStatus();
+        break;
+
+    case &#x27;h&#x27;:
+    case &#x27;H&#x27;:
+        PrintHelp();
+        break;
+
+    case &#x27;\r&#x27;:
+    case &#x27;\n&#x27;:
+        break;
+
+    default:
+        UartPutString(&quot;\r\nUnknown command. Press h.\r\n&quot;);
+        break;
+    }
+}
+
+static void UpdateLedOutput(void)
+{
+    u32 new_led_state;
+    u32 heartbeat_state;
+
+    if ((interrupt_count &amp; 1U) != 0U) {
+        heartbeat_state = HEARTBEAT_LED_MASK;
+    } else {
+        heartbeat_state = 0U;
+    }
+
+    new_led_state =
+        (switch_value &amp; SW_LED_MASK) |
+        uart_led_state |
+        heartbeat_state;
+
+    if (new_led_state != led_state) {
+        led_state = new_led_state;
+        XGpio_DiscreteWrite(
+            &amp;Gpio,
+            GPIO_LED_CHANNEL,
+            led_state
+        );
+    }
+}
+
+int main(void)
+{
+    int status;
+
+    status = InitGpio();
+    if (status != XST_SUCCESS) {
+        return XST_FAILURE;
+    }
+
+    InitUart();
+
+    status = InitTimer();
+    if (status != XST_SUCCESS) {
+        return XST_FAILURE;
+    }
+
+    status = SetupInterruptSystem();
+    if (status != XST_SUCCESS) {
+        return XST_FAILURE;
+    }
+
+    led_state = 0U;
+    XGpio_DiscreteWrite(&amp;Gpio, GPIO_LED_CHANNEL, led_state);
+
+    UartPutString(&quot;\r\nSoC 10 Integrated System Ready\r\n&quot;);
+    PrintHelp();
+
+    XTmrCtr_Start(&amp;Timer, TIMER0);
+
+    while (1) {
+        switch_value = XGpio_DiscreteRead(
+            &amp;Gpio,
+            GPIO_SW_CHANNEL
+        );
+
+        HandleUartCommand();
+        UpdateLedOutput();
+    }
+
+    return XST_SUCCESS;
+}
+</code></pre></div>
+      <p><a href="p1_11_user_top_v02.html">← 11장 사용자 Top과 1비트 GPIO(으)로 돌아가기</a></p>
+    </section>
+    <div class="chapter-links" id="chapter-links"></div>
+  </main>
+</div>
+<script>
+window.COURSE={
+ "title": "제1부 · MicroBlaze V 기본 SoC",
+ "chapters": [
+  {
+   "id": "p1-01",
+   "number": "01",
+   "title": "MicroBlaze V + BRAM 최소 SoC",
+   "file": "p1_01_microblaze_bram_v02.html"
+  },
+  {
+   "id": "p1-02",
+   "number": "02",
+   "title": "Clock · Reset 구조",
+   "file": "p1_02_clock_reset_v02.html"
+  },
+  {
+   "id": "p1-03",
+   "number": "03",
+   "title": "BRAM 프로그램 실행",
+   "file": "p1_03_bram_program_v02.html"
+  },
+  {
+   "id": "p1-04",
+   "number": "04",
+   "title": "Memory Map · MMIO",
+   "file": "p1_04_memory_map_v02.html"
+  },
+  {
+   "id": "p1-05",
+   "number": "05",
+   "title": "AXI4 · AXI4-Lite · AXI4-Stream",
+   "file": "p1_05_axi_v02.html"
+  },
+  {
+   "id": "p1-06",
+   "number": "06",
+   "title": "AXI GPIO",
+   "file": "p1_06_axi_gpio_v02.html"
+  },
+  {
+   "id": "p1-07",
+   "number": "07",
+   "title": "AXI UART Lite",
+   "file": "p1_07_axi_uartlite_v02.html"
+  },
+  {
+   "id": "p1-07-1",
+   "number": "07.1",
+   "title": "UART Echo C 코드 풀이",
+   "file": "p1_07_1_uart_echo_c_v02.html"
+  },
+  {
+   "id": "p1-08",
+   "number": "08",
+   "title": "AXI Timer",
+   "file": "p1_08_axi_timer_v02.html"
+  },
+  {
+   "id": "p1-08-1",
+   "number": "08.1",
+   "title": "AXI Timer C 코드 풀이",
+   "file": "p1_08_1_timer_c_v02.html"
+  },
+  {
+   "id": "p1-09",
+   "number": "09",
+   "title": "AXI Interrupt Controller",
+   "file": "p1_09_axi_intc_v02.html"
+  },
+  {
+   "id": "p1-09-1",
+   "number": "09.1",
+   "title": "Timer Interrupt C 코드 풀이",
+   "file": "p1_09_1_intc_c_v02.html"
+  },
+  {
+   "id": "p1-10",
+   "number": "10",
+   "title": "GPIO · UART · Timer 통합",
+   "file": "p1_10_integration_v02.html"
+  },
+  {
+   "id": "p1-10-1",
+   "number": "10.1",
+   "title": "통합 C 코드 풀이",
+   "file": "p1_10_1_integration_c_v02.html"
+  },
+  {
+   "id": "p1-11",
+   "number": "11",
+   "title": "사용자 Top과 1비트 GPIO",
+   "file": "p1_11_user_top_v02.html"
+  }
+ ]
+};
+</script>
+<script defer src="../assets/education/site.js"></script>
+<script>
+// 그림 확대: 그림을 누르면 쪽 안에서 크게 보기, 다시 누르거나 Escape로 닫기
+document.addEventListener("click", (e) => {
+  const img = e.target.closest("img.zoom");
+  const open = document.querySelector(".zoom-view");
+  if (open) { open.remove(); return; }
+  if (!img) return;
+  const v = document.createElement("div");
+  v.className = "zoom-view";
+  v.setAttribute("role", "dialog");
+  v.setAttribute("aria-label", img.alt || "그림 확대");
+  const big = document.createElement("img");
+  big.src = img.currentSrc || img.src;
+  big.alt = img.alt;
+  v.append(big);
+  document.body.append(v);
+});
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") document.querySelector(".zoom-view")?.remove(); });
+</script>
+</body>
+</html>
