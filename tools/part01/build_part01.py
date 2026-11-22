@@ -42,7 +42,8 @@ def rd(path):
 COURSE = json.loads(rd(os.path.join(P1, "course.json")))
 CHS = COURSE["chapters"]
 VER = COURSE["version"]
-BY_SRC = {os.path.normpath(os.path.join(P1, c["source"])): c for c in CHS}
+BY_SRC = {os.path.normpath(os.path.join(P1, c["source"])): c for c in CHS if c.get("source")}
+BUNDLE = {c["bundle_of"]: c for c in CHS if c.get("bundle_of")}   # 장 → 실습 파일 묶음 쪽
 
 # ── 문구 정리 규칙 ─────────────────────────────────────────────────────────
 # 1) 낱말 바꾸기 (순서대로 적용). 그림 확대 링크·이전 장 프로젝트·공식 문서 표기를 배포용 표현으로.
@@ -103,7 +104,7 @@ BLOCKS = {"p", "div", "ol", "ul", "figure", "pre", "table", "section", "details"
 TEXT_BLOCKS = ["h2", "h3", "h4", "p", "li", "figcaption", "summary", "th", "td", "div", "strong", "span", "b", "small"]
 
 removed: dict[str, list[str]] = {}
-SOURCES: dict[str, tuple[str, dict]] = {}          # 실습 파일 보기 쪽: slug → (part01 기준 경로, 쓰는 장)
+SOURCES: dict[str, dict[str, str]] = {}            # 장 id → {slug: part01 기준 경로} (본문에서 링크한 실습 파일)
 PAGE_CH = {c["file"]: c for c in CHS}
 LANG = {".c": "C", ".h": "C", ".v": "Verilog", ".sv": "SystemVerilog", ".xdc": "XDC", ".tcl": "Tcl", ".py": "Python", ".sh": "Shell"}
 broken: list[str] = []
@@ -181,8 +182,8 @@ def new_url(raw, src_dir, tag, page):
     lrel = os.path.relpath(tgt, os.path.join(P1, "legacy")).replace(os.sep, "/")
     if tag == "a" and TEXT_EXT.search(rel) and re.match(r"^(legacy/code|files)/", rel) and not sp.query:
         slug = re.sub(r"[^A-Za-z0-9]+", "_", re.sub(r"^(legacy/code|files)/", "", rel)).strip("_")
-        SOURCES.setdefault(slug, (rel, PAGE_CH[page]))
-        return f"p1_src_{slug}.html"
+        SOURCES.setdefault(PAGE_CH[page]["id"], {}).setdefault(slug, rel)
+        return f"SRC::{slug}"
     if tag == "a" and re.match(r"^(code|docs|validation)/", lrel) and TEXT_EXT.search(lrel) and not sp.query:
         return "legacy/source_viewer.html?file=" + quote(lrel, safe="") + frag
     return quote(rel, safe="/") + ("?" + sp.query if sp.query else "") + frag
@@ -517,22 +518,63 @@ def page_html(c, doc, desc):
     return re.sub(r"/home/[A-Za-z0-9_.-]+", "~", head + doc + FOOT.replace("{course}", course_js()))
 
 
-def source_html(slug, rel, c):
-    """실습 파일을 공통 틀 안의 코드 박스로 보여 주는 쪽 (날것 파일·다운로드로 열리지 않게)."""
+def file_block(slug, rel):
     name = os.path.basename(rel)
-    code = rd(os.path.join(P1, rel))
-    code = re.sub(r"/home/[A-Za-z0-9_.-]+", "~", code)
+    code = re.sub(r"/home/[A-Za-z0-9_.-]+", "~", rd(os.path.join(P1, rel)))
     lang = LANG.get(os.path.splitext(name)[1].lower(), "텍스트")
-    lines = code.count("\n") + (0 if code.endswith("\n") else 1)
-    doc = f"""    <section class="section" id="file">
-      <h2><span class="num">00</span>{html.escape(name)}</h2>
-      <p>{c['number']}장 <a href="{c['file']}">{html.escape(c['title'])}</a> 실습에서 사용하는 {lang} 파일입니다. ({lines}줄)</p>
-      <div class="codeblock"><div class="codebar"><span>{html.escape(name)} · {lang}</span></div><pre tabindex="0"><code>{html.escape(code)}</code></pre></div>
-      <p><a href="{c['file']}">← {c['number']}장 {html.escape(c['title'])}(으)로 돌아가기</a></p>
-    </section>"""
-    head = HEAD.format(meta=html.escape(f"Basys3 제1부 {c['number']}장 실습 파일 {name}"), title=html.escape(f"{name} · 제1부 {c['number']}장 ({VER})"),
-                       style=STYLE, chid=c["id"], kicker=f"BASYS3 · 제1부 MicroBlaze V 기본 SoC · {c['number']}장 실습 파일", ver=VER,
-                       h1=html.escape(name), desc=html.escape(f"{c['number']}장 · {c['title']}"))
+    return (f'<div class="codeblock" id="f-{slug}"><div class="codebar"><span>{html.escape(name)} · {lang}</span></div>'
+            f'<pre tabindex="0"><code>{html.escape(code)}</code></pre></div>')
+
+
+def norm(s):
+    return re.sub(r"\s+", "", s)
+
+
+def attach_sources(c, doc):
+    """본문의 실습 파일 링크(SRC::slug)를 화면 안 코드로 잇는다.
+    묶음 쪽이 있는 장(11장)은 묶음 쪽으로, 나머지는 같은 쪽의 같은 코드 박스, 없으면 끝의 '실습 파일' 절로."""
+    files = SOURCES.get(c["id"], {})
+    if not files:
+        return doc
+    if c["id"] in BUNDLE:
+        b = BUNDLE[c["id"]]["file"]
+        return re.sub(r"SRC::([A-Za-z0-9_]+)", lambda m: f"{b}#f-{m.group(1)}", doc)
+    soup = BeautifulSoup(doc, "html.parser")
+    extra = []
+    for slug, rel in files.items():
+        code = norm(rd(os.path.join(P1, rel)))
+        box = next((pre.find_parent("div", class_="codeblock") for pre in soup.find_all("pre") if norm(pre.get_text()) == code), None)
+        if box is not None and not box.get("id"):
+            box["id"] = f"f-{slug}"
+        elif box is None:
+            extra.append(file_block(slug, rel))
+    doc = str(soup)
+    if extra:
+        n = len(re.findall(r'<section class="section"', doc))
+        doc += (f'\n    <section class="section" id="files">\n      <h2><span class="num">{n:02d}</span>실습 파일</h2>\n      '
+                + "\n      ".join(extra) + "\n    </section>")
+    return re.sub(r"SRC::([A-Za-z0-9_]+)", r"#f-\1", doc)
+
+
+def bundle_html(b):
+    owner = next(c for c in CHS if c["id"] == b["bundle_of"])
+    files = SOURCES.get(owner["id"], {})
+    secs = []
+    def order(item):   # 이 장 파일(Top → XDC → C) 먼저, 이전 장 참고 파일은 뒤
+        rel = item[1]
+        return (rel.startswith("legacy/"), {".v": 0, ".xdc": 1, ".c": 2}.get(os.path.splitext(rel)[1], 3))
+    for i, (slug, rel) in enumerate(sorted(files.items(), key=order)):
+        name = os.path.basename(rel)
+        m = re.match(r"legacy/code/soc(\d+)/", rel)
+        title = f"{m.group(1)}장 {name} (참고)" if m else name
+        lang = LANG.get(os.path.splitext(name)[1].lower(), "텍스트")
+        secs.append(f'    <section class="section" id="s-{slug}">\n      <h2><span class="num">{i:02d}</span>{html.escape(title)}</h2>\n'
+                    f'      <p>{lang} · {rd(os.path.join(P1, rel)).count(chr(10))}줄</p>\n      {file_block(slug, rel)}\n    </section>')
+    doc = "\n".join(secs)
+    head = HEAD.format(meta=html.escape(f"Basys3 제1부 {b['number']}장 · {b['title']}"), title=html.escape(f"제1부 {b['number']}장 · {b['title']} ({VER})"),
+                       style=STYLE, chid=b["id"], kicker=f"BASYS3 · 제1부 MicroBlaze V 기본 SoC · {b['number']}장", ver=VER,
+                       h1=html.escape(f"제1부 {b['number']}장 · {owner['title']} {b['title']}"),
+                       desc=html.escape(f"{owner['number']}장 실습에 쓰는 소스·제약 파일 {len(files)}개"))
     return head + doc + FOOT.replace("{course}", course_js())
 
 
@@ -585,6 +627,8 @@ def edit_log(summary):
            "그림·표·코드 개수를 대조하고, 지운 제작·검증 메모를 여기에 남긴다.", "",
            "| 장 | 파일 | img | figure | svg | pre | table | details | 지운 문장 |", "|---|---|---|---|---|---|---|---|---|"]
     for c in CHS:
+        if c["id"] not in summary:
+            continue
         b, a = summary[c["id"]]
         out.append(f"| {c['number']} | {c['file']} | " + " | ".join(f"{b[k]}→{a[k]}" for k in b) + f" | {len(removed.get(c['file'], []))} |")
     out += ["", f"깨진 상대 링크: {len(broken)}개", ""]
@@ -598,19 +642,23 @@ def edit_log(summary):
 def main(check):
     outputs, summary, fails, descs = {}, {}, [], {}
     for c in CHS:
+        if not c.get("source"):
+            continue
         doc, before, after, desc = convert(c)
+        doc = attach_sources(c, doc)
         summary[c["id"]] = (before, after)
         descs[c["id"]] = first_sentence(desc)
         outputs[os.path.join("part01", c["file"])] = page_html(c, doc, desc)
         for k in ("img", "svg", "pre", "table"):
             if before[k] != after[k]:
                 fails.append(f"{c['file']}: {k} 개수 {before[k]} → {after[k]}")
+    for b in BUNDLE.values():
+        outputs[os.path.join("part01", b["file"])] = bundle_html(b)
+        descs[b["id"]] = f"{b['bundle_of'][3:]}장 Top·C·XDC 파일을 한 쪽에서 보기"
     outputs[os.path.join("part01", "index.html")] = index_html(descs)
-    for slug, (rel, c) in sorted(SOURCES.items()):
-        outputs[os.path.join("part01", f"p1_src_{slug}.html")] = source_html(slug, rel, c)
     outputs[os.path.join("docs", "PART01_EDIT_LOG.md")] = edit_log(summary)
     fails += [f"깨진 링크 {x}" for x in broken]
-    keep = {c["file"] for c in CHS} | {f"p1_src_{k}.html" for k in SOURCES}
+    keep = {c["file"] for c in CHS}
     stale = [f for f in os.listdir(P1) if re.match(r"p1_(.*_v\d+|src_.*)\.html$", f) and f not in keep]
     old_docs = [p for p in ("docs/PART01_MIGRATION.md",) if os.path.exists(os.path.join(ROOT, p))]
     if check:

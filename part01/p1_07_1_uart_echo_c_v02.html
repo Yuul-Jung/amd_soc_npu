@@ -59,14 +59,14 @@ img.zoom{cursor:zoom-in}
 <div class="wrap">
   <nav class="toc" id="course-nav" aria-label="전체 장과 절 탐색"></nav>
   <main class="content" id="main-content">
-    <section class="section" id="overview">
-      <h2><span class="num">00</span>이 장의 목표</h2>
-      <p>07장에서 성공한 main.c 를 한 줄씩 풀어 읽는다. C 코드가 CPU에서 무슨 일을 시키는지, 메모리와 AXI UART Lite의 어느 부분을 움직이는지 연결한다.</p>
-      <ul class="chips" aria-label="핵심 용어"><li>C 코드 해석</li><li>UART 115200 8N1</li><li>포인터</li><li>FIFO</li><li>Polling Echo</li></ul>
-      <div class="cards"><div><b>코드</b>명령을 한 줄씩 읽는다.</div><div><b>CPU·메모리</b>변수와 주소 변화를 이해한다.</div><div><b>UART</b>RX FIFO를 읽고 TX FIFO로 돌려준다.</div></div>
-    </section>
-    <section class="section" id="s01">
-      <h2><span class="num">01</span>프로그램이 하는 일 — PC에서 보낸 문자를 돌려준다</h2>
+ <section class="section" id="overview">
+<h2><span class="num">00</span>이 장의 목표</h2>
+<p>07장에서 성공한 main.c 를 한 줄씩 풀어 읽는다. C 코드가 CPU에서 무슨 일을 시키는지, 메모리와 AXI UART Lite의 어느 부분을 움직이는지 연결한다.</p>
+<ul aria-label="핵심 용어" class="chips"><li>C 코드 해석</li><li>UART 115200 8N1</li><li>포인터</li><li>FIFO</li><li>Polling Echo</li></ul>
+<div class="cards"><div><b>코드</b>명령을 한 줄씩 읽는다.</div><div><b>CPU·메모리</b>변수와 주소 변화를 이해한다.</div><div><b>UART</b>RX FIFO를 읽고 TX FIFO로 돌려준다.</div></div>
+</section>
+<section class="section" id="s01">
+<h2><span class="num">01</span>프로그램이 하는 일 — PC에서 보낸 문자를 돌려준다</h2>
 <p class="lead">PC에서 <code>a</code>를 보내면 Basys3는 <code>a</code>를 받아 다시 <code>a</code>를 전송합니다. C 프로그램은 그 가운데에서 <strong>한 바이트를 읽고 같은 한 바이트를 쓰는 일</strong>을 담당합니다.</p>
 <div class="flow" tabindex="0">PC moserial에서 문자 'a' 송신
        │ USB-UART 신호
@@ -90,18 +90,18 @@ PC moserial에서 문자 'a' 수신</div>
 <div class="callout"><strong>쉽게 말하면</strong><p>UART Lite는 직렬 비트 신호를 만드는 전용 하드웨어이고, MicroBlaze V는 그 하드웨어의 저장 공간을 읽고 쓰는 CPU입니다. CPU가 직접 UART 비트의 높고 낮음을 일일이 만들지 않습니다.</p></div>
 <div aria-label="표 (가로 스크롤 가능)" class="table-wrap" role="region" tabindex="0"><table><thead><tr><th>대상</th><th>담당하는 일</th></tr></thead><tbody><tr><td>PC 터미널</td><td>문자 입력과 결과 화면 표시</td></tr><tr><td>RX FIFO(수신 버퍼)</td><td>직렬로 도착한 바이트를 보관</td></tr><tr><td>MicroBlaze V CPU</td><td>받은 바이트를 읽고 다시 송신하도록 명령</td></tr><tr><td>TX FIFO(송신 버퍼)</td><td>보낼 바이트를 보관하여 직렬 신호로 내보냄</td></tr></tbody></table></div>
 <p class="callout"><strong>핵심 확인</strong> Echo(에코, 받은 문자를 그대로 반환하는 동작)는 UART 하드웨어와 CPU의 협업으로 이루어집니다.</p>
-    </section>
-    <section class="section" id="s02">
-      <h2><span class="num">02</span>세 개의 헤더 파일 — 이미 준비된 도구를 가져온다</h2>
+</section>
+<section class="section" id="s02">
+<h2><span class="num">02</span>세 개의 헤더 파일 — 이미 준비된 도구를 가져온다</h2>
 <div class="codeblock"><div class="codebar"><span>헤더 include 3줄</span></div><pre tabindex="0"><code>#include "xparameters.h"
 #include "xuartlite_l.h"
 #include "xil_types.h"</code></pre></div>
 <div aria-label="표 (가로 스크롤 가능)" class="table-wrap" role="region" tabindex="0"><table><thead><tr><th>파일</th><th>쉬운 설명</th><th>실제로 쓰는 대상</th></tr></thead><tbody><tr><td><code>xparameters.h</code></td><td>Vivado 설계에서 생성된 하드웨어 주소표</td><td><code>XPAR_XUARTLITE_0_BASEADDR</code></td></tr><tr><td><code>xuartlite_l.h</code></td><td>UART Lite 레지스터를 사용하기 위한 저수준 도구</td><td><code>SendByte</code>, <code>RecvByte</code>, <code>WriteReg</code></td></tr><tr><td><code>xil_types.h</code></td><td>AMD 임베디드 코드의 기본 정수형</td><td><code>u8</code>, <code>u32</code></td></tr></tbody></table></div>
 <div class="callout"><strong>C 문법으로 읽기</strong><p><code>#include</code>는 지정한 헤더의 선언과 매크로를 컴파일 전에 사용할 수 있게 하는 명령입니다. 즉, UART 하드웨어 주소와 함수를 매번 직접 작성하지 않아도 됩니다.</p></div>
 <p class="callout"><strong>핵심 확인</strong> 헤더 파일은 07장 Platform Build 후 생성·제공됩니다. 컴파일이 정상이라면 헤더 내용을 직접 고치지 않습니다.</p>
-    </section>
-    <section class="section" id="s03">
-      <h2><span class="num">03</span>UART 주소를 선택한다 — CPU가 어느 장치에 접근할까?</h2>
+</section>
+<section class="section" id="s03">
+<h2><span class="num">03</span>UART 주소를 선택한다 — CPU가 어느 장치에 접근할까?</h2>
 <div class="codeblock"><div class="codebar"><span>하드웨어 주소 매크로 선택</span></div><pre tabindex="0"><code>#ifndef SDT
 #define UARTLITE_BASEADDR XPAR_UARTLITE_0_BASEADDR
 #else
@@ -117,9 +117,9 @@ PC moserial에서 문자 'a' 수신</div>
 <div aria-label="표 (가로 스크롤 가능)" class="table-wrap" role="region" tabindex="0"><table><thead><tr><th>컴파일 조건</th><th>선택되는 기호</th></tr></thead><tbody><tr><td><code>SDT</code>가 정의되지 않은 경우</td><td><code>XPAR_UARTLITE_0_BASEADDR</code></td></tr><tr><td><code>SDT</code>가 정의된 경우</td><td><code>XPAR_XUARTLITE_0_BASEADDR</code></td></tr></tbody></table></div>
 <p class="callout">실제 헤더 화면에서는 <code>XPAR_XUARTLITE_0_BASEADDR</code>의 값 <code>0x40600000</code>이 확인됩니다. 현재 프로젝트에서 어느 분기가 선택됐는지는 실제 빌드 설정으로 판단합니다. 전체 코드는 그대로 유지합니다.</p>
 <p class="callout"><strong>핵심 확인</strong> MicroBlaze V는 주소를 통해 UART Lite에 접근하며, 04장의 Local BRAM 주소와는 다른 영역입니다.</p>
-    </section>
-    <section class="section" id="s04">
-      <h2><span class="num">04</span>변수 세 개 — 받은 문자와 횟수를 기억한다</h2>
+</section>
+<section class="section" id="s04">
+<h2><span class="num">04</span>변수 세 개 — 받은 문자와 횟수를 기억한다</h2>
 <div class="codeblock"><div class="codebar"><span>UART 관찰 변수</span></div><pre tabindex="0"><code>volatile u8  last_rx  = 0U;
 volatile u32 rx_count = 0U;
 volatile u32 tx_count = 0U;</code></pre></div>
@@ -132,9 +132,9 @@ volatile u32 tx_count = 0U;</code></pre></div>
 <div class="callout"><strong>volatile u8 last_rx = 0U; 를 풀어 읽기</strong><p><code>u8</code>은 8비트 부호 없는 정수입니다. <code>volatile</code>은 컴파일러가 이 변수의 메모리 읽기·쓰기를 임의로 생략하지 않도록 합니다. <code>0U</code>는 부호 없는 정수 0입니다. Vitis Watch(변숫값 관찰 창)에서도 유용합니다.</p></div>
 <p><code>u32</code>는 32비트 부호 없는 정수입니다. 여기서 <code>volatile</code>은 인터럽트 처리나 병렬 접근을 안전하게 만드는 장치가 아닙니다.</p>
 <p class="callout"><strong>핵심 확인</strong> 문자 한 개의 내용은 <code>last_rx</code>, 누적된 횟수는 <code>rx_count</code>와 <code>tx_count</code>에 따로 기록됩니다.</p>
-    </section>
-    <section class="section" id="s05">
-      <h2><span class="num">05</span>uart_puts() — 문자열을 한 글자씩 전송한다</h2>
+</section>
+<section class="section" id="s05">
+<h2><span class="num">05</span>uart_puts() — 문자열을 한 글자씩 전송한다</h2>
 <div class="codeblock"><div class="codebar"><span>문자열 전송 함수</span></div><pre tabindex="0"><code>static void uart_puts(const char *text)
 {
     while (*text != '\0') {
@@ -149,9 +149,9 @@ volatile u32 tx_count = 0U;</code></pre></div>
 <div class="callout"><strong>포인터 기초</strong><p><code>*text</code>는 text가 가리키는 주소에 있는 <strong>현재 문자 읽기</strong>이고, <code>text++</code>는 <strong>다음 문자로 이동</strong>입니다. 문자 <code>A</code>를 보낼 때 <code>\0</code>까지 함께 송신하는 것은 아닙니다.</p></div>
 <p><code>XUartLite_SendByte()</code>는 TX FIFO가 기록 가능한 상태가 될 때까지 기다릴 수 있습니다. 함수가 돌아왔다는 사실과 UART 직렬선에서 마지막 비트까지 모두 전송됐다는 사실은 구분해야 합니다.</p>
 <p class="callout"><strong>핵심 확인</strong> 문자열 전체를 한 번에 보내는 것처럼 보여도 실제 함수 안에서는 1바이트씩 UART에 기록합니다.</p>
-    </section>
-    <section class="section" id="s06">
-      <h2><span class="num">06</span>main() 시작 — UART RX/TX FIFO를 비운다</h2>
+</section>
+<section class="section" id="s06">
+<h2><span class="num">06</span>main() 시작 — UART RX/TX FIFO를 비운다</h2>
 <div class="codeblock"><div class="codebar"><span>제어 레지스터 초기화</span></div><pre tabindex="0"><code>/*
      * CTRL_REG bit1 = RX FIFO reset
      * CTRL_REG bit0 = TX FIFO reset
@@ -175,9 +175,9 @@ bit4 = 0 → Interrupt 사용 안 함</div>
 <div aria-label="표 (가로 스크롤 가능)" class="table-wrap" role="region" tabindex="0"><table><thead><tr><th>Offset</th><th>레지스터</th><th>주요 용도</th></tr></thead><tbody><tr><td><code>+0x00</code></td><td>RX FIFO</td><td>받은 바이트 읽기</td></tr><tr><td><code>+0x04</code></td><td>TX FIFO</td><td>보낼 바이트 쓰기</td></tr><tr><td><code>+0x08</code></td><td>Status Register</td><td>수신 있음·송신 가득 참 확인</td></tr><tr><td><code>+0x0C</code></td><td>Control Register</td><td>FIFO 초기화·인터럽트 제어</td></tr></tbody></table></div>
 <div class="callout"><strong>WriteReg(Base, Offset, Value)라는 모양</strong><p>첫 번째는 UART의 시작 주소, 두 번째는 내부 레지스터 위치, 세 번째는 실제로 기록할 값입니다. 결국 CPU가 AXI4-Lite를 통해 UART 제어 레지스터에 <code>0x03</code>을 쓰게 됩니다.</p></div>
 <p class="callout"><strong>핵심 확인</strong> 여기서는 UART FIFO만 초기화합니다. FPGA 전체를 다시 설계하거나 CPU 메모리를 지우는 동작이 아닙니다.</p>
-    </section>
-    <section class="section" id="s07">
-      <h2><span class="num">07</span>시작 안내문 — PC에 글자를 출력한다</h2>
+</section>
+<section class="section" id="s07">
+<h2><span class="num">07</span>시작 안내문 — PC에 글자를 출력한다</h2>
 <div class="codeblock"><div class="codebar"><span>시작 안내문 두 줄</span></div><pre tabindex="0"><code>uart_puts("\r\nAXI UART Lite Echo Ready\r\n");
     uart_puts("Type characters. Received data will be echoed.\r\n&gt; ");</code></pre></div>
 <p><code>\r</code>은 커서를 줄의 시작으로 옮기는 문자, <code>\n</code>은 다음 줄로 내리는 문자입니다. 화면의 줄바꿈도 UART로 보내는 1바이트 문자들이 조합된 결과입니다.</p>
@@ -187,9 +187,9 @@ Type characters. Received data will be echoed.
 <div aria-label="표 (가로 스크롤 가능)" class="table-wrap" role="region" tabindex="0"><table><thead><tr><th>출력 대상</th><th>문자 수</th></tr></thead><tbody><tr><td>첫 번째 안내문 (앞뒤 <code>\r\n</code> 포함)</td><td>28바이트</td></tr><tr><td>두 번째 안내문 (뒤 <code>\r\n&gt; </code> 포함)</td><td>50바이트</td></tr><tr><td>안내문 합계</td><td><strong>78바이트</strong></td></tr></tbody></table></div>
 <div class="callout"><strong>tx_count가 0부터 시작하지 않는 이유</strong><p>Echo 문자를 아직 받지 않았더라도 이 두 개의 안내문을 전송하면서 <code>tx_count</code>가 증가합니다. 안내문 송신 함수들이 모두 반환된 시점의 예상값은 78입니다.</p></div>
 <p class="callout"><strong>핵심 확인</strong> 터미널에서 안내문이 보이는 것은 FPGA → PC의 UART TX 경로가 동작한다는 증거입니다.</p>
-    </section>
-    <section class="section" id="s08">
-      <h2><span class="num">08</span>RecvByte() — 문자가 들어올 때까지 기다린다</h2>
+</section>
+<section class="section" id="s08">
+<h2><span class="num">08</span>RecvByte() — 문자가 들어올 때까지 기다린다</h2>
 <div class="codeblock"><div class="codebar"><span>한 바이트 수신·횟수 증가</span></div><pre tabindex="0"><code>while (1) {
         /* RX FIFO에 문자가 들어올 때까지 Blocking 대기 */
         last_rx = XUartLite_RecvByte(UARTLITE_BASEADDR);
@@ -200,9 +200,9 @@ Type characters. Received data will be echoed.
 <div class="callout"><strong>Blocking(블로킹, 기다리는 방식) + Polling(폴링, 상태 반복 확인)</strong><p><code>XUartLite_RecvByte()</code>는 데이터가 들어오기 전까지 반환하지 않습니다. CPU는 다른 작업을 하지 않고 UART의 수신 가능 상태를 확인합니다. 07장은 가장 단순한 문자 Echo 동작을 이해하기 위한 구조입니다.</p></div>
 <p>이 줄이 끝나면 <code>rx_count++</code>가 실행되어 수신한 바이트 수를 1 증가시킵니다.</p>
 <p class="callout"><strong>핵심 확인</strong> PC가 아무 문자도 보내지 않으면 <code>RecvByte()</code>에서 계속 기다리는 것이 정상입니다.</p>
-    </section>
-    <section class="section" id="s09">
-      <h2><span class="num">09</span>SendByte() — 받은 글자를 그대로 돌려준다</h2>
+</section>
+<section class="section" id="s09">
+<h2><span class="num">09</span>SendByte() — 받은 글자를 그대로 돌려준다</h2>
 <div class="codeblock"><div class="codebar"><span>UART Echo 핵심 송신부</span></div><pre tabindex="0"><code>/* 받은 1 Byte를 그대로 PC로 다시 전송 */
         XUartLite_SendByte(UARTLITE_BASEADDR, last_rx);
         tx_count++;</code></pre></div>
@@ -216,9 +216,9 @@ UART TX 핀에서 직렬 전송 → PC에 'a' 표시</div>
 <div class="callout"><strong>왜 같은 글자가 돌아올까?</strong><p>수신 데이터에 더하거나 빼는 계산을 전혀 하지 않습니다. <code>last_rx</code>에 저장된 바이트 값을 <code>SendByte()</code>에 그대로 전달하기 때문에 Echo가 됩니다.</p></div>
 <p><code>tx_count++</code>는 TX FIFO로 데이터를 쓰도록 요청한 횟수를 기록합니다. UART 케이블의 물리적인 비트 전송 완료 횟수를 측정한 것은 아닙니다.</p>
 <p class="callout"><strong>핵심 확인</strong> 수신은 RX FIFO 읽기, 송신은 TX FIFO 쓰기입니다. CPU는 AXI4-Lite 레지스터를 통해 두 동작을 수행합니다.</p>
-    </section>
-    <section class="section" id="s10">
-      <h2><span class="num">10</span>실제 Basys3 결과 — abc를 보내면 abc가 돌아온다</h2>
+</section>
+<section class="section" id="s10">
+<h2><span class="num">10</span>실제 Basys3 결과 — abc를 보내면 abc가 돌아온다</h2>
 <p>07장 실습에서 moserial은 <code>/dev/ttyUSB2</code>에 <strong>115200 8N1</strong>로 연결됐고, PC에서 전송한 <code>abc</code>가 수신 창에 그대로 표시됐습니다.</p>
 <figure class="fig"><img alt="실제 Basys3 UART Lite moserial에서 abc가 수신된 성공 화면" class="zoom" loading="lazy" src="legacy/images/soc07/steps/soc07_34_moserial_echo_abc_success.webp"/><figcaption><strong>07장 실행 화면</strong> — 시작 안내문 및 <code>abc</code> 반환 확인. 이미지를 클릭하면 크게 열립니다.</figcaption></figure>
 <div class="flow" tabindex="0">PC 전송   a (0x61)   b (0x62)   c (0x63)
@@ -232,9 +232,9 @@ TX FIFO       a          b          c
 PC 수신       a          b          c</div>
 <div class="callout"><strong>확인 :</strong> moserial <code>Received ASCII</code>에 <code>abc</code>가 반환된 것을 확인합니다.</div>
 <div aria-label="표 (가로 스크롤 가능)" class="table-wrap" role="region" tabindex="0"><table><thead><tr><th>상태</th><th>last_rx</th><th>rx_count</th><th>tx_count</th></tr></thead><tbody><tr><td>안내문 두 개 출력 후</td><td><code>0x00</code></td><td>0</td><td>78</td></tr><tr><td><code>a</code> Echo 처리 후</td><td><code>0x61</code></td><td>1</td><td>79</td></tr><tr><td><code>b</code> Echo 처리 후</td><td><code>0x62</code></td><td>2</td><td>80</td></tr><tr><td><code>c</code> Echo 처리 후</td><td><code>0x63</code></td><td>3</td><td>81</td></tr></tbody></table></div>
-    </section>
-    <section class="section" id="s11">
-      <h2><span class="num">11</span>디버그로 확인 — 무엇을 관찰하면 될까?</h2>
+</section>
+<section class="section" id="s11">
+<h2><span class="num">11</span>디버그로 확인 — 무엇을 관찰하면 될까?</h2>
 <p>Vitis Debugger(디버거, 프로그램 실행과 변수를 관찰하는 도구)의 Watch에 아래 세 변수를 등록하면 흐름을 쉽게 볼 수 있습니다.</p>
 <div aria-label="표 (가로 스크롤 가능)" class="table-wrap" role="region" tabindex="0"><table><thead><tr><th>표현식</th><th>확인할 내용</th></tr></thead><tbody><tr><td><code>last_rx</code></td><td>마지막 문자의 ASCII 값</td></tr><tr><td><code>rx_count</code></td><td>받은 바이트 수</td></tr><tr><td><code>tx_count</code></td><td>안내문까지 포함한 UART 송신 함수 기록 수</td></tr></tbody></table></div>
 <ol>
@@ -245,11 +245,11 @@ PC 수신       a          b          c</div>
 <div class="callout"><strong>실습 확인 질문</strong><p>① <code>text++</code>는 왜 필요한가? ② 문자가 오지 않으면 CPU는 어느 함수에서 멈춰 있는가? ③ 처음부터 <code>tx_count</code>가 증가하는 이유는 무엇인가? ④ RX/TX FIFO는 CPU의 Local BRAM과 같은 곳인가?</p></div>
 <p class="callout"><code>launch.json</code> 탭을 먼저 여는 순서는 이번 Vivado/Vitis 2024.2 환경에서 성공한 절차입니다. 그 탭을 여는 것 자체가 문제 해결의 원인이라는 결론은 아닙니다.</p>
 <p class="callout"><strong>핵심 확인</strong> 디버그로 멈춰 있는 동안에는 UART 수신 반복문이 진행하지 않으므로 Echo가 지연될 수 있습니다.</p>
-    </section>
-    <section class="section" id="s12">
-      <h2><span class="num">12</span>main.c 전체</h2>
+</section>
+<section class="section" id="s12">
+<h2><span class="num">12</span>main.c 전체</h2>
 <p>이번 07.1장은 설명을 추가한 자료일 뿐 <strong>하드웨어 설정이나 실행 코드를 바꾸지 않습니다. </strong></p>
-<div class="codeblock"><div class="codebar"><span>실제 07장 main.c 전체 소스</span></div><pre tabindex="0"><code>#include "xparameters.h"
+<div class="codeblock" id="f-soc07_main_c"><div class="codebar"><span>실제 07장 main.c 전체 소스</span></div><pre tabindex="0"><code>#include "xparameters.h"
 #include "xuartlite_l.h"
 #include "xil_types.h"
 
@@ -317,9 +317,8 @@ int main(void)
     return 0;
 }</code></pre></div>
 <div class="callout"><strong>한 문장으로 정리:</strong> UART를 초기화하고 → 시작 안내문을 출력하고 → 1바이트를 수신하고 → 같은 1바이트를 보내고 → 무한 반복합니다.</div>
-
 <p class="callout"><strong>핵심 확인</strong> C 코드를 이해했다면 07장을 다시 구성할 필요 없이 08장 AXI Timer로 이어갈 수 있습니다.</p>
-    </section>
+</section>
     <div class="chapter-links" id="chapter-links"></div>
   </main>
 </div>
@@ -416,6 +415,12 @@ window.COURSE={
    "number": "11",
    "title": "사용자 Top과 1비트 GPIO",
    "file": "p1_11_user_top_v02.html"
+  },
+  {
+   "id": "p1-11-1",
+   "number": "11.1",
+   "title": "실습 파일",
+   "file": "p1_11_1_files_v02.html"
   }
  ]
 };
