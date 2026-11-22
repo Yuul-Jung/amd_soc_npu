@@ -353,6 +353,24 @@ def short(line, n=90):
     return esc(line if len(line) <= n else line[:n] + "…")
 
 
+def drc_open(owner):
+    """미해결 DRC 경고 증거(validation/drc_reqp1840_*.txt)가 있으면 게이트 한 칸으로 드러낸다.
+
+    REQP-1840: 비동기 리셋에서 나온 신호가 RAMB18 제어 핀으로 들어감 → 동작 중 리셋 때 BRAM 내용이 깨질 수 있고,
+    기본 STA·배선 후 타이밍 시뮬레이션(리셋을 시작 때 한 번만 줌)은 이를 검증하지 않는다.
+    """
+    path = latest(f"{owner}/validation/drc_reqp1840_*.txt")
+    if not path:
+        return None
+    counts = [(int(m.group(1)), m.group(2) == "1") for m in re.finditer(r"count=(\d+) limit_reached=(\d)", rd(path))]
+    hit = [n for n, _ in counts if n]
+    if not hit:
+        return None
+    more = "+" if any(lim for _, lim in counts) else ""
+    return ("todo", "DRC REQP-1840", f"⚠ 미해결 · 비동기 리셋 → BRAM 제어 핀 경고 {sum(hit)}{more}건(보고서 {len(hit)}개), "
+            f"동작 중 리셋 미검증 · <code>{path}</code>")
+
+
 def gates(c, e):
     g = [("pass", "HTML_PASS", f"{c['version']} · 생성기·정적 검사")]
     if e.host:
@@ -403,6 +421,9 @@ def gates(c, e):
             g.append(("fail", "TIMING_SIM_PASS", f"✗ 통과 기록 없음 · {e.viv_path}"))
         else:
             g.append(("todo", "TIMING_SIM_PASS", "⚠ 미검증 · 배선 후 SDF 시뮬레이션 실행 대기 (8-2)"))
+    drc = drc_open(c["id"])
+    if drc:
+        g.append(drc)
     if e.board:
         g.append(("pass", "BOARD_PASS", f"{e.board_path}"))
     else:

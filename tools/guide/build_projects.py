@@ -239,6 +239,9 @@ def project_gates(p, e):
         g.append(gate("fail", "SYNTH_TIMING_PASS", "✗ " + bg.short(next(v for v in e.viv if "FAIL" in v), 70)))
     else:
         g.append(gate("todo", "SYNTH_TIMING_PASS", "⚠ 미검증 · VS Code Vivado 실행 대기 (" + os.path.basename(p["vivado_tcl"]) + ")"))
+    drc = bg.drc_open(p["id"])
+    if drc:
+        g.append(gate(*drc))
     g.append(gate("pass", "BOARD_PASS", e.board_path) if e.board else gate("todo", "BOARD_PASS", "⚠ 미실시 · 실물 보드 확인 대기"))
     return g
 
