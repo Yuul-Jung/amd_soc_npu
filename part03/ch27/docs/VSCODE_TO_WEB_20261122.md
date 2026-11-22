@@ -69,3 +69,18 @@ VS Code의 `200eedc`가 빈 SLACK을 NA로 바꾸면서 드러나지 않게 됐�
 1절 오류 때문에 `fd65a88`로는 실행할 수 없다. 설계 RTL·XDC가 같은 `47c2f79`의 무수정 사본에서, 같은 배선 후 넷리스트·SDF로 **전체 시나리오**를 실행한다.
 증거는 실제 실행 날짜로 `ch12/validation/vivado_impl_timesim_20261122.txt`에 남긴다(지시문의 파일명은 20261120, 생성기는 최신 파일을 읽는다).
 지시문 머리말의 `git fetch origin`은 이 PC에서 `git fetch npu`이다(origin은 `amd_soc_rtl`).
+
+## 8. 지시 11-3 회신 (2026-11-22 밤, `restructure/projects` a5d89dc)
+
+| 항목 | 결과 |
+|---|---|
+| 지시 11: 12장 SDF 전체 | PASS 6/6, 위반 경고 0. `ch12/validation/vivado_impl_timesim_20261122.txt` |
+| 1절: `2544442` TB | xvlog, xelab + SDF 역주석 통과. 이 TB로 SDF 시뮬레이션은 실행하지 않음 |
+| 3절: 경고 문구 | `WARNING: ... Timing violation in scope ...`. 현재 grep과 일치(2 ns 음성 대조로 확인) |
+| 4절: DRC 증거 | `ch12`·`p02`·`p03`·`p04`의 `validation/drc_reqp1840_20261122.txt` |
+
+남은 웹 작업:
+
+1. **먼저 `build_guides.py`·`build_projects.py` 재생성.** 새 증거 때문에 a5d89dc에서 두 `--check`가 실패한다(대상: 11·12장, p02, GUIDE_STATUS).
+2. REQP-1840을 페이지에 미해결로 표시한다. 12장 TIMING_SIM PASS는 동작 중 리셋을 검증하지 않는다.
+3. 5절(26·29장 판정 기준)은 11-3에 회신이 없고 `GUIDE_STATUS.md`에 여전히 FAIL로 나온다.
