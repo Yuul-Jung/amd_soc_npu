@@ -1,9 +1,9 @@
-# REQP-1840·1839 — fix/sync-reset a80698e 배선 후 report_drc, 2026-11-23 추출
-report=<repo>/build/vivado/p02_s1/drc_route.rpt date=Mon Nov 23 00:09:00 2026 count=0 reqp1839=0 limit_reached=0
-report=<repo>/build/vivado/p02_s2/drc_route.rpt date=Mon Nov 23 00:10:08 2026 count=0 reqp1839=0 limit_reached=0
-report=<repo>/build/vivado/p02_s3/drc_route.rpt date=Mon Nov 23 00:11:13 2026 count=0 reqp1839=0 limit_reached=0
-report=<repo>/build/vivado/p02_s4/drc_route.rpt date=Mon Nov 23 00:12:25 2026 count=0 reqp1839=0 limit_reached=0
-report=<repo>/build/vivado/p02_s5/drc_route.rpt date=Mon Nov 23 00:13:38 2026 count=0 reqp1839=0 limit_reached=0
-report=<repo>/build/vivado/p02_s6/drc_route.rpt date=Mon Nov 23 00:14:54 2026 count=0 reqp1839=0 limit_reached=0
-report=<repo>/build/vivado/p02_s7/drc_route.rpt date=Mon Nov 23 00:16:08 2026 count=0 reqp1839=0 limit_reached=0
-report=<repo>/build/vivado/p02_s8/drc_route.rpt date=Mon Nov 23 00:17:36 2026 count=0 reqp1839=0 limit_reached=0
+# REQP-1840·1839 — fix/sync-reset e661da2(지시 13) 배선 후 report_drc, 2026-11-23 추출
+report=<repo>/build/vivado/p02_s1/drc_route.rpt date=Mon Nov 23 01:09:01 2026 count=0 reqp1839=0 limit_reached=0
+report=<repo>/build/vivado/p02_s2/drc_route.rpt date=Mon Nov 23 01:10:01 2026 count=0 reqp1839=0 limit_reached=0
+report=<repo>/build/vivado/p02_s3/drc_route.rpt date=Mon Nov 23 01:10:55 2026 count=0 reqp1839=0 limit_reached=0
+report=<repo>/build/vivado/p02_s4/drc_route.rpt date=Mon Nov 23 01:11:53 2026 count=0 reqp1839=0 limit_reached=0
+report=<repo>/build/vivado/p02_s5/drc_route.rpt date=Mon Nov 23 01:13:04 2026 count=0 reqp1839=0 limit_reached=0
+report=<repo>/build/vivado/p02_s6/drc_route.rpt date=Mon Nov 23 01:14:21 2026 count=0 reqp1839=0 limit_reached=0
+report=<repo>/build/vivado/p02_s7/drc_route.rpt date=Mon Nov 23 01:15:42 2026 count=0 reqp1839=0 limit_reached=0
+report=<repo>/build/vivado/p02_s8/drc_route.rpt date=Mon Nov 23 01:17:06 2026 count=0 reqp1839=0 limit_reached=0
