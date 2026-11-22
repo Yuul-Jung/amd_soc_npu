@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
-"""제1부(MicroBlaze V 기본 SoC) 배포용 학습안내서 생성기.
+"""부(part) 단위 배포용 학습안내서 생성기 — 제1부(part01)·제2부(part02).
 
-  pip install beautifulsoup4==4.15.0 lxml       # 필요 패키지 (CI와 같은 판)
-  python3 tools/part01/build_part01.py          # part01/p1_*_v02.html · part01/index.html · docs/PART01_EDIT_LOG.md 생성
-  python3 tools/part01/build_part01.py --check  # 디스크와 다르거나 그림·코드·표 개수가 원본과 다르면 exit 1 (CI)
+  pip install beautifulsoup4==4.15.0 lxml           # 필요 패키지 (CI와 같은 판)
+  python3 tools/guide/build_part.py part01          # part01/p1_*.html · part01/index.html · docs/PART01_EDIT_LOG.md 생성
+  python3 tools/guide/build_part.py part02 --check  # 디스크와 다르거나 그림·코드·표 개수가 원본과 다르면 exit 1 (CI)
 
-입력: part01/legacy/pages/soc/*.html, part01/chapters/11_*.html (amd_soc_rtl 이관본, 수정하지 않음)
-목록: part01/course.json
+입력: partNN/ 안의 amd_soc_rtl 이관 원본 페이지 (수정하지 않음)
+목록·문구: partNN/course.json (prefix·label·short_title·home_label·kicker_base·index·groups·chapters)
+각 부는 독립 과정이다: 부 밖(다른 부·저장소 최상위)으로 가는 링크는 지운다.
 
 원본 페이지를 공통 표준(rule_md STANDARD) 안내서로 새로 구성한다.
   - 틀: 책장 배너 · 좌측 장/절 탐색(site.js) · 이전/다음 · 코드 복사 박스 · 공통 색상
@@ -14,7 +15,7 @@
   - 본문: 제작·검증 메모(검증 완료/실기/계측/출처/원본/캡처 여부 등)를 문장 단위로 지우고,
           남은 '검증'은 학습 동작인 '확인'으로, 이전 장 프로젝트를 뜻하는 '원본'은 '기존'으로 바꾼다
   - 그림·표·코드는 하나도 빼지 않는다 (개수 대조, 다르면 실패)
-지운 문장은 docs/PART01_EDIT_LOG.md 에 남긴다 (배포 본문 아님).
+지운 문장은 docs/PARTNN_EDIT_LOG.md 에 남긴다 (배포 본문 아님).
 """
 from __future__ import annotations
 
@@ -29,7 +30,8 @@ from urllib.parse import quote, unquote, urlsplit
 from bs4 import BeautifulSoup, Comment, NavigableString, Tag
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-P1 = os.path.join(ROOT, "part01")
+PART = next((a for a in sys.argv[1:] if not a.startswith("-")), "part01")
+P1 = os.path.join(ROOT, PART)
 TEXT_EXT = re.compile(r"\.(?:v|vh|sv|svh|c|h|py|tcl|xdc|sh|md|txt|json|xml|csv|log|S|hex|mem|coe|yml|yaml)$", re.I)
 GITHUB_SOC = re.compile(r"^https://github\.com/Yuul-Jung/soc/blob/[^/]+/MicroBlaze_V_SoC01_41/(.+)$")
 
@@ -40,6 +42,7 @@ def rd(path):
 
 
 COURSE = json.loads(rd(os.path.join(P1, "course.json")))
+PFX, LABEL = COURSE["prefix"], COURSE["label"]
 CHS = COURSE["chapters"]
 VER = COURSE["version"]
 BY_SRC = {os.path.normpath(os.path.join(P1, c["source"])): c for c in CHS if c.get("source")}
@@ -59,6 +62,7 @@ REPLACE = [
     (r"실제 GUI 확인", "GUI에서 확인"), (r"실기 (확인|검증) 완료", "보드에서 확인"), (r"(확인|검증) 완료", "확인"),
     (r"^(값의 )?근거$", "확인 방법"), (r"^원본$", "문서"), (r"^대조 내용$", "내용"), (r"원본 대조 내용", "참고 내용"), (r"분석 가정 기반 추정값, 실측 아님", "분석 가정 기반 추정값"),
     (r"점멸 실기 확인", "점멸 확인"),
+    (r"(과|와|및) (경계|제한|보류 Gate)$", ""), (r" (판정 )?및 제한$", ""),
     (r"클릭하면 원본 크기로 확대", "클릭하면 확대"), (r"이미지 클릭 시 원본 확대", "클릭하면 확대"),
     (r"원본 크기로 (열립니다|확대)", "크게 열립니다"), (r"원본 그림 크게 보기", "그림 크게 보기"),
     (r"원본 회로도 확대", "회로도 크게 보기"), (r"원본 (보기|확대)", "크게 보기"),
@@ -80,19 +84,27 @@ REPLACE = [
     (r"(에서|이미) (정상 )?검증(된|한) ", r"\1 만든 "), (r"(정상 )?검증(된|한) ", ""), (r"실기 검증 및 오류 점검", "결과 확인 및 오류 점검"),
     (r"선택 참고·추가 검증", "선택 실습"), (r"선택 검증", "선택 실습"), (r"실제 Debug Watch 검증값", "Debug Watch 확인값"),
     (r"최종 검증 아님", "초기 상태"), (r"재검증", "다시 확인"), (r"검증", "확인"),
+    # 남은 '원본'은 이전 장·복제 전 프로젝트나 소스를 뜻한다 (제작 메모는 위 META가 먼저 지움)
+    (r"전체 원본", "전체 코드"), (r"개별 파일 원본", "개별 파일"), (r"원본 (?=소스|RTL|C 파일|Verilog 파일|C 코드|Verilog)", ""),
+    (r"(제\d부) 원본", r"\1 프로젝트"), (r"원본 (?=\d+(~\d+)?장)", ""), (r"(프로젝트) 원본", r"\1"),
+    (r"원본입니다", "기존 프로젝트입니다"), (r"기준 원본", "기존 프로젝트"), (r"원본(?![과의은을이]? ?(동일|일치|대조|근거|PDF|문서|캡처))", "기존"),
 ]
 REPLACE = [(re.compile(a), b) for a, b in REPLACE]
 
 # 2) 문장 지우기 — 이 문장 자체가 제작·검증 기록이면 삭제
 META = re.compile("|".join([
     r"실기", r"(확인|검증) (완료|상태|범위|경계|기록)", r"정상 (확인|검증)", r"확인해야 완료",
-    r"계측", r"실측", r"추정값", r"LOW confidence",
+    r"정밀 계측", r"계측(하지|한 것은|했다는|값은|기로|결과는 아니)", r"실측(값|한 |이 아니|이 아닙|아님|이라는|정확도| 성공| 전력)", r"실측 전력",
+    r"추정값(이며|으로)", r"LOW confidence",
     r"캡처(가|는)? 아니", r"캡처로 (확인|검증)", r"스크린샷이 아니", r"공식 (예시|참고 도판|참고 그림)", r"재구성한", r"성공 사례", r"성공 화면이 아니",
-    r"출처", r"근거", r"원본", r"원문", r"이관", r"재작성", r"GitHub",
+    r"출처", r"근거(입니다|로 합니다)", r"(확인|원본|기능별) 근거", r"원본(과|과는|의)? ?(동일|일치|대조)", r"원본 파일 전체 내용", r"원본 근거",
+    r"원본 PDF", r"원본 문서", r"원본 캡처", r"원본은 08장", r"원문", r"이관", r"재작성(한 )?(SVG|도식)", r"그림으로 재작성", r"GitHub",
     r"별도 (확장 )?확인 항목", r"성과로 기록", r"실행하지 않았", r"취급하지 않",
     r"확인되지 않았", r"관찰값은", r"예상값이지", r"예상값으로 표시", r"설정상 값이고", r"유도한 값", r"외부 이미지", r"PDF \d", r"기존 교재",
     r"당시 실제", r"후속 (확인|검증)한", r"이번 캡처", r"중간 캡처", r"기존 (확인|검증) 과정", r"성공 결과입니다", r"타이밍 결과가 아닙니다",
     r"아직 확인", r"확인한 결과는 아니", r"결과는 아니", r"신호가 아니", r"전력이 아닙니다", r"측정기로", r"측정하지 않", r"Watch 변수값은",
+    r"미실시", r"미실행", r"NOT_RUN", r"PASS로 기록", r"[A-Z]_PASS", r"보류 상태", r"현 단계에서 보류", r"완료되지 않았", r"완료 범위", r"시험 상태", r"PASS는", r"테스트는 PASS", r"RTL_SIM PASS", r"여전히 (미실|보류)", r"이 장의 PASS",
+    r"통과 결과는", r"실행 로그", r"CI 기록", r"시뮬레이션 PASS", r"회귀는 PASS", r"(확인|검증) 경계",
     r"성공 실측값", r"최종 캡처", r"(과|와)는 (구분|구별)", r"(은|는) 구별합니다", r"(과|와) 구별합니다", r"라고 단정", r"확인하기 전에 단정", r"수행하지 않았",
 ]))
 # 3) 통째로 지우는 요소
@@ -104,13 +116,42 @@ BLOCKS = {"p", "div", "ol", "ul", "figure", "pre", "table", "section", "details"
 TEXT_BLOCKS = ["h2", "h3", "h4", "p", "li", "figcaption", "summary", "th", "td", "div", "strong", "span", "b", "small"]
 
 removed: dict[str, list[str]] = {}
-SOURCES: dict[str, dict[str, str]] = {}            # 장 id → {slug: part01 기준 경로} (본문에서 링크한 실습 파일)
+DROPPED: dict[str, dict[str, int]] = {}     # 쪽별로 일부러 지운 현황 절의 그림·표·코드 개수 (대조에서 뺌)
+SOURCES: dict[str, dict[str, str]] = {}            # 장 id → {slug: 경로} (본문에서 링크한 실습 파일, 경로는 부 폴더 기준)
 PAGE_CH = {c["file"]: c for c in CHS}
 LANG = {".c": "C", ".h": "C", ".v": "Verilog", ".sv": "SystemVerilog", ".xdc": "XDC", ".tcl": "Tcl", ".py": "Python", ".sh": "Shell"}
 broken: list[str] = []
 
 
+STATUS_SECTION = re.compile(r"^(통합 )?확인 결과$|^확인표$|^확인 및 결과 판정$|^실행 확인·판정$|추가 통합 작업 Gate|^테스트·확인 기록$|"
+                            r"^확인 기록표$|^확인 판정$|Vivado 실행 및 Gate|^설계·확인$|^확인 결과와 보류 Gate$|^확인 결과와$")
+STATUS_COL = re.compile(r"^(현재 )?(상태|결과)$|^현재$|^증거$|^진행 상황$|(확인|검증) 상태$|^결과 범위$")
+STATUS_VAL = re.compile(r"PASS|NOT_RUN|FAIL|미실|미확인|보류|GitHub|NOT RUN")
+
+
+def drop_status_columns(table, page):
+    """검증 현황 열(상태·현재 결과·증거…)을 지워 확인 항목·방법만 남긴다."""
+    rows = table.find_all("tr")
+    if not rows or table.find(attrs={"colspan": True}) or not STATUS_VAL.search(table.get_text(" ")):
+        return
+    head = rows[0].find_all(["th", "td"])
+    idx = [i for i, c in enumerate(head) if STATUS_COL.search(c.get_text(" ", strip=True))]
+    if not idx or len(idx) >= len(head):
+        return
+    removed.setdefault(page, []).append("[표 열 삭제] " + ", ".join(head[i].get_text(" ", strip=True) for i in idx))
+    for tr in rows:
+        cells = tr.find_all(["th", "td"], recursive=False)
+        for i in sorted(idx, reverse=True):
+            if i < len(cells):
+                cells[i].decompose()
+    for th in table.find_all("th"):
+        if th.get_text(strip=True) == "PASS 조건":
+            th.string = "통과 조건"
+
+
 def clean_text(s):
+    for pat, rep in COURSE.get("rename", []):
+        s = re.sub(pat, rep, s)
     for pat, rep in REPLACE:
         s = pat.sub(rep, s)
     return s
@@ -174,19 +215,49 @@ def new_url(raw, src_dir, tag, page):
     tgt = os.path.normpath(os.path.join(src_dir, unquote(sp.path)))
     frag = "#" + sp.fragment if sp.fragment else ""
     if not tgt.startswith(P1 + os.sep) or not os.path.exists(tgt):
-        broken.append(f"{page}: {raw}")
-        return u
+        if tag != "a":          # 그림·자원이 없으면 실패로 보고
+            broken.append(f"{page}: {raw}")
+            return u
+        return "DROP::outside"  # 부 밖(다른 부·최상위)이거나 원본에서 이미 끊긴 링크: 글자만 남김
     if tgt in BY_SRC:
         return BY_SRC[tgt]["file"] + frag
     rel = os.path.relpath(tgt, P1).replace(os.sep, "/")
     lrel = os.path.relpath(tgt, os.path.join(P1, "legacy")).replace(os.sep, "/")
-    if tag == "a" and TEXT_EXT.search(rel) and re.match(r"^(legacy/code|files)/", rel) and not sp.query:
-        slug = re.sub(r"[^A-Za-z0-9]+", "_", re.sub(r"^(legacy/code|files)/", "", rel)).strip("_")
+    if tag == "a" and re.search(r"(^|/)(validation|manifests|docs|tests)/|\.md$", rel):
+        return "DROP::internal"  # 제작·검증 기록, 설명 문서
+    if tag == "a" and os.path.basename(rel) == "index.html":
+        return "DROP::index"     # 원본 목록 쪽: 좌측 탐색이 대신함
+    if tag == "a" and rel.endswith((".html", ".htm")):
+        return "DROP::page"      # 이 과정 안내서가 아닌 원본 쪽 (옛 요약판·목록)
+    if tag == "a" and TEXT_EXT.search(rel) and not sp.query:
+        slug = re.sub(r"[^A-Za-z0-9]+", "_", re.sub(r"^(legacy/code|files|legacy)/", "", rel)).strip("_")
         SOURCES.setdefault(PAGE_CH[page]["id"], {}).setdefault(slug, rel)
         return f"SRC::{slug}"
     if tag == "a" and re.match(r"^(code|docs|validation)/", lrel) and TEXT_EXT.search(lrel) and not sp.query:
         return "legacy/source_viewer.html?file=" + quote(lrel, safe="") + frag
     return quote(rel, safe="/") + ("?" + sp.query if sp.query else "") + frag
+
+
+# ── 원본 SVG 표시 보정 ─────────────────────────────────────────────────────
+FIXED: dict[str, str] = {}   # 출력 경로 → 내용
+
+
+def fixed_svg(src):
+    """Graphviz가 scale(2)로 그렸는데 viewBox는 절반 크기라 그림 왼쪽 위만 보이는 원본 SVG를
+    viewBox를 실제 크기로 맞춘 사본(assets/fixed/)으로 바꿔 보여 준다. 원본 파일은 고치지 않는다."""
+    if not src.endswith(".svg") or src.startswith(("http", "//")):
+        return src
+    path = os.path.join(P1, unquote(src))
+    if not os.path.exists(path):
+        return src
+    t = rd(path)
+    m = re.search(r'(<svg[^>]*?width="([\d.]+)pt"[^>]*?height="([\d.]+)pt"[^>]*?viewBox=")([^"]+)(")', t, re.S)
+    g = re.search(r'id="graph0"[^>]*transform="scale\(([\d.]+)', t)
+    if not (m and g) or float(g.group(1)) == 1.0:
+        return src
+    out = "assets/fixed/" + re.sub(r"[^A-Za-z0-9.]+", "_", os.path.relpath(path, P1))
+    FIXED[out] = t[:m.start(5) - len(m.group(4))] + f"0 0 {m.group(2)} {m.group(3)}" + t[m.start(5):]
+    return out
 
 
 # ── 페이지 변환 ─────────────────────────────────────────────────────────────
@@ -213,14 +284,17 @@ def convert(c):
         for attr in ("href", "src"):
             if a.get(attr):
                 a[attr] = new_url(a[attr], src_dir, a.name, page)
-        if a.name == "a" and a.get("href") and INTERNAL.search(a["href"]):
-            removed.setdefault(page, []).append("[링크] " + a.get_text(" ", strip=True))
-            a.decompose()
+        if a.name == "a" and a.get("href", "").startswith("DROP::"):
+            removed.setdefault(page, []).append(f"[링크 해제 · {a['href'][6:]}] " + a.get_text(" ", strip=True))
+            if a["href"] in ("DROP::internal", "DROP::index"):
+                a.decompose()
+            else:
+                a.unwrap()
     for a in main.find_all("a", href=re.compile(r"^legacy/index\.html")):
         a.decompose()
     for p in main.find_all("p"):
         if p.find("a") and re.fullmatch(r"[\s·←→]*", re.sub(r"(?s)<a\b.*?</a>", "", p.decode_contents())) \
-                and all(a.get("href", "").startswith("p1_") for a in p.find_all("a")) and re.search(r"[←→]", p.get_text()):
+                and all(a.get("href", "").startswith(PFX + "_") for a in p.find_all("a")) and re.search(r"[←→]", p.get_text()):
             p.decompose()
     # 그림 링크: 이미지 파일로 넘어가지 않고 쪽 안에서 확대 (아래 ZOOM 스크립트)
     IMG = re.compile(r"\.(webp|png|jpe?g|gif|svg|avif)$", re.I)
@@ -233,7 +307,10 @@ def convert(c):
         else:
             a.decompose()
     for img in main.find_all("img"):
+        if img.get("alt"):
+            img["alt"] = clean_text(img["alt"])
         img["class"] = ["zoom"]
+        img["src"] = fixed_svg(img.get("src", ""))
     for cap in main.find_all("figcaption"):
         for t in cap.find_all(string=True):
             t.replace_with(re.sub(r"(\s*·\s*)+$", "", str(t)))
@@ -313,6 +390,24 @@ def convert(c):
         if e.get("class") == ["table-wrap"]:
             e["role"] = "region"
 
+    # 절이 없는 원본(h2만 늘어놓은 쪽)은 h2 단위로 절을 만든다
+    if not main.find("section", recursive=False) and main.find("h2", recursive=False):
+        for h1 in main.find_all("h1", recursive=False):
+            h1.decompose()
+        cur, k = None, 0
+        for ch in list(main.children):
+            if isinstance(ch, Tag) and ch.name == "h2":
+                k += 1
+                cur = soup.new_tag("section", attrs={"id": f"s{k:02d}"})
+                ch.insert_before(cur)
+            if cur is not None and ch is not cur:
+                cur.append(ch.extract())
+    for t in main.find_all("table"):
+        drop_status_columns(t, page)
+        par = t.parent
+        if not (par and par.name == "div" and "table-wrap" in (par.get("class") or [])):
+            w = soup.new_tag("div", attrs={"class": "table-wrap", "tabindex": "0", "role": "region", "aria-label": "표 (가로 스크롤 가능)"})
+            t.wrap(w)
     # 절 구성: 최상위 절만 남기고, 절 밖의 낱개 요소는 앞 절(없으면 개요)에 붙임
     sections, loose_head = [], []
     for ch in list(main.children):
@@ -360,6 +455,13 @@ def convert(c):
         h2 = sec.find("h2")
         title = h2.get_text(" ", strip=True) if h2 else "실습"
         title = re.sub(r"^\s*(SECTION|STEP)\s*\d+\s*", "", title)
+        title = re.sub(r"^\d+(\.\d+)?\.?\s+(?=\D)", "", title)   # 원본 절 번호는 새 번호로 대신함
+        if STATUS_SECTION.search(title) and not sec.find(["pre", "img", "svg", "figure"]):
+            removed.setdefault(page, []).append("[현황 절 삭제] " + title)
+            for k, v in counts(sec).items():
+                DROPPED.setdefault(page, {}).setdefault(k, 0)
+                DROPPED[page][k] += v
+            continue
         body = copy.copy(sec)
         bh = body.find("h2")
         if bh:
@@ -373,11 +475,11 @@ def convert(c):
                    + body.decode_contents().strip() + "\n    </section>")
     desc = ""
     if hero:
-        p = hero.select_one("p.hero-desc") or hero.find("p")
+        p = hero.select_one("p.hero-desc") or next((x for x in hero.find_all("p") if "kicker" not in (x.get("class") or [])), None)
         desc = clean_text(p.get_text(" ", strip=True)) if p else ""
         desc = " ".join(s for s in SENT.split(desc) if s and not META.search(s))
-    chips = [clean_text(x.get_text(" ", strip=True)) for x in hero.select(".chip, .chips span")] if hero else []
-    chips = [x for x in chips if not META.search(x) and not re.search(r"확인|완료|기준$", x)]
+    chips = [clean_text(x.get_text(" ", strip=True)) for x in hero.select(".chip, .chips span, .pills span")] if hero else []
+    chips = [x for x in chips if not META.search(x) and not re.search(r"확인|완료|기준$|보류|미검증|유지|중심$", x)]
     brief = [(clean_text(a.find("h2").get_text(" ", strip=True)), a.find("p")) for a in hero.select(".hero-brief article")] if hero else []
     ov = ['    <section class="section" id="overview">', '      <h2><span class="num">00</span>이 장의 목표</h2>']
     if desc:
@@ -409,6 +511,8 @@ STYLE = """
 .hero p{max-width:none}
 .hero h1,.section h2{overflow-wrap:anywhere}
 .section :not(pre)>code{overflow-wrap:anywhere}
+.section p,.section li,.section .callout,.section .cards>div,.section figcaption{overflow-wrap:anywhere}
+.section label{display:block;margin:4px 0;overflow-wrap:anywhere}
 .section img{max-width:100%;height:auto;display:block}
 .section .lead{color:var(--ink-2);font-weight:500}
 .section .minor{color:var(--ink-3);font-size:.9em}
@@ -446,7 +550,7 @@ HEAD = """<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="description" content="{meta}">
-<meta name="generator" content="tools/part01/build_part01.py — 직접 수정 금지">
+<meta name="generator" content="tools/guide/build_part.py — 직접 수정 금지">
 <title>{title}</title>
 <link rel="stylesheet" href="../assets/education/site.css">
 <style>{style}</style>
@@ -500,7 +604,7 @@ document.addEventListener("keydown", (e) => { if (e.key === "Escape") document.q
 
 
 def course_js():
-    return json.dumps({"title": COURSE["title"], "short_title": "MICROBLAZE V SOC", "home_label": "제1부 학습 안내서",
+    return json.dumps({"title": COURSE["title"], "short_title": COURSE["short_title"], "home_label": COURSE["home_label"],
                        "chapters": [{"id": c["id"], "number": c["number"], "title": c["title"], "file": c["file"]} for c in CHS]},
                       ensure_ascii=False, indent=1)
 
@@ -511,10 +615,10 @@ def first_sentence(s):
 
 
 def page_html(c, doc, desc):
-    head = HEAD.format(meta=html.escape(f"Basys3 제1부 {c['number']}장 · {c['title']}"),
-                       title=html.escape(f"제1부 {c['number']}장 · {c['title']} ({VER})"), style=STYLE, chid=c["id"],
-                       kicker=f"BASYS3 · 제1부 MicroBlaze V 기본 SoC · {c['number']}장", ver=VER,
-                       h1=html.escape(f"제1부 {c['number']}장 · {c['title']}"), desc=html.escape(first_sentence(desc)))
+    head = HEAD.format(meta=html.escape(f"Basys3 {LABEL} {c['number']}장 · {c['title']}"),
+                       title=html.escape(f"{LABEL} {c['number']}장 · {c['title']} ({VER})"), style=STYLE, chid=c["id"],
+                       kicker=f"{COURSE['kicker_base']} · {c['number']}장", ver=VER,
+                       h1=html.escape(f"{LABEL} {c['number']}장 · {c['title']}"), desc=html.escape(first_sentence(desc)))
     return re.sub(r"/home/[A-Za-z0-9_.-]+", "~", head + doc + FOOT.replace("{course}", course_js()))
 
 
@@ -587,9 +691,9 @@ def bundle_html(b):
         secs.append(f'    <section class="section" id="s-{slug}">\n      <h2><span class="num">{i:02d}</span>{html.escape(title)}</h2>\n'
                     f'      <p>{lang} · {rd(os.path.join(P1, rel)).count(chr(10))}줄</p>\n      {file_block(slug, rel)}\n    </section>')
     doc = "\n".join(secs)
-    head = HEAD.format(meta=html.escape(f"Basys3 제1부 {b['number']}장 · {b['title']}"), title=html.escape(f"제1부 {b['number']}장 · {b['title']} ({VER})"),
-                       style=STYLE, chid=b["id"], kicker=f"BASYS3 · 제1부 MicroBlaze V 기본 SoC · {b['number']}장", ver=VER,
-                       h1=html.escape(f"제1부 {b['number']}장 · {owner['title']} {b['title']}"),
+    head = HEAD.format(meta=html.escape(f"Basys3 {LABEL} {b['number']}장 · {b['title']}"), title=html.escape(f"{LABEL} {b['number']}장 · {b['title']} ({VER})"),
+                       style=STYLE, chid=b["id"], kicker=f"{COURSE['kicker_base']} · {b['number']}장", ver=VER,
+                       h1=html.escape(f"{LABEL} {b['number']}장 · {owner['title']} {b['title']}"),
                        desc=html.escape(f"{owner['number']}장 실습에 쓰는 소스·제약 파일 {len(files)}개"))
     return head + doc + FOOT.replace("{course}", course_js())
 
@@ -605,17 +709,13 @@ def index_html(descs):
             c = by[cid]
             rows.append(f'          <tr><td>{c["number"]}</td><td><a href="{c["file"]}">{html.escape(c["title"])}</a></td><td>{html.escape(descs[cid])}</td></tr>')
         rows.append("        </tbody></table></div>")
+    ix = COURSE["index"]
+    env = "\n".join(f"          <tr><td>{a}</td><td>{b}</td></tr>" for a, b in ix["env"])
     doc = f"""    <section class="section" id="intro">
       <h2><span class="num">00</span>학습 흐름</h2>
-      <p>Basys3 위에 MicroBlaze V CPU와 Local BRAM으로 가장 작은 SoC를 만들고, AXI 주변장치를 하나씩 붙여 GPIO·UART·Timer·Interrupt를 다루는 SoC로 키웁니다. 11장에서 사용자 Top을 연결해 제1부의 SoC를 완성합니다.</p>
-      <div class="flow">01~05장  MicroBlaze V · BRAM · Clock/Reset · Memory Map · AXI
-   ↓
-06~09장  AXI GPIO · UART Lite · Timer · Interrupt Controller   (07.1~09.1 C 코드 풀이)
-   ↓
-10장     GPIO · UART · Timer 통합   (10.1 C 코드 풀이)
-   ↓
-11장     사용자 Top과 1비트 GPIO</div>
-      <p>각 장은 앞 장의 Vivado·Vitis 프로젝트를 새 이름으로 복제해 이어서 만듭니다. 앞 장 프로젝트는 그대로 둡니다.</p>
+      <p>{html.escape(ix["intro"])}</p>
+      <div class="flow">{html.escape(ix["flow"])}</div>
+      <p>{html.escape(ix["after"])}</p>
     </section>
     <section class="section" id="chapters">
       <h2><span class="num">01</span>장별 바로가기</h2>
@@ -625,21 +725,18 @@ def index_html(descs):
       <h2><span class="num">02</span>실습 환경</h2>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>항목</th><th>내용</th></tr></thead><tbody>
-          <tr><td>보드</td><td>Digilent Basys3 (Artix-7 XC7A35T · 100 MHz 클록 W5 · 리셋 btnC U18)</td></tr>
-          <tr><td>도구</td><td>Vivado 2024.2 · Vitis Unified IDE 2024.2 · 시리얼 터미널(moserial)</td></tr>
-          <tr><td>작업 폴더</td><td><code>~/soc/hw</code> (Vivado 프로젝트) · <code>~/soc/sw</code> (Vitis Workspace)</td></tr>
-          <tr><td>UART</td><td>115200 bps · 8N1</td></tr>
+{env}
         </tbody></table></div>
     </section>"""
-    head = HEAD.format(meta="Basys3 MicroBlaze V 기본 SoC 제1부 01~11장 학습안내서", title=html.escape(f"{COURSE['title']} ({VER})"),
-                       style=STYLE, chid="p1-index", kicker="BASYS3 · PART 01 · CHAPTER 01–11", ver=VER,
-                       h1="제1부 · MicroBlaze V 기본 SoC", desc="CPU·BRAM·AXI 주변장치 구축에서 사용자 Top 연결까지")
+    head = HEAD.format(meta=html.escape(ix["meta"]), title=html.escape(f"{COURSE['title']} ({VER})"),
+                       style=STYLE, chid=f"{PFX}-index", kicker=html.escape(ix["kicker"]), ver=VER,
+                       h1=html.escape(ix["h1"]), desc=html.escape(ix["desc"]))
     return head + doc + FOOT.replace("{course}", course_js())
 
 
 def edit_log(summary):
-    out = ["# 제1부 안내서 편집 기록 (자동 생성 · 배포 본문 아님)", "",
-           "`python3 tools/part01/build_part01.py`가 이관 원본(`part01/legacy/pages/soc/`, `part01/chapters/`)에서 배포용 안내서를 만들 때",
+    out = [f"# {LABEL} 안내서 편집 기록 (자동 생성 · 배포 본문 아님)", "",
+           f"`python3 tools/guide/build_part.py {PART}`가 이관 원본(`{PART}/` 안의 원본 페이지)에서 배포용 안내서를 만들 때",
            "그림·표·코드 개수를 대조하고, 지운 제작·검증 메모를 여기에 남긴다.", "",
            "| 장 | 파일 | img | figure | svg | pre | table | details | 지운 문장 |", "|---|---|---|---|---|---|---|---|---|"]
     for c in CHS:
@@ -664,37 +761,40 @@ def main(check):
         doc = attach_sources(c, doc)
         summary[c["id"]] = (before, after)
         descs[c["id"]] = first_sentence(desc)
-        outputs[os.path.join("part01", c["file"])] = page_html(c, doc, desc)
+        outputs[os.path.join(PART, c["file"])] = page_html(c, doc, desc)
         for k in ("img", "svg", "pre", "table"):
-            if before[k] != after[k]:
+            if before[k] - DROPPED.get(c["file"], {}).get(k, 0) != after[k]:
                 fails.append(f"{c['file']}: {k} 개수 {before[k]} → {after[k]}")
     for b in BUNDLE.values():
-        outputs[os.path.join("part01", b["file"])] = bundle_html(b)
+        outputs[os.path.join(PART, b["file"])] = bundle_html(b)
         descs[b["id"]] = f"{b['bundle_of'][3:]}장 Top·C·XDC 파일을 한 쪽에서 보기"
-    outputs[os.path.join("part01", "index.html")] = index_html(descs)
-    outputs[os.path.join("docs", "PART01_EDIT_LOG.md")] = edit_log(summary)
+    outputs[os.path.join(PART, "index.html")] = index_html(descs)
+    for out, t in FIXED.items():
+        outputs[os.path.join(PART, out)] = t
+    outputs[os.path.join("docs", f"{PART.upper()}_EDIT_LOG.md")] = edit_log(summary)
     fails += [f"깨진 링크 {x}" for x in broken]
     keep = {c["file"] for c in CHS}
-    stale = [f for f in os.listdir(P1) if re.match(r"p1_(.*_v\d+|src_.*)\.html$", f) and f not in keep]
+    stale = [f for f in os.listdir(P1) if re.match(PFX + r"_(.*_v\d+|src_.*)\.html$", f) and f not in keep]
     old_docs = [p for p in ("docs/PART01_MIGRATION.md",) if os.path.exists(os.path.join(ROOT, p))]
     if check:
         fails += [f"{p} 갱신 필요" for p, t in outputs.items()
                   if not os.path.exists(os.path.join(ROOT, p)) or rd(os.path.join(ROOT, p)) != t]
-        fails += [f"{p} 삭제 필요" for p in ["part01/" + s for s in stale] + old_docs]
+        fails += [f"{p} 삭제 필요" for p in [f"{PART}/" + s for s in stale] + old_docs]
     if fails:
-        print("PART01_FAIL")
+        print(f"{PART.upper()}_FAIL")
         for x in fails:
             print("  -", x)
         return 1
     if check:
-        print(f"PART01_UP_TO_DATE chapters={len(CHS)}")
+        print(f"{PART.upper()}_UP_TO_DATE chapters={len(CHS)}")
         return 0
     for p, t in outputs.items():
+        os.makedirs(os.path.dirname(os.path.join(ROOT, p)), exist_ok=True)
         with open(os.path.join(ROOT, p), "w", encoding="utf-8") as f:
             f.write(t)
-    for p in ["part01/" + s for s in stale] + old_docs:
+    for p in [f"{PART}/" + s for s in stale] + old_docs:
         os.remove(os.path.join(ROOT, p))
-    print(f"PART01_BUILT chapters={len(CHS)} removed_files={len(stale) + len(old_docs)} "
+    print(f"{PART.upper()}_BUILT chapters={len(CHS)} removed_files={len(stale) + len(old_docs)} "
           f"removed_sentences={sum(map(len, removed.values()))}")
     return 0
 

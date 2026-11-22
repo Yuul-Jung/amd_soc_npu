@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="description" content="Basys3 제1부 07장 · AXI UART Lite">
-<meta name="generator" content="tools/part01/build_part01.py — 직접 수정 금지">
+<meta name="generator" content="tools/guide/build_part.py — 직접 수정 금지">
 <title>제1부 07장 · AXI UART Lite (v02)</title>
 <link rel="stylesheet" href="../assets/education/site.css">
 <style>
@@ -14,6 +14,8 @@
 .hero p{max-width:none}
 .hero h1,.section h2{overflow-wrap:anywhere}
 .section :not(pre)>code{overflow-wrap:anywhere}
+.section p,.section li,.section .callout,.section .cards>div,.section figcaption{overflow-wrap:anywhere}
+.section label{display:block;margin:4px 0;overflow-wrap:anywhere}
 .section img{max-width:100%;height:auto;display:block}
 .section .lead{color:var(--ink-2);font-weight:500}
 .section .minor{color:var(--ink-3);font-size:.9em}
@@ -95,7 +97,7 @@ Ubuntu moserial Received ASCII</div>
 </section>
 <section class="section" id="s20">
 <h2><span class="num">04</span>UART Register Map</h2>
-<figure class="fig"><img alt="AMD PG142 Table 2-4 · 원본 주소 맵 · 공식 PDF 도판에서 직접 추출한 그림" class="zoom" decoding="async" loading="lazy" src="legacy/images/soc07/vendor/pg142_table02_04_registers.png"/><figcaption><strong>AMD PG142 Table 2-4 · 주소 맵</strong><br/>RX +0x00, TX +0x04, STAT +0x08, CTRL +0x0C.<br/><span><a href="https://docs.amd.com/api/khub/documents/dB1MAeh~uLG7FE62a5_QbA/content#page=9" rel="noopener" target="_blank">AMD PG142 · 공식 문서 ↗</a></span><br/></figcaption></figure>
+<figure class="fig"><img alt="AMD PG142 Table 2-4 · 주소 맵 · 공식 PDF 도판에서 직접 추출한 그림" class="zoom" decoding="async" loading="lazy" src="legacy/images/soc07/vendor/pg142_table02_04_registers.png"/><figcaption><strong>AMD PG142 Table 2-4 · 주소 맵</strong><br/>RX +0x00, TX +0x04, STAT +0x08, CTRL +0x0C.<br/><span><a href="https://docs.amd.com/api/khub/documents/dB1MAeh~uLG7FE62a5_QbA/content#page=9" rel="noopener" target="_blank">AMD PG142 · 공식 문서 ↗</a></span><br/></figcaption></figure>
 <div aria-label="표 (가로 스크롤 가능)" class="table-wrap" role="region" tabindex="0"><table><thead><tr><th scope="col">Offset</th><th scope="col">Register</th><th scope="col">Access</th><th scope="col">역할</th></tr></thead><tbody>
 <tr><td><code>+0x00</code></td><td>RX FIFO</td><td>Read</td><td>수신 Byte 읽기</td></tr>
 <tr><td><code>+0x04</code></td><td>TX FIFO</td><td>Write</td><td>송신 Byte 쓰기</td></tr>
@@ -193,7 +195,7 @@ Ubuntu moserial Received ASCII</div>
 <tr><td>AXI CLK Frequency</td><td>기존 AXI 연결 클록 확인 · 06장 기준 <code>100 MHz</code></td></tr>
 <tr><td>Baud Rate</td><td><code>115200</code></td></tr><tr><td>Data Bits</td><td><code>8</code></td></tr>
 <tr><td>Parity</td><td><code>None</code></td></tr><tr><td>Stop Bits</td><td><code>1</code> (고정)</td></tr></tbody></table></div>
-<figure class="fig"><img alt="AMD PG142 Figure 4-1 · 원본 IP 설정 화면 · 공식 PDF 도판에서 직접 추출한 그림" class="zoom" decoding="async" loading="lazy" src="legacy/images/soc07/vendor/pg142_fig04_01_vivado_gui.png"/><figcaption><strong>AMD PG142 Figure 4-1 · IP 설정 화면</strong><br/>문서에는 Baud 9600으로 표시된다. 실제 07장 설정은 Vivado 2024.2에서 115200, 8N1로 선택한다.<br/><span><a href="https://docs.amd.com/api/khub/documents/dB1MAeh~uLG7FE62a5_QbA/content#page=15" rel="noopener" target="_blank">AMD PG142 · 공식 문서 ↗</a></span><br/></figcaption></figure>
+<figure class="fig"><img alt="AMD PG142 Figure 4-1 · IP 설정 화면 · 공식 PDF 도판에서 직접 추출한 그림" class="zoom" decoding="async" loading="lazy" src="legacy/images/soc07/vendor/pg142_fig04_01_vivado_gui.png"/><figcaption><strong>AMD PG142 Figure 4-1 · IP 설정 화면</strong><br/>문서에는 Baud 9600으로 표시된다. 실제 07장 설정은 Vivado 2024.2에서 115200, 8N1로 선택한다.<br/><span><a href="https://docs.amd.com/api/khub/documents/dB1MAeh~uLG7FE62a5_QbA/content#page=15" rel="noopener" target="_blank">AMD PG142 · 공식 문서 ↗</a></span><br/></figcaption></figure>
 <div class="callout">AMD PG142 공식 GUI 그림에 표시된 <strong>9600</strong>은 예제값이며, 07장에서는 반드시 <strong>115200</strong>으로 설정합니다. 실제 Vivado 화면과 위 항목명을 대조합니다.</div>
 <p class="callout"><strong>화면 확인</strong> IP 설정이 115200, 8비트, Parity 없음으로 표시됩니다.</p>
 </section>

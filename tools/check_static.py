@@ -70,11 +70,13 @@ class LocalLinks(HTMLParser):
 
 
 link_checks = 0
-# 제1부(part01) 안내서·INDEX도 같은 방식으로 링크 검사 (목록: part01/course.json)
-part01 = json.loads((ROOT / "part01/course.json").read_text(encoding="utf-8"))
-part01_pages = [ROOT / "part01/index.html"] + [ROOT / "part01" / ch["file"] for ch in part01["chapters"]]
+# 제1부·제2부(partNN) 안내서·INDEX도 같은 방식으로 링크 검사 (목록: partNN/course.json)
+part01_pages = []
+for part in ("part01", "part02"):
+    pc = json.loads((ROOT / part / "course.json").read_text(encoding="utf-8"))
+    part01_pages += [ROOT / part / "index.html"] + [ROOT / part / ch["file"] for ch in pc["chapters"]]
 for page in part01_pages:
-    check(page.is_file(), "제1부 안내서 누락: " + str(page.relative_to(ROOT)))
+    check(page.is_file(), "부 안내서 누락: " + str(page.relative_to(ROOT)))
 all_pages = ([ROOT / "index.html"]
              + [ROOT / ch["file"] for ch in chapters]
              + part01_pages)
