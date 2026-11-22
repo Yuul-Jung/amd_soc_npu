@@ -779,6 +779,9 @@ def status_md(chs, all_gates, course):
     out = ["# 학습안내서 현황 (자동 생성)", "",
            "`python3 tools/guide/build_guides.py`가 `chNN/chapter.json`과 `chNN/validation/` 증거로 만든다. 직접 수정하지 않는다.", "",
            "✅ 통과 · ❌ 실패 · ⏳ 실행 대기/미검증 · — 해당 없음", "",
+           "**13~31장 줄은 웹 판 RTL(`chNN/rtl`) 기준이다.** 장 프로젝트판(3~6장 페이지)이 채택한 코드는 VS Code 판 `part03/chNN`이고, "
+           "그 판정은 각 장 페이지 게이트와 `part03/ch27/docs/VSCODE_REPORT_A_20261120.md` 대조표에 있다 "
+           "(예: 26·29장 OOC는 웹 판 ❌, 채택한 VS Code 판 통과). 00~12장은 판이 하나다.", "",
            "| 장 | 제목 | 안내서 | HOST | RTL_SIM | SYNTH_TIMING | TIMING_SIM | BOARD |",
            "|---|---|---|---|---|---|---|---|"]
     have = {c["id"]: c for c in chs}

@@ -9,41 +9,22 @@
 | VS Code Claude (Vivado 설치 PC) | RTL·TB·기준 모델·`run_sim.sh` 작성, 시뮬레이션·Vivado 실행, `validation/` 증거 저장, `chNN/chapter.json` 작성 | `chNN_*_vNN.html`·`index.html`·`docs/GUIDE_STATUS.md` 직접 수정 |
 | 웹 Claude (안내서 관리) | 생성기(`tools/guide/`) 관리, 안내서 재생성·검토, 현황표 관리, 장 간 정합성 점검 | 실행하지 않은 결과를 PASS로 표시 |
 
-## 2. 지금 할 일 — 00~12장 Vivado 게이트
+## 2. 지금 할 일 (2026-11-23 갱신)
 
-```bash
-source /tools/Xilinx/Vivado/<버전>/settings64.sh
-bash tools/run_vivado_all.sh            # 마지막 줄: VIVADO_ALL_PASS (all)
-python3 tools/guide/build_guides.py     # 증거를 읽어 배지·현황표 갱신
-git add ch*/validation/vivado_* ch*_v*.html index.html course.json docs/GUIDE_STATUS.md
-git commit -m "test: 00~12장 Vivado 합성·타이밍·타이밍 시뮬레이션 증거"
-```
+00~12장 Vivado 게이트, 13~31장 VS Code 판(`part03/`) 빌드, 안 A 재빌드는 끝났다. 현재 지시는 **[docs/plan/VSCODE_DIRECTIVE_A.md](plan/VSCODE_DIRECTIVE_A.md)의 가장 큰 번호 항목**을 따른다 (지금은 13: `fix/sync-reset` 재빌드).
 
-- 실패하면 `build/vivado/logs/*.log`의 첫 ERROR와 `SYNTH_TIMING_FAIL`·`TIMING_SIM_FAIL` 줄을 그대로 보고한다. 스크립트는 Vivado 없이 모의 실행으로만 시험했으므로 첫 실행에서 명령 옵션 오류가 날 수 있다.
-- 증거 파일 이름은 바꾸지 않는다. 생성기가 아래 이름으로 찾는다.
+증거 파일 이름은 바꾸지 않는다. 생성기가 아래 이름으로 찾고, 같은 종류가 여러 개면 날짜가 가장 늦은 파일을 쓴다. 로그에는 개인 경로를 넣지 않는다(`<repo>`로 치환).
 
 | 증거 | 경로 | 게이트 |
 |---|---|---|
-| RTL 시뮬레이션 로그 | `chNN/validation/rtl_sim_YYYYMMDD.log` | HOST_MODEL · RTL_SIM |
-| OOC 합성·타이밍 | `chNN/validation/vivado_ooc_YYYYMMDD.txt` | SYNTH_TIMING |
+| RTL 시뮬레이션 로그 | `chNN/validation/rtl_sim_YYYYMMDD.log` · `pNN/validation/rtl_sim_YYYYMMDD.log` | HOST_MODEL · RTL_SIM |
+| OOC 합성·타이밍 | `chNN/validation/vivado_ooc_YYYYMMDD.txt` (WNS=NA는 `SYNTH_TIMING_NOT_CHECKED`) | SYNTH_TIMING |
+| 장 Top 구현 | `pNN/validation/vivado_impl_YYYYMMDD.txt` (STAGE마다 한 줄) | SYNTH_TIMING |
 | 12장 구현·타이밍 시뮬레이션 | `ch12/validation/vivado_impl_timesim_YYYYMMDD.txt` | SYNTH_TIMING · TIMING_SIM |
+| DRC REQP-1840 | `{ch12,pNN}/validation/drc_reqp1840_YYYYMMDD.txt` (`count=` 줄, 0이면 게이트 칸이 사라진다) | DRC |
 | 보드 기록 | `chNN/validation/board_YYYYMMDD.md` (`BOARD_PASS` 문구 포함) | BOARD (현재 미실시) |
 
-같은 종류가 여러 개면 날짜가 가장 늦은 파일을 쓴다. 로그에는 개인 경로를 넣지 않는다(`<repo>`로 치환).
-
-## 2-1. 13~31장 — 웹 Claude가 작성 완료 (사용자 권한 위임, 2026-11-18~19)
-
-코드·TB·기준 모델·`chapter.json`·안내서는 모두 저장소에 있다. VS Code에서 따로 만들던 판이 있으면 `git pull` 후 이 판과 비교하고, 바꿀 때는 아래 3절 계약을 지킨다.
-
-| 장 | 확인한 것 | VS Code(Vivado·Vitis·보드)에서 남은 일 |
-|---|---|---|
-| 13~20, 26, 29, 30 | Icarus RTL 시뮬레이션 + Python 비교 | `bash tools/run_vivado_all.sh ooc` (19장은 NPE=1·4·8 세 줄, `-generic`) |
-| 21 | `add_npu.tcl` 모의 실행 정적 검사 | 제1부 11장 프로젝트 Save As → `add_npu.tcl` → Validate → 비트스트림·XSA (21장 8절) |
-| 22, 23, 27, 28, 31 | RV32IMC 교차 컴파일, PC 시험, 펌웨어 레지스터 접근 기록을 20장 RTL에서 재생 | Vitis 빌드·보드 실행. 기준 주소(NPU 0x44A0_0000, Timer·UART는 xparameters.h 확인) |
-| 24, 25 | Tcl 문법·해석기(견본 보고서) | 21장 구현 결과로 `report_soc.tcl`·`report_power.tcl` 실행 → `run_check.sh` 출력 저장 |
-| 27 | 표시기 RTL, Top·XDC 정적 검사, 기대 화면(DEMO 줄) | 27장 8절 (Top·제약 교체 → 비트스트림 → `npu_system`) |
-
-증거 파일 이름은 각 장 8절 표를 따른다. 보드 결과가 들어오면 BOARD 게이트를 갱신한다.
+역할: Vivado·Vitis·보드 실행과 `part03/`는 VS Code, 생성기·안내서·`pNN/`·`mini_npu/`·`tools/`는 웹. 경계 밖 파일은 고치지 말고 `part03/ch27/docs/VSCODE_TO_WEB_*.md`로 요청한다.
 
 ## 3. 13~31장 새 장 추가 계약
 
