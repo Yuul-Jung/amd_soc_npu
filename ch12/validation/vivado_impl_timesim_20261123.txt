@@ -1,0 +1,77 @@
+# 2026-11-23 00:09 · 2024.2 · xc7a35tcpg236-1
+SYNTH_TIMING_PASS ch12 basys3_npu_top WNS=1.993 WHS=0.024 DRC_ERRORS=0 LUT=1657 FF=1262 DSP48E1=4 RAMB=5
+
+    WNS(ns)      TNS(ns)  TNS Failing Endpoints  TNS Total Endpoints      WHS(ns)      THS(ns)  THS Failing Endpoints  THS Total Endpoints     WPWS(ns)     TPWS(ns)  TPWS Failing Endpoints  TPWS Total Endpoints
+    -------      -------  ---------------------  -------------------      -------      -------  ---------------------  -------------------     --------     --------  ----------------------  --------------------
+      1.993        0.000                      0                 3559        0.024        0.000                      0                 3559        3.750        0.000                       0                  1301
+
+Clock             WNS(ns)      TNS(ns)  TNS Failing Endpoints  TNS Total Endpoints      WHS(ns)      THS(ns)  THS Failing Endpoints  THS Total Endpoints     WPWS(ns)     TPWS(ns)  TPWS Failing Endpoints  TPWS Total Endpoints
+-----             -------      -------  ---------------------  -------------------      -------      -------  ---------------------  -------------------     --------     --------  ----------------------  --------------------
+sys_clk_pin         1.993        0.000                      0                 3559        0.024        0.000                      0                 3559        3.750        0.000                       0                  1301
+
+From Clock    To Clock          WNS(ns)      TNS(ns)  TNS Failing Endpoints  TNS Total Endpoints      WHS(ns)      THS(ns)  THS Failing Endpoints  THS Total Endpoints
+----------    --------          -------      -------  ---------------------  -------------------      -------      -------  ---------------------  -------------------
+
+Path Group    From Clock    To Clock          WNS(ns)      TNS(ns)  TNS Failing Endpoints  TNS Total Endpoints      WHS(ns)      THS(ns)  THS Failing Endpoints  THS Total Endpoints
+----------    ----------    --------          -------      -------  ---------------------  -------------------      -------      -------  ---------------------  -------------------
+
+d5bae1cec644aa9efda48b4db18b4dc668e8e9f3995582bd405d44fe93042c14  mini_npu/build/impl/basys3_npu_top.bit
+c551165e31760f2481466b371f81141047fa888f3fbbba5043ee57ec0f4d615f  mini_npu/build/impl/basys3_npu_top_timesim.v
+108a860ae6332b56454a6c0809f22c28444bb4d68faf6018a92f641e421ec358  mini_npu/build/impl/basys3_npu_top_timesim.sdf
+
+## run_timing_sim.sh (fix/sync-reset a80698e, 무수정, 전체 시나리오)
+# 구현과 시뮬레이션 모두 a80698e. mini_npu·common/rtl·ch02/rtl은 d76735d와 차이 없음
+START 2026-11-23 00:08:00 commit=a80698e
+TIMESIM_SANITIZE_OK verilog_ids=15828 sdf_escapes=49838
+INFO: [XSIM 43-3452] SDF backannotation was successful for SDF file "<repo>/mini_npu/build/timesim/basys3_npu_top_timesim.sdf", for root module "tb_npu_uart/dut".
+TIMESIM_MODE full
+TIMESIM_PROGRESS t=1 ms results=0 ack=0 err=0
+TIMESIM_PROGRESS t=2 ms results=0 ack=0 err=0
+TIMESIM_PROGRESS t=3 ms results=0 ack=0 err=0
+TIMESIM_PROGRESS t=4 ms results=0 ack=0 err=0
+TIMESIM_PROGRESS t=5 ms results=1 ack=0 err=0
+TIMESIM_PROGRESS t=6 ms results=1 ack=0 err=0
+TIMESIM_PROGRESS t=7 ms results=1 ack=0 err=0
+TIMESIM_PROGRESS t=8 ms results=1 ack=0 err=0
+TIMESIM_PROGRESS t=9 ms results=1 ack=0 err=0
+TIMESIM_PROGRESS t=10 ms results=2 ack=0 err=0
+TIMESIM_PROGRESS t=11 ms results=2 ack=0 err=0
+TIMESIM_PROGRESS t=12 ms results=2 ack=0 err=0
+TIMESIM_PROGRESS t=13 ms results=2 ack=0 err=0
+TIMESIM_PROGRESS t=14 ms results=3 ack=0 err=0
+TIMESIM_PROGRESS t=15 ms results=3 ack=0 err=0
+TIMESIM_PROGRESS t=16 ms results=3 ack=0 err=0
+TIMESIM_PROGRESS t=17 ms results=3 ack=0 err=0
+TIMESIM_PROGRESS t=18 ms results=3 ack=0 err=0
+TIMESIM_PROGRESS t=19 ms results=4 ack=0 err=0
+TIMESIM_PROGRESS t=20 ms results=4 ack=0 err=0
+TIMESIM_PROGRESS t=21 ms results=4 ack=0 err=0
+TIMESIM_PROGRESS t=22 ms results=4 ack=0 err=0
+TIMESIM_PROGRESS t=23 ms results=5 ack=0 err=0
+TIMESIM_PROGRESS t=24 ms results=5 ack=1 err=0
+TIMESIM_PROGRESS t=25 ms results=5 ack=1 err=0
+TIMESIM_PROGRESS t=26 ms results=5 ack=1 err=0
+TIMESIM_PROGRESS t=27 ms results=5 ack=1 err=0
+TIMESIM_PROGRESS t=28 ms results=5 ack=1 err=0
+TIMESIM_PROGRESS t=29 ms results=6 ack=1 err=0
+INTEGRATED_UART_RTL_SIM_PASS classes=6 model_edit=1 invalid_length=1
+$finish called at time : 29187805 ns : File "<repo>/mini_npu/build/timesim/tb_npu_uart_timesim.sv" Line 145
+PC_GOLDEN_COMPARE_PASS predictions=6 model_edit=1
+TIMING_SIM_PASS ch12 basys3_npu_top post-route SDF(slow) classes=6 model_edit=1 invalid_length=1 timing_violations=0 scenario=full
+EXIT 0
+END 2026-11-23 02:42:50
+
+## predictions.csv
+scenario,class,score0,score1,score2,score3
+0,0,2,0,0,-2
+1,1,0,2,-2,0
+2,2,0,-2,2,0
+3,3,-2,0,0,2
+4,0,2,0,0,-2
+5,3,2,0,0,8
+
+## 로그 검사
+timing_violations=0 (구현·시뮬레이션 로그 전체, 대소문자 무시)
+# xsim 경고: XSIM 43-4099(TB 모니터 모듈에 timescale 없음) 2건
+# 검출 능력 음성 대조(2 ns 클록)는 수정 전 넷리스트에서만 했다 (vivado_impl_timesim_20261122.txt). 이번 넷리스트로는 반복하지 않음
+# 미검증: fast corner 시뮬레이션, 입출력 지연 제약, 실물 보드. 동작 중 btnC는 별도 시험(reset_press_timesim_20261123.txt, 위반 검출만)

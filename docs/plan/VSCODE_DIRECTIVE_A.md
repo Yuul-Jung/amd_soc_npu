@@ -120,6 +120,11 @@
 
     **회신 반영 (VSCODE_TO_WEB 9절)**: ① PROJECT_PLAN In4→In12 정정 ② GUIDE_STATUS에 "13~31장 줄은 웹 판 RTL 기준" 명시 ③ CI를 `restructure/projects`·`fix/**` push에서도 실행 ④ PROJECT_PLAN 8절·VSCODE_HANDOFF 2절 갱신 ⑤ main 공개 완료 (PR #1·#2, 2026-11-23 00:3x, CI 통과). 로컬 CI 예행연습은 **python3.11**로 돌릴 것 (웹도 같은 실수를 했다).
 
+14. **(2026-11-23 04:1x, 지시 12·13 종료)** 합격 기준 충족 확인(1b99bd2·411b02c): 웹이 재생성·CI 확인 뒤 `fix/sync-reset`을 main에 병합했다. **지금 VS Code에 남은 지시는 없다.** 다음은 사용자와 함께 하는 실물 보드 점검(`part03/ch27/docs/BOARD_CHECKLIST.md` B1~B26, 1~4장 서브젝트별 보드 확인)뿐이다.
+    - btnC 시험의 `timing_violations=16`(동기화 첫 단 `sync_q[0]`)은 비동기 입력을 받는 플립플롭의 예상된 경고로 받아들인다. 합격 기준 "0건"은 RAMB18 위반 수가 맞다.
+    - 정정: 장 Top 전 STAGE 빌드는 인자 없이 `vivado -mode batch -nojournal -source pNN/vivado/build_pNN.tcl` **한 번** (STAGE마다 따로 돌리면 증거 파일이 덮어써진다). 지시 13 ①의 반복문은 틀렸다.
+    - 다음 재빌드가 필요해지면 15번으로 적는다.
+
 ## 5. 웹 Claude가 그동안 하는 것
 
 1장(구 00~03장) 시범 전환: 생성기를 "장 페이지 + 서브젝트 절" 구조로 바꾸고 미리보기를 만든다. VS Code 작업과 파일이 겹치지 않는다.

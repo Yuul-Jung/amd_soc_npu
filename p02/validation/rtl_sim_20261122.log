@@ -1,4 +1,4 @@
-# p02 RTL simulation 2026-11-22T14:03Z
+# p02 RTL simulation 2026-11-22T15:35Z
 # tool: Icarus Verilog version 12.0 (stable) ()
 PYTHON_P02_SELF_TEST_PASS
 PYTHON_P02_VECTORS stage=1 cases=9 final_led=0x0005
@@ -510,5 +510,5 @@ P02_CASE_PASS stage=8 2-8 sw=3 rx="C2:00000000000,FFFFFFFFFFE,00000000002,000000
 P02_CASE_PASS stage=8 2-8 sw=3 rx="C1:00000000000,00000000002,FFFFFFFFFFE,00000000000\r\n"
 P02_BOARD_TOP_LED_PASS stage=8 led=0x4002
 P02_TOP_RTL_SIM_PASS stage=8 cases=54 bytes=730
-p02/tb/tb_p02_top.sv:70: $finish called at 1504915000 (1ps)
+p02/tb/tb_p02_top.sv:70: $finish called at 1504955000 (1ps)
 RTL_SIM_PASS stages=8

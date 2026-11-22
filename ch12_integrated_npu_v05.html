@@ -334,16 +334,23 @@ endmodule</code></pre>
       </div>
       <div class="codeblock">
         <div class="codebar"><span>mini_npu/rtl/npu_reset_controller.v · verilog · 원본 · RTL_SIM 통과 2026-11-19</span></div>
-        <pre tabindex="0"><code class="language-verilog">// (추가) Basys3 btnC 비동기 Assertion, 동기 Release Reset.
+        <pre tabindex="0"><code class="language-verilog">// Basys3 btnC → 동기 Reset (Active-Low resetn).
+// (변경 2026-11-22) 비동기 assert를 없앴다. 이전에는 release_q가 btnC로 비동기 clear되어, 그 출력이 RAMB18의
+// EN·WE·RST 핀으로 들어가면 버튼을 누르는 순간 BRAM setup/hold를 어겨 내용이 깨질 수 있었다 (Vivado DRC REQP-1840).
+// 이제 btnC를 플립플롭 2단으로 동기화한 뒤 resetn을 만든다. 모든 플립플롭이 clk에만 반응한다.
+//   · 전원 인가 직후: 초기값으로 resetn=0, btnC가 0이면 3클록 뒤 해제
+//   · btnC를 1클록(10 ns) 이상 누르면 2~3클록 뒤 resetn=0, 떼면 2~3클록 뒤 resetn=1
 module npu_reset_controller(
     input wire clk,btnC,
     output wire resetn
 );
-    reg [1:0] release_q;
-    always @(posedge clk or posedge btnC)
-        if(btnC)release_q&lt;=2'b00;
-        else release_q&lt;={release_q[0],1'b1};
-    assign resetn=release_q[1];
+    (* ASYNC_REG="TRUE" *) reg [1:0] sync_q=2'b11;
+    reg resetn_q=1'b0;
+    always @(posedge clk)begin
+        sync_q&lt;={sync_q[0],btnC};
+        resetn_q&lt;=~sync_q[1];
+    end
+    assign resetn=resetn_q;
 endmodule</code></pre>
       </div>
       <div class="codeblock">
@@ -1274,10 +1281,10 @@ picocom -b 115200 -d 8 -p n -y n -f n /dev/ttyUSB1   # n은 실제 번호로 변
         </tbody>
       </table></div>
       <p>7행이 모두 기대와 같을 때만 <code>BOARD_PASS</code>로 기록합니다. 기록 파일은 <code>ch12/validation/board_YYYYMMDD.md</code>로 저장합니다.</p>
-      <p>실행 기록 (2026-11-22, 출처 <code>ch12/validation/vivado_impl_timesim_20261122.txt</code>):</p>
+      <p>실행 기록 (2026-11-23, 출처 <code>ch12/validation/vivado_impl_timesim_20261123.txt</code>):</p>
       <div class="codeblock"><div class="codebar"><span>Vivado 실행 결과</span></div>
-        <pre tabindex="0"><code>SYNTH_TIMING_PASS ch12 basys3_npu_top WNS=1.193 WHS=0.064 DRC_ERRORS=0 LUT=1656 FF=1261 DSP48E1=4 RAMB=5
-TIMING_SIM_PASS ch12 basys3_npu_top post-route SDF(slow) classes=6 model_edit=1 invalid_length=1</code></pre></div>
+        <pre tabindex="0"><code>SYNTH_TIMING_PASS ch12 basys3_npu_top WNS=1.993 WHS=0.024 DRC_ERRORS=0 LUT=1657 FF=1262 DSP48E1=4 RAMB=5
+TIMING_SIM_PASS ch12 basys3_npu_top post-route SDF(slow) classes=6 model_edit=1 invalid_length=1 timing_violations=0 scenario=full</code></pre></div>
     </section>
     <section class="section" id="s09">
       <h2><span class="num">09</span>검증 현황·인계</h2>
@@ -1306,15 +1313,11 @@ TIMING_SIM_PASS ch12 basys3_npu_top post-route SDF(slow) classes=6 model_edit=1 
         </div>
         <div class="gate pass">
           <b>SYNTH_TIMING_PASS</b>
-          <span>ch12 basys3_npu_top WNS=1.193 WHS=0.064 DRC_ERRORS=0 LUT=1656 FF=1261 … · 2026-11-22</span>
+          <span>ch12 basys3_npu_top WNS=1.993 WHS=0.024 DRC_ERRORS=0 LUT=1657 FF=1262 … · 2026-11-23</span>
         </div>
         <div class="gate pass">
           <b>TIMING_SIM_PASS</b>
-          <span>TIMING_SIM_PASS ch12 basys3_npu_top post-route SDF(slow) classes=6 mod… · 2026-11-22</span>
-        </div>
-        <div class="gate todo">
-          <b>DRC REQP-1840</b>
-          <span>⚠ 미해결 · 비동기 리셋 → BRAM 제어 핀 경고 20+건(보고서 1개), 동작 중 리셋 미검증 · <code>ch12/validation/drc_reqp1840_20261122.txt</code></span>
+          <span>TIMING_SIM_PASS ch12 basys3_npu_top post-route SDF(slow) classes=6 mod… · 2026-11-23</span>
         </div>
         <div class="gate todo">
           <b>BOARD_PASS</b>

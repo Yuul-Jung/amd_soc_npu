@@ -2,6 +2,8 @@
 
 대상은 `restructure/projects`(기준 `fd65a88`)이다. 아래 파일은 웹 담당이라 VS Code에서 고치지 않았다.
 
+> **최신은 11절 (2026-11-23): 지시 13 합격 기준을 모두 충족했다. 웹에 남은 일은 HTML 3개 재생성, CI 확인, main 병합이다.** 아래 요약과 1~10절은 당시 기록이다.
+
 ## 요청 요약
 
 | 순위 | 요청 | 파일 |
@@ -126,3 +128,33 @@ p02 STAGE 8 원인: `result_o_reg[0] → response_reg[1][0]`의 조합 argmax(13
 
 - 로컬 44/44 PASS는 CI와 같은 조건이 아니었다. 로컬 Python 3.12라서 CI(3.11)의 `build_projects.py` f-string SyntaxError를 놓쳤다. `a9b124b`·`682c856`·`14c7e1c`의 CI가 실패했고 웹이 `4a6be29`에서 고쳤다.
 - 9절 5번(main 반영)은 PR #1·#2로 처리됐다. 1번(In4 → In12)은 `4a6be29`에도 남아 있다.
+
+## 11. 지시 13 최종 회신 (2026-11-23, `fix/sync-reset` 1b99bd2): **합격 기준 충족**
+
+| 조건 | 결과 | 증거 |
+|---|---|---|
+| p01~p04 20 STAGE | 20 PASS. 최소 WNS +0.195 (p04-4), 최소 WHS +0.012 (p02-7), DRC 오류 0 | `pNN/validation/vivado_impl_20261123.txt` |
+| REQP-1840 | 21개 빌드 모두 0건 (REQP-1839도 0건) | `pNN`·`ch12`의 `validation/drc_reqp1840_20261123.txt` |
+| 12장 | 구현 PASS (+1.993 / +0.024). SDF(slow) 전체 시나리오 PASS, 분류 6/6, timing_violations=0 | `ch12/validation/vivado_impl_timesim_20261123.txt` |
+| 동작 중 btnC | RAMB18 위반 69 → 0건 | `ch12/validation/reset_press_timesim_20261123.txt` |
+
+빌드 시점: p01·p03·p04·12장은 a80698e, p02는 e661da2. 각 빌드 이후 해당 빌드의 RTL·XDC는 바뀌지 않았다.
+
+btnC 시험의 `timing_violations` 전체 값은 0이 아니라 16이다. 모두 동기화 첫 단(`sync_q[0]`)의 예상된 경고이고, 합격 기준의 "0건"은 RAMB18 위반 수로 읽었다.
+
+### 웹에 요청
+
+1. `build_guides.py`와 `build_projects.py`로 재생성한다. 1b99bd2에서는 두 `--check`가 실패한다. 바뀌는 파일은 `ch11_uart_register_v05.html`, `ch12_integrated_npu_v05.html`, `p02_npu4_board_v01.html` 세 개다.
+2. GitHub CI 통과를 확인한 뒤 main에 병합한다. 그 전까지 main에는 REQP-1840이 남아 있다.
+3. 지시 13 ①의 반복문(`-tclargs $n`)은 매번 증거 파일을 덮어써 마지막 STAGE만 남는다. 이번에는 인자 없이 한 번 실행해 8줄을 남겼다. 다음 지시에서는 그 형태로 적어 달라.
+
+### CI 예행연습 (로컬, GitHub 실행 결과 아님)
+
+1b99bd2의 깨끗한 사본에서 위 세 파일을 재생성한 뒤 Python 3.11로 실행한 44단계가 모두 통과했다. apt·pip 설치 단계는 실행하지 않았다. 재생성한 HTML은 커밋하지 않았다.
+
+### 검증하지 않은 것
+
+- 실물 보드 전부 (`NOT_RUN`), fast corner 시뮬레이션, 입출력 지연 제약.
+- p01~p04의 배선 후 시뮬레이션. 이 네 프로젝트의 근거는 정적 타이밍과 DRC이다.
+- btnC를 누른 뒤의 BRAM 내용, 연산·적재 중 누름. btnC 시험은 12장에서 타이밍 위반만 봤다.
+- 동기 리셋 넷리스트에서의 음성 대조. 수정 전 넷리스트에서만 했다.
