@@ -431,8 +431,8 @@ STYLE = """
 .fig-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin:14px 0}
 .fig-grid .fig{margin:0}
 .gui-walkthrough{border:1px solid var(--line);background:#fbfbf9;padding:12px 18px;margin:14px 0}
-details{border:1px solid var(--line);background:#fff;padding:8px 14px;margin:14px 0}
-summary{cursor:pointer;font-weight:600}
+.section details{border:1px solid var(--line);background:#fff;padding:8px 14px;margin:14px 0}
+.section summary{cursor:pointer;font-weight:600}
 .codeblock pre{max-height:780px;white-space:pre}
 img.zoom{cursor:zoom-in}
 .zoom-view{position:fixed;inset:0;z-index:2000;background:rgba(21,23,28,.86);display:flex;align-items:center;justify-content:center;padding:24px;cursor:zoom-out}
@@ -500,7 +500,7 @@ document.addEventListener("keydown", (e) => { if (e.key === "Escape") document.q
 
 
 def course_js():
-    return json.dumps({"title": COURSE["title"], "chapter_select": True,
+    return json.dumps({"title": COURSE["title"], "short_title": "MICROBLAZE V SOC", "home_label": "제1부 학습 안내서",
                        "chapters": [{"id": c["id"], "number": c["number"], "title": c["title"], "file": c["file"]} for c in CHS]},
                       ensure_ascii=False, indent=1)
 

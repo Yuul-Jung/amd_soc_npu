@@ -44,6 +44,23 @@
 6. 모든 링크와 버튼은 키보드 접근 지원
 7. 코드 복사 버튼은 브라우저 권한에 따라 작동하며, 불가 시 오류 표시
 
+### 4.1 좌측 탐색 구성 (기준: [ai-agent-engineering](https://yuul-jung.github.io/ai-agent-engineering/index.html))
+
+좌측 탐색은 위에서 아래로 다음 순서만 둡니다. 장 목록을 드롭다운(선택 상자)으로 바꾸거나 다른 꾸밈을 더하지 않습니다.
+
+| 순서 | 요소 | 규칙 |
+|---|---|---|
+| 1 | 과정 머리글 | 왼쪽 과정 약칭(영문 대문자, 예 `AI AGENT ENGINEERING`), 오른쪽 `NN CHAPTERS` (본 장 수, 소수점 보조 장 제외) |
+| 2 | INDEX 복귀 | `⌂ 전체 학습 안내서` — 연보라 바탕(`#EDEAFA`)·왼쪽 보라 띠(`#4635B1`)·굵게, INDEX에서는 현재 위치 표시 |
+| 3 | 전체 장 바로가기 | 접이식 상자(`<details open>` + `<summary>`), 제목 오른쪽 `⌃`/`⌄` 표시. 각 줄은 **장 번호(IBM Plex Mono, 보라) + 짧은 장 제목**, 현재 장은 연보라 바탕·왼쪽 보라 띠·굵게(`aria-current="page"`) |
+| 4 | 세부 목차 | 소제목 `제NN장 세부 목차`(INDEX는 `INDEX 목차`), 그 아래 **절 번호 + 절 제목**을 두 칸으로 나란히. 스크롤 위치의 절을 보라 띠로 강조(`aria-current="location"`) |
+
+- 장·절 번호 칸은 같은 폭(약 34px)으로 맞춰 `07.1`처럼 긴 번호에도 제목이 한 줄로 정렬되게 합니다.
+- 장 제목은 탐색용 짧은 이름(`nav_title`)을 씁니다. 긴 본문 제목을 그대로 넣지 않습니다.
+- 이전/다음 장 이동은 좌측이 아니라 본문 끝(`#chapter-links`)에 둡니다.
+- 모바일(860px 이하)에서는 같은 구성 그대로 서랍 메뉴로 엽니다.
+- 구현: `assets/site.js`가 `window.COURSE`(`title`, `short_title`, `home_label`, `chapters[]`)와 `body[data-chapter]`, `main section[id] > h2 .num`으로 만들고, 모양은 `assets/site.css` 4.1절.
+
 ## 5. 콘텐츠 작성 원칙
 
 1. 개념은 필요성 → 구조 → 과정 → 결과 순으로 설명합니다.

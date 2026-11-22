@@ -46,6 +46,7 @@ amd_soc_npu/
 
 ## HTML 교재 제작
 - STANDARD.md: 책장 사진 1800×380, `#F1F2EE` 바탕, `#4635B1` 강조, 좌측 탐색, 860px 모바일 메뉴, 이전/다음/INDEX.
+- 좌측 탐색 구성은 STANDARD 4.1(rule_md `95a42e4`에서 추가, 로컬 사본 `rule_md/web/education-html/STANDARD.md`)을 따른다: 과정 머리글 → ⌂ 학습 안내서 → 접이식 전체 장 바로가기 → 제NN장 세부 목차. 구현은 `assets/education/site.js`.
 - 버전 규칙: ch00~ch12는 현재 v05(실습 절차형), ch13~ch31은 v02부터 시작.
 - 실습 안내서 절 구성: 00 위치(유지·작성 파일) → 01 구조도(실제 포트·인스턴스) → 02 준비 → 03 RTL → 04 TB·기준 모델 → 05 실행(실제 로그) → 06 판정 → 07 코드 읽기 → 08 합성·타이밍·보드 → 09 검증·인계. 설명 문단은 최소화한다.
 - **안내서 HTML·`index.html`·`docs/GUIDE_STATUS.md`는 직접 수정하지 않는다.** 내용은 `chNN/chapter.json`, 코드는 원본 파일, 게이트 배지는 `validation/` 증거에서 `python3 tools/guide/build_guides.py`가 만든다. CI가 `--check`로 어긋남을 막는다.

@@ -152,13 +152,10 @@ pre code {
   max-height: 100vh;
   padding: 28px 0;
 }
-.toc h2 {
-  color: var(--ink-3);
-  font-size: 0.75rem;
-  letter-spacing: 0.06em;
-  margin: 17px 0 8px;
-}
-.toc ul {
+/* 4.1 좌측 탐색 구성 (STANDARD 4.1, 기준 ai-agent-engineering)
+   과정 머리글 → 전체 학습 안내서 → 접이식 전체 장 바로가기 → 현재 쪽 세부 목차 */
+.toc ul,
+.toc ol {
   padding: 0;
   margin: 0;
   list-style: none;
@@ -167,51 +164,111 @@ pre code {
   display: block;
   text-decoration: none;
   color: var(--ink-2);
-  font-size: 0.82rem;
-  border-left: 2px solid transparent;
-  padding: 5px 9px;
+  font-size: 0.8rem;
+  border-left: 3px solid transparent;
+  padding: 7px 9px;
   line-height: 1.4;
 }
-.toc a:hover,
-.toc a.active {
+.toc a:hover {
+  color: var(--accent);
+  background: #efedf9;
+}
+.course-nav-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 9px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #59566d;
+  letter-spacing: 0.02em;
+}
+.course-nav-header span:last-child {
+  white-space: nowrap;
+}
+.toc .course-nav-home {
   color: var(--accent);
   background: var(--soft);
-  border-color: var(--accent);
-}
-.toc .current-chapter {
+  border-left-color: var(--accent);
+  padding: 9px 10px;
+  margin-bottom: 12px;
   font-weight: 700;
 }
-.toc .chapter-no {
-  color: var(--ink-3);
-  font-family: "IBM Plex Mono", monospace;
-  margin-right: 6px;
+.course-chapters {
+  margin: 0 0 15px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 12px;
 }
-.toc .toplink {
-  font-weight: 600;
-}
-.toc .chapter-select {
-  /* 장 선택 드롭다운 (COURSE.chapter_select) */
-  display: block;
-  width: 100%;
-  font: inherit;
-  font-size: 0.84rem;
-  color: var(--ink);
-  background: #fff;
-  border: 1px solid var(--line);
-  border-left: 3px solid var(--accent);
-  border-radius: 3px;
-  padding: 7px 8px;
+.course-chapters summary {
   cursor: pointer;
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 9px 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #242535;
+  background: #f1f0f9;
+  border: 1px solid #e2dff0;
 }
-.toc .chapter-select:focus-visible {
-  outline: 3px solid var(--yellow);
-  outline-offset: 2px;
+.course-chapters summary::-webkit-details-marker {
+  display: none;
 }
-.toc .toc-sections {
-  margin-top: 7px;
+.course-chapters summary::after {
+  content: "⌄";
+  color: var(--accent);
+}
+.course-chapters[open] summary::after {
+  content: "⌃";
+}
+.course-ch-links {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 5px 0;
+}
+.toc .course-ch-link {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  font-size: 0.77rem;
+  line-height: 1.35;
+  padding: 7px 9px;
+  color: #4c4d5d;
+}
+.toc .course-ch-link[aria-current="page"] {
+  background: #e9e5fa;
+  color: #322384;
+  font-weight: 700;
+  border-left-color: var(--accent);
+}
+.course-ch-num,
+.toc .n {
+  font: 600 0.74rem "IBM Plex Mono", monospace;
+  color: #7962bd;
+  min-width: 34px;
+  flex: none;
+}
+.course-toc-heading {
+  font-size: 0.73rem;
+  font-weight: 700;
+  color: #777985;
+  letter-spacing: 0.02em;
+  margin: 9px 0 6px;
 }
 .toc .toc-sections a {
-  padding-left: 17px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.79rem;
+}
+.toc .toc-sections a.active {
+  color: var(--accent);
+  background: #f1effb;
+  border-left-color: var(--accent);
+  font-weight: 600;
 }
 
 /* 5. 본문 절 — 절 번호(.num)·표·목록 */
