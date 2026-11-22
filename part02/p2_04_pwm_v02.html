@@ -72,7 +72,7 @@ img.zoom{cursor:zoom-in}
 </section>
 <section class="section" id="architecture">
 <h2><span class="num">02</span>CPU·AXI·PWM Core 역할</h2>
-<div>A · 시스템 구조</div><figure class="fig"><img alt="P2-04 PWM AXI IP, pwm_core, LED1 및 기존 장치 분리 구조" class="zoom" loading="lazy" src="legacy/part02_1/ch04/assets/architecture.svg"/><figcaption>04장에서는 PWM IP를 추가하고 01~03장 장치를 재사용합니다.</figcaption></figure><p>명령 수신은 C 애플리케이션의 <code>poll_uart()</code> 및 <code>handle_line()</code>에서 이루어집니다. <code>pwm_queue_percent()</code>가 AXI 레지스터에 설정값을 기록하면 <code>pwm_core</code>가 새로운 주기 경계에서 활성값을 교체합니다.</p><div>PC 명령 → MicroBlaze V → AXI4-Lite REG0~REG3 → pwm_core → LED1(E19)</div>
+<div>A · 시스템 구조</div><figure class="fig"><img alt="P2-04 PWM AXI IP, pwm_core, LED1 및 기존 장치 분리 구조" class="zoom" loading="lazy" src="diagrams/p2_04_architecture.svg"/><figcaption>04장에서는 PWM IP를 추가하고 01~03장 장치를 재사용합니다.</figcaption></figure><p>명령 수신은 C 애플리케이션의 <code>poll_uart()</code> 및 <code>handle_line()</code>에서 이루어집니다. <code>pwm_queue_percent()</code>가 AXI 레지스터에 설정값을 기록하면 <code>pwm_core</code>가 새로운 주기 경계에서 활성값을 교체합니다.</p><div>PC 명령 → MicroBlaze V → AXI4-Lite REG0~REG3 → pwm_core → LED1(E19)</div>
 </section>
 <section class="section" id="concept">
 <h2><span class="num">03</span>PWM 주파수와 Duty 관계</h2>
@@ -93,7 +93,7 @@ Xil_Out32(P2_04_PWM_BASEADDR + PWM_APPLY,      1U);
 </section>
 <section class="section" id="flow">
 <h2><span class="num">06</span>문자열 명령 플로우차트</h2>
-<div>A · 명령 처리</div><figure class="fig"><img alt="poll_uart, handle_line, pwm_parse_command, pwm_queue_percent의 흐름" class="zoom" loading="lazy" src="legacy/part02_1/ch04/assets/command_flow.svg"/><figcaption>실제 C 함수명과 PWM 처리 분기 기준. 기존 명령은 p2_parse_command()로 전달합니다.</figcaption></figure><p><code>pwm_parse_command()</code>는 <code>PWM 0</code>부터 <code>PWM 100</code>까지만 허용합니다. <code>PWM 050</code>, <code>PWM 101</code>, <code>PWM -1</code> 등은 오류입니다. 대문자·공백·Enter 입력을 기존 03장 UART 루프와 동일하게 처리합니다.</p>
+<div>A · 명령 처리</div><figure class="fig"><img alt="poll_uart, handle_line, pwm_parse_command, pwm_queue_percent의 흐름" class="zoom" loading="lazy" src="diagrams/p2_04_command_flow.svg"/><figcaption>실제 C 함수명과 PWM 처리 분기 기준. 기존 명령은 p2_parse_command()로 전달합니다.</figcaption></figure><p><code>pwm_parse_command()</code>는 <code>PWM 0</code>부터 <code>PWM 100</code>까지만 허용합니다. <code>PWM 050</code>, <code>PWM 101</code>, <code>PWM -1</code> 등은 오류입니다. 대문자·공백·Enter 입력을 기존 03장 UART 루프와 동일하게 처리합니다.</p>
 </section>
 <section class="section" id="step01">
 <h2><span class="num">07</span>03장 복제 프로젝트로 04장 독립 생성</h2>

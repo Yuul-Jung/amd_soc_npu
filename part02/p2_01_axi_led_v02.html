@@ -158,7 +158,7 @@ assign led_o = slv_reg0[0]; // 하위 AXI 모듈 내부 출력 연결</code></pr
 <section class="section" id="bdmap">
 <h2><span class="num">13</span>AXI IP 연결 완료 후 구조 대조</h2>
 <div>B · BD 확인표</div>
-<figure class="fig"><img alt="PC UART 명령, MicroBlaze V, AXI4-Lite, p2_01_axi_led, Basys3 LED0의 신호 흐름" class="zoom" loading="lazy" src="legacy/part02_1/ch01/P2_01_Architecture.svg"/><figcaption>01장 목표 구조. 실제 Vivado BD에서 연결·주소·클록을 각각 확인합니다.</figcaption></figure>
+<figure class="fig"><img alt="PC UART 명령, MicroBlaze V, AXI4-Lite, p2_01_axi_led, Basys3 LED0의 신호 흐름" class="zoom" loading="lazy" src="diagrams/p2_01_architecture.svg"/><figcaption>01장 목표 구조. 실제 Vivado BD에서 연결·주소·클록을 각각 확인합니다.</figcaption></figure>
 <div aria-label="표 (가로 스크롤 가능)" class="table-wrap" role="region" tabindex="0"><table><thead><tr><th>시작</th><th>도착</th><th>무엇을 확인할까?</th></tr></thead><tbody>
 <tr><td>기존 MicroBlaze V AXI 주소 경로</td><td>신규 <code>p2_01_axi_led/S00_AXI</code></td><td>기존 인터커넥트에 매핑, Address Editor 주소 존재</td></tr>
 <tr><td>기존 AXI Clock</td><td>신규 IP <code>s00_axi_aclk</code></td><td>BD에서 같은 클록 도메인 사용</td></tr>
@@ -245,7 +245,7 @@ endmodule
 </section>
 <section class="section" id="s12">
 <h2><span class="num">18</span>C 플로우차트 → 코드 이해</h2>
-<div>C · VITIS 절차 12</div><p>명령 한 줄을 수신해 <code>handle_command()</code>가 문자열을 비교하고 <code>report_status()</code>가 실제 IP를 재읽는 순서입니다.</p><figure class="fig"><img alt="main, read_command_line, handle_command, report_status의 제어 흐름" class="zoom" loading="lazy" src="legacy/part02_1/ch01/P2_01_C_Flow.svg"/><figcaption>코드 함수·조건과 명령 문자열이 01장 C 코드와 일치합니다. 그림을 클릭하면 크게 볼 수 있습니다.</figcaption></figure><div><a href="p2_01_1_c_v02.html">C 코드 풀이</a></div><div aria-label="표 (가로 스크롤 가능)" class="table-wrap" role="region" tabindex="0"><table><thead><tr><th>C 함수</th><th>역할</th></tr></thead><tbody><tr><td><code>read_command_line()</code></td><td>문자를 Enter까지 저장 · 초과 입력 보호</td></tr><tr><td><code>handle_command()</code></td><td>세 문자열을 비교해 쓰기/읽기 결정</td></tr><tr><td><code>Xil_Out32()</code></td><td>AXI REG0에 1 또는 0 기록</td></tr><tr><td><code>report_status()</code></td><td>AXI REG0 재읽기·UART 결과 출력</td></tr></tbody></table></div>
+<div>C · VITIS 절차 12</div><p>명령 한 줄을 수신해 <code>handle_command()</code>가 문자열을 비교하고 <code>report_status()</code>가 실제 IP를 재읽는 순서입니다.</p><figure class="fig"><img alt="main, read_command_line, handle_command, report_status의 제어 흐름" class="zoom" loading="lazy" src="diagrams/p2_01_command_flow.svg"/><figcaption>코드 함수·조건과 명령 문자열이 01장 C 코드와 일치합니다. 그림을 클릭하면 크게 볼 수 있습니다.</figcaption></figure><div><a href="p2_01_1_c_v02.html">C 코드 풀이</a></div><div aria-label="표 (가로 스크롤 가능)" class="table-wrap" role="region" tabindex="0"><table><thead><tr><th>C 함수</th><th>역할</th></tr></thead><tbody><tr><td><code>read_command_line()</code></td><td>문자를 Enter까지 저장 · 초과 입력 보호</td></tr><tr><td><code>handle_command()</code></td><td>세 문자열을 비교해 쓰기/읽기 결정</td></tr><tr><td><code>Xil_Out32()</code></td><td>AXI REG0에 1 또는 0 기록</td></tr><tr><td><code>report_status()</code></td><td>AXI REG0 재읽기·UART 결과 출력</td></tr></tbody></table></div>
 </section>
 <section class="section" id="s13">
 <h2><span class="num">19</span>Basys3 연결·UART 설정</h2>

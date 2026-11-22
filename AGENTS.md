@@ -31,7 +31,7 @@ amd_soc_npu/
 ├── docs/               ← 내부 감사·검증 기록
 ├── tools/              ← 정적 검사 · guide/(안내서 생성기) · diagram/(상태도 SVG) · vivado/(OOC 합성)
 ├── part01/            ← 제1부 MicroBlaze V 기본 SoC (amd_soc_rtl/part01 이관: legacy/·chapters/·files/ 원본 보존, p1_*_v02.html·index.html은 생성물)
-├── part02/            ← 제2부 사용자 AXI IP와 주변장치 (amd_soc_rtl/part02_1·part02_2 이관: legacy/ 원본 보존, p2_*_v02.html·index.html·assets/fixed/는 생성물, 독립 과정)
+├── part02/            ← 제2부 사용자 AXI IP와 주변장치 (amd_soc_rtl/part02_1·part02_2 이관: legacy/ 원본 보존, p2_*_v02.html·index.html는 생성물, diagrams/는 Graphviz 그림을 규칙에 맞춰 다시 그린 svg-flow-editor JSON·SVG — `python3 tools/diagram/build_from_graphviz.py part02`, 독립 과정)
 ├── host_tools/         ← Python 기준 정수 모델
 ├── .github/workflows/  ← CI (정적 검사·RTL 시뮬레이션)
 └── ch{NN}/             ← 장별 디렉터리

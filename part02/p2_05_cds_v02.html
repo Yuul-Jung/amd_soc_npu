@@ -72,7 +72,7 @@ img.zoom{cursor:zoom-in}
 </section>
 <section class="section" id="architecture">
 <h2><span class="num">02</span>MicroBlaze V · AXI · CdS · PWM · LED1</h2>
-<div>A · 전체 구조</div><figure class="fig"><img alt="P2-05 사용자 AXI CdS IP와 P2-04 PWM을 독립 Controller에서 결합" class="zoom" loading="lazy" src="assets/fixed/legacy_part02_1_ch05_assets_architecture.svg"/><figcaption>P2-05 사용자 AXI CdS IP와 P2-04 PWM을 독립 Controller에서 결합</figcaption></figure><p>MicroBlaze V는 명령 문자열을 해석하고 AXI4-Lite(에이엑스아이 포 라이트, 메모리 매핑 주변장치 버스)로 모드·극성을 설정한다. <code>cds_digital_core</code>는 CPU 없이 2FF 동기화와 안정값 판정을 수행한다. <code>auto_light_controller</code>는 LED1 단일 출력 소유자다.</p><div>PC → main_p2_05.c → AXI CONTROL → cds_digital_core → auto_light_controller ← P2-04 pwm_core → LED1</div>
+<div>A · 전체 구조</div><figure class="fig"><img alt="P2-05 사용자 AXI CdS IP와 P2-04 PWM을 독립 Controller에서 결합" class="zoom" loading="lazy" src="diagrams/p2_05_architecture.svg"/><figcaption>P2-05 사용자 AXI CdS IP와 P2-04 PWM을 독립 Controller에서 결합</figcaption></figure><p>MicroBlaze V는 명령 문자열을 해석하고 AXI4-Lite(에이엑스아이 포 라이트, 메모리 매핑 주변장치 버스)로 모드·극성을 설정한다. <code>cds_digital_core</code>는 CPU 없이 2FF 동기화와 안정값 판정을 수행한다. <code>auto_light_controller</code>는 LED1 단일 출력 소유자다.</p><div>PC → main_p2_05.c → AXI CONTROL → cds_digital_core → auto_light_controller ← P2-04 pwm_core → LED1</div>
 </section>
 <section class="section" id="sensor">
 <h2><span class="num">03</span>CdS 디지털 센서와 JA1 배선</h2>
@@ -92,7 +92,7 @@ img.zoom{cursor:zoom-in}
 </section>
 <section class="section" id="flow">
 <h2><span class="num">07</span>UART 문자열 처리 플로우차트</h2>
-<div>A · 처리 절차</div><figure class="fig"><img alt="실제 C 함수명과 AUTO/CDS/PWM 명령 분기 일치" class="zoom" loading="lazy" src="assets/fixed/legacy_part02_1_ch05_assets_command_flow.svg"/><figcaption>실제 C 함수명과 AUTO/CDS/PWM 명령 분기 일치</figcaption></figure><p><code>poll_uart()</code>가 Enter를 수신한 뒤 <code>handle_line()</code>을 호출합니다. <code>cds_parse_command()</code>에서 05장 명령을 먼저 검사하고, 그렇지 않은 경우 기존 <code>pwm_parse_command()</code> → <code>p2_parse_command()</code>로 전달합니다. 센서 상태는 <code>CDS READ</code>로, 누적 상태는 <code>STATUS</code>로 확인합니다.</p>
+<div>A · 처리 절차</div><figure class="fig"><img alt="실제 C 함수명과 AUTO/CDS/PWM 명령 분기 일치" class="zoom" loading="lazy" src="diagrams/p2_05_command_flow.svg"/><figcaption>실제 C 함수명과 AUTO/CDS/PWM 명령 분기 일치</figcaption></figure><p><code>poll_uart()</code>가 Enter를 수신한 뒤 <code>handle_line()</code>을 호출합니다. <code>cds_parse_command()</code>에서 05장 명령을 먼저 검사하고, 그렇지 않은 경우 기존 <code>pwm_parse_command()</code> → <code>p2_parse_command()</code>로 전달합니다. 센서 상태는 <code>CDS READ</code>로, 누적 상태는 <code>STATUS</code>로 확인합니다.</p>
 </section>
 <section class="section" id="step01">
 <h2><span class="num">08</span>04장 기반 새 프로젝트 복제</h2>

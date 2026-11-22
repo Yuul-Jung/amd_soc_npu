@@ -72,7 +72,7 @@ img.zoom{cursor:zoom-in}
 </section>
 <section class="section" id="protocol">
 <h2><span class="num">02</span>poll_uart() → pwm_parse_command() → pwm_queue_percent()</h2>
-<div>B · 명령 흐름</div><figure class="fig"><img alt="C UART PWM 명령 처리 플로우차트" class="zoom" loading="lazy" src="legacy/part02_1/ch04/assets/command_flow.svg"/></figure><p>① <code>poll_uart()</code>는 입력된 ASCII(아스키, 영문 문자 코드)를 버퍼에 모읍니다. ② Enter에서 <code>handle_line()</code>을 호출합니다. ③ <code>pwm_parse_command()</code>가 PWM 명령이면 숫자를 검사합니다. ④ <code>pwm_queue_percent()</code>는 Pending이 없을 때 AXI 설정값을 기록하고 APPLY를 요청합니다. ⑤ 다른 명령은 기존 <code>p2_parse_command()</code>로 전달됩니다.</p><div class="codeblock"><div class="codebar"><span>명령·출력</span></div><pre tabindex="0"><code>PwmParseResult pwm_cmd = pwm_parse_command(line, &amp;pwm_percent);
+<div>B · 명령 흐름</div><figure class="fig"><img alt="C UART PWM 명령 처리 플로우차트" class="zoom" loading="lazy" src="diagrams/p2_04_command_flow.svg"/></figure><p>① <code>poll_uart()</code>는 입력된 ASCII(아스키, 영문 문자 코드)를 버퍼에 모읍니다. ② Enter에서 <code>handle_line()</code>을 호출합니다. ③ <code>pwm_parse_command()</code>가 PWM 명령이면 숫자를 검사합니다. ④ <code>pwm_queue_percent()</code>는 Pending이 없을 때 AXI 설정값을 기록하고 APPLY를 요청합니다. ⑤ 다른 명령은 기존 <code>p2_parse_command()</code>로 전달됩니다.</p><div class="codeblock"><div class="codebar"><span>명령·출력</span></div><pre tabindex="0"><code>PwmParseResult pwm_cmd = pwm_parse_command(line, &amp;pwm_percent);
 if (pwm_cmd != PWM_NOT_COMMAND) {
     // PWM 문법 오류 / BUSY / 새 요청 처리
     ...

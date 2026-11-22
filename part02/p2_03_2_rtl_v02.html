@@ -67,7 +67,7 @@ img.zoom{cursor:zoom-in}
 </section>
 <section class="section" id="overview">
 <h2><span class="num">01</span>독립 Core → AXI 레지스터 → IRQ</h2>
-<div>RTL · 구조</div><figure class="fig"><img alt="버튼 동기화/이벤트와 CPU 제어·FND 표시가 분리된 구조" class="zoom" loading="lazy" src="legacy/part02_1/ch03/assets/architecture.svg"/><figcaption>버튼 동기화/이벤트와 CPU 제어·FND 표시가 분리된 구조</figcaption></figure><p>RTL(알티엘, 레지스터 전송 수준)은 버튼의 물리적 시간을 판정합니다. AXI4-Lite Slave는 이 사건을 레지스터에 래치하고, CPU는 인터럽트를 받아 값을 해석합니다.</p>
+<div>RTL · 구조</div><figure class="fig"><img alt="버튼 동기화/이벤트와 CPU 제어·FND 표시가 분리된 구조" class="zoom" loading="lazy" src="diagrams/p2_03_architecture.svg"/><figcaption>버튼 동기화/이벤트와 CPU 제어·FND 표시가 분리된 구조</figcaption></figure><p>RTL(알티엘, 레지스터 전송 수준)은 버튼의 물리적 시간을 판정합니다. AXI4-Lite Slave는 이 사건을 레지스터에 래치하고, CPU는 인터럽트를 받아 값을 해석합니다.</p>
 </section>
 <section class="section" id="ports">
 <h2><span class="num">02</span>IP 포트·비트폭·Reset</h2>
