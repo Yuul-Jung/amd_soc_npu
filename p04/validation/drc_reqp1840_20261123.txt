@@ -1,0 +1,5 @@
+# REQP-1840·1839 — fix/sync-reset a80698e 배선 후 report_drc, 2026-11-23 추출
+report=<repo>/build/vivado/p04_s1/drc_route.rpt date=Mon Nov 23 00:09:00 2026 count=0 reqp1839=0 limit_reached=0
+report=<repo>/build/vivado/p04_s2/drc_route.rpt date=Mon Nov 23 00:10:31 2026 count=0 reqp1839=0 limit_reached=0
+report=<repo>/build/vivado/p04_s3/drc_route.rpt date=Mon Nov 23 00:12:21 2026 count=0 reqp1839=0 limit_reached=0
+report=<repo>/build/vivado/p04_s4/drc_route.rpt date=Mon Nov 23 00:14:18 2026 count=0 reqp1839=0 limit_reached=0
