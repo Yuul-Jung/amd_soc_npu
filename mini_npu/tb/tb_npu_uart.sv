@@ -32,6 +32,9 @@ module tb_npu_uart;
             uart_rxd=1;repeat(CPB)@(negedge clk);
         end
     endtask
+    // Bias 변경 뒤 재분류가 몇 번째 응답인가 (전체 5, +SHORT 1). golden()이 쓰므로 함수보다 먼저 선언한다
+    // (xvlog는 선언 전 사용을 오류로 본다: VRFC 10-3380).
+    integer edit_idx=5;
     function automatic [7:0] hexchar(input [3:0] value);
         begin
             if(value<10)hexchar="0"+value;
@@ -78,7 +81,6 @@ module tb_npu_uart;
     // (추가) +SHORT: 배선 후 타이밍 시뮬레이션용 짧은 시나리오(분류 1 · Bias 변경 뒤 재분류 1 · ERR 1).
     // 같은 넷리스트·같은 UART 경로를 쓰고 응답 수만 6 → 2로 줄인다 (UART 송신 시간이 대부분).
     reg short_mode=1'b0;
-    integer edit_idx=5;
     reg signed [40:0] exp_score;
     always @(posedge clk)if(byte_valid)begin
         if(nbytes>=63)$fatal(1,"TX line overflow");
