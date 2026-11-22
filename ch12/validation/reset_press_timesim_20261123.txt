@@ -1,0 +1,51 @@
+# 12장 btnC 동작 중 누름 — 배선 후 SDF(slow) 시험, 수정 전·후 비교 (2026-11-23, xsim 2024.2)
+# 자극: 10 ns 클록, UART idle, btnC 200회, 클록 대비 위상 0~9.95 ns(0.05 ns 간격). xelab 옵션은 run_timing_sim.sh와 같음.
+# 범위: 타이밍 위반 검출만. BRAM 내용 비교, 연산·적재 중 누름, fast corner, 실물은 하지 않음.
+## 수정 전 (47c2f79 넷리스트)
+presses=200 timing_violations=332 ramb18_violations=69
+     21 uart/tx/tx_o_reg
+     21 display/scan_count_reg__LB3RB__
+     21 display/scan_count_reg__LB2RB__
+     21 display/scan_count_reg__LB1RB__
+     21 display/scan_count_reg__LB0RB__
+     18 engine/lane3/acc_o_reg
+     18 engine/lane2/acc_o_reg
+     18 engine/lane1/acc_o_reg
+     18 engine/lane0/acc_o_reg
+     17 uart/rx/rx_sync_reg
+     17 uart/rx/rx_meta_reg
+     16 rst/release_q_reg__LB0RB__
+     14 engine/xmem_reg
+     14 engine/w3_reg
+     14 engine/w2_reg
+     14 engine/w1_reg
+     13 engine/w0_reg
+      8 rst/release_q_reg__LB1RB__
+      4 uart/tx/frame_q_reg__LB7RB__
+      4 uart/tx/frame_q_reg__LB6RB__
+      4 uart/tx/frame_q_reg__LB5RB__
+      4 uart/tx/frame_q_reg__LB4RB__
+      4 uart/tx/frame_q_reg__LB3RB__
+      4 uart/tx/frame_q_reg__LB2RB__
+      4 uart/tx/frame_q_reg__LB1RB__
+## 수정 후 (a80698e 넷리스트)
+presses=200 timing_violations=16 ramb18_violations=0
+     16 rst/sync_q_reg__LB0RB__
+# 수정 후 남은 16건은 비동기 입력을 받는 동기화 첫 단(sync_q[0], ASYNC_REG)뿐이며 예상된 경고이다.
+## 시험 TB 원문
+`timescale 1ns/1ps
+module tb_press;
+  reg clk=0,btnC=1,rxd=1; integer k;
+  wire txd,dp; wire [15:0] led; wire [6:0] seg; wire [3:0] an;
+  basys3_npu_top dut(.clk(clk),.btnC(btnC),.uart_rxd(rxd),.uart_txd(txd),.led(led),.seg(seg),.an(an),.dp(dp));
+  always #5 clk=~clk;
+  initial begin
+    #400 btnC=0; #600;
+    for(k=0;k<200;k=k+1) begin
+      @(posedge clk); #(k*0.050) btnC=1;
+      #100 @(posedge clk); #(k*0.050) btnC=0;
+      #150;
+    end
+    $display("PRESS_DONE presses=%0d",k); $finish;
+  end
+endmodule
