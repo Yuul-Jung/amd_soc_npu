@@ -90,6 +90,36 @@
     - VS Code 할 일 (그 브랜치에서): ① p01~p04 전 STAGE `build_pNN.tcl` 재빌드 → `pNN/validation/vivado_impl_YYYYMMDD.txt` ② 12장 `vivado_impl.tcl` + `run_timing_sim.sh`(전체) ③ 각 빌드의 `report_drc`에서 REQP-1840 건수 → `drc_reqp1840_YYYYMMDD.txt` (0건이면 `count=0`으로 기록) ④ 타이밍이 나빠지면(리셋 fanout) 수치와 함께 보고. 증거만 `fix/sync-reset`에 커밋.
     - 통과하면 웹이 `fix/sync-reset`을 main에 병합한다. 그 전까지 main의 2~4장·12장 페이지는 REQP-1840 ⚠ 미해결 표시를 유지한다.
 
+13. **(2026-11-23 00:50, 지시 12 중간 회신에 대한 결정 — 지금 실행할 것은 이 항목이다)**
+
+    **결정**: 2장 STAGE 8은 구현 옵션이 아니라 **RTL 레지스터 한 단**으로 고쳤다 (`fix/sync-reset` d826c0b, `p02/rtl/p02_npu_path.v`). 고른 엔진의 done·error·class·scores를 레지스터에 받아 11장 해석기로 넘긴다. 응답 1클록 지연, 값 동일. 웹 확인: p02 Top STAGE 1~8 시뮬레이션 PASS, 클래스 선택 변이를 TB가 잡음. 구현 옵션(Explore)은 쓰지 않는다 — `build_p02.tcl`은 그대로.
+
+    **실행 순서** (브랜치 `fix/sync-reset`, 이 PC에서는 원격 이름 `npu`):
+    ```bash
+    git fetch npu && git checkout fix/sync-reset && git pull --ff-only npu fix/sync-reset   # faf242d 이상
+    # ① 2장만 전 STAGE 재빌드 (RTL이 바뀐 것은 p02_npu_path.v 하나 — p01·p03·p04·12장은 9e95d4d 결과 유지)
+    for n in 1 2 3 4 5 6 7 8; do vivado -mode batch -nojournal -source p02/vivado/build_p02.tcl -tclargs $n; done
+    # ② 12장 SDF 전체 시나리오가 아직 안 끝났으면 끝까지 (동기 리셋 넷리스트 기준)
+    bash mini_npu/scripts/run_timing_sim.sh
+    ```
+    **남길 증거** (모두 `fix/sync-reset`에 커밋·푸시, 개인 경로는 `<repo>`):
+    - `p02/validation/vivado_impl_YYYYMMDD.txt` — STAGE 1~8 여덟 줄 (오늘 날짜 새 파일. FAIL 줄이 있으면 그대로 남긴다)
+    - `p02/validation/drc_reqp1840_YYYYMMDD.txt` — 새 빌드 8개의 `count=` 줄
+    - `ch12/validation/vivado_impl_timesim_YYYYMMDD.txt` — 동기 리셋 넷리스트의 `SYNTH_TIMING_PASS` 줄 + `TIMING_SIM_PASS … timing_violations=0 scenario=full`
+    - 증거를 올린 뒤 `python3 tools/guide/build_guides.py && python3 tools/guide/build_projects.py`는 **돌리지 않아도 된다** (웹이 재생성한다). 돌렸다면 결과 HTML도 같이 커밋한다 — 증거만 올리고 HTML을 빼면 CI `--check`가 실패한다는 점만 알아 둔다.
+
+    **합격 기준** (전부 만족해야 웹이 main에 병합한다):
+    | 조건 | 기준 |
+    |---|---|
+    | p01~p04 전 STAGE (20개) | 모두 `SYNTH_TIMING_PASS` (WNS ≥ 0, WHS ≥ 0, DRC_ERRORS=0) |
+    | REQP-1840 | 21개 빌드 모두 0건 (p02는 새 빌드 기준) |
+    | 12장 | 구현 PASS + SDF 전체 시나리오 PASS, timing_violations=0 |
+    | 동작 중 btnC 시험 | 0건 유지 (`reset_press_timesim_*.txt`, 이미 확인됨 — 12장 RTL은 안 바뀌었으므로 재실행 불필요) |
+
+    **실패했을 때**: 고치지 말고 보고한다 — 실패 STAGE, WNS/WHS, 최악 경로의 Source·Destination·Logic Levels·Data Path Delay(`report_timing` 발췌)를 `part03/ch27/docs/VSCODE_TO_WEB_YYYYMMDD.md`에 적는다. `pNN/rtl`·`mini_npu/rtl`·`tools/`·`*.tcl`은 웹 담당이므로 수정하지 않는다 (진단용 임시 Tcl은 커밋하지 않는다).
+
+    **회신 반영 (VSCODE_TO_WEB 9절)**: ① PROJECT_PLAN In4→In12 정정 ② GUIDE_STATUS에 "13~31장 줄은 웹 판 RTL 기준" 명시 ③ CI를 `restructure/projects`·`fix/**` push에서도 실행 ④ PROJECT_PLAN 8절·VSCODE_HANDOFF 2절 갱신 ⑤ main 공개 완료 (PR #1·#2, 2026-11-23 00:3x, CI 통과). 로컬 CI 예행연습은 **python3.11**로 돌릴 것 (웹도 같은 실수를 했다).
+
 ## 5. 웹 Claude가 그동안 하는 것
 
 1장(구 00~03장) 시범 전환: 생성기를 "장 페이지 + 서브젝트 절" 구조로 바꾸고 미리보기를 만든다. VS Code 작업과 파일이 겹치지 않는다.
