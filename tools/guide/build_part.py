@@ -239,6 +239,16 @@ def new_url(raw, src_dir, tag, page):
     return quote(rel, safe="/") + ("?" + sp.query if sp.query else "") + frag
 
 
+def scope_svg_css(css, sid):
+    """도면 내부 스타일 규칙 앞에 #도면id 를 붙인다 (예: .line → #id .line, text → #id text)."""
+    css = re.sub(r"/\*.*?\*/", "", css, flags=re.S)
+    out = []
+    for sel, body in re.findall(r"([^{}]+)\{([^{}]*)\}", css):
+        sels = ", ".join(f"#{sid} {x.strip()}" for x in sel.split(",") if x.strip())
+        out.append(f"{sels}{{{body.strip()}}}")
+    return "".join(out)
+
+
 # ── 원본 SVG 표시 보정 ─────────────────────────────────────────────────────
 FIXED: dict[str, str] = {}   # 출력 경로 → 내용
 
@@ -274,9 +284,20 @@ def convert(c):
     main = soup.find("main")
     for x in main.find_all(string=lambda t: isinstance(t, Comment)):
         x.extract()
+    # 도면 안의 <style>은 그 도면 모양의 일부라 남기고, 다른 도면과 섞이지 않게 #id 범위로 한정
+    for k, svg in enumerate(main.find_all("svg")):
+        for st in svg.find_all("style"):
+            sid = svg.get("id") or f"{PFX}-fig-{c['id']}-{k}"
+            svg["id"] = sid
+            st.string = scope_svg_css(st.get_text(), sid)
+            st["data-keep"] = "1"
     for sel in DROP_SEL:
         for e in main.select(sel):
+            if e.name == "style" and e.get("data-keep"):
+                continue
             e.decompose()
+    for st in main.select("style[data-keep]"):
+        del st["data-keep"]
     before = counts(main)
     src_dir = os.path.dirname(src)
 
@@ -516,7 +537,7 @@ STYLE = """
 .section label{display:block;margin:4px 0;overflow-wrap:anywhere}
 .section img{max-width:100%;height:auto;display:block}
 .section .lead{color:var(--ink-2);font-weight:500}
-.section .minor{color:var(--ink-3);font-size:.9em}
+.section .minor:not(text){color:var(--ink-3);font-size:.9em}
 .table-wrap{overflow-x:auto;margin:12px 0}
 .table-wrap th{white-space:nowrap}
 .section .chips{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 14px;padding:0;list-style:none}
