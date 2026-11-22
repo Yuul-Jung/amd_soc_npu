@@ -36,4 +36,4 @@
 | ELF 크기 (digit·sensor·secure·motor) | 36,276 · 39,372 · 61,556 · 53,748 B | 같음 |
 | bit·XSA·ELF SHA-256 | 점검표 값 | 다름 — 빌드 시각·경로가 파일에 들어가므로 예상한 차이. 보드 확인은 점검표 SHA의 원래 빌드로 한다 |
 
-`sweep_ch24`·`soc_sim_ch23`·`power_ch25`는 이미 안 A로 실행한 기록이 있다(각 장 `validation/`). `soc_sim_ch28`은 따로 재실행 중(`ch28/validation/soc_sim_mapA_20261120.log`).
+`sweep_ch24`·`soc_sim_ch23`·`power_ch25`는 이미 안 A로 실행한 기록이 있다(각 장 `validation/`). `soc_sim_ch28`은 따로 실행해 PASS 15/15(`ch28/validation/soc_sim_mapA_20261120.log`).
