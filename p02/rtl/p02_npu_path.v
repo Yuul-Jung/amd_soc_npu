@@ -88,10 +88,26 @@ module p02_npu_path #(
         // 쓰기는 두 엔진이 모두 받을 수 있을 때만 (11장 해석기는 load_ready를 보고 쓴다)
         assign load_ready = e_load_ready_i && r4;
         assign busy   = use4 ? b4 : e_busy_i;
-        assign done   = use4 ? d4 : e_done_i;
-        assign err    = use4 ? x4 : e_error_i;
-        assign cls    = use4 ? c4 : e_class_i;
-        assign scores = use4 ? s4 : e_scores_i;
+        // (변경 2026-11-23) 고른 엔진의 완료·오류·클래스·점수를 레지스터 한 단에 받은 뒤 11장 해석기로 넘긴다.
+        // 이전에는 npu_core 결과 → p02_bank 조합 argmax → 엔진 선택 → 해석기 응답 버퍼가 한 클록 경로(13단, 10.07 ns)여서
+        // STAGE 8 배선에서 WNS -0.103 ns였다. 응답이 1클록 늦어질 뿐 값은 같다 (done·error는 1클록 펄스 그대로).
+        reg          done_q, err_q;
+        reg [1:0]    cls_r;
+        reg [163:0]  scores_r;
+        always @(posedge clk) begin
+            if (!resetn) begin
+                done_q <= 1'b0; err_q <= 1'b0; cls_r <= 2'd0; scores_r <= 164'd0;
+            end else begin
+                done_q   <= use4 ? d4 : e_done_i;
+                err_q    <= use4 ? x4 : e_error_i;
+                cls_r    <= use4 ? c4 : e_class_i;
+                scores_r <= use4 ? s4 : e_scores_i;
+            end
+        end
+        assign done   = done_q;
+        assign err    = err_q;
+        assign cls    = cls_r;
+        assign scores = scores_r;
 
         reg [1:0] cls_q;                          // 표시: 마지막으로 끝난 실행의 클래스
         always @(posedge clk) begin
