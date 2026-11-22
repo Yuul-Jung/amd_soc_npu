@@ -354,7 +354,7 @@ def build(pg, svg_path, out_base, title, mode_hint):
         H = max(H, max(lowl) + 36)
     scene = {
         "version": 3, "pageTitle": title, "title": title,
-        "subtitle": "원본 그림의 노드·연결·문구 그대로 · 직각 연결 · 마름모 꼭짓점 분기",
+        "subtitle": "",
         "width": W, "height": H + 10,
         "headings": {"title": {"x": W / 2, "y": 44, "w": W - 80, "h": 50, "size": 26, "align": "left", "autoFit": True},
                      "subtitle": {"x": W / 2, "y": 90, "w": W - 80, "h": 30, "size": 15, "align": "left", "autoFit": True}},
