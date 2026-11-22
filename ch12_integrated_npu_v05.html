@@ -1281,10 +1281,10 @@ picocom -b 115200 -d 8 -p n -y n -f n /dev/ttyUSB1   # n은 실제 번호로 변
         </tbody>
       </table></div>
       <p>7행이 모두 기대와 같을 때만 <code>BOARD_PASS</code>로 기록합니다. 기록 파일은 <code>ch12/validation/board_YYYYMMDD.md</code>로 저장합니다.</p>
-      <p>실행 기록 (2026-11-22, 출처 <code>ch12/validation/vivado_impl_timesim_20261122.txt</code>):</p>
+      <p>실행 기록 (2026-11-23, 출처 <code>ch12/validation/vivado_impl_timesim_20261123.txt</code>):</p>
       <div class="codeblock"><div class="codebar"><span>Vivado 실행 결과</span></div>
-        <pre tabindex="0"><code>SYNTH_TIMING_PASS ch12 basys3_npu_top WNS=1.193 WHS=0.064 DRC_ERRORS=0 LUT=1656 FF=1261 DSP48E1=4 RAMB=5
-TIMING_SIM_PASS ch12 basys3_npu_top post-route SDF(slow) classes=6 model_edit=1 invalid_length=1</code></pre></div>
+        <pre tabindex="0"><code>SYNTH_TIMING_PASS ch12 basys3_npu_top WNS=1.993 WHS=0.024 DRC_ERRORS=0 LUT=1657 FF=1262 DSP48E1=4 RAMB=5
+TIMING_SIM_PASS ch12 basys3_npu_top post-route SDF(slow) classes=6 model_edit=1 invalid_length=1 timing_violations=0 scenario=full</code></pre></div>
     </section>
     <section class="section" id="s09">
       <h2><span class="num">09</span>검증 현황·인계</h2>
@@ -1313,11 +1313,11 @@ TIMING_SIM_PASS ch12 basys3_npu_top post-route SDF(slow) classes=6 model_edit=1 
         </div>
         <div class="gate pass">
           <b>SYNTH_TIMING_PASS</b>
-          <span>ch12 basys3_npu_top WNS=1.193 WHS=0.064 DRC_ERRORS=0 LUT=1656 FF=1261 … · 2026-11-22</span>
+          <span>ch12 basys3_npu_top WNS=1.993 WHS=0.024 DRC_ERRORS=0 LUT=1657 FF=1262 … · 2026-11-23</span>
         </div>
         <div class="gate pass">
           <b>TIMING_SIM_PASS</b>
-          <span>TIMING_SIM_PASS ch12 basys3_npu_top post-route SDF(slow) classes=6 mod… · 2026-11-22</span>
+          <span>TIMING_SIM_PASS ch12 basys3_npu_top post-route SDF(slow) classes=6 mod… · 2026-11-23</span>
         </div>
         <div class="gate todo">
           <b>BOARD_PASS</b>
