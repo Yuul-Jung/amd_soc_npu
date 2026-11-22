@@ -31,6 +31,7 @@ amd_soc_npu/
 ├── docs/               ← 내부 감사·검증 기록
 ├── tools/              ← 정적 검사 · guide/(안내서 생성기) · diagram/(상태도 SVG) · vivado/(OOC 합성)
 ├── part01/            ← 제1부 MicroBlaze V 기본 SoC (amd_soc_rtl/part01 이관: legacy/·chapters/·files/ 원본 보존, p1_*_v02.html·index.html은 생성물)
+├── part02/            ← 제2부 사용자 AXI IP와 주변장치 (amd_soc_rtl/part02_1·part02_2 이관: legacy/ 원본 보존, p2_*_v02.html·index.html·assets/fixed/는 생성물, 독립 과정)
 ├── host_tools/         ← Python 기준 정수 모델
 ├── .github/workflows/  ← CI (정적 검사·RTL 시뮬레이션)
 └── ch{NN}/             ← 장별 디렉터리
@@ -54,7 +55,7 @@ amd_soc_npu/
 - (개편 전 장 단위 v05·v02 안내서와 절 구성 00~09는 브랜치 `archive/v02-ch00-31`에 보관)
 - **안내서 HTML·`index.html`·`docs/GUIDE_STATUS.md`는 직접 수정하지 않는다.** 내용은 `chNN/chapter.json`, 코드는 원본 파일, 게이트 배지는 `validation/` 증거에서 `python3 tools/guide/build_guides.py`가 만든다. CI가 `--check`로 어긋남을 막는다.
 - 역할 분담: 코드·실행·증거·`chapter.json`은 VS Code Claude, 생성기·안내서 관리는 웹 Claude. 상세는 [docs/VSCODE_HANDOFF.md](docs/VSCODE_HANDOFF.md).
-- 제1부(`part01/`) 안내서·INDEX와 편집 기록 `docs/PART01_EDIT_LOG.md`는 `python3 tools/part01/build_part01.py`가 원본 페이지(`part01/legacy/pages/soc/`, `part01/chapters/`)와 `part01/course.json`에서 만든다. 원본 페이지는 고치지 않는다. 배포 본문에는 제작·검증 메모(검증 완료·실기·계측·출처·원본 등)를 넣지 않고 생성기가 걸러내며, 그림·표·코드 개수가 원본과 다르면 생성기가 실패한다(CI `--check`).
+- 제1부(`part01/`)·제2부(`part02/`) 안내서·INDEX와 편집 기록 `docs/PARTNN_EDIT_LOG.md`는 `python3 tools/guide/build_part.py partNN`이 원본 페이지(`part01/legacy/pages/soc/`, `part01/chapters/`)와 `part01/course.json`에서 만든다. 원본 페이지는 고치지 않는다. 배포 본문에는 제작·검증 메모(검증 완료·실기·계측·출처·원본 등)를 넣지 않고 생성기가 걸러내며, 그림·표·코드 개수가 원본과 다르면 생성기가 실패한다(CI `--check`).
 - `window.COURSE` 탐색에는 실제 존재하는 장 파일만 넣는다.
 - 구조도는 실제 RTL 선언에서 자동 생성하는 **구현 도식**이다. 포트 한글 설명(`port_notes`)과 FSM 전이표(`fsm`)는 `chapter.json`에 쓰고 생성기가 코드와 대조한다. FSM 상태도(`chNN/diagrams/`)와 과정 흐름·모듈 테크트리(`diagrams/`)는 [svg-flow-editor](https://github.com/Yuul-Jung/svg-flow-editor) JSON이 원본이며 `tools/diagram/export_svg.py`로 SVG를 만든다. 각 장 09절에 part03 규칙 5절 누적 보고 표를 둔다. 규칙별 판정은 [docs/RULE_COMPLIANCE.md](docs/RULE_COMPLIANCE.md), 화면 점검은 `tools/guide/audit_render.py`.
 - 원본에 없는 하드웨어 실행 결과·GUI 캡처를 성공 사례처럼 조작하지 않는다.
