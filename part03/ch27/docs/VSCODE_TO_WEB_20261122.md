@@ -84,3 +84,45 @@ VS Code의 `200eedc`가 빈 SLACK을 NA로 바꾸면서 드러나지 않게 됐�
 1. **먼저 `build_guides.py`·`build_projects.py` 재생성.** 새 증거 때문에 a5d89dc에서 두 `--check`가 실패한다(대상: 11·12장, p02, GUIDE_STATUS).
 2. REQP-1840을 페이지에 미해결로 표시한다. 12장 TIMING_SIM PASS는 동작 중 리셋을 검증하지 않는다.
 3. 5절(26·29장 판정 기준)은 11-3에 회신이 없고 `GUIDE_STATUS.md`에 여전히 FAIL로 나온다.
+
+## 9. 전수 점검 결과 (2026-11-23, `ebcd242` 기준)
+
+8절의 1·2번(재생성, REQP-1840 표시)은 `7bd78ab`·`e136ef6`에서 처리된 것을 확인했다.
+`npu-ci.yml`의 실행 단계(apt 설치 제외)를 로컬 클론에서 돌려 44/44 PASS했다. GitHub runner 결과는 아니다.
+
+남은 웹 작업:
+
+| 순위 | 문제 | 요청 |
+|---|---|---|
+| 1 | `docs/PROJECT_PLAN.md` 6절 "안 A 적용"이 **In4 NPU**로 적혀 있다. 지시문·BD·빌드 로그·펌웨어는 모두 **In12**이고 In4는 상수 0이다 | In12로 정정 |
+| 2 | `GUIDE_STATUS.md`의 13~20·26·29·30장 OOC는 채택하지 않은 웹 판 RTL(`chNN/rtl`)의 결과다. 13~20·30장 ✅와 26·29장 ❌ 모두 해당한다 | 판을 표시하거나 `part03` 증거로 판정 (5절 확장). 채택 판 근거는 `VSCODE_REPORT_A_20261120.md`의 대조표 |
+| 3 | `npu-ci.yml`이 main push·PR에서만 돌아 `restructure/projects`는 CI 검사를 받지 않는다 | push 대상에 브랜치 추가 |
+| 4 | `PROJECT_PLAN.md` 8절(재빌드 대기, 미커밋, B1~B17)과 `VSCODE_HANDOFF.md` 2·2-1절(할 일)이 옛 내용이다 | 완료로 갱신. 남은 실행은 보드 점검과 승인 대기 중인 REQP-1840 |
+| 5 | main은 `restructure/projects`보다 66커밋 뒤라 12장 증거·장 페이지·OOC 판정 수정이 없다 | 반영 시점은 사용자 결정. 그 전에는 병합하지 않는다 |
+
+## 10. 지시 12 중간 회신 (2026-11-23, `fix/sync-reset` 50b52a5) — **main 병합 보류**
+
+| 항목 | 결과 |
+|---|---|
+| ① p01~p04 20 STAGE | 19 PASS, **p02 STAGE 8 FAIL (WNS -0.103, 실패 endpoint 1)** |
+| ② 12장 | 구현 PASS (WNS +1.993, WHS +0.024). SDF 전체 시뮬레이션 실행 중 |
+| ③ REQP-1840 | 21개 빌드 모두 0건 |
+| 추가: 동작 중 btnC (12장 배선 후) | RAMB18 위반 69건(수정 전) → 0건(수정 후). `ch12/validation/reset_press_timesim_20261123.txt` |
+| ④ 여유 감소 | p02-8 +0.484→-0.103, p02-3 +1.494→+0.628, p03-4 +0.710→+0.547, p04-4 +0.402→+0.195, p04-1 +1.017→+0.583 |
+
+p02 STAGE 8 원인: `result_o_reg[0] → response_reg[1][0]`의 조합 argmax(13단, 10.070 ns). 리셋 net은 경로에 없다.
+
+진단 빌드(같은 RTL, 커밋하지 않은 Tcl, 증거 아님):
+
+| 구현 옵션 | WNS | WHS |
+|---|---|---|
+| place Explore · phys_opt AggressiveExplore · route Explore | +0.409 | +0.031 |
+| 기본 + route 뒤 phys_opt_design | +0.076 | +0.031 |
+
+요청: 웹이 `p02/vivado/build_p02.tcl` STAGE 8에 첫 번째 옵션을 넣거나(RTL 불변, 권장), argmax를 레지스터로 나눈다(사이클 변경).
+그 뒤 VS Code가 다시 빌드해 PASS 증거를 올린다. 두 조건(p02-8 PASS, 12장 SDF PASS) 전에는 병합하지 않는다.
+
+### 9절 정정 (2026-11-23)
+
+- 로컬 44/44 PASS는 CI와 같은 조건이 아니었다. 로컬 Python 3.12라서 CI(3.11)의 `build_projects.py` f-string SyntaxError를 놓쳤다. `a9b124b`·`682c856`·`14c7e1c`의 CI가 실패했고 웹이 `4a6be29`에서 고쳤다.
+- 9절 5번(main 반영)은 PR #1·#2로 처리됐다. 1번(In4 → In12)은 `4a6be29`에도 남아 있다.
