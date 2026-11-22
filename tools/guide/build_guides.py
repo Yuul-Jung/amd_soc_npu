@@ -500,7 +500,7 @@ FOOT = """    <div class="chapter-links" id="chapter-links"></div>
 
 
 def course_js(chs):
-    data = {"title": SITE_TITLE, "chapters": [
+    data = {"title": SITE_TITLE, "short_title": "BASYS3 · SMALL NPU", "home_label": "전체 학습 안내서", "chapters": [
         {"id": c["id"], "number": c["number"], "title": c["nav_title"], "file": fname(c)} for c in chs]}
     return "window.COURSE=" + json.dumps(data, ensure_ascii=False, indent=1) + ";"
 
