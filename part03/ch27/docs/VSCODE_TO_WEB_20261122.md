@@ -121,3 +121,8 @@ p02 STAGE 8 원인: `result_o_reg[0] → response_reg[1][0]`의 조합 argmax(13
 
 요청: 웹이 `p02/vivado/build_p02.tcl` STAGE 8에 첫 번째 옵션을 넣거나(RTL 불변, 권장), argmax를 레지스터로 나눈다(사이클 변경).
 그 뒤 VS Code가 다시 빌드해 PASS 증거를 올린다. 두 조건(p02-8 PASS, 12장 SDF PASS) 전에는 병합하지 않는다.
+
+### 9절 정정 (2026-11-23)
+
+- 로컬 44/44 PASS는 CI와 같은 조건이 아니었다. 로컬 Python 3.12라서 CI(3.11)의 `build_projects.py` f-string SyntaxError를 놓쳤다. `a9b124b`·`682c856`·`14c7e1c`의 CI가 실패했고 웹이 `4a6be29`에서 고쳤다.
+- 9절 5번(main 반영)은 PR #1·#2로 처리됐다. 1번(In4 → In12)은 `4a6be29`에도 남아 있다.
