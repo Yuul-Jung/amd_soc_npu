@@ -8,6 +8,7 @@
 
 | 구간 | 장 | 내용 | 상태 |
 |---|---|---|---|
+| **제1부 선수 과정** | P1 01~11 | [MicroBlaze V 기본 SoC](part01/index.html) — BRAM·Clock/Reset·Memory Map·AXI·GPIO·UART·Timer·INTC·통합·사용자 Top | 안내서 v01 (원본 그림·코드 그대로 이관) |
 | UART 준비 | 00 | UART Echo RTL | 안내서 v05 · RTL_SIM 통과 |
 | 독립 RTL | 01~12 | MAC·DSP·BRAM·4PE·통합 NPU | 안내서 v05 · RTL_SIM 통과 · Vivado 실행 대기 |
 | 10분류 정수 | 13~19 | 8×8·MLP·784 타일·INT8/16 | HTML v02 · RTL 신규 구현 |
@@ -22,6 +23,7 @@
 - **CI**: GitHub Actions 정적 검사 자동화
 
 ## 원본 소스
+- 제1부 원본: `Yuul-Jung/amd_soc_rtl/part01/` (019832b) → [`part01/`](part01/) 전체 이관, 안내서는 `python3 tools/part01/build_part01.py`로 생성 — 점검 기록 [docs/PART01_MIGRATION.md](docs/PART01_MIGRATION.md)
 - RTL 원본: [`Yuul-Jung/amd_soc_rtl/part03/`](https://github.com/Yuul-Jung/amd_soc_rtl/tree/main/part03)
 - 규칙 기준: `rule_md` 커밋 `d1b8278d`
 
