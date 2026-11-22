@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """제1부(MicroBlaze V 기본 SoC) 배포용 학습안내서 생성기.
 
+  pip install beautifulsoup4==4.15.0 lxml       # 필요 패키지 (CI와 같은 판)
   python3 tools/part01/build_part01.py          # part01/p1_*_v02.html · part01/index.html · docs/PART01_EDIT_LOG.md 생성
   python3 tools/part01/build_part01.py --check  # 디스크와 다르거나 그림·코드·표 개수가 원본과 다르면 exit 1 (CI)
 

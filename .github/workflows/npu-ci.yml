@@ -20,7 +20,9 @@ jobs:
       - name: Guide sync check (chapter.json·코드·증거 ↔ HTML)
         run: python3 tools/guide/build_guides.py --check
       - name: 제1부 안내서 동기·그림 개수 검사 (원본 ↔ HTML)
-        run: python3 tools/part01/build_part01.py --check
+        run: |
+          pip install -q beautifulsoup4==4.15.0 lxml==6.1.3
+          python3 tools/part01/build_part01.py --check
 
   rtl-sim-ch00-ch12:
     name: RTL 시뮬레이션 ch00~ch31
