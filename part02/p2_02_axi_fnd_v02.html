@@ -77,7 +77,7 @@ img.zoom{cursor:zoom-in}
 <div>A · 작동 원리</div>
 <figure class="fig"><img alt="CPU와 AXI FND IP, FND 스캔 코어, Basys3 FND 연결 구조" class="zoom" loading="lazy" src="legacy/part02_1/ch02/assets/architecture.svg"/><figcaption>기존 P2-01 LED IP를 유지하면서 새 P2-02 FND IP를 추가한다.</figcaption></figure>
 <p><strong>CPU는 표시 숫자를 설정</strong>하고, <strong>RTL은 각 자리의 켜짐 시간을 반복 제어</strong>합니다. MicroBlaze V가 자리마다 일일이 켜고 끄는 방식이 아닙니다. 따라서 CPU가 UART 입력을 기다리는 동안에도 FND 스캔은 계속됩니다.</p>
-<div><a href="legacy/part02_1/ch02/assets/architecture.mmd">Mermaid 구조도</a><a href="#f-part02_1_ch02_rtl_fnd_scan_controller_v">재사용 RTL</a><a href="p2_02_2_rtl_v02.html">RTL 동작 해설</a></div>
+<div><a href="#f-part02_1_ch02_rtl_fnd_scan_controller_v">재사용 RTL</a><a href="p2_02_2_rtl_v02.html">RTL 동작 해설</a></div>
 </section>
 <section class="section" id="fnd-basics">
 <h2><span class="num">03</span>FND 4자리·Active-Low·BCD</h2>
@@ -165,7 +165,7 @@ bash tests/run_rtl_tests.sh        # 독립 FND + AXI TB 실행</code></pre></di
 <div>C · 코드 이해</div>
 <figure class="fig"><img alt="main, read_command_line, handle_command, DISP, LED 및 STATUS 처리 흐름" class="zoom" loading="lazy" src="legacy/part02_1/ch02/assets/command_flow.svg"/></figure>
 <p><code>read_command_line()</code>은 Enter까지 한 줄을 조립합니다. <code>handle_command()</code>가 문자열을 비교하며, 명령에 따라 AXI 레지스터에 값을 쓰거나 읽습니다. 오타나 비정상 문자는 레지스터에 기록하지 않습니다.</p>
-<div><a href="legacy/part02_1/ch02/assets/command_flow.mmd">Mermaid 플로우차트 기존</a><a href="p2_02_1_c_v02.html#trace">DISP 0050 값 추적</a></div>
+<div><a href="p2_02_1_c_v02.html#trace">DISP 0050 값 추적</a></div>
 </section>
 <section class="section" id="step15">
 <h2><span class="num">20</span>UART 터미널에서 결과 비교</h2>

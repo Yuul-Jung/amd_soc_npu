@@ -78,7 +78,7 @@ img.zoom{cursor:zoom-in}
 </section>
 <section class="section" id="flow">
 <h2><span class="num">03</span>실제 함수명 기준 C 플로우차트</h2>
-<span>구조</span><figure class="fig"><img alt="실제 C 함수 이름을 사용한 MODE AUTO와 IRQ 명령 분기" class="zoom" loading="lazy" src="legacy/part02_1/ch09/assets/command_flow.svg"/><figcaption>Enter로 완성된 한 줄만 실행하며 기존 01~08장 명령은 변경하지 않는다.</figcaption></figure><p><code>poll_uart()</code> → <code>handle_line()</code> → <code>p2_09_parse_command()</code>. 명령이 일치하면 <code>enter_auto_mode()</code>, <code>enter_manual_mode()</code> 또는 <code>print_irq_status()</code> 실행. 그 외 명령은 기존 파서에 전달한다.</p><p><a href="legacy/part02_1/ch09/assets/command_flow.mmd">Mermaid 크게 보기</a></p>
+<span>구조</span><figure class="fig"><img alt="실제 C 함수 이름을 사용한 MODE AUTO와 IRQ 명령 분기" class="zoom" loading="lazy" src="legacy/part02_1/ch09/assets/command_flow.svg"/><figcaption>Enter로 완성된 한 줄만 실행하며 기존 01~08장 명령은 변경하지 않는다.</figcaption></figure><p><code>poll_uart()</code> → <code>handle_line()</code> → <code>p2_09_parse_command()</code>. 명령이 일치하면 <code>enter_auto_mode()</code>, <code>enter_manual_mode()</code> 또는 <code>print_irq_status()</code> 실행. 그 외 명령은 기존 파서에 전달한다.</p>
 </section>
 <section class="section" id="step04">
 <h2><span class="num">04</span>04. 08장 프로젝트 소스·기능 확인</h2>

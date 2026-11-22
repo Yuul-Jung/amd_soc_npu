@@ -63,6 +63,7 @@ REPLACE = [
     (r"^(값의 )?근거$", "확인 방법"), (r"^원본$", "문서"), (r"^대조 내용$", "내용"), (r"원본 대조 내용", "참고 내용"), (r"분석 가정 기반 추정값, 실측 아님", "분석 가정 기반 추정값"),
     (r"점멸 실기 확인", "점멸 확인"),
     (r"(과|와|및) (경계|제한|보류 Gate)$", ""), (r" (판정 )?및 제한$", ""),
+    (r"그림을 클릭하면 SVG 원본을 엽니다\.?", "그림을 클릭하면 크게 볼 수 있습니다."),
     (r"클릭하면 원본 크기로 확대", "클릭하면 확대"), (r"이미지 클릭 시 원본 확대", "클릭하면 확대"),
     (r"원본 크기로 (열립니다|확대)", "크게 열립니다"), (r"원본 그림 크게 보기", "그림 크게 보기"),
     (r"원본 회로도 확대", "회로도 크게 보기"), (r"원본 (보기|확대)", "크게 보기"),
@@ -223,7 +224,7 @@ def new_url(raw, src_dir, tag, page):
         return BY_SRC[tgt]["file"] + frag
     rel = os.path.relpath(tgt, P1).replace(os.sep, "/")
     lrel = os.path.relpath(tgt, os.path.join(P1, "legacy")).replace(os.sep, "/")
-    if tag == "a" and re.search(r"(^|/)(validation|manifests|docs|tests)/|\.md$", rel):
+    if tag == "a" and re.search(r"(^|/)(validation|manifests|docs|tests)/|\.(md|mmd|dot|zip|pdf)$", rel):
         return "DROP::internal"  # 제작·검증 기록, 설명 문서
     if tag == "a" and os.path.basename(rel) == "index.html":
         return "DROP::index"     # 원본 목록 쪽: 좌측 탐색이 대신함
