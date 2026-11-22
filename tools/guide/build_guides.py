@@ -701,6 +701,14 @@ def update_index(text, chs):
     text = re.sub(r'(<section class="section" id="techtree">\s*<h2>.*?</h2>)', lambda m: m.group(1) + "\n      " + figs, text, count=1, flags=re.S)
     if ".figure-wrap{" not in text:
         text = text.replace("</style>", ".figure-wrap{overflow-x:auto}\n.figure-wrap svg{width:100%;height:auto;min-width:860px}\n</style>", 1)
+    # 00 교육과정 개요 절 끝에 제1부(선수 과정) 바로가기 — 목록은 part01/course.json (tools/part01/build_part01.py)
+    p1 = json.loads(rd("part01/course.json"))
+    p1_links = " · ".join(f'<a href="part01/{c["file"]}">{c["number"]} {html.escape(c["title"])}</a>' for c in p1["chapters"])
+    p1_block = f"""<!-- part01:start -->
+      <p><strong>선수 과정 · <a href="part01/index.html">{html.escape(p1["title"])}</a></strong> — CPU·BRAM·AXI 주변장치에서 사용자 Top까지: {p1_links}</p>
+      <!-- part01:end -->"""
+    text = re.sub(r"\n?\s*<!-- part01:start -->.*?<!-- part01:end -->", "", text, flags=re.S)
+    text = re.sub(r'(<section class="section" id="intro">.*?)(\n\s*</section>)', lambda m: m.group(1) + "\n      " + p1_block + m.group(2), text, count=1, flags=re.S)
     # 장식용 칩 제거 (STANDARD 3절, 헤더 높이 160~220px)
     text = re.sub(r'\n\s*<div class="chips">.*?</div>', "", text, count=1, flags=re.S)
     if ".table-wrap{" not in text:

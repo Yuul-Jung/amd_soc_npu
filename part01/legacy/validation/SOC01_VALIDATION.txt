@@ -1,0 +1,13 @@
+SoC 01 · MicroBlaze V + BRAM 최소 SoC
+
+## 구성 확인
+- Basys3 / Vivado 2024.2 / MicroBlaze V 기본 IP와 Local BRAM 16 KiB 구성.
+- Block Design: soc01_mb_bram.bd; 프로젝트: soc01_microblaze_bram.xpr.
+- CPU Instruction ILMB와 Data DLMB가 공유 Local BRAM에 연결되는 구조.
+
+## 판정 경계
+- 첫 장은 프로젝트·IP 기본 구성과 저장까지 진행하는 단계.
+- Clock/Reset 외부 연결과 Bitstream 생성은 SoC 02에서 완료. SoC 01 자체에서 보드 실행을 검증한 것으로 표시하지 않음.
+
+## 판정
+범위 내 완료. 해당 장에서 별도 FPGA 보드 실행은 수행하지 않음.
