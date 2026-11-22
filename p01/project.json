@@ -1,0 +1,112 @@
+{
+  "id": "p01",
+  "number": 1,
+  "version": "v01",
+  "slug": "uart_calc",
+  "nav_title": "UART 계산기",
+  "name": "UART 계산기",
+  "days": 1,
+  "demo": "PC가 보낸 두 수의 곱이 누산되어 UART·LED·7세그먼트로 돌아오고, sw로 코어를 바꿔도 값은 같고 응답 지연만 달라진다.",
+  "goal": "PC 두 수 → 보드 곱·누산 → UART·LED·7세그먼트. 서브젝트 4개마다 보드 확인.",
+  "top": {
+    "file": "p01/rtl/basys3_p01_top.v",
+    "module": "basys3_p01_top"
+  },
+  "skeleton": [
+    "p01/rtl/p01_reset_sync.v",
+    "p01/rtl/p01_calc_controller.v",
+    "p01/rtl/p01_mac_bank.v",
+    "p01/rtl/p01_hex4_display.v",
+    "p01/rtl/basys3_p01_top.v",
+    "p01/constraints/basys3_p01.xdc",
+    "p01/vivado/build_p01.tcl",
+    "p01/host/p01_send.py"
+  ],
+  "tb": [
+    "p01/tb/tb_p01_top.sv"
+  ],
+  "ref": [
+    "p01/reference/p01_model.py"
+  ],
+  "run": "bash p01/scripts/run_sim.sh",
+  "evidence": {
+    "rtl_log": "p01/validation/rtl_sim_*.log",
+    "vivado": "p01/validation/vivado_impl_*.txt"
+  },
+  "imports": [],
+  "subjects": [
+    {
+      "code": "1-1",
+      "ch": "ch00",
+      "title": "UART 에코",
+      "stage": 1,
+      "when": "오전",
+      "see": "보낸 글자가 그대로 돌아오고, <code>S</code>에는 준비 신호 <code>I</code>가 온다. MAC 코어가 아직 없어 <code>M</code>도 에코."
+    },
+    {
+      "code": "1-2",
+      "ch": "ch01",
+      "title": "MAC 누산",
+      "stage": 2,
+      "when": "오전",
+      "see": "<code>M 3 4</code>를 두 번 보내면 12 → 24(0x18)로 누산되고, LED·7세그먼트에 <code>0018</code>이 보인다. 지연 <code>L:1</code>."
+    },
+    {
+      "code": "1-3",
+      "ch": "ch02",
+      "title": "DSP48E1 곱셈",
+      "stage": 3,
+      "when": "오후",
+      "see": "sw0을 올리면 DSP 코어(<code>L:2</code>), 내리면 1-2 코어(<code>L:1</code>). 두 코어의 누산값은 같다. 보고서에서 DSP48E1이 늘어난다."
+    },
+    {
+      "code": "1-4",
+      "ch": "ch03",
+      "title": "MAC 파이프라인",
+      "stage": 4,
+      "when": "오후",
+      "see": "sw1을 올리면 파이프라인 코어(<code>L:2</code>). 음수 경계값 −32768×32767도 40비트 누산이 맞고, 마지막 LED·7세그먼트는 <code>7D45</code>."
+    }
+  ],
+  "port_notes": {
+    "clk": "보드 100 MHz 발진기 (W5)",
+    "btnC": "가운데 버튼, 누르면 리셋 (Active-High, 놓으면 동기 해제)",
+    "uart_rxd": "USB-UART에서 들어오는 직렬 입력 (B18), 115200 bps 8N1",
+    "sw": "sw[1:0] 코어 선택: 00 = 1-2 mac_core, 01 = 1-3 DSP, 10·11 = 1-4 파이프라인",
+    "uart_txd": "PC로 나가는 직렬 출력 (A18)",
+    "led": "누산값 아래 16비트",
+    "seg": "7세그먼트 a~g (active-low), 누산값 아래 16비트를 16진수 4자리로",
+    "an": "7세그먼트 자리 선택 (active-low)",
+    "dp": "소수점 (항상 끔)"
+  },
+  "handoff": [
+    [
+      "common/rtl/uart_core.v",
+      "2-7 UART 적재 컨트롤러(구 11장)의 송수신"
+    ],
+    [
+      "ch02/rtl/dsp_multiplier.v",
+      "2-4 4PE(구 08장) MAC lane의 곱셈"
+    ],
+    [
+      "p01/rtl/p01_calc_controller.v",
+      "명령 형식: 1바이트 명령 + 바이너리 페이로드, stop-and-wait. 2-7 적재 명령(X·W·B·R)이 같은 형식"
+    ],
+    [
+      "p01/host/p01_send.py",
+      "PC에서 바이너리 명령 보내기. 2장에서 적재 명령용으로 확장 (2장 전환 때)"
+    ]
+  ],
+  "sw_label": "sw[1:0]",
+  "sw_bits": 2,
+  "host": "p01/host/p01_send.py",
+  "vivado_tcl": "p01/vivado/build_p01.tcl",
+  "led_note": "누산값 아래 16비트, 7세그먼트도 같은 값 16진수 4자리",
+  "figures": [
+    {
+      "file": "p01/rtl/p01_mac_bank.v",
+      "module": "p01_mac_bank",
+      "note": "MAC 묶음: 1-2·1-3·1-4 코어가 같은 입력을 받고 sw[1:0]으로 고른 코어의 결과만 나간다."
+    }
+  ]
+}

@@ -1,0 +1,153 @@
+{
+  "id": "p02",
+  "number": 2,
+  "version": "v01",
+  "slug": "npu4_board",
+  "nav_title": "4뉴런 NPU 보드",
+  "name": "4뉴런 NPU 보드",
+  "days": 2,
+  "demo": "PC가 적재한 입력·가중치로 보드가 4뉴런 추론을 하고 UART에 점수, LED·7세그먼트에 클래스를 띄운다. 누적 npu_core와 12장 엔진을 sw로 바꿔 같은 클래스를 확인한다.",
+  "goal": "BRAM→양자화→내적→4PE→Dense→Core를 쌓아 보드 4뉴런 추론. 서브젝트 8개마다 확인.",
+  "top": {
+    "file": "p02/rtl/basys3_p02_top.v",
+    "module": "basys3_p02_top"
+  },
+  "skeleton": [
+    "p02/rtl/p02_console.v",
+    "p02/rtl/p02_bank.v",
+    "p02/rtl/p02_uart_switch.v",
+    "p02/rtl/p02_npu_path.v",
+    "p02/rtl/p02_view.v",
+    "p02/rtl/basys3_p02_top.v",
+    "p02/constraints/basys3_p02.xdc",
+    "p02/vivado/build_p02.tcl",
+    "p02/host/p02_send.py"
+  ],
+  "tb": [
+    "p02/tb/tb_p02_top.sv"
+  ],
+  "ref": [
+    "p02/reference/p02_model.py"
+  ],
+  "run": "bash p02/scripts/run_sim.sh",
+  "host": "p02/host/p02_send.py",
+  "vivado_tcl": "p02/vivado/build_p02.tcl",
+  "sw_label": "sw[3:2]",
+  "sw_bits": 2,
+  "sw_note": "sw2 = UART 주인 (0 디버그 콘솔, 1 = 11장 명령), sw3 = 엔진 (0 누적 npu_core, 1 = 12장 엔진). 스위치는 명령 사이에 바꿉니다.",
+  "led_note": "콘솔 마지막 결과 아래 16비트, 7세그먼트도 같은 값 16진수 4자리",
+  "evidence": {
+    "rtl_log": "p02/validation/rtl_sim_*.log",
+    "vivado": "p02/validation/vivado_impl_*.txt"
+  },
+  "imports": [
+    "common/rtl/uart_rx.v · uart_tx.v · uart_core.v (1-1)",
+    "ch01/rtl/mac_core.v (1-2, 2-3 내적 안에서)",
+    "ch02/rtl/dsp_multiplier.v (1-3, 2-8 12장 엔진 안에서)",
+    "p01/rtl/p01_reset_sync.v · p01_hex4_display.v (1장 뼈대)"
+  ],
+  "subjects": [
+    {
+      "code": "2-1",
+      "ch": "ch04",
+      "title": "BRAM 동기 버퍼",
+      "stage": 1,
+      "when": "1일 오전",
+      "see": "<code>X</code>·<code>W</code>로 쓴 값을 <code>x</code>·<code>w</code>로 되읽으면 같은 값(<code>X:0003</code>, <code>X:FFFE</code>, <code>W:0005</code>). 주소 64는 <code>ERR</code>."
+    },
+    {
+      "code": "2-2",
+      "ch": "ch05",
+      "title": "고정소수점 양자화",
+      "stage": 2,
+      "when": "1일 오전",
+      "see": "32비트 → 8비트: 768 → <code>03</code>, 384(=1.5) → <code>02</code>(반올림), 65536 → <code>7F</code>와 넘침 <code>O:1</code>."
+    },
+    {
+      "code": "2-3",
+      "ch": "ch07",
+      "title": "벡터 내적",
+      "stage": 3,
+      "when": "1일 오후",
+      "see": "X=(1,2,3,4)·W0=(5,6,7,8) → <code>D:0000000046</code>(70). W0[3]을 −8로 바꾸면 6. 길이 0은 <code>ERR</code>."
+    },
+    {
+      "code": "2-4",
+      "ch": "ch08",
+      "title": "4PE 병렬 어레이",
+      "stage": 4,
+      "when": "1일 오후",
+      "see": "같은 X에 W0~W3 네 내적을 한 번에: <code>P:</code> 6, 10, −10(<code>…FFF6</code>), 8."
+    },
+    {
+      "code": "2-5",
+      "ch": "ch09",
+      "title": "Dense 4뉴런 레이어",
+      "stage": 5,
+      "when": "2일 오전",
+      "see": "Bias를 더하고 ReLU·16비트 포화: <code>L:0006,0000,005A,7FFF O:8</code> (음수 → 0, 65544 → 7FFF와 넘침)."
+    },
+    {
+      "code": "2-6",
+      "ch": "ch10",
+      "title": "4뉴런 NPU Core",
+      "stage": 6,
+      "when": "2일 오전",
+      "see": "npu_core가 자체 BRAM에서 읽어 같은 Dense를 한다: <code>N 4</code>가 <code>L 4</code>와 같은 답. 길이 2면 <code>0011,0000,0061,7FFF</code>."
+    },
+    {
+      "code": "2-7",
+      "ch": "ch11",
+      "title": "UART 모델 적재",
+      "stage": 7,
+      "when": "2일 오후",
+      "see": "sw2를 올리면 11장 명령: 고정 그룹 <code>0</code>~<code>3</code> → <code>C0</code>~<code>C3</code>. 내리고 <code>x 0</code> → <code>X:FFFF</code> (11장이 쓴 값을 콘솔이 읽음)."
+    },
+    {
+      "code": "2-8",
+      "ch": "ch12",
+      "title": "통합 NPU Top",
+      "stage": 8,
+      "when": "2일 오후",
+      "see": "sw3을 올리면 12장 엔진: 같은 그룹에서 음수 점수(<code>…FFE</code>, ReLU 없음)가 보이고 클래스는 같다. LED0~3에 클래스, LED14 끝남, 7세그먼트에 클래스.",
+      "led_note": "LED[3:0] 클래스 원-핫, LED14 끝남, LED15 오류, 7세그먼트 오른쪽 자리에 클래스"
+    }
+  ],
+  "port_notes": {
+    "clk": "보드 100 MHz 발진기 (W5)",
+    "btnC": "가운데 버튼, 누르면 리셋 (Active-High, 놓으면 동기 해제). BRAM 내용은 남는다",
+    "uart_rxd": "USB-UART에서 들어오는 직렬 입력 (B18), 115200 bps 8N1",
+    "sw": "sw[2] UART 주인 (0 디버그 콘솔, 1 = 11장 명령 해석기), sw[3] 엔진 (0 누적 npu_core, 1 = 12장 npu_engine4)",
+    "uart_txd": "PC로 나가는 직렬 출력 (A18)",
+    "led": "STAGE 1~7: 콘솔 마지막 결과 아래 16비트. STAGE 8: [3:0] 클래스, [13] busy, [14] 끝남, [15] 오류",
+    "seg": "7세그먼트 a~g (active-low). STAGE 1~7: LED와 같은 값 16진수, STAGE 8: 클래스",
+    "an": "7세그먼트 자리 선택 (active-low)",
+    "dp": "소수점 (항상 끔)"
+  },
+  "handoff": [
+    [
+      "p02/rtl/p02_console.v",
+      "디버그 콘솔 방식(모듈 하나를 UART 명령 하나로 확인). 3장 서브젝트 확인에 같은 방식을 쓴다 (3장 전환 때 연결)"
+    ],
+    [
+      "p02/host/p02_send.py",
+      "PC 바이너리 명령 도구. 3장에서 64픽셀 입력 적재용으로 확장 (3장 전환 때)"
+    ],
+    [
+      "ch04/rtl/bram_sync_buffer.v · ch05/rtl/fixed_quantizer.v · ch09/rtl/dense_layer4.v",
+      "3장(구 13~16장, VS Code 판 p3_* 모듈)이 같은 기능을 다시 쓰는지 3장 전환 때 대조 (⚠ 미확인)"
+    ]
+  ],
+  "figures": [
+    {
+      "file": "p02/rtl/p02_bank.v",
+      "module": "p02_bank",
+      "note": "NPU 묶음: 2-1~2-6 서브젝트 모듈. X·W 쓰기는 BRAM과 npu_core에 함께 들어가고, 2-7부터는 엔진 포트로 11장 명령 해석기가 npu_core를 쓴다."
+    },
+    {
+      "file": "p02/rtl/p02_npu_path.v",
+      "module": "p02_npu_path",
+      "note": "NPU 경로 (2-7·2-8): 11장 명령 해석기가 누적 npu_core(엔진 포트)와 12장 npu_engine4에 같은 쓰기·시작을 보내고, sw3으로 고른 엔진의 점수·클래스를 받는다."
+    }
+  ]
+}

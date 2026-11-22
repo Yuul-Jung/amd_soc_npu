@@ -1,0 +1,6 @@
+BUSIF s_axi xilinx.com:interface:aximm:1.0
+BUSIF s_axi_aresetn xilinx.com:signal:reset:1.0
+BUSIF s_axi_aclk xilinx.com:signal:clock:1.0
+BUSIF irq_o xilinx.com:signal:interrupt:1.0
+ADDRBLOCK reg0 range=0x1000
+IP_PACKAGE_DONE

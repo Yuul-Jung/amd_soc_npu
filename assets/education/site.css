@@ -247,14 +247,14 @@ pre code {
 .course-ch-num,
 .toc .n {
   font: 600 0.74rem "IBM Plex Mono", monospace;
-  color: #7962bd;
+  color: #6650ad;
   min-width: 34px;
   flex: none;
 }
 .course-toc-heading {
   font-size: 0.73rem;
   font-weight: 700;
-  color: #777985;
+  color: #63656f;
   letter-spacing: 0.02em;
   margin: 9px 0 6px;
 }

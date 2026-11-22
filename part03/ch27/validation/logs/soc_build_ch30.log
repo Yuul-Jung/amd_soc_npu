@@ -1,0 +1,99 @@
+CRITICAL WARNING: [filemgmt 20-742] The top module "basys3_soc21_top" specified for this project can not be validated. The current project is using automatic hierarchy update mode, and hence a new suitable replacement top will be automatically selected. If this is not desired, please change the hierarchy update mode to one of the manual compile order modes first, and then set top to any desired value.
+BD soc11_integration
+CHECK_PASS 21장 안 A SoC(NPU + BTN + SEG7)에서 시작
+CHECK_PASS SmartConnect NUM_MI 7 (21장 안 A)
+ADDR SEG_axi_uartlite_0_Reg 0x40020000 0x00010000
+ADDR SEG_ip06_seg7_reg0 0x40060000 0x00010000
+ADDR SEG_p3_npu_0_reg0 0x44A00000 0x00001000
+ADDR SEG_dlmb_bram_if_cntlr_Mem 0x00000000 0x00010000
+ADDR SEG_axi_gpio_0_Reg 0x40000000 0x00010000
+ADDR SEG_axi_timer_0_Reg 0x40030000 0x00010000
+ADDR SEG_axi_intc_0_Reg 0x40040000 0x00010000
+ADDR SEG_axi_gpio_btn_Reg 0x40010000 0x00010000
+ADDR SEG_axi_gpio_motor_Reg 0x40070000 0x00010000
+CHECK_PASS data address segments do not overlap
+CHECK_PASS motor GPIO base 0x40070000
+ADDR_MAP_A dlmb_bram_if_cntlr 0x00000000 0x00010000 expect 0x00000000 65536 OK
+ADDR_MAP_A axi_gpio_0 0x40000000 0x00010000 expect 0x40000000 65536 OK
+ADDR_MAP_A axi_gpio_btn 0x40010000 0x00010000 expect 0x40010000 65536 OK
+ADDR_MAP_A axi_uartlite_0 0x40020000 0x00010000 expect 0x40020000 65536 OK
+ADDR_MAP_A axi_timer_0 0x40030000 0x00010000 expect 0x40030000 65536 OK
+ADDR_MAP_A axi_intc_0 0x40040000 0x00010000 expect 0x40040000 65536 OK
+ADDR_MAP_A ip06_seg7 0x40060000 0x00010000 expect 0x40060000 65536 OK
+ADDR_MAP_A axi_gpio_motor 0x40070000 0x00010000 expect 0x40070000 65536 OK
+ADDR_MAP_A p3_npu_0 0x44A00000 0x00001000 expect 0x44A00000 4096 OK
+ADDR_MAP_A_PASS
+CHECK_PASS address map A (21장 8줄 + 모터 1줄)
+IRQ_MAP_A In0 axi_timer_0/interrupt expect axi_timer_0/interrupt OK
+IRQ_MAP_A In1 axi_uartlite_0/interrupt expect axi_uartlite_0/interrupt OK
+IRQ_MAP_A In2 irq_zero/dout expect irq_zero/dout OK
+IRQ_MAP_A In3 axi_gpio_btn/ip2intc_irpt expect axi_gpio_btn/ip2intc_irpt OK
+IRQ_MAP_A In4 irq_zero/dout expect irq_zero/dout OK
+IRQ_MAP_A In5 irq_zero/dout expect irq_zero/dout OK
+IRQ_MAP_A In6 irq_zero/dout expect irq_zero/dout OK
+IRQ_MAP_A In7 irq_zero/dout expect irq_zero/dout OK
+IRQ_MAP_A In8 irq_zero/dout expect irq_zero/dout OK
+IRQ_MAP_A In9 irq_zero/dout expect irq_zero/dout OK
+IRQ_MAP_A In10 irq_zero/dout expect irq_zero/dout OK
+IRQ_MAP_A In11 irq_zero/dout expect irq_zero/dout OK
+IRQ_MAP_A In12 p3_npu_0/irq_o expect p3_npu_0/irq_o OK
+IRQ_MAP_A In13 irq_zero/dout expect irq_zero/dout OK
+IRQ_MAP_A In14 irq_zero/dout expect irq_zero/dout OK
+IRQ_MAP_A In15 irq_zero/dout expect irq_zero/dout OK
+IRQ_MAP_A_PASS
+CHECK_PASS irq map A (21장과 같음)
+CHECK_PASS motor clock = SmartConnect clock
+CHECK_PASS motor reset = peripheral_aresetn
+CHECK_PASS BD port estop_ok
+CHECK_PASS BD port estop_btn
+CHECK_PASS BD port fault
+CHECK_PASS BD port otemp
+CHECK_PASS BD port lim_f
+CHECK_PASS BD port lim_r
+CHECK_PASS BD port in1
+CHECK_PASS BD port in2
+CHECK_PASS BD port ena
+CHECK_PASS BD port trip
+CHECK_PASS BD port in1 connects only to motor_safety_0 (not CPU/NPU)
+CHECK_PASS BD port in2 connects only to motor_safety_0 (not CPU/NPU)
+CHECK_PASS BD port ena connects only to motor_safety_0 (not CPU/NPU)
+CHECK_PASS motor cmd_i comes only from axi_gpio_motor (CPU register)
+CHECK_PASS user top basys3_soc30_top
+CRITICAL WARNING: [Constraints 18-1056] Clock 'sys_clk_pin' completely overrides clock 'clk'.
+CRITICAL WARNING: [Synth 8-6895] The reference checkpoint build/soc30/soc11_user_top.srcs/utils_1/imports/synth_1/soc01_mb_bram_wrapper.dcp is not suitable for use with incremental synthesis for this design. Please regenerate the checkpoint for this design with -incremental_synth switch in the same Vivado session that synth_design has been run. Synthesis will continue with the default flow
+CHECK_PASS synth_1 complete
+CRITICAL WARNING: [Constraints 18-1055] Clock 'sys_clk_pin' completely overrides clock 'clk', which is referenced by one or more other constraints. Any constraints that refer to the overridden clock will be ignored.
+CHECK_PASS impl_1 + bitstream complete
+TIMING WNS=0.357 WHS=0.030
+CHECK_PASS post-route setup/hold met
+CHECK_PASS pin JB[0] = A14
+CHECK_PASS pin JB[1] = A16
+CHECK_PASS pin JB[2] = B15
+CHECK_PASS pin JB4 = B16
+CHECK_PASS pin btn[3] = T18
+CHECK_PASS pin btn[0] = T17
+CHECK_PASS pin seg[0] = W7
+CHECK_PASS pin an[0] = U2
+CHECK_PASS pin RsRx = B18
+CHECK_PASS pin led[15] = L1
+CHECK_PASS pin led[12] = P3
+CHECK_PASS JB4 estop loop PULLDOWN (open = stop)
+CHECK_PASS input synchronizers ASYNC_REG (12 cells)
+SOC30_BUILD_DONE
+CH21_PROJECT_UNCHANGED tree_sha=10b2d1d1bea0db39
+26cbefa53523fbee8d03cb739d078e8272049bf16d45d15f59e6b42dc5b1ed71  out/soc30_motor.xsa
+2fd42b53b9292739dd1918fb6af1d0f0f07837602b3ea011a425bc4ca2e4d9d1  out/basys3_soc30_top.bit
+SENSOR_HEADER_DONE model_id=18496ca4 w=[-110, -127, -63, -66, -117, -92]...
+#define XPAR_AXI_GPIO_0_BASEADDR 0x40000000
+#define XPAR_AXI_GPIO_BTN_BASEADDR 0x40010000
+#define XPAR_AXI_GPIO_MOTOR_BASEADDR 0x40070000
+#define XPAR_AXI_INTC_0_BASEADDR 0x40040000
+#define XPAR_AXI_TIMER_0_BASEADDR 0x40030000
+#define XPAR_AXI_UARTLITE_0_BASEADDR 0x40020000
+#define XPAR_IP06_SEG7_BASEADDR 0x40060000
+#define XPAR_P3_NPU_0_BASEADDR 0x44a00000
+#define XPAR_AXI_GPIO_MOTOR_IS_DUAL 0x1
+ELF motor_app text=45116 data=208 bss=8424 total=53748 sha256=251980977fdc8f8a
+ELF_MEM stack=4096 heap=2052 stack_end=53752 lmb=65536
+ELF_MEM_PASS
+SOC30_BUILD_PASS (빌드만, 실물 실행은 사용자와 함께)

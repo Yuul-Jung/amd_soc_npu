@@ -1,0 +1,6 @@
+Python 3.12.3
+Icarus Verilog version 12.0 (stable) ()
+PYTHON_FRAME64_SELF_TEST_PASS items=2664 frames=36 short=2 long=3 seed=1313
+RTL_SIM_PASS FRAME64 frames=36 short=2 long=3
+part03/ch13/tb/tb_p3_frame64_buffer.sv:155: $finish called at 91940000 (1ps)
+PYTHON_RTL_COMPARE_PASS frames=36 bit_exact=1

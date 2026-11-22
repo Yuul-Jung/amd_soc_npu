@@ -1,0 +1,504 @@
+{
+  "id": "p06",
+  "number": 6,
+  "version": "v01",
+  "slug": "npu_apps",
+  "nav_title": "응용 확장",
+  "name": "응용 확장",
+  "days": 2,
+  "mode": "soc",
+  "demo": "5장 비트스트림에 ELF만 바꿔 PC가 보낸 28×28 손글씨를 NPU가 분류해 7세그먼트·LED에 띄우고(6-1), 고른 응용 2개(센서 감시·보안 모델 적재 등)를 같은 방식으로 시연한다.",
+  "goal": "5장 SoC 위에 응용 올리기 — 6-1 손글씨 인식은 공통, 6-2~6-5 중 2개 선택 (나머지는 자습).",
+  "top": {
+    "file": "part03/ch21/rtl/basys3_soc21_top.v",
+    "module": "basys3_soc21_top"
+  },
+  "diagram": "p06/diagrams/app_map",
+  "diagram_label": "6장 응용 지도",
+  "diagram_note": "도면 원본: <code>p06/diagrams/app_map.json</code> (svg-flow-editor, <code>p06/diagrams/make_app_map.py</code>가 이 장 서브젝트 목록에서 만든다). 아래 주소맵·포트는 5장과 같은 21장 비트스트림이다.",
+  "plan_note": "6-1은 모두 하고, 6-2~6-5 중 2개를 골라 보드에서 확인합니다. 6-1·6-3·6-5는 5장 비트스트림에 ELF만 바꾸고, 6-4는 30장 비트스트림(21장 + 모터 GPIO), 6-2는 RTL만입니다.",
+  "soc_summary": "part03/ch21/validation/soc_summary.md",
+  "checklist": "part03/ch27/docs/BOARD_CHECKLIST.md",
+  "skeleton": [
+    "p06/diagrams/make_app_map.py"
+  ],
+  "tb": [],
+  "ref": [],
+  "run": "LEVEL=sim bash part03/ch27/scripts/run_all.sh",
+  "host": "",
+  "vivado_tcl": "part03/ch21/synth/soc_npu_bd.tcl",
+  "sw_label": "",
+  "sw_bits": 0,
+  "led_note": "",
+  "evidence": {
+    "rtl_log": "part03/ch27/validation/run_all_summary.md",
+    "vivado": "part03/ch21/validation/soc_summary.md"
+  },
+  "project_synth": {
+    "path": "part03/ch21/validation/soc_summary.md",
+    "regex": "WNS (?P<wns>[+-][\\d.]+) ns, WHS (?P<whs>[+-][\\d.]+) ns",
+    "src": "21장 SoC 배선 후, 안 A — 6-1·6-3·6-5 공용"
+  },
+  "imports": [
+    "5장: 21장 비트스트림·XSA (<code>basys3_soc21_top.bit</code>) — 6-1·6-3·6-5는 이것 그대로",
+    "5장: <code>part03/ch22/sw/npu_driver.c</code> · <code>npu_io_xil.c</code> (NPU 드라이버)",
+    "5장: <code>part03/common/sw/p3_seg7.h</code> (표준 7세그먼트 IP)",
+    "4장: 784 INT8 모델 (구 18장 <code>mnist_linear_f32.json</code> → 6-1 MODEL_ID f16c4f12)",
+    "1장: <code>part03/ch02/rtl/dsp_multiplier.v</code> (6-2 합성곱의 곱셈기)"
+  ],
+  "source_note": "6장 코드·빌드·증거는 VS Code 판(커밋 ddaaf66)의 part03/ch26·28~31을 고치지 않고 가져왔다 (docs/plan/part03_snapshot.md). 서브젝트 시뮬레이션 5개는 웹에서 다시 돌렸다 (아래 각 절의 로그는 VS Code 기록).",
+  "prep": [
+    "5장을 끝내 21장 비트스트림과 XSA가 있어야 합니다. 보드는 USB 케이블 하나, 외부 회로는 연결하지 않습니다 (6-4 2단계 B24만 예외, 사용자 판단).",
+    "PC 도구: <code>python3</code>, <code>pip install pyserial pillow numpy</code> (6-5는 <code>cryptography</code>로 기준 모델 대조). 호스트 도구가 시리얼 포트를 쓰므로 Vitis 터미널은 닫습니다.",
+    "서브젝트 고르기: 6-1은 공통. 6-2(합성곱 RTL)·6-3(센서 감시)·6-4(모터 안전)·6-5(보안 모델 적재) 중 2개. 보드에서 바로 되는 것은 6-3·6-5입니다."
+  ],
+  "subjects": [
+    {
+      "code": "6-1",
+      "ch": "ch28",
+      "title": "손글씨 숫자 인식 (공통)",
+      "stage": 1,
+      "when": "1일 오전",
+      "app": "elf",
+      "common": true,
+      "see": "<code>digit_app.elf</code> 실행 → 7세그먼트 <code>F16C</code>. PC에서 <code>p3_digit_host.py</code>로 28×28 그림을 보내면 보드 클래스 = PC 골든 클래스(22장 모두), 마지막에 7세그먼트 <code>07 _7</code>·LED7. 깨진 프레임 11종은 거부하고 <code>E</code>+코드.",
+      "board_items": [
+        "B9",
+        "B10",
+        "B11",
+        "B12",
+        "B13",
+        "B13a"
+      ],
+      "board_note": "5장 비트스트림 + <code>digit_app.elf</code>. PC 호스트: <code>python3 part03/ch28/host/p3_digit_host.py --port &lt;포트&gt; …</code>",
+      "chapter": {
+        "id": "part03/ch28",
+        "version": "VS Code 판",
+        "new": [
+          "part03/ch28/sw/main.c",
+          "part03/ch28/sw/digit_app.h",
+          "part03/ch28/sw/digit_app.c",
+          "part03/ch28/sw/digit_io.h",
+          "part03/ch28/sw/digit_io_xil.c",
+          "part03/ch28/host/p3_digit_host.py"
+        ],
+        "tb": [
+          "part03/ch28/host/digit_cosim_main.c",
+          "part03/ch28/host/digit_io_host.c",
+          "part03/ch28/tb/tb_p3_fnd_scan.sv"
+        ],
+        "ref": [
+          "part03/ch28/reference/digit_reference.py"
+        ],
+        "run": "bash part03/ch28/scripts/run_sim.sh   # 호스트 → UART 프레임 → C 펌웨어 → AXI NPU RTL 협동 시뮬레이션 (약 6분)",
+        "checks": [
+          [
+            "DIGIT_HOST_SUMMARY images=22 scores_match=22 display_ok=22",
+            "그림 22장: 보드(RTL) 점수·클래스·표시가 PC 골든과 같음, 라벨 정답 19/22"
+          ],
+          [
+            "error_suite=11/11",
+            "CRC·길이·MODEL_ID·범위 오류 등 11종 거부, 이후 정상 프레임 복구"
+          ],
+          [
+            "SOC28_RTL_SIM_PASS checks=15/15",
+            "안 A SoC 전체 xsim: NPU 7 = CPU 7, 점수 = 기준 모델, 표준 7세그먼트 IP·LED 핀 대조 (3시간 7분)"
+          ],
+          [
+            "ELF_MEM_PASS",
+            "Vitis ELF가 LMB 64 KB 안에 들어감 (안 A 플랫폼)"
+          ]
+        ],
+        "evidence": {
+          "rtl_log": "part03/ch28/validation/rtl_sim.log",
+          "pattern": "_PASS|SUMMARY",
+          "date": "2026-11-19",
+          "host_model_pattern": "\\w*REFERENCE_SELFTEST_PASS"
+        },
+        "vivado": {
+          "mode": "none"
+        },
+        "vivado_ran": false,
+        "extra_gates": [
+          {
+            "name": "ELF_MEM_PASS",
+            "path": "part03/ch28/validation/build_sw.log",
+            "pattern": "ELF_MEM_PASS"
+          },
+          {
+            "name": "SOC28_RTL_SIM_PASS",
+            "path": "part03/ch28/validation/soc_sim_mapA_20261120.log",
+            "pattern": "SOC28_RTL_SIM_PASS"
+          }
+        ]
+      }
+    },
+    {
+      "code": "6-2",
+      "ch": "ch26",
+      "title": "3×3 합성곱 (선택, RTL)",
+      "stage": 2,
+      "when": "1일 오후",
+      "app": "none",
+      "see": "보드 없음 (AXI 래퍼가 없어 SoC에 붙지 않는다). 8×8 그림 26장을 3×3 커널로 합성곱해 6×6 출력 936개가 Python과 비트 단위로 같음을 시뮬레이션으로 본다.",
+      "board_items": [],
+      "board_note": "보드 항목 없음 — RTL 시뮬레이션과 OOC 합성만. SoC 연결(AXI 래퍼)은 7장 종합과제 후보로 남긴다.",
+      "chapter": {
+        "id": "part03/ch26",
+        "version": "VS Code 판",
+        "new": [
+          "part03/ch26/rtl/p3_conv3x3_8x8.v"
+        ],
+        "tb": [
+          "part03/ch26/tb/tb_p3_conv3x3_8x8.sv"
+        ],
+        "ref": [
+          "part03/ch26/reference/conv_reference.py"
+        ],
+        "run": "bash part03/ch26/scripts/run_sim.sh",
+        "checks": [
+          [
+            "RTL_SIM_PASS CONV3X3 frames=26 outputs_per_frame=36",
+            "26장 × 36출력, 지연 5클록, 버블·last 오류 4종 확인"
+          ],
+          [
+            "PYTHON_RTL_COMPARE_PASS outputs=936 bit_exact=1",
+            "Python 기준과 비트 단위로 같음"
+          ]
+        ],
+        "evidence": {
+          "rtl_log": "part03/ch26/validation/rtl_sim.log",
+          "pattern": "_PASS",
+          "date": "2026-11-18"
+        },
+        "vivado": {
+          "mode": "ooc"
+        },
+        "vivado_ran": true,
+        "synth_md": {
+          "path": "part03/ch26/validation/synth_ooc_summary.md",
+          "after": "## OOC 배치·배선 후",
+          "rows": [
+            "CONV3X3 INT8"
+          ],
+          "src": "OOC"
+        }
+      }
+    },
+    {
+      "code": "6-3",
+      "ch": "ch29",
+      "title": "센서 상태 감시",
+      "stage": 3,
+      "when": "1일 오후",
+      "app": "elf",
+      "see": "<code>sensor_app.elf</code> 실행 → 7세그먼트 <code>3 _00</code>(UNKNOWN). PC가 가상 센서 창을 보내면 규칙 검사 → NPU 3상태 → 경보 정책 결과가 UART·7세그먼트·LED에 나오고, FAULT는 ACK 전까지 래치(점·LED13).",
+      "board_items": [
+        "B14",
+        "B15",
+        "B16",
+        "B17",
+        "B17a"
+      ],
+      "board_note": "5장 비트스트림 + <code>sensor_app.elf</code>. 센서는 연결하지 않는다 (가상 센서 값을 UART로).",
+      "chapter": {
+        "id": "part03/ch29",
+        "version": "VS Code 판",
+        "new": [
+          "part03/ch29/sw/main.c",
+          "part03/ch29/sw/sensor_app.h",
+          "part03/ch29/sw/sensor_app.c",
+          "part03/ch29/sw/sensor_io.h",
+          "part03/ch29/sw/sensor_io_xil.c",
+          "part03/ch29/rtl/p3_alarm_policy.v",
+          "part03/ch29/host/p3_sensor_host.py"
+        ],
+        "tb": [
+          "part03/ch29/host/sensor_cosim_main.c",
+          "part03/ch29/host/sensor_io_host.c",
+          "part03/ch29/tb/tb_p3_alarm_policy.sv"
+        ],
+        "ref": [
+          "part03/ch29/reference/sensor_reference.py",
+          "part03/ch29/reference/train_sensor_model.py"
+        ],
+        "run": "bash part03/ch29/scripts/run_sim.sh   # 정책 RTL + 협동 시뮬레이션 + 변이 시험 (약 10분)",
+        "checks": [
+          [
+            "SENSOR_HOST_SUMMARY checks=109/109",
+            "가상 센서 창 60개·오류 시나리오: 보드(RTL) 판정이 기준 모델과 같음, 정답 57/60"
+          ],
+          [
+            "MUTANT … KILLED",
+            "펌웨어 정책 변이(래치 없음·ACK 항상 등)를 모두 잡음"
+          ],
+          [
+            "ELF_MEM_PASS",
+            "Vitis ELF 빌드 (안 A 플랫폼)"
+          ]
+        ],
+        "evidence": {
+          "rtl_log": "part03/ch29/validation/rtl_sim.log",
+          "pattern": "_PASS|SUMMARY|KILLED",
+          "date": "2026-11-19",
+          "host_model_pattern": "\\w*REFERENCE_SELFTEST_PASS"
+        },
+        "vivado": {
+          "mode": "ooc"
+        },
+        "vivado_ran": true,
+        "synth_md": {
+          "path": "part03/ch29/validation/synth_ooc_summary.md",
+          "after": "## OOC 배치·배선 후",
+          "rows": [
+            "ALARM_POLICY"
+          ],
+          "src": "OOC"
+        },
+        "extra_gates": [
+          {
+            "name": "ELF_MEM_PASS",
+            "path": "part03/ch29/validation/build_sw.log",
+            "pattern": "ELF_MEM_PASS"
+          }
+        ]
+      }
+    },
+    {
+      "code": "6-4",
+      "ch": "ch30",
+      "title": "모터 안전 (가상 부하)",
+      "stage": 4,
+      "when": "2일 오전",
+      "app": "own",
+      "see": "30장 비트스트림(21장 SoC + 모터 GPIO 0x4007_0000) + <code>motor_app.elf</code>, 모터는 연결하지 않고 LED로 본다: JB4가 열려 있으면 LED9(트립), 점퍼 뒤 호스트 단계에서 LED11·12가 NORMAL 80 % → WARNING 30 % → NPU FAULT 정지. btnU(비상정지)·리밋·고장 스위치는 즉시 정지.",
+      "board_items": [
+        "B18",
+        "B19",
+        "B20",
+        "B21",
+        "B22",
+        "B23",
+        "B23a",
+        "B23b"
+      ],
+      "board_note": "30장 비트스트림 <code>basys3_soc30_top.bit</code>(안 A 재빌드) + <code>motor_app.elf</code>. 1단계는 가상 부하(LED)만. 실제 드라이버·모터(B24)는 따로, 사용자 판단.",
+      "chapter": {
+        "id": "part03/ch30",
+        "version": "VS Code 판",
+        "new": [
+          "part03/ch30/rtl/p3_motor_safety.v",
+          "part03/ch30/rtl/p3_motor_safety_bd.v",
+          "part03/ch30/rtl/basys3_soc30_top.v",
+          "part03/ch30/constraints/basys3_soc30.xdc",
+          "part03/ch30/synth/soc30_bd.tcl",
+          "part03/ch30/sw/main.c",
+          "part03/ch30/sw/motor_app.h",
+          "part03/ch30/sw/motor_app.c",
+          "part03/ch30/host/p3_motor_host.py"
+        ],
+        "tb": [
+          "part03/ch30/tb/tb_p3_motor_safety.sv",
+          "part03/ch30/tb/tb_p3_motor_bridge.sv",
+          "part03/ch30/host/motor_cosim_main.c"
+        ],
+        "ref": [
+          "part03/ch30/reference/motor_reference.py"
+        ],
+        "run": "bash part03/ch30/scripts/run_sim.sh   # 안전 코어 RTL + 협동 시뮬레이션",
+        "checks": [
+          [
+            "RTL_SIM_PASS MOTOR_SAFETY",
+            "안전 코어가 클록 단위 기준 모델과 같음 (트립·램프·데드타임)"
+          ],
+          [
+            "PYTHON_RTL_COMPARE_PASS … invariants=0",
+            "호스트 → 펌웨어(29장 정책) → NPU·모터 RTL에서 안전 불변식 위반 0"
+          ],
+          [
+            "ADDR_MAP_A_PASS · IRQ_MAP_A_PASS",
+            "30장 SoC = 21장 8줄 + 모터 GPIO 0x4007_0000, 인터럽트는 21장과 같음 (모터는 폴링)"
+          ],
+          [
+            "TIMING WNS=0.357 WHS=0.030",
+            "30장 SoC 배선 후, ELF_MEM_PASS (motor_app 53,748 B)"
+          ]
+        ],
+        "evidence": {
+          "rtl_log": "part03/ch30/validation/rtl_sim.log",
+          "pattern": "_PASS|SUMMARY",
+          "date": "2026-11-19",
+          "host_model_pattern": "\\w*REFERENCE_SELFTEST_PASS"
+        },
+        "vivado": {
+          "mode": "ooc"
+        },
+        "vivado_ran": true,
+        "synth_md": {
+          "path": "part03/ch30/validation/synth_ooc_summary.md",
+          "after": "## OOC 배치·배선 후",
+          "rows": [
+            "MOTOR_SAFETY"
+          ],
+          "src": "OOC"
+        },
+        "extra_gates": [
+          {
+            "name": "ADDR_MAP_A_PASS",
+            "path": "part03/ch30/validation/build_soc_mapA_20261120.log",
+            "pattern": "ADDR_MAP_A_PASS"
+          },
+          {
+            "name": "ELF_MEM_PASS",
+            "path": "part03/ch30/validation/build_soc_mapA_20261120.log",
+            "pattern": "ELF_MEM_PASS"
+          }
+        ],
+        "soc_timing": {
+          "path": "part03/ch30/validation/build_soc_mapA_20261120.log",
+          "regex": "WNS=(?P<wns>-?[\\d.]+) WHS=(?P<whs>-?[\\d.]+)",
+          "src": "30장 SoC 배선 후, 안 A"
+        }
+      }
+    },
+    {
+      "code": "6-5",
+      "ch": "ch31",
+      "title": "보안 모델 적재",
+      "stage": 5,
+      "when": "2일 오전",
+      "app": "elf",
+      "see": "<code>secure_app.elf</code> 실행 뒤 PC가 AES-128-CTR로 암호화하고 HMAC-SHA-256으로 인증한 새 모델을 보내면 보드가 받아들여 7세그먼트 <code>b749</code>(모델 B). 변조·재전송 등 17종은 거부.",
+      "board_items": [
+        "B25",
+        "B26",
+        "B26a"
+      ],
+      "board_note": "5장 비트스트림 + <code>secure_app.elf</code> (저장소 TEST 키로 빌드).",
+      "chapter": {
+        "id": "part03/ch31",
+        "version": "VS Code 판",
+        "new": [
+          "part03/ch31/sw/main.c",
+          "part03/ch31/sw/p3_crypto.h",
+          "part03/ch31/sw/p3_crypto.c",
+          "part03/ch31/sw/secure_app.h",
+          "part03/ch31/sw/secure_app.c",
+          "part03/ch31/host/p3_secure_host.py",
+          "part03/ch31/rtl/p3_aes128_enc.v",
+          "part03/ch31/rtl/p3_sha256_core.v"
+        ],
+        "tb": [
+          "part03/ch31/tb/tb_p3_aes128.sv",
+          "part03/ch31/tb/tb_p3_sha256.sv",
+          "part03/ch31/host/secure_cosim_main.c",
+          "part03/ch31/host/crypto_selftest.c"
+        ],
+        "ref": [
+          "part03/ch31/reference/secure_reference.py",
+          "part03/ch31/reference/train_model_b.py"
+        ],
+        "run": "bash part03/ch31/scripts/run_sim.sh",
+        "checks": [
+          [
+            "C_CRYPTO_KAT_PASS · RTL_SIM_PASS AES128·SHA256",
+            "펌웨어 C 암호와 독립 RTL 코어가 NIST 정답 벡터와 같음"
+          ],
+          [
+            "SECURE_HOST_PASS · STEPS_PASS 35",
+            "모델 B 적재·추론, 거부 17종, 모델 A 재적재"
+          ],
+          [
+            "RTL_MUTATION_SUMMARY killed=6 total=6",
+            "AES·SHA RTL 변이 6개 모두 잡음"
+          ],
+          [
+            "ELF_MEM_PASS",
+            "Vitis ELF 빌드 (안 A 플랫폼)"
+          ]
+        ],
+        "evidence": {
+          "rtl_log": "part03/ch31/validation/rtl_sim.log",
+          "pattern": "_PASS|SUMMARY",
+          "date": "2026-11-19",
+          "host_model_pattern": "\\w*REFERENCE_SELFTEST_PASS"
+        },
+        "vivado": {
+          "mode": "ooc"
+        },
+        "vivado_ran": true,
+        "synth_md": {
+          "path": "part03/ch31/validation/synth_ooc_summary.md",
+          "after": "## OOC 배치·배선 후",
+          "rows": [
+            "AES128",
+            "SHA256"
+          ],
+          "src": "OOC"
+        },
+        "extra_gates": [
+          {
+            "name": "ELF_MEM_PASS",
+            "path": "part03/ch31/validation/build_sw.log",
+            "pattern": "ELF_MEM_PASS"
+          }
+        ]
+      }
+    }
+  ],
+  "demo_items": [
+    "B9",
+    "B10",
+    "B11",
+    "B14",
+    "B15",
+    "B16",
+    "B25",
+    "B26a"
+  ],
+  "demo_intro": "5장 비트스트림 하나에 ELF만 바꿔 6-1(공통)과 고른 응용을 차례로 시연합니다. 아래는 6-1 + 6-3 + 6-5 조합의 점검표 항목입니다. 기대값은 협동 시뮬레이션·빌드에서 얻은 값이고, 실물 실행은 아직 하지 않았습니다.",
+  "results": [
+    [
+      "6-1 그림 22장 (협동 시뮬레이션)",
+      "part03/ch28/validation/rtl_sim.log",
+      "DIGIT_HOST_SUMMARY"
+    ],
+    [
+      "6-3 센서 창 (협동 시뮬레이션)",
+      "part03/ch29/validation/rtl_sim.log",
+      "SENSOR_HOST_SUMMARY"
+    ],
+    [
+      "6-5 암호 RTL 변이",
+      "part03/ch31/validation/rtl_sim.log",
+      "RTL_MUTATION_SUMMARY"
+    ]
+  ],
+  "results_note": "정확도(19/22, 57/60)는 시험 그림·합성 센서 데이터 기준이며, 보드 결과가 PC 골든과 같다는 것이 이 장의 판정이다. 실제 손글씨·센서 정확도는 주장하지 않는다.",
+  "port_notes": {
+    "clk": "Basys3 W5 외부 100 MHz (11장 clk_wiz가 100 MHz 시스템 클록으로)",
+    "btnC": "SoC 리셋 (Active-High, 11장 그대로)",
+    "btn": "btn[3]=U·[2]=D·[1]=L·[0]=R → axi_gpio_btn 0x4001_0000, INTC In3",
+    "sw": "슬라이드 스위치 → axi_gpio_0 두 번째 채널 (0x4000_0000)",
+    "led": "LED 16개 ← axi_gpio_0 (22장: 클래스 LED 하나)",
+    "RsRx": "USB-UART PC → FPGA (axi_uartlite 0x4002_0000)",
+    "RsTx": "USB-UART FPGA → PC, 115200 8N1",
+    "seg": "7세그먼트 {g..a}, Low 활성 ← ip_seg7 0x4006_0000",
+    "dp": "7세그먼트 점, Low 활성",
+    "an": "자리 선택 4개, Low 활성"
+  },
+  "handoff": [
+    [
+      "6-1 손글씨 전송 프로토콜 (part03/ch28)",
+      "7장 종합과제 기본 틀 (그림 → UART → NPU → 표시)"
+    ],
+    [
+      "part03/ch26/rtl/p3_conv3x3_8x8.v",
+      "7장 후보: AXI 래퍼를 붙여 CNN 앞단으로"
+    ],
+    [
+      "30장 비트스트림 basys3_soc30_top.bit (0x4007_0000 모터 GPIO)",
+      "7장: 모터·서보를 쓰는 과제의 출발점 (주소맵 안 A + 1줄)"
+    ]
+  ]
+}

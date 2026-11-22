@@ -1,0 +1,10 @@
+HW (21장 그대로) 0dfa2eaf38100392 soc21_npu.xsa, db889f14774dafa9 basys3_soc21_top.bit
+DIGIT_HEADER_DONE model_id=f16c4f12
+#define XPAR_AXI_GPIO_0_BASEADDR 0x40000000
+#define XPAR_AXI_UARTLITE_0_BASEADDR 0x40020000
+#define XPAR_IP06_SEG7_BASEADDR 0x40060000
+#define XPAR_P3_NPU_0_BASEADDR 0x44a00000
+ELF digit_app text=27748 data=204 bss=8324 total=36276 sha256=0775b4c32e68a852
+ELF_MEM stack=4096 heap=2052 stack_end=36280 lmb=65536
+ELF_MEM_PASS
+DIGIT_SW_BUILD_PASS (빌드만, 실물 실행은 사용자와 함께)

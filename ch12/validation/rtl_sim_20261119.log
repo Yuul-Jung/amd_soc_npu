@@ -1,4 +1,5 @@
-# 실행 환경: Icarus Verilog version 12.0 (stable) · Python 3.12.3 · 2026-11-18
+# 실행 환경: Icarus Verilog version 12.0 (stable) · Python 3.13.18 · 2026-11-19
+# (재실행) 12장 npu_engine4 argmax 두 클록 토너먼트 수정 뒤 (2장 Top STAGE 8 타이밍 실패 대응)
 PASS ch00
 PASS ch01
 PASS ch02
@@ -16,23 +17,22 @@ PASS ch11_ch12
 
 | 단계 | 실제 결과 | 로그 |
 |---|---|---|
-| ch00 | RTL_SIM_PASS | <repo>/mini_npu/validation/local_runs/20261118T033010175021430/ch00.log |
-| ch01 | RTL_SIM_PASS | <repo>/mini_npu/validation/local_runs/20261118T033010175021430/ch01.log |
-| ch02 | RTL_SIM_PASS | <repo>/mini_npu/validation/local_runs/20261118T033010175021430/ch02.log |
-| ch03 | RTL_SIM_PASS | <repo>/mini_npu/validation/local_runs/20261118T033010175021430/ch03.log |
-| ch04 | RTL_SIM_PASS | <repo>/mini_npu/validation/local_runs/20261118T033010175021430/ch04.log |
-| ch05 | RTL_SIM_PASS | <repo>/mini_npu/validation/local_runs/20261118T033010175021430/ch05.log |
-| ch06 | RTL_SIM_PASS | <repo>/mini_npu/validation/local_runs/20261118T033010175021430/ch06.log |
-| ch07 | RTL_SIM_PASS | <repo>/mini_npu/validation/local_runs/20261118T033010175021430/ch07.log |
-| ch08 | RTL_SIM_PASS | <repo>/mini_npu/validation/local_runs/20261118T033010175021430/ch08.log |
-| ch09 | RTL_SIM_PASS | <repo>/mini_npu/validation/local_runs/20261118T033010175021430/ch09.log |
-| ch10 | RTL_SIM_PASS | <repo>/mini_npu/validation/local_runs/20261118T033010175021430/ch10.log |
-| dsp_engine | RTL_SIM_PASS | <repo>/mini_npu/validation/local_runs/20261118T033010175021430/dsp_engine.log |
-| ch11_ch12 | RTL_SIM_PASS | <repo>/mini_npu/validation/local_runs/20261118T033010175021430/ch11_ch12.log |
+| ch00 | RTL_SIM_PASS | <repo>/mini_npu/validation/local_runs/20261119T082254785716479/ch00.log |
+| ch01 | RTL_SIM_PASS | <repo>/mini_npu/validation/local_runs/20261119T082254785716479/ch01.log |
+| ch02 | RTL_SIM_PASS | <repo>/mini_npu/validation/local_runs/20261119T082254785716479/ch02.log |
+| ch03 | RTL_SIM_PASS | <repo>/mini_npu/validation/local_runs/20261119T082254785716479/ch03.log |
+| ch04 | RTL_SIM_PASS | <repo>/mini_npu/validation/local_runs/20261119T082254785716479/ch04.log |
+| ch05 | RTL_SIM_PASS | <repo>/mini_npu/validation/local_runs/20261119T082254785716479/ch05.log |
+| ch06 | RTL_SIM_PASS | <repo>/mini_npu/validation/local_runs/20261119T082254785716479/ch06.log |
+| ch07 | RTL_SIM_PASS | <repo>/mini_npu/validation/local_runs/20261119T082254785716479/ch07.log |
+| ch08 | RTL_SIM_PASS | <repo>/mini_npu/validation/local_runs/20261119T082254785716479/ch08.log |
+| ch09 | RTL_SIM_PASS | <repo>/mini_npu/validation/local_runs/20261119T082254785716479/ch09.log |
+| ch10 | RTL_SIM_PASS | <repo>/mini_npu/validation/local_runs/20261119T082254785716479/ch10.log |
+| dsp_engine | RTL_SIM_PASS | <repo>/mini_npu/validation/local_runs/20261119T082254785716479/dsp_engine.log |
+| ch11_ch12 | RTL_SIM_PASS | <repo>/mini_npu/validation/local_runs/20261119T082254785716479/ch11_ch12.log |
 
 **실행 완료:** 원본 01~10장 독립 실험 + 신규 준비·DSP 엔진·UART 전체 회귀.
 **중요:** SYNTH_TIMING_PASS, BOARD_PASS를 뜻하지 않음.
-
 ## run_adversarial.sh
 warning: Some design elements have no explicit time unit and/or
        : time precision. This may cause confusing timing results.
@@ -94,4 +94,4 @@ A6_RESET_DURING_RESPONSE_PASS
 A7_ABORTED_COMMAND_NO_TIMEOUT_OBSERVED recovered_by_reset=1
 A8_FRAMING_ERROR_PASS
 NPU_UART_ADVERSARIAL_SIM_PASS tests=8 responses=43
-<repo>/mini_npu/tb/tb_npu_uart_adversarial.sv:187: $finish called at 51292620000 (1ps)
+<repo>/mini_npu/tb/tb_npu_uart_adversarial.sv:187: $finish called at 51292680000 (1ps)

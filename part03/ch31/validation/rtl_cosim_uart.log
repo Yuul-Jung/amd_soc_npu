@@ -1,0 +1,69 @@
+P3_SECURE READY model=18496ca4 model_ok=1 bias_rc=0 key_fp=e7950043 test_key=1 last_seq=0
+DISP fnd=000f1849 led=2000
+INFER seq=10 model=18496ca4 guard=OK npu=0 cpu=0 match=1 scores=3219,1390,-4609
+DISP fnd=000f1849 led=2000
+INFER seq=11 model=18496ca4 guard=OK npu=1 cpu=1 match=1 scores=-5367,2746,2621
+DISP fnd=000f1849 led=2000
+INFER seq=12 model=18496ca4 guard=OK npu=2 cpu=2 match=1 scores=-6901,2402,4499
+DISP fnd=000f1849 led=2000
+INFER seq=13 model=18496ca4 guard=OK npu=1 cpu=1 match=1 scores=1459,1566,-3025
+DISP fnd=000f1849 led=2000
+INFER seq=14 model=18496ca4 guard=OK npu=1 cpu=1 match=1 scores=1695,1702,-3397
+DISP fnd=000f1849 led=2000
+SECURE result=COMMIT seq=1 model=b7491f99 bank=1 last_seq=1
+DISP fnd=000fb749 led=2001
+INFER seq=20 model=b7491f99 guard=OK npu=0 cpu=0 match=1 scores=3559,1539,-5027
+DISP fnd=000fb749 led=2001
+INFER seq=21 model=b7491f99 guard=OK npu=1 cpu=1 match=1 scores=-5283,3217,3047
+DISP fnd=000fb749 led=2001
+INFER seq=22 model=b7491f99 guard=OK npu=2 cpu=2 match=1 scores=-7297,1631,3897
+DISP fnd=000fb749 led=2001
+INFER seq=23 model=b7491f99 guard=OK npu=0 cpu=0 match=1 scores=1671,1555,-3475
+DISP fnd=000fb749 led=2001
+INFER seq=24 model=b7491f99 guard=OK npu=0 cpu=0 match=1 scores=2035,1899,-3707
+DISP fnd=000fb749 led=2001
+SECURE result=REJECT reason=AUTH code=3 seq=2 last_seq=1 active=b7491f99
+DISP fnd=000fb749 led=6001
+SECURE result=REJECT reason=AUTH code=3 seq=2 last_seq=1 active=b7491f99
+DISP fnd=000fb749 led=6001
+SECURE result=REJECT reason=AUTH code=3 seq=3 last_seq=1 active=b7491f99
+DISP fnd=000fb749 led=6001
+SECURE result=REJECT reason=AUTH code=3 seq=2 last_seq=1 active=b7491f99
+DISP fnd=000fb749 led=6001
+SECURE result=REJECT reason=AUTH code=3 seq=2 last_seq=1 active=b7491f99
+DISP fnd=000fb749 led=6001
+SECURE result=REJECT reason=LENGTH code=2 seq=2 last_seq=1 active=b7491f99
+DISP fnd=000fb749 led=6001
+SECURE result=REJECT reason=AUTH code=3 seq=2 last_seq=1 active=b7491f99
+DISP fnd=000fb749 led=6001
+SECURE result=REJECT reason=VERSION code=1 seq=2 last_seq=1 active=b7491f99
+DISP fnd=000fb749 led=6001
+SECURE result=REJECT reason=REPLAY code=4 seq=1 last_seq=1 active=b7491f99
+DISP fnd=000fb749 led=6001
+SECURE result=REJECT reason=NONCE code=5 seq=2 last_seq=1 active=b7491f99
+DISP fnd=000fb749 led=6001
+SECURE result=REJECT reason=AUTH code=3 seq=1000 last_seq=1 active=b7491f99
+DISP fnd=000fb749 led=6001
+SECURE result=REJECT reason=MODEL code=6 seq=3 last_seq=3 active=b7491f99
+DISP fnd=000fb749 led=6001
+SECURE result=REJECT reason=MODEL code=6 seq=4 last_seq=4 active=b7491f99
+DISP fnd=000fb749 led=6001
+SECURE result=REJECT reason=REPLAY code=4 seq=3 last_seq=4 active=b7491f99
+DISP fnd=000fb749 led=6001
+ERROR code=1 name=CRC detail=0 active=b7491f99
+DISP fnd=000fb749 led=6001
+ERROR code=2 name=TIMEOUT detail=0 active=b7491f99
+DISP fnd=000fb749 led=6001
+INFER seq=30 model=b7491f99 guard=OK npu=0 cpu=0 match=1 scores=1671,1555,-3475
+DISP fnd=000fb749 led=6001
+INFER seq=31 model=b7491f99 guard=OK npu=0 cpu=0 match=1 scores=2035,1899,-3707
+DISP fnd=000fb749 led=6001
+SECURE result=REJECT reason=MODEL code=6 seq=5 last_seq=5 active=b7491f99
+DISP fnd=000fb749 led=6001
+SECURE result=COMMIT seq=6 model=18496ca4 bank=0 last_seq=6
+DISP fnd=000f1849 led=2000
+INFER seq=40 model=18496ca4 guard=OK npu=1 cpu=1 match=1 scores=1459,1566,-3025
+DISP fnd=000f1849 led=2000
+INFER seq=41 model=18496ca4 guard=OK npu=1 cpu=1 match=1 scores=1695,1702,-3397
+DISP fnd=000f1849 led=2000
+P3_SECURE READY model=18496ca4 key_fp=e7950043 test_key=1 last_seq=6

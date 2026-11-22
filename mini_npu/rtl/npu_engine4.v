@@ -14,7 +14,7 @@ module npu_engine4(
     output reg [1:0] class_o,
     output reg [163:0] scores_o
 );
-    localparam [2:0] IDLE=0,READ=1,ISSUE=2,DRAIN1=3,DRAIN2=4;
+    localparam [2:0] IDLE=0,READ=1,ISSUE=2,DRAIN1=3,DRAIN2=4,CMP1=5,CMP2=6;
     reg [2:0] state;
     reg [6:0] length_q;
     reg [5:0] index_q;
@@ -56,19 +56,18 @@ module npu_engine4(
     wire signed [40:0] score1=$signed({acc1[39],acc1})+$signed({bias1[39],bias1});
     wire signed [40:0] score2=$signed({acc2[39],acc2})+$signed({bias2[39],bias2});
     wire signed [40:0] score3=$signed({acc3[39],acc3})+$signed({bias3[39],bias3});
-    reg [1:0] best_class;
-    reg signed [40:0] best_score;
-    always @*begin
-        best_class=0;best_score=score0;
-        if(score1>best_score)begin best_score=score1;best_class=1;end
-        if(score2>best_score)begin best_score=score2;best_class=2;end
-        if(score3>best_score)begin best_score=score3;best_class=3;end
-    end
+    // (수정 2026-11-19) argmax를 두 클록 토너먼트로 나눈다. 종전에는 누산값 + Bias 덧셈과 41비트 비교 3번을
+    // 한 클록에 직렬로 해 2장 누적 Top(STAGE 8)에서 WNS -1.952 ns (28단). 동점 규칙(앞 번호)은 그대로.
+    //   DRAIN2: 점수 등록 → CMP1: (0,1)·(2,3) 쌍의 승자 등록 → CMP2: 두 승자 비교, class_o·done
+    wire signed [40:0] s0=scores_o[40:0],s1=scores_o[81:41],s2=scores_o[122:82],s3=scores_o[163:123];
+    reg [1:0] w01_q,w23_q;
+    reg signed [40:0] v01_q,v23_q;
 
     always @(posedge clk)begin
         if(!resetn)begin
             state<=IDLE;busy_o<=0;done_o<=0;error_o<=0;
             class_o<=0;scores_o<=0;length_q<=0;index_q<=0;
+            w01_q<=0;w23_q<=0;v01_q<=0;v23_q<=0;
             x_seen<=0;w0_seen<=0;w1_seen<=0;w2_seen<=0;w3_seen<=0;
             bias0<=0;bias1<=0;bias2<=0;bias3<=0;
             x_sample<=0;w_sample0<=0;w_sample1<=0;w_sample2<=0;w_sample3<=0;
@@ -111,7 +110,16 @@ module npu_engine4(
                 DRAIN1:state<=DRAIN2;
                 DRAIN2:begin
                     scores_o<={score3,score2,score1,score0};
-                    class_o<=best_class;done_o<=1;busy_o<=0;state<=IDLE;
+                    state<=CMP1;
+                end
+                CMP1:begin
+                    if(s1>s0)begin w01_q<=1;v01_q<=s1;end else begin w01_q<=0;v01_q<=s0;end
+                    if(s3>s2)begin w23_q<=3;v23_q<=s3;end else begin w23_q<=2;v23_q<=s2;end
+                    state<=CMP2;
+                end
+                CMP2:begin
+                    class_o<=(v23_q>v01_q) ? w23_q : w01_q;
+                    done_o<=1;busy_o<=0;state<=IDLE;
                 end
                 default:begin state<=IDLE;busy_o<=0;error_o<=1;end
             endcase

@@ -19,6 +19,8 @@ jobs:
         run: python3 tools/check_static.py
       - name: Guide sync check (chapter.json·코드·증거 ↔ HTML)
         run: python3 tools/guide/build_guides.py --check
+      - name: Project guide sync check (project.json·chapter.json·증거 ↔ 장 페이지)
+        run: python3 tools/guide/build_projects.py --check
       - name: 제1부·제2부 안내서 동기·그림 개수 검사 (원본 ↔ HTML)
         run: |
           pip install -q beautifulsoup4==4.15.0 lxml==6.1.3
@@ -42,6 +44,8 @@ jobs:
         run: bash ch02/scripts/run_sim.sh
       - name: Run ch03 MAC Pipeline
         run: bash ch03/scripts/run_sim.sh
+      - name: Run 1장 Top (p01, STAGE 1~4)
+        run: bash p01/scripts/run_sim.sh
       - name: Run ch04 BRAM
         run: bash ch04/scripts/run_sim.sh
       - name: Run ch05 Fixed Quantizer
@@ -58,6 +62,20 @@ jobs:
         run: bash ch10/scripts/run_sim.sh
       - name: Run mini_npu batch (ch11+ch12)
         run: bash mini_npu/scripts/run_batch_00_12.sh
+      - name: Run 2장 Top (p02, STAGE 1~8)
+        run: bash p02/scripts/run_sim.sh
+      - name: Run part03 ch13~16 (VS Code 판 사본, 3장 서브젝트)
+        run: for c in 13 14 15 16; do bash part03/ch$c/scripts/run_sim.sh; done
+      - name: Run 3장 Top (p03, STAGE 1~4, MNIST 내려받기 포함)
+        run: bash p03/scripts/run_sim.sh
+      - name: Run part03 ch17~19 (VS Code 판 사본, 4장 서브젝트)
+        run: for c in 17 18 19; do bash part03/ch$c/scripts/run_sim.sh; done
+      - name: Run 4장 Top (p04, STAGE 1~4)
+        run: bash p04/scripts/run_sim.sh
+      - name: Run part03 ch20·ch22 (VS Code 판 사본, 5장 서브젝트 AXI IP·C 드라이버 협동 시뮬레이션)
+        run: for c in 20 22; do bash part03/ch$c/scripts/run_sim.sh; done
+      - name: Run part03 ch26·ch31 (6장 서브젝트, 짧은 것만 — 28~30장 협동 시뮬레이션은 6~13분이라 수동)
+        run: for c in 26 31; do bash part03/ch$c/scripts/run_sim.sh; done
       - name: Run ch13 Input Loader
         run: bash ch13/scripts/run_sim.sh
       - name: Run ch14 Group10 Scheduler

@@ -1,0 +1,41 @@
+START 2026-11-20 09:09:59
+SOC_FRAME bytes=795 index=0 label=7 golden_class=7
+ELF digit_app sha256=077ca88b0cf043a9 (보드와 같은 ELF)
+UART< P3_DIGIT READY model=F16C4F12 model_ok=1 mode=784x8 tiles=13 bias_rc=0  (t=27456410000)
+UART< DISP fnd=000FF16C led=0000  (t=29875610000)
+UART< RESULT img=40 model=F16C4F12 npu_class=7 cpu_class=7 match=1 rc=0 status=00000C12 junk=0 scores=-34082,-171877,-20186,44571,-67625,-20574,-141553,112746,-23315,13460  (t=153531290000)
+UART< DISP fnd=000D2807 led=8080  (t=155950490000)
+SOC28_SIM_END
+BOOT_DONE t_ns=29875610
+FND digit=0 an=1110 seg=46 dp=1
+FND digit=1 an=1101 seg=02 dp=1
+FND digit=2 an=1011 seg=79 dp=1
+FND digit=3 an=0111 seg=0e dp=1
+PIN led=0000
+SEND bytes=795 t_ns=40361365
+RESPONSE_DONE t_ns=155950490
+FND digit=0 an=1110 seg=78 dp=1
+FND digit=1 off
+FND digit=2 an=1011 seg=00 dp=1
+FND digit=3 an=0111 seg=24 dp=1
+PIN led=8080
+SOC28_SIM_END t_ns=166436245
+SOCCHK ready_line PASS :: P3_DIGIT READY model=F16C4F12 model_ok=1 mode=784x8 tiles=13 bias_rc=0
+SOCCHK boot_disp PASS :: ['DISP fnd=000FF16C led=0000']
+SOCCHK boot_fnd_digit0 PASS :: pin=(14, 70, 1) expect=(14, 70, 1)
+SOCCHK boot_fnd_digit1 PASS :: pin=(13, 2, 1) expect=(13, 2, 1)
+SOCCHK boot_fnd_digit2 PASS :: pin=(11, 121, 1) expect=(11, 121, 1)
+SOCCHK boot_fnd_digit3 PASS :: pin=(7, 14, 1) expect=(7, 14, 1)
+SOCCHK boot_led_pin PASS :: [0]
+SOCCHK result_line PASS :: RESULT img=40 model=F16C4F12 npu_class=7 cpu_class=7 match=1 rc=0 status=00000C12 junk=0 scores=-34082,-171877,-20186,44571,-67625,-20574,-141553,112746,-23315,13460
+SOCCHK scores_eq_golden PASS :: [-34082, -171877, -20186, 44571, -67625, -20574, -141553, 112746, -23315, 13460] vs [-34082, -171877, -20186, 44571, -67625, -20574, -141553, 112746, -23315, 13460]
+SOCCHK result_disp PASS :: ['DISP fnd=000D2807 led=8080']
+SOCCHK result_fnd_digit0 PASS :: pin=(14, 120, 1) expect=(14, 120, 1)
+SOCCHK result_fnd_digit1 PASS :: pin=None expect=None
+SOCCHK result_fnd_digit2 PASS :: pin=(11, 0, 1) expect=(11, 0, 1)
+SOCCHK result_fnd_digit3 PASS :: pin=(7, 36, 1) expect=(7, 36, 1)
+SOCCHK result_led_pin PASS :: [32896]
+SOC_TIMELINE boot_done_ms=29.876 send_start_ms=40.361 response_done_ms=155.950 end_ms=166.436
+SOC28_RTL_SIM_PASS checks=15/15
+EXIT 0
+END 2026-11-20 12:17:12

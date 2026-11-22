@@ -1,0 +1,241 @@
+{
+  "id": "p04",
+  "number": 4,
+  "version": "v01",
+  "slug": "tile784",
+  "nav_title": "784 가속기 설계 공간",
+  "name": "784 가속기 설계 공간",
+  "days": 1,
+  "demo": "PC가 28×28 원본 손글씨를 타일 13개로 나눠 보내면 보드가 3장 코어로 784 입력을 누산해 분류한다. 같은 그림이 INT8에서는 4, INT16에서는 9(정답)로 갈리고, 1PE·4PE·8PE 클록 수가 보드에서 나온다.",
+  "goal": "28×28 손글씨 → 13타일 누산 → INT8/INT16 차이 → PE 수와 클록. 서브젝트 4개.",
+  "top": {
+    "file": "p04/rtl/basys3_p04_top.v",
+    "module": "basys3_p04_top"
+  },
+  "figures": [
+    {
+      "file": "p04/rtl/p04_bank.v",
+      "module": "p04_bank",
+      "note": "784 가속기 묶음: 4-2·4-3의 타일 엔진은 안에서 3-2 코어를 그대로 쓰고, 4-4의 PE 구성도 같은 코어를 #(64,1)·#(64,10)·#(64,6)+#(64,4)로 만든다. INT8 x 타일은 3-1 버퍼, INT16 x 타일은 2-1 BRAM."
+    }
+  ],
+  "skeleton": [
+    "p04/rtl/p04_console.v",
+    "p04/rtl/p04_bank.v",
+    "p04/rtl/p04_view.v",
+    "p04/rtl/basys3_p04_top.v",
+    "p04/constraints/basys3_p04.xdc",
+    "p04/vivado/build_p04.tcl",
+    "p04/host/p04_send.py"
+  ],
+  "tb": [
+    "p04/tb/tb_p04_top.sv"
+  ],
+  "ref": [
+    "p04/reference/p04_model.py"
+  ],
+  "run": "bash p04/scripts/run_sim.sh",
+  "host": "p04/host/p04_send.py",
+  "vivado_tcl": "p04/vivado/build_p04.tcl",
+  "sw_label": "",
+  "sw_bits": 0,
+  "sw_note": "스위치는 쓰지 않습니다. 784 추론 한 번은 PC 도구 <code>digit 92 int8</code>(명령 167개, 9,352바이트, 115200 bps로 약 0.8초)으로 보냅니다.",
+  "led_note": "LED[9:0] 마지막 784 추론 클래스 원-핫, LED15 INT8 x 타일 보관, LED14 INT16 x 타일 보관. 7세그먼트는 타일 번호·클래스·클록 수",
+  "evidence": {
+    "rtl_log": "p04/validation/rtl_sim_*.log",
+    "vivado": "p04/validation/vivado_impl_*.txt"
+  },
+  "imports": [
+    "common/rtl/uart_*.v (1-1) · p01/rtl/p01_reset_sync.v · p01_hex4_display.v (1장 뼈대)",
+    "ch05/rtl/fixed_quantizer.v (2-2, 4-1 정밀도 비교 안에서)",
+    "part03/ch04/rtl/bram_sync_buffer.v (2-1과 같은 파일, 4-3 INT16 x 타일)",
+    "part03/ch13/rtl/p3_frame64_buffer.v (3-1, INT8 x 타일) · part03/ch14/rtl/p3_group10_core.v (3-2, 모든 타일 엔진·PE 구성)",
+    "part03/ch02/rtl/dsp_multiplier.v · part03/mini_npu/rtl/npu_dsp_mac_lane.v (1-3·2-8, 코어 안에서)"
+  ],
+  "source_note": "구06장은 이 저장소 코드, 구17~19장은 VS Code 판(커밋 9203bfa)의 part03/ch17~19를 고치지 않고 가져왔다 (docs/plan/part03_snapshot.md).",
+  "subjects": [
+    {
+      "code": "4-1",
+      "ch": "ch06",
+      "title": "INT8·INT16 정밀도 비교",
+      "stage": 1,
+      "when": "오전",
+      "see": "같은 32비트 값을 두 정밀도로: 768 → <code>Q:03,0030</code>, 65536 → INT8은 <code>7F</code>로 포화(넘침 1), INT16은 <code>1000</code>으로 정확."
+    },
+    {
+      "code": "4-2",
+      "ch": "ch17",
+      "title": "784 입력 13타일 누산 (INT8)",
+      "stage": 2,
+      "when": "오전",
+      "see": "시험 #92(숫자 9)를 타일 13개로: 타일마다 가중치 640개 + x 64개를 싣고 <code>T</code> → <code>T0</code>…<code>TB</code>, 마지막에 <code>C4</code> (INT8은 4로 틀림). 시작 전 <code>T</code>는 <code>E1</code>.",
+      "chapter": {
+        "id": "part03/ch17",
+        "version": "VS Code 판",
+        "new": [
+          "part03/ch17/rtl/p3_tile784_10.v"
+        ],
+        "tb": [
+          "part03/ch17/tb/tb_p3_tile784_10.sv"
+        ],
+        "ref": [
+          "part03/ch17/reference/tile784_reference.py"
+        ],
+        "run": "bash part03/ch17/scripts/run_sim.sh",
+        "checks": [
+          [
+            "RTL_SIM_PASS TILE784 tile_go_to_accept_cycles=207",
+            "26사례 × 13타일, 타일 하나 207클록, 오류 14종"
+          ],
+          [
+            "PYTHON_RTL_COMPARE_PASS tile_partials=3380",
+            "타일 부분합 3,380개·점수·클래스가 Python 기준과 같음"
+          ]
+        ],
+        "evidence": {
+          "rtl_log": "part03/ch17/validation/rtl_sim.log",
+          "pattern": "_PASS"
+        },
+        "vivado": {
+          "mode": "ooc"
+        },
+        "synth_md": {
+          "path": "part03/ch19/validation/synth_ooc_summary.md",
+          "after": "## OOC 배치·배선 후",
+          "rows": [
+            "17장 Tile INT8"
+          ],
+          "src": "구 19장 OOC 기록"
+        }
+      }
+    },
+    {
+      "code": "4-3",
+      "ch": "ch18",
+      "title": "INT8·INT16 MNIST 정밀도",
+      "stage": 3,
+      "when": "오후",
+      "see": "같은 그림을 INT16 엔진으로: 가중치·x가 2바이트라 보낼 양이 두 배, 결과 <code>C9</code> (정답). LED가 4번에서 9번으로 옮겨 간다.",
+      "chapter": {
+        "id": "part03/ch18",
+        "version": "VS Code 판",
+        "new": [],
+        "tb": [],
+        "ref": [
+          "part03/ch18/reference/precision_reference.py",
+          "part03/ch18/reference/train_mnist_linear.py"
+        ],
+        "run": "bash part03/ch18/scripts/run_sim.sh",
+        "checks": [
+          [
+            "PC_EVAL_PASS float=9260 int8=9256 int16=9260",
+            "MNIST 시험 10,000장: Float 92.60%, INT8 92.56%, INT16 92.60%"
+          ],
+          [
+            "RTL_SIM_PASS TILE784 data_w=16",
+            "INT16 784 추론 RTL이 Python 기준과 비트 단위로 같음 (표본 16개 포함)"
+          ]
+        ],
+        "evidence": {
+          "rtl_log": "part03/ch18/validation/rtl_sim.log",
+          "pattern": "_PASS|== config"
+        },
+        "vivado": {
+          "mode": "ooc"
+        },
+        "synth_md": {
+          "path": "part03/ch19/validation/synth_ooc_summary.md",
+          "after": "## OOC 배치·배선 후",
+          "rows": [
+            "18장 Tile INT16"
+          ],
+          "src": "구 19장 OOC 기록"
+        }
+      },
+      "no_new_note": "새 RTL 파일이 없습니다. 4-2 <code>p3_tile784_10</code>을 <code>DATA_W=16</code>(코어 누산 38비트, 부분합 39비트)으로 하나 더 두고, x 타일은 2-1 <code>bram_sync_buffer</code> 16×64에 담습니다 (장 Top의 <code>u_t16</code>·<code>u_x16</code>)."
+    },
+    {
+      "code": "4-4",
+      "ch": "ch19",
+      "title": "PE 병렬도·메모리 구조",
+      "stage": 4,
+      "when": "오후",
+      "see": "같은 타일 하나를 4PE <code>K4:00CE</code>(206클록), 8PE <code>K8:008A</code>(138), 1PE는 class마다 가중치를 다시 실어 <code>K1:0046</code>(70) × 10. 세 구성의 점수는 같다.",
+      "chapter": {
+        "id": "part03/ch19",
+        "version": "VS Code 판",
+        "new": [],
+        "tb": [
+          "part03/ch19/tb/tb_p3_pe_scale.sv"
+        ],
+        "ref": [
+          "part03/ch19/reference/arch_reference.py"
+        ],
+        "run": "bash part03/ch19/scripts/run_sim.sh",
+        "checks": [
+          [
+            "RTL_SIM_PASS PE_SCALE PE1=70x10 PE4=206 PE8=138",
+            "같은 52타일 작업에서 세 구성의 클록 수"
+          ],
+          [
+            "PYTHON_RTL_COMPARE_PASS cycles_match_model=1",
+            "부분합 비트 단위 일치, 클록 수가 모델과 같음"
+          ]
+        ],
+        "evidence": {
+          "rtl_log": "part03/ch19/validation/rtl_sim.log",
+          "pattern": "_PASS"
+        },
+        "vivado": {
+          "mode": "ooc"
+        },
+        "synth_md": {
+          "path": "part03/ch19/validation/synth_ooc_summary.md",
+          "after": "## OOC 배치·배선 후",
+          "rows": [
+            "PE1 INT8",
+            "PE4 INT8",
+            "PE8 코어 A INT8",
+            "PE8 코어 B INT8",
+            "PE4 INT16"
+          ],
+          "src": "OOC"
+        }
+      },
+      "no_new_note": "새 RTL 모듈이 없습니다. 3-2 <code>p3_group10_core</code>를 <code>#(64,1)</code>·<code>#(64,10)</code>·<code>#(64,6)</code>+<code>#(64,4)</code>로 두고 (장 Top의 <code>u_pe1</code>·<code>u_pe4</code>·<code>u_pe8a</code>·<code>u_pe8b</code>), 시작부터 끝까지 클록을 셉니다."
+    }
+  ],
+  "port_notes": {
+    "clk": "보드 100 MHz 발진기 (W5)",
+    "btnC": "가운데 버튼, 누르면 리셋 (Active-High). 코어 가중치 BRAM은 남고 누산·Bias·타일은 지워진다",
+    "uart_rxd": "USB-UART에서 들어오는 직렬 입력 (B18), 115200 bps 8N1",
+    "uart_txd": "PC로 나가는 직렬 출력 (A18)",
+    "led": "[9:0] 마지막 784 추론 클래스 원-핫, [14] INT16 x 타일 보관, [15] INT8 x 타일 보관",
+    "seg": "7세그먼트 a~g (active-low): 타일 번호·클래스·클록 수·INT16 값",
+    "an": "7세그먼트 자리 선택 (active-low)",
+    "dp": "소수점 (항상 끔)"
+  },
+  "results": [
+    [
+      "784→10 선형, MNIST 시험 10,000장 (구 18장 PC 평가)",
+      "part03/ch18/validation/pc_eval.log",
+      "PC_EVAL_PASS"
+    ],
+    [
+      "장 시연 그림 (18장 표본 파일)",
+      "p04/validation/rtl_sim_*.log",
+      "PYTHON_P04_DEMO"
+    ]
+  ],
+  "results_note": "정답 수 차이는 10,000장 중 4장(INT8 9,256 · INT16 9,260)뿐이지만, INT8이 Float와 다른 클래스를 내는 그림은 24장(일치 9,976)이고 시험 #92가 그중 하나다. 가중치 재적재(그림 한 장에 9,352바이트)가 연산(타일당 206클록)보다 훨씬 오래 걸리는 것이 4-4의 결론이다.",
+  "handoff": [
+    [
+      "part03/ch17/rtl/p3_tile784_10.v",
+      "5장 AXI NPU IP(구 20장 p3_npu_axi_lite)가 안에 그대로 넣어 MicroBlaze V에 붙인다 (VS Code 판)"
+    ],
+    [
+      "p04/host/p04_send.py",
+      "5장에서 같은 784 추론을 CPU 드라이버가 대신 하므로, PC 도구와 드라이버 시간 비교에 쓴다 (5장 전환 때)"
+    ]
+  ]
+}

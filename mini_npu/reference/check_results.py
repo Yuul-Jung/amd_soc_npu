@@ -19,19 +19,22 @@ def expected_row(scenario):
 
 def main():
     path = Path(sys.argv[1])
+    short = "--short" in sys.argv[2:]          # 타이밍 시뮬레이션 짧은 시나리오: 0번 분류 + Bias 변경 뒤(5번)
     with path.open(newline="", encoding="utf-8") as stream:
         reader = csv.reader(stream)
         assert next(reader) == [
             "scenario", "class", "score0", "score1", "score2", "score3"
         ]
         rows = [[int(v) for v in row] for row in reader]
-    expected = [expected_row(s) for s in range(6)]
+    expected = [expected_row(s) for s in ((0, 5) if short else range(6))]
     if rows != expected:
-        for scenario, (got, want) in enumerate(zip(rows, expected)):
+        for got, want in zip(rows, expected):
             if got != want:
-                print(f"FAIL scenario {scenario}: got={got} expected={want}")
+                print(f"FAIL scenario {want[0]}: got={got} expected={want}")
+        if len(rows) != len(expected):
+            print(f"FAIL rows={len(rows)} expected={len(expected)}")
         raise SystemExit("GOLDEN_COMPARE_FAIL")
-    print("PC_GOLDEN_COMPARE_PASS predictions=6 model_edit=1")
+    print(f"PC_GOLDEN_COMPARE_PASS predictions={len(expected)} model_edit=1")
 
 
 if __name__ == "__main__":

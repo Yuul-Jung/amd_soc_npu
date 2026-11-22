@@ -1,0 +1,5 @@
+# p03 PC training 2026-11-19T07:21Z
+# python 3.13.18 numpy 2.5.3
+P03_TRAIN_LINEAR float=0.9132 int8=0.9130 test=10000
+P03_TRAIN_MLP float=0.9085 int8=0.9087 shift=9 test=10000
+P03_MODEL_WRITTEN p03/model/p03_models.json

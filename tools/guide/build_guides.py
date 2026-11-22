@@ -353,6 +353,24 @@ def short(line, n=90):
     return esc(line if len(line) <= n else line[:n] + "…")
 
 
+def drc_open(owner):
+    """미해결 DRC 경고 증거(validation/drc_reqp1840_*.txt)가 있으면 게이트 한 칸으로 드러낸다.
+
+    REQP-1840: 비동기 리셋에서 나온 신호가 RAMB18 제어 핀으로 들어감 → 동작 중 리셋 때 BRAM 내용이 깨질 수 있고,
+    기본 STA·배선 후 타이밍 시뮬레이션(리셋을 시작 때 한 번만 줌)은 이를 검증하지 않는다.
+    """
+    path = latest(f"{owner}/validation/drc_reqp1840_*.txt")
+    if not path:
+        return None
+    counts = [(int(m.group(1)), m.group(2) == "1") for m in re.finditer(r"count=(\d+) limit_reached=(\d)", rd(path))]
+    hit = [n for n, _ in counts if n]
+    if not hit:
+        return None
+    more = "+" if any(lim for _, lim in counts) else ""
+    return ("todo", "DRC REQP-1840", f"⚠ 미해결 · 비동기 리셋 → BRAM 제어 핀 경고 {sum(hit)}{more}건(보고서 {len(hit)}개), "
+            f"동작 중 리셋 미검증 · <code>{path}</code>")
+
+
 def gates(c, e):
     g = [("pass", "HTML_PASS", f"{c['version']} · 생성기·정적 검사")]
     if e.host:
@@ -384,6 +402,10 @@ def gates(c, e):
     mode = c.get("vivado", {}).get("mode", "none")
     if mode == "none":
         g.append(("na", "SYNTH_TIMING_PASS", "해당 없음"))
+    elif e.synth and (e.synth.startswith("SYNTH_TIMING_NOT_CHECKED") or "WNS=NA" in e.synth):
+        # 제약된 레지스터 간 경로가 없으면(WNS=NA) 타이밍을 검사한 것이 아니다: PASS로 세지 않는다.
+        g.append(("todo", "SYNTH_TIMING_PASS", "⚠ 미검사 · 레지스터 간 경로 없음(WNS=NA), 합성·자원만 확인 · "
+                  + short(e.synth.split(" ", 1)[1], 50) + f" · {file_date(e.viv_path)}"))
     elif e.synth:
         ok = e.synth.startswith("SYNTH_TIMING_PASS")
         via = f" ({int(c['vivado']['ref'][2:]):02d}장 통합 Top)" if mode == "via" else ""
@@ -399,6 +421,9 @@ def gates(c, e):
             g.append(("fail", "TIMING_SIM_PASS", f"✗ 통과 기록 없음 · {e.viv_path}"))
         else:
             g.append(("todo", "TIMING_SIM_PASS", "⚠ 미검증 · 배선 후 SDF 시뮬레이션 실행 대기 (8-2)"))
+    drc = drc_open(c["id"])
+    if drc:
+        g.append(drc)
     if e.board:
         g.append(("pass", "BOARD_PASS", f"{e.board_path}"))
     else:
@@ -488,6 +513,8 @@ def code_status(path, e):
         return "원본"
     if VIVADO_FILES.search(path):
         if e.synth:
+            if e.synth.startswith("SYNTH_TIMING_NOT_CHECKED") or "WNS=NA" in e.synth:
+                return "원본 · Vivado 합성만 (타이밍 ⚠ 미검사)"
             return "원본 · Vivado 실행 " + ("통과" if e.synth.startswith("SYNTH_TIMING_PASS") else "실패")
         return "원본 · ⚠ 미검증 (Vivado 미실행)"
     if path.endswith((".c", ".h")):           # 보드 소프트웨어: PC 컴파일·시험까지만 확인
@@ -695,6 +722,27 @@ def update_index(text, chs):
     text = re.sub(r'(<section class="section" id="techtree">\s*<h2>.*?</h2>)', lambda m: m.group(1) + "\n      " + figs, text, count=1, flags=re.S)
     if ".figure-wrap{" not in text:
         text = text.replace("</style>", ".figure-wrap{overflow-x:auto}\n.figure-wrap svg{width:100%;height:auto;min-width:860px}\n</style>", 1)
+    # 00 교육과정 개요 절 맨 위에 장 프로젝트(개편판) 바로가기 — 목록은 course_projects.json·pNN/project.json (tools/guide/build_projects.py)
+    cp = json.loads(rd("course_projects.json"))
+    rows = ""
+    for q in cp["projects"]:
+        pj = os.path.join(ROOT, q["id"], "project.json")
+        if not os.path.exists(pj):
+            rows += f'<tr><td style="white-space:nowrap">{q["number"]}장</td><td>{html.escape(q["title"])}</td><td>—</td><td>{html.escape(q["subjects"])}</td><td>준비 중</td></tr>'
+            continue
+        pp = json.loads(rd(os.path.relpath(pj, ROOT)))
+        page = f'{pp["id"]}_{pp["slug"]}_{pp["version"]}.html'
+        rows += (f'<tr><td style="white-space:nowrap">{q["number"]}장</td><td><a href="{page}">{html.escape(q["title"])}</a></td><td style="white-space:nowrap">{q["days"]}일</td>'
+                 f'<td>구 {html.escape(q["subjects"])}장</td><td>{re.sub(r"<[^>]+>", "", pp["demo"])}</td></tr>')
+    pr_block = f"""<!-- projects:start -->
+      <p><strong>장 프로젝트판 (2026-11 개편)</strong> — 장마다 보드 Top 하나를 키워 가며 장 끝에서 보드 시연합니다. 아래 장 페이지가 현재 기준이고, 00~31장 안내서는 서브젝트의 단독 실습 자료로 남겨 두었습니다. 실물 보드 확인은 아직 하지 않았습니다(각 페이지 게이트 표시).</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>장</th><th>프로젝트</th><th>편성</th><th>서브젝트</th><th>장 시연 (보드)</th></tr></thead>
+        <tbody>{rows}</tbody>
+      </table></div>
+      <!-- projects:end -->"""
+    text = re.sub(r"\n?\s*<!-- projects:start -->.*?<!-- projects:end -->", "", text, flags=re.S)
+    text = re.sub(r'(<section class="section" id="intro">\s*<h2>.*?</h2>)', lambda m: m.group(1) + "\n      " + pr_block, text, count=1, flags=re.S)
     # 00 교육과정 개요 절 끝에 제1부(선수 과정) 바로가기 — 목록은 part01/course.json (tools/part01/build_part01.py)
     p1 = json.loads(rd("part01/course.json"))
     p1_links = " · ".join(f'<a href="part01/{c["file"]}">{c["number"]} {html.escape(c["title"])}</a>' for c in p1["chapters"])

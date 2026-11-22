@@ -1,0 +1,475 @@
+{
+  "id": "p05",
+  "number": 5,
+  "version": "v01",
+  "slug": "mbv_soc",
+  "nav_title": "MicroBlaze V SoC",
+  "name": "MicroBlaze V SoC",
+  "days": 2,
+  "mode": "soc",
+  "demo": "21장 비트스트림 하나에 MicroBlaze V와 NPU가 함께 있고, C 드라이버가 그림 4장을 NPU로 분류해 UART·LED·7세그먼트에 띄운다. 같은 추론을 CPU만으로 하면 1,816,547클록, NPU로 하면 1,080,161클록.",
+  "goal": "4장 NPU를 AXI IP로 → MicroBlaze V SoC → C 드라이버 → 시간·자원·전력. 서브젝트 7개.",
+  "top": {
+    "file": "part03/ch21/rtl/basys3_soc21_top.v",
+    "module": "basys3_soc21_top"
+  },
+  "diagram": "p05/diagrams/soc_map",
+  "soc_summary": "part03/ch21/validation/soc_summary.md",
+  "checklist": "part03/ch27/docs/BOARD_CHECKLIST.md",
+  "skeleton": [
+    "p05/diagrams/make_soc_map.py"
+  ],
+  "tb": [],
+  "ref": [],
+  "run": "LEVEL=sim bash part03/ch27/scripts/run_all.sh",
+  "host": "",
+  "vivado_tcl": "part03/ch21/synth/soc_npu_bd.tcl",
+  "sw_label": "",
+  "sw_bits": 0,
+  "led_note": "",
+  "board_files_after": "## 0. 준비",
+  "evidence": {
+    "rtl_log": "part03/ch27/validation/run_all_summary.md",
+    "vivado": "part03/ch21/validation/soc_summary.md"
+  },
+  "project_synth": {
+    "path": "part03/ch21/validation/soc_summary.md",
+    "regex": "WNS (?P<wns>[+-][\\d.]+) ns, WHS (?P<whs>[+-][\\d.]+) ns",
+    "src": "21장 SoC 배선 후, 안 A"
+  },
+  "imports": [
+    "4장: part03/ch17/rtl/p3_tile784_10.v → 20장 AXI IP 안에 그대로 (그 안에 3-2 p3_group10_core, 2-1 bram_sync_buffer)",
+    "part03/common/rtl/ip_std/ip_seg7.v · axil_slave.v · ip_std.v (표준 7세그먼트 IP, 동결 주소맵 [06])",
+    "제1부 11장 MicroBlaze V SoC 복제본 (원본은 고치지 않음, ORIGINAL_PROJECT_UNCHANGED)"
+  ],
+  "source_note": "5장 코드·빌드·증거는 모두 VS Code 판(커밋 ddaaf66)의 part03/ch20~25·27·common을 고치지 않고 가져왔다 (docs/plan/part03_snapshot.md). Vivado·Vitis 빌드는 VS Code에서 실제로 했고, 웹에서는 20·22장 시뮬레이션을 다시 돌렸다.",
+  "prep": [
+    "Vivado 2024.2와 Vitis 2024.2 (VS Code에서 빌드). 웹에서 재현 가능한 범위는 <code>LEVEL=sim bash part03/ch27/scripts/run_all.sh</code> (Icarus·Python·C 협동 시뮬레이션).",
+    "전체 다시 만들기: <code>LEVEL=fpga SOC11_DIR=&lt;제1부 11장 폴더&gt; VIVADO_SETTINGS=… VITIS_SETTINGS=… bash part03/ch27/scripts/run_all.sh</code> (21장 비트스트림·XSA, 22·23장 ELF).",
+    "보드는 USB 케이블 하나(JTAG + USB-UART), 터미널 115200 8N1. 비트스트림은 <b>21장 것 하나</b>이고 서브젝트마다 ELF만 바꾼다."
+  ],
+  "subjects": [
+    {
+      "code": "5-1",
+      "ch": "ch20",
+      "title": "AXI4-Lite NPU IP",
+      "stage": 1,
+      "when": "1일 오전",
+      "see": "보드 확인은 5-2 비트스트림으로 한다. 여기서는 AXI 버스로 레지스터 15개를 읽고 써서 784 추론 7번이 Python과 비트 단위로 같고, 없는 주소는 SLVERR(16건)인 것을 시뮬레이션으로 본다.",
+      "board_items": [],
+      "board_note": "보드 항목 없음 — IP 하나로는 보드에 올릴 수 없다. 5-2에서 이 IP가 0x44A0_0000에 붙는다.",
+      "chapter": {
+        "id": "part03/ch20",
+        "version": "VS Code 판",
+        "new": [
+          "part03/ch20/rtl/p3_npu_axi_lite.v",
+          "part03/ch20/synth/package_ip.tcl"
+        ],
+        "tb": [
+          "part03/ch20/tb/tb_p3_npu_axi_lite.sv",
+          "part03/ch20/tb/axi_lite_bfm.svh"
+        ],
+        "ref": [
+          "part03/ch20/reference/axi_reference.py"
+        ],
+        "run": "bash part03/ch20/scripts/run_sim.sh",
+        "checks": [
+          [
+            "RTL_SIM_PASS AXI_NPU inferences=7 slverr=16",
+            "AXI 쓰기 67,451건·읽기 7,012건으로 784 추론 7번, 없는 주소 응답 16건"
+          ],
+          [
+            "PYTHON_RTL_COMPARE_PASS scores_via_axi=10 class=1",
+            "AXI로 읽은 점수 10개·클래스가 Python 기준과 같음"
+          ]
+        ],
+        "evidence": {
+          "rtl_log": "part03/ch20/validation/rtl_sim.log",
+          "pattern": "_PASS",
+          "date": "2026-11-18"
+        },
+        "vivado": {
+          "mode": "ooc"
+        },
+        "synth_md": {
+          "path": "part03/ch20/validation/synth_ooc_summary.md",
+          "after": "## OOC 배치·배선 후",
+          "rows": [
+            "AXI NPU INT8"
+          ],
+          "src": "OOC"
+        },
+        "vivado_ran": true
+      }
+    },
+    {
+      "code": "5-2",
+      "ch": "ch21",
+      "title": "MicroBlaze V SoC 연결 (동결 주소맵)",
+      "stage": 2,
+      "when": "1일 오전",
+      "see": "21장 비트스트림을 내려받으면 DONE LED. XSDB로 7세그먼트 ID <code>mrd 0x4006FFF0</code> → <code>53454737</code>, 버튼을 누른 채 <code>mrd 0x40010000</code> → U·D·L·R = <code>8</code>·<code>4</code>·<code>2</code>·<code>1</code>.",
+      "board_items": [
+        "B1",
+        "B4b",
+        "B4c"
+      ],
+      "board_note": "비트스트림 <code>basys3_soc21_top.bit</code>. ELF 없이 XSDB 읽기만으로 주소맵을 확인한다.",
+      "chapter": {
+        "id": "part03/ch21",
+        "version": "VS Code 판",
+        "new": [
+          "part03/ch21/rtl/basys3_soc21_top.v",
+          "part03/ch21/constraints/basys3_soc21_npu.xdc",
+          "part03/ch21/synth/soc_npu_bd.tcl",
+          "part03/ch21/scripts/build_soc.sh"
+        ],
+        "tb": [],
+        "ref": [],
+        "run": "bash part03/ch21/scripts/build_soc.sh   # Vivado: 블록 설계 → 비트스트림·XSA (약 5분)",
+        "checks": [
+          [
+            "ADDR_MAP_A_PASS · IRQ_MAP_A_PASS",
+            "Address Editor 8줄·INTC 16입력이 동결 주소맵(안 A) 표와 같음"
+          ],
+          [
+            "CHECK_PASS data address segments do not overlap",
+            "주소 겹침 없음, NPU 0x44A0_0000"
+          ],
+          [
+            "ORIGINAL_PROJECT_UNCHANGED",
+            "제1부 11장 원본 폴더 SHA-256이 빌드 전후 같음"
+          ]
+        ],
+        "evidence": {
+          "rtl_log": "part03/ch21/validation/build_soc.log",
+          "kind": "static",
+          "gate_pattern": "ADDR_MAP_A_PASS|IRQ_MAP_A_PASS|CHECK_PASS|_FAIL",
+          "pattern": "_PASS|_FAIL|UNCHANGED",
+          "date": "2026-11-19"
+        },
+        "vivado": {
+          "mode": "ooc"
+        },
+        "synth_grep": {
+          "path": "part03/ch21/validation/soc_summary.md",
+          "regex": "WNS (?P<wns>[+-][\\d.]+) ns, WHS (?P<whs>[+-][\\d.]+) ns",
+          "src": "SoC 배선 후, 비트스트림 생성"
+        },
+        "vivado_ran": true
+      }
+    },
+    {
+      "code": "5-3",
+      "ch": "ch22",
+      "title": "C 드라이버와 표시",
+      "stage": 3,
+      "when": "1일 오후",
+      "see": "<code>npu_app.elf</code>: 그림 4장(시험 0·1·92·1640)을 NPU로 분류해 CPU 계산과 점수까지 같고(<code>scores_match=1</code>), 끝나면 7세그먼트 <code>03 4</code>·LED4. #92는 4장과 같이 INT8에서 4.",
+      "board_items": [
+        "B2",
+        "B3",
+        "B4",
+        "B4a"
+      ],
+      "board_note": "21장 비트스트림 + <code>npu_app.elf</code> (Vitis, 같은 XSA 플랫폼).",
+      "chapter": {
+        "id": "part03/ch22",
+        "version": "VS Code 판",
+        "new": [
+          "part03/ch22/sw/npu_driver.h",
+          "part03/ch22/sw/npu_driver.c",
+          "part03/ch22/sw/npu_io_xil.c",
+          "part03/ch22/sw/app.h",
+          "part03/ch22/sw/app.c",
+          "part03/ch22/sw/app_show_xil.c",
+          "part03/ch22/sw/main.c",
+          "part03/common/sw/p3_seg7.h"
+        ],
+        "tb": [
+          "part03/ch22/tb/tb_p3_npu_bridge.sv",
+          "part03/ch22/host/cosim_main.c",
+          "part03/ch22/host/npu_io_cosim.c"
+        ],
+        "ref": [
+          "part03/ch22/reference/gen_model.py"
+        ],
+        "run": "bash part03/ch22/scripts/run_sim.sh   # C 드라이버를 PC에서 컴파일해 RTL과 협동 시뮬레이션",
+        "checks": [
+          [
+            "NPU_APP_DONE samples=4 failures=0",
+            "그림 4장 모두 NPU·CPU 클래스와 점수가 같음"
+          ],
+          [
+            "SHOW picture=3 class=4 seg7_value=0304",
+            "표시: 7세그먼트 왼쪽 두 자리 그림 번호, 오른쪽 클래스, LED 클래스 하나"
+          ],
+          [
+            "VITIS_ELF_PASS",
+            "Vitis로 ELF 빌드 (VS Code, 실물 실행은 보드 점검표)"
+          ]
+        ],
+        "evidence": {
+          "rtl_log": "part03/ch22/validation/rtl_sim.log",
+          "pattern": "SAMPLE|SHOW|NPU_APP_DONE|_PASS",
+          "date": "2026-11-19"
+        },
+        "vivado": {
+          "mode": "none"
+        },
+        "extra_gates": [
+          {
+            "name": "VITIS_ELF_PASS",
+            "path": "part03/ch22/validation/build_vitis.log",
+            "pattern": "VITIS_ELF_PASS"
+          }
+        ],
+        "vivado_ran": false
+      }
+    },
+    {
+      "code": "5-4",
+      "ch": "ch23",
+      "title": "CPU·NPU 추론 시간",
+      "stage": 4,
+      "when": "1일 오후",
+      "see": "<code>bench_board.elf</code>: 같은 그림을 CPU 정수 계산으로 1,816,547클록, NPU로 1,080,161클록(Bias 적재 3,076 포함) — 1.68배. 리셋 뒤 다시 돌려도 같은 값.",
+      "board_items": [
+        "B5",
+        "B6",
+        "B7"
+      ],
+      "board_note": "21장 비트스트림 + <code>bench_board.elf</code>. 값은 안 A SoC 전체 xsim(23장) 기대값.",
+      "chapter": {
+        "id": "part03/ch23",
+        "version": "VS Code 판",
+        "new": [
+          "part03/ch23/sw/bench.c",
+          "part03/ch23/synth/soc_bench_sim.tcl",
+          "part03/ch23/scripts/run_soc_bench.sh"
+        ],
+        "tb": [
+          "part03/ch23/tb/tb_soc_bench.sv"
+        ],
+        "ref": [],
+        "run": "bash part03/ch23/scripts/run_soc_bench.sh   # Vivado xsim: 21장 SoC 전체 + bench.elf",
+        "checks": [
+          [
+            "SOC_BENCH cpu_cycles=1816547 npu_cycles=1080161",
+            "SoC 전체 시뮬레이션에서 잰 클록 (안 A 재빌드 뒤 같은 값)"
+          ],
+          [
+            "SOC_RTL_SIM_PASS",
+            "CPU·NPU 클래스와 점수 일치"
+          ]
+        ],
+        "evidence": {
+          "rtl_log": "part03/ch23/validation/soc_bench_sim.log",
+          "pattern": "SOC_BENCH|_PASS",
+          "date": "2026-11-19",
+          "tool": "Vivado 2024.2 xsim (21장 SoC 전체 + ELF)"
+        },
+        "vivado": {
+          "mode": "none"
+        },
+        "vivado_ran": true
+      }
+    },
+    {
+      "code": "5-5",
+      "ch": "ch24",
+      "title": "자원·타이밍 스윕",
+      "stage": 5,
+      "when": "2일 오전",
+      "see": "보드 없음. 클록 주기를 10 → 8 → 7 → 6 ns로 줄여 배선: 20장 AXI NPU IP는 10 ns 통과·8 ns 실패로 Fmax 약 105 MHz, 4PE INT8 코어는 146 MHz.",
+      "board_items": [],
+      "board_note": "보드 항목 없음 — Vivado 보고서(OOC 스윕)를 읽는 서브젝트다.",
+      "chapter": {
+        "id": "part03/ch24",
+        "version": "VS Code 판",
+        "new": [
+          "part03/ch24/synth/sweep_cores.tcl",
+          "part03/ch24/synth/sweep_axi.tcl",
+          "part03/ch24/reference/sweep_summary.py",
+          "part03/ch24/scripts/run_sweep.sh"
+        ],
+        "tb": [],
+        "ref": [],
+        "run": "bash part03/ch24/scripts/run_sweep.sh   # Vivado OOC: 4구성 × 주기 4개",
+        "checks": [
+          [
+            "SWEEP_SUMMARY axi_npu_int8=105.0MHz",
+            "통과한 가장 짧은 주기로 추정한 Fmax (OOC, 실물 주파수 아님)"
+          ]
+        ],
+        "evidence": {
+          "rtl_log": "part03/ch24/validation/timing_sweep.log",
+          "kind": "static",
+          "gate_pattern": "SWEEP_SUMMARY",
+          "pattern": "SWEEP_SUMMARY|errors=",
+          "date": "2026-11-18"
+        },
+        "vivado": {
+          "mode": "ooc"
+        },
+        "synth_md": {
+          "path": "part03/ch24/validation/timing_sweep.md",
+          "after": "| 구성 | 주기(ns)",
+          "rows": [
+            "20장 AXI NPU IP"
+          ],
+          "src": "10 ns 스윕 첫 줄",
+          "first_only": true
+        },
+        "vivado_ran": true
+      }
+    },
+    {
+      "code": "5-6",
+      "ch": "ch25",
+      "title": "전력·추론당 에너지",
+      "stage": 6,
+      "when": "2일 오전",
+      "see": "보드 없음(Basys3에 전력 측정 회로가 없다). Vivado 추정(안 A 21장 SoC): 추론당 CPU 4.596 mJ · NPU 2.765 mJ (1.66배).",
+      "board_items": [
+        "B8"
+      ],
+      "board_note": "보드에서는 측정하지 않는다 (B8).",
+      "chapter": {
+        "id": "part03/ch25",
+        "version": "VS Code 판",
+        "new": [
+          "part03/ch25/synth/soc_power_sim.tcl",
+          "part03/ch25/synth/soc_power_report.tcl",
+          "part03/ch25/reference/power_summary.py",
+          "part03/ch25/scripts/run_power.sh"
+        ],
+        "tb": [],
+        "ref": [],
+        "run": "bash part03/ch25/scripts/run_power.sh   # Vivado: 구간별 SAIF → report_power",
+        "checks": [
+          [
+            "power_summary.md 추론당 에너지",
+            "CPU 4.596 mJ · NPU 2.765 mJ (전체 전력 기준, Vivado 추정치, 보드 측정 아님)"
+          ],
+          [
+            "SAIF annotation done",
+            "23장 SoC xsim 구간별 토글률을 report_power에 적용 (안 A 비트스트림, c32d094)"
+          ]
+        ],
+        "evidence": {
+          "rtl_log": "part03/ch25/validation/power.log",
+          "pattern": "_PASS",
+          "date": "2026-11-19",
+          "tool": "Vivado 2024.2 xsim (21장 SoC 전체 + ELF)"
+        },
+        "vivado": {
+          "mode": "none"
+        },
+        "vivado_ran": true
+      }
+    },
+    {
+      "code": "5-7",
+      "ch": "ch27",
+      "title": "시스템 통합·보드 점검표",
+      "stage": 7,
+      "when": "2일 오후",
+      "see": "<code>run_all.sh</code> 한 번으로 13~31장 회귀를 돌리고(LEVEL=sim PASS), 보드 점검표 B1~B7을 한 자리에서 실행한다 — 장 시연.",
+      "board_items": [],
+      "board_note": "보드 항목은 아래 장 시연 절에 모아 둔다 (B1~B7).",
+      "chapter": {
+        "id": "part03/ch27",
+        "version": "VS Code 판",
+        "new": [
+          "part03/ch27/scripts/run_all.sh",
+          "part03/ch27/docs/BOARD_CHECKLIST.md"
+        ],
+        "tb": [],
+        "ref": [],
+        "run": "LEVEL=sim bash part03/ch27/scripts/run_all.sh",
+        "checks": [
+          [
+            "host_integer_reference · rtl_ch13_26 PASS",
+            "LEVEL=sim 회귀 (Vivado·Vitis 단계는 LEVEL=fpga에서)"
+          ]
+        ],
+        "evidence": {
+          "rtl_log": "part03/ch27/validation/run_all_summary.md",
+          "kind": "static",
+          "gate_pattern": "\\| (PASS|FAIL) \\|",
+          "pattern": "PASS|FAIL",
+          "date": "2026-11-19"
+        },
+        "vivado": {
+          "mode": "none"
+        },
+        "vivado_ran": false
+      }
+    }
+  ],
+  "demo_items": [
+    "B1",
+    "B2",
+    "B3",
+    "B4",
+    "B4a",
+    "B4b",
+    "B4c",
+    "B5",
+    "B6",
+    "B7"
+  ],
+  "results": [
+    [
+      "CPU·NPU 추론 시간 (23장 SoC xsim, 안 A)",
+      "part03/ch23/validation/soc_bench_sim.log",
+      "SOC_BENCH"
+    ],
+    [
+      "클록 스윕 Fmax 추정 (24장 OOC)",
+      "part03/ch24/validation/timing_sweep.log",
+      "SWEEP_SUMMARY"
+    ],
+    [
+      "22장 그림 4장 (C 드라이버 협동 시뮬레이션)",
+      "part03/ch22/validation/rtl_sim.log",
+      "NPU_APP_DONE"
+    ]
+  ],
+  "results_note": "종단간 1.68배에 그치는 이유 (23장 README): 시간의 99% 이상이 AXI4-Lite로 가중치·입력을 한 단어씩 쓰는 데 든다(타일마다 704단어, 쓰기 1회 평균 약 115클록). 4장 마지막 서브젝트(구 19장)의 적재 병목과 같은 결론이다.",
+  "port_notes": {
+    "clk": "Basys3 W5 외부 100 MHz (11장 clk_wiz가 100 MHz 시스템 클록으로)",
+    "btnC": "SoC 리셋 (Active-High, 11장 그대로)",
+    "btn": "btn[3]=U·[2]=D·[1]=L·[0]=R → axi_gpio_btn 0x4001_0000, INTC In3",
+    "sw": "슬라이드 스위치 → axi_gpio_0 두 번째 채널 (0x4000_0000)",
+    "led": "LED 16개 ← axi_gpio_0 (22장: 클래스 LED 하나)",
+    "RsRx": "USB-UART PC → FPGA (axi_uartlite 0x4002_0000)",
+    "RsTx": "USB-UART FPGA → PC, 115200 8N1",
+    "seg": "7세그먼트 {g..a}, Low 활성 ← ip_seg7 0x4006_0000",
+    "dp": "7세그먼트 점, Low 활성",
+    "an": "자리 선택 4개, Low 활성"
+  },
+  "handoff": [
+    [
+      "21장 비트스트림 basys3_soc21_top.bit · XSA",
+      "6장 응용(28·29·31장)이 같은 비트스트림에 ELF만 바꿔 쓴다"
+    ],
+    [
+      "part03/ch22/sw/npu_driver.c · npu_io_xil.c",
+      "6장 모든 응용 펌웨어의 NPU 드라이버"
+    ],
+    [
+      "part03/common/sw/p3_seg7.h",
+      "6장 표시 (표준 7세그먼트 IP)"
+    ],
+    [
+      "part03/ch27/docs/BOARD_CHECKLIST.md",
+      "6장 보드 항목 B9~ (28~31장)"
+    ]
+  ],
+  "plan_note": "비트스트림은 5-2에서 한 번 만들고, 이후 서브젝트는 ELF만 바꿔 보드에서 확인합니다.",
+  "diagram_label": "5장 SoC 주소맵과 인터럽트 구조도",
+  "diagram_note": "도면 원본: <code>p05/diagrams/soc_map.json</code> (svg-flow-editor, <code>p05/diagrams/make_soc_map.py</code>가 아래 Address Editor 표에서 만든다).",
+  "demo_intro": "21장 비트스트림 하나와 ELF 두 개로 점검표 B1~B7을 차례로 실행합니다. 기대값은 협동 시뮬레이션·SoC xsim·Vivado 빌드에서 얻은 값이고, 실물 실행은 아직 하지 않았습니다."
+}

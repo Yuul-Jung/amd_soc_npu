@@ -1,0 +1,68 @@
+P3_DIGIT READY model=f16c4f12 model_ok=1 mode=784x8 tiles=13 bias_rc=0
+DISP fnd=000ff16c led=0000
+P3_DIGIT READY model=f16c4f12 model_ok=1 mode=784x8 tiles=13 junk=0
+RESULT img=0 model=f16c4f12 npu_class=7 cpu_class=7 match=1 rc=0 status=00000c12 junk=0 scores=-34082,-171877,-20186,44571,-67625,-20574,-141553,112746,-23315,13460
+DISP fnd=000d0007 led=8080
+RESULT img=1 model=f16c4f12 npu_class=2 cpu_class=2 match=1 rc=0 status=00000c12 junk=0 scores=9573,-50284,103058,13178,-249652,33033,39366,-314610,-15311,-211984
+DISP fnd=000d0102 led=8004
+RESULT img=2 model=f16c4f12 npu_class=1 cpu_class=1 match=1 rc=0 status=00000c12 junk=0 scores=-85003,66913,11850,-5461,-39089,-24120,-16713,-11152,-2768,-33872
+DISP fnd=000d0201 led=8002
+RESULT img=3 model=f16c4f12 npu_class=0 cpu_class=0 match=1 rc=0 status=00000c12 junk=0 scores=112274,-195514,-8927,-48242,-107755,-13438,-10422,-32255,-34194,-37184
+DISP fnd=000d0300 led=8001
+RESULT img=4 model=f16c4f12 npu_class=4 cpu_class=4 match=1 rc=0 status=00000c12 junk=0 scores=-31108,-110946,-10103,-56647,65788,-47285,-14986,-7104,-4959,18382
+DISP fnd=000d0404 led=8010
+RESULT img=5 model=f16c4f12 npu_class=1 cpu_class=1 match=1 rc=0 status=00000c12 junk=0 scores=-105408,83711,5045,913,-51546,-43752,-50739,8233,4323,-17292
+DISP fnd=000d0501 led=8002
+RESULT img=6 model=f16c4f12 npu_class=4 cpu_class=4 match=1 rc=0 status=00000c12 junk=0 scores=-84347,-114918,-95196,-29113,84038,9258,-45168,-6740,21015,20333
+DISP fnd=000d0604 led=8010
+RESULT img=7 model=f16c4f12 npu_class=9 cpu_class=9 match=1 rc=0 status=00000c12 junk=0 scores=-150114,-14019,-44725,-30406,1483,-5788,-64981,-40108,-18012,56959
+DISP fnd=000d0709 led=8200
+RESULT img=8 model=f16c4f12 npu_class=6 cpu_class=6 match=1 rc=0 status=00000c12 junk=0 scores=-5446,-130635,-34601,-151386,13726,2271,99852,-156380,-20211,-79813
+DISP fnd=000d0806 led=8040
+RESULT img=9 model=f16c4f12 npu_class=9 cpu_class=9 match=1 rc=0 status=00000c12 junk=0 scores=-86946,-185554,-117060,-74157,38317,-57515,-92281,46935,5248,86446
+DISP fnd=000d0909 led=8200
+RESULT img=10 model=f16c4f12 npu_class=0 cpu_class=0 match=1 rc=0 status=00000c12 junk=0 scores=99311,-174582,12565,-11709,-96724,33356,-29298,-112966,18142,-86292
+DISP fnd=000d0a00 led=8001
+RESULT img=11 model=f16c4f12 npu_class=6 cpu_class=6 match=1 rc=0 status=00000c12 junk=0 scores=-44671,-79317,-10589,-34427,-50943,-72141,27410,-120702,-6878,-77723
+DISP fnd=000d0b06 led=8040
+RESULT img=12 model=f16c4f12 npu_class=5 cpu_class=5 match=1 rc=0 status=00000c12 junk=0 scores=-29881,-75614,-39679,23257,-61813,58432,-62503,-90927,19334,-97502
+DISP fnd=000d0c05 led=8020
+RESULT img=13 model=f16c4f12 npu_class=7 cpu_class=7 match=1 rc=0 status=00000c12 junk=0 scores=-18160,-213801,-6002,71248,-84047,-44046,-138945,132599,-44633,-20802
+DISP fnd=000d0d07 led=8080
+RESULT img=14 model=f16c4f12 npu_class=3 cpu_class=3 match=1 rc=0 status=00000c12 junk=0 scores=-103450,-126463,-17576,9693,-88992,-21688,-40131,-120796,-38008,-137197
+DISP fnd=000d0e03 led=8008
+RESULT img=15 model=f16c4f12 npu_class=6 cpu_class=6 match=1 rc=0 status=00000c12 junk=0 scores=-34947,-99941,-997,-30556,-29898,17883,78329,-147379,-3518,-63781
+DISP fnd=000d0f06 led=8040
+RESULT img=16 model=f16c4f12 npu_class=3 cpu_class=3 match=1 rc=0 status=00000c12 junk=0 scores=-90398,-94003,-72473,93832,-90759,20914,-107108,23047,-21003,10349
+DISP fnd=000d1003 led=8008
+RESULT img=17 model=f16c4f12 npu_class=2 cpu_class=2 match=1 rc=0 status=00000c12 junk=0 scores=-16603,-73566,105833,12878,-129028,16859,-54172,-158306,10544,-159407
+DISP fnd=000d1102 led=8004
+RESULT img=18 model=f16c4f12 npu_class=8 cpu_class=8 match=1 rc=0 status=00000c12 junk=0 scores=-29240,-183874,28988,-76341,-68294,-17084,-29734,-132829,53536,-9753
+DISP fnd=000d1208 led=8100
+RESULT img=19 model=f16c4f12 npu_class=8 cpu_class=8 match=1 rc=0 status=00000c12 junk=0 scores=-65661,-50366,-28130,-60999,-5909,22883,-36952,-100271,52939,-33096
+DISP fnd=000d1308 led=8100
+RESULT img=20 model=f16c4f12 npu_class=0 cpu_class=0 match=1 rc=0 status=00000c12 junk=0 scores=29962,-228371,-36604,-169151,6442,3775,29364,-105632,-27602,-76556
+DISP fnd=000d1400 led=8001
+RESULT img=21 model=f16c4f12 npu_class=2 cpu_class=2 match=1 rc=0 status=00000c12 junk=0 scores=-54315,-48622,54385,44188,-60942,-37490,-50979,-112182,7801,-23724
+DISP fnd=000d1502 led=8004
+ERROR img=-1 code=1 name=CRC detail=790 junk=0
+DISP fnd=000300e1 led=4000
+ERROR img=7 code=4 name=MODEL detail=1 junk=0
+DISP fnd=000f07e4 led=4000
+ERROR img=7 code=5 name=RANGE detail=300 junk=0
+DISP fnd=000f07e5 led=4000
+ERROR img=-1 code=3 name=CMD detail=90 junk=0
+DISP fnd=000300e3 led=4000
+ERROR img=-1 code=3 name=CMD detail=90 junk=5
+DISP fnd=000300e3 led=4000
+RESULT img=7 model=f16c4f12 npu_class=7 cpu_class=7 match=1 rc=0 status=00000c12 junk=4 scores=-34082,-171877,-20186,44571,-67625,-20574,-141553,112746,-23315,13460
+DISP fnd=000d0707 led=8080
+ERROR img=-1 code=2 name=TIMEOUT detail=397 junk=0
+DISP fnd=000300e2 led=4000
+RESULT img=7 model=f16c4f12 npu_class=7 cpu_class=7 match=1 rc=0 status=00000c12 junk=0 scores=-34082,-171877,-20186,44571,-67625,-20574,-141553,112746,-23315,13460
+DISP fnd=000d0707 led=8080
+SELFTEST w_missing err_code=9 recovered=1 status=00009010
+DISP fnd=00030000 led=0000
+RESULT img=7 model=f16c4f12 npu_class=7 cpu_class=7 match=1 rc=0 status=00009c12 junk=0 scores=-34082,-171877,-20186,44571,-67625,-20574,-141553,112746,-23315,13460
+DISP fnd=000d0707 led=8080
+P3_DIGIT READY model=f16c4f12 model_ok=1 mode=784x8 tiles=13 junk=0
