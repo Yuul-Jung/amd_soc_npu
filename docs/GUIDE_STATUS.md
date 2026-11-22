@@ -7,10 +7,10 @@
 | 장 | 제목 | 안내서 | HOST | RTL_SIM | SYNTH_TIMING | TIMING_SIM | BOARD |
 |---|---|---|---|---|---|---|---|
 | 00 | UART Echo | [ch00_uart_echo_v05.html](../ch00_uart_echo_v05.html) | — | ✅ | ✅ | — | ⏳ |
-| 01 | DSP 추론 MAC 누산 | [ch01_mac_v05.html](../ch01_mac_v05.html) | ✅ | ✅ | ✅ | — | ⏳ |
-| 02 | DSP48E1 타깃 곱셈 | [ch02_dsp_v05.html](../ch02_dsp_v05.html) | ✅ | ✅ | ✅ | — | ⏳ |
+| 01 | DSP 추론 MAC 누산 | [ch01_mac_v05.html](../ch01_mac_v05.html) | ✅ | ✅ | ⏳ | — | ⏳ |
+| 02 | DSP48E1 타깃 곱셈 | [ch02_dsp_v05.html](../ch02_dsp_v05.html) | ✅ | ✅ | ⏳ | — | ⏳ |
 | 03 | MAC 2단계 파이프라인 | [ch03_mac_pipeline_v05.html](../ch03_mac_pipeline_v05.html) | ✅ | ✅ | ✅ | — | ⏳ |
-| 04 | BRAM 동기 버퍼 | [ch04_bram_v05.html](../ch04_bram_v05.html) | ✅ | ✅ | ✅ | — | ⏳ |
+| 04 | BRAM 동기 버퍼 | [ch04_bram_v05.html](../ch04_bram_v05.html) | ✅ | ✅ | ⏳ | — | ⏳ |
 | 05 | Fixed-Point Quantizer | [ch05_fixed_v05.html](../ch05_fixed_v05.html) | ✅ | ✅ | ✅ | — | ⏳ |
 | 06 | INT8·INT16 정밀도 비교 | [ch06_precision_v05.html](../ch06_precision_v05.html) | ✅ | ✅ | ✅ | — | ⏳ |
 | 07 | 벡터 내적 | [ch07_vector_dot_v05.html](../ch07_vector_dot_v05.html) | ✅ | ✅ | ✅ | — | ⏳ |

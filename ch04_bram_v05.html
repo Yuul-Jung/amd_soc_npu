@@ -351,7 +351,7 @@ vivado -mode batch -nojournal -source tools/vivado/ooc_timing.tcl -tclargs ch04
       <p>누적 보고 (이전 결과 → 추가 RTL → 시험 벡터 → 시뮬레이션 → 합성/보드 → 인계):</p>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>이전 결과</th><th>추가 RTL</th><th>시험 벡터</th><th>시뮬레이션</th><th>합성 / 보드</th><th>인계</th></tr></thead>
-        <tbody><tr><td>없음 (첫 장)</td><td><code>bram_sync_buffer.v</code></td><td><code>tb_bram_sync_buffer.sv</code><br><code>bram_reference.py</code></td><td>통과</td><td>통과 / 미실시</td><td>3건 (아래 표)</td></tr></tbody>
+        <tbody><tr><td>없음 (첫 장)</td><td><code>bram_sync_buffer.v</code></td><td><code>tb_bram_sync_buffer.sv</code><br><code>bram_reference.py</code></td><td>통과</td><td>⚠ 대기 / 미실시</td><td>3건 (아래 표)</td></tr></tbody>
       </table></div>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>다음 장으로 넘기는 파일</th><th>사용처</th></tr></thead>
@@ -371,9 +371,9 @@ vivado -mode batch -nojournal -source tools/vivado/ooc_timing.tcl -tclargs ch04
           <b>RTL_SIM_PASS</b>
           <span>RTL_SIM_PASS BRAM W=16 A=8 cycles=1016 외 1건 · 도구 버전 미기록 · 2026-11-18</span>
         </div>
-        <div class="gate pass">
+        <div class="gate todo">
           <b>SYNTH_TIMING_PASS</b>
-          <span>ch04 bram_sync_buffer WNS=NA WHS=NA LUT=3 FF=1 DSP48E1=0 RAMB=1 · 2026-11-20</span>
+          <span>⚠ 미검사 · 레지스터 간 경로 없음(WNS=NA), 합성·자원만 확인 · ch04 bram_sync_buffer WNS=NA WHS=NA LUT=3 FF=1 DSP… · 2026-11-20</span>
         </div>
         <div class="gate todo">
           <b>BOARD_PASS</b>

@@ -75,6 +75,13 @@
 - 타이밍을 못 맞추면(WNS < 0) 억지로 고치지 말고 결과 그대로 보고한다.
 
 11-1. **(12장 타이밍 시뮬레이션 단축, 웹 2026-11-20)** `run_timing_sim.sh` 기본이 짧은 시나리오(`+SHORT`)가 됐다: 분류 1 · Bias 변경 뒤 재분류 1 · ERR 1. 같은 넷리스트·SDF·UART 핀 경로이고 응답 수만 6 → 2 (Icarus 기능 시뮬 기준 시뮬 시간 29.2 → 10.8 ms, 2.7배 단축 — 시간은 대부분 115200 bps 송신). 판정 줄 `TIMING_SIM_PASS … classes=2 … scenario=short`. 지금 도는 전체 실행이 `TIMESIM_PROGRESS`로 응답 수가 늘고 있으면 그대로 두고, 멈춰 있거나 다시 돌려야 하면 짧은 시나리오로 실행한다. 전체는 `TIMESIM_FULL=1`.
+11-3. **(2026-11-22 밤, VSCODE_TO_WEB_20261122 회신)**
+   - 1절 반영: `tb_npu_uart.sv`의 `edit_idx` 선언을 함수 앞으로 옮김 (xvlog VRFC 10-3380). 웹은 xvlog가 없어 Icarus로만 확인 — xvlog·xelab 통과는 VS Code에서 확인 바람.
+   - 3절 반영(11-1 철회): `run_timing_sim.sh` 기본은 **전체 시나리오** → `TIMING_SIM_PASS`. 짧은 것은 `TIMESIM_SHORT=1` smoke → `TIMING_SIM_SMOKE_PASS`(게이트 증거 아님). LED1·2 변이를 smoke가 놓치는 것을 웹에서도 재현함. 판정 줄에 `timing_violations=<수>` 추가 (xsim 경고 문구 "Timing violation" 기준, 실제 문구는 로그로 확인 바람).
+   - 2절 반영: `ooc_timing.tcl`은 NA를 `SYNTH_TIMING_NOT_CHECKED`로 출력, 생성기는 `WNS=NA`를 ⚠ 미검사로 표시(01·02·04장). 장 페이지 서브젝트는 장 Top STAGE 배선 결과로 판정.
+   - 4절 REQP-1840: 저장소에 증거 파일이 없어 웹은 아직 페이지에 쓰지 않았다. DRC 보고서 발췌(REQP-1840 줄, 대상 셀)를 `ch12/validation/`·`p02~p04/validation/`에 커밋해 주면 페이지에 미해결로 표시한다. RTL 변경(동기 리셋)은 사용자 승인 대기.
+   - 6절: `timesim_sanitize.py`·`run_timing_sim.sh` 수정은 유지. `ooc_timing.tcl`의 빈 SLACK→NA 변경도 유지(판정만 위처럼 바꿈).
+   - 7절: 12장 SDF 전체 시나리오는 이 커밋으로 다시 실행해도 되고, `47c2f79` 사본 결과를 올려도 된다(설계·넷리스트가 같음을 증거에 적을 것).
 11-2. **(2026-11-22)** 구 11장·13~16장 단독 OOC는 돌리지 않아도 된다. 2장 2-7·2-8과 3장 서브젝트의 Vivado 게이트는 장 Top STAGE n 배선 결과로 판정하도록 생성기를 바꿨다. VS Code에 남은 Vivado 작업은 12장 SDF 시뮬레이션(11-1) 하나다.
 11. **(남은 것, 2026-11-20)** 12장 배선 후 SDF 타이밍 시뮬레이션이 끝나면 `ch12/validation/vivado_impl_timesim_20261120.txt`를 `restructure/projects`에 커밋 (2장 2-8 TIMING_SIM 게이트가 대기 중). 웹 판 `ch26`·`ch29` OOC FAIL은 고치지 않는다 (개편 장은 `part03` VS Code 판을 쓴다).
 

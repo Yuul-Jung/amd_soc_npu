@@ -493,8 +493,12 @@ foreach d $designs {
         set wns [worst_slack setup]
         set whs [worst_slack hold]
         set res "LUT=[count_ref LUT*] FF=[count_ref FD*] DSP48E1=[count_ref DSP48E1] RAMB=[count_ref RAMB*]"
-        set ok [expr {($wns eq "NA" || $wns &gt;= 0) &amp;&amp; ($whs eq "NA" || $whs &gt;= 0)}]
-        set tag [expr {$ok ? "SYNTH_TIMING_PASS" : "SYNTH_TIMING_FAIL"}]
+        # NA = 제약된 레지스터 간 경로 없음 → 타이밍을 검사하지 못한 것이므로 PASS로 세지 않는다.
+        if {$wns eq "NA" || $whs eq "NA"} {
+            set tag SYNTH_TIMING_NOT_CHECKED
+        } else {
+            set tag [expr {($wns &gt;= 0 &amp;&amp; $whs &gt;= 0) ? "SYNTH_TIMING_PASS" : "SYNTH_TIMING_FAIL"}]
+        }
         set line "$tag $ch $top[expr {[llength $generics] ? " [join $generics ,]" : ""}] WNS=$wns WHS=$whs $res"
         close_project
     } err]
