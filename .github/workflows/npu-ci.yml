@@ -2,7 +2,7 @@ name: NPU CI — 정적 검사 · RTL 시뮬레이션
 
 on:
   push:
-    branches: [main]
+    branches: [main, restructure/projects, 'fix/**']
   pull_request:
     branches: [main]
 

@@ -41,12 +41,22 @@
 
 | 항목 | 결과 | 증거 | 값 |
 |---|---|---|---|
-| OOC 합성·타이밍 (`run_vivado_all.sh ooc`) | **19 PASS · 2 FAIL · 3 미검사** (정정 2026-11-22, 이전 기재 22/24 PASS는 잘못) | `chNN/validation/vivado_ooc_20261120.txt` (200eedc) | 00·03·05~10·13~20·30장 PASS (19장 NPE 1·4·8). 01·02·04장은 WNS·WHS=NA, 검사된 경로가 없어 PASS가 아니다 (`VSCODE_TO_WEB_20261122.md` 2절) |
+| OOC 합성·타이밍 (`run_vivado_all.sh ooc`) | **19 PASS · 2 FAIL · 3 미검사** (정정 2026-11-22, 이전 기재 22/24 PASS는 잘못) | `chNN/validation/vivado_ooc_20261120.txt` (200eedc) | 00·03·05~10·13~20·30장 PASS (19장 NPE 1·4·8). 01·02·04장은 WNS·WHS=NA, 검사된 경로가 없어 PASS가 아니다 (`VSCODE_TO_WEB_20261122.md` 2절). **코드 판 구분(정정 2026-11-23): 19 PASS 중 00~10장이 8건이고, 13~20·30장 11건은 채택하지 않은 웹 판 RTL의 결과다.** 채택한 VS Code 판의 타이밍 근거는 아래 표 |
 | 도구 수정 | — | `tools/vivado/ooc_timing.tcl` (200eedc) | `worst_slack`: SLACK이 비면 NA (첫 실행에서 01·02·04장이 Tcl 오류로 FAIL로 찍혔던 원인). 정정 2026-11-22: 이 수정으로 NA가 PASS로 집계됐고, VS Code 작업 경계 밖 수정이었다 |
 | 웹 판 ch26 `npu_cnn3x3` | **FAIL** | `ch26/validation/vivado_ooc_20261120.txt` | WNS −0.468 ns — VS Code 판 `part03/ch26`은 OOC PASS (68fd5b6). 억지로 고치지 않음 |
 | 웹 판 ch29 `sensor_guard_ai` | **FAIL** | `ch29/validation/vivado_ooc_20261120.txt` | WNS −2.811 ns — VS Code 판 `part03/ch29`은 OOC PASS (68fd5b6). 억지로 고치지 않음 |
 | 12장 구현 | PASS | `ch12/validation/vivado_impl_timesim_20261122.txt` (a5d89dc) | WNS +1.193 · WHS +0.064, LUT 1,656 · DSP 4 · RAMB 5 |
 | 12장 배선 후 SDF 타이밍 시뮬레이션 | **PASS** (2026-11-22, 전체 시나리오) | `ch12/validation/vivado_impl_timesim_20261122.txt` (`restructure/projects` a5d89dc) | 분류 6/6 = 기준 모델, Bias 변경·ERR 확인, 위반 경고 0(음성 대조로 검출 확인). 이전에 적은 RSTRAMB setup 경고 2건은 11-20 실행의 기록이며 이번 실행에는 없음. 동작 중 btnC 리셋은 미검증 |
+
+## 채택한 VS Code 판 13~31장 RTL의 타이밍 근거 (2026-11-23 파일 단위 대조)
+
+| RTL | 근거 (100 MHz, 배선 후) |
+|---|---|
+| 13·14·16장 | p03 Top STAGE 1~4 PASS (15장은 자체 RTL 없음) |
+| 14·17장, 18장 INT16 구성 | p04 Top STAGE 1~4, `ch19/validation/synth_ooc_summary.md` PASS |
+| 20·26·29·30·31장 코어 | 각 장 `validation/synth_ooc_summary.md` PASS |
+| 21·30장 SoC Top | 각 장 빌드 로그 PASS |
+| `ch28/rtl/p3_fnd_scan.v` | 없음 (RTL 시험 전용, BD에서 쓰지 않음) |
 
 ## 남은 것
 
