@@ -1,16 +1,18 @@
 # 제3부 Basys3 실물 일괄 점검표 (사용자와 함께 진행)
 
 > 이 점검표의 항목은 아직 **실행하지 않았다(NOT_RUN)**. 아래 기대값은 RTL·SoC 시뮬레이션과 Vivado/Vitis 빌드에서 얻은 값이다.
-> 외부 회로 연결 없이 Basys3 USB 케이블 하나(J4: JTAG + USB-UART)만 사용한다.
+> (변경 2026-11-22) Basys3 USB 케이블 하나(J4: JTAG + USB-UART)로 진행한다. 예외는 30장이다: B19부터 JB4↔JB6(3.3 V) 점퍼 1개가 필요하고, B24(실제 모터)는 별도다.
+> 점퍼는 전원을 끈 상태에서 꽂는다. JB4와 JB6 사이의 **JB5는 GND**이므로 JB6과 닿으면 3.3 V가 단락된다.
 
 ## 0. 준비
 
 | 항목 | 내용 |
 |---|---|
-| 비트스트림 | `part03/ch21/build/out/basys3_soc21_top.bit` (SHA-256 fca1368c…3925, `ch21/validation/soc_summary.md`) — (변경) 안 A 동결 주소맵. **21~31장 모두 이 비트스트림 하나**(30장은 판단 대기) |
+| 비트스트림 | `part03/ch21/build/out/basys3_soc21_top.bit` (SHA-256 fca1368c…3925, `ch21/validation/soc_summary.md`) — (변경) 안 A 동결 주소맵. **30장을 뺀 21~31장은 이 비트스트림 하나.** (변경 2026-11-22) **30장은 별도** `part03/ch30/build/out/basys3_soc30_top.bit`·`soc30_motor.xsa`(1-30절) |
 | XSA | `part03/ch21/build/out/soc21_npu.xsa` (SHA-256 24abeb3a…458d) |
 | ELF ① | `part03/ch22/build/ws/npu_app/build/npu_app.elf` (SHA-256 bdb8cb6e…b0ce) |
 | ELF ② | `part03/ch23/build/ws/bench_board/build/bench_board.elf` (SHA-256 768c9cd9…) |
+| 주의 | (추가 2026-11-22) 재빌드하면 SHA가 달라진다. 보드 점검 전에는 이 폴더에서 재빌드하지 않는다 |
 | 재생성 | `LEVEL=fpga SOC11_DIR=<제1부 11장 폴더> VIVADO_SETTINGS=… VITIS_SETTINGS=… bash part03/ch27/scripts/run_all.sh` |
 | 터미널 | USB-UART 115200 bps, 8N1, 흐름 제어 없음 |
 | 주소(안 A) | GPIO0 LED/SW 0x4000_0000, BTN 0x4001_0000, UART 0x4002_0000, Timer 0x4003_0000, INTC 0x4004_0000, SEG7 0x4006_0000, NPU 0x44A0_0000 |

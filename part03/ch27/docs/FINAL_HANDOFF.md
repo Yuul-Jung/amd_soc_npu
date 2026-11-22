@@ -1,6 +1,6 @@
-# 제3부 13~27장 최종 인계 (2026-11-18)
+# 제3부 13~31장 최종 인계 (2026-11-18, 정정 2026-11-22)
 
-> 저장소 `amd_soc_rtl`, 브랜치 `work/part03-ch13-19`(로컬 커밋, GitHub 반영은 ChatGPT 담당). 결과는 실제 실행한 도구 기준이며,
+> 저장소 `amd_soc_rtl`, 브랜치 `work/part03-ch13-19`(`amd_soc_npu`의 `vscode/part03-ch13-31`로 푸시, `origin/main` 반영은 ChatGPT 담당). 결과는 실제 실행한 도구 기준이며,
 > **Basys3 실물은 전부 NOT_RUN**(`docs/BOARD_CHECKLIST.md`로 사용자와 함께).
 
 ## 1. 장별 상태
@@ -15,7 +15,7 @@
 | 18 | Float·INT8·INT16 정밀도 | 9ff54d0 | PC 평가 + RTL sim | t10k Float 92.60%, INT8 92.56%, INT16 92.60%, INT16 RTL 41비트 검증 |
 | 19 | 1·4·8PE 비교 | 1498e7e | RTL sim + OOC 배선 | 700/206/138클록, 적재 병목, argmax 결함 발견 |
 | 20 | AXI4-Lite NPU IP | 31ffd79 | BFM RTL sim + OOC 배선 + IP 패키징 | 784 추론 7회 일치, SLVERR 16, WNS +0.223 |
-| 21 | MicroBlaze V + NPU SoC | 8a3c4a6 | Vivado 칩 전체 구현·Bitstream·XSA | WNS +0.219 / WHS +0.021, 원본 무변경 |
+| 21 | MicroBlaze V + NPU SoC | 8a3c4a6 | Vivado 칩 전체 구현·Bitstream·XSA | (안 A) WNS +0.374 / WHS +0.034, 원본 무변경 |
 | 22 | C 드라이버·Vitis | 22ea723 | C·RTL 협동 sim + Vitis ELF | NPU = CPU = Python, ELF 30.5 KB |
 | 23 | CPU 대 NPU | 3b36549 | SoC 전체 xsim(실제 MicroBlaze V) | CPU 1,816,547 / NPU 종단간 1,080,161 클록 |
 | 24 | 자원·타이밍 | fd137d6 | OOC 배선 주기 스윕 | Fmax 코어 146·Tile 101·AXI 105 MHz |
@@ -24,6 +24,8 @@
 | 27 | 통합 실행기·인계 | e148ccd | `run_all.sh` LEVEL=sim PASS | 이 문서, 실물 점검표 |
 | 28 | 손글씨 숫자 인식 시스템(종합 1) | c7fbcb3 | 호스트↔펌웨어↔NPU RTL 협동 sim + Vivado 칩 전체·Bitstream + Vitis ELF + SoC 전체 xsim PASS 15/15 | 22장 점수 골든 일치, 오류 시험 11·변이 8, WNS +0.420 |
 | 29 | 센서 융합 상태 감시(종합 2) | 5d22429 (+ 최종 회귀) | 정책 RTL sim·OOC 배선 + 호스트↔펌웨어↔NPU RTL 협동 sim + Vitis ELF(28장 Bitstream 재사용) | 정책 RTL 4070클록 일치·변이 4, 협동 109검사·변이 12, 합성 데이터 INT8 95.67% |
+| 30 | 모터 안전 인터록(종합 3) | 943f864, 336d1b2 | RTL·협동 sim + OOC 배선 + 별도 Bitstream·ELF | (안 A) WNS +0.357 / WHS +0.030 |
+| 31 | 보안 모델 적재(종합 4) | a1c8904, c6bf771 | RTL·협동 sim + 암호 RTL OOC 배선 + ELF | 협동 35/35, SHA-256 코어 WNS +0.117 (여유 작음) |
 
 ## 2. 재현
 
@@ -47,9 +49,9 @@ LEVEL=full …                                                          # + SoC 
 
 ## 4. 남은 일·알려진 한계
 
-1. **실물:** Basys3 다운로드·UART·인터럽트·사이클 실측 (BOARD_CHECKLIST B1~B7).
+1. **실물:** Basys3 다운로드·UART·인터럽트·사이클 실측 (BOARD_CHECKLIST B1~B26a: 필수 30, 선택 2, 실모터 1, 모두 NOT_RUN).
 2. **성능 병목:** NPU 종단간 시간의 99% 이상이 AXI4-Lite 단어 단위 적재. 가중치 상주 BRAM(62.7 kbit) 또는 DMA/버스트가 다음 개선 대상.
 3. **타이밍 여유:** 17장 컨트롤러 argmax 1·2단이 Fmax 101 MHz를 정한다. 클록당 비교 1단 분할안(done +2클록)을 문서화만 했다.
 4. **빌드 설정:** Vitis 기본 Debug(-O0), MicroBlaze V rv32i(M 확장 없음). 최적화 빌드·M 확장 비교는 아직 없다.
 5. **인터럽트:** IRQ 신호와 INTC 연결까지 확인. ISR 소프트웨어는 없다(폴링 드라이버).
-6. **응용 과제:** 28장 완료(실물 B9~B13 NOT_RUN, SoC xsim 재실행 중), 29장 완료(실물 B14~B17 NOT_RUN, 실제 센서 연결 안 함). 30·31장은 아직 착수하지 않았다.
+6. **응용 과제:** 28~31장 구현·시뮬레이션·빌드 완료(28장 SoC xsim 15/15). 실물은 모두 NOT_RUN, 실제 센서·모터는 연결하지 않았다.
