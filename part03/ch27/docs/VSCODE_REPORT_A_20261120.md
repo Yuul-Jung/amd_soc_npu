@@ -45,10 +45,11 @@
 | 도구 수정 | — | `tools/vivado/ooc_timing.tcl` (200eedc) | `worst_slack`: SLACK이 비면 NA (첫 실행에서 01·02·04장이 Tcl 오류로 FAIL로 찍혔던 원인). 정정 2026-11-22: 이 수정으로 NA가 PASS로 집계됐고, VS Code 작업 경계 밖 수정이었다 |
 | 웹 판 ch26 `npu_cnn3x3` | **FAIL** | `ch26/validation/vivado_ooc_20261120.txt` | WNS −0.468 ns — VS Code 판 `part03/ch26`은 OOC PASS (68fd5b6). 억지로 고치지 않음 |
 | 웹 판 ch29 `sensor_guard_ai` | **FAIL** | `ch29/validation/vivado_ooc_20261120.txt` | WNS −2.811 ns — VS Code 판 `part03/ch29`은 OOC PASS (68fd5b6). 억지로 고치지 않음 |
-| 12장 구현 | PASS | (타이밍 시뮬레이션 끝나면 `ch12/validation/vivado_impl_timesim_20261120.txt`) | WNS +1.193 · WHS +0.064, LUT 1,656 · DSP 4 · RAMB 5 |
-| 12장 배선 후 SDF 타이밍 시뮬레이션 | 11-20 중단(판정 없음) → 11-22 재실행 | 〃 | 리셋 해제 120 ns 시점 RAMB18 RSTRAMB setup 경고 2건(시작 때 한 번), 이후 없음 |
+| 12장 구현 | PASS | `ch12/validation/vivado_impl_timesim_20261122.txt` (a5d89dc) | WNS +1.193 · WHS +0.064, LUT 1,656 · DSP 4 · RAMB 5 |
+| 12장 배선 후 SDF 타이밍 시뮬레이션 | **PASS** (2026-11-22, 전체 시나리오) | `ch12/validation/vivado_impl_timesim_20261122.txt` (`restructure/projects` a5d89dc) | 분류 6/6 = 기준 모델, Bias 변경·ERR 확인, 위반 경고 0(음성 대조로 검출 확인). 이전에 적은 RSTRAMB setup 경고 2건은 11-20 실행의 기록이며 이번 실행에는 없음. 동작 중 btnC 리셋은 미검증 |
 
 ## 남은 것
 
 - Basys3 점검표 B1~B26 (사용자와 함께). B24 실제 모터는 사용자 판단으로 따로.
 - 보드 실측과 sim 비교: 23장 클록, 28장 손글씨 결과 = PC.
+- REQP-1840(12장·p02~p04): 미해결, 증거 a5d89dc. 동기 리셋 수정은 사용자 승인 대기.
