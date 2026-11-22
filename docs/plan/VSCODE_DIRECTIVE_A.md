@@ -75,6 +75,7 @@
 - 타이밍을 못 맞추면(WNS < 0) 억지로 고치지 말고 결과 그대로 보고한다.
 
 11-1. **(12장 타이밍 시뮬레이션 단축, 웹 2026-11-20)** `run_timing_sim.sh` 기본이 짧은 시나리오(`+SHORT`)가 됐다: 분류 1 · Bias 변경 뒤 재분류 1 · ERR 1. 같은 넷리스트·SDF·UART 핀 경로이고 응답 수만 6 → 2 (Icarus 기능 시뮬 기준 시뮬 시간 29.2 → 10.8 ms, 2.7배 단축 — 시간은 대부분 115200 bps 송신). 판정 줄 `TIMING_SIM_PASS … classes=2 … scenario=short`. 지금 도는 전체 실행이 `TIMESIM_PROGRESS`로 응답 수가 늘고 있으면 그대로 두고, 멈춰 있거나 다시 돌려야 하면 짧은 시나리오로 실행한다. 전체는 `TIMESIM_FULL=1`.
+11-2. **(2026-11-22)** 구 11장·13~16장 단독 OOC는 돌리지 않아도 된다. 2장 2-7·2-8과 3장 서브젝트의 Vivado 게이트는 장 Top STAGE n 배선 결과로 판정하도록 생성기를 바꿨다. VS Code에 남은 Vivado 작업은 12장 SDF 시뮬레이션(11-1) 하나다.
 11. **(남은 것, 2026-11-20)** 12장 배선 후 SDF 타이밍 시뮬레이션이 끝나면 `ch12/validation/vivado_impl_timesim_20261120.txt`를 `restructure/projects`에 커밋 (2장 2-8 TIMING_SIM 게이트가 대기 중). 웹 판 `ch26`·`ch29` OOC FAIL은 고치지 않는다 (개편 장은 `part03` VS Code 판을 쓴다).
 
 ## 5. 웹 Claude가 그동안 하는 것
