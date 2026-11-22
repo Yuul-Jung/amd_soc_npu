@@ -251,6 +251,9 @@ def scope_svg_css(css, sid):
 
 # ── 원본 SVG 표시 보정 ─────────────────────────────────────────────────────
 FIXED: dict[str, str] = {}   # 출력 경로 → 내용
+_DJ = os.path.join(P1, "diagrams.json")
+REDRAWN = {d["source"]: f"diagrams/{d['name']}.svg" for d in json.loads(rd(_DJ))["diagrams"]
+           if os.path.exists(os.path.join(P1, "diagrams", d["name"] + ".svg"))} if os.path.exists(_DJ) else {}
 
 
 def fixed_svg(src):
@@ -258,6 +261,8 @@ def fixed_svg(src):
     viewBox를 실제 크기로 맞춘 사본(assets/fixed/)으로 바꿔 보여 준다. 원본 파일은 고치지 않는다."""
     if not src.endswith(".svg") or src.startswith(("http", "//")):
         return src
+    if unquote(src) in REDRAWN:      # 규칙(직각 연결·마름모 꼭짓점)에 맞춰 다시 그린 도면 (tools/diagram/build_from_graphviz.py)
+        return REDRAWN[unquote(src)]
     path = os.path.join(P1, unquote(src))
     if not os.path.exists(path):
         return src

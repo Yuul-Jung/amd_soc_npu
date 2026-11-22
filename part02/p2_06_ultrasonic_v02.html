@@ -68,7 +68,7 @@ img.zoom{cursor:zoom-in}
 </section>
 <section class="section" id="overview">
 <h2><span class="num">01</span>01장부터 이어지는 06장 실습 범위</h2>
-<div>A · 구조</div><p>CPU는 문자열 명령과 표시 모드를 처리한다. <b>hc_sr04_core</b>는 12μs TRIG 발생·Echo HIGH 폭 측정을 수행한다. 사용자 <b>AXI4-Lite(에이엑스아이 포 라이트, 저속 제어 레지스터 버스)</b> IP는 설정과 결과를 전달한다.</p><div><img alt="P2-06 명령 처리와 센서 하드웨어 구조" class="zoom" loading="lazy" src="legacy/part02_1/ch06/assets/architecture.svg"/></div><div>PC UART → MicroBlaze V → AXI4-Lite 사용자 IP → HC-SR04 Core → TRIG/ECHO · LED2 · FND</div><p><b>과제 경계:</b> LED0은 01장, FND는 02장, 방향 버튼/IRQ는 03장, PWM LED1은 04장, CdS 자동 조명은 05장을 이어받는다. 새 출력 LED2와 초음파 신호만 추가한다.</p>
+<div>A · 구조</div><p>CPU는 문자열 명령과 표시 모드를 처리한다. <b>hc_sr04_core</b>는 12μs TRIG 발생·Echo HIGH 폭 측정을 수행한다. 사용자 <b>AXI4-Lite(에이엑스아이 포 라이트, 저속 제어 레지스터 버스)</b> IP는 설정과 결과를 전달한다.</p><div><img alt="P2-06 명령 처리와 센서 하드웨어 구조" class="zoom" loading="lazy" src="diagrams/p2_06_architecture.svg"/></div><div>PC UART → MicroBlaze V → AXI4-Lite 사용자 IP → HC-SR04 Core → TRIG/ECHO · LED2 · FND</div><p><b>과제 경계:</b> LED0은 01장, FND는 02장, 방향 버튼/IRQ는 03장, PWM LED1은 04장, CdS 자동 조명은 05장을 이어받는다. 새 출력 LED2와 초음파 신호만 추가한다.</p>
 </section>
 <section class="section" id="commands">
 <h2><span class="num">02</span>UART 문자열 명령과 기대 동작</h2>
@@ -100,7 +100,7 @@ TIMEOUT: 약 38ms 동안 시작/종료 이벤트가 없으면 오류 처리</cod
 </section>
 <section class="section" id="flow">
 <h2><span class="num">07</span>문자열 처리 및 표시 갱신 흐름</h2>
-<div>A · 소프트웨어</div><div><img alt="실제 main_p2_06.c 함수명 기반 UART 분기" class="zoom" loading="lazy" src="legacy/part02_1/ch06/assets/command_flow.svg"/></div><p>UART 한 줄이 완성되면 <code>handle_line()</code>에서 <code>sonic_parse_command()</code>를 먼저 호출하고, 해당 명령이 아니면 기존 CDS/PWM/LED/DISP/STATUS 분기로 진행한다. 메인 반복문에서 <code>service_sonic_display()</code>가 SEQ 변경을 관찰해 새 거리값을 FND에 반영한다.</p><p>동기화 대상 Echo 핀은 외부 비동기 입력이므로 Core에서 2FF(2단 플립플롭, 메타안정성 위험 감소)를 사용한다. 인터럽트가 아니라 기존 C의 주기적 폴링으로 거리 상태를 표시하므로, 03장 버튼 IRQ 흐름은 변경하지 않는다.</p>
+<div>A · 소프트웨어</div><div><img alt="실제 main_p2_06.c 함수명 기반 UART 분기" class="zoom" loading="lazy" src="diagrams/p2_06_command_flow.svg"/></div><p>UART 한 줄이 완성되면 <code>handle_line()</code>에서 <code>sonic_parse_command()</code>를 먼저 호출하고, 해당 명령이 아니면 기존 CDS/PWM/LED/DISP/STATUS 분기로 진행한다. 메인 반복문에서 <code>service_sonic_display()</code>가 SEQ 변경을 관찰해 새 거리값을 FND에 반영한다.</p><p>동기화 대상 Echo 핀은 외부 비동기 입력이므로 Core에서 2FF(2단 플립플롭, 메타안정성 위험 감소)를 사용한다. 인터럽트가 아니라 기존 C의 주기적 폴링으로 거리 상태를 표시하므로, 03장 버튼 IRQ 흐름은 변경하지 않는다.</p>
 </section>
 <section class="section" id="step01">
 <h2><span class="num">08</span>05장 기준 프로젝트 확인</h2>

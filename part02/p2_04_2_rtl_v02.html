@@ -68,7 +68,7 @@ img.zoom{cursor:zoom-in}
 </section>
 <section class="section" id="overview">
 <h2><span class="num">01</span>pwm_core · AXI Register Bank · IP Wrapper</h2>
-<div>A · 구조</div><figure class="fig"><img alt="PWM Core와 AXI Slave를 분리한 구조" class="zoom" loading="lazy" src="legacy/part02_1/ch04/assets/architecture.svg"/></figure><p><code>pwm_core.v</code>는 AXI를 모르며, Clock·Reset·설정값·APPLY·PWM 출력만 사용합니다. <code>p2_04_axi_pwm_v1_0_S00_AXI.v</code>는 CPU의 레지스터 접근을 담당합니다. <code>p2_04_axi_pwm_v1_0.v</code>는 Vivado IP Packager에서 인식시키는 최상위 인터페이스입니다.</p>
+<div>A · 구조</div><figure class="fig"><img alt="PWM Core와 AXI Slave를 분리한 구조" class="zoom" loading="lazy" src="diagrams/p2_04_architecture.svg"/></figure><p><code>pwm_core.v</code>는 AXI를 모르며, Clock·Reset·설정값·APPLY·PWM 출력만 사용합니다. <code>p2_04_axi_pwm_v1_0_S00_AXI.v</code>는 CPU의 레지스터 접근을 담당합니다. <code>p2_04_axi_pwm_v1_0.v</code>는 Vivado IP Packager에서 인식시키는 최상위 인터페이스입니다.</p>
 </section>
 <section class="section" id="boundary">
 <h2><span class="num">02</span>설정 Shadow와 출력 Active를 분리</h2>

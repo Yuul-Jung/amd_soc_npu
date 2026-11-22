@@ -75,7 +75,7 @@ img.zoom{cursor:zoom-in}
 </section>
 <section class="section" id="flow">
 <h2><span class="num">03</span>함수별 실행 흐름</h2>
-<div>C 코드 이해</div><figure class="fig"><img alt="UART 명령 해석 흐름" class="zoom" loading="lazy" src="legacy/part02_1/ch02/assets/command_flow.svg"/></figure><div aria-label="표 (가로 스크롤 가능)" class="table-wrap" role="region" tabindex="0"><table><thead><tr><th>함수</th><th>동작</th></tr></thead><tbody><tr><td><code>main()</code></td><td>명령 버퍼 생성, 초기 상태 출력, 반복 수신</td></tr><tr><td><code>read_command_line()</code></td><td>CR/LF까지 입력하며 길이·제어문자를 검사</td></tr><tr><td><code>handle_command()</code></td><td>LED·FND·STATUS와 그 외 문자열 구분</td></tr><tr><td><code>parse_disp_digits()</code></td><td>정확히 4개의 0~9 숫자를 4니블 BCD로 결합</td></tr><tr><td><code>report_fnd()</code></td><td>FND REG0/REG1을 읽고 4자리로 해석해 출력</td></tr></tbody></table></div>
+<div>C 코드 이해</div><figure class="fig"><img alt="UART 명령 해석 흐름" class="zoom" loading="lazy" src="diagrams/p2_02_command_flow.svg"/></figure><div aria-label="표 (가로 스크롤 가능)" class="table-wrap" role="region" tabindex="0"><table><thead><tr><th>함수</th><th>동작</th></tr></thead><tbody><tr><td><code>main()</code></td><td>명령 버퍼 생성, 초기 상태 출력, 반복 수신</td></tr><tr><td><code>read_command_line()</code></td><td>CR/LF까지 입력하며 길이·제어문자를 검사</td></tr><tr><td><code>handle_command()</code></td><td>LED·FND·STATUS와 그 외 문자열 구분</td></tr><tr><td><code>parse_disp_digits()</code></td><td>정확히 4개의 0~9 숫자를 4니블 BCD로 결합</td></tr><tr><td><code>report_fnd()</code></td><td>FND REG0/REG1을 읽고 4자리로 해석해 출력</td></tr></tbody></table></div>
 </section>
 <section class="section" id="trace">
 <h2><span class="num">04</span>DISP 0050 실제 값 추적</h2>

@@ -72,7 +72,7 @@ img.zoom{cursor:zoom-in}
 </section>
 <section class="section" id="functions">
 <h2><span class="num">02</span>C 실행 구조와 플로우차트</h2>
-<span>절차</span><figure class="fig"><img alt="실제 C 명령 플로우" class="zoom" loading="lazy" src="legacy/part02_1/ch08/assets/command_flow.svg"/><figcaption>poll_uart() → handle_line() → adc_parse_command()</figcaption></figure><p><code>main()</code>은 기존 버튼 인터럽트/초음파 출력 서비스를 계속 실행한다. <code>poll_uart()</code>는 수신된 한 줄을 <code>handle_line()</code>으로 넘기고, ADC 명령이 아니면 이전 장 명령 처리 경로로 이동한다.</p>
+<span>절차</span><figure class="fig"><img alt="실제 C 명령 플로우" class="zoom" loading="lazy" src="diagrams/p2_08_command_flow.svg"/><figcaption>poll_uart() → handle_line() → adc_parse_command()</figcaption></figure><p><code>main()</code>은 기존 버튼 인터럽트/초음파 출력 서비스를 계속 실행한다. <code>poll_uart()</code>는 수신된 한 줄을 <code>handle_line()</code>으로 넘기고, ADC 명령이 아니면 이전 장 명령 처리 경로로 이동한다.</p>
 </section>
 <section class="section" id="parser">
 <h2><span class="num">03</span>UART 명령을 단일 문자가 아닌 문자열로 처리</h2>
