@@ -57,16 +57,14 @@ summary{cursor:pointer;font-weight:600}
   <main class="content" id="main-content">
     <section class="section" id="intro">
       <h2><span class="num">00</span>학습 흐름</h2>
-      <p>Basys3 위에 MicroBlaze V CPU와 Local BRAM으로 가장 작은 SoC를 만들고, AXI 주변장치를 하나씩 붙여 GPIO·UART·Timer·Interrupt를 다루는 SoC로 키웁니다. 11장에서 사용자 Top을 연결해 다음 과정의 출발점이 되는 SoC를 완성합니다.</p>
+      <p>Basys3 위에 MicroBlaze V CPU와 Local BRAM으로 가장 작은 SoC를 만들고, AXI 주변장치를 하나씩 붙여 GPIO·UART·Timer·Interrupt를 다루는 SoC로 키웁니다. 11장에서 사용자 Top을 연결해 제1부의 SoC를 완성합니다.</p>
       <div class="flow">01~05장  MicroBlaze V · BRAM · Clock/Reset · Memory Map · AXI
    ↓
 06~09장  AXI GPIO · UART Lite · Timer · Interrupt Controller   (07.1~09.1 C 코드 풀이)
    ↓
 10장     GPIO · UART · Timer 통합   (10.1 C 코드 풀이)
    ↓
-11장     사용자 Top과 1비트 GPIO
-   ↓
-제3부    소형 NPU (00~31장)</div>
+11장     사용자 Top과 1비트 GPIO</div>
       <p>각 장은 앞 장의 Vivado·Vitis 프로젝트를 새 이름으로 복제해 이어서 만듭니다. 앞 장 프로젝트는 그대로 둡니다.</p>
     </section>
     <section class="section" id="chapters">
@@ -93,7 +91,7 @@ summary{cursor:pointer;font-weight:600}
           <tr><td>10</td><td><a href="p1_10_integration_v02.html">GPIO · UART · Timer 통합</a></td><td>09장 성공 프로젝트를 복제하여 Local BRAM을 16 KiB → 64 KiB로 확장한 뒤, 새 Vivado XSA·Vitis Platform으로 SW 입력·UART 명령·Timer Interrupt를 통합 실행합니다.</td></tr>
           <tr><td>10.1</td><td><a href="p1_10_1_integration_c_v02.html">통합 C 코드 풀이</a></td><td>기존 10장 main.c를 기능별로 나누어 코드 → 쉬운 해설 → CPU·메모리·AXI 하드웨어 동작 순서로 살펴봅니다.</td></tr>
         </tbody></table></div>
-      <h3>11장 · 사용자 Top (제2부 출발점)</h3>
+      <h3>11장 · 사용자 Top</h3>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>장</th><th>제목</th><th>학습 내용</th></tr></thead><tbody>
           <tr><td>11</td><td><a href="p1_11_user_top_v02.html">사용자 Top과 1비트 GPIO</a></td><td>Vivado에서 사용자 Top을 연결하고 Vitis에서 SW0 입력을 LED0 출력에 반영합니다.</td></tr>
@@ -108,7 +106,6 @@ summary{cursor:pointer;font-weight:600}
           <tr><td>작업 폴더</td><td><code>~/soc/hw</code> (Vivado 프로젝트) · <code>~/soc/sw</code> (Vitis Workspace)</td></tr>
           <tr><td>UART</td><td>115200 bps · 8N1</td></tr>
         </tbody></table></div>
-      <p>다음 과정: <a href="../index.html">제3부 · 소형 NPU 제작 (00~31장)</a></p>
     </section>
     <div class="chapter-links" id="chapter-links"></div>
   </main>

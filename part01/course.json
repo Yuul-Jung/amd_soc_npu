@@ -6,7 +6,7 @@
   "groups": [
     {"id": "g1", "title": "01~05장 · 프로세서·메모리·버스", "chapters": ["p1-01", "p1-02", "p1-03", "p1-04", "p1-05"]},
     {"id": "g2", "title": "06~10장 · AXI 주변장치와 통합", "chapters": ["p1-06", "p1-07", "p1-07-1", "p1-08", "p1-08-1", "p1-09", "p1-09-1", "p1-10", "p1-10-1"]},
-    {"id": "g3", "title": "11장 · 사용자 Top (제2부 출발점)", "chapters": ["p1-11"]}
+    {"id": "g3", "title": "11장 · 사용자 Top", "chapters": ["p1-11"]}
   ],
   "chapters": [
     {"id": "p1-01",   "number": "01",   "title": "MicroBlaze V + BRAM 최소 SoC",   "source": "legacy/pages/soc/01_microblaze_bram_minimal_soc.html",            "file": "p1_01_microblaze_bram_v02.html"},

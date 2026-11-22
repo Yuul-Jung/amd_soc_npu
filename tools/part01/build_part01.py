@@ -483,16 +483,14 @@ def index_html(descs):
         rows.append("        </tbody></table></div>")
     doc = f"""    <section class="section" id="intro">
       <h2><span class="num">00</span>학습 흐름</h2>
-      <p>Basys3 위에 MicroBlaze V CPU와 Local BRAM으로 가장 작은 SoC를 만들고, AXI 주변장치를 하나씩 붙여 GPIO·UART·Timer·Interrupt를 다루는 SoC로 키웁니다. 11장에서 사용자 Top을 연결해 다음 과정의 출발점이 되는 SoC를 완성합니다.</p>
+      <p>Basys3 위에 MicroBlaze V CPU와 Local BRAM으로 가장 작은 SoC를 만들고, AXI 주변장치를 하나씩 붙여 GPIO·UART·Timer·Interrupt를 다루는 SoC로 키웁니다. 11장에서 사용자 Top을 연결해 제1부의 SoC를 완성합니다.</p>
       <div class="flow">01~05장  MicroBlaze V · BRAM · Clock/Reset · Memory Map · AXI
    ↓
 06~09장  AXI GPIO · UART Lite · Timer · Interrupt Controller   (07.1~09.1 C 코드 풀이)
    ↓
 10장     GPIO · UART · Timer 통합   (10.1 C 코드 풀이)
    ↓
-11장     사용자 Top과 1비트 GPIO
-   ↓
-제3부    소형 NPU (00~31장)</div>
+11장     사용자 Top과 1비트 GPIO</div>
       <p>각 장은 앞 장의 Vivado·Vitis 프로젝트를 새 이름으로 복제해 이어서 만듭니다. 앞 장 프로젝트는 그대로 둡니다.</p>
     </section>
     <section class="section" id="chapters">
@@ -508,7 +506,6 @@ def index_html(descs):
           <tr><td>작업 폴더</td><td><code>~/soc/hw</code> (Vivado 프로젝트) · <code>~/soc/sw</code> (Vitis Workspace)</td></tr>
           <tr><td>UART</td><td>115200 bps · 8N1</td></tr>
         </tbody></table></div>
-      <p>다음 과정: <a href="../index.html">제3부 · 소형 NPU 제작 (00~31장)</a></p>
     </section>"""
     head = HEAD.format(meta="Basys3 MicroBlaze V 기본 SoC 제1부 01~11장 학습안내서", title=html.escape(f"{COURSE['title']} ({VER})"),
                        style=STYLE, chid="p1-index", kicker="BASYS3 · PART 01 · CHAPTER 01–11", ver=VER,
