@@ -1,6 +1,6 @@
 {
   "title": "제1부 · MicroBlaze V 기본 SoC",
-  "version": "v01",
+  "version": "v02",
   "source": "Yuul-Jung/amd_soc_rtl part01 @ 019832bf1e400e3ddc778be8402f584687eefdea",
   "note": "안내서 HTML은 python3 tools/part01/build_part01.py 가 아래 원본 페이지에서 만든다. 원본(legacy/·chapters/)은 수정하지 않는다.",
   "groups": [
@@ -9,20 +9,20 @@
     {"id": "g3", "title": "11장 · 사용자 Top (제2부 출발점)", "chapters": ["p1-11"]}
   ],
   "chapters": [
-    {"id": "p1-01",   "number": "01",   "title": "MicroBlaze V + BRAM 최소 SoC",   "source": "legacy/pages/soc/01_microblaze_bram_minimal_soc.html",            "file": "p1_01_microblaze_bram_v01.html"},
-    {"id": "p1-02",   "number": "02",   "title": "Clock · Reset 구조",              "source": "legacy/pages/soc/02_clock_reset_processor_system_reset.html",     "file": "p1_02_clock_reset_v01.html"},
-    {"id": "p1-03",   "number": "03",   "title": "BRAM 프로그램 실행",              "source": "legacy/pages/soc/03_microblaze_bram_program_execution.html",      "file": "p1_03_bram_program_v01.html"},
-    {"id": "p1-04",   "number": "04",   "title": "Memory Map · MMIO",               "source": "legacy/pages/soc/04_memory_map_memory_mapped_io.html",            "file": "p1_04_memory_map_v01.html"},
-    {"id": "p1-05",   "number": "05",   "title": "AXI4 · AXI4-Lite · AXI4-Stream",  "source": "legacy/pages/soc/05_axi4_axi4lite_axi4stream.html",               "file": "p1_05_axi_v01.html"},
-    {"id": "p1-06",   "number": "06",   "title": "AXI GPIO",                        "source": "legacy/pages/soc/06_axi_gpio.html",                               "file": "p1_06_axi_gpio_v01.html"},
-    {"id": "p1-07",   "number": "07",   "title": "AXI UART Lite",                   "source": "legacy/pages/soc/07_axi_uart_lite.html",                          "file": "p1_07_axi_uartlite_v01.html"},
-    {"id": "p1-07-1", "number": "07.1", "title": "UART Echo C 코드 풀이",           "source": "legacy/pages/soc/07_1_uart_echo_c_code_guide.html",               "file": "p1_07_1_uart_echo_c_v01.html"},
-    {"id": "p1-08",   "number": "08",   "title": "AXI Timer",                       "source": "legacy/pages/soc/08_axi_timer.html",                              "file": "p1_08_axi_timer_v01.html"},
-    {"id": "p1-08-1", "number": "08.1", "title": "AXI Timer C 코드 풀이",           "source": "legacy/pages/soc/08_1_axi_timer_c_code_guide.html",               "file": "p1_08_1_timer_c_v01.html"},
-    {"id": "p1-09",   "number": "09",   "title": "AXI Interrupt Controller",        "source": "legacy/pages/soc/09_axi_interrupt_controller.html",               "file": "p1_09_axi_intc_v01.html"},
-    {"id": "p1-09-1", "number": "09.1", "title": "Timer Interrupt C 코드 풀이",     "source": "legacy/pages/soc/09_1_axi_interrupt_c_code_guide.html",           "file": "p1_09_1_intc_c_v01.html"},
-    {"id": "p1-10",   "number": "10",   "title": "GPIO · UART · Timer 통합",        "source": "legacy/pages/soc/10_microblaze_gpio_uart_timer_integration.html", "file": "p1_10_integration_v01.html"},
-    {"id": "p1-10-1", "number": "10.1", "title": "통합 C 코드 풀이",                "source": "legacy/pages/soc/10_1_integration_c_code_guide.html",             "file": "p1_10_1_integration_c_v01.html"},
-    {"id": "p1-11",   "number": "11",   "title": "사용자 Top과 1비트 GPIO",         "source": "chapters/11_user_top_io_remap.html",                              "file": "p1_11_user_top_v01.html"}
+    {"id": "p1-01",   "number": "01",   "title": "MicroBlaze V + BRAM 최소 SoC",   "source": "legacy/pages/soc/01_microblaze_bram_minimal_soc.html",            "file": "p1_01_microblaze_bram_v02.html"},
+    {"id": "p1-02",   "number": "02",   "title": "Clock · Reset 구조",              "source": "legacy/pages/soc/02_clock_reset_processor_system_reset.html",     "file": "p1_02_clock_reset_v02.html"},
+    {"id": "p1-03",   "number": "03",   "title": "BRAM 프로그램 실행",              "source": "legacy/pages/soc/03_microblaze_bram_program_execution.html",      "file": "p1_03_bram_program_v02.html"},
+    {"id": "p1-04",   "number": "04",   "title": "Memory Map · MMIO",               "source": "legacy/pages/soc/04_memory_map_memory_mapped_io.html",            "file": "p1_04_memory_map_v02.html"},
+    {"id": "p1-05",   "number": "05",   "title": "AXI4 · AXI4-Lite · AXI4-Stream",  "source": "legacy/pages/soc/05_axi4_axi4lite_axi4stream.html",               "file": "p1_05_axi_v02.html"},
+    {"id": "p1-06",   "number": "06",   "title": "AXI GPIO",                        "source": "legacy/pages/soc/06_axi_gpio.html",                               "file": "p1_06_axi_gpio_v02.html"},
+    {"id": "p1-07",   "number": "07",   "title": "AXI UART Lite",                   "source": "legacy/pages/soc/07_axi_uart_lite.html",                          "file": "p1_07_axi_uartlite_v02.html"},
+    {"id": "p1-07-1", "number": "07.1", "title": "UART Echo C 코드 풀이",           "source": "legacy/pages/soc/07_1_uart_echo_c_code_guide.html",               "file": "p1_07_1_uart_echo_c_v02.html"},
+    {"id": "p1-08",   "number": "08",   "title": "AXI Timer",                       "source": "legacy/pages/soc/08_axi_timer.html",                              "file": "p1_08_axi_timer_v02.html"},
+    {"id": "p1-08-1", "number": "08.1", "title": "AXI Timer C 코드 풀이",           "source": "legacy/pages/soc/08_1_axi_timer_c_code_guide.html",               "file": "p1_08_1_timer_c_v02.html"},
+    {"id": "p1-09",   "number": "09",   "title": "AXI Interrupt Controller",        "source": "legacy/pages/soc/09_axi_interrupt_controller.html",               "file": "p1_09_axi_intc_v02.html"},
+    {"id": "p1-09-1", "number": "09.1", "title": "Timer Interrupt C 코드 풀이",     "source": "legacy/pages/soc/09_1_axi_interrupt_c_code_guide.html",           "file": "p1_09_1_intc_c_v02.html"},
+    {"id": "p1-10",   "number": "10",   "title": "GPIO · UART · Timer 통합",        "source": "legacy/pages/soc/10_microblaze_gpio_uart_timer_integration.html", "file": "p1_10_integration_v02.html"},
+    {"id": "p1-10-1", "number": "10.1", "title": "통합 C 코드 풀이",                "source": "legacy/pages/soc/10_1_integration_c_code_guide.html",             "file": "p1_10_1_integration_c_v02.html"},
+    {"id": "p1-11",   "number": "11",   "title": "사용자 Top과 1비트 GPIO",         "source": "chapters/11_user_top_io_remap.html",                              "file": "p1_11_user_top_v02.html"}
   ]
 }

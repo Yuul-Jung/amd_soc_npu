@@ -699,7 +699,7 @@ def update_index(text, chs):
     p1 = json.loads(rd("part01/course.json"))
     p1_links = " · ".join(f'<a href="part01/{c["file"]}">{c["number"]} {html.escape(c["title"])}</a>' for c in p1["chapters"])
     p1_block = f"""<!-- part01:start -->
-      <p><strong>선수 과정 · <a href="part01/index.html">{html.escape(p1["title"])}</a></strong> — CPU·BRAM·AXI 주변장치에서 사용자 Top까지 ({len(p1["chapters"])}쪽): {p1_links}</p>
+      <p><strong>선수 과정 · <a href="part01/index.html">{html.escape(p1["title"])}</a></strong> — CPU·BRAM·AXI 주변장치에서 사용자 Top까지: {p1_links}</p>
       <!-- part01:end -->"""
     text = re.sub(r"\n?\s*<!-- part01:start -->.*?<!-- part01:end -->", "", text, flags=re.S)
     text = re.sub(r'(<section class="section" id="intro">.*?)(\n\s*</section>)', lambda m: m.group(1) + "\n      " + p1_block + m.group(2), text, count=1, flags=re.S)

@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Basys3 제1부 08장 · AXI Timer">
+<meta name="generator" content="tools/part01/build_part01.py — 직접 수정 금지">
+<title>제1부 08장 · AXI Timer (v02)</title>
+<link rel="stylesheet" href="../assets/education/site.css">
+<style>
+.access-skip{position:absolute;left:-9999px;top:0}
+.access-skip:focus{left:12px;top:12px;z-index:1003;background:#fff;color:#15171c;padding:6px 10px}
+.vbadge{display:inline-block;padding:.15em .6em;border-radius:4px;font-size:.78em;font-weight:700;background:#d4edda;color:#155724;vertical-align:middle}
+.hero p{max-width:none}
+.section :not(pre)>code{overflow-wrap:anywhere}
+.section img{max-width:100%;height:auto;display:block}
+.section .lead{color:var(--ink-2);font-weight:500}
+.section .minor{color:var(--ink-3);font-size:.9em}
+.table-wrap{overflow-x:auto;margin:12px 0}
+.table-wrap th{white-space:nowrap}
+.section .chips{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 14px;padding:0;list-style:none}
+.chips li{border:1px solid var(--line);background:#fff;padding:3px 10px;border-radius:3px;font:500 12px "IBM Plex Mono",monospace;color:var(--ink-2);margin:0}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:12px 0}
+.cards>div{border:1px solid var(--line);border-left:3px solid var(--accent);background:#fff;padding:12px 14px}
+.cards b,.cards strong{display:block;margin-bottom:4px}
+.cards small{display:block;color:var(--ink-3)}
+.callout{border:1px solid #d9d3f5;border-left:4px solid var(--accent);background:#f7f5fe;padding:12px 16px;margin:14px 0}
+.callout.warn{border-color:#f0d9a8;border-left-color:#b07a12;background:#fffaf0}
+.callout>:first-child{margin-top:0}.callout>:last-child{margin-bottom:0}
+.flow{white-space:pre-wrap;font:500 .86rem/1.7 "IBM Plex Mono",monospace;background:#fbfbf9;border:1px solid var(--line);padding:12px 16px;margin:14px 0;overflow-x:auto}
+.flow code{background:none;padding:0}
+.fig{margin:16px 0;border:1px solid var(--line);background:#fff;padding:10px}
+.fig img,.fig svg{margin:0 auto;max-width:100%;height:auto}
+.fig figcaption{font-size:.84rem;color:var(--ink-2);margin-top:8px}
+.fig-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin:14px 0}
+.fig-grid .fig{margin:0}
+.gui-walkthrough{border:1px solid var(--line);background:#fbfbf9;padding:12px 18px;margin:14px 0}
+details{border:1px solid var(--line);background:#fff;padding:8px 14px;margin:14px 0}
+summary{cursor:pointer;font-weight:600}
+.codeblock pre{max-height:780px;white-space:pre}
+.codebar{gap:8px}.codebar span{min-width:0;overflow-wrap:anywhere}
+</style>
+</head>
+<body data-chapter="p1-08">
+<a class="access-skip" href="#main-content">본문 바로가기</a>
+<button type="button" class="mobile-menu" id="mobile-menu" aria-controls="course-nav" aria-expanded="false">☰ 장·목차</button>
+<div class="shade" id="shade"></div>
+<header class="hero">
+  <div class="hero-inner">
+    <p class="kicker">BASYS3 · 제1부 MicroBlaze V 기본 SoC · 08장 <span class="vbadge">v02</span></p>
+    <h1>제1부 08장 · AXI Timer</h1>
+    <p>07장에서 만든 MicroBlaze V + AXI GPIO + AXI UART Lite 회로에 Timer IP를 추가합니다.</p>
+  </div>
+</header>
+<div class="wrap">
+  <nav class="toc" id="course-nav" aria-label="전체 장과 절 탐색"></nav>
+  <main class="content" id="main-content">
+    <section class="section" id="overview">
+      <h2><span class="num">00</span>이 장의 목표</h2>
+      <p>07장에서 만든 MicroBlaze V + AXI GPIO + AXI UART Lite 회로에 Timer IP를 추가합니다. 실제 Vivado GUI를 따라가며 비트스트림과 Vitis 프로그램을 완성합니다.</p>
+      <ul class="chips" aria-label="핵심 용어"><li>Basys3</li><li>32-bit Timer</li><li>100 MHz</li><li>0x41C00000</li><li>Polling</li></ul>
+    </section>
+    <section class="section" id="s01">
+      <h2><span class="num">01</span>AXI Timer 실습 목표</h2>
+<p><strong>AXI Timer를 이용하여 Basys3의 LED0를 약 0.5초마다 켰다 껐다 반복합니다.</strong> Timer(타이머, 일정 시간 경과를 세는 주변장치)는 CPU가 시간을 직접 지연시키지 않고 하드웨어에서 시간 경과를 셀 수 있게 합니다.</p>
+<div class="callout"><strong>동작 경로</strong><div class="flow">MicroBlaze V → AXI SmartConnect → AXI Timer 만료 상태 Polling → MicroBlaze V → AXI GPIO → LED0</div></div>
+<div aria-label="표 (가로 스크롤 가능)" class="table-wrap" role="region" tabindex="0"><table><thead><tr><th>Timer 만료 확인</th><th>LED0 출력</th></tr></thead><tbody>
+<tr><td>첫 번째 만료(약 0.5초)</td><td>LED0 ON</td></tr>
+<tr><td>두 번째 만료(약 1.0초)</td><td>LED0 OFF</td></tr>
+<tr><td>세 번째 만료(약 1.5초)</td><td>LED0 ON</td></tr>
+</tbody></table></div>
+<p>08장에서는 07장의 GPIO·UART 하드웨어를 유지하고 AXI Timer를 추가합니다. CPU는 Timer의 만료 상태를 반복 확인하는 <strong>Polling(폴링, 상태 반복 확인)</strong> 방식으로 LED0를 제어하며, Interrupt(인터럽트, CPU 실행 흐름에 이벤트를 알리는 방식)는 <a href="p1_09_axi_intc_v02.html">09장</a>에서 진행합니다. </p>
+    </section>
+    <section class="section" id="s02">
+      <h2><span class="num">02</span>07장 하드웨어에 무엇을 추가하는가</h2>
+<p class="lead">기존 BRAM·GPIO·UART·Clock·Reset은 유지합니다.</p><div aria-label="표 (가로 스크롤 가능)" class="table-wrap" role="region" tabindex="0"><table><thead><tr><th>기능</th><th>07장</th><th>08장</th></tr></thead><tbody><tr><td>MicroBlaze V / 16 KiB BRAM</td><td>존재</td><td>유지</td></tr><tr><td>AXI GPIO · LED/SW</td><td>존재</td><td>유지</td></tr><tr><td>AXI UART Lite · Echo</td><td>존재</td><td>유지</td></tr><tr><td>AXI SmartConnect</td><td>2개 Slave 연결</td><td>3개 Slave 연결</td></tr><tr><td><b>AXI Timer</b></td><td>없음</td><td><b>신규 추가</b></td></tr><tr><td>Interrupt Controller</td><td>없음</td><td>09장에서 연결</td></tr></tbody></table></div><p>타이머 IP는 FPGA 외부 핀을 사용하지 않습니다. LED 출력은 06장에서 연결한 AXI GPIO를 그대로 재사용합니다.</p>
+    </section>
+    <section class="section" id="s03">
+      <h2><span class="num">03</span>AMD PG079 · AXI Timer 내부 구조</h2>
+<figure class="fig"><div><strong>AMD PG079 · Figure 1: Block Diagram of AXI Timer</strong><span>v2.0 · AMD 공식 문서</span></div><a href="https://docs.amd.com/r/en-US/pg079-axi-timer/Functional-Description" rel="noopener" target="_blank"><img alt="AMD PG079 Figure 1 이미지 (AMD 웹서버에서 표시 제한 시 아래 공식 원문 링크 사용)" loading="lazy" src="https://docs.amd.com/api/khub/maps/7aOjdvedJEcrg0QugvEIRw/resources/AVrd7WC4uUtsfDiUhP4EQw-7aOjdvedJEcrg0QugvEIRw/content?v=638a630f97050079"/></a><figcaption><a href="https://docs.amd.com/r/en-US/pg079-axi-timer/Functional-Description" target="_blank">AMD PG079 · Functional Description · Figure 1</a>.</figcaption></figure><p>AXI4-Lite(악시 포 라이트, 단일 레지스터 읽기·쓰기용 인터페이스)로 CPU가 Timer 레지스터를 설정하고 읽습니다. Counter는 CPU 코드가 매 순간 감소시키는 것이 아니라 <code>s_axi_aclk</code>에 따라 하드웨어에서 독립적으로 진행됩니다.</p>
+    </section>
+    <section class="section" id="s04">
+      <h2><span class="num">04</span>AMD 레지스터 표 · Timer 0을 사용</h2>
+<p class="lead">아래 주소 오프셋은 AMD PG079 Register Space의 Table 1과 같은 값입니다.</p><div aria-label="표 (가로 스크롤 가능)" class="table-wrap" role="region" tabindex="0"><table><thead><tr><th>Offset</th><th>Register Name</th><th>역할</th></tr></thead><tbody><tr><td><code>0x00</code></td><td><code>TCSR0</code></td><td>Timer 0 Control / Status</td></tr><tr><td><code>0x04</code></td><td><code>TLR0</code></td><td>Timer 0 Load Register</td></tr><tr><td><code>0x08</code></td><td><code>TCR0</code></td><td>Timer 0 현재 카운트 값</td></tr><tr><td><code>0x10</code></td><td><code>TCSR1</code></td><td>Timer 1 Control / Status (이번 장 미사용)</td></tr><tr><td><code>0x14</code></td><td><code>TLR1</code></td><td>Timer 1 Load Register</td></tr><tr><td><code>0x18</code></td><td><code>TCR1</code></td><td>Timer 1 현재 카운트 값</td></tr></tbody></table></div><p>실제 Timer Base Address는 <code>0x41C00000</code>입니다. 예: <code>TCSR0</code>의 주소는 <code>0x41C00000</code>, <code>TLR0</code>는 <code>0x41C00004</code>입니다.</p><p><code>TCSR0</code>의 주요 설정은 <code>T0INT</code>(bit 8, 만료 플래그), <code>ENT0</code>(bit 7, 카운터 동작), <code>ENIT0</code>(bit 6, 인터럽트 출력), <code>LOAD0</code>(bit 5, 값 적재), <code>ARHT0</code>(bit 4, 자동 재적재), <code>UDT0</code>(bit 1, 감소), <code>MDT0</code>(bit 0, Generate 모드)입니다. <a href="https://docs.amd.com/r/en-US/pg079-axi-timer/Control/Status-Register-0-TCSR0" target="_blank">AMD TCSR0 전체 비트</a></p>
+    </section>
+    <section class="section" id="s05">
+      <h2><span class="num">05</span>0.5초를 만드는 카운트 값</h2>
+<p class="lead">실제 연결한 Timer의 AXI Clock은 100 MHz입니다.</p><div class="flow">100 MHz → 1 Clock = 10 ns<br/>0.5 s ÷ 10 ns = 50,000,000 clocks<br/><b>TLR0 = 50,000,000 − 2 = 49,999,998 = 0x02FAF07E</b></div><p>PG079의 Down-count Generate Mode에서는 <code>TIMING_INTERVAL = (TLRx + 2) × AXI_CLOCK_PERIOD</code>입니다. <a href="https://docs.amd.com/r/en-US/pg079-axi-timer/Generate-Mode" target="_blank">AMD PG079 · Generate Mode</a></p><p>다음 단계에서는 32비트 Down Count + Auto Reload(오토 리로드, 자동 재적재) + Polling(폴링, CPU 반복 확인)을 사용합니다. Interrupt(인터럽트, 이벤트 알림 신호) 배선은 09장에서 진행합니다.</p>
+    </section>
+    <section class="section" id="s06">
+      <h2><span class="num">06</span>07장 성공 프로젝트 열기</h2>
+<p class="lead">이후 08장 복제본을 만들기 전에 확인한 화면입니다.</p><figure class="fig"><a href="legacy/images/soc08/gui_20261028/step_01.svg" rel="noopener" target="_blank"><img alt="07장 성공 프로젝트 — 완료된 비트스트림 및 WNS +0.817 ns" loading="lazy" src="legacy/images/soc08/gui_20261028/step_01.svg"/></a><figcaption><strong>GUI 01 · 07장 성공 프로젝트 — 완료된 비트스트림 및 WNS +0.817 ns</strong><span>클릭하면 확대</span></figcaption></figure><div class="callout"><strong>확인</strong> 07장 <code>soc07_axi_uartlite.xpr</code> 오픈. <code>write_bitstream Complete</code>, WNS +0.817 ns는 <b>07장</b></div>
+    </section>
+    <section class="section" id="s07">
+      <h2><span class="num">07</span>08장 Project·Block Design 분리</h2>
+<p class="lead">07장 파일을 덮어쓰지 않습니다.</p><ol><li><strong>Vivado Project Save As</strong><div><code>File → Project → Save As</code>. Project name <code>soc08_axi_timer</code>, Project location <code>~/soc/hw</code>. <b>Create project subdirectory</b>와 <b>Include run results</b> 선택 후 OK.<figure class="fig"><a href="legacy/images/soc08/gui_20261028/step_02.svg" rel="noopener" target="_blank"><img alt="08장 Vivado Project Save As — 기존 07장 프로젝트 보존" loading="lazy" src="legacy/images/soc08/gui_20261028/step_02.svg"/></a><figcaption><strong>GUI 02 · 08장 Vivado Project Save As — 기존 07장 프로젝트 보존</strong><span>클릭하면 확대</span></figcaption></figure></div></li><li><strong>Block Design Save As</strong><div>08장 복제본에서 기존 <code>soc07_axi_uartlite.bd</code>를 열고 <code>File → Save Block Design As</code>. Design name <code>soc08_axi_timer</code>, Directory <code>&lt;Local to Project&gt;</code>, Add to source set <code>Design Sources</code> 선택 후 OK.<figure class="fig"><a href="legacy/images/soc08/gui_20261028/step_03.svg" rel="noopener" target="_blank"><img alt="08장 Block Design Save As — 프로젝트 내부로 분리" loading="lazy" src="legacy/images/soc08/gui_20261028/step_03.svg"/></a><figcaption><strong>GUI 03 · 08장 Block Design Save As — 프로젝트 내부로 분리</strong><span>클릭하면 확대</span></figcaption></figure></div></li><li><strong>기존 07장 파일 보호</strong><div>08장 Sources에서 새 <code>soc08_axi_timer.bd</code>를 사용하며, 오래된 07장 래퍼가 Top이면 나중에 08장 새 래퍼를 생성·지정합니다. 소스 삭제 옵션을 사용하지 않습니다.</div></li></ol>
+    </section>
+    <section class="section" id="s08">
+      <h2><span class="num">08</span>AXI Timer IP 추가·설정</h2>
+<p class="lead">Timer 0만 실제 소프트웨어에서 사용합니다.</p><ol><li><strong>AXI Timer 추가</strong><div>08장 Block Design에서 <code>+</code>(Add IP) → <code>AXI Timer</code> 검색 → 추가. 블록 인스턴스 <code>axi_timer_0</code> 확인.<figure class="fig"><a href="legacy/images/soc08/gui_20261028/step_04.svg" rel="noopener" target="_blank"><img alt="07장 구성에 axi_timer_0 IP 추가 — 아직 연결 전" loading="lazy" src="legacy/images/soc08/gui_20261028/step_04.svg"/></a><figcaption><strong>GUI 04 · 07장 구성에 axi_timer_0 IP 추가 — 아직 연결 전</strong><span>클릭하면 확대</span></figcaption></figure></div></li><li><strong>Re-customize IP</strong><div><code>axi_timer_0</code> 더블클릭 → <b>Enable 64-bit mode 해제</b>, <b>Width of the timer/counter (bits) = 32</b> 확인. <b>Enable Timer 2</b>는 현재 체크된 상태로 두어도 됩니다. 이번 코드에서 Timer 0만 사용합니다. OK.<figure class="fig"><a href="legacy/images/soc08/gui_20261028/step_05.svg" rel="noopener" target="_blank"><img alt="AXI Timer 2.0 설정 — 32비트, 64-bit 모드 해제" loading="lazy" src="legacy/images/soc08/gui_20261028/step_05.svg"/></a><figcaption><strong>GUI 05 · AXI Timer 2.0 설정 — 32비트, 64-bit 모드 해제</strong><span>클릭하면 확대</span></figcaption></figure></div></li><li><strong>외부 이벤트 미사용</strong><div><code>capturetrig0/1</code>, <code>generateout0/1</code>, <code>pwm0</code>, <code>interrupt</code>는 이번 실습에서 외부로 연결하지 않습니다.</div></li></ol>
+    </section>
+    <section class="section" id="s09">
+      <h2><span class="num">09</span>AXI · Clock · Reset 연결</h2>
+<p class="lead">기존 SmartConnect를 재사용합니다.</p><ol><li><strong>Run Connection Automation</strong><div><code>axi_timer_0/S_AXI</code>만 대상으로 Automation 실행. Master <code>/microblaze_riscv_0 (Periph)</code>, Bridge IP <code>/axi_smc</code>, 100 MHz Clock 확인 후 OK.<figure class="fig"><a href="legacy/images/soc08/gui_20261028/step_06.svg" rel="noopener" target="_blank"><img alt="Connection Automation — 기존 axi_smc로 S_AXI 연결" loading="lazy" src="legacy/images/soc08/gui_20261028/step_06.svg"/></a><figcaption><strong>GUI 06 · Connection Automation — 기존 axi_smc로 S_AXI 연결</strong><span>클릭하면 확대</span></figcaption></figure></div></li><li><strong>완성된 AXI 경로</strong><div><code>microblaze_riscv_0/M_AXI_DP</code> → <code>axi_smc</code> → GPIO/UART/Timer의 각 <code>S_AXI</code>. Timer의 <code>s_axi_aclk</code>과 <code>s_axi_aresetn</code>도 연결된 화면입니다.<figure class="fig"><a href="legacy/images/soc08/gui_20261028/step_07.svg" rel="noopener" target="_blank"><img alt="AXI SmartConnect → GPIO/UART/Timer 연결 완료" loading="lazy" src="legacy/images/soc08/gui_20261028/step_07.svg"/></a><figcaption><strong>GUI 07 · AXI SmartConnect → GPIO/UART/Timer 연결 완료</strong><span>클릭하면 확대</span></figcaption></figure></div></li><li><strong>Interrupt 미연결 확인</strong><div>Timer의 <code>interrupt</code> 포트는 외부에 연결하지 않습니다. Polling에서는 <code>TCSR0.T0INT</code> 상태를 AXI Read로 확인합니다.</div></li></ol><div class="callout"><strong>확인</strong> 연결 완료 화면 확인.</div>
+    </section>
+    <section class="section" id="s10">
+      <h2><span class="num">10</span>Address Editor · 실제 Timer 주소 확정</h2>
+<p class="lead">실제 Address Editor 확인.</p><figure class="fig"><a href="legacy/images/soc08/gui_20261028/step_08.svg" rel="noopener" target="_blank"><img alt="실제 Address Editor — Timer 0x41C00000 / 64 KiB" loading="lazy" src="legacy/images/soc08/gui_20261028/step_08.svg"/></a><figcaption><strong>GUI 08 · 실제 Address Editor — Timer 0x41C00000 / 64 KiB</strong><span>클릭하면 확대</span></figcaption></figure><div aria-label="표 (가로 스크롤 가능)" class="table-wrap" role="region" tabindex="0"><table><thead><tr><th>IP</th><th>Base</th><th>High</th><th>Range</th></tr></thead><tbody><tr><td>Local BRAM</td><td><code>0x00000000</code></td><td><code>0x00003FFF</code></td><td>16 KiB</td></tr><tr><td>AXI GPIO</td><td><code>0x40000000</code></td><td><code>0x4000FFFF</code></td><td>64 KiB</td></tr><tr><td>AXI UART Lite</td><td><code>0x40600000</code></td><td><code>0x4060FFFF</code></td><td>64 KiB</td></tr><tr><td><b>AXI Timer</b></td><td><b><code>0x41C00000</code></b></td><td><b><code>0x41C0FFFF</code></b></td><td>64 KiB</td></tr></tbody></table></div><div class="callout"><strong>확인 </strong> <b>Assigned (5), Unassigned (0)</b>. 데이터 네트워크 4개와 Instruction BRAM 1개가 Assigned입니다. 주소 충돌이 없습니다.</div>
+    </section>
+    <section class="section" id="s11">
+      <h2><span class="num">11</span>Validate Design</h2>
+<p class="lead">기존 화면에서 다시 Block Design을 열고 정합성을 검사합니다.</p><ol><li><strong>Block Design 저장</strong><div>Diagram 탭으로 돌아간 뒤 <code>Ctrl+S</code>로 현재 08장 BD를 저장합니다.</div></li><li><strong>Validate Design 실행</strong><div>Diagram 상단 <b>Validate Design</b> 아이콘을 클릭하거나 <b>F6</b>을 누릅니다.</div></li><li><strong>결과 확인</strong><div><code>Validation successful</code> 표시와 Messages 창의 Error·Critical Warning 유무를 확인합니다. 경고가 있다면 캡처 후 조치합니다. 바로 넘어가지 않습니다.</div></li></ol><figure class="fig"><a href="legacy/images/soc08/gui_20261028/step_09.svg" rel="noopener" target="_blank"><img alt="실제 GUI 09 · Validate Design 성공 화면" loading="lazy" src="legacy/images/soc08/gui_20261028/step_09.svg"/></a><figcaption>GUI 09 · Validate Design 성공 화면 (클릭하면 확대)</figcaption></figure>
+    </section>
+    <section class="section" id="s12">
+      <h2><span class="num">12</span>08장 Wrapper·Top 확인</h2>
+<p class="lead">07장 래퍼를 실수로 최상위로 사용하면 Timer가 합성에 포함되지 않을 수 있습니다.</p><ol><li><strong>08장 BD 선택</strong><div>Sources → Design Sources에서 <code>soc08_axi_timer.bd</code>를 확인합니다.</div></li><li><strong>HDL Wrapper 생성</strong><div>새 BD를 우클릭 → <b>Create HDL Wrapper</b> → <b>Let Vivado manage wrapper and auto-update</b> → OK. <code>soc08_axi_timer_wrapper</code> 생성.</div></li><li><strong>Set as Top</strong><div><code>soc08_axi_timer_wrapper</code>를 우클릭 → <b>Set as Top</b>. 굵게 표시된 Top이 08장 래퍼인지 확인합니다.</div></li><li><strong>기존 외부 포트 유지</strong><div>Wrapper의 <code>clk</code>, <code>btnC</code>, <code>led[15:0]</code>, <code>sw[15:0]</code>, <code>UART_0</code> 관련 RX/TX 포트를 07장과 대조합니다. 새로운 Timer 외부 포트는 없어야 합니다.</div></li></ol><figure class="fig"><a href="legacy/images/soc08/gui_20261028/step_10.svg" rel="noopener" target="_blank"><img alt="실제 GUI 10 · 08장 Design Sources 확인" loading="lazy" src="legacy/images/soc08/gui_20261028/step_10.svg"/></a><figcaption>GUI 10 · 08장 Design Sources 확인 (클릭하면 확대)</figcaption></figure><figure class="fig"><a href="legacy/images/soc08/gui_20261028/step_11.svg" rel="noopener" target="_blank"><img alt="실제 GUI 11 · HDL Wrapper 생성 대화상자" loading="lazy" src="legacy/images/soc08/gui_20261028/step_11.svg"/></a><figcaption>GUI 11 · HDL Wrapper 생성 대화상자 (클릭하면 확대)</figcaption></figure><figure class="fig"><a href="legacy/images/soc08/gui_20261028/step_12.svg" rel="noopener" target="_blank"><img alt="실제 GUI 12 · 08장 Wrapper 외부 포트 확인" loading="lazy" src="legacy/images/soc08/gui_20261028/step_12.svg"/></a><figcaption>GUI 12 · 08장 Wrapper 외부 포트 확인 (클릭하면 확대)</figcaption></figure><figure class="fig"><a href="legacy/images/soc08/gui_20261028/step_13.svg" rel="noopener" target="_blank"><img alt="실제 GUI 14 · Top Module 포트 확인" loading="lazy" src="legacy/images/soc08/gui_20261028/step_13.svg"/></a><figcaption>GUI 14 · Top Module 포트 확인 (클릭하면 확대)</figcaption></figure>
+    </section>
+    <section class="section" id="s13">
+      <h2><span class="num">13</span>XDC 유지·핀 중복 확인</h2>
+<p class="lead">08장에서는 외부 핀을 새로 할당하지 않습니다.</p><ol><li><strong>기존 제약 확인</strong><div>Sources → Constraints에서 07장의 정상 작동 XDC가 08장 복제본에 포함돼 있는지 확인합니다.</div></li><li><strong>경로 점검</strong><div>XDC Properties의 File Path가 <code>soc07_axi_uartlite</code> 이전 장 폴더를 직접 가리키지 않는지 확인합니다. 그렇다면 복사본을 08장 프로젝트에 포함시킨 뒤 소스 참조를 변경합니다.</div></li><li><strong>중복 제약 방지</strong><div><code>basys3_axi_timer_led.xdc</code> 예제의 LED/SW만 있는 불완전한 파일로 XDC를 <b>교체하지 않습니다.</b> Clock W5, Reset U18, UART RX/TX B18/A18 및 기존 LED/SW 핀 제약을 유지합니다.</div></li></ol>
+    </section>
+    <section class="section" id="s14">
+      <h2><span class="num">14</span>Generate Bitstream</h2>
+<p class="lead">07장의 Bitstream과 구별되는 08장 결과물을 생성합니다.</p><ol><li><strong>비트스트림 생성</strong><div>Flow Navigator → <b>Generate Bitstream</b>. 하위 합성/구현이 필요하다는 창이 나오면 Yes, Launch Runs는 설정 확인 후 OK.</div></li><li><strong>완료 확인</strong><div>Design Runs에서 <code>synth_1</code>, <code>impl_1</code>, <code>write_bitstream Complete</code>를 확인합니다. Error 또는 Critical Warning이 있는지 먼저 봅니다.</div></li><li><strong>타이밍 확인</strong><div>Implementation의 <b>Report Timing Summary</b>에서 WNS/TNS를 확인합니다. 07장 WNS +0.817 ns를 08장 결과로 복사하지 않습니다.</div></li><li><strong>Bitstream 파일 경로</strong><div>08장 <code>.runs/impl_1/</code> 아래 <code>soc08_axi_timer_wrapper.bit</code> 등 실제 생성 파일명을 확인합니다. 래퍼 이름에 따라 달라질 수 있습니다.</div></li></ol><figure class="fig"><a href="legacy/images/soc08/gui_20261028/step_14.svg" rel="noopener" target="_blank"><img alt="실제 GUI 13 · Generate Bitstream 실행" loading="lazy" src="legacy/images/soc08/gui_20261028/step_14.svg"/></a><figcaption>GUI 13 · Generate Bitstream 실행 (클릭하면 확대)</figcaption></figure><figure class="fig"><a href="legacy/images/soc08/gui_20261028/step_15.svg" rel="noopener" target="_blank"><img alt="실제 GUI 15 · Implementation Timing Summary 성공" loading="lazy" src="legacy/images/soc08/gui_20261028/step_15.svg"/></a><figcaption>GUI 15 · Implementation Timing Summary 성공 (클릭하면 확대)</figcaption></figure><figure class="fig"><a href="legacy/images/soc08/gui_20261028/step_16.svg" rel="noopener" target="_blank"><img alt="실제 GUI 16 · Power Report — 추정값" loading="lazy" src="legacy/images/soc08/gui_20261028/step_16.svg"/></a><figcaption>GUI 16 · Power Report (클릭하면 확대)</figcaption></figure><figure class="fig"><a href="legacy/images/soc08/gui_20261028/step_17.svg" rel="noopener" target="_blank"><img alt="실제 GUI 17 · DRC Warning 8건 — 추가 점검 대상" loading="lazy" src="legacy/images/soc08/gui_20261028/step_17.svg"/></a><figcaption>GUI 17 · DRC Warning 8건 — 추가 점검 대상 (클릭하면 확대)</figcaption></figure><p class="callout warn"><strong>DRC 주의:</strong> 실제 결과에 Warning 8건이 관측되었습니다. Bitstream 생성·LED 동작 성공과는 별도로 원인 분석이 남아 있습니다.</p>
+    </section>
+    <section class="section" id="s15">
+      <h2><span class="num">15</span>08장 XSA 내보내기</h2>
+<p class="lead">새 하드웨어 사양을 Vitis로 가져갑니다.</p><ol><li><strong>Export Hardware</strong><div>Vivado → <b>File → Export → Export Hardware</b> → Next.</div></li><li><strong>Include bitstream</strong><div>Output에서 <b>Include bitstream</b>을 선택합니다.</div></li><li><strong>독립 XSA 저장</strong><div>파일 이름 <code>soc08_axi_timer</code>, 저장 경로 <code>~/soc/hw/soc08_axi_timer</code>로 지정 후 Finish.</div></li><li><strong>파일 확인</strong><div>실제 <code>soc08_axi_timer.xsa</code> 생성 여부와 파일 위치를 확인합니다. 기존 07장 XSA는 덮어쓰지 않습니다.</div></li></ol><figure class="fig"><a href="legacy/images/soc08/gui_20261028/step_18.svg" rel="noopener" target="_blank"><img alt="실제 GUI 18 · Export Hardware" loading="lazy" src="legacy/images/soc08/gui_20261028/step_18.svg"/></a><figcaption>GUI 18 · Export Hardware (클릭하면 확대)</figcaption></figure><figure class="fig"><a href="legacy/images/soc08/gui_20261028/step_19.svg" rel="noopener" target="_blank"><img alt="실제 GUI 19 · Include bitstream 선택" loading="lazy" src="legacy/images/soc08/gui_20261028/step_19.svg"/></a><figcaption>GUI 19 · Include bitstream 선택 (클릭하면 확대)</figcaption></figure><figure class="fig"><a href="legacy/images/soc08/gui_20261028/step_20.svg" rel="noopener" target="_blank"><img alt="실제 GUI 20 · XSA 실제 파일 선택" loading="lazy" src="legacy/images/soc08/gui_20261028/step_20.svg"/></a><figcaption>GUI 20 · XSA 실제 파일 선택 (클릭하면 확대)</figcaption></figure>
+    </section>
+    <section class="section" id="s16">
+      <h2><span class="num">16</span>Vitis 08장 Platform 생성</h2>
+<p class="lead">07장 플랫폼을 덮어쓰지 않습니다.</p><ol><li><strong>Platform 만들기</strong><div>Vitis Unified IDE 2024.2 → <b>File → New Component → Platform</b>.</div></li><li><strong>Name and Location</strong><div>Component name <code>soc08_axi_timer_platform</code>, 작업공간 <code>~/soc/sw</code>.</div></li><li><strong>Hardware Design XSA</strong><div>Hardware Design을 선택하고 <code>~/soc/hw/soc08_axi_timer/soc08_axi_timer_wrapper.xsa</code> 지정.</div></li><li><strong>OS / Processor</strong><div>Operating System <code>standalone</code>, Processor <code>microblaze_riscv_0</code>를 선택. Finish.</div></li><li><strong>Platform Build</strong><div>FLOW → Component <code>soc08_axi_timer_platform</code> → Build. 실제 종료 메시지를 확인합니다.</div></li><li><strong>Driver / xparameters 확인</strong><div>Platform이 생성한 <code>xparameters.h</code>에서 <code>XTMRCTR</code> Base Address와 <code>XGPIO</code> Base Address 매크로를 확인합니다. Timer는 실제 주소 <code>0x41C00000</code>여야 합니다. <code>SDT</code> 사용 여부와 실제 매크로 이름은 생성 파일로 판정합니다.</div></li></ol><figure class="fig"><a href="legacy/images/soc08/gui_20261028/step_21.svg" rel="noopener" target="_blank"><img alt="실제 GUI 21 · Vitis Platform 이름 지정" loading="lazy" src="legacy/images/soc08/gui_20261028/step_21.svg"/></a><figcaption>GUI 21 · Vitis Platform 이름 지정 (클릭하면 확대)</figcaption></figure><figure class="fig"><a href="legacy/images/soc08/gui_20261028/step_22.svg" rel="noopener" target="_blank"><img alt="실제 GUI 22 · 08장 XSA 선택" loading="lazy" src="legacy/images/soc08/gui_20261028/step_22.svg"/></a><figcaption>GUI 22 · 08장 XSA 선택 (클릭하면 확대)</figcaption></figure><figure class="fig"><a href="legacy/images/soc08/gui_20261028/step_23.svg" rel="noopener" target="_blank"><img alt="실제 GUI 23 · standalone · MicroBlaze V 선택" loading="lazy" src="legacy/images/soc08/gui_20261028/step_23.svg"/></a><figcaption>GUI 23 · standalone · MicroBlaze V 선택 (클릭하면 확대)</figcaption></figure><figure class="fig"><a href="legacy/images/soc08/gui_20261028/step_24.svg" rel="noopener" target="_blank"><img alt="실제 GUI 24 · Platform 생성 요약" loading="lazy" src="legacy/images/soc08/gui_20261028/step_24.svg"/></a><figcaption>GUI 24 · Platform 생성 요약 (클릭하면 확대)</figcaption></figure><figure class="fig"><a href="legacy/images/soc08/gui_20261028/step_25.svg" rel="noopener" target="_blank"><img alt="실제 GUI 25 · Platform Build와 xparameters.h 확인" loading="lazy" src="legacy/images/soc08/gui_20261028/step_25.svg"/></a><figcaption>GUI 25 · Platform Build와 xparameters.h 확인 (클릭하면 확대)</figcaption></figure>
+    </section>
+    <section class="section" id="s17">
+      <h2><span class="num">17</span>Timer Application 생성</h2>
+<p class="lead">07장의 UART Echo 애플리케이션을 덮어쓰지 않습니다.</p><ol><li><strong>새 애플리케이션</strong><div>File → New Component → Application 또는 Empty Application 템플릿 생성 흐름. 이름 <code>soc08_axi_timer</code>.</div></li><li><strong>Platform 연결</strong><div>Platform에 <code>soc08_axi_timer_platform</code>을, Domain에 <code>standalone_microblaze_riscv_0</code>을 선택.</div></li><li><strong>소스 배치</strong><div>Application → <code>src/main.c</code>에 다음 섹션의 코드를 배치합니다. 기존에 <code>main()</code>이 있다면 중복이 없도록 정리합니다.</div></li><li><strong>BSP 확인</strong><div>필요한 드라이버 <code>xtmrctr.h</code>, <code>xgpio.h</code>가 빌드에서 인식되는지 확인합니다. 누락 시 Platform 설정에서 해당 드라이버를 확인합니다.</div></li></ol><figure class="fig"><a href="legacy/images/soc08/gui_20261028/step_26.svg" rel="noopener" target="_blank"><img alt="실제 GUI 26 · Application 이름 지정" loading="lazy" src="legacy/images/soc08/gui_20261028/step_26.svg"/></a><figcaption>GUI 26 · Application 이름 지정 (클릭하면 확대)</figcaption></figure><figure class="fig"><a href="legacy/images/soc08/gui_20261028/step_27.svg" rel="noopener" target="_blank"><img alt="실제 GUI 27 · Application Platform 선택" loading="lazy" src="legacy/images/soc08/gui_20261028/step_27.svg"/></a><figcaption>GUI 27 · Application Platform 선택 (클릭하면 확대)</figcaption></figure><figure class="fig"><a href="legacy/images/soc08/gui_20261028/step_28.svg" rel="noopener" target="_blank"><img alt="실제 GUI 28 · Application Domain 선택" loading="lazy" src="legacy/images/soc08/gui_20261028/step_28.svg"/></a><figcaption>GUI 28 · Application Domain 선택 (클릭하면 확대)</figcaption></figure><figure class="fig"><a href="legacy/images/soc08/gui_20261028/step_29.svg" rel="noopener" target="_blank"><img alt="실제 GUI 29 · Application Source Files" loading="lazy" src="legacy/images/soc08/gui_20261028/step_29.svg"/></a><figcaption>GUI 29 · Application Source Files (클릭하면 확대)</figcaption></figure><figure class="fig"><a href="legacy/images/soc08/gui_20261028/step_30.svg" rel="noopener" target="_blank"><img alt="실제 GUI 30 · Application 생성 요약" loading="lazy" src="legacy/images/soc08/gui_20261028/step_30.svg"/></a><figcaption>GUI 30 · Application 생성 요약 (클릭하면 확대)</figcaption></figure>
+    </section>
+    <section class="section" id="s18">
+      <h2><span class="num">18</span>main.c · 0.5초 Timer Polling 코드</h2>
+<p class="lead">하드웨어를 직접 세는 것은 Timer IP이며, CPU는 만료 상태를 확인해 LED를 변경합니다.</p><div class="codeblock"><div class="codebar"><span>main.c 전체 코드</span></div><pre tabindex="0"><code>#include "xparameters.h"
+#include "xtmrctr.h"
+#include "xgpio.h"
+#include "xstatus.h"
+#include "xil_types.h"
+
+/* SoC08: Timer0 0.5초 Polling, 기존 AXI GPIO LED0 출력 */
+#define TIMER0                 0U
+#define GPIO_LED_CHANNEL       1U
+#define LED0_MASK              0x00000001U
+
+/* 100 MHz × 0.5 s = 50,000,000 clocks, PG079: TLR + 2 */
+#define TIMER_RESET_VALUE      (50000000U - 2U)
+
+#ifndef SDT
+#define TIMER_DEVICE_ID        XPAR_TMRCTR_0_DEVICE_ID
+#define GPIO_DEVICE_ID         XPAR_GPIO_0_DEVICE_ID
+#else
+#define TIMER_BASEADDR         XPAR_XTMRCTR_0_BASEADDR
+#define GPIO_BASEADDR          XPAR_XGPIO_0_BASEADDR
+#endif
+
+static XTmrCtr Timer;
+static XGpio Gpio;
+
+/* Vitis Debug Watch로 확인할 변수 */
+volatile u32 expire_count = 0U;
+volatile u32 led_state = 0U;
+volatile u32 timer_value = 0U;
+
+static int init_gpio(void)
+{
+#ifndef SDT
+    return XGpio_Initialize(&amp;Gpio, GPIO_DEVICE_ID);
+#else
+    return XGpio_Initialize(&amp;Gpio, GPIO_BASEADDR);
+#endif
+}
+
+static int init_timer(void)
+{
+    int status;
+#ifndef SDT
+    status = XTmrCtr_Initialize(&amp;Timer, TIMER_DEVICE_ID);
+#else
+    status = XTmrCtr_Initialize(&amp;Timer, TIMER_BASEADDR);
+#endif
+    if (status != XST_SUCCESS) return status;
+    status = XTmrCtr_SelfTest(&amp;Timer, TIMER0);
+    if (status != XST_SUCCESS) return status;
+
+    /* (유지) Down Count + Auto Reload, Interrupt 출력은 미사용 */
+    XTmrCtr_SetOptions(&amp;Timer, TIMER0,
+        XTC_DOWN_COUNT_OPTION | XTC_AUTO_RELOAD_OPTION);
+    XTmrCtr_SetResetValue(&amp;Timer, TIMER0, TIMER_RESET_VALUE);
+    XTmrCtr_Start(&amp;Timer, TIMER0);
+    return XST_SUCCESS;
+}
+
+/* 만료 비트 T0INT는 1을 쓰면 0으로 지워진다. */
+static void clear_timer_expired(void)
+{
+    u32 csr = XTmrCtr_GetControlStatusReg(Timer.BaseAddress, TIMER0);
+    XTmrCtr_SetControlStatusReg(Timer.BaseAddress, TIMER0,
+        csr | XTC_CSR_INT_OCCURED_MASK);
+}
+
+int main(void)
+{
+    if (init_gpio() != XST_SUCCESS) return XST_FAILURE;
+    if (init_timer() != XST_SUCCESS) return XST_FAILURE;
+
+    /* LED0 초기 소등: 기존 AXI GPIO 채널 1 출력 */
+    XGpio_DiscreteWrite(&amp;Gpio, GPIO_LED_CHANNEL, led_state);
+
+    while (1) {
+        timer_value = XTmrCtr_GetValue(&amp;Timer, TIMER0);
+        if (XTmrCtr_IsExpired(&amp;Timer, TIMER0)) {
+            clear_timer_expired();
+            expire_count++;
+            led_state ^= LED0_MASK;  /* 0 → 1 → 0 반복 */
+            XGpio_DiscreteWrite(&amp;Gpio, GPIO_LED_CHANNEL, led_state);
+        }
+    }
+}
+</code></pre></div><div aria-label="표 (가로 스크롤 가능)" class="table-wrap" role="region" tabindex="0"><table><thead><tr><th>코드</th><th>의미</th></tr></thead><tbody><tr><td><code>XTmrCtr_SetResetValue()</code></td><td>49,999,998을 TLR0에 설정</td></tr><tr><td><code>XTmrCtr_Start()</code></td><td>Timer 0 시작</td></tr><tr><td><code>XTmrCtr_IsExpired()</code></td><td>만료 상태 폴링</td></tr><tr><td><code>clear_timer_expired()</code></td><td>T0INT 플래그를 1 쓰기로 제거</td></tr><tr><td><code>XGpio_DiscreteWrite()</code></td><td>LED0 켜기/끄기</td></tr></tbody></table></div><div class="callout"><strong>08.1장 · C 코드 쉽게 풀이</strong><p>07.1장과 같은 형식으로 함수·변수·C 문법과 실제 Timer/GPIO 동작을 연결했습니다. 전체 <code>main.c</code>는 변경하지 않았습니다.</p><p><a href="p1_08_1_timer_c_v02.html">08.1장 C 코드 풀이 열기</a></p></div>
+    </section>
+    <section class="section" id="s19">
+      <h2><span class="num">19</span>Application Build</h2>
+<p class="lead">실행 파일을 생성하고 경고·오류를 확인합니다.</p><ol><li><strong>Application Build</strong><div>FLOW 패널의 Component에서 <code>soc08_axi_timer</code> 선택 → Build.</div></li><li><strong>컴파일 오류 확인</strong><div><code>XTmrCtr_Initialize</code>, <code>XPAR_XTMRCTR_0_BASEADDR</code>, <code>XPAR_XGPIO_0_BASEADDR</code> 관련 메시지가 있으면 <code>xparameters.h</code> 내용과 일치 여부를 확인합니다.</div></li><li><strong>성공 판정</strong><div>Build Finished successfully 및 <code>soc08_axi_timer.elf</code> 파일 생성 확인. 빌드 성공 전에는 FPGA 프로그램으로 넘어가지 않습니다.</div></li></ol><figure class="fig"><a href="legacy/images/soc08/gui_20261028/step_31.svg" rel="noopener" target="_blank"><img alt="실제 GUI 31 · Application Build 성공" loading="lazy" src="legacy/images/soc08/gui_20261028/step_31.svg"/></a><figcaption>GUI 31 · Application Build 성공 (클릭하면 확대)</figcaption></figure><figure class="fig"><a href="legacy/images/soc08/gui_20261028/step_32.svg" rel="noopener" target="_blank"><img alt="실제 GUI 32 · 드라이버 헤더 확인" loading="lazy" src="legacy/images/soc08/gui_20261028/step_32.svg"/></a><figcaption>GUI 32 · 드라이버 헤더 확인 (클릭하면 확대)</figcaption></figure>
+    </section>
+    <section class="section" id="s20">
+      <h2><span class="num">20</span>FPGA Program · Run/Debug</h2>
+<p class="lead">07장 UART Echo를 다시 제작하지 않습니다.</p><ol><li><strong>Basys3 연결</strong><div>USB(JTAG) 연결과 전원을 확인합니다. JP1은 JTAG 모드로 유지합니다.</div></li><li><strong>08장 비트스트림 다운로드</strong><div>Vivado Hardware Manager → Open Target / Auto Connect → Program Device에서 <b>08장</b> Bitstream 선택. 07장 Bitstream을 다시 사용하지 않습니다.</div></li><li><strong>Vitis Run/Debug 설정</strong><div>08장 Application FLOW에서 Debug 설정(<code>launch.json</code> 탭)을 열어 08장 ELF, 플랫폼, 비트스트림 및 <code>microblaze_riscv_0</code>를 확인합니다.</div></li><li><strong>디버그 시작</strong><div>Debug 실행 후 타깃이 인식되는지 확인합니다. 이전에 확인된 환경에서는 중앙 상단 <code>launch.json</code> 탭을 열고 Debug를 실행했을 때 정상 진입했습니다. 이를 만능 해결책으로 단정하지 않습니다.</div></li><li><strong>LED 관측</strong><div>Continue로 실행하여 LED0의 ON/OFF 반전을 관측합니다. 07장의 moserial Echo 실습을 반복하지 않습니다.</div></li></ol><figure class="fig"><a href="legacy/images/soc08/gui_20261028/step_33.svg" rel="noopener" target="_blank"><img alt="실제 GUI 33 · Debug 일시정지 정상 진입" loading="lazy" src="legacy/images/soc08/gui_20261028/step_33.svg"/></a><figcaption>GUI 33 · launch.json 실행 설정 (클릭하면 확대)</figcaption></figure>
+    </section>
+    <section class="section" id="s21">
+      <h2><span class="num">21</span>실제 결과 확인 · LED0·Watch</h2>
+<p class="lead">아래 시간표는 설계상 목표 주기이며, 실제 LED 점멸 및 Watch 결과는 별도로 확인합니다.</p><div aria-label="표 (가로 스크롤 가능)" class="table-wrap" role="region" tabindex="0"><table><thead><tr><th>시간(예상)</th><th><code>expire_count</code></th><th>LED0</th></tr></thead><tbody><tr><td>0 s</td><td>0</td><td>OFF</td></tr><tr><td>0.5 s</td><td>1</td><td>ON</td></tr><tr><td>1.0 s</td><td>2</td><td>OFF</td></tr><tr><td>1.5 s</td><td>3</td><td>ON</td></tr></tbody></table></div><p>Debug Watch에서 <code>expire_count</code>, <code>led_state</code>, <code>timer_value</code>를 확인합니다. <code>timer_value</code>는 실행 중 계속 변화하며 Breakpoint로 CPU를 멈춰도 타이머 자체가 자동 정지하지 않을 수 있습니다.</p><div class="callout warn">08장 Bitstream 및 ELF Build, 실제 Basys3 LED0 반복 점멸, Watch 변화까지 확인합니다.</div><figure class="fig"><a href="legacy/images/soc08/gui_20261028/step_35.svg" rel="noopener" target="_blank"><img alt="실제 GUI 34 · Watch 초기 상태 — 최종 검증 아님" loading="lazy" src="legacy/images/soc08/gui_20261028/step_35.svg"/></a><figcaption>GUI 35 · Watch 초기 상태 — 초기 상태 (클릭하면 확대)</figcaption></figure><figure class="fig"><a href="legacy/images/soc08/gui_20261028/step_36.svg" rel="noopener" target="_blank"><img alt="실제 GUI 35 · Watch 최종 성공 — expire_count 37, led_state 1" loading="lazy" src="legacy/images/soc08/gui_20261028/step_36.svg"/></a><figcaption>GUI 36 · Watch 최종 성공 — expire_count 37, led_state 1 (클릭하면 확대)</figcaption></figure><h3>Debug Watch 확인값</h3><table><thead><tr><th>변수</th><th>최종 관측값</th><th>의미</th></tr></thead><tbody><tr><td><code>timer_value</code></td><td><code>0x028816E6</code></td><td>Timer 카운터 값</td></tr><tr><td><code>expire_count</code></td><td><code>0x00000025</code></td><td>37회 만료 처리</td></tr><tr><td><code>led_state</code></td><td><code>0x00000001</code></td><td>LED0 ON</td></tr></tbody></table>
+    </section>
+    <section class="section" id="s22">
+      <h2><span class="num">22</span>오류가 발생할 때 점검</h2>
+<p class="lead">07장 반복 실습이 아닌 08장의 신규 오류만 우선 확인합니다.</p><div aria-label="표 (가로 스크롤 가능)" class="table-wrap" role="region" tabindex="0"><table><thead><tr><th>증상</th><th>우선 확인</th></tr></thead><tbody><tr><td>Validate Design 오류</td><td>Timer <code>S_AXI</code>·Clock·Reset 연결</td></tr><tr><td>08장 Timer가 구현에 포함되지 않음</td><td><code>soc08_axi_timer_wrapper</code>가 Top인지</td></tr><tr><td>경고: Unconstrained ports</td><td>07장 XDC 경로와 Wrapper 외부 포트명</td></tr><tr><td>Vitis Timer 주소 매크로가 없음</td><td>08장 XSA 사용, Platform Build, <code>xparameters.h</code></td></tr><tr><td>LED가 전혀 변하지 않음</td><td>08장 Bitstream 다운로드 / Timer Reset·Clock·AXI</td></tr><tr><td>한 번만 LED가 바뀜</td><td><code>XTC_AUTO_RELOAD_OPTION</code> 설정</td></tr><tr><td>LED가 빠르게 반복됨</td><td>Timer 클록 100 MHz·TLR0 값·T0INT Clear</td></tr><tr><td>디버그 타깃 미검출</td><td>08장 Bitstream / <code>launch.json</code> / JTAG 연결</td></tr></tbody></table></div>
+    </section>
+    <section class="section" id="s23">
+      <h2><span class="num">23</span>완료 기준 · 다음 09장 준비</h2>
+<p class="lead">09장은 AXI Interrupt Controller를 다루므로 08장에서 인터럽트 배선은 수행하지 않습니다.</p><div aria-label="표 (가로 스크롤 가능)" class="table-wrap" role="region" tabindex="0"><table><thead><tr><th>확인 항목</th><th>현재 상태</th></tr></thead><tbody><tr><td>07장 프로젝트 보존 + 08장 독립 복제</td><td>GUI에서 확인</td></tr><tr><td>AXI Timer 32비트 / SmartConnect 연결</td><td>GUI에서 확인</td></tr><tr><td>Timer 0x41C00000 / 64 KiB 할당</td><td>GUI에서 확인</td></tr><tr><td>Validate Design / Wrapper / XDC</td><td>확인</td></tr><tr><td>08장 Bitstream / XSA</td><td>확인</td></tr><tr><td>Vitis 08장 Platform / ELF Build</td><td>확인</td></tr><tr><td>Basys3 LED0 0.5초 반전 / Watch</td><td>보드에서 확인</td></tr></tbody></table></div>
+    </section>
+    <div class="chapter-links" id="chapter-links"></div>
+  </main>
+</div>
+<script>
+window.COURSE={
+ "title": "제1부 · MicroBlaze V 기본 SoC",
+ "chapters": [
+  {
+   "id": "p1-01",
+   "number": "01",
+   "title": "MicroBlaze V + BRAM 최소 SoC",
+   "file": "p1_01_microblaze_bram_v02.html"
+  },
+  {
+   "id": "p1-02",
+   "number": "02",
+   "title": "Clock · Reset 구조",
+   "file": "p1_02_clock_reset_v02.html"
+  },
+  {
+   "id": "p1-03",
+   "number": "03",
+   "title": "BRAM 프로그램 실행",
+   "file": "p1_03_bram_program_v02.html"
+  },
+  {
+   "id": "p1-04",
+   "number": "04",
+   "title": "Memory Map · MMIO",
+   "file": "p1_04_memory_map_v02.html"
+  },
+  {
+   "id": "p1-05",
+   "number": "05",
+   "title": "AXI4 · AXI4-Lite · AXI4-Stream",
+   "file": "p1_05_axi_v02.html"
+  },
+  {
+   "id": "p1-06",
+   "number": "06",
+   "title": "AXI GPIO",
+   "file": "p1_06_axi_gpio_v02.html"
+  },
+  {
+   "id": "p1-07",
+   "number": "07",
+   "title": "AXI UART Lite",
+   "file": "p1_07_axi_uartlite_v02.html"
+  },
+  {
+   "id": "p1-07-1",
+   "number": "07.1",
+   "title": "UART Echo C 코드 풀이",
+   "file": "p1_07_1_uart_echo_c_v02.html"
+  },
+  {
+   "id": "p1-08",
+   "number": "08",
+   "title": "AXI Timer",
+   "file": "p1_08_axi_timer_v02.html"
+  },
+  {
+   "id": "p1-08-1",
+   "number": "08.1",
+   "title": "AXI Timer C 코드 풀이",
+   "file": "p1_08_1_timer_c_v02.html"
+  },
+  {
+   "id": "p1-09",
+   "number": "09",
+   "title": "AXI Interrupt Controller",
+   "file": "p1_09_axi_intc_v02.html"
+  },
+  {
+   "id": "p1-09-1",
+   "number": "09.1",
+   "title": "Timer Interrupt C 코드 풀이",
+   "file": "p1_09_1_intc_c_v02.html"
+  },
+  {
+   "id": "p1-10",
+   "number": "10",
+   "title": "GPIO · UART · Timer 통합",
+   "file": "p1_10_integration_v02.html"
+  },
+  {
+   "id": "p1-10-1",
+   "number": "10.1",
+   "title": "통합 C 코드 풀이",
+   "file": "p1_10_1_integration_c_v02.html"
+  },
+  {
+   "id": "p1-11",
+   "number": "11",
+   "title": "사용자 Top과 1비트 GPIO",
+   "file": "p1_11_user_top_v02.html"
+  }
+ ]
+};
+</script>
+<script defer src="../assets/education/site.js"></script>
+</body>
+</html>

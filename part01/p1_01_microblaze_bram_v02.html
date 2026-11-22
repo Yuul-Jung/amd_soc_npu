@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Basys3 제1부 01장 · MicroBlaze V + BRAM 최소 SoC">
+<meta name="generator" content="tools/part01/build_part01.py — 직접 수정 금지">
+<title>제1부 01장 · MicroBlaze V + BRAM 최소 SoC (v02)</title>
+<link rel="stylesheet" href="../assets/education/site.css">
+<style>
+.access-skip{position:absolute;left:-9999px;top:0}
+.access-skip:focus{left:12px;top:12px;z-index:1003;background:#fff;color:#15171c;padding:6px 10px}
+.vbadge{display:inline-block;padding:.15em .6em;border-radius:4px;font-size:.78em;font-weight:700;background:#d4edda;color:#155724;vertical-align:middle}
+.hero p{max-width:none}
+.section :not(pre)>code{overflow-wrap:anywhere}
+.section img{max-width:100%;height:auto;display:block}
+.section .lead{color:var(--ink-2);font-weight:500}
+.section .minor{color:var(--ink-3);font-size:.9em}
+.table-wrap{overflow-x:auto;margin:12px 0}
+.table-wrap th{white-space:nowrap}
+.section .chips{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 14px;padding:0;list-style:none}
+.chips li{border:1px solid var(--line);background:#fff;padding:3px 10px;border-radius:3px;font:500 12px "IBM Plex Mono",monospace;color:var(--ink-2);margin:0}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:12px 0}
+.cards>div{border:1px solid var(--line);border-left:3px solid var(--accent);background:#fff;padding:12px 14px}
+.cards b,.cards strong{display:block;margin-bottom:4px}
+.cards small{display:block;color:var(--ink-3)}
+.callout{border:1px solid #d9d3f5;border-left:4px solid var(--accent);background:#f7f5fe;padding:12px 16px;margin:14px 0}
+.callout.warn{border-color:#f0d9a8;border-left-color:#b07a12;background:#fffaf0}
+.callout>:first-child{margin-top:0}.callout>:last-child{margin-bottom:0}
+.flow{white-space:pre-wrap;font:500 .86rem/1.7 "IBM Plex Mono",monospace;background:#fbfbf9;border:1px solid var(--line);padding:12px 16px;margin:14px 0;overflow-x:auto}
+.flow code{background:none;padding:0}
+.fig{margin:16px 0;border:1px solid var(--line);background:#fff;padding:10px}
+.fig img,.fig svg{margin:0 auto;max-width:100%;height:auto}
+.fig figcaption{font-size:.84rem;color:var(--ink-2);margin-top:8px}
+.fig-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin:14px 0}
+.fig-grid .fig{margin:0}
+.gui-walkthrough{border:1px solid var(--line);background:#fbfbf9;padding:12px 18px;margin:14px 0}
+details{border:1px solid var(--line);background:#fff;padding:8px 14px;margin:14px 0}
+summary{cursor:pointer;font-weight:600}
+.codeblock pre{max-height:780px;white-space:pre}
+.codebar{gap:8px}.codebar span{min-width:0;overflow-wrap:anywhere}
+</style>
+</head>
+<body data-chapter="p1-01">
+<a class="access-skip" href="#main-content">본문 바로가기</a>
+<button type="button" class="mobile-menu" id="mobile-menu" aria-controls="course-nav" aria-expanded="false">☰ 장·목차</button>
+<div class="shade" id="shade"></div>
+<header class="hero">
+  <div class="hero-inner">
+    <p class="kicker">BASYS3 · 제1부 MicroBlaze V 기본 SoC · 01장 <span class="vbadge">v02</span></p>
+    <h1>제1부 01장 · MicroBlaze V + BRAM 최소 SoC</h1>
+    <p>Basys3의 Artix-7 FPGA 내부에 MicroBlaze V(마이크로블레이즈 브이) CPU와 Local BRAM을 구성하고, Local BRAM과 Debug 구성요소를 자동 생성한다.</p>
+  </div>
+</header>
+<div class="wrap">
+  <nav class="toc" id="course-nav" aria-label="전체 장과 절 탐색"></nav>
+  <main class="content" id="main-content">
+    <section class="section" id="overview">
+      <h2><span class="num">00</span>이 장의 목표</h2>
+      <p>Basys3의 Artix-7 FPGA 내부에 MicroBlaze V(마이크로블레이즈 브이) CPU와 Local BRAM을 구성하고, Local BRAM과 Debug 구성요소를 자동 생성한다. 보드 Clock·Reset의 외부 연결과 Bitstream 생성은 02장에서 완료한다.</p>
+      <ul class="chips" aria-label="핵심 용어"><li>Basys3</li><li>MicroBlaze V</li><li>BRAM</li><li>LMB</li><li>IP Integrator</li></ul>
+      <div class="cards"><div><b>CPU</b>FPGA Fabric에 구현되는 MicroBlaze V를 사용한다.</div><div><b>Memory</b>ILMB/DLMB를 통해 공통 Block RAM에 접근한다.</div><div><b>완료 기준</b>MicroBlaze V · Local BRAM 계층 생성과 Block Design 저장까지 확인한다. 외부 Clock/Reset 연결 및 첫 Validate는 SoC 02에서 진행한다.</div></div>
+    </section>
+    <section class="section" id="s01">
+      <h2><span class="num">01</span>최소 SoC 구성 범위</h2>
+<p>SoC 01은 이후 확장의 기준이 되는 <strong>MicroBlaze V · Local BRAM IP 기본 구성</strong>을 생성하고 저장한다. Clock/Reset의 외부 연결과 빌드는 SoC 02에서 완료하며, GPIO·UART·Timer·Interrupt·Custom AXI IP·NPU는 포함하지 않는다.</p>
+<div class="callout">
+<article><strong>① CPU</strong><p><code>MicroBlaze V</code>를 FPGA 내부에 구성한다.</p></article>
+<article><strong>② Local Memory</strong><p>명령과 데이터를 저장할 BRAM을 붙인다.</p></article>
+<article><strong>③ Clock / Reset</strong><p>자동 생성된 Clock/Reset IP와 내부 연결을 확인한다. Basys3 외부 입력 포트 연결은 SoC 02에서 완료한다.</p></article>
+<article><strong>④ 저장 기준</strong><p>Local Memory 16 KB 구성과 Block Design 저장을 확인한다. Validate 및 후속 빌드는 SoC 02 연결 이후 진행한다.</p></article>
+</div>
+<div class="callout">MicroBlaze V는 RISC-V(리스크-파이브, 개방형 명령어 집합) 계열의 소프트 CPU다. 이 프로젝트에서 확인된 CPU 인스턴스는 <code>microblaze_riscv_0</code>이다.</div><div class="flow">MicroBlaze V → ILMB(명령어) / DLMB(데이터) → Local BRAM 16 KiB · 외부 Clock/Reset은 02장에서 연결</div>
+    </section>
+    <section class="section" id="s02">
+      <h2><span class="num">02</span>Basys3 하드웨어 기준</h2>
+<p>Basys3는 Artix-7 <code>XC7A35T-1CPG236C</code>를 사용하며, 보드에는 100 MHz 단일 Oscillator가 있다. Digilent Reference Manual은 이 Clock이 FPGA의 <code>W5</code> 핀에 연결되어 있음을 명시한다.</p>
+<figure class="fig">
+<a aria-label="Basys 3 보드 콜아웃 — Reference Manual Figure 1과 동일한 구성 · 원본 보기 (새 탭)" href="legacy/images/common/basys3_board_callout.jpg" rel="noopener" target="_blank"><img alt="Basys 3 보드 콜아웃 — Reference Manual Figure 1과 동일한 구성" loading="lazy" src="legacy/images/common/basys3_board_callout.jpg"/>
+</a><figcaption>Basys 3 보드 콜아웃. FPGA, 공유 UART/JTAG USB, Push Button, 100 MHz Clock 위치를 확인한다.
+<span><a href="https://digilent.com/reference/_media/reference/programmable-logic/basys-3/basys3_rm.pdf" rel="noopener" target="_blank">Digilent Basys 3 Reference Manual</a> · Figure 1</span><br/><a aria-label="Basys 3 보드 콜아웃 — Reference Manual Figure 1과 동일한 구성 · 원본 보기 (새 탭)" href="legacy/images/common/basys3_board_callout.jpg" rel="noopener" target="_blank">크게 보기 ↗</a></figcaption>
+</figure>
+<div aria-label="표 (가로 스크롤 가능)" class="table-wrap" role="region" tabindex="0"><table><thead><tr><th scope="col">항목</th><th scope="col">Basys3 기준</th><th scope="col">SoC 01에서의 사용</th></tr></thead><tbody>
+<tr><td>FPGA</td><td><code>XC7A35T-1CPG236C</code></td><td>MicroBlaze V·BRAM·Clock/Reset IP가 모두 이 FPGA 내부에 구현된다.</td></tr>
+<tr><td>기준 Clock</td><td>100 MHz</td><td>Clocking Wizard 입력</td></tr>
+<tr><td>Clock Pin</td><td><code>W5</code></td><td>Top/BD 외부 Clock 포트와 XDC 연결</td></tr>
+<tr><td>Reset 입력</td><td>Center Button <code>BTNC</code>, pin <code>U18</code></td><td>실습용 외부 Reset으로 사용</td></tr>
+<tr><td>BRAM 자원</td><td>1,800 Kbits</td><td>초기 Local Memory 16 KB 구성에 충분한 온칩 자원</td></tr>
+</tbody></table></div>
+<div class="flow">100 MHz → T = 1/f → 10 ns / cycle</div>
+<div class="callout">Local Memory는 외부 DDR이 아니라 FPGA 내부 <strong>Block RAM</strong>을 사용한다. Basys3의 SPI Flash는 FPGA Configuration 저장장치이며 MicroBlaze V Local BRAM과 역할이 다르다.</div>
+    </section>
+    <section class="section" id="s03">
+      <h2><span class="num">03</span>MicroBlaze V 내부 구조</h2>
+<p>MicroBlaze V는 AMD FPGA에 구현하도록 설계된 RISC Soft Processor이다. 내부에는 Program Counter, Instruction Decode, Register File, ALU 등이 있고 양쪽에 Instruction-side/Data-side bus interface가 있다.</p>
+<figure class="fig">
+<a aria-label="AMD UG1711 2026.1 · MicroBlaze V Processor Block Diagram. 이번 실습은 32비트 구성을 사용한다. · 원본 보기 (새 탭)" href="legacy/images/common/v_core.png" rel="noopener" target="_blank"><img alt="AMD UG1711 2026.1 · MicroBlaze V Processor Block Diagram. 이번 실습은 32비트 구성을 사용한다." loading="lazy" src="legacy/images/common/v_core.png"/>
+</a><figcaption>AMD UG1711 2026.1 · MicroBlaze V Processor Block Diagram. 이번 실습은 32비트 구성을 사용한다.<br/><a aria-label="AMD UG1711 2026.1 · MicroBlaze V Processor Block Diagram. 이번 실습은 32비트 구성을 사용한다. · 원본 보기 (새 탭)" href="legacy/images/common/v_core.png" rel="noopener" target="_blank">크게 보기 ↗</a></figcaption>
+</figure>
+<div aria-label="03절 신호 및 실행 흐름" class="flow" tabindex="0">PC → Instruction-side Bus → ILMB → BRAM → Instruction Fetch
+Load/Store → Data-side Bus → DLMB → BRAM → Data Read/Write</div>
+<p>핵심은 “CPU가 BRAM 하나를 쓴다”에서 끝내지 않고, <strong>명령어 Fetch 경로와 Data Load/Store 경로가 논리적으로 분리되어 있다</strong>는 것을 Block Design에서 확인하는 것이다.</p>
+    </section>
+    <section class="section" id="s04">
+      <h2><span class="num">04</span>ILMB · DLMB · BRAM 관계</h2>
+<p>LMB(Local Memory Bus)는 FPGA 내부 Block RAM에 빠르게 접근하기 위한 간결한 Local Bus이다. AMD UG1711는 Instruction LMB와 Data LMB가 각각 LMB BRAM Interface Controller를 통해 공통 Block RAM에 연결되는 구성을 일반적인 MicroBlaze V Local Memory 구조로 설명한다.</p>
+<div aria-label="ILMB와 DLMB의 공통 BRAM 연결" class="flow" tabindex="0"><table><thead><tr><th scope="col">경로</th><th scope="col">버스와 컨트롤러</th><th scope="col">도착점</th></tr></thead><tbody><tr><td>microblaze_riscv_0 / ILMB</td><td>ilmb_v10 → lmb_bram_if_cntlr</td><td>공통 Block Memory Generator</td></tr><tr><td>microblaze_riscv_0 / DLMB</td><td>dlmb_v10 → lmb_bram_if_cntlr</td><td>공통 Block Memory Generator</td></tr></tbody></table></div>
+<div aria-label="표 (가로 스크롤 가능)" class="table-wrap" role="region" tabindex="0"><table><thead><tr><th scope="col">인터페이스</th><th scope="col">주 역할</th><th scope="col">실행 관점</th></tr></thead><tbody>
+<tr><td>ILMB</td><td>Instruction Local Memory Bus</td><td>PC가 가리키는 명령어 Fetch</td></tr>
+<tr><td>DLMB</td><td>Data Local Memory Bus</td><td>변수·Stack·Data Load/Store</td></tr>
+<tr><td>BRAM</td><td>Program + Data Local Memory</td><td>초기 Bare-metal 실행 저장공간</td></tr>
+</tbody></table></div>
+<div class="callout">MicroBlaze V의 Vector Base Address는 일반적으로 Local Memory의 <code>0x00000000</code>을 기준으로 사용한다. 실제 프로그램 배치와 linker 영역은 SoC 03의 Software 실행 단계에서 확인한다.</div>
+    </section>
+    <section class="section" id="s05">
+      <h2><span class="num">05</span>Vivado 프로젝트 생성 · 2024.2</h2>
+<p class="callout"><code>~/soc</code>는 Ubuntu에서 <strong>각 사용자 홈 폴더 아래의 soc 폴더</strong>를 의미합니다. Vivado의 폴더 선택 창에서는 <strong>Home → soc → hw</strong>를 찾아 선택합니다.</p>
+<p>기존 성공 프로젝트를 삭제하거나 덮어쓰지 않는다.</p>
+<ol>
+<li><h3>01 · Create Project</h3><p><strong>Quick Start → Create Project → Next</strong>. <strong>Project name</strong>은 <code>soc01_microblaze_bram</code>, <strong>Project location</strong>은 <code>~/soc/hw</code>를 입력한다.</p></li>
+<li><h3>02 · RTL Project</h3><p><strong>RTL Project</strong>와 <strong>Do not specify sources at this time</strong>을 선택하고 <strong>Next</strong>.</p></li>
+<li><h3>03 · Parts 탭</h3><p><strong>Parts</strong> 탭에서 <code>xc7a35tcpg236-1</code>을 찾아 해당 행을 선택한다. <strong>Next → Finish</strong>. 이 실습에서는 자동 Board 인터페이스 선택으로 작업 순서가 달라지지 않도록 Parts 기준을 사용한다.</p></li>
+<li><h3>04 · 결과 확인</h3><p><strong>Project Settings → General</strong>의 Part가 <code>xc7a35tcpg236-1</code>인지 확인한다. <strong>Sources</strong>에 아직 RTL 파일이 없어도 정상이다.</p></li></ol>
+<div class="callout">프로젝트 파일: <code>~/soc/hw/soc01_microblaze_bram/soc01_microblaze_bram.xpr</code>. 이 단계는 하드웨어 설정 파일만 만든 것이며 FPGA 실행은 아직 아니다.</div>
+    </section>
+    <section class="section" id="s06">
+      <h2><span class="num">06</span>Block Design 생성</h2>
+<ol>
+<li><h3>01 · 메뉴 선택</h3><p><strong>Flow Navigator → IP INTEGRATOR → Create Block Design</strong>을 누른다.</p></li>
+<li><h3>02 · 설정</h3><p><strong>Design name</strong>에 <code>soc01_mb_bram</code>을 입력하고 <strong>Directory</strong>는 <code>&lt;Local to Project&gt;</code>로 둔다. <strong>OK</strong>.</p></li>
+<li><h3>03 · 화면 확인</h3><p>중앙에 빈 <strong>Diagram</strong>이 열리고 <strong>Sources → Design Sources</strong>에 <code>soc01_mb_bram.bd</code>가 보인다.</p></li></ol>
+<div class="flow">soc01_microblaze_bram.xpr → Create Block Design → soc01_mb_bram.bd</div>
+    </section>
+    <section class="section" id="s07">
+      <h2><span class="num">07</span>MicroBlaze V IP 추가</h2>
+<ol>
+<li><h3>01 · Add IP</h3><p>Diagram에서 <strong>+</strong>(Add IP)를 누르고 <code>MicroBlaze V</code>를 검색한 다음 <strong>MicroBlaze V</strong>를 더블클릭한다. 구형 <code>MicroBlaze</code> IP가 아니다.</p></li>
+<li><h3>02 · CPU 이름 확인</h3><p>Diagram에 <code>microblaze_riscv_0</code> 블록이 생성된다. 인스턴스 번호는 실제 프로젝트 화면을 우선한다.</p></li>
+<li><h3>03 · 다음 조작 확인</h3><p>Diagram 위쪽에 <strong>Run Block Automation</strong> 링크가 보이는지 확인한다.</p></li></ol>
+<div class="callout"><strong>왜 자동 구성이 필요한가?</strong> CPU만 추가했을 때는 실행할 명령어를 담는 Local BRAM과 그 연결이 아직 완성되지 않았다. <strong>Block Automation</strong>(블록 오토메이션, 자동 구성)이 메모리·Debug·Clock·Reset 기본 블록을 생성한다. <code>M_AXI_DP</code>는 06장 주변장치 연결 전까지 사용하지 않는다.</div>
+    </section>
+    <section class="section" id="s08">
+      <h2><span class="num">08</span>Run Block Automation — 최소 시스템 자동 구성</h2>
+<p>MicroBlaze V를 추가하면 Designer Assistance가 활성화된다. <strong>Run Block Automation</strong>을 실행한다.</p>
+<figure class="fig">
+<a aria-label="AMD UG1711 2026.1 · MicroBlaze V Run Block Automation. 본문 설정표에 맞춰 구성한다. · 원본 보기 (새 탭)" href="legacy/images/common/v_automation.png" rel="noopener" target="_blank"><img alt="AMD UG1711 2026.1 · MicroBlaze V Run Block Automation. 본문 설정표에 맞춰 구성한다." loading="lazy" src="legacy/images/common/v_automation.png"/>
+</a><figcaption>AMD UG1711 2026.1 · MicroBlaze V Run Block Automation. 본문 설정표에 맞춰 구성한다.<br/><a aria-label="AMD UG1711 2026.1 · MicroBlaze V Run Block Automation. 본문 설정표에 맞춰 구성한다. · 원본 보기 (새 탭)" href="legacy/images/common/v_automation.png" rel="noopener" target="_blank">크게 보기 ↗</a></figcaption>
+</figure>
+<p class="callout">위 그림은 AMD UG1711 <strong>2026.1</strong> 아래 표의 학습용 설정값을 기준으로 2024.2 화면에서 항목을 확인한다.</p><h3>Vivado 2024.2 설정값</h3>
+<div aria-label="표 (가로 스크롤 가능)" class="table-wrap" role="region" tabindex="0"><table><thead><tr><th scope="col">항목</th><th scope="col">설정</th><th scope="col">이유</th></tr></thead><tbody>
+<tr><td>Preset</td><td><code>None</code></td><td>자동 고성능 구성이 아니라 최소 구조를 직접 확인한다.</td></tr>
+<tr><td>Local Memory</td><td><code>16 KB</code></td><td>초기 Bare-metal 실습에 충분하며 구조 확인이 쉽다.</td></tr>
+<tr><td>Local Memory ECC</td><td><code>None</code></td><td>첫 단계에서 ECC 복잡도를 제외한다.</td></tr>
+<tr><td>Cache Configuration</td><td><code>None</code></td><td>Local BRAM 동작을 먼저 이해한다.</td></tr>
+<tr><td>Debug Module</td><td><code>Debug Enabled</code></td><td>후속 Vitis/JTAG Debug를 위해 MDM V을 유지한다.</td></tr>
+<tr><td>Peripheral AXI Port</td><td><code>Enabled</code></td><td>SoC 06 이후 AXI Peripheral 확장을 위해 유지하며, SoC 01에서는 연결하지 않는다.</td></tr>
+<tr><td>Interrupt Controller</td><td><strong>Off</strong></td><td>Interrupt는 후속 장에서 별도로 추가한다.</td></tr>
+<tr><td>Clock Connection</td><td><code>New Clocking Wizard</code></td><td>Basys3 100 MHz 기준 Clock을 시스템 Clock으로 만든다.</td></tr>
+</tbody></table></div>
+<div class="callout warn">각 값을 확인한 뒤 <strong>OK</strong> . 특히 <code>Local Memory = 16 KB</code>를 확인한다. GUI의 Preset·ISA 선택 상태는 실제 2024.2 화면에 표시된 내용을 우선한다.</div>
+    </section>
+    <section class="section" id="s09">
+      <h2><span class="num">09</span>Block Automation 이후 구조</h2>
+<figure class="fig">
+<a aria-label="AMD UG1711 2026.1 · Block Automation으로 생성한 MicroBlaze V 시스템. · 원본 보기 (새 탭)" href="legacy/images/common/v_system.png" rel="noopener" target="_blank"><img alt="AMD UG1711 2026.1 · Block Automation으로 생성한 MicroBlaze V 시스템." loading="lazy" src="legacy/images/common/v_system.png"/>
+</a><figcaption>AMD UG1711 2026.1 · Block Automation으로 생성한 MicroBlaze V 시스템.<br/><a aria-label="AMD UG1711 2026.1 · Block Automation으로 생성한 MicroBlaze V 시스템. · 원본 보기 (새 탭)" href="legacy/images/common/v_system.png" rel="noopener" target="_blank">크게 보기 ↗</a></figcaption>
+</figure>
+<p class="callout">위 그림도 AMD UG1711 <strong>2026.1</strong></p><p>설정 창을 닫은 뒤 Vivado <strong>Diagram</strong>에서 자동 생성 구조를 확인한다.</p>
+<div aria-label="최소 시스템의 클록 메모리 리셋 디버그 연결" class="flow" tabindex="0"><table><thead><tr><th scope="col">구성</th><th scope="col">연결</th></tr></thead><tbody><tr><td>clk_wiz_* / Clocking Wizard</td><td>clk_out1 → 시스템 클록</td></tr><tr><td>microblaze_riscv_0 + Local Memory</td><td>ILMB → Local Memory / DLMB → Local Memory</td></tr><tr><td>proc_sys_reset / Processor System Reset</td><td>mb_reset → MicroBlaze V / bus_struct_reset → Bus</td></tr><tr><td>AXI 리셋</td><td>peripheral_aresetn / interconnect_aresetn → AXI 계층</td></tr><tr><td>mdm_* / MicroBlaze Debug Module V</td><td>DEBUG 인터페이스</td></tr></tbody></table></div>
+<h3>Local Memory Hierarchy를 펼쳐서 확인</h3>
+<p><code>microblaze_riscv_0_local_memory</code>와 같은 Hierarchical Block을 열어 <strong>ILMB Controller, DLMB Controller, Block Memory Generator</strong>가 실제로 존재하는지 확인한다.</p>
+<div class="callout"><strong>완료 확인:</strong> <code>ILMB</code>와 <code>DLMB</code>가 Local BRAM으로 연결되는지 계층 내부를 펼쳐 확인한다. 04장에서 확인한 BRAM 범위는 <code>0x00000000</code>~<code>0x00003FFF</code>(16 KiB)다. <code>M_AXI_DP</code>에는 아직 AXI 주변장치가 연결되지 않는다.</div>
+    </section>
+    <section class="section" id="s10">
+      <h2><span class="num">10</span>Clock · Reset 기본 블록 확인</h2>
+<p>Block Automation이 만든 <strong>Clocking Wizard</strong>(클로킹 위저드, 클록 생성·관리 IP)와 <strong>Processor System Reset</strong>(프로세서 시스템 리셋, 초기화 제어 IP)이 Diagram에 있는지 확인한다.</p>
+<div aria-label="표 (가로 스크롤 가능)" class="table-wrap" role="region" tabindex="0"><table><thead><tr><th>01장 확인 대상</th><th>역할</th><th>02장 작업</th></tr></thead><tbody>
+<tr><td><code>clk_wiz_*</code></td><td>CPU 동작 클록 공급</td><td>Basys3 W5 100 MHz 입력 연결</td></tr>
+<tr><td><code>rst_clk_wiz_*</code></td><td>CPU·버스 리셋 순서 제어</td><td>U18 리셋, 극성, locked 연결</td></tr>
+<tr><td><code>mdm_*</code></td><td>MicroBlaze V Debug 연결</td><td>03장에서 Vitis 디버그 실행</td></tr></tbody></table></div>
+<div class="callout">01장에서는 위 IP가 생성됐는지만 확인한다. 외부 포트 설정, 클록 주파수 상세 설정, Reset 배선, Validate Design은 02장에서 수행한다.</div>
+    </section>
+    <section class="section" id="s11">
+      <h2><span class="num">11</span>Basys3 XDC — 02장에서 사용할 핀 확인</h2>
+<p>Digilent 공식 <code>Basys-3-Master.xdc</code>를 Vivado <strong>Add Sources → Add or create constraints → Add Files</strong>로 등록한다. Clock과 Center Button Reset의 핀 번호를 확인한다. 실제 외부 포트 생성과 XDC 제약의 유효성 확인은 02장에서 완료한다.</p>
+<div class="codeblock"><div class="codebar"><span>Basys3 XDC — 필요한 줄만 Master XDC에서 활성화 · 소스 코드</span></div><pre tabindex="0"><code>## Clock signal
+set_property -dict { PACKAGE_PIN W5 IOSTANDARD LVCMOS33 } [get_ports clk]
+create_clock -name sys_clk_pin -period 10.00 -waveform {0 5} [get_ports clk]
+
+## Center Button : Reset
+set_property -dict { PACKAGE_PIN U18 IOSTANDARD LVCMOS33 } [get_ports btnC]</code></pre></div>
+<div aria-label="표 (가로 스크롤 가능)" class="table-wrap" role="region" tabindex="0"><table><thead><tr><th scope="col">XDC</th><th scope="col">의미</th><th scope="col">확인</th></tr></thead><tbody>
+<tr><td><code>PACKAGE_PIN W5</code></td><td>Basys3 100 MHz oscillator</td><td>Reference Manual의 Oscillators/Clocks 절과 일치</td></tr>
+<tr><td><code>period 10.00</code></td><td>100 MHz의 1주기 = 10 ns</td><td>Timing Engine에 Primary Clock 정의</td></tr>
+<tr><td><code>PACKAGE_PIN U18</code></td><td>Center Push Button</td><td>Digilent Master XDC의 <code>btnC</code></td></tr>
+</tbody></table></div>
+<div class="callout warn">XDC 파일에서는 사용할 W5 / U18 줄만 활성화한다. Digilent 예제의 <code>create_clock -add</code> 대신 이 프로젝트에서 후속 <strong><code>-add</code> 없는 명령</strong>을 표시했다. 01장에서는 아직 BD 외부 포트를 만들지 않으므로 Validate Design을 실행하지 않는다. Block Design에서 생성된 외부 포트 이름이 <code>clk_0</code>, <code>reset_0</code>처럼 되어 있다면 XDC를 억지로 바꾸기 전에 포트 이름을 먼저 의도한 이름으로 정리한다. <strong>HDL/BD 포트명 ↔ XDC <code>get_ports</code> 이름이 정확히 같아야 한다.</strong></div>
+    </section>
+    <section class="section" id="s12">
+      <h2><span class="num">12</span>Diagram 저장 · 구성 확인</h2>
+<ol>
+<li><h3>01 · 저장</h3><p>Diagram 탭의 <code>soc01_mb_bram</code>에서 <strong>Ctrl+S</strong>.</p></li>
+<li><h3>02 · Local Memory 계층 확인</h3><p><code>microblaze_riscv_0_local_memory</code> 계층 블록을 펼쳐 <code>ILMB</code> 컨트롤러, <code>DLMB</code> 컨트롤러, Block Memory Generator가 있는지 확인한다.</p></li>
+<li><h3>03 · IP 확인</h3><p>CPU, Local Memory, Debug Module, Clocking Wizard, Processor System Reset이 생성되어 있는지 확인한다. GPIO/UART IP는 아직 추가하지 않는다.</p></li>
+<li><h3>04 · 프로젝트 파일 확인</h3><p><strong>Sources → Design Sources</strong>에 <code>soc01_mb_bram.bd</code>가 보이면 저장 완료다.</p></li></ol>
+<div class="callout"><strong>01장 완료 기준:</strong> CPU와 16 KiB BRAM이 포함된 Block Design 저장. 02장에서는 이 프로젝트를 이어서 Clock·Reset·XDC·Bitstream을 처리한다. 01장에서 Bitstream·C 프로그램 성공을 선언하지 않는다.</div>
+    </section>
+    <section class="section" id="summary">
+      <h2><span class="num">13</span>SoC 01 완료 확인</h2>
+<ul>
+<li>Target이 Basys3의 <code>XC7A35T-1CPG236C</code>이다.</li>
+<li><code>soc01_mb_bram.bd</code>가 생성되었다.</li>
+<li>MicroBlaze V와 MDM V가 존재한다.</li>
+<li>Local Memory 16 KB, ECC None, Cache None이다.</li>
+<li>ILMB와 DLMB가 Local BRAM으로 연결된다.</li>
+<li>MDM V Debug Module이 연결된다.</li>
+<li>Clocking Wizard와 Processor System Reset IP가 생성되어 있다.</li>
+<li>Basys-3-Master.xdc를 Constraints에 등록하고 W5 / U18 / 10 ns 기준을 확인한다. 외부 포트 연결과 제약 확인은 02장에서 한다.</li>
+<li><code>soc01_mb_bram.bd</code>를 저장했다.</li>
+<li>아직 GPIO/UART/Timer/Interrupt/NPU를 추가하지 않았다.</li>
+</ul>
+<div class="flow">SoC 01 완료 → SoC 02 Clock / Reset 구조 → SoC 03 BRAM 프로그램 실행 → SoC 04 Memory Map → SoC 05 AXI</div>
+    </section>
+    <section class="section" id="sources">
+      <h2><span class="num">14</span>참고 문서</h2>
+<div aria-label="표 (가로 스크롤 가능)" class="table-wrap" role="region" tabindex="0"><table><thead><tr><th scope="col">문서</th><th scope="col">확인 항목</th></tr></thead><tbody>
+<tr><td><a href="https://docs.amd.com/r/2024.2-English/ug1711-microblaze-v-embedded-design" rel="noopener" target="_blank">AMD UG1711 · MicroBlaze V Processor Embedded Design User Guide · 2024.2</a></td><td>MicroBlaze V 기본 구조, Local Memory Bus, Block Automation 설정, Clock/Reset 연결 흐름</td></tr>
+<tr><td><a href="https://docs.amd.com/r/2024.2-English/ug994-vivado-ip-subsystems" rel="noopener" target="_blank">AMD UG994 · Designing IP Subsystems Using IP Integrator · 2024.2</a></td><td>IP Integrator, Designer Assistance, Run Block Automation, Validate Design, HDL Wrapper</td></tr>
+<tr><td><a href="https://docs.amd.com/r/2024.2-English/ug1629-microblaze-v-user-guide" rel="noopener" target="_blank">AMD UG1629 · MicroBlaze V Processor Reference Guide · 2024.2</a></td><td>MicroBlaze V Processor Architecture와 Register/Address 구조의 심화 기준</td></tr>
+<tr><td><a href="https://docs.amd.com/v/u/en-US/pg164-proc-sys-reset" rel="noopener" target="_blank">AMD PG164 · Processor System Reset</a></td><td>External/Aux Reset polarity, Reset synchronization과 sequencing</td></tr>
+<tr><td><a href="https://digilent.com/reference/_media/reference/programmable-logic/basys-3/basys3_rm.pdf" rel="noopener" target="_blank">Digilent Basys 3 Reference Manual</a></td><td>Artix-7 device, 100 MHz oscillator, W5 Clock pin, 보드 I/O</td></tr>
+<tr><td><a href="https://github.com/Digilent/digilent-xdc/blob/master/Basys-3-Master.xdc" rel="noopener" target="_blank">Digilent Basys-3-Master.xdc</a></td><td>W5 Clock, 10 ns constraint, U18 Center Button pin 기준</td></tr>
+</tbody></table></div>
+    </section>
+    <div class="chapter-links" id="chapter-links"></div>
+  </main>
+</div>
+<script>
+window.COURSE={
+ "title": "제1부 · MicroBlaze V 기본 SoC",
+ "chapters": [
+  {
+   "id": "p1-01",
+   "number": "01",
+   "title": "MicroBlaze V + BRAM 최소 SoC",
+   "file": "p1_01_microblaze_bram_v02.html"
+  },
+  {
+   "id": "p1-02",
+   "number": "02",
+   "title": "Clock · Reset 구조",
+   "file": "p1_02_clock_reset_v02.html"
+  },
+  {
+   "id": "p1-03",
+   "number": "03",
+   "title": "BRAM 프로그램 실행",
+   "file": "p1_03_bram_program_v02.html"
+  },
+  {
+   "id": "p1-04",
+   "number": "04",
+   "title": "Memory Map · MMIO",
+   "file": "p1_04_memory_map_v02.html"
+  },
+  {
+   "id": "p1-05",
+   "number": "05",
+   "title": "AXI4 · AXI4-Lite · AXI4-Stream",
+   "file": "p1_05_axi_v02.html"
+  },
+  {
+   "id": "p1-06",
+   "number": "06",
+   "title": "AXI GPIO",
+   "file": "p1_06_axi_gpio_v02.html"
+  },
+  {
+   "id": "p1-07",
+   "number": "07",
+   "title": "AXI UART Lite",
+   "file": "p1_07_axi_uartlite_v02.html"
+  },
+  {
+   "id": "p1-07-1",
+   "number": "07.1",
+   "title": "UART Echo C 코드 풀이",
+   "file": "p1_07_1_uart_echo_c_v02.html"
+  },
+  {
+   "id": "p1-08",
+   "number": "08",
+   "title": "AXI Timer",
+   "file": "p1_08_axi_timer_v02.html"
+  },
+  {
+   "id": "p1-08-1",
+   "number": "08.1",
+   "title": "AXI Timer C 코드 풀이",
+   "file": "p1_08_1_timer_c_v02.html"
+  },
+  {
+   "id": "p1-09",
+   "number": "09",
+   "title": "AXI Interrupt Controller",
+   "file": "p1_09_axi_intc_v02.html"
+  },
+  {
+   "id": "p1-09-1",
+   "number": "09.1",
+   "title": "Timer Interrupt C 코드 풀이",
+   "file": "p1_09_1_intc_c_v02.html"
+  },
+  {
+   "id": "p1-10",
+   "number": "10",
+   "title": "GPIO · UART · Timer 통합",
+   "file": "p1_10_integration_v02.html"
+  },
+  {
+   "id": "p1-10-1",
+   "number": "10.1",
+   "title": "통합 C 코드 풀이",
+   "file": "p1_10_1_integration_c_v02.html"
+  },
+  {
+   "id": "p1-11",
+   "number": "11",
+   "title": "사용자 Top과 1비트 GPIO",
+   "file": "p1_11_user_top_v02.html"
+  }
+ ]
+};
+</script>
+<script defer src="../assets/education/site.js"></script>
+</body>
+</html>
