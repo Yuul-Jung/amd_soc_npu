@@ -309,7 +309,7 @@ def subject_section(p, e, s, c, ce):
     # 구 장 단독 OOC 기록이 없으면, 이 서브젝트 모듈이 들어간 장 Top STAGE n 배선 결과로 판정한다 (출처를 적는다).
     if syn and syn.startswith("SYNTH_TIMING_PASS"):
         m = re.search(r"WNS=(\S+) WHS=(\S+)", syn)
-        top_note = f"장 Top STAGE {n} 배선 후 WNS {m.group(1)} ns · WHS {m.group(2)} ns (구 장 단독 OOC는 미실행) · {bg.file_date(e.viv_path)}"
+        top_note = f"장 Top STAGE {n} 배선 후 WNS {m.group(1)} ns · WHS {m.group(2)} ns (구 장 단독 OOC 판정 없음) · {bg.file_date(e.viv_path)}"
         subj_gates = [("pass", gn, top_note) if gn == "SYNTH_TIMING_PASS" and cl == "todo" else (cl, gn, no) for cl, gn, no in subj_gates]
     pat = c.get("evidence", {}).get("pattern", r"_PASS|PYTHON_VECTORS|^\|")
     chk = "".join(f"<tr><td><code>{a}</code></td><td>{b}</td></tr>" for a, b in c["checks"])

@@ -384,6 +384,10 @@ def gates(c, e):
     mode = c.get("vivado", {}).get("mode", "none")
     if mode == "none":
         g.append(("na", "SYNTH_TIMING_PASS", "해당 없음"))
+    elif e.synth and (e.synth.startswith("SYNTH_TIMING_NOT_CHECKED") or "WNS=NA" in e.synth):
+        # 제약된 레지스터 간 경로가 없으면(WNS=NA) 타이밍을 검사한 것이 아니다: PASS로 세지 않는다.
+        g.append(("todo", "SYNTH_TIMING_PASS", "⚠ 미검사 · 레지스터 간 경로 없음(WNS=NA), 합성·자원만 확인 · "
+                  + short(e.synth.split(" ", 1)[1], 50) + f" · {file_date(e.viv_path)}"))
     elif e.synth:
         ok = e.synth.startswith("SYNTH_TIMING_PASS")
         via = f" ({int(c['vivado']['ref'][2:]):02d}장 통합 Top)" if mode == "via" else ""
@@ -488,6 +492,8 @@ def code_status(path, e):
         return "원본"
     if VIVADO_FILES.search(path):
         if e.synth:
+            if e.synth.startswith("SYNTH_TIMING_NOT_CHECKED") or "WNS=NA" in e.synth:
+                return "원본 · Vivado 합성만 (타이밍 ⚠ 미검사)"
             return "원본 · Vivado 실행 " + ("통과" if e.synth.startswith("SYNTH_TIMING_PASS") else "실패")
         return "원본 · ⚠ 미검증 (Vivado 미실행)"
     if path.endswith((".c", ".h")):           # 보드 소프트웨어: PC 컴파일·시험까지만 확인
