@@ -907,10 +907,26 @@ module p02_npu_path #(
         // 쓰기는 두 엔진이 모두 받을 수 있을 때만 (11장 해석기는 load_ready를 보고 쓴다)
         assign load_ready = e_load_ready_i &amp;&amp; r4;
         assign busy   = use4 ? b4 : e_busy_i;
-        assign done   = use4 ? d4 : e_done_i;
-        assign err    = use4 ? x4 : e_error_i;
-        assign cls    = use4 ? c4 : e_class_i;
-        assign scores = use4 ? s4 : e_scores_i;
+        // (변경 2026-11-23) 고른 엔진의 완료·오류·클래스·점수를 레지스터 한 단에 받은 뒤 11장 해석기로 넘긴다.
+        // 이전에는 npu_core 결과 → p02_bank 조합 argmax → 엔진 선택 → 해석기 응답 버퍼가 한 클록 경로(13단, 10.07 ns)여서
+        // STAGE 8 배선에서 WNS -0.103 ns였다. 응답이 1클록 늦어질 뿐 값은 같다 (done·error는 1클록 펄스 그대로).
+        reg          done_q, err_q;
+        reg [1:0]    cls_r;
+        reg [163:0]  scores_r;
+        always @(posedge clk) begin
+            if (!resetn) begin
+                done_q &lt;= 1'b0; err_q &lt;= 1'b0; cls_r &lt;= 2'd0; scores_r &lt;= 164'd0;
+            end else begin
+                done_q   &lt;= use4 ? d4 : e_done_i;
+                err_q    &lt;= use4 ? x4 : e_error_i;
+                cls_r    &lt;= use4 ? c4 : e_class_i;
+                scores_r &lt;= use4 ? s4 : e_scores_i;
+            end
+        end
+        assign done   = done_q;
+        assign err    = err_q;
+        assign cls    = cls_r;
+        assign scores = scores_r;
 
         reg [1:0] cls_q;                          // 표시: 마지막으로 끝난 실행의 클래스
         always @(posedge clk) begin
@@ -1068,7 +1084,7 @@ endmodule
 `default_nettype wire</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>p02/constraints/basys3_p02.xdc · xdc · 원본 · Vivado 실행 통과</span></div>
+        <div class="codebar"><span>p02/constraints/basys3_p02.xdc · xdc · 원본 · Vivado 실행 실패</span></div>
         <pre tabindex="0"><code class="language-xdc"># 2장 보드 Top (basys3_p02_top) 핀. Basys-3-Master.xdc 이름·핀 그대로 (12장 basys3_npu.xdc와 같은 핀 + sw[3:2]).
 set_property -dict { PACKAGE_PIN W5 IOSTANDARD LVCMOS33 } [get_ports clk]
 set_property -dict { PACKAGE_PIN U18 IOSTANDARD LVCMOS33 } [get_ports btnC]
@@ -1107,7 +1123,7 @@ set_property -dict { PACKAGE_PIN W17 IOSTANDARD LVCMOS33 } [get_ports {sw[3]}]
 create_clock -name sys_clk_pin -period 10.000 -waveform {0 5} [get_ports clk]</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>p02/vivado/build_p02.tcl · tcl · 원본 · Vivado 실행 통과</span></div>
+        <div class="codebar"><span>p02/vivado/build_p02.tcl · tcl · 원본 · Vivado 실행 실패</span></div>
         <pre tabindex="0"><code class="language-tcl"># 2장 보드 Top (4뉴런 NPU 보드): STAGE 1~8 각각 합성 → 구현 → 타이밍 판정 → 비트스트림.
 # STAGE = 끝낸 서브젝트 수 (1 = 2-1 BRAM … 8 = 2-8 통합). 서브젝트마다 보드에서 확인할 비트스트림을 만든다.
 # 실행 (저장소 루트): vivado -mode batch -nojournal -source p02/vivado/build_p02.tcl
@@ -1473,7 +1489,7 @@ if __name__ == '__main__':
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
         <tbody><tr><td><code>RTL_SIM_PASS BRAM W=16 A=8 cycles=1016</code></td><td>16비트·256깊이 설정 통과</td></tr><tr><td><code>RTL_SIM_PASS BRAM W=8 A=3 cycles=520</code></td><td>8비트·8깊이 설정 통과</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS</code></td><td>RTL 출력 파일과 Python 기준값이 모든 사이클에서 일치</td></tr><tr><td>장 Top STAGE=1 시뮬레이션</td><td>위 '보드에서 볼 것' 응답과 바이트 단위로 같음 · 통과</td></tr>
-        <tr><td>장 Top STAGE=1 합성·타이밍</td><td>통과 · WNS=3.247 WHS=0.070 DRC_ERRORS=0 LUT=571 FF=394 DSP48E1=0 RAMB18=5</td></tr></tbody>
+        <tr><td>장 Top STAGE=1 합성·타이밍</td><td>통과 · WNS=3.272 WHS=0.083 DRC_ERRORS=0 LUT=576 FF=395 DSP48E1=0 RAMB18=5</td></tr></tbody>
       </table></div>
       <div class="gate-row">
         <div class="gate pass">
@@ -1486,7 +1502,7 @@ if __name__ == '__main__':
         </div>
         <div class="gate pass">
           <b>SYNTH_TIMING_PASS</b>
-          <span>장 Top STAGE 1 배선 후 WNS 3.247 ns · WHS 0.070 ns (구 장 단독 OOC 판정 없음) · 2026-11-19</span>
+          <span>장 Top STAGE 1 배선 후 WNS 3.272 ns · WHS 0.083 ns (구 장 단독 OOC 판정 없음) · 2026-11-23</span>
         </div>
         <div class="gate todo">
           <b>BOARD_PASS</b>
@@ -1679,7 +1695,7 @@ if __name__=='__main__':
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
         <tbody><tr><td><code>RTL_SIM_PASS FIXED IW=32 OW=8 SHIFT=8 cycles=2035</code></td><td>INT8 출력 설정 통과</td></tr><tr><td><code>RTL_SIM_PASS FIXED IW=32 OW=16 SHIFT=4 cycles=2035</code></td><td>INT16 출력 설정 통과</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS</code></td><td>RTL 출력 파일과 Python 기준값이 모든 사이클에서 일치</td></tr><tr><td>장 Top STAGE=2 시뮬레이션</td><td>위 '보드에서 볼 것' 응답과 바이트 단위로 같음 · 통과</td></tr>
-        <tr><td>장 Top STAGE=2 합성·타이밍</td><td>통과 · WNS=1.255 WHS=0.059 DRC_ERRORS=0 LUT=752 FF=440 DSP48E1=0 RAMB18=5</td></tr></tbody>
+        <tr><td>장 Top STAGE=2 합성·타이밍</td><td>통과 · WNS=1.136 WHS=0.056 DRC_ERRORS=0 LUT=757 FF=441 DSP48E1=0 RAMB18=5</td></tr></tbody>
       </table></div>
       <div class="gate-row">
         <div class="gate pass">
@@ -1873,7 +1889,7 @@ if __name__=='__main__':
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
         <tbody><tr><td><code>RTL_SIM_PASS DOT INT16/40 cases=78</code></td><td>길이 0·최대·오류·연속 트랜잭션 포함 78건 통과</td></tr><tr><td><code>RTL_SIM_PASS DOT INT8/32 cases=78</code></td><td>INT8 설정 통과</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS</code></td><td>RTL 출력 파일과 Python 기준값이 모든 사이클에서 일치</td></tr><tr><td>장 Top STAGE=3 시뮬레이션</td><td>위 '보드에서 볼 것' 응답과 바이트 단위로 같음 · 통과</td></tr>
-        <tr><td>장 Top STAGE=3 합성·타이밍</td><td>통과 · WNS=1.494 WHS=0.024 DRC_ERRORS=0 LUT=952 FF=566 DSP48E1=1 RAMB18=5</td></tr></tbody>
+        <tr><td>장 Top STAGE=3 합성·타이밍</td><td>통과 · WNS=0.628 WHS=0.024 DRC_ERRORS=0 LUT=956 FF=567 DSP48E1=1 RAMB18=5</td></tr></tbody>
       </table></div>
       <div class="gate-row">
         <div class="gate pass">
@@ -2069,7 +2085,7 @@ if __name__=='__main__':
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
         <tbody><tr><td><code>RTL_SIM_PASS PE4 INT16/40 cases=26</code></td><td>4개 PE 결과·합산 26건 통과</td></tr><tr><td><code>RTL_SIM_PASS PE4 INT8/32 cases=26</code></td><td>INT8 설정 통과</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS</code></td><td>RTL 출력 파일과 Python 기준값이 모든 사이클에서 일치</td></tr><tr><td>장 Top STAGE=4 시뮬레이션</td><td>위 '보드에서 볼 것' 응답과 바이트 단위로 같음 · 통과</td></tr>
-        <tr><td>장 Top STAGE=4 합성·타이밍</td><td>통과 · WNS=1.157 WHS=0.024 DRC_ERRORS=0 LUT=1426 FF=1260 DSP48E1=5 RAMB18=5</td></tr></tbody>
+        <tr><td>장 Top STAGE=4 합성·타이밍</td><td>통과 · WNS=1.642 WHS=0.022 DRC_ERRORS=0 LUT=1427 FF=1261 DSP48E1=5 RAMB18=5</td></tr></tbody>
       </table></div>
       <div class="gate-row">
         <div class="gate pass">
@@ -2270,7 +2286,7 @@ if __name__=='__main__':
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
         <tbody><tr><td><code>RTL_SIM_PASS DENSE4 INT16/40 cases=46</code></td><td>Bias·ReLU·포화 포함 46건 통과</td></tr><tr><td><code>RTL_SIM_PASS DENSE4 INT8/32 cases=46</code></td><td>INT8 설정 통과</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS</code></td><td>RTL 출력 파일과 Python 기준값이 모든 사이클에서 일치</td></tr><tr><td>장 Top STAGE=5 시뮬레이션</td><td>위 '보드에서 볼 것' 응답과 바이트 단위로 같음 · 통과</td></tr>
-        <tr><td>장 Top STAGE=5 합성·타이밍</td><td>통과 · WNS=1.078 WHS=0.017 DRC_ERRORS=0 LUT=2083 FF=2181 DSP48E1=9 RAMB18=5</td></tr></tbody>
+        <tr><td>장 Top STAGE=5 합성·타이밍</td><td>통과 · WNS=1.381 WHS=0.024 DRC_ERRORS=0 LUT=2084 FF=2182 DSP48E1=9 RAMB18=5</td></tr></tbody>
       </table></div>
       <div class="gate-row">
         <div class="gate pass">
@@ -2514,7 +2530,7 @@ if __name__=='__main__':
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
         <tbody><tr><td><code>RTL_SIM_PASS NPU INT16/40 datasets=22 inferences=44</code></td><td>22개 데이터셋·44회 추론 통과</td></tr><tr><td><code>RTL_SIM_PASS NPU INT8/32 datasets=22 inferences=44</code></td><td>INT8 설정 통과</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS</code></td><td>RTL 출력 파일과 Python 기준값이 모든 사이클에서 일치</td></tr><tr><td>장 Top STAGE=6 시뮬레이션</td><td>위 '보드에서 볼 것' 응답과 바이트 단위로 같음 · 통과</td></tr>
-        <tr><td>장 Top STAGE=6 합성·타이밍</td><td>통과 · WNS=0.852 WHS=0.022 DRC_ERRORS=0 LUT=2616 FF=3137 DSP48E1=13 RAMB18=10</td></tr></tbody>
+        <tr><td>장 Top STAGE=6 합성·타이밍</td><td>통과 · WNS=0.560 WHS=0.019 DRC_ERRORS=0 LUT=2619 FF=3138 DSP48E1=13 RAMB18=10</td></tr></tbody>
       </table></div>
       <div class="gate-row">
         <div class="gate pass">
@@ -2943,7 +2959,7 @@ if __name__ == "__main__":
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
         <tbody><tr><td><code>INTEGRATED_UART_RTL_SIM_PASS classes=6 model_edit=1 invalid_length=1</code></td><td>6개 표본 분류 · Bias 변경 후 분류 변화 · 잘못된 길이 거부</td></tr><tr><td><code>PC_GOLDEN_COMPARE_PASS predictions=6 model_edit=1</code></td><td>mini_npu/outputs/predictions.csv가 PC 기준 모델과 일치</td></tr><tr><td>장 Top STAGE=7 시뮬레이션</td><td>위 '보드에서 볼 것' 응답과 바이트 단위로 같음 · 통과</td></tr>
-        <tr><td>장 Top STAGE=7 합성·타이밍</td><td>통과 · WNS=0.160 WHS=0.021 DRC_ERRORS=0 LUT=3032 FF=3362 DSP48E1=13 RAMB18=10</td></tr></tbody>
+        <tr><td>장 Top STAGE=7 합성·타이밍</td><td>통과 · WNS=0.212 WHS=0.021 DRC_ERRORS=0 LUT=3035 FF=3363 DSP48E1=13 RAMB18=10</td></tr></tbody>
       </table></div>
       <div class="gate-row">
         <div class="gate pass">
@@ -4042,7 +4058,7 @@ endmodule</code></pre>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
         <tbody><tr><td><code>결과 표 13행이 모두 RTL_SIM_PASS</code></td><td>ch00~ch10 · dsp_engine · ch11_ch12</td></tr><tr><td><code>UART_FIFO_ADVERSARIAL_SIM_PASS tests=11</code></td><td>FIFO Full·Reset·Framing·동시 Push/Pop</td></tr><tr><td><code>NPU_UART_ADVERSARIAL_SIM_PASS tests=8</code></td><td>잘못된 명령·필드, 응답 중 명령, 응답 중 Reset</td></tr><tr><td>장 Top STAGE=8 시뮬레이션</td><td>위 '보드에서 볼 것' 응답과 바이트 단위로 같음 · 통과</td></tr>
-        <tr><td>장 Top STAGE=8 합성·타이밍</td><td>통과 · WNS=0.484 WHS=0.021 DRC_ERRORS=0 LUT=4307 FF=4229 DSP48E1=17 RAMB18=15</td></tr></tbody>
+        <tr><td>장 Top STAGE=8 합성·타이밍</td><td>✗ WNS=-0.103 WHS=0.031 DRC_ERRORS=0 LUT=4311 FF=4230 DSP48E1=17 RAMB18=1…</td></tr></tbody>
       </table></div>
       <div class="gate-row">
         <div class="gate pass">
@@ -4060,10 +4076,6 @@ endmodule</code></pre>
         <div class="gate pass">
           <b>TIMING_SIM_PASS</b>
           <span>TIMING_SIM_PASS ch12 basys3_npu_top post-route SDF(slow) classes=6 mod… · 2026-11-22</span>
-        </div>
-        <div class="gate todo">
-          <b>DRC REQP-1840</b>
-          <span>⚠ 미해결 · 비동기 리셋 → BRAM 제어 핀 경고 20+건(보고서 1개), 동작 중 리셋 미검증 · <code>ch12/validation/drc_reqp1840_20261122.txt</code></span>
         </div>
         <div class="gate todo">
           <b>BOARD_PASS</b>
@@ -4103,14 +4115,14 @@ P02_TOP_RTL_SIM_PASS stage=8 cases=54 bytes=730
 RTL_SIM_PASS stages=8</code></pre></div>
       <div class="codeblock"><div class="codebar"><span>Vivado (VS Code) · STAGE 1~4 비트스트림</span></div>
         <pre tabindex="0"><code>vivado -mode batch -nojournal -source p02/vivado/build_p02.tcl
-SYNTH_TIMING_PASS p02 basys3_p02_top STAGE=1 WNS=3.247 WHS=0.070 DRC_ERRORS=0 LUT=571 FF=394 DSP48E1=0 RAMB18=5
-SYNTH_TIMING_PASS p02 basys3_p02_top STAGE=2 WNS=1.255 WHS=0.059 DRC_ERRORS=0 LUT=752 FF=440 DSP48E1=0 RAMB18=5
-SYNTH_TIMING_PASS p02 basys3_p02_top STAGE=3 WNS=1.494 WHS=0.024 DRC_ERRORS=0 LUT=952 FF=566 DSP48E1=1 RAMB18=5
-SYNTH_TIMING_PASS p02 basys3_p02_top STAGE=4 WNS=1.157 WHS=0.024 DRC_ERRORS=0 LUT=1426 FF=1260 DSP48E1=5 RAMB18=5
-SYNTH_TIMING_PASS p02 basys3_p02_top STAGE=5 WNS=1.078 WHS=0.017 DRC_ERRORS=0 LUT=2083 FF=2181 DSP48E1=9 RAMB18=5
-SYNTH_TIMING_PASS p02 basys3_p02_top STAGE=6 WNS=0.852 WHS=0.022 DRC_ERRORS=0 LUT=2616 FF=3137 DSP48E1=13 RAMB18=10
-SYNTH_TIMING_PASS p02 basys3_p02_top STAGE=7 WNS=0.160 WHS=0.021 DRC_ERRORS=0 LUT=3032 FF=3362 DSP48E1=13 RAMB18=10
-SYNTH_TIMING_PASS p02 basys3_p02_top STAGE=8 WNS=0.484 WHS=0.021 DRC_ERRORS=0 LUT=4307 FF=4229 DSP48E1=17 RAMB18=15</code></pre></div>
+SYNTH_TIMING_PASS p02 basys3_p02_top STAGE=1 WNS=3.272 WHS=0.083 DRC_ERRORS=0 LUT=576 FF=395 DSP48E1=0 RAMB18=5
+SYNTH_TIMING_PASS p02 basys3_p02_top STAGE=2 WNS=1.136 WHS=0.056 DRC_ERRORS=0 LUT=757 FF=441 DSP48E1=0 RAMB18=5
+SYNTH_TIMING_PASS p02 basys3_p02_top STAGE=3 WNS=0.628 WHS=0.024 DRC_ERRORS=0 LUT=956 FF=567 DSP48E1=1 RAMB18=5
+SYNTH_TIMING_PASS p02 basys3_p02_top STAGE=4 WNS=1.642 WHS=0.022 DRC_ERRORS=0 LUT=1427 FF=1261 DSP48E1=5 RAMB18=5
+SYNTH_TIMING_PASS p02 basys3_p02_top STAGE=5 WNS=1.381 WHS=0.024 DRC_ERRORS=0 LUT=2084 FF=2182 DSP48E1=9 RAMB18=5
+SYNTH_TIMING_PASS p02 basys3_p02_top STAGE=6 WNS=0.560 WHS=0.019 DRC_ERRORS=0 LUT=2619 FF=3138 DSP48E1=13 RAMB18=10
+SYNTH_TIMING_PASS p02 basys3_p02_top STAGE=7 WNS=0.212 WHS=0.021 DRC_ERRORS=0 LUT=3035 FF=3363 DSP48E1=13 RAMB18=10
+SYNTH_TIMING_FAIL p02 basys3_p02_top STAGE=8 WNS=-0.103 WHS=0.031 DRC_ERRORS=0 LUT=4311 FF=4230 DSP48E1=17 RAMB18=15</code></pre></div>
       <details class="full"><summary>장 Top 테스트벤치·기준 모델 (전체 코드)</summary>
       <div class="codeblock">
         <div class="codebar"><span>p02/tb/tb_p02_top.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-22</span></div>
@@ -4474,7 +4486,7 @@ if __name__ == "__main__":
       <h2><span class="num">12</span> 누적 보고·인계</h2>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>서브젝트</th><th>구 장</th><th>추가 RTL</th><th>시뮬레이션 (단독 + 장 Top)</th><th>합성 (장 Top STAGE)</th><th>보드</th></tr></thead>
-        <tbody><tr><td>2-1</td><td>04장</td><td><code>bram_sync_buffer.v</code></td><td>통과</td><td>통과</td><td>⚠ 미검증</td></tr><tr><td>2-2</td><td>05장</td><td><code>fixed_quantizer.v</code></td><td>통과</td><td>통과</td><td>⚠ 미검증</td></tr><tr><td>2-3</td><td>07장</td><td><code>vector_dot_core.v</code></td><td>통과</td><td>통과</td><td>⚠ 미검증</td></tr><tr><td>2-4</td><td>08장</td><td><code>pe_array4.v</code></td><td>통과</td><td>통과</td><td>⚠ 미검증</td></tr><tr><td>2-5</td><td>09장</td><td><code>dense_layer4.v</code></td><td>통과</td><td>통과</td><td>⚠ 미검증</td></tr><tr><td>2-6</td><td>10장</td><td><code>npu_core.v</code></td><td>통과</td><td>통과</td><td>⚠ 미검증</td></tr><tr><td>2-7</td><td>11장</td><td><code>uart_npu_command_controller.v</code></td><td>통과</td><td>통과</td><td>⚠ 미검증</td></tr><tr><td>2-8</td><td>12장</td><td><code>npu_dsp_mac_lane.v</code><br><code>npu_engine4.v</code><br><code>npu_display_controller.v</code><br><code>npu_reset_controller.v</code> ※<br><code>basys3_npu_top.v</code> ※</td><td>통과</td><td>통과</td><td>⚠ 미검증</td></tr></tbody>
+        <tbody><tr><td>2-1</td><td>04장</td><td><code>bram_sync_buffer.v</code></td><td>통과</td><td>통과</td><td>⚠ 미검증</td></tr><tr><td>2-2</td><td>05장</td><td><code>fixed_quantizer.v</code></td><td>통과</td><td>통과</td><td>⚠ 미검증</td></tr><tr><td>2-3</td><td>07장</td><td><code>vector_dot_core.v</code></td><td>통과</td><td>통과</td><td>⚠ 미검증</td></tr><tr><td>2-4</td><td>08장</td><td><code>pe_array4.v</code></td><td>통과</td><td>통과</td><td>⚠ 미검증</td></tr><tr><td>2-5</td><td>09장</td><td><code>dense_layer4.v</code></td><td>통과</td><td>통과</td><td>⚠ 미검증</td></tr><tr><td>2-6</td><td>10장</td><td><code>npu_core.v</code></td><td>통과</td><td>통과</td><td>⚠ 미검증</td></tr><tr><td>2-7</td><td>11장</td><td><code>uart_npu_command_controller.v</code></td><td>통과</td><td>통과</td><td>⚠ 미검증</td></tr><tr><td>2-8</td><td>12장</td><td><code>npu_dsp_mac_lane.v</code><br><code>npu_engine4.v</code><br><code>npu_display_controller.v</code><br><code>npu_reset_controller.v</code> ※<br><code>basys3_npu_top.v</code> ※</td><td>통과</td><td>⚠ 미검증</td><td>⚠ 미검증</td></tr></tbody>
       </table></div>
       <p>※ = 구 장 단독 실습 파일이라 장 Top 빌드(<code>p02/vivado/build_p02.tcl</code>)에는 들어가지 않음.</p>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
@@ -4495,13 +4507,9 @@ if __name__ == "__main__":
           <b>RTL_SIM_PASS</b>
           <span>장 Top STAGE 1~8 · Icarus Verilog 12.0 · 2026-11-22</span>
         </div>
-        <div class="gate pass">
+        <div class="gate fail">
           <b>SYNTH_TIMING_PASS</b>
-          <span>STAGE 1~8 비트스트림 · 2026-11-19</span>
-        </div>
-        <div class="gate todo">
-          <b>DRC REQP-1840</b>
-          <span>⚠ 미해결 · 비동기 리셋 → BRAM 제어 핀 경고 135+건(보고서 8개), 동작 중 리셋 미검증 · <code>p02/validation/drc_reqp1840_20261122.txt</code></span>
+          <span>✗ SYNTH_TIMING_FAIL p02 basys3_p02_top STAGE=8 WNS=-0.103 WHS=0.031 DRC_…</span>
         </div>
         <div class="gate todo">
           <b>BOARD_PASS</b>

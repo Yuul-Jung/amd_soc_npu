@@ -1250,7 +1250,7 @@ if __name__=='__main__':
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
         <tbody><tr><td><code>RTL_SIM_PASS PRECISION cycles=2020</code></td><td>INT8·INT16 동시 출력 통과</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS</code></td><td>RTL 출력 파일과 Python 기준값이 모든 사이클에서 일치</td></tr><tr><td>장 Top STAGE=1 시뮬레이션</td><td>위 '보드에서 볼 것' 응답과 바이트 단위로 같음 · 통과</td></tr>
-        <tr><td>장 Top STAGE=1 합성·타이밍</td><td>통과 · WNS=1.017 WHS=0.037 DRC_ERRORS=0 LUT=813 FF=389 DSP48E1=0 RAMB18=0</td></tr></tbody>
+        <tr><td>장 Top STAGE=1 합성·타이밍</td><td>통과 · WNS=0.583 WHS=0.024 DRC_ERRORS=0 LUT=814 FF=390 DSP48E1=0 RAMB18=0</td></tr></tbody>
       </table></div>
       <div class="gate-row">
         <div class="gate pass">
@@ -2155,7 +2155,7 @@ if __name__ == "__main__":
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
         <tbody><tr><td><code>RTL_SIM_PASS TILE784 tile_go_to_accept_cycles=207</code></td><td>26사례 × 13타일, 타일 하나 207클록, 오류 14종</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS tile_partials=3380</code></td><td>타일 부분합 3,380개·점수·클래스가 Python 기준과 같음</td></tr><tr><td>장 Top STAGE=2 시뮬레이션</td><td>위 '보드에서 볼 것' 응답과 바이트 단위로 같음 · 통과</td></tr>
-        <tr><td>장 Top STAGE=2 합성·타이밍</td><td>통과 · WNS=0.347 WHS=0.024 DRC_ERRORS=0 LUT=3965 FF=2789 DSP48E1=4 RAMB18=4</td></tr></tbody>
+        <tr><td>장 Top STAGE=2 합성·타이밍</td><td>통과 · WNS=0.423 WHS=0.035 DRC_ERRORS=0 LUT=3966 FF=2790 DSP48E1=4 RAMB18=4</td></tr></tbody>
       </table></div>
       <div class="gate-row">
         <div class="gate pass">
@@ -2542,7 +2542,7 @@ if __name__ == "__main__":
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
         <tbody><tr><td><code>PC_EVAL_PASS float=9260 int8=9256 int16=9260</code></td><td>MNIST 시험 10,000장: Float 92.60%, INT8 92.56%, INT16 92.60%</td></tr><tr><td><code>RTL_SIM_PASS TILE784 data_w=16</code></td><td>INT16 784 추론 RTL이 Python 기준과 비트 단위로 같음 (표본 16개 포함)</td></tr><tr><td>장 Top STAGE=3 시뮬레이션</td><td>위 '보드에서 볼 것' 응답과 바이트 단위로 같음 · 통과</td></tr>
-        <tr><td>장 Top STAGE=3 합성·타이밍</td><td>통과 · WNS=0.224 WHS=0.037 DRC_ERRORS=0 LUT=6487 FF=4637 DSP48E1=8 RAMB18=9</td></tr></tbody>
+        <tr><td>장 Top STAGE=3 합성·타이밍</td><td>통과 · WNS=0.201 WHS=0.036 DRC_ERRORS=0 LUT=6488 FF=4638 DSP48E1=8 RAMB18=9</td></tr></tbody>
       </table></div>
       <div class="gate-row">
         <div class="gate pass">
@@ -3007,7 +3007,7 @@ if __name__ == "__main__":
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
         <tbody><tr><td><code>RTL_SIM_PASS PE_SCALE PE1=70x10 PE4=206 PE8=138</code></td><td>같은 52타일 작업에서 세 구성의 클록 수</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS cycles_match_model=1</code></td><td>부분합 비트 단위 일치, 클록 수가 모델과 같음</td></tr><tr><td>장 Top STAGE=4 시뮬레이션</td><td>위 '보드에서 볼 것' 응답과 바이트 단위로 같음 · 통과</td></tr>
-        <tr><td>장 Top STAGE=4 합성·타이밍</td><td>통과 · WNS=0.402 WHS=0.046 DRC_ERRORS=0 LUT=7400 FF=5535 DSP48E1=21 RAMB18=22</td></tr></tbody>
+        <tr><td>장 Top STAGE=4 합성·타이밍</td><td>통과 · WNS=0.195 WHS=0.036 DRC_ERRORS=0 LUT=7401 FF=5536 DSP48E1=21 RAMB18=22</td></tr></tbody>
       </table></div>
       <div class="gate-row">
         <div class="gate pass">
@@ -3056,10 +3056,10 @@ P04_TOP_RTL_SIM_PASS stage=4 cases=384 bytes=2135
 RTL_SIM_PASS stages=4</code></pre></div>
       <div class="codeblock"><div class="codebar"><span>Vivado (VS Code) · STAGE 1~4 비트스트림</span></div>
         <pre tabindex="0"><code>vivado -mode batch -nojournal -source p04/vivado/build_p04.tcl
-SYNTH_TIMING_PASS p04 basys3_p04_top STAGE=1 WNS=1.017 WHS=0.037 DRC_ERRORS=0 LUT=813 FF=389 DSP48E1=0 RAMB18=0
-SYNTH_TIMING_PASS p04 basys3_p04_top STAGE=2 WNS=0.347 WHS=0.024 DRC_ERRORS=0 LUT=3965 FF=2789 DSP48E1=4 RAMB18=4
-SYNTH_TIMING_PASS p04 basys3_p04_top STAGE=3 WNS=0.224 WHS=0.037 DRC_ERRORS=0 LUT=6487 FF=4637 DSP48E1=8 RAMB18=9
-SYNTH_TIMING_PASS p04 basys3_p04_top STAGE=4 WNS=0.402 WHS=0.046 DRC_ERRORS=0 LUT=7400 FF=5535 DSP48E1=21 RAMB18=22</code></pre></div>
+SYNTH_TIMING_PASS p04 basys3_p04_top STAGE=1 WNS=0.583 WHS=0.024 DRC_ERRORS=0 LUT=814 FF=390 DSP48E1=0 RAMB18=0
+SYNTH_TIMING_PASS p04 basys3_p04_top STAGE=2 WNS=0.423 WHS=0.035 DRC_ERRORS=0 LUT=3966 FF=2790 DSP48E1=4 RAMB18=4
+SYNTH_TIMING_PASS p04 basys3_p04_top STAGE=3 WNS=0.201 WHS=0.036 DRC_ERRORS=0 LUT=6488 FF=4638 DSP48E1=8 RAMB18=9
+SYNTH_TIMING_PASS p04 basys3_p04_top STAGE=4 WNS=0.195 WHS=0.036 DRC_ERRORS=0 LUT=7401 FF=5536 DSP48E1=21 RAMB18=22</code></pre></div>
       <details class="full"><summary>장 Top 테스트벤치·기준 모델 (전체 코드)</summary>
       <div class="codeblock">
         <div class="codebar"><span>p04/tb/tb_p04_top.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-22</span></div>
@@ -3455,11 +3455,7 @@ if __name__ == "__main__":
         </div>
         <div class="gate pass">
           <b>SYNTH_TIMING_PASS</b>
-          <span>STAGE 1~4 비트스트림 · 2026-11-19</span>
-        </div>
-        <div class="gate todo">
-          <b>DRC REQP-1840</b>
-          <span>⚠ 미해결 · 비동기 리셋 → BRAM 제어 핀 경고 35+건(보고서 3개), 동작 중 리셋 미검증 · <code>p04/validation/drc_reqp1840_20261122.txt</code></span>
+          <span>STAGE 1~4 비트스트림 · 2026-11-23</span>
         </div>
         <div class="gate todo">
           <b>BOARD_PASS</b>
