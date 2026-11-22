@@ -1,0 +1,162 @@
+# REQP-1840 (RAMB18 async control check) — Vivado 배선 후 report_drc 발췌, 2026-11-22 추출
+# 미해결. 규칙당 보고 한도 20건: limit_reached=1이면 실제 건수는 20 이상. 기본 STA와 TIMING_SIM으로 검증되지 않음.
+# p02 STAGE 1~7 보고서는 argmax 수정(a8bafe4) 전 빌드, STAGE 8은 수정 후 빌드이다.
+
+## <repo>/build/vivado/p02_s1/drc_route.rpt
+report_date=Thu Nov 19 16:39:08 2026 count=15 limit_reached=0
+REQP-1840#1 pin=bank/g_wmem[0].u_wmem/mem_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#2 pin=bank/g_wmem[0].u_wmem/mem_reg/ENBWREN driver=rst/release_q_reg[1]
+REQP-1840#3 pin=bank/g_wmem[0].u_wmem/mem_reg/RSTRAMB driver=rst/release_q_reg[1]
+REQP-1840#4 pin=bank/g_wmem[1].u_wmem/mem_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#5 pin=bank/g_wmem[1].u_wmem/mem_reg/ENBWREN driver=rst/release_q_reg[1]
+REQP-1840#6 pin=bank/g_wmem[1].u_wmem/mem_reg/RSTRAMB driver=rst/release_q_reg[1]
+REQP-1840#7 pin=bank/g_wmem[2].u_wmem/mem_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#8 pin=bank/g_wmem[2].u_wmem/mem_reg/ENBWREN driver=rst/release_q_reg[1]
+REQP-1840#9 pin=bank/g_wmem[2].u_wmem/mem_reg/RSTRAMB driver=rst/release_q_reg[1]
+REQP-1840#10 pin=bank/g_wmem[3].u_wmem/mem_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#11 pin=bank/g_wmem[3].u_wmem/mem_reg/ENBWREN driver=rst/release_q_reg[1]
+REQP-1840#12 pin=bank/g_wmem[3].u_wmem/mem_reg/RSTRAMB driver=rst/release_q_reg[1]
+REQP-1840#13 pin=bank/u_xmem/mem_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#14 pin=bank/u_xmem/mem_reg/ENBWREN driver=rst/release_q_reg[1]
+REQP-1840#15 pin=bank/u_xmem/mem_reg/RSTRAMB driver=rst/release_q_reg[1]
+
+## <repo>/build/vivado/p02_s2/drc_route.rpt
+report_date=Thu Nov 19 16:40:15 2026 count=15 limit_reached=0
+REQP-1840#1 pin=bank/g_wmem[0].u_wmem/mem_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#2 pin=bank/g_wmem[0].u_wmem/mem_reg/ENBWREN driver=rst/release_q_reg[1]
+REQP-1840#3 pin=bank/g_wmem[0].u_wmem/mem_reg/RSTRAMB driver=rst/release_q_reg[1]
+REQP-1840#4 pin=bank/g_wmem[1].u_wmem/mem_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#5 pin=bank/g_wmem[1].u_wmem/mem_reg/ENBWREN driver=rst/release_q_reg[1]
+REQP-1840#6 pin=bank/g_wmem[1].u_wmem/mem_reg/RSTRAMB driver=rst/release_q_reg[1]
+REQP-1840#7 pin=bank/g_wmem[2].u_wmem/mem_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#8 pin=bank/g_wmem[2].u_wmem/mem_reg/ENBWREN driver=rst/release_q_reg[1]
+REQP-1840#9 pin=bank/g_wmem[2].u_wmem/mem_reg/RSTRAMB driver=rst/release_q_reg[1]
+REQP-1840#10 pin=bank/g_wmem[3].u_wmem/mem_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#11 pin=bank/g_wmem[3].u_wmem/mem_reg/ENBWREN driver=rst/release_q_reg[1]
+REQP-1840#12 pin=bank/g_wmem[3].u_wmem/mem_reg/RSTRAMB driver=rst/release_q_reg[1]
+REQP-1840#13 pin=bank/u_xmem/mem_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#14 pin=bank/u_xmem/mem_reg/ENBWREN driver=rst/release_q_reg[1]
+REQP-1840#15 pin=bank/u_xmem/mem_reg/RSTRAMB driver=rst/release_q_reg[1]
+
+## <repo>/build/vivado/p02_s3/drc_route.rpt
+report_date=Thu Nov 19 16:41:17 2026 count=15 limit_reached=0
+REQP-1840#1 pin=bank/g_wmem[0].u_wmem/mem_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#2 pin=bank/g_wmem[0].u_wmem/mem_reg/ENBWREN driver=rst/release_q_reg[1]
+REQP-1840#3 pin=bank/g_wmem[0].u_wmem/mem_reg/RSTRAMB driver=rst/release_q_reg[1]
+REQP-1840#4 pin=bank/g_wmem[1].u_wmem/mem_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#5 pin=bank/g_wmem[1].u_wmem/mem_reg/ENBWREN driver=rst/release_q_reg[1]
+REQP-1840#6 pin=bank/g_wmem[1].u_wmem/mem_reg/RSTRAMB driver=rst/release_q_reg[1]
+REQP-1840#7 pin=bank/g_wmem[2].u_wmem/mem_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#8 pin=bank/g_wmem[2].u_wmem/mem_reg/ENBWREN driver=rst/release_q_reg[1]
+REQP-1840#9 pin=bank/g_wmem[2].u_wmem/mem_reg/RSTRAMB driver=rst/release_q_reg[1]
+REQP-1840#10 pin=bank/g_wmem[3].u_wmem/mem_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#11 pin=bank/g_wmem[3].u_wmem/mem_reg/ENBWREN driver=rst/release_q_reg[1]
+REQP-1840#12 pin=bank/g_wmem[3].u_wmem/mem_reg/RSTRAMB driver=rst/release_q_reg[1]
+REQP-1840#13 pin=bank/u_xmem/mem_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#14 pin=bank/u_xmem/mem_reg/ENBWREN driver=rst/release_q_reg[1]
+REQP-1840#15 pin=bank/u_xmem/mem_reg/RSTRAMB driver=rst/release_q_reg[1]
+
+## <repo>/build/vivado/p02_s4/drc_route.rpt
+report_date=Thu Nov 19 16:42:26 2026 count=15 limit_reached=0
+REQP-1840#1 pin=bank/g_wmem[0].u_wmem/mem_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#2 pin=bank/g_wmem[0].u_wmem/mem_reg/ENBWREN driver=rst/release_q_reg[1]
+REQP-1840#3 pin=bank/g_wmem[0].u_wmem/mem_reg/RSTRAMB driver=rst/release_q_reg[1]
+REQP-1840#4 pin=bank/g_wmem[1].u_wmem/mem_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#5 pin=bank/g_wmem[1].u_wmem/mem_reg/ENBWREN driver=rst/release_q_reg[1]
+REQP-1840#6 pin=bank/g_wmem[1].u_wmem/mem_reg/RSTRAMB driver=rst/release_q_reg[1]
+REQP-1840#7 pin=bank/g_wmem[2].u_wmem/mem_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#8 pin=bank/g_wmem[2].u_wmem/mem_reg/ENBWREN driver=rst/release_q_reg[1]
+REQP-1840#9 pin=bank/g_wmem[2].u_wmem/mem_reg/RSTRAMB driver=rst/release_q_reg[1]
+REQP-1840#10 pin=bank/g_wmem[3].u_wmem/mem_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#11 pin=bank/g_wmem[3].u_wmem/mem_reg/ENBWREN driver=rst/release_q_reg[1]
+REQP-1840#12 pin=bank/g_wmem[3].u_wmem/mem_reg/RSTRAMB driver=rst/release_q_reg[1]
+REQP-1840#13 pin=bank/u_xmem/mem_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#14 pin=bank/u_xmem/mem_reg/ENBWREN driver=rst/release_q_reg[1]
+REQP-1840#15 pin=bank/u_xmem/mem_reg/RSTRAMB driver=rst/release_q_reg[1]
+
+## <repo>/build/vivado/p02_s5/drc_route.rpt
+report_date=Thu Nov 19 16:43:43 2026 count=15 limit_reached=0
+REQP-1840#1 pin=bank/g_wmem[0].u_wmem/mem_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#2 pin=bank/g_wmem[0].u_wmem/mem_reg/ENBWREN driver=rst/release_q_reg[1]
+REQP-1840#3 pin=bank/g_wmem[0].u_wmem/mem_reg/RSTRAMB driver=rst/release_q_reg[1]
+REQP-1840#4 pin=bank/g_wmem[1].u_wmem/mem_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#5 pin=bank/g_wmem[1].u_wmem/mem_reg/ENBWREN driver=rst/release_q_reg[1]
+REQP-1840#6 pin=bank/g_wmem[1].u_wmem/mem_reg/RSTRAMB driver=rst/release_q_reg[1]
+REQP-1840#7 pin=bank/g_wmem[2].u_wmem/mem_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#8 pin=bank/g_wmem[2].u_wmem/mem_reg/ENBWREN driver=rst/release_q_reg[1]
+REQP-1840#9 pin=bank/g_wmem[2].u_wmem/mem_reg/RSTRAMB driver=rst/release_q_reg[1]
+REQP-1840#10 pin=bank/g_wmem[3].u_wmem/mem_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#11 pin=bank/g_wmem[3].u_wmem/mem_reg/ENBWREN driver=rst/release_q_reg[1]
+REQP-1840#12 pin=bank/g_wmem[3].u_wmem/mem_reg/RSTRAMB driver=rst/release_q_reg[1]
+REQP-1840#13 pin=bank/u_xmem/mem_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#14 pin=bank/u_xmem/mem_reg/ENBWREN driver=rst/release_q_reg[1]
+REQP-1840#15 pin=bank/u_xmem/mem_reg/RSTRAMB driver=rst/release_q_reg[1]
+
+## <repo>/build/vivado/p02_s6/drc_route.rpt
+report_date=Thu Nov 19 16:45:04 2026 count=20 limit_reached=1
+REQP-1840#1 pin=bank/g_core.u_core/inputs_mem/mem_reg/ENARDEN driver=rst/release_q_reg[1]_rep__0
+REQP-1840#2 pin=bank/g_core.u_core/inputs_mem/mem_reg/ENBWREN driver=rst/release_q_reg[1]_rep__0
+REQP-1840#3 pin=bank/g_core.u_core/inputs_mem/mem_reg/RSTRAMB driver=rst/release_q_reg[1]_rep__0
+REQP-1840#4 pin=bank/g_core.u_core/inputs_mem/mem_reg/WEA[0] driver=rst/release_q_reg[1]_rep__0
+REQP-1840#5 pin=bank/g_core.u_core/weights_mem[0].mem/mem_reg/ENARDEN driver=rst/release_q_reg[1]_rep__0
+REQP-1840#6 pin=bank/g_wmem[0].u_wmem/mem_reg/ENARDEN driver=rst/release_q_reg[1]_rep__0
+REQP-1840#7 pin=bank/g_wmem[0].u_wmem/mem_reg/ENBWREN driver=rst/release_q_reg[1]_rep__0
+REQP-1840#8 pin=bank/g_wmem[0].u_wmem/mem_reg/RSTRAMB driver=rst/release_q_reg[1]_rep__0
+REQP-1840#9 pin=bank/g_wmem[1].u_wmem/mem_reg/ENARDEN driver=rst/release_q_reg[1]_rep__0
+REQP-1840#10 pin=bank/g_wmem[1].u_wmem/mem_reg/ENBWREN driver=rst/release_q_reg[1]_rep__0
+REQP-1840#11 pin=bank/g_wmem[1].u_wmem/mem_reg/RSTRAMB driver=rst/release_q_reg[1]_rep__0
+REQP-1840#12 pin=bank/g_wmem[2].u_wmem/mem_reg/ENARDEN driver=rst/release_q_reg[1]_rep__0
+REQP-1840#13 pin=bank/g_wmem[2].u_wmem/mem_reg/ENBWREN driver=rst/release_q_reg[1]_rep__0
+REQP-1840#14 pin=bank/g_wmem[2].u_wmem/mem_reg/RSTRAMB driver=rst/release_q_reg[1]_rep__0
+REQP-1840#15 pin=bank/g_wmem[3].u_wmem/mem_reg/ENARDEN driver=rst/release_q_reg[1]_rep__0
+REQP-1840#16 pin=bank/g_wmem[3].u_wmem/mem_reg/ENBWREN driver=rst/release_q_reg[1]_rep__0
+REQP-1840#17 pin=bank/g_wmem[3].u_wmem/mem_reg/RSTRAMB driver=rst/release_q_reg[1]_rep__0
+REQP-1840#18 pin=bank/u_xmem/mem_reg/ENARDEN driver=rst/release_q_reg[1]_rep__0
+REQP-1840#19 pin=bank/u_xmem/mem_reg/ENBWREN driver=rst/release_q_reg[1]_rep__0
+REQP-1840#20 pin=bank/u_xmem/mem_reg/RSTRAMB driver=rst/release_q_reg[1]_rep__0
+
+## <repo>/build/vivado/p02_s7/drc_route.rpt
+report_date=Thu Nov 19 16:46:30 2026 count=20 limit_reached=1
+REQP-1840#1 pin=bank/g_wmem[0].u_wmem/mem_reg/ENARDEN driver=rst/release_q_reg[1]_rep__0
+REQP-1840#2 pin=bank/g_wmem[0].u_wmem/mem_reg/ENBWREN driver=rst/release_q_reg[1]_rep__0
+REQP-1840#3 pin=bank/g_wmem[0].u_wmem/mem_reg/RSTRAMB driver=rst/release_q_reg[1]_rep__0
+REQP-1840#4 pin=bank/g_wmem[0].u_wmem/mem_reg/WEA[0] driver=rst/release_q_reg[1]_rep__0
+REQP-1840#5 pin=bank/g_wmem[0].u_wmem/mem_reg/WEA[1] driver=rst/release_q_reg[1]_rep__0
+REQP-1840#6 pin=bank/g_wmem[1].u_wmem/mem_reg/ENARDEN driver=rst/release_q_reg[1]_rep__0
+REQP-1840#7 pin=bank/g_wmem[1].u_wmem/mem_reg/ENBWREN driver=rst/release_q_reg[1]_rep__0
+REQP-1840#8 pin=bank/g_wmem[1].u_wmem/mem_reg/RSTRAMB driver=rst/release_q_reg[1]_rep__0
+REQP-1840#9 pin=bank/g_wmem[1].u_wmem/mem_reg/WEA[0] driver=rst/release_q_reg[1]_rep__0
+REQP-1840#10 pin=bank/g_wmem[1].u_wmem/mem_reg/WEA[1] driver=rst/release_q_reg[1]_rep__0
+REQP-1840#11 pin=bank/g_wmem[2].u_wmem/mem_reg/ENARDEN driver=rst/release_q_reg[1]_rep__0
+REQP-1840#12 pin=bank/g_wmem[2].u_wmem/mem_reg/ENBWREN driver=rst/release_q_reg[1]_rep__0
+REQP-1840#13 pin=bank/g_wmem[2].u_wmem/mem_reg/RSTRAMB driver=rst/release_q_reg[1]_rep__0
+REQP-1840#14 pin=bank/g_wmem[2].u_wmem/mem_reg/WEA[0] driver=rst/release_q_reg[1]_rep__0
+REQP-1840#15 pin=bank/g_wmem[2].u_wmem/mem_reg/WEA[1] driver=rst/release_q_reg[1]_rep__0
+REQP-1840#16 pin=bank/u_xmem/mem_reg/ENARDEN driver=rst/release_q_reg[1]_rep__0
+REQP-1840#17 pin=bank/u_xmem/mem_reg/ENBWREN driver=rst/release_q_reg[1]_rep__0
+REQP-1840#18 pin=bank/u_xmem/mem_reg/RSTRAMB driver=rst/release_q_reg[1]_rep__0
+REQP-1840#19 pin=bank/u_xmem/mem_reg/WEA[0] driver=rst/release_q_reg[1]_rep__0
+REQP-1840#20 pin=bank/u_xmem/mem_reg/WEA[1] driver=rst/release_q_reg[1]_rep__0
+
+## <repo>/build/vivado/p02_s8/drc_route.rpt
+report_date=Fri Nov 20 09:11:38 2026 count=20 limit_reached=1
+REQP-1840#1 pin=npu/g_path.g_e4.u_e4/w0_reg/ENARDEN driver=rst/release_q_reg[1]_rep__1
+REQP-1840#2 pin=npu/g_path.g_e4.u_e4/w0_reg/ENBWREN driver=rst/release_q_reg[1]_rep__1
+REQP-1840#3 pin=npu/g_path.g_e4.u_e4/w0_reg/RSTRAMB driver=rst/release_q_reg[1]_rep__0
+REQP-1840#4 pin=npu/g_path.g_e4.u_e4/w0_reg/WEA[0] driver=rst/release_q_reg[1]_rep__0
+REQP-1840#5 pin=npu/g_path.g_e4.u_e4/w0_reg/WEA[0] driver=rst/release_q_reg[1]_rep__1
+REQP-1840#6 pin=npu/g_path.g_e4.u_e4/w0_reg/WEA[1] driver=rst/release_q_reg[1]_rep__0
+REQP-1840#7 pin=npu/g_path.g_e4.u_e4/w0_reg/WEA[1] driver=rst/release_q_reg[1]_rep__1
+REQP-1840#8 pin=npu/g_path.g_e4.u_e4/w1_reg/ENARDEN driver=rst/release_q_reg[1]_rep__1
+REQP-1840#9 pin=npu/g_path.g_e4.u_e4/w1_reg/ENBWREN driver=rst/release_q_reg[1]_rep__1
+REQP-1840#10 pin=npu/g_path.g_e4.u_e4/w1_reg/RSTRAMB driver=rst/release_q_reg[1]_rep__0
+REQP-1840#11 pin=npu/g_path.g_e4.u_e4/w1_reg/WEA[0] driver=rst/release_q_reg[1]_rep__0
+REQP-1840#12 pin=npu/g_path.g_e4.u_e4/w1_reg/WEA[0] driver=rst/release_q_reg[1]_rep__1
+REQP-1840#13 pin=npu/g_path.g_e4.u_e4/w1_reg/WEA[1] driver=rst/release_q_reg[1]_rep__0
+REQP-1840#14 pin=npu/g_path.g_e4.u_e4/w1_reg/WEA[1] driver=rst/release_q_reg[1]_rep__1
+REQP-1840#15 pin=npu/g_path.g_e4.u_e4/w2_reg/ENARDEN driver=rst/release_q_reg[1]_rep__1
+REQP-1840#16 pin=npu/g_path.g_e4.u_e4/w2_reg/ENBWREN driver=rst/release_q_reg[1]_rep__1
+REQP-1840#17 pin=npu/g_path.g_e4.u_e4/w2_reg/RSTRAMB driver=rst/release_q_reg[1]_rep__0
+REQP-1840#18 pin=npu/g_path.g_e4.u_e4/w2_reg/WEA[0] driver=rst/release_q_reg[1]_rep__0
+REQP-1840#19 pin=npu/g_path.g_e4.u_e4/w2_reg/WEA[1] driver=rst/release_q_reg[1]_rep__0
+REQP-1840#20 pin=npu/g_path.g_e4.u_e4/w2_reg/WEA[1] driver=rst/release_q_reg[1]_rep__1

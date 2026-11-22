@@ -1,0 +1,49 @@
+# REQP-1840 (RAMB18 async control check) — Vivado 배선 후 report_drc 발췌, 2026-11-22 추출
+# 미해결. 규칙당 보고 한도 20건: limit_reached=1이면 실제 건수는 20 이상. 기본 STA와 TIMING_SIM으로 검증되지 않음.
+
+## <repo>/build/vivado/p04_s1/drc_route.rpt
+report_date=Thu Nov 19 16:56:10 2026 count=0 limit_reached=0
+
+## <repo>/build/vivado/p04_s2/drc_route.rpt
+report_date=Thu Nov 19 16:57:47 2026 count=4 limit_reached=0
+REQP-1840#1 pin=bank/g_t8.u_t8/core/bank0_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#2 pin=bank/g_t8.u_t8/core/bank1_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#3 pin=bank/g_t8.u_t8/core/bank2_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#4 pin=bank/g_t8.u_t8/core/bank3_reg/ENARDEN driver=rst/release_q_reg[1]
+
+## <repo>/build/vivado/p04_s3/drc_route.rpt
+report_date=Thu Nov 19 16:59:30 2026 count=11 limit_reached=0
+REQP-1840#1 pin=bank/g_t16.u_t16/core/bank0_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#2 pin=bank/g_t16.u_t16/core/bank1_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#3 pin=bank/g_t16.u_t16/core/bank2_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#4 pin=bank/g_t16.u_t16/core/bank3_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#5 pin=bank/g_t16.u_x16/mem_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#6 pin=bank/g_t16.u_x16/mem_reg/ENBWREN driver=rst/release_q_reg[1]
+REQP-1840#7 pin=bank/g_t16.u_x16/mem_reg/RSTRAMB driver=rst/release_q_reg[1]
+REQP-1840#8 pin=bank/g_t8.u_t8/core/bank0_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#9 pin=bank/g_t8.u_t8/core/bank1_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#10 pin=bank/g_t8.u_t8/core/bank2_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#11 pin=bank/g_t8.u_t8/core/bank3_reg/ENARDEN driver=rst/release_q_reg[1]
+
+## <repo>/build/vivado/p04_s4/drc_route.rpt
+report_date=Thu Nov 19 17:01:28 2026 count=20 limit_reached=1
+REQP-1840#1 pin=bank/g_pe.u_pe1/bank0_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#2 pin=bank/g_pe.u_pe4/bank0_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#3 pin=bank/g_pe.u_pe4/bank1_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#4 pin=bank/g_pe.u_pe4/bank2_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#5 pin=bank/g_pe.u_pe4/bank3_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#6 pin=bank/g_pe.u_pe8a/bank0_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#7 pin=bank/g_pe.u_pe8a/bank1_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#8 pin=bank/g_pe.u_pe8a/bank2_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#9 pin=bank/g_pe.u_pe8a/bank3_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#10 pin=bank/g_t16.u_t16/core/bank0_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#11 pin=bank/g_t16.u_t16/core/bank1_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#12 pin=bank/g_t16.u_t16/core/bank2_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#13 pin=bank/g_t16.u_t16/core/bank3_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#14 pin=bank/g_t16.u_x16/mem_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#15 pin=bank/g_t16.u_x16/mem_reg/ENBWREN driver=rst/release_q_reg[1]
+REQP-1840#16 pin=bank/g_t16.u_x16/mem_reg/RSTRAMB driver=rst/release_q_reg[1]
+REQP-1840#17 pin=bank/g_t8.u_t8/core/bank0_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#18 pin=bank/g_t8.u_t8/core/bank1_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#19 pin=bank/g_t8.u_t8/core/bank2_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#20 pin=bank/g_t8.u_t8/core/bank3_reg/ENARDEN driver=rst/release_q_reg[1]

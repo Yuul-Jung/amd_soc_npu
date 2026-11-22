@@ -1,0 +1,50 @@
+# REQP-1840 (RAMB18 async control check) — Vivado 배선 후 report_drc 발췌, 2026-11-22 추출
+# 미해결. 규칙당 보고 한도 20건: limit_reached=1이면 실제 건수는 20 이상. 기본 STA와 TIMING_SIM으로 검증되지 않음.
+
+## <repo>/build/vivado/p03_s1/drc_route.rpt
+report_date=Thu Nov 19 16:49:37 2026 count=0 limit_reached=0
+
+## <repo>/build/vivado/p03_s2/drc_route.rpt
+report_date=Thu Nov 19 16:51:01 2026 count=4 limit_reached=0
+REQP-1840#1 pin=bank/g_c10.u_c10/bank0_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#2 pin=bank/g_c10.u_c10/bank1_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#3 pin=bank/g_c10.u_c10/bank2_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#4 pin=bank/g_c10.u_c10/bank3_reg/ENARDEN driver=rst/release_q_reg[1]
+
+## <repo>/build/vivado/p03_s3/drc_route.rpt
+report_date=Thu Nov 19 16:52:34 2026 count=12 limit_reached=0
+REQP-1840#1 pin=bank/g_c10.u_c10/bank0_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#2 pin=bank/g_c10.u_c10/bank1_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#3 pin=bank/g_c10.u_c10/bank2_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#4 pin=bank/g_c10.u_c10/bank3_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#5 pin=bank/g_shapes.u_h8/bank0_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#6 pin=bank/g_shapes.u_h8/bank1_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#7 pin=bank/g_shapes.u_h8/bank2_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#8 pin=bank/g_shapes.u_h8/bank3_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#9 pin=bank/g_shapes.u_o10/bank0_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#10 pin=bank/g_shapes.u_o10/bank1_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#11 pin=bank/g_shapes.u_o10/bank2_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#12 pin=bank/g_shapes.u_o10/bank3_reg/ENARDEN driver=rst/release_q_reg[1]
+
+## <repo>/build/vivado/p03_s4/drc_route.rpt
+report_date=Thu Nov 19 16:54:27 2026 count=20 limit_reached=1
+REQP-1840#1 pin=bank/g_c10.u_c10/bank0_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#2 pin=bank/g_c10.u_c10/bank1_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#3 pin=bank/g_c10.u_c10/bank2_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#4 pin=bank/g_c10.u_c10/bank3_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#5 pin=bank/g_mlp.u_mlp/layer1/bank0_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#6 pin=bank/g_mlp.u_mlp/layer1/bank1_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#7 pin=bank/g_mlp.u_mlp/layer1/bank2_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#8 pin=bank/g_mlp.u_mlp/layer1/bank3_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#9 pin=bank/g_mlp.u_mlp/layer2/bank0_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#10 pin=bank/g_mlp.u_mlp/layer2/bank1_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#11 pin=bank/g_mlp.u_mlp/layer2/bank2_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#12 pin=bank/g_mlp.u_mlp/layer2/bank3_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#13 pin=bank/g_shapes.u_h8/bank0_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#14 pin=bank/g_shapes.u_h8/bank1_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#15 pin=bank/g_shapes.u_h8/bank2_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#16 pin=bank/g_shapes.u_h8/bank3_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#17 pin=bank/g_shapes.u_o10/bank0_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#18 pin=bank/g_shapes.u_o10/bank1_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#19 pin=bank/g_shapes.u_o10/bank2_reg/ENARDEN driver=rst/release_q_reg[1]
+REQP-1840#20 pin=bank/g_shapes.u_o10/bank3_reg/ENARDEN driver=rst/release_q_reg[1]
