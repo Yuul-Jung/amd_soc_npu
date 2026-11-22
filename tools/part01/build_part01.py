@@ -500,7 +500,7 @@ document.addEventListener("keydown", (e) => { if (e.key === "Escape") document.q
 
 
 def course_js():
-    return json.dumps({"title": COURSE["title"],
+    return json.dumps({"title": COURSE["title"], "chapter_select": True,
                        "chapters": [{"id": c["id"], "number": c["number"], "title": c["title"], "file": c["file"]} for c in CHS]},
                       ensure_ascii=False, indent=1)
 

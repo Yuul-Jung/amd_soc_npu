@@ -21,7 +21,32 @@
   let h = document.createElement("h2");
   h.textContent = "전체 장 바로가기";
   nav.append(h);
+  if (data.chapter_select) {
+    // 1-1. 장이 많은 과정: 목록 대신 드롭다운 하나로 장 이동 (window.COURSE.chapter_select = true)
+    const sel = document.createElement("select");
+    sel.className = "chapter-select";
+    sel.setAttribute("aria-label", "장 선택");
+    if (!pageNames.some((ch) => ch.id === current)) {
+      const o = document.createElement("option");
+      o.textContent = "장을 선택하세요";
+      o.value = "";
+      o.selected = true;
+      sel.append(o);
+    }
+    pageNames.forEach((ch) => {
+      const o = document.createElement("option");
+      o.value = ch.file;
+      o.textContent = String(ch.number).padStart(2, "0") + "  " + ch.title;
+      if (ch.id === current) o.selected = true;
+      sel.append(o);
+    });
+    sel.addEventListener("change", () => {
+      if (sel.value) location.href = sel.value;
+    });
+    nav.append(sel);
+  }
   const ul = document.createElement("ul");
+  if (data.chapter_select) ul.hidden = true;
   pageNames.forEach((ch) => {
     let li = document.createElement("li"),
       a = document.createElement("a");
@@ -48,7 +73,11 @@
       let li = document.createElement("li"),
         a = document.createElement("a");
       a.href = "#" + sec.id;
-      a.textContent = sec.querySelector("h2")?.textContent.trim().replace(/\s+/g, " ") || sec.id;
+      const h2 = sec.querySelector("h2"),
+        num = h2?.querySelector(".num")?.textContent.trim();
+      const text = h2?.textContent.trim().replace(/\s+/g, " ") || sec.id;
+      // 절 번호와 제목 사이를 띄움 (예: "00  이 장의 목표")
+      a.textContent = num && text.startsWith(num) ? num + "  " + text.slice(num.length).trim() : text;
       li.append(a);
       sub.append(li);
     });

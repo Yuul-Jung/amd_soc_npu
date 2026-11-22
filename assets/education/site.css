@@ -189,6 +189,24 @@ pre code {
 .toc .toplink {
   font-weight: 600;
 }
+.toc .chapter-select {
+  /* 장 선택 드롭다운 (COURSE.chapter_select) */
+  display: block;
+  width: 100%;
+  font: inherit;
+  font-size: 0.84rem;
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  border-radius: 3px;
+  padding: 7px 8px;
+  cursor: pointer;
+}
+.toc .chapter-select:focus-visible {
+  outline: 3px solid var(--yellow);
+  outline-offset: 2px;
+}
 .toc .toc-sections {
   margin-top: 7px;
 }
