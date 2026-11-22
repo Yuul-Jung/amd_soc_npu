@@ -516,7 +516,8 @@ def md_cell(s):
 
 def html_table(rows, nw=()):
     head = "".join(f"<th>{md_cell(c)}</th>" for c in rows[0])
-    body = "".join("<tr>" + "".join(f'<td{" class=\"nw\"" if i in nw else ""}>{md_cell(c)}</td>' for i, c in enumerate(r)) + "</tr>"
+    cls = ' class="nw"'          # (Python 3.11: f-string 식 안에 역슬래시를 쓸 수 없다)
+    body = "".join("<tr>" + "".join(f'<td{cls if i in nw else ""}>{md_cell(c)}</td>' for i, c in enumerate(r)) + "</tr>"
                    for r in rows[1:])
     return f"      <table>\n        <thead><tr>{head}</tr></thead>\n        <tbody>{body}</tbody>\n      </table>"
 
