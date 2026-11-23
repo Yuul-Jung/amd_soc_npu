@@ -10,16 +10,17 @@
 |---|---|---|---|
 | **제1부 선수 과정** | P1 01~11 | [MicroBlaze V 기본 SoC](part01/index.html) — BRAM·Clock/Reset·Memory Map·AXI·GPIO·UART·Timer·INTC·통합·사용자 Top | 안내서 v02 |
 | **제2부 (독립)** | P2 00~20 | [사용자 AXI IP와 주변장치](part02/index.html) — LED·FND·버튼·PWM·센서·모터·SPI·I²C·1-Wire·통합 | 안내서 v02 |
-| UART 준비 | 00 | UART Echo RTL | 안내서 v05 · RTL_SIM 통과 |
-| 독립 RTL | 01~12 | MAC·DSP·BRAM·4PE·통합 NPU | 안내서 v05 · RTL_SIM 통과 · Vivado 실행 대기 |
-| 10분류 정수 | 13~19 | 8×8·MLP·784 타일·INT8/16 | HTML v02 · RTL 신규 구현 |
-| AXI·SoC | 20~27 | AXI4-Lite·MBV·Vitis·성능 | HTML v02 · RTL 신규 구현 |
-| 종합 과제 | 28~31 | MNIST·센서·모터·보안 UART | HTML v02 · RTL 신규 구현 |
+| **소형 NPU** | 1장 | [UART 계산기](p01_uart_calc_v01.html) — 곱·누산 코어 세 가지 | 1일 |
+| | 2장 | [4뉴런 NPU 보드](p02_npu4_board_v01.html) — BRAM·양자화·내적·4PE·Dense·통합 엔진 | 2일 |
+| | 3장 | [8×8 MNIST](p03_mnist8x8_v01.html) — 프레임·10분류 코어·MLP | 2일 |
+| | 4장 | [784 가속기](p04_tile784_v01.html) — 13타일 누산·INT8/INT16·PE 비교 | 1일 |
+| | 5장 | [MicroBlaze V SoC](p05_mbv_soc_v01.html) — AXI NPU IP·C 드라이버·시간·전력 | 2일 |
+| | 6장 | [응용 확장](p06_npu_apps_v01.html) — 손글씨 인식·센서 감시·모터 안전·보안 적재 | 2일 |
 
 ## 고도화 내용
-- **안내서**: ch00~12 v05 실습 절차형(생성기 `tools/guide/build_guides.py`), ch13~31 v02 예정 — 장별 현황은 [docs/GUIDE_STATUS.md](docs/GUIDE_STATUS.md)
+- **안내서**: 장 프로젝트 1~6장 (생성기 `tools/guide/build_projects.py`). 검증 현황은 [docs/PROJECT_STATUS.md](docs/PROJECT_STATUS.md)
 - **분담**: 코드·Vivado 실행은 VS Code, 안내서 관리는 생성기 — [docs/VSCODE_HANDOFF.md](docs/VSCODE_HANDOFF.md)
-- **RTL**: ch13~31에 Verilog 구현 및 테스트벤치 신규 추가
+- **코드**: 서브젝트 코드는 `chNN/`·`part03/chNN/`, 장 Top은 `pNN/`
 - **검증**: 장별 `validation/` 폴더에 시뮬레이션 로그·SHA 관리
 - **CI**: GitHub Actions 정적 검사 자동화
 

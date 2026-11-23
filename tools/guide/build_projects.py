@@ -353,17 +353,22 @@ def subject_section(p, e, s, c, ce):
 {unused_note}{f"      <p>{s['no_new_note']}</p>" if s.get("no_new_note") else ""}
 {chr(10).join(pcode(x) for x in c["new"])}
       <h3>시뮬레이션</h3>
-      <p>보드에 올리기 전에 이 서브젝트 모듈만 먼저 시험합니다. 아래와 같은 줄이 나오면 됩니다.</p>
+      <p>보드에 올리기 전에, 이 서브젝트까지 넣은 장 Top을 시뮬레이션합니다. 위 표와 같은 명령을 UART 핀으로 넣고 응답을 한 바이트씩 비교합니다. 마지막 줄이 <code>RTL_SIM_PASS</code>이면 됩니다.</p>
       <div class="codeblock"><div class="codebar"><span>터미널 · 저장소 루트</span></div>
-        <pre><code>{esc(c['run'])}</code></pre></div>
+        <pre><code>{esc(p['run'])} {n}</code></pre></div>
       <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
-        <pre><code>{esc(bg.excerpt(ce.rtl, pat))}</code></pre></div>
-{details}
-      <h3>확인할 것</h3>
-      <table>
-        <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
-        <tbody>{chk}<tr><td>보드 응답</td><td>위 '보드에서 볼 것' 표의 응답과 한 글자도 다르지 않아야 합니다.</td></tr></tbody>
-      </table>"""
+        <pre><code>{esc(stage_out(e, n))}</code></pre></div>"""
+
+
+def stage_out(e, n):
+    """run_sim.sh n이 화면에 내는 줄: 그 STAGE의 사례 줄 + 판정 줄."""
+    out, on = [], False
+    for ln in e.lines:
+        if ln.startswith("## STAGE="):
+            on = ln.strip() == f"## STAGE={n}"
+        elif on and re.match(rf"{e.tag}_(CASE_PASS|TOP)", ln):
+            out.append(ln.rstrip())
+    return "\n".join(out + ["RTL_SIM_PASS stages=1"])
 
 
 def sch(s, chs_by_id):
@@ -412,7 +417,6 @@ def build(p, course, chs_by_id, all_chs, pages, all_projects):
                    for s, c, _ in subj)
     s00 = f"""      <p><b>장 시연 (보드):</b> {p['demo']}</p>
       <p>{p['days']}일 과정입니다. 서브젝트 {len(p['subjects'])}개를 차례로 끝내며 그때마다 보드에서 확인하고, 마지막에 장 전체를 시연합니다.</p>
-{road(course, p, pages)}
 {steps(p, e, state)}"""
     s01 = f"""      <div class="figure-wrap">{fig_top}</div>
 {bg.port_table(top_c, True)}
@@ -427,12 +431,12 @@ def build(p, course, chs_by_id, all_chs, pages, all_projects):
         </tbody>
       </table>"""
     s02 = f"""      <ol>
-        <li>VS Code에서 저장소 루트(<code>amd_soc_npu/</code>)를 엽니다. 필요한 도구는 Vivado 2024.2, <code>python3</code>, 시뮬레이터 <code>iverilog</code> 12 이상, 그리고 PC에서 보드로 명령을 보낼 <code>pyserial</code>(<code>pip install pyserial</code>)입니다.</li>
+        <li>VS Code에서 저장소 루트(<code>amd_soc_npu/</code>)를 엽니다. 필요한 도구는 Vivado 2024.2(합성·시뮬레이션), <code>python3</code>, 그리고 PC에서 보드로 명령을 보낼 <code>pyserial</code>(<code>pip install pyserial</code>)입니다. 터미널에서 Vivado 명령이 잡히도록 <code>settings64.sh</code>를 먼저 불러옵니다.</li>
         <li>아래 장 뼈대 파일을 경로 그대로 입력합니다. 서브젝트 모듈은 각 서브젝트 절에서 작성합니다.</li>
         <li><code>STAGE</code>는 끝낸 서브젝트 수입니다. {p['subjects'][0]['code']}만 끝냈으면 1, {p['subjects'][-1]['code']}까지 끝냈으면 {len(p['subjects'])}입니다. 아직 작성하지 않은 모듈은 빌드에 들어가지 않으므로, 서브젝트를 하나 끝낼 때마다 바로 보드에 올려 볼 수 있습니다.</li>
       </ol>
 {chr(10).join(pcode(x) for x in p['skeleton'])}"""
-    secs = [("장 목표·진행 위치", s00, "s00"), ("최종 구조도·가져오는 파일", s01, "s01"), ("준비 · 장 뼈대", s02, "s02")]
+    secs = [("장 목표", s00, "s00"), ("최종 구조도·가져오는 파일", s01, "s01"), ("준비 · 장 뼈대", s02, "s02")]
     for s, c, ce in subj:
         secs.append((f"서브젝트 {s['code']} · {s['title']}", subject_section(p, e, s, c, ce), sid(s)))
 
@@ -661,7 +665,6 @@ def build_soc(p, course, pages):
         board = board_done
     s00 = f"""      <p><b>장 시연 (보드):</b> {p['demo']}</p>
       <p>{p['days']}일 과정, 서브젝트 {len(p['subjects'])}개입니다. {p['plan_note']}</p>
-{road(course, p, pages)}
 {steps(p, _E, state)}"""
 
     summ = rd(p["soc_summary"])
@@ -690,7 +693,7 @@ def build_soc(p, course, pages):
     s02 = f"""      <ol>
         {prep}
       </ol>"""
-    secs = [("장 목표·진행 위치", s00, "s00"), ("최종 구조도·주소맵", s01, "s01"), ("준비", s02, "s02")]
+    secs = [("장 목표", s00, "s00"), ("최종 구조도·주소맵", s01, "s01"), ("준비", s02, "s02")]
     for s, c, ce, gs in subj:
         secs.append((f"서브젝트 {s['code']} · {s['title']}", soc_subject_section(p, s, c, ce, gs), sid(s)))
 

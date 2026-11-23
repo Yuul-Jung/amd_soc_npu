@@ -1,5 +1,5 @@
 {
-  "title": "Basys3 소형 NPU 실습 (프로젝트판)",
+  "title": "Basys3 소형 NPU 실습",
   "note": "장 = 프로젝트, 서브젝트 = 구 장. 설계는 docs/PROJECT_PLAN.md. 페이지가 있는 장만 탐색에 넣는다.",
   "projects": [
     {"number": 1, "id": "p01", "title": "UART 계산기", "days": 1, "subjects": "00~03"},
