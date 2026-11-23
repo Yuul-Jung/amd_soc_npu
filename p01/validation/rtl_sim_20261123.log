@@ -1,0 +1,96 @@
+# p01 RTL simulation 2026-11-23T01:50Z
+# tool: Icarus Verilog version 12.0 (stable) ()
+PYTHON_P01_SELF_TEST_PASS
+PYTHON_P01_VECTORS stage=1 cases=4 final_led=0x0000
+PYTHON_P01_VECTORS stage=2 cases=6 final_led=0x0018
+PYTHON_P01_VECTORS stage=3 cases=10 final_led=0x000E
+PYTHON_P01_CASE 1-1 sw=0 tx=5a rx='Z'
+PYTHON_P01_CASE 1-1 sw=0 tx=35 rx='5'
+PYTHON_P01_CASE 1-1 sw=0 tx=53 rx='I\r\n'
+PYTHON_P01_CASE 1-2 sw=0 tx=43 rx='OK\r\n'
+PYTHON_P01_CASE 1-2 sw=0 tx=4d00030004 rx='A:000000000C L:1\r\n'
+PYTHON_P01_CASE 1-2 sw=0 tx=4d00030004 rx='A:0000000018 L:1\r\n'
+PYTHON_P01_CASE 1-3 sw=0 tx=43 rx='OK\r\n'
+PYTHON_P01_CASE 1-3 sw=1 tx=4d00030004 rx='A:000000000C L:2\r\n'
+PYTHON_P01_CASE 1-3 sw=0 tx=4d00030004 rx='A:0000000018 L:1\r\n'
+PYTHON_P01_CASE 1-3 sw=1 tx=4dfffe0005 rx='A:000000000E L:2\r\n'
+PYTHON_P01_CASE 1-4 sw=0 tx=43 rx='OK\r\n'
+PYTHON_P01_CASE 1-4 sw=2 tx=4d80007fff rx='A:FFC0008000 L:2\r\n'
+PYTHON_P01_CASE 1-4 sw=2 tx=4d0064fff9 rx='A:FFC0007D44 L:2\r\n'
+PYTHON_P01_CASE 1-4 sw=0 tx=4d7fff7fff rx='A:FFFFFF7D45 L:1\r\n'
+PYTHON_P01_VECTORS stage=4 cases=14 final_led=0x7D45
+## STAGE=1
+warning: Some design elements have no explicit time unit and/or
+       : time precision. This may cause confusing timing results.
+       : Affected design elements are:
+       :   -- module uart_core declared here: common/rtl/uart_core.v:3
+       :   -- module uart_rx declared here: common/rtl/uart_rx.v:2
+       :   -- module uart_tx declared here: common/rtl/uart_tx.v:2
+P01_CASE_PASS stage=1 1-1 sw=0 rx="Z"
+P01_CASE_PASS stage=1 1-1 sw=0 rx="5"
+P01_CASE_PASS stage=1 1-1 sw=0 rx="I\r\n"
+P01_CASE_PASS stage=1 1-1 sw=0 rx="M"
+P01_BOARD_TOP_LED_PASS stage=1 led=0x0000
+P01_TOP_RTL_SIM_PASS stage=1 cases=4 bytes=6
+p01/tb/tb_p01_top.sv:69: $finish called at 16525000 (1ps)
+## STAGE=2
+warning: Some design elements have no explicit time unit and/or
+       : time precision. This may cause confusing timing results.
+       : Affected design elements are:
+       :   -- module uart_core declared here: common/rtl/uart_core.v:3
+       :   -- module uart_rx declared here: common/rtl/uart_rx.v:2
+       :   -- module uart_tx declared here: common/rtl/uart_tx.v:2
+P01_CASE_PASS stage=2 1-1 sw=0 rx="Z"
+P01_CASE_PASS stage=2 1-1 sw=0 rx="5"
+P01_CASE_PASS stage=2 1-1 sw=0 rx="I\r\n"
+P01_CASE_PASS stage=2 1-2 sw=0 rx="OK\r\n"
+P01_CASE_PASS stage=2 1-2 sw=0 rx="A:000000000C L:1\r\n"
+P01_CASE_PASS stage=2 1-2 sw=0 rx="A:0000000018 L:1\r\n"
+P01_BOARD_TOP_LED_PASS stage=2 led=0x0018
+P01_TOP_RTL_SIM_PASS stage=2 cases=6 bytes=45
+p01/tb/tb_p01_top.sv:69: $finish called at 95525000 (1ps)
+## STAGE=3
+warning: Some design elements have no explicit time unit and/or
+       : time precision. This may cause confusing timing results.
+       : Affected design elements are:
+       :   -- module uart_core declared here: common/rtl/uart_core.v:3
+       :   -- module uart_rx declared here: common/rtl/uart_rx.v:2
+       :   -- module uart_tx declared here: common/rtl/uart_tx.v:2
+P01_CASE_PASS stage=3 1-1 sw=0 rx="Z"
+P01_CASE_PASS stage=3 1-1 sw=0 rx="5"
+P01_CASE_PASS stage=3 1-1 sw=0 rx="I\r\n"
+P01_CASE_PASS stage=3 1-2 sw=0 rx="OK\r\n"
+P01_CASE_PASS stage=3 1-2 sw=0 rx="A:000000000C L:1\r\n"
+P01_CASE_PASS stage=3 1-2 sw=0 rx="A:0000000018 L:1\r\n"
+P01_CASE_PASS stage=3 1-3 sw=0 rx="OK\r\n"
+P01_CASE_PASS stage=3 1-3 sw=1 rx="A:000000000C L:2\r\n"
+P01_CASE_PASS stage=3 1-3 sw=0 rx="A:0000000018 L:1\r\n"
+P01_CASE_PASS stage=3 1-3 sw=1 rx="A:000000000E L:2\r\n"
+P01_BOARD_TOP_LED_PASS stage=3 led=0x000e
+P01_TOP_RTL_SIM_PASS stage=3 cases=10 bytes=103
+p01/tb/tb_p01_top.sv:69: $finish called at 214845000 (1ps)
+## STAGE=4
+warning: Some design elements have no explicit time unit and/or
+       : time precision. This may cause confusing timing results.
+       : Affected design elements are:
+       :   -- module uart_core declared here: common/rtl/uart_core.v:3
+       :   -- module uart_rx declared here: common/rtl/uart_rx.v:2
+       :   -- module uart_tx declared here: common/rtl/uart_tx.v:2
+P01_CASE_PASS stage=4 1-1 sw=0 rx="Z"
+P01_CASE_PASS stage=4 1-1 sw=0 rx="5"
+P01_CASE_PASS stage=4 1-1 sw=0 rx="I\r\n"
+P01_CASE_PASS stage=4 1-2 sw=0 rx="OK\r\n"
+P01_CASE_PASS stage=4 1-2 sw=0 rx="A:000000000C L:1\r\n"
+P01_CASE_PASS stage=4 1-2 sw=0 rx="A:0000000018 L:1\r\n"
+P01_CASE_PASS stage=4 1-3 sw=0 rx="OK\r\n"
+P01_CASE_PASS stage=4 1-3 sw=1 rx="A:000000000C L:2\r\n"
+P01_CASE_PASS stage=4 1-3 sw=0 rx="A:0000000018 L:1\r\n"
+P01_CASE_PASS stage=4 1-3 sw=1 rx="A:000000000E L:2\r\n"
+P01_CASE_PASS stage=4 1-4 sw=0 rx="OK\r\n"
+P01_CASE_PASS stage=4 1-4 sw=2 rx="A:FFC0008000 L:2\r\n"
+P01_CASE_PASS stage=4 1-4 sw=2 rx="A:FFC0007D44 L:2\r\n"
+P01_CASE_PASS stage=4 1-4 sw=0 rx="A:FFFFFF7D45 L:1\r\n"
+P01_BOARD_TOP_LED_PASS stage=4 led=0x7d45
+P01_TOP_RTL_SIM_PASS stage=4 cases=14 bytes=161
+p01/tb/tb_p01_top.sv:69: $finish called at 334165000 (1ps)
+RTL_SIM_PASS stages=4

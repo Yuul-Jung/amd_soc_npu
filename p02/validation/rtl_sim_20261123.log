@@ -1,0 +1,514 @@
+# p02 RTL simulation 2026-11-23T01:50Z
+# tool: Icarus Verilog version 12.0 (stable) ()
+PYTHON_P02_SELF_TEST_PASS
+PYTHON_P02_VECTORS stage=1 cases=9 final_led=0x0005
+PYTHON_P02_VECTORS stage=2 cases=13 final_led=0xFF80
+PYTHON_P02_VECTORS stage=3 cases=25 final_led=0x0006
+PYTHON_P02_VECTORS stage=4 cases=38 final_led=0x0006
+PYTHON_P02_VECTORS stage=5 cases=43 final_led=0x0006
+PYTHON_P02_VECTORS stage=6 cases=45 final_led=0x0011
+PYTHON_P02_VECTORS stage=7 cases=51 final_led=0xFFFF
+PYTHON_P02_CASE 2-1 sw=00 rx='I\r\n'
+PYTHON_P02_CASE 2-1 sw=00 rx='OK\r\n'
+PYTHON_P02_CASE 2-1 sw=00 rx='OK\r\n'
+PYTHON_P02_CASE 2-1 sw=00 rx='X:0003\r\n'
+PYTHON_P02_CASE 2-1 sw=00 rx='X:FFFE\r\n'
+PYTHON_P02_CASE 2-1 sw=00 rx='OK\r\n'
+PYTHON_P02_CASE 2-1 sw=00 rx='W:0005\r\n'
+PYTHON_P02_CASE 2-1 sw=00 rx='ERR\r\n'
+PYTHON_P02_CASE 2-2 sw=00 rx='Q:03 O:0\r\n'
+PYTHON_P02_CASE 2-2 sw=00 rx='Q:02 O:0\r\n'
+PYTHON_P02_CASE 2-2 sw=00 rx='Q:FE O:0\r\n'
+PYTHON_P02_CASE 2-2 sw=00 rx='Q:7F O:1\r\n'
+PYTHON_P02_CASE 2-2 sw=00 rx='Q:80 O:1\r\n'
+PYTHON_P02_CASE 2-3 sw=00 rx='OK\r\n'
+PYTHON_P02_CASE 2-3 sw=00 rx='OK\r\n'
+PYTHON_P02_CASE 2-3 sw=00 rx='OK\r\n'
+PYTHON_P02_CASE 2-3 sw=00 rx='OK\r\n'
+PYTHON_P02_CASE 2-3 sw=00 rx='OK\r\n'
+PYTHON_P02_CASE 2-3 sw=00 rx='OK\r\n'
+PYTHON_P02_CASE 2-3 sw=00 rx='OK\r\n'
+PYTHON_P02_CASE 2-3 sw=00 rx='OK\r\n'
+PYTHON_P02_CASE 2-3 sw=00 rx='D:0000000046\r\n'
+PYTHON_P02_CASE 2-3 sw=00 rx='OK\r\n'
+PYTHON_P02_CASE 2-3 sw=00 rx='D:0000000006\r\n'
+PYTHON_P02_CASE 2-3 sw=00 rx='ERR\r\n'
+PYTHON_P02_CASE 2-4 sw=00 rx='OK\r\n'
+PYTHON_P02_CASE 2-4 sw=00 rx='OK\r\n'
+PYTHON_P02_CASE 2-4 sw=00 rx='OK\r\n'
+PYTHON_P02_CASE 2-4 sw=00 rx='OK\r\n'
+PYTHON_P02_CASE 2-4 sw=00 rx='OK\r\n'
+PYTHON_P02_CASE 2-4 sw=00 rx='OK\r\n'
+PYTHON_P02_CASE 2-4 sw=00 rx='OK\r\n'
+PYTHON_P02_CASE 2-4 sw=00 rx='OK\r\n'
+PYTHON_P02_CASE 2-4 sw=00 rx='OK\r\n'
+PYTHON_P02_CASE 2-4 sw=00 rx='OK\r\n'
+PYTHON_P02_CASE 2-4 sw=00 rx='OK\r\n'
+PYTHON_P02_CASE 2-4 sw=00 rx='OK\r\n'
+PYTHON_P02_CASE 2-4 sw=00 rx='P:0000000006,000000000A,FFFFFFFFF6,0000000008\r\n'
+PYTHON_P02_CASE 2-5 sw=00 rx='OK\r\n'
+PYTHON_P02_CASE 2-5 sw=00 rx='OK\r\n'
+PYTHON_P02_CASE 2-5 sw=00 rx='OK\r\n'
+PYTHON_P02_CASE 2-5 sw=00 rx='OK\r\n'
+PYTHON_P02_CASE 2-5 sw=00 rx='L:0006,0000,005A,7FFF O:8\r\n'
+PYTHON_P02_CASE 2-6 sw=00 rx='N:0006,0000,005A,7FFF O:8\r\n'
+PYTHON_P02_CASE 2-6 sw=00 rx='N:0011,0000,0061,7FFF O:8\r\n'
+PYTHON_P02_CASE 2-7 sw=01 rx='I\r\n'
+PYTHON_P02_CASE 2-7 sw=01 rx='C0:00000000002,00000000000,00000000000,00000000000\r\n'
+PYTHON_P02_CASE 2-7 sw=01 rx='C1:00000000000,00000000002,00000000000,00000000000\r\n'
+PYTHON_P02_CASE 2-7 sw=01 rx='C2:00000000000,00000000000,00000000002,00000000000\r\n'
+PYTHON_P02_CASE 2-7 sw=01 rx='C3:00000000000,00000000000,00000000000,00000000002\r\n'
+PYTHON_P02_CASE 2-7 sw=00 rx='X:FFFF\r\n'
+PYTHON_P02_CASE 2-8 sw=01 rx='C2:00000000000,00000000000,00000000002,00000000000\r\n'
+PYTHON_P02_CASE 2-8 sw=11 rx='C2:00000000000,FFFFFFFFFFE,00000000002,00000000000\r\n'
+PYTHON_P02_CASE 2-8 sw=11 rx='C1:00000000000,00000000002,FFFFFFFFFFE,00000000000\r\n'
+PYTHON_P02_VECTORS stage=8 cases=54 final_led=0x4002
+## STAGE=1
+mini_npu/rtl/uart_npu_command_controller.v:4: warning: timescale for uart_npu_command_controller inherited from another file.
+ch10/rtl/npu_core.v:1: ...: The inherited timescale is here.
+mini_npu/rtl/npu_dsp_mac_lane.v:2: warning: timescale for npu_dsp_mac_lane inherited from another file.
+ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
+mini_npu/rtl/npu_engine4.v:4: warning: timescale for npu_engine4 inherited from another file.
+ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
+mini_npu/rtl/npu_display_controller.v:2: warning: timescale for npu_display_controller inherited from another file.
+ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
+warning: Some design elements have no explicit time unit and/or
+       : time precision. This may cause confusing timing results.
+       : Affected design elements are:
+       :   -- module uart_core declared here: common/rtl/uart_core.v:3
+       :   -- module uart_rx declared here: common/rtl/uart_rx.v:2
+       :   -- module uart_tx declared here: common/rtl/uart_tx.v:2
+P02_CASE_PASS stage=1 2-1 sw=0 rx="I\r\n"
+P02_CASE_PASS stage=1 2-1 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=1 2-1 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=1 2-1 sw=0 rx="X:0003\r\n"
+P02_CASE_PASS stage=1 2-1 sw=0 rx="X:FFFE\r\n"
+P02_CASE_PASS stage=1 2-1 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=1 2-1 sw=0 rx="W:0005\r\n"
+P02_CASE_PASS stage=1 2-1 sw=0 rx="ERR\r\n"
+P02_CASE_PASS stage=1 2-1 sw=0 rx="?\r\n"
+P02_BOARD_TOP_LED_PASS stage=1 led=0x0005
+P02_TOP_RTL_SIM_PASS stage=1 cases=9 bytes=47
+p02/tb/tb_p02_top.sv:70: $finish called at 115095000 (1ps)
+## STAGE=2
+mini_npu/rtl/uart_npu_command_controller.v:4: warning: timescale for uart_npu_command_controller inherited from another file.
+ch10/rtl/npu_core.v:1: ...: The inherited timescale is here.
+mini_npu/rtl/npu_dsp_mac_lane.v:2: warning: timescale for npu_dsp_mac_lane inherited from another file.
+ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
+mini_npu/rtl/npu_engine4.v:4: warning: timescale for npu_engine4 inherited from another file.
+ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
+mini_npu/rtl/npu_display_controller.v:2: warning: timescale for npu_display_controller inherited from another file.
+ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
+warning: Some design elements have no explicit time unit and/or
+       : time precision. This may cause confusing timing results.
+       : Affected design elements are:
+       :   -- module uart_core declared here: common/rtl/uart_core.v:3
+       :   -- module uart_rx declared here: common/rtl/uart_rx.v:2
+       :   -- module uart_tx declared here: common/rtl/uart_tx.v:2
+P02_CASE_PASS stage=2 2-1 sw=0 rx="I\r\n"
+P02_CASE_PASS stage=2 2-1 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=2 2-1 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=2 2-1 sw=0 rx="X:0003\r\n"
+P02_CASE_PASS stage=2 2-1 sw=0 rx="X:FFFE\r\n"
+P02_CASE_PASS stage=2 2-1 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=2 2-1 sw=0 rx="W:0005\r\n"
+P02_CASE_PASS stage=2 2-1 sw=0 rx="ERR\r\n"
+P02_CASE_PASS stage=2 2-2 sw=0 rx="Q:03 O:0\r\n"
+P02_CASE_PASS stage=2 2-2 sw=0 rx="Q:02 O:0\r\n"
+P02_CASE_PASS stage=2 2-2 sw=0 rx="Q:FE O:0\r\n"
+P02_CASE_PASS stage=2 2-2 sw=0 rx="Q:7F O:1\r\n"
+P02_CASE_PASS stage=2 2-2 sw=0 rx="Q:80 O:1\r\n"
+P02_BOARD_TOP_LED_PASS stage=2 led=0xff80
+P02_TOP_RTL_SIM_PASS stage=2 cases=13 bytes=94
+p02/tb/tb_p02_top.sv:70: $finish called at 229735000 (1ps)
+## STAGE=3
+mini_npu/rtl/uart_npu_command_controller.v:4: warning: timescale for uart_npu_command_controller inherited from another file.
+ch10/rtl/npu_core.v:1: ...: The inherited timescale is here.
+mini_npu/rtl/npu_dsp_mac_lane.v:2: warning: timescale for npu_dsp_mac_lane inherited from another file.
+ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
+mini_npu/rtl/npu_engine4.v:4: warning: timescale for npu_engine4 inherited from another file.
+ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
+mini_npu/rtl/npu_display_controller.v:2: warning: timescale for npu_display_controller inherited from another file.
+ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
+warning: Some design elements have no explicit time unit and/or
+       : time precision. This may cause confusing timing results.
+       : Affected design elements are:
+       :   -- module uart_core declared here: common/rtl/uart_core.v:3
+       :   -- module uart_rx declared here: common/rtl/uart_rx.v:2
+       :   -- module uart_tx declared here: common/rtl/uart_tx.v:2
+P02_CASE_PASS stage=3 2-1 sw=0 rx="I\r\n"
+P02_CASE_PASS stage=3 2-1 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=3 2-1 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=3 2-1 sw=0 rx="X:0003\r\n"
+P02_CASE_PASS stage=3 2-1 sw=0 rx="X:FFFE\r\n"
+P02_CASE_PASS stage=3 2-1 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=3 2-1 sw=0 rx="W:0005\r\n"
+P02_CASE_PASS stage=3 2-1 sw=0 rx="ERR\r\n"
+P02_CASE_PASS stage=3 2-2 sw=0 rx="Q:03 O:0\r\n"
+P02_CASE_PASS stage=3 2-2 sw=0 rx="Q:02 O:0\r\n"
+P02_CASE_PASS stage=3 2-2 sw=0 rx="Q:FE O:0\r\n"
+P02_CASE_PASS stage=3 2-2 sw=0 rx="Q:7F O:1\r\n"
+P02_CASE_PASS stage=3 2-2 sw=0 rx="Q:80 O:1\r\n"
+P02_CASE_PASS stage=3 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=3 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=3 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=3 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=3 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=3 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=3 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=3 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=3 2-3 sw=0 rx="D:0000000046\r\n"
+P02_CASE_PASS stage=3 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=3 2-3 sw=0 rx="D:0000000006\r\n"
+P02_CASE_PASS stage=3 2-3 sw=0 rx="ERR\r\n"
+P02_BOARD_TOP_LED_PASS stage=3 led=0x0006
+P02_TOP_RTL_SIM_PASS stage=3 cases=25 bytes=163
+p02/tb/tb_p02_top.sv:70: $finish called at 417445000 (1ps)
+## STAGE=4
+mini_npu/rtl/uart_npu_command_controller.v:4: warning: timescale for uart_npu_command_controller inherited from another file.
+ch10/rtl/npu_core.v:1: ...: The inherited timescale is here.
+mini_npu/rtl/npu_dsp_mac_lane.v:2: warning: timescale for npu_dsp_mac_lane inherited from another file.
+ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
+mini_npu/rtl/npu_engine4.v:4: warning: timescale for npu_engine4 inherited from another file.
+ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
+mini_npu/rtl/npu_display_controller.v:2: warning: timescale for npu_display_controller inherited from another file.
+ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
+warning: Some design elements have no explicit time unit and/or
+       : time precision. This may cause confusing timing results.
+       : Affected design elements are:
+       :   -- module uart_core declared here: common/rtl/uart_core.v:3
+       :   -- module uart_rx declared here: common/rtl/uart_rx.v:2
+       :   -- module uart_tx declared here: common/rtl/uart_tx.v:2
+P02_CASE_PASS stage=4 2-1 sw=0 rx="I\r\n"
+P02_CASE_PASS stage=4 2-1 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=4 2-1 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=4 2-1 sw=0 rx="X:0003\r\n"
+P02_CASE_PASS stage=4 2-1 sw=0 rx="X:FFFE\r\n"
+P02_CASE_PASS stage=4 2-1 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=4 2-1 sw=0 rx="W:0005\r\n"
+P02_CASE_PASS stage=4 2-1 sw=0 rx="ERR\r\n"
+P02_CASE_PASS stage=4 2-2 sw=0 rx="Q:03 O:0\r\n"
+P02_CASE_PASS stage=4 2-2 sw=0 rx="Q:02 O:0\r\n"
+P02_CASE_PASS stage=4 2-2 sw=0 rx="Q:FE O:0\r\n"
+P02_CASE_PASS stage=4 2-2 sw=0 rx="Q:7F O:1\r\n"
+P02_CASE_PASS stage=4 2-2 sw=0 rx="Q:80 O:1\r\n"
+P02_CASE_PASS stage=4 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=4 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=4 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=4 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=4 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=4 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=4 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=4 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=4 2-3 sw=0 rx="D:0000000046\r\n"
+P02_CASE_PASS stage=4 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=4 2-3 sw=0 rx="D:0000000006\r\n"
+P02_CASE_PASS stage=4 2-3 sw=0 rx="ERR\r\n"
+P02_CASE_PASS stage=4 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=4 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=4 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=4 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=4 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=4 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=4 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=4 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=4 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=4 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=4 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=4 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=4 2-4 sw=0 rx="P:0000000006,000000000A,FFFFFFFFF6,0000000008\r\n"
+P02_BOARD_TOP_LED_PASS stage=4 led=0x0006
+P02_TOP_RTL_SIM_PASS stage=4 cases=38 bytes=258
+p02/tb/tb_p02_top.sv:70: $finish called at 671075000 (1ps)
+## STAGE=5
+mini_npu/rtl/uart_npu_command_controller.v:4: warning: timescale for uart_npu_command_controller inherited from another file.
+ch10/rtl/npu_core.v:1: ...: The inherited timescale is here.
+mini_npu/rtl/npu_dsp_mac_lane.v:2: warning: timescale for npu_dsp_mac_lane inherited from another file.
+ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
+mini_npu/rtl/npu_engine4.v:4: warning: timescale for npu_engine4 inherited from another file.
+ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
+mini_npu/rtl/npu_display_controller.v:2: warning: timescale for npu_display_controller inherited from another file.
+ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
+warning: Some design elements have no explicit time unit and/or
+       : time precision. This may cause confusing timing results.
+       : Affected design elements are:
+       :   -- module uart_core declared here: common/rtl/uart_core.v:3
+       :   -- module uart_rx declared here: common/rtl/uart_rx.v:2
+       :   -- module uart_tx declared here: common/rtl/uart_tx.v:2
+P02_CASE_PASS stage=5 2-1 sw=0 rx="I\r\n"
+P02_CASE_PASS stage=5 2-1 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=5 2-1 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=5 2-1 sw=0 rx="X:0003\r\n"
+P02_CASE_PASS stage=5 2-1 sw=0 rx="X:FFFE\r\n"
+P02_CASE_PASS stage=5 2-1 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=5 2-1 sw=0 rx="W:0005\r\n"
+P02_CASE_PASS stage=5 2-1 sw=0 rx="ERR\r\n"
+P02_CASE_PASS stage=5 2-2 sw=0 rx="Q:03 O:0\r\n"
+P02_CASE_PASS stage=5 2-2 sw=0 rx="Q:02 O:0\r\n"
+P02_CASE_PASS stage=5 2-2 sw=0 rx="Q:FE O:0\r\n"
+P02_CASE_PASS stage=5 2-2 sw=0 rx="Q:7F O:1\r\n"
+P02_CASE_PASS stage=5 2-2 sw=0 rx="Q:80 O:1\r\n"
+P02_CASE_PASS stage=5 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=5 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=5 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=5 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=5 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=5 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=5 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=5 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=5 2-3 sw=0 rx="D:0000000046\r\n"
+P02_CASE_PASS stage=5 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=5 2-3 sw=0 rx="D:0000000006\r\n"
+P02_CASE_PASS stage=5 2-3 sw=0 rx="ERR\r\n"
+P02_CASE_PASS stage=5 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=5 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=5 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=5 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=5 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=5 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=5 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=5 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=5 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=5 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=5 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=5 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=5 2-4 sw=0 rx="P:0000000006,000000000A,FFFFFFFFF6,0000000008\r\n"
+P02_CASE_PASS stage=5 2-5 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=5 2-5 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=5 2-5 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=5 2-5 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=5 2-5 sw=0 rx="L:0006,0000,005A,7FFF O:8\r\n"
+P02_BOARD_TOP_LED_PASS stage=5 led=0x0006
+P02_TOP_RTL_SIM_PASS stage=5 cases=43 bytes=301
+p02/tb/tb_p02_top.sv:70: $finish called at 789085000 (1ps)
+## STAGE=6
+mini_npu/rtl/uart_npu_command_controller.v:4: warning: timescale for uart_npu_command_controller inherited from another file.
+ch10/rtl/npu_core.v:1: ...: The inherited timescale is here.
+mini_npu/rtl/npu_dsp_mac_lane.v:2: warning: timescale for npu_dsp_mac_lane inherited from another file.
+ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
+mini_npu/rtl/npu_engine4.v:4: warning: timescale for npu_engine4 inherited from another file.
+ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
+mini_npu/rtl/npu_display_controller.v:2: warning: timescale for npu_display_controller inherited from another file.
+ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
+warning: Some design elements have no explicit time unit and/or
+       : time precision. This may cause confusing timing results.
+       : Affected design elements are:
+       :   -- module uart_core declared here: common/rtl/uart_core.v:3
+       :   -- module uart_rx declared here: common/rtl/uart_rx.v:2
+       :   -- module uart_tx declared here: common/rtl/uart_tx.v:2
+P02_CASE_PASS stage=6 2-1 sw=0 rx="I\r\n"
+P02_CASE_PASS stage=6 2-1 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=6 2-1 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=6 2-1 sw=0 rx="X:0003\r\n"
+P02_CASE_PASS stage=6 2-1 sw=0 rx="X:FFFE\r\n"
+P02_CASE_PASS stage=6 2-1 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=6 2-1 sw=0 rx="W:0005\r\n"
+P02_CASE_PASS stage=6 2-1 sw=0 rx="ERR\r\n"
+P02_CASE_PASS stage=6 2-2 sw=0 rx="Q:03 O:0\r\n"
+P02_CASE_PASS stage=6 2-2 sw=0 rx="Q:02 O:0\r\n"
+P02_CASE_PASS stage=6 2-2 sw=0 rx="Q:FE O:0\r\n"
+P02_CASE_PASS stage=6 2-2 sw=0 rx="Q:7F O:1\r\n"
+P02_CASE_PASS stage=6 2-2 sw=0 rx="Q:80 O:1\r\n"
+P02_CASE_PASS stage=6 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=6 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=6 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=6 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=6 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=6 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=6 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=6 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=6 2-3 sw=0 rx="D:0000000046\r\n"
+P02_CASE_PASS stage=6 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=6 2-3 sw=0 rx="D:0000000006\r\n"
+P02_CASE_PASS stage=6 2-3 sw=0 rx="ERR\r\n"
+P02_CASE_PASS stage=6 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=6 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=6 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=6 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=6 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=6 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=6 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=6 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=6 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=6 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=6 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=6 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=6 2-4 sw=0 rx="P:0000000006,000000000A,FFFFFFFFF6,0000000008\r\n"
+P02_CASE_PASS stage=6 2-5 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=6 2-5 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=6 2-5 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=6 2-5 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=6 2-5 sw=0 rx="L:0006,0000,005A,7FFF O:8\r\n"
+P02_CASE_PASS stage=6 2-6 sw=0 rx="N:0006,0000,005A,7FFF O:8\r\n"
+P02_CASE_PASS stage=6 2-6 sw=0 rx="N:0011,0000,0061,7FFF O:8\r\n"
+P02_BOARD_TOP_LED_PASS stage=6 led=0x0011
+P02_TOP_RTL_SIM_PASS stage=6 cases=45 bytes=355
+p02/tb/tb_p02_top.sv:70: $finish called at 882925000 (1ps)
+## STAGE=7
+mini_npu/rtl/uart_npu_command_controller.v:4: warning: timescale for uart_npu_command_controller inherited from another file.
+ch10/rtl/npu_core.v:1: ...: The inherited timescale is here.
+mini_npu/rtl/npu_dsp_mac_lane.v:2: warning: timescale for npu_dsp_mac_lane inherited from another file.
+ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
+mini_npu/rtl/npu_engine4.v:4: warning: timescale for npu_engine4 inherited from another file.
+ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
+mini_npu/rtl/npu_display_controller.v:2: warning: timescale for npu_display_controller inherited from another file.
+ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
+warning: Some design elements have no explicit time unit and/or
+       : time precision. This may cause confusing timing results.
+       : Affected design elements are:
+       :   -- module uart_core declared here: common/rtl/uart_core.v:3
+       :   -- module uart_rx declared here: common/rtl/uart_rx.v:2
+       :   -- module uart_tx declared here: common/rtl/uart_tx.v:2
+mini_npu/rtl/uart_npu_command_controller.v:74: warning: @* is sensitive to all 6 words in array 'payload'.
+mini_npu/rtl/uart_npu_command_controller.v:74: warning: @* is sensitive to all 6 words in array 'payload'.
+mini_npu/rtl/uart_npu_command_controller.v:74: warning: @* is sensitive to all 6 words in array 'payload'.
+mini_npu/rtl/uart_npu_command_controller.v:75: warning: @* is sensitive to all 6 words in array 'payload'.
+mini_npu/rtl/uart_npu_command_controller.v:75: warning: @* is sensitive to all 6 words in array 'payload'.
+mini_npu/rtl/uart_npu_command_controller.v:76: warning: @* is sensitive to all 6 words in array 'payload'.
+mini_npu/rtl/uart_npu_command_controller.v:76: warning: @* is sensitive to all 6 words in array 'payload'.
+mini_npu/rtl/uart_npu_command_controller.v:77: warning: @* is sensitive to all 6 words in array 'payload'.
+mini_npu/rtl/uart_npu_command_controller.v:78: warning: @* is sensitive to all 6 words in array 'payload'.
+mini_npu/rtl/uart_npu_command_controller.v:78: warning: @* is sensitive to all 6 words in array 'payload'.
+mini_npu/rtl/uart_npu_command_controller.v:78: warning: @* is sensitive to all 6 words in array 'payload'.
+mini_npu/rtl/uart_npu_command_controller.v:78: warning: @* is sensitive to all 6 words in array 'payload'.
+mini_npu/rtl/uart_npu_command_controller.v:78: warning: @* is sensitive to all 6 words in array 'payload'.
+P02_CASE_PASS stage=7 2-1 sw=0 rx="I\r\n"
+P02_CASE_PASS stage=7 2-1 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=7 2-1 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=7 2-1 sw=0 rx="X:0003\r\n"
+P02_CASE_PASS stage=7 2-1 sw=0 rx="X:FFFE\r\n"
+P02_CASE_PASS stage=7 2-1 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=7 2-1 sw=0 rx="W:0005\r\n"
+P02_CASE_PASS stage=7 2-1 sw=0 rx="ERR\r\n"
+P02_CASE_PASS stage=7 2-2 sw=0 rx="Q:03 O:0\r\n"
+P02_CASE_PASS stage=7 2-2 sw=0 rx="Q:02 O:0\r\n"
+P02_CASE_PASS stage=7 2-2 sw=0 rx="Q:FE O:0\r\n"
+P02_CASE_PASS stage=7 2-2 sw=0 rx="Q:7F O:1\r\n"
+P02_CASE_PASS stage=7 2-2 sw=0 rx="Q:80 O:1\r\n"
+P02_CASE_PASS stage=7 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=7 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=7 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=7 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=7 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=7 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=7 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=7 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=7 2-3 sw=0 rx="D:0000000046\r\n"
+P02_CASE_PASS stage=7 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=7 2-3 sw=0 rx="D:0000000006\r\n"
+P02_CASE_PASS stage=7 2-3 sw=0 rx="ERR\r\n"
+P02_CASE_PASS stage=7 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=7 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=7 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=7 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=7 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=7 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=7 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=7 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=7 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=7 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=7 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=7 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=7 2-4 sw=0 rx="P:0000000006,000000000A,FFFFFFFFF6,0000000008\r\n"
+P02_CASE_PASS stage=7 2-5 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=7 2-5 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=7 2-5 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=7 2-5 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=7 2-5 sw=0 rx="L:0006,0000,005A,7FFF O:8\r\n"
+P02_CASE_PASS stage=7 2-6 sw=0 rx="N:0006,0000,005A,7FFF O:8\r\n"
+P02_CASE_PASS stage=7 2-6 sw=0 rx="N:0011,0000,0061,7FFF O:8\r\n"
+P02_CASE_PASS stage=7 2-7 sw=1 rx="I\r\n"
+P02_CASE_PASS stage=7 2-7 sw=1 rx="C0:00000000002,00000000000,00000000000,00000000000\r\n"
+P02_CASE_PASS stage=7 2-7 sw=1 rx="C1:00000000000,00000000002,00000000000,00000000000\r\n"
+P02_CASE_PASS stage=7 2-7 sw=1 rx="C2:00000000000,00000000000,00000000002,00000000000\r\n"
+P02_CASE_PASS stage=7 2-7 sw=1 rx="C3:00000000000,00000000000,00000000000,00000000002\r\n"
+P02_CASE_PASS stage=7 2-7 sw=0 rx="X:FFFF\r\n"
+P02_BOARD_TOP_LED_PASS stage=7 led=0xffff
+P02_TOP_RTL_SIM_PASS stage=7 cases=51 bytes=574
+p02/tb/tb_p02_top.sv:70: $finish called at 1248115000 (1ps)
+## STAGE=8
+mini_npu/rtl/uart_npu_command_controller.v:4: warning: timescale for uart_npu_command_controller inherited from another file.
+ch10/rtl/npu_core.v:1: ...: The inherited timescale is here.
+mini_npu/rtl/npu_dsp_mac_lane.v:2: warning: timescale for npu_dsp_mac_lane inherited from another file.
+ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
+mini_npu/rtl/npu_engine4.v:4: warning: timescale for npu_engine4 inherited from another file.
+ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
+mini_npu/rtl/npu_display_controller.v:2: warning: timescale for npu_display_controller inherited from another file.
+ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
+warning: Some design elements have no explicit time unit and/or
+       : time precision. This may cause confusing timing results.
+       : Affected design elements are:
+       :   -- module uart_core declared here: common/rtl/uart_core.v:3
+       :   -- module uart_rx declared here: common/rtl/uart_rx.v:2
+       :   -- module uart_tx declared here: common/rtl/uart_tx.v:2
+mini_npu/rtl/uart_npu_command_controller.v:74: warning: @* is sensitive to all 6 words in array 'payload'.
+mini_npu/rtl/uart_npu_command_controller.v:74: warning: @* is sensitive to all 6 words in array 'payload'.
+mini_npu/rtl/uart_npu_command_controller.v:74: warning: @* is sensitive to all 6 words in array 'payload'.
+mini_npu/rtl/uart_npu_command_controller.v:75: warning: @* is sensitive to all 6 words in array 'payload'.
+mini_npu/rtl/uart_npu_command_controller.v:75: warning: @* is sensitive to all 6 words in array 'payload'.
+mini_npu/rtl/uart_npu_command_controller.v:76: warning: @* is sensitive to all 6 words in array 'payload'.
+mini_npu/rtl/uart_npu_command_controller.v:76: warning: @* is sensitive to all 6 words in array 'payload'.
+mini_npu/rtl/uart_npu_command_controller.v:77: warning: @* is sensitive to all 6 words in array 'payload'.
+mini_npu/rtl/uart_npu_command_controller.v:78: warning: @* is sensitive to all 6 words in array 'payload'.
+mini_npu/rtl/uart_npu_command_controller.v:78: warning: @* is sensitive to all 6 words in array 'payload'.
+mini_npu/rtl/uart_npu_command_controller.v:78: warning: @* is sensitive to all 6 words in array 'payload'.
+mini_npu/rtl/uart_npu_command_controller.v:78: warning: @* is sensitive to all 6 words in array 'payload'.
+mini_npu/rtl/uart_npu_command_controller.v:78: warning: @* is sensitive to all 6 words in array 'payload'.
+P02_CASE_PASS stage=8 2-1 sw=0 rx="I\r\n"
+P02_CASE_PASS stage=8 2-1 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=8 2-1 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=8 2-1 sw=0 rx="X:0003\r\n"
+P02_CASE_PASS stage=8 2-1 sw=0 rx="X:FFFE\r\n"
+P02_CASE_PASS stage=8 2-1 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=8 2-1 sw=0 rx="W:0005\r\n"
+P02_CASE_PASS stage=8 2-1 sw=0 rx="ERR\r\n"
+P02_CASE_PASS stage=8 2-2 sw=0 rx="Q:03 O:0\r\n"
+P02_CASE_PASS stage=8 2-2 sw=0 rx="Q:02 O:0\r\n"
+P02_CASE_PASS stage=8 2-2 sw=0 rx="Q:FE O:0\r\n"
+P02_CASE_PASS stage=8 2-2 sw=0 rx="Q:7F O:1\r\n"
+P02_CASE_PASS stage=8 2-2 sw=0 rx="Q:80 O:1\r\n"
+P02_CASE_PASS stage=8 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=8 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=8 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=8 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=8 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=8 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=8 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=8 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=8 2-3 sw=0 rx="D:0000000046\r\n"
+P02_CASE_PASS stage=8 2-3 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=8 2-3 sw=0 rx="D:0000000006\r\n"
+P02_CASE_PASS stage=8 2-3 sw=0 rx="ERR\r\n"
+P02_CASE_PASS stage=8 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=8 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=8 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=8 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=8 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=8 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=8 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=8 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=8 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=8 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=8 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=8 2-4 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=8 2-4 sw=0 rx="P:0000000006,000000000A,FFFFFFFFF6,0000000008\r\n"
+P02_CASE_PASS stage=8 2-5 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=8 2-5 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=8 2-5 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=8 2-5 sw=0 rx="OK\r\n"
+P02_CASE_PASS stage=8 2-5 sw=0 rx="L:0006,0000,005A,7FFF O:8\r\n"
+P02_CASE_PASS stage=8 2-6 sw=0 rx="N:0006,0000,005A,7FFF O:8\r\n"
+P02_CASE_PASS stage=8 2-6 sw=0 rx="N:0011,0000,0061,7FFF O:8\r\n"
+P02_CASE_PASS stage=8 2-7 sw=1 rx="I\r\n"
+P02_CASE_PASS stage=8 2-7 sw=1 rx="C0:00000000002,00000000000,00000000000,00000000000\r\n"
+P02_CASE_PASS stage=8 2-7 sw=1 rx="C1:00000000000,00000000002,00000000000,00000000000\r\n"
+P02_CASE_PASS stage=8 2-7 sw=1 rx="C2:00000000000,00000000000,00000000002,00000000000\r\n"
+P02_CASE_PASS stage=8 2-7 sw=1 rx="C3:00000000000,00000000000,00000000000,00000000002\r\n"
+P02_CASE_PASS stage=8 2-7 sw=0 rx="X:FFFF\r\n"
+P02_CASE_PASS stage=8 2-8 sw=1 rx="C2:00000000000,00000000000,00000000002,00000000000\r\n"
+P02_CASE_PASS stage=8 2-8 sw=3 rx="C2:00000000000,FFFFFFFFFFE,00000000002,00000000000\r\n"
+P02_CASE_PASS stage=8 2-8 sw=3 rx="C1:00000000000,00000000002,FFFFFFFFFFE,00000000000\r\n"
+P02_BOARD_TOP_LED_PASS stage=8 led=0x4002
+P02_TOP_RTL_SIM_PASS stage=8 cases=54 bytes=730
+p02/tb/tb_p02_top.sv:70: $finish called at 1504955000 (1ps)
+RTL_SIM_PASS stages=8

@@ -125,6 +125,24 @@
     - 정정: 장 Top 전 STAGE 빌드는 인자 없이 `vivado -mode batch -nojournal -source pNN/vivado/build_pNN.tcl` **한 번** (STAGE마다 따로 돌리면 증거 파일이 덮어써진다). 지시 13 ①의 반복문은 틀렸다.
     - 다음 재빌드가 필요해지면 15번으로 적는다.
 
+15. **(2026-11-23 11:00, Vivado 시뮬레이터로 RTL 시뮬레이션 확인 — 지금 실행할 것은 이 항목이다)**
+
+    **배경**: 실습하는 사람은 Vivado에서 시뮬레이션한다. 지금 RTL 시뮬레이션 근거는 Icarus Verilog뿐이라 같은 과정을 두 번 거치게 된다. 같은 TB·사례 파일·판정 줄을 Vivado 시뮬레이터(xsim)로 돌려 증거를 남기고, 통과하면 장 페이지의 실행 명령을 xsim 기준으로 바꾼다. Icarus는 GitHub CI(Vivado 없음)용 자동 검사로 남긴다.
+
+    **1단계 — 1~4장 장 Top** (main `git pull` 뒤, 저장소 루트에서):
+    ```bash
+    for p in p01 p02 p03 p04; do SIM=xsim bash $p/scripts/run_sim.sh; done
+    ```
+    - 실행기는 `tools/sim/sim_top.sh` (`xvlog -sv` → `xelab -generic_top STAGE=n` → `xsim -R`). **웹은 xsim을 돌려 보지 못했다(⚠ 미검증)** — 옵션·출력 거르기가 틀렸으면 **이 파일 하나는 VS Code가 고쳐도 된다** (xsim 분기만, Icarus 분기는 그대로).
+    - 증거: `pNN/validation/xsim_rtl_YYYYMMDD.log` (스크립트가 만든다. 첫 줄들에 `# tool: Vivado Simulator …`, 마지막에 `RTL_SIM_PASS stages=N`). 네 파일을 main에 커밋(브랜치 → PR도 좋다). 개인 경로는 스크립트가 `<repo>`로 바꾼다.
+    - `xsim.dir/`·`*.jou`·`*.pb`·`*.wdb`는 커밋하지 않는다 (`.gitignore`에 없는 산출물이 생기면 알려 달라).
+
+    **합격 기준**: 네 장 모두 `RTL_SIM_PASS stages=N`(4·8·4·4)이고, `PNN_CASE_PASS` 줄의 수와 `rx="…"` 내용이 같은 날짜 Icarus 로그(`rtl_sim_*.log`)와 같다 — `diff <(grep CASE_PASS p02/validation/rtl_sim_*.log | sort -u) <(grep CASE_PASS p02/validation/xsim_rtl_*.log | sort -u)` 형태로 확인하고 결과를 회신에 적는다.
+
+    **xsim에서 컴파일·실행이 안 되면**: TB·RTL은 고치지 말고 보고한다 — 파일·줄·xvlog/xelab 메시지(VRFC 번호)를 `part03/ch27/docs/VSCODE_TO_WEB_YYYYMMDD.md`에. 웹이 고쳐 다시 지시한다 (12장 TB의 VRFC 10-3380과 같은 종류가 더 있을 수 있다).
+
+    **2단계 (1단계 통과 뒤, 따로 지시)**: 00~12장 서브젝트 단독 TB, `part03/` VS Code 판 TB(이쪽은 VS Code 담당이므로 `run_sim.sh`에 같은 `SIM=xsim` 분기를 직접 넣는다 — `tools/sim/sim_top.sh`를 써도 된다). C 협동 시뮬레이션(22·28~31장)은 방식이 달라 마지막에 검토.
+
 ## 5. 웹 Claude가 그동안 하는 것
 
 1장(구 00~03장) 시범 전환: 생성기를 "장 페이지 + 서브젝트 절" 구조로 바꾸고 미리보기를 만든다. VS Code 작업과 파일이 겹치지 않는다.

@@ -239,6 +239,16 @@ def project_gates(p, e):
         g.append(gate("fail", "SYNTH_TIMING_PASS", "✗ " + bg.short(next(v for v in e.viv if "FAIL" in v), 70)))
     else:
         g.append(gate("todo", "SYNTH_TIMING_PASS", "⚠ 미검증 · VS Code Vivado 실행 대기 (" + os.path.basename(p["vivado_tcl"]) + ")"))
+    # Vivado 시뮬레이터(xsim)로 같은 TB를 돌린 기록: SIM=xsim bash pNN/scripts/run_sim.sh → validation/xsim_rtl_*.log
+    xs = bg.latest(f"{p['id']}/validation/xsim_rtl_*.log")
+    if xs:
+        xl = bg.log_lines(xs)
+        tool = next((ln[8:].strip() for ln in xl if ln.startswith("# tool:")), "Vivado xsim")
+        okx = any(ln.startswith("RTL_SIM_PASS") for ln in xl)
+        g.append(gate("pass" if okx else "fail", "XSIM_RTL_PASS",
+                      f"{'' if okx else '✗ '}{esc(bg.short(tool, 40))} · Icarus와 같은 TB·판정 줄 · {bg.file_date(xs)} · <code>{xs}</code>"))
+    else:
+        g.append(gate("todo", "XSIM_RTL_PASS", "⚠ 미검증 · Vivado 시뮬레이터(xsim) 실행 대기 — 현재 근거는 Icarus Verilog"))
     drc = bg.drc_open(p["id"])
     if drc:
         g.append(gate(*drc))
