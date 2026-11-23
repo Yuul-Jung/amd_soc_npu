@@ -1,4 +1,4 @@
-// (추가) 30장: p3_motor_safety 클록 단위 벡터 시험(UNIT 파라미터). Python motor_reference.unit_vectors가 만든
+// p3_motor_safety 클록 단위 벡터 시험(UNIT 파라미터). Python motor_reference.unit_vectors가 만든
 //   입력(rst cmd estop fault otemp lim_f lim_r)과 기대 출력(in1 in2 ena status 32비트)을 클록마다 대조한다.
 //   Python 쪽에서 같은 출력이 안전 불변식(정지 조건 중 출력 0, IN1·IN2 동시 금지, 반전 데드타임)을 지키는지도 확인한다.
 `timescale 1ns/1ps

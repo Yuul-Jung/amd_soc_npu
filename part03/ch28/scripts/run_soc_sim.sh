@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# (추가) 28장: 숫자 인식 SoC 전체 행동 시뮬레이션(xsim, 실제 MicroBlaze V + 보드용 ELF + UART 비트 단위 프레임).
-# (변경) 안 A: 하드웨어는 21장 SoC 복제본(ch21/build/soc21_npu, 읽기만 하고 cp -a), ELF는 build_sw.sh 결과.
-#   필요: 21장 build_soc.sh, 28장 build_sw.sh 결과(build/ws/digit_app ELF), VIVADO_SETTINGS. 시뮬레이션 약 0.2초 분량(수 시간).
+# 숫자 인식 SoC 전체 행동 시뮬레이션(xsim, 실제 MicroBlaze V + 보드용 ELF + UART 비트 단위 프레임).
+# 하드웨어는 5-2 SoC 복제본(ch21/build/soc21_npu, 읽기만 하고 cp -a), ELF는 build_sw.sh 결과.
+#   필요: 5-2 build_soc.sh, 6-1 build_sw.sh 결과(build/ws/digit_app ELF), VIVADO_SETTINGS. 시뮬레이션 약 0.2초 분량(수 시간).
 #   결과: validation/soc_uart_sim.log (TB 기록 + Python 판정)
 set -euo pipefail
 chapter_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)

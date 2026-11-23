@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# (추가) 21장: 제1부 11장 MicroBlaze V 성공 프로젝트를 복제해 20장 NPU IP를 통합하고 Bitstream·XSA를 만든다.
+# 제1부 11장 MicroBlaze V 성공 프로젝트를 복제해 5-1 NPU IP를 통합하고 Bitstream·XSA를 만든다.
 #   SOC11_DIR : 원본 프로젝트 폴더(soc11_user_top.xpr 포함). 원본은 읽기만 하고 cp -a로 build/에 복제한다.
 #   결과(build/, 저장소 제외): 복제 프로젝트, NPU IP, soc21_npu.xsa, *.bit, 보고서
 #   요약(저장소): validation/build_soc.log, validation/soc_summary.md
-# (변경) 안 A: 동결 주소맵·BTN GPIO·표준 7세그먼트 IP. ADDR_MAP_A·IRQ_MAP_A 대조 결과를 로그에 남긴다.
+# 동결 주소맵·BTN GPIO·표준 7세그먼트 IP. ADDR_MAP_A·IRQ_MAP_A 대조 결과를 로그에 남긴다.
 set -euo pipefail
 chapter_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 part03=$(cd -- "$chapter_dir/.." && pwd)

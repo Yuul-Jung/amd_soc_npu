@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# (추가) 28장: 숫자 인식 시스템 PC 검증.
+# 숫자 인식 시스템 PC 검증.
 #   1) 기준모델 자체 시험(CRC16·프레임·FND 표시 규칙)
 #   2) FND 스캔 RTL 시험(Python 기대값과 핀 단위 비교)
-#   3) 종단간 협동 시뮬레이션: Python 호스트(전처리·UART 프레임·CSV) → 표준 입출력 → 보드와 같은 C 펌웨어
-#      → 22장 FIFO 브리지 → 20장 AXI NPU RTL(Icarus). 표본 22장 + 오류 시험 묶음.
+#   3) 종단간 PC 시뮬레이션: Python 호스트(전처리·UART 프레임·CSV) → 표준 입출력 → 보드와 같은 C 펌웨어
+#      → 5-3 FIFO 브리지 → 5-1 AXI NPU RTL. 표본 22장 + 오류 시험 묶음.
 #   결과: validation/rtl_cosim.csv, validation/rtl_cosim_uart.log (+ 표준 출력)
 set -euo pipefail
 chapter_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
@@ -21,13 +21,13 @@ python3 "$ref" --selftest --header "$build_dir/digit_model.h" --fnd-vectors "$bu
 iverilog -g2012 -Wall -s tb_p3_fnd_scan -o "$build_dir/fnd" "$chapter_dir/rtl/p3_fnd_scan.v" "$chapter_dir/tb/tb_p3_fnd_scan.sv"
 vvp -n "$build_dir/fnd" +VEC="$build_dir/fnd_vectors.txt" | grep -v "finish called"
 
-# 3) 협동 시뮬레이션
+# 3) PC 시뮬레이션
 iverilog -g2012 -Wall -s tb_p3_npu_bridge -o "$build_dir/sim" -I"$part03/ch20/tb" \
   "$part03/ch02/rtl/dsp_multiplier.v" "$part03/mini_npu/rtl/npu_dsp_mac_lane.v" \
   "$part03/ch04/rtl/bram_sync_buffer.v" "$part03/ch14/rtl/p3_group10_core.v" \
   "$part03/ch17/rtl/p3_tile784_10.v" "$part03/ch20/rtl/p3_npu_axi_lite.v" \
   "$part03/ch22/tb/tb_p3_npu_bridge.sv"
-# 협동 시뮬레이션 1회: $1 = 펌웨어 소스(digit_app.c), $2 = 이름, 나머지 = 호스트 인자
+# PC 시뮬레이션 1회: $1 = 펌웨어 소스(digit_app.c), $2 = 이름, 나머지 = 호스트 인자
 run_cosim() {
   local app=$1 name=$2; shift 2
   local d="$build_dir/$name"

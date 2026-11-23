@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""26장: 8×8·3×3 합성곱(Cross-Correlation, stride 1, padding 0)+Bias+ReLU 기준모델·시험 벡터·RTL 비교.
+"""8×8·3×3 합성곱(Cross-Correlation, stride 1, padding 0)+Bias+ReLU 기준모델·시험 벡터·RTL 비교.
 
 창마다 host_tools의 dot_signed로 9항 내적을 구한다. 출력 6×6을 행 우선으로 비교한다.
 """
@@ -49,7 +49,7 @@ def cases(rng):
 def selftest():
     img = [[r * 8 + c for c in range(8)] for r in range(8)]
     out = conv3x3(img, [[1, 0, -1]] * 3, 0, 0)
-    assert len(out) == 36 and out[0] == -6                    # 26장 규격 예제
+    assert len(out) == 36 and out[0] == -6                    # 규격 예제
     assert sum(1 for _ in range(6) for _ in range(6)) * 9 == 324   # 필터 1개 324 MAC
     ident = [[0, 0, 0], [0, 1, 0], [0, 0, 0]]
     assert conv3x3(img, ident, 0, 0) == [img[r + 1][c + 1] for r in range(6) for c in range(6)]

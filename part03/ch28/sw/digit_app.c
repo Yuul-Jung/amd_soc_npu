@@ -1,4 +1,4 @@
-/* (추가) 28장: UART 손글씨 숫자 → 784 INT8 → 20장 NPU(13타일) → 10개 점수·Class → UART·LED·FND.
+/* UART 손글씨 숫자 → 784 INT8 → 5-1 NPU(13타일) → 10개 점수·Class → UART·LED·FND.
  * MicroBlaze V는 프레임 수신·검사, NPU 버스 제어, 결과 전송만 한다. 10개 점수의 MAC은 NPU RTL이 한다.
  * 같은 입력으로 CPU 정수 추론(cpu_infer)도 실행해 NPU 점수와 비교한다(불일치면 표시하지 않고 오류 7).
  * 표시 규칙: Class는 NPU DONE·rc=0·모델 ID 일치·NPU=CPU일 때만 FND/LED에 쓴다. 그 밖에는 오류 표시.

@@ -1,4 +1,4 @@
-/* (추가) 22장: p3_npu_axi_lite 드라이버 구현. 20장 docs/README.md의 "CPU 실행 순서"를 그대로 따른다. */
+/* p3_npu_axi_lite 드라이버 구현. 5-1 docs/README.md의 "CPU 실행 순서"를 그대로 따른다. */
 #include "npu_driver.h"
 
 static void wr(npu_t *npu, uint32_t off, uint32_t v) { npu_io_write(npu->base + off, v); }

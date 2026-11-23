@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""31장: 보안 모델 적재(Encrypt-then-MAC: AES-128-CTR + HMAC-SHA-256) 기준모델(정본, 표준 라이브러리만).
+"""보안 모델 적재(Encrypt-then-MAC: AES-128-CTR + HMAC-SHA-256) 기준모델(정본, 표준 라이브러리만).
 교육용 구현이다. 상용 보안 제품이 아니며 Basys3는 키 보호 저장소·Secure Boot·Tamper 방어를 제공하지 않는다.
 
 역할 구분: AES-128(FIPS 197)·CTR(SP 800-38A) = 기밀성만, HMAC-SHA-256(FIPS 198-1) = 키 기반 무결성·인증.
@@ -9,7 +9,7 @@ SHA-256 Digest만으로는 인증이 아니고, AES-CTR만으로는 변조를 �
     보드용 키는 저장소 밖 파일(P3_KEY_FILE: 16진 48바이트)에서 build/ 헤더로 만든다. 로그에는 지문만:
     key_fp = SHA-256("P3KF" ‖ enc ‖ mac)[0:4] (big-endian u32)
 모델 평문(blob, 54바이트): "P3MD" ‖ ver u16=1 ‖ n_cls u8=3 ‖ n_feat u8=6 ‖ model_id u32 ‖ w[3][6] int8 ‖ b[3] int64
-    model_id는 29장 규칙(20장 IP 형태로 늘린 w[10][784] ‖ b[10]의 CRC32)
+    model_id는 6-3 규칙(5-1 IP 형태로 늘린 w[10][784] ‖ b[10]의 CRC32)
 보안 프레임('M' 명령 payload, 정수는 LE):
     ver u8=1 ‖ seq u32 ‖ model_id u32 ‖ iv 16 ‖ len u16 ‖ ct[len] ‖ tag 32
     iv = nonce64 ‖ seq u32(BE) ‖ ctr u32(BE)=0   (CTR 카운터는 마지막 32비트 BE 증가, SP 800-38A)
@@ -126,7 +126,7 @@ def blob(qm):
 
 
 def parse_blob(p):
-    """장치와 같은 스테이징 검사. 반환 qm(20장 형태) 또는 None."""
+    """장치와 같은 스테이징 검사. 반환 qm(5-1 형태) 또는 None."""
     if len(p) != BLOB_LEN or p[:4] != b"P3MD":
         return None
     ver, nc, nf, mid = struct.unpack_from("<HBBI", p, 4)

@@ -1,4 +1,4 @@
-/* (추가) 31장: 교육용 AES-128(암호화 방향)·CTR, SHA-256, HMAC-SHA-256, 일정시간 비교. 부채널 대책 없음. */
+/* 교육용 AES-128(암호화 방향)·CTR, SHA-256, HMAC-SHA-256, 일정시간 비교. 부채널 대책 없음. */
 #ifndef P3_CRYPTO_H
 #define P3_CRYPTO_H
 #include <stdint.h>

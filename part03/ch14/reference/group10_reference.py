@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""14장: 4PE 3그룹(4+4+2) 10분류 코어 기준모델·시험 벡터 생성·RTL 결과 비교.
+"""4PE 3그룹(4+4+2) 10분류 코어 기준모델·시험 벡터 생성·RTL 결과 비교.
 
 점수와 Class는 host_tools/p3_integer_reference.py의 linear_64x10, argmax_lowest로 계산한다.
 그룹 스케줄(class = 4*group + lane, group 2는 lane 0·1만 유효)은 group_schedule()로 별도 확인한다.
@@ -64,7 +64,7 @@ def build_cases():
         w = [[rng.randint(-128, 127) for _ in range(64)] for _ in range(10)]
         b = [rng.randint(BIAS_MIN, BIAS_MAX) for _ in range(10)]
         cases.append((x, w, b))
-    # (추가) 19장 argmax 트리: 각 비교 단의 동점(lane 쌍 0·1, 2·3, 그룹 1의 4·5, 6·7, 그룹 2의 8·9) → 낮은 번호
+    # 4-4 argmax 트리: 각 비교 단의 동점(lane 쌍 0·1, 2·3, 그룹 1의 4·5, 6·7, 그룹 2의 8·9) → 낮은 번호
     z = [[0] * 64 for _ in range(10)]
     for pair in ((0, 1), (2, 3), (4, 5), (6, 7), (8, 9)):
         b = [-100 - c for c in range(10)]

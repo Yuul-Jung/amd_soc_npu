@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# (추가) 22장: C 드라이버 PC 협동 시뮬레이션. gcc로 드라이버·응용을 PC용으로 빌드하고 FIFO로 Icarus RTL과 연결한다.
+# C 드라이버 PC 시뮬레이션. gcc로 드라이버·응용을 PC용으로 빌드하고 FIFO로 RTL과 연결한다.
 set -euo pipefail
 chapter_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 part03=$(cd -- "$chapter_dir/.." && pwd)

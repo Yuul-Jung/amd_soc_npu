@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# (추가) 24장: 주요 구성의 OOC 합성·배치·배선을 클록 주기 10/8/7/6 ns로 반복해 실제 Fmax를 찾는다.
+# 주요 구성의 OOC 합성·배치·배선을 클록 주기 10/8/7/6 ns로 반복해 실제 Fmax를 찾는다.
 # 결과 보고서는 build/(저장소 제외), 요약은 validation/timing_sweep.md (reference/sweep_summary.py).
 set -euo pipefail
 chapter_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)

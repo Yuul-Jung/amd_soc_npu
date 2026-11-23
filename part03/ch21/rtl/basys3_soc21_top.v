@@ -1,9 +1,9 @@
-// (추가) 안 A(2026-11-19) 21장 사용자 Top: 동결 주소맵 SoC(MicroBlaze V + NPU + BTN GPIO + 표준 7세그먼트 IP)의 Wrapper와 보드 핀 연결.
+// 사용자 Top: 동결 주소맵 SoC(MicroBlaze V + NPU + BTN GPIO + 표준 7세그먼트 IP)의 Wrapper와 보드 핀 연결.
 // Top은 배선만 한다(MBV_SOC §4). 7세그먼트 구동은 BD 안 ip06_seg7(ip_seg7), 버튼은 axi_gpio_btn이 받는다.
 // 제1부 11장 basys3_soc11_top은 원본 그대로 두고(복제본에서 비활성), 이 파일을 Top으로 쓴다.
 module basys3_soc21_top (
     input  wire        clk,    // Basys3 W5: 외부 100 MHz
-    input  wire        btnC,   // Basys3 U18: SoC Reset (11장 그대로)
+    input  wire        btnC,   // Basys3 U18: SoC Reset (2-7 그대로)
     input  wire [3:0]  btn,    // [3] btnU T18, [2] btnD U17, [1] btnL W19, [0] btnR T17 → axi_gpio_btn
     input  wire [15:0] sw,
     output wire [15:0] led,

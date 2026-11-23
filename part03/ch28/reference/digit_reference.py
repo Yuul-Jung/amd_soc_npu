@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""28장: 손글씨 숫자 인식 NPU 시스템 기준모델·UART 프레임 규약(표준 라이브러리만, PNG는 Pillow 선택).
+"""손글씨 숫자 인식 NPU 시스템 기준모델·UART 프레임 규약(표준 라이브러리만, PNG는 Pillow 선택).
 
-실습 모드: **28×28·784 타일링**(17장 13타일 하드웨어, 18장 INT8 학습 모델). 8×8·64 모드는 쓰지 않는다.
-모델 연결: 18장 mnist_linear_f32.json → quantize_model(…, 8) → model_w[10][784]·model_b[10]
+실습 모드: **28×28·784 타일링**(4-2 13타일 하드웨어, 4-3 INT8 학습 모델). 8×8·64 모드는 쓰지 않는다.
+모델 연결: 4-3 mnist_linear_f32.json → quantize_model(…, 8) → model_w[10][784]·model_b[10]
   MODEL_ID = zlib.crc32(w 바이트(class 우선, int8 2의 보수) ‖ b 각 int64 little-endian)  — 펌웨어도 부팅 때 같은 값을 계산
 전처리: 28×28 8비트 회색조(MNIST 극성: 흰 글씨·검은 바탕), x_q = div_round_away(pixel·127, 255) ∈ 0..127
-Golden: 17장 model(x, w, b, 41, 40, 8) → 10개 점수·class(동점은 낮은 번호)
+Golden: 4-2 model(x, w, b, 41, 40, 8) → 10개 점수·class(동점은 낮은 번호)
 
 UART 프레임(PC → 보드, 115200 8N1):
   'P' '3' CMD  PAYLOAD  CRC16(상위 먼저)    CRC16/CCITT-FALSE(poly 0x1021, init 0xFFFF)를 CMD‖PAYLOAD에 계산
@@ -131,7 +131,7 @@ def read_samples(path=SAMPLES):
 
 
 def make_samples(mnist_dir, out):
-    """t10k에서 숫자별 첫 2장 + 18장 INT8 모델이 틀리는 첫 2장(모델 오분류 분류 확인용)."""
+    """t10k에서 숫자별 첫 2장 + 4-3 INT8 모델이 틀리는 첫 2장(모델 오분류 분류 확인용)."""
     xs = read_idx(mnist_dir / "t10k-images-idx3-ubyte")
     ys = read_idx(mnist_dir / "t10k-labels-idx1-ubyte")
     qm = load_qmodel()

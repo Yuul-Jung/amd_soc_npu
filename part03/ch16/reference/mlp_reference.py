@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""16장: 64→8→10 정수 MLP 기준모델·시험 명령 생성·RTL 결과 비교.
+"""64→8→10 정수 MLP 기준모델·시험 명령 생성·RTL 결과 비교.
 
 최종 점수는 host_tools의 mlp_64_8_10(x, w1, b1, w2, b2, shift), Class는 argmax_lowest.
 진단용 은닉값은 같은 규칙 sat_int8(round_shift_away(max(0, dot_signed + b1), shift))을 함수 조합으로 계산해

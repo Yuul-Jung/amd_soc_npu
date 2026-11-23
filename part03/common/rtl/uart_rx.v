@@ -1,4 +1,4 @@
-// (추가) 8N1 수신. RX 2FF, start midpoint/bit center, hold/overrun.
+// 8N1 수신. RX 2FF, start midpoint/bit center, hold/overrun.
 module uart_rx #(
     parameter integer CLK_HZ=100000000, BAUD=115200
 )(

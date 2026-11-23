@@ -1,12 +1,12 @@
-// (추가) 17장 p3_tile784_10 자동 판정 테스트벤치.
-// 13장 p3_frame64_buffer 실제 RTL과 연결: 타일마다 W 적재 → 64바이트 프레임 → tile_go → 부분합 누산.
+// p3_tile784_10 자동 판정 테스트벤치.
+// 3-1 p3_frame64_buffer 실제 RTL과 연결: 타일마다 W 적재 → 64바이트 프레임 → tile_go → 부분합 누산.
 // 마지막 타일은 W를 16주소만 다시 쓰고(나머지 48주소는 타일 11 가중치 잔류), x 주소 16~63에는 0이 아닌
 // 쓰레기 값을 보낸다. 타일별 부분합·최종 점수·Class·overflow를 actual에 기록하고 Python이 비트 단위 비교.
 // +FULL 추가 판정: 상태별 명령 거부, 타일 중복·누락, 프레임 없는 tile_go, 동작 중 W/Bias 쓰기 거부,
 // RUN·LOAD 중 Reset 후 재실행, LOAD 중 취소 후 재실행, 코어 Bias 0 유지(화이트박스).
-// (변경) 18장: DATA_W 파라미터. 8이면 위와 같이 13장 8비트 프레임 버퍼를 쓰고,
-// 16이면 04장 bram_sync_buffer(16비트×64)에 x 타일을 쓴 뒤 TB가 프레임 보관 플래그를 세운다
-// (frame_ack까지 다음 타일 쓰기 대기 = 13장 버퍼의 s_ready 계약과 같은 순서 규칙).
+// 4-3: DATA_W 파라미터. 8이면 위와 같이 3-1 8비트 프레임 버퍼를 쓰고,
+// 16이면 2-1 bram_sync_buffer(16비트×64)에 x 타일을 쓴 뒤 TB가 프레임 보관 플래그를 세운다
+// (frame_ack까지 다음 타일 쓰기 대기 = 3-1 버퍼의 s_ready 계약과 같은 순서 규칙).
 `timescale 1ns/1ps
 module tb_p3_tile784_10;
     parameter integer ACC_W = 41;
@@ -39,7 +39,7 @@ module tb_p3_tile784_10;
     wire [3:0] tile_idx, cls;
     wire [10*PART_W-1:0] parts;
     wire [10*SCORE_W-1:0] scores;
-    // DATA_W > 8: 04장 버퍼 쓰기 포트와 TB 프레임 보관 플래그
+    // DATA_W > 8: 2-1 버퍼 쓰기 포트와 TB 프레임 보관 플래그
     reg x_wr = 0, x_commit = 0, x_held = 0;
     reg [5:0] x_wr_addr = 0;
     reg signed [DATA_W-1:0] x_wr_data = 0;
@@ -344,7 +344,7 @@ module tb_p3_tile784_10;
             expect_error(ERR_STATE, "abort in IDLE");
         end
         for (cidx = 0; cidx < ncase; cidx = cidx + 1) begin
-            // Icarus는 배열 원소에 직접 $fscanf할 수 없어 임시 변수로 읽는다.
+            // 배열 원소에 직접 $fscanf하지 않고 임시 변수로 읽는다.
             for (i = 0; i < 784; i = i + 1) begin rc = $fscanf(vf, "%d", tmp); X[i] = tmp; end
             for (i = 0; i < 48; i = i + 1) begin rc = $fscanf(vf, "%d", tmp); PAD[i] = tmp; end
             for (c = 0; c < 10; c = c + 1)

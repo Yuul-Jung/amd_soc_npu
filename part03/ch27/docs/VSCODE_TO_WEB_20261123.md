@@ -27,3 +27,31 @@
 ## 3. 다음
 
 2단계(00~12장 서브젝트 단독 TB, `part03/` VS Code 판 TB)는 따로 지시를 기다린다. 보드 점검(B1~B26)은 사용자와 함께.
+
+## 4. 지시 16 회신 (2026-11-23 오후)
+
+### 16-1 장 Top xsim (15번 대체): PASS
+- `vscode/xsim-stage1`을 main 550bb80 기준으로 맞추고, Vivado 환경에서 인자 없이 `bash pNN/scripts/run_sim.sh` → 네 장 모두 `# tool: Vivado Simulator v2024.2.0` 자동 선택, `RTL_SIM_PASS stages=4/8/4/4`.
+- 사례 줄(CASE_PASS, sort -u) 34/147/64/111, main의 `rtl_sim_20261123.log`와 diff 0줄. Traceback 0건.
+- 한 STAGE만: `bash p02/scripts/run_sim.sh 3` → `P02_TOP_RTL_SIM_PASS stage=3 cases=25 bytes=163`, `RTL_SIM_PASS stages=1` (xsim).
+- `tools/sim/sim_top.sh` 수정 없음. `docs/PROJECT_STATUS.md`는 `build_projects.py`로 재생성(XSIM_RTL_PASS ✅) — PR #7 정적 검사 실패(PROJECT_GUIDE_OUT_OF_DATE) 해소.
+
+### 16-2 part03 소스 주석 정리
+- main에 있는 `part03/` 소스(.v .sv .svh .c .h .py .tcl .xdc .sh) 중 **155개 수정**, 주석·docstring만. 파일마다 주석을 뺀 코드가 바꾸기 전과 같음을 기계 검사(Python은 docstring 뺀 AST 비교도). `git diff -w --shortstat` = 155 files, 352(+)/352(−).
+- 규칙: `(추가)`·`(변경)`·`안 A`·날짜 꼬리표 삭제 / 이력 서술은 지금 동작 설명으로 / 옛 장 번호 → 서브젝트 번호(14장 → 3-2, 17장 → 4-2, 21장 → 5-2, 28장 → 6-1 …) / `Icarus`·`협동 시뮬레이션` → `RTL`·`PC 시뮬레이션`.
+- 그대로 둔 것: `제1부 11장`·`제2부 07장`(다른 부의 장), `표본 22장`(그림 개수).
+- **문자열이라 건드리지 않은 것** (장 페이지에 보임): `part03/common/sw/` 헤더의 `#error "안 A: axi_intc_0 입력은 16개여야 한다 …"`, `ch30/synth/soc30_bd.tcl` check 메시지 `"21장 안 A SoC(…)에서 시작"`·`"(21장 안 A)"`, `ch27/scripts/run_all.sh`가 찍는 `# 27장 run_all 결과`, `ch22/reference/gen_model.py`가 만드는 헤더 주석. 바꿔도 되면 알려 달라(출력이 바뀐다).
+- 웹 담당 파일에 남은 꼬리표(참고): `common/rtl/uart_rx.v`·`uart_tx.v`·`uart_core.v`·`uart_echo_controller.v`, `ch00/rtl/basys3_uart_echo_top.v`의 `(추가)`/`(변경)`, p02 페이지의 `(변경) 입력이 초기 0에서…` 한 줄.
+- `ch27/validation/run_all_summary.md`(p05 페이지에 실림)의 "이미 안 A로 실행한 기록" 한 줄은 run_all이 다시 쓰는 파일이라 아직 그대로다.
+- `LEVEL=sim bash part03/ch27/scripts/run_all.sh` (iverilog): `host_integer_reference` PASS, `rtl_ch13_26` PASS. 비트스트림 재빌드 없음.
+
+### 16-3 BOARD_CHECKLIST
+- B 항목의 절차·기대 결과 칸 11곳: `21장 비트스트림` → `5장 비트스트림`(CK_SUBS와 같은 표기), `(22장 협동 시뮬레이션과 같은 줄)`·`(안 A 22장 표시)`·`(협동 시뮬레이션 SHOW 줄)`·`(23장 SoC xsim 값)`·`rtl_cosim.csv`와 같은 … 꼬리표·`, 협동 시뮬레이션` 삭제, `25장 값은` → `5-6 전력 값은`, `28장 펌웨어는` → `이 펌웨어는`, `22장 scores_match` → `표본 22장 scores_match`(개수).
+- 추가로 머리말·준비 줄의 `(변경)`·`(추가)`·`안 A`·날짜, 표 머리 `기대 결과 (협동 시뮬레이션 근거)` → `기대 결과`. 절 제목(`## 1-28. 28장 …`)의 장 번호는 사용자가 보드에서 쓰는 순서라 그대로. 생성기는 `| B` 줄만 읽으므로 영향 없음.
+
+### 16-4 2단계: part03 RTL 단독 run_sim.sh xsim
+- 새 공용 파일 `part03/common/scripts/p3_sim.sh` (`p3_sim_version`·`p3_sim_build`·`p3_sim_run`, 선택 규칙은 `tools/sim/sim_top.sh`와 같다: SIM → xvlog 있으면 xsim → iverilog). xsim은 출력 폴더 안에서 `xvlog -sv` → `xelab -generic_top` → `xsim -R -testplusarg`. `$fatal`은 종료 코드와 출력 둘 다로 실패 판정(+ACTUAL을 빼고 돌려 rc=1 확인).
+- 13~20·26장 `run_sim.sh` 9개를 이 함수로 바꿨다. **9개 장 모두 xsim·iverilog 양쪽 PASS, PASS 줄(사이클 수·cases·errors_checked 포함) diff 0**. xsim 11~60 s(18장이 가장 김), iverilog 0~18 s.
+- 참고: 13장 TB는 무작위 valid 간격이라 `$finish` 시각이 다르다(xsim 131600 ns, iverilog 91940 ns, `$urandom` 수열 차이). actual 파일은 비트 단위로 같다.
+- C 펌웨어와 함께 도는 22·28~31장(PC 시뮬레이션: FIFO + vvp 프로세스)은 iverilog 그대로. xsim 방식은 시험 전 — 정해지면 회신한다.
+- Vivado 환경 `LEVEL=sim run_all`(13~20·26장이 xsim으로 돎)은 실행 중 — 결과는 다음 회신.

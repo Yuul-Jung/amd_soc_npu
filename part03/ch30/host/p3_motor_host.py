@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""30장 PC 호스트: 가상 센서 창 → 보드(또는 협동 시뮬레이션) → 정책 상태·추천·모터 상태 워드 판정 → CSV.
+"""PC 호스트: 가상 센서 창 → 보드(또는 PC 시뮬레이션) → 정책 상태·추천·모터 상태 워드 판정 → CSV.
 
-  --cosim "<명령>"  PC 빌드 펌웨어 + Icarus(20장 NPU + 30장 모터 안전 코어). 'J' 주입으로 E-Stop·고장·과열·리밋·
+  --cosim "<명령>"  PC 빌드 펌웨어 + RTL(5-1 NPU + 6-4 모터 안전 코어). 'J' 주입으로 E-Stop·고장·과열·리밋·
                     클록 진행(워치독)을 넣는다. 코어 파라미터는 motor_reference.COSIM.
-  --port <포트>     Basys3(30장 Bitstream + ELF). 'J'는 거부된다 → 자동 단계만 하고 버튼·스위치 단계는 점검표(B18~)로.
-판정: 정책(state·latch·npu·guard)은 29장 Firmware 모델과 같아야 하고, 추천(rec_dir·rec_duty)은 motor_recommend 규칙,
+  --port <포트>     Basys3(6-4 Bitstream + ELF). 'J'는 거부된다 → 자동 단계만 하고 버튼·스위치 단계는 점검표(B18~)로.
+판정: 정책(state·latch·npu·guard)은 6-3 Firmware 모델과 같아야 하고, 추천(rec_dir·rec_duty)은 motor_recommend 규칙,
       모터 상태 워드(st)는 단계별 술어(예: E-Stop 중 in1=0·ESTOP 래치, AI가 NORMAL이어도 구동 없음)를 만족해야 한다.
-      핀 단위 안전 불변식은 협동 시뮬레이션 브리지 TB가 모든 클록에서 따로 센다(SAFETY_SUMMARY).
+      핀 단위 안전 불변식은 PC 시뮬레이션 브리지 TB가 모든 클록에서 따로 센다(SAFETY_SUMMARY).
 """
 import argparse
 import csv
@@ -57,7 +57,7 @@ class Host:
                 return lines
 
     def run(self, name, data, kind="MOTOR", src=None, policy=None, pred=None, why=""):
-        """policy: 정책 기대(29장 Firmware 결과 dict) 또는 None. pred(f): 모터 상태 술어 → 실패 설명 목록."""
+        """policy: 정책 기대(6-3 Firmware 결과 dict) 또는 None. pred(f): 모터 상태 술어 → 실패 설명 목록."""
         if data:
             self.tr.write(data)
         lines = self.block()

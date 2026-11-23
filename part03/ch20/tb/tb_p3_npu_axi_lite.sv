@@ -1,4 +1,4 @@
-// (추가) 20장 p3_npu_axi_lite 자동 판정 테스트벤치. AXI4-Lite Master BFM으로 레지스터만 사용해 784 추론을 수행한다.
+// p3_npu_axi_lite 자동 판정 테스트벤치. AXI4-Lite Master BFM으로 레지스터만 사용해 784 추론을 수행한다.
 // 프로토콜: AW·W 동시/AW 먼저/W 먼저, BREADY·RREADY 지연 중 응답 유지(상시 검사), WSTRB 병합,
 //   읽기 전용·미할당 주소·범위 초과·부분 WSTRB·프레임 잠금 중 X_DATA → SLVERR(효과 없음 확인).
 // 동작: LENGTH 오류, IDLE의 TILE_GO, x 미완성·W 미적재 TILE_GO, BUSY 중 START·Bias 쓰기, DONE·ERROR W1C,
@@ -51,7 +51,7 @@ module tb_p3_npu_axi_lite;
         pr = resetn && rvalid && !rready; prresp = rresp; prdata = rdata;
     end
 
-    // ---------------- AXI Master BFM (20장 공용) ----------------
+    // ---------------- AXI Master BFM (5-1 공용) ----------------
     `include "axi_lite_bfm.svh"
 
     reg [1:0] resp;

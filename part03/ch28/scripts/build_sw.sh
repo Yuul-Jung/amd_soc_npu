@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# (변경) 안 A(2026-11-19): 28장은 하드웨어를 따로 만들지 않는다. 21장 SoC(Bitstream·XSA, 동결 주소맵·표준 7세그먼트 IP)
-#   위에서 도는 숫자 인식 펌웨어 ELF만 만든다(이전 build_soc.sh·soc28_bd.tcl·basys3_soc28_top·axi_gpio_1은 삭제).
-#   필요: 21장 build_soc.sh 결과(ch21/build/out/soc21_npu.xsa, basys3_soc21_top.bit) — 읽기만 한다.
+# 6-1은 하드웨어를 따로 만들지 않는다. 5-2 SoC(Bitstream·XSA, 동결 주소맵·표준 7세그먼트 IP)
+#   위에서 도는 숫자 인식 펌웨어 ELF만 만든다.
+#   필요: 5-2 build_soc.sh 결과(ch21/build/out/soc21_npu.xsa, basys3_soc21_top.bit) — 읽기만 한다.
 #   결과(build/, 저장소 제외): ws/digit_app ELF.  요약은 validation/build_sw.log 로 남긴다.
 set -euo pipefail
 chapter_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)

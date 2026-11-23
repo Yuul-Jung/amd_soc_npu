@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""28장 SoC 전체 xsim 입력 생성·판정.
+"""SoC 전체 xsim 입력 생성·판정.
 
 --make  : 표본 0(digit_samples.txt 첫 줄)을 img_id 0x28로 프레임화 → 한 줄 1바이트 16진 파일, 기대값 JSON
 --check : TB 기록(UART 줄, LED 핀, FND 자리별 an/seg/dp)을 Python 골든과 비교
@@ -51,7 +51,7 @@ def check_fnd(name, block, word, results):
 
 
 def hx(v):
-    """(변경) xil_printf는 %x를 대문자로, PC printf는 소문자로 찍는다. 문자열 대신 정수로 비교한다."""
+    """xil_printf는 %x를 대문자로, PC printf는 소문자로 찍는다. 문자열 대신 정수로 비교한다."""
     try:
         return int(v, 16)
     except (TypeError, ValueError):

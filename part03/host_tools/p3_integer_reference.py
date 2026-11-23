@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""제3부 13~19/28장: PC 정수 기준모델. RTL 동작 검증 결과와 별개."""
+"""제3부 3-1~4-4·6-1: PC 정수 기준모델. RTL 동작 검증 결과와 별개."""
 from __future__ import annotations
 
 

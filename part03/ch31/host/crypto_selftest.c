@@ -1,4 +1,4 @@
-/* (추가) 31장: C 암호 구현 알려진 정답 시험(PC). FIPS 197 C.1, SP 800-38A F.5.1(2블록), FIPS 180-4 "abc"·448비트,
+/* C 암호 구현 알려진 정답 시험(PC). FIPS 197 C.1, SP 800-38A F.5.1(2블록), FIPS 180-4 "abc"·448비트,
  * RFC 4231 HMAC 1·2. 모두 맞으면 C_CRYPTO_KAT_PASS. */
 #include <stdio.h>
 #include <string.h>

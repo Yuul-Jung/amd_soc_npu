@@ -1,4 +1,4 @@
-// (변경) 8N1 PHY 내부에 깊이 16 RX/TX FIFO를 넣어 byte stream ready/valid를 보존.
+// 8N1 PHY 내부에 깊이 16 RX/TX FIFO를 넣어 byte stream ready/valid를 보존.
 // 1바이트 UART 수신 레지스터와 FIFO는 별개. Controller는 stop-and-wait 정책을 유지.
 module uart_core #(
     parameter integer CLK_HZ=100000000,BAUD=115200

@@ -1,4 +1,4 @@
-/* (추가) 29장: MicroBlaze V main. NPU 베이스 주소는 Vivado Address Editor 값(xparameters.h, 28장 XSA). */
+/* MicroBlaze V main. NPU 베이스 주소는 Vivado Address Editor 값(xparameters.h, 6-1 XSA). */
 #include "xparameters.h"
 #include "sensor_app.h"
 

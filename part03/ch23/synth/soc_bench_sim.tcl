@@ -1,4 +1,4 @@
-# (추가) 23장: 21장 SoC 복제 프로젝트에 TB와 벤치마크 ELF(시뮬레이션용)를 연결해 xsim 행동 시뮬레이션을 실행한다.
+# 5-2 SoC 복제 프로젝트에 TB와 벤치마크 ELF(시뮬레이션용)를 연결해 xsim 행동 시뮬레이션을 실행한다.
 # 사용: vivado -mode batch -source soc_bench_sim.tcl -tclargs <복제 xpr> <tb_soc_bench.sv> <bench_sim.elf>
 set xpr [lindex $argv 0]
 set tb [file normalize [lindex $argv 1]]

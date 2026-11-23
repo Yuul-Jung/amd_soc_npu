@@ -1,4 +1,4 @@
-/* (추가) 31장: PC 협동 시뮬레이션 main(22장 FIFO 브리지 → 20장 NPU RTL, UART = 표준 입출력). */
+/* PC 시뮬레이션 main(5-3 FIFO 브리지 → 5-1 NPU RTL, UART = 표준 입출력). */
 #include <stdio.h>
 #include "secure_app.h"
 

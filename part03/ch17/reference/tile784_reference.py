@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""17장: 784입력 13타일 외부 부분합 누산 기준모델·시험 벡터 생성·RTL 결과 비교.
+"""784입력 13타일 외부 부분합 누산 기준모델·시험 벡터 생성·RTL 결과 비교.
 
 타일 부분합은 host_tools의 dot_signed, 784 전체는 dot_tiled_64·dot_signed로 계산해 교차 확인한다.
 Bias는 13타일 누산을 마친 뒤 클래스별로 1회만 더한다. 외부 누산 폭(acc_w)이 부족하면
@@ -18,11 +18,11 @@ from part03.host_tools.p3_integer_reference import (  # noqa: E402
 N_IN, TILE, N_CLASS = 784, 64, 10
 N_TILE = (N_IN + TILE - 1) // TILE          # 13
 LAST_LEN = N_IN - TILE * (N_TILE - 1)       # 16
-CORE_BIAS_W = 24                            # 14장 코어 Bias 폭(17장에서는 0으로 고정)
+CORE_BIAS_W = 24                            # 3-2 코어 Bias 폭(4-2에서는 0으로 고정)
 
 
 def core_part_w(data_w):
-    """14장 코어 점수(부분합) 폭: INT8은 기존 25비트, 그 밖은 lane 누산 2N+6비트 + 1."""
+    """3-2 코어 점수(부분합) 폭: INT8은 25비트, 그 밖은 lane 누산 2N+6비트 + 1."""
     core_acc = 24 if data_w == 8 else 2 * data_w + 6
     return max(core_acc, CORE_BIAS_W) + 1
 
@@ -127,7 +127,7 @@ def build_cases(suite, bias_w, rng, data_w=8):
     w = [[rng.randint(-2, 2) for _ in range(N_IN)] for _ in range(N_CLASS)]
     cases.append((x, w, [1000 * (c + 1) for c in range(N_CLASS)]))
     cases += [rand_case() for _ in range(12)]
-    # (추가) 19장 argmax 트리: 1단 쌍(0·1, 2·3)·2단(1 vs 2, 5 vs 6) 동점 → 낮은 번호. x=0이라 점수 = Bias
+    # 4-4 argmax 트리: 1단 쌍(0·1, 2·3)·2단(1 vs 2, 5 vs 6) 동점 → 낮은 번호. x=0이라 점수 = Bias
     z = [[0] * N_IN for _ in range(N_CLASS)]
     for tie in ((0, 1), (2, 3), (1, 2), (5, 6)):
         b = [-100 - c for c in range(N_CLASS)]
