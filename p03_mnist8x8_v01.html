@@ -61,7 +61,7 @@ details.full>summary{cursor:pointer;font-weight:600}
   <div class="hero-inner">
     <p class="kicker">BASYS3 · NPU 고도화판 · 3장 프로젝트 · 2일 <span class="vbadge">v01</span></p>
     <h1>제3장 · 8×8 MNIST (CPU 없음)</h1>
-    <p>PC 8×8 손글씨 → 프레임 → 4PE 10분류 → MLP 64→8→10 → 보드 클래스. 서브젝트 4개.</p>
+    <p>8×8 손글씨를 프레임으로 받아 4PE 코어로 10분류하고, MLP 64→8→10까지 확장합니다.</p>
   </div>
 </header>
 <div class="wrap">
@@ -69,10 +69,10 @@ details.full>summary{cursor:pointer;font-weight:600}
   <main class="content" id="main-content">
     <section class="section" id="s00">
       <h2><span class="num">00</span> 장 목표·진행 위치</h2>
-      <p><b>장 시연 (보드):</b> PC가 MNIST 시험 숫자를 8×8로 줄여 보내면 보드가 CPU 없이 4PE 코어로 0~9를 고르고, UART에 은닉값·점수, LED·7세그먼트에 클래스를 띄운다.</p>
-      <p>편성: 2일 · 서브젝트 4개 · 서브젝트마다 보드 확인 1번 + 장 시연.</p>
+      <p><b>장 시연 (보드):</b> PC가 MNIST 시험 숫자를 8×8로 줄여 보내면, 보드가 CPU 없이 4PE 코어만으로 0~9를 고릅니다. UART로 은닉값과 점수가, LED와 7세그먼트로 클래스가 나옵니다.</p>
+      <p>2일 과정입니다. 서브젝트 4개를 차례로 끝내며 그때마다 보드에서 확인하고, 마지막에 장 전체를 시연합니다.</p>
       <ol class="road" aria-label="전체 장에서 지금 위치"><li class=""><a href="p01_uart_calc_v01.html"><b>1장</b>UART 계산기</a></li><li class=""><a href="p02_npu4_board_v01.html"><b>2장</b>4뉴런 NPU 보드</a></li><li class="now" aria-current="step"><b>3장</b>8×8 MNIST (CPU 없음)</li><li class=""><a href="p04_tile784_v01.html"><b>4장</b>784 가속기 설계 공간</a></li><li class=""><a href="p05_mbv_soc_v01.html"><b>5장</b>MicroBlaze V SoC</a></li><li class=""><a href="p06_npu_apps_v01.html"><b>6장</b>응용 확장</a></li><li class="plan"><b>7장</b>종합과제</li></ol>
-      <ol class="steps" aria-label="이 장의 서브젝트와 진행 상태"><li class=""><span class="code">3-1</span><span><a href="#s3_1">8×8 입력 프레임</a> <small>(구 13장 · 1일 오전)</small><br>숫자 그림 64바이트 → <code>F:OK</code>, 화소 되읽기 <code>p 36</code> → <code>P:17</code>. 63바이트는 <code>F:SHORT</code>, 65바이트는 <code>F:LONG</code>, 프레임 없을 때 <code>p</code>는 <code>ERR</code>.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">3-2</span><span><a href="#s3_2">4PE 3그룹 10분류 코어</a> <small>(구 14장 · 1일 오후)</small><br>선형 모델 650개 명령을 적재한 뒤 숫자 7·0·3 그림마다 <code>R</code> → <code>R7</code>·<code>R0</code>·<code>R5</code>와 점수 10개. 숫자 3을 5로 잘못 고르는 것도 그대로 보인다 (정확도 91.3%).</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">3-3</span><span><a href="#s3_3">64→10·64→8·8→10 Dense</a> <small>(구 15장 · 2일 오전)</small><br>같은 코어를 모양만 바꿔: <code>H</code> → 64→8 점수 8개(MLP 1층 원시값), <code>G</code> → 8→10 (프레임 앞 8원소). 새 연산 RTL 없음.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">3-4</span><span><a href="#s3_4">MLP 64→8→10</a> <small>(구 16장 · 2일 오후)</small><br><code>Z 9</code>(은닉 shift) 뒤 숫자 0~9 그림마다 <code>M</code> → 은닉 8개·점수 10개·클래스. 10개 중 9개 맞음(숫자 5 → 6).</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class="demo"><span class="code">시연</span><span><a href="#demo">장 시연</a><br>PC가 MNIST 시험 숫자를 8×8로 줄여 보내면 보드가 CPU 없이 4PE 코어로 0~9를 고르고, UART에 은닉값·점수, LED·7세그먼트에 클래스를 띄운다.</span><span class="st">보드 ⚠ 미실시</span></li></ol>
+      <ol class="steps" aria-label="이 장의 서브젝트와 순서"><li><span class="code">3-1</span><span><a href="#s3_1">8×8 입력 프레임</a><br>숫자 그림 64바이트를 보내면 <code>F:OK</code>가 오고, <code>p 36</code>으로 화소를 되읽으면 <code>P:17</code>입니다. 63바이트는 <code>F:SHORT</code>, 65바이트는 <code>F:LONG</code>이고, 프레임이 없을 때 <code>p</code>는 <code>ERR</code>입니다.</span><span class="st">1일 오전</span></li><li><span class="code">3-2</span><span><a href="#s3_2">4PE 3그룹 10분류 코어</a><br>선형 모델(명령 650개)을 실은 뒤 숫자 7·0·3 그림마다 <code>R</code>을 보내면 <code>R7</code>·<code>R0</code>·<code>R5</code>와 점수 10개가 옵니다. 숫자 3을 5로 잘못 고르는 것도 그대로 보입니다(이 모델의 정확도는 91.3%).</span><span class="st">1일 오후</span></li><li><span class="code">3-3</span><span><a href="#s3_3">64→10·64→8·8→10 Dense</a><br>같은 코어를 크기만 바꿔 씁니다. <code>H</code>는 64→8 계산의 점수 8개(MLP 1층 값), <code>G</code>는 8→10 계산 결과를 돌려줍니다.</span><span class="st">2일 오전</span></li><li><span class="code">3-4</span><span><a href="#s3_4">MLP 64→8→10</a><br><code>Z 9</code>로 은닉층 시프트를 정한 뒤 숫자 0~9 그림마다 <code>M</code>을 보내면 은닉값 8개, 점수 10개, 클래스가 옵니다. 10개 중 9개를 맞히고, 숫자 5는 6으로 틀립니다.</span><span class="st">2일 오후</span></li><li class="demo"><span class="code">시연</span><span><a href="#demo">장 시연</a><br>PC가 MNIST 시험 숫자를 8×8로 줄여 보내면, 보드가 CPU 없이 4PE 코어만으로 0~9를 고릅니다. UART로 은닉값과 점수가, LED와 7세그먼트로 클래스가 나옵니다.</span><span class="st">장 끝</span></li></ol>
     </section>
     <section class="section" id="s01">
       <h2><span class="num">01</span> 최종 구조도·가져오는 파일</h2>
@@ -121,7 +121,7 @@ details.full>summary{cursor:pointer;font-weight:600}
         <tbody><tr><td>input</td><td class="nw"><code>clk</code></td><td class="nw"><code>1</code></td><td class="nw">클록</td><td>보드 100 MHz 발진기 (W5)</td></tr><tr><td>input</td><td class="nw"><code>btnC</code></td><td class="nw"><code>1</code></td><td class="nw">리셋</td><td>가운데 버튼, 누르면 리셋 (Active-High). 가중치 BRAM은 남고 Bias·프레임은 지워진다</td></tr><tr><td>input</td><td class="nw"><code>uart_rxd</code></td><td class="nw"><code>1</code></td><td class="nw">보드 핀</td><td>USB-UART에서 들어오는 직렬 입력 (B18), 115200 bps 8N1</td></tr><tr><td>output</td><td class="nw"><code>uart_txd</code></td><td class="nw"><code>1</code></td><td class="nw">보드 핀</td><td>PC로 나가는 직렬 출력 (A18)</td></tr><tr><td>output</td><td class="nw"><code>led</code></td><td class="nw"><code>[15:0]</code></td><td class="nw">보드 핀</td><td>[9:0] 마지막 클래스 원-핫, [13] 긴 프레임, [14] 짧은 프레임, [15] 프레임 보관 중</td></tr><tr><td>output</td><td class="nw"><code>seg</code></td><td class="nw"><code>[6:0]</code></td><td class="nw">보드 핀</td><td>7세그먼트 a~g (active-low): 클래스 또는 읽은 화소 16진수</td></tr><tr><td>output</td><td class="nw"><code>an</code></td><td class="nw"><code>[3:0]</code></td><td class="nw">보드 핀</td><td>7세그먼트 자리 선택 (active-low)</td></tr><tr><td>output</td><td class="nw"><code>dp</code></td><td class="nw"><code>1</code></td><td class="nw">보드 핀</td><td>소수점 (항상 끔)</td></tr></tbody>
       </table></div>
       <p>장 Top은 배선만 합니다. 기능은 하위 모듈에 있고, 서브젝트 모듈은 <code>STAGE</code>(끝낸 서브젝트 수)에 따라 하나씩 들어옵니다.</p>
-      <p>8×8 MNIST 묶음: 3-1 프레임 버퍼의 읽기 포트 하나를 화소 읽기와 코어 넷이 나눠 쓴다. 3-3의 두 코어와 3-4 MLP는 같은 p3_group10_core를 모양만 바꿔 쓴다.</p>
+      <p>8×8 MNIST 묶음입니다. 3-1 프레임 버퍼의 읽기 포트 하나를 화소 읽기와 코어 넷이 나눠 씁니다. 3-3의 두 코어와 3-4 MLP는 같은 p3_group10_core를 크기만 바꿔 씁니다.</p>
       <div class="figure-wrap" tabindex="0" role="region" aria-label="도면 (가로 스크롤 가능)"><svg viewBox="0 0 1026 524" role="img" aria-label="p03_bank 실제 포트와 하위 모듈 구조">
 <rect x="250" y="30" width="526" height="454" rx="10" fill="#fff" stroke="#4635b1" stroke-width="2"/>
 <text x="513" y="54" font-size="18" font-weight="700" text-anchor="middle">p03_bank</text>
@@ -186,13 +186,13 @@ details.full>summary{cursor:pointer;font-weight:600}
 <text x="804" y="295" font-size="14" font-family="monospace">hidden_o[63:0]</text>
 <rect x="270" y="88" width="486" height="28" rx="5" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="5 3"/>
 <text x="282" y="107" font-size="14" font-family="monospace">p3_frame64_buffer  (u_frame)</text>
-<text x="744" y="107" font-size="12" text-anchor="end" fill="#4635b1">3-1 (구 13장)</text>
+<text x="744" y="107" font-size="12" text-anchor="end" fill="#4635b1">3-1에서 작성</text>
 <rect x="270" y="124" width="486" height="28" rx="5" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="5 3"/>
 <text x="282" y="143" font-size="14" font-family="monospace">p3_group10_core ×3  (u_c10 · u_h8 · u_o10)</text>
-<text x="744" y="143" font-size="12" text-anchor="end" fill="#4635b1">3-2 (구 14장)</text>
+<text x="744" y="143" font-size="12" text-anchor="end" fill="#4635b1">3-2에서 작성</text>
 <rect x="270" y="161" width="486" height="28" rx="5" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="5 3"/>
 <text x="282" y="180" font-size="14" font-family="monospace">p3_mlp_64_8_10  (u_mlp)</text>
-<text x="744" y="180" font-size="12" text-anchor="end" fill="#4635b1">3-4 (구 16장)</text>
+<text x="744" y="180" font-size="12" text-anchor="end" fill="#4635b1">3-4에서 작성</text>
 <rect x="250" y="499" width="16" height="12" fill="#edeafa" stroke="#4635b1"/><text x="272" y="510" font-size="13">장 뼈대 (제공)</text>
 <rect x="370" y="499" width="16" height="12" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="4 2"/><text x="392" y="510" font-size="13">서브젝트에서 작성</text>
 <text x="600" y="510" font-size="13">왼쪽 input · 오른쪽 output · 점선 = 클록·리셋</text>
@@ -200,22 +200,21 @@ details.full>summary{cursor:pointer;font-weight:600}
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>구분</th><th>파일</th></tr></thead>
         <tbody>
-          <tr><td>이전 장에서 가져오는 파일</td><td><ul><li><code>common/rtl/uart_rx.v · uart_tx.v · uart_core.v (1-1)</code></li><li><code>p01/rtl/p01_reset_sync.v · p01_hex4_display.v (1장 뼈대)</code></li><li><code>part03/ch02/rtl/dsp_multiplier.v (1-3과 같은 파일, VS Code 판 사본)</code></li><li><code>part03/mini_npu/rtl/npu_dsp_mac_lane.v (2-8과 같은 파일, VS Code 판 사본)</code></li></ul></td></tr>
+          <tr><td>이전 장에서 가져오는 파일</td><td><ul><li><code>common/rtl/uart_rx.v · uart_tx.v · uart_core.v (1-1)</code></li><li><code>p01/rtl/p01_reset_sync.v · p01_hex4_display.v (1장 뼈대)</code></li><li><code>part03/ch02/rtl/dsp_multiplier.v (1-3에서 만든 곱셈기)</code></li><li><code>part03/mini_npu/rtl/npu_dsp_mac_lane.v (2-8에서 만든 MAC lane)</code></li></ul></td></tr>
           <tr><td>3-1 8×8 입력 프레임</td><td><code>part03/ch13/rtl/p3_frame64_buffer.v</code></td></tr><tr><td>3-2 4PE 3그룹 10분류 코어</td><td><code>part03/ch14/rtl/p3_group10_core.v</code></td></tr><tr><td>3-3 64→10·64→8·8→10 Dense</td><td></td></tr><tr><td>3-4 MLP 64→8→10</td><td><code>part03/ch16/rtl/p3_relu_requant.v</code><br><code>part03/ch16/rtl/p3_mlp_64_8_10.v</code></td></tr>
-          <tr><td>장 뼈대 (02절에서 입력)</td><td><code>p03/rtl/p03_console.v</code><br><code>p03/rtl/p03_bank.v</code><br><code>p03/rtl/p03_view.v</code><br><code>p03/rtl/basys3_p03_top.v</code><br><code>p03/constraints/basys3_p03.xdc</code><br><code>p03/vivado/build_p03.tcl</code><br><code>p03/host/p03_send.py</code><br><code>p03/model/train_p03.py</code></td></tr>
+          <tr><td>장 뼈대 (다음 절에서 입력)</td><td><code>p03/rtl/p03_console.v</code><br><code>p03/rtl/p03_bank.v</code><br><code>p03/rtl/p03_view.v</code><br><code>p03/rtl/basys3_p03_top.v</code><br><code>p03/constraints/basys3_p03.xdc</code><br><code>p03/vivado/build_p03.tcl</code><br><code>p03/host/p03_send.py</code><br><code>p03/model/train_p03.py</code></td></tr>
         </tbody>
       </table></div>
     </section>
     <section class="section" id="s02">
       <h2><span class="num">02</span> 준비 · 장 뼈대</h2>
       <ol>
-        <li>VS Code에서 저장소 루트(<code>amd_soc_npu/</code>)를 엽니다. 도구: <code>iverilog</code> 12 이상, <code>python3</code>, Vivado 2024.2 (합성·비트스트림), 보드 터미널(115200 8N1) 또는 <code>pip install pyserial</code>.</li>
-        <li>아래 장 뼈대 파일을 경로 그대로 입력합니다. 서브젝트 모듈은 각 서브젝트 절에서 씁니다.</li>
-        <li>서브젝트 코드는 VS Code 판(브랜치 vscode/part03-ch13-31, 커밋 9203bfa)의 part03/ch13~16을 고치지 않고 가져왔다. 시뮬레이션 증거도 그 판의 로그다.</li>
-        <li>STAGE 값 = 끝낸 서브젝트 수: 3-1만 끝냈으면 1, 3-4까지 끝냈으면 4. 아직 없는 모듈은 들어가지 않으므로 빌드가 됩니다.</li>
+        <li>VS Code에서 저장소 루트(<code>amd_soc_npu/</code>)를 엽니다. 필요한 도구는 Vivado 2024.2, <code>python3</code>, 시뮬레이터 <code>iverilog</code> 12 이상, 그리고 PC에서 보드로 명령을 보낼 <code>pyserial</code>(<code>pip install pyserial</code>)입니다.</li>
+        <li>아래 장 뼈대 파일을 경로 그대로 입력합니다. 서브젝트 모듈은 각 서브젝트 절에서 작성합니다.</li>
+        <li><code>STAGE</code>는 끝낸 서브젝트 수입니다. 3-1만 끝냈으면 1, 3-4까지 끝냈으면 4입니다. 아직 작성하지 않은 모듈은 빌드에 들어가지 않으므로, 서브젝트를 하나 끝낼 때마다 바로 보드에 올려 볼 수 있습니다.</li>
       </ol>
       <div class="codeblock">
-        <div class="codebar"><span>p03/rtl/p03_console.v · verilog · 원본 · RTL_SIM 통과 2026-11-23</span></div>
+        <div class="codebar"><span>p03/rtl/p03_console.v · verilog</span></div>
         <pre tabindex="0"><code class="language-verilog">// 3장 디버그 콘솔: 8×8 MNIST 서브젝트를 UART 명령으로 확인한다. 1·2장과 같은 형식 (1바이트 명령 + 바이너리).
 //
 //   명령 페이로드                      응답                                         서브젝트 (STAGE)
@@ -479,7 +478,7 @@ endmodule
 `default_nettype wire</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>p03/rtl/p03_bank.v · verilog · 원본 · RTL_SIM 통과 2026-11-23</span></div>
+        <div class="codebar"><span>p03/rtl/p03_bank.v · verilog</span></div>
         <pre tabindex="0"><code class="language-verilog">// 3장 8×8 MNIST 묶음: 서브젝트 모듈(VS Code 판 구13~16장)을 STAGE만큼 쌓는다. 모듈 파일은 고치지 않는다.
 //   3-1 (STAGE&gt;=1) p3_frame64_buffer: 64원소 INT8 프레임 (구 13장)
 //   3-2 (STAGE&gt;=2) p3_group10_core 64→10: 4PE 3그룹, 점수·argmax (구 14장)        → 층 0
@@ -632,7 +631,7 @@ endmodule
 `default_nettype wire</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>p03/rtl/p03_view.v · verilog · 원본 · RTL_SIM 통과 2026-11-23</span></div>
+        <div class="codebar"><span>p03/rtl/p03_view.v · verilog</span></div>
         <pre tabindex="0"><code class="language-verilog">// 3장 LED·7세그먼트.
 //   LED[9:0]  마지막 실행(R·H·G·M)의 클래스 원-핫 (실행 전 꺼짐)
 //   LED[13]   마지막 프레임이 길었음 (F:LONG),  LED[14] 짧았음 (F:SHORT),  LED[15] 프레임을 들고 있음
@@ -664,7 +663,7 @@ endmodule
 `default_nettype wire</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>p03/rtl/basys3_p03_top.v · verilog · 원본 · RTL_SIM 통과 2026-11-23</span></div>
+        <div class="codebar"><span>p03/rtl/basys3_p03_top.v · verilog</span></div>
         <pre tabindex="0"><code class="language-verilog">// 3장 보드 Top: 8×8 MNIST (CPU 없음). 인스턴스와 배선만 둔다 (기능은 하위 모듈).
 //   PC가 손글씨 숫자를 8×8 INT8 프레임으로 보내면 보드가 4PE 코어로 0~9를 고른다.
 //   3-1 프레임 → 3-2 64→10 코어 → 3-3 64→8·8→10 → 3-4 MLP 64→8→10. STAGE = 끝낸 서브젝트 수 (1~4).
@@ -739,7 +738,7 @@ endmodule
 `default_nettype wire</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>p03/constraints/basys3_p03.xdc · xdc · 원본 · Vivado 실행 통과</span></div>
+        <div class="codebar"><span>p03/constraints/basys3_p03.xdc · xdc</span></div>
         <pre tabindex="0"><code class="language-xdc"># 3장 보드 Top (basys3_p03_top) 핀. Basys-3-Master.xdc 이름·핀 그대로 (12장 basys3_npu.xdc와 같은 핀, 스위치 없음).
 set_property -dict { PACKAGE_PIN W5 IOSTANDARD LVCMOS33 } [get_ports clk]
 set_property -dict { PACKAGE_PIN U18 IOSTANDARD LVCMOS33 } [get_ports btnC]
@@ -776,7 +775,7 @@ set_property -dict { PACKAGE_PIN L1 IOSTANDARD LVCMOS33 } [get_ports {led[15]}]
 create_clock -name sys_clk_pin -period 10.000 -waveform {0 5} [get_ports clk]</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>p03/vivado/build_p03.tcl · tcl · 원본 · Vivado 실행 통과</span></div>
+        <div class="codebar"><span>p03/vivado/build_p03.tcl · tcl</span></div>
         <pre tabindex="0"><code class="language-tcl"># 3장 보드 Top (8×8 MNIST, CPU 없음): STAGE 1~4 각각 합성 → 구현 → 타이밍 판정 → 비트스트림.
 # STAGE = 끝낸 서브젝트 수 (1 = 3-1 프레임 … 4 = 3-4 MLP). 서브젝트 모듈은 VS Code 판 part03/ 파일 그대로.
 # 실행 (저장소 루트): vivado -mode batch -nojournal -source p03/vivado/build_p03.tcl
@@ -860,7 +859,7 @@ close $fh
 if {!$all_ok} { error "P03_IMPL_TIMING_FAILED" }</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>p03/host/p03_send.py · python · 원본 · RTL_SIM 통과 2026-11-23</span></div>
+        <div class="codebar"><span>p03/host/p03_send.py · python</span></div>
         <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
 """3장 8×8 MNIST 보드 PC 쪽 도구: 명령을 바이트로 바꿔 보내고 응답을 출력한다.
 
@@ -967,7 +966,7 @@ if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>p03/model/train_p03.py · python · 원본 · RTL_SIM 통과 2026-11-23</span></div>
+        <div class="codebar"><span>p03/model/train_p03.py · python</span></div>
         <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
 """3장 8×8 MNIST 모델 학습·INT8 양자화·정수 평가 (PC, numpy).
 
@@ -1126,22 +1125,22 @@ if __name__ == "__main__":
       </div>
     </section>
     <section class="section" id="s3_1">
-      <h2><span class="num">03</span> 서브젝트 3-1 · 8×8 입력 프레임 <small>(구 13장)</small></h2>
-      <p class="verdict"><b>학습목표 (보드):</b> 숫자 그림 64바이트 → <code>F:OK</code>, 화소 되읽기 <code>p 36</code> → <code>P:17</code>. 63바이트는 <code>F:SHORT</code>, 65바이트는 <code>F:LONG</code>, 프레임 없을 때 <code>p</code>는 <code>ERR</code>.</p>
+      <h2><span class="num">03</span> 서브젝트 3-1 · 8×8 입력 프레임</h2>
+      <p class="verdict"><b>학습목표:</b> 숫자 그림 64바이트를 보내면 <code>F:OK</code>가 오고, <code>p 36</code>으로 화소를 되읽으면 <code>P:17</code>입니다. 63바이트는 <code>F:SHORT</code>, 65바이트는 <code>F:LONG</code>이고, 프레임이 없을 때 <code>p</code>는 <code>ERR</code>입니다.</p>
       <h3>보드에서 볼 것</h3>
       <ol>
-        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다: <code>vivado -mode batch -nojournal -source p03/vivado/build_p03.tcl -tclargs 1</code> → <code>build/vivado/p03_s1/basys3_p03_top.bit</code></li>
-        <li>Hardware Manager로 보드에 내려받고 <code>python3 p03/host/p03_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다 (115200 8N1). 3장 Top은 스위치를 쓰지 않습니다. 모델 적재는 PC 도구의 <code>load linear</code>·<code>load mlp</code>, 숫자 전송은 <code>digit 시험번호</code>.</li>
+        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다.<br><code>vivado -mode batch -nojournal -source p03/vivado/build_p03.tcl -tclargs 1</code><br>결과: <code>build/vivado/p03_s1/basys3_p03_top.bit</code></li>
+        <li>Hardware Manager로 보드에 내려받고, <code>python3 p03/host/p03_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다 (115200 8N1). 이 장은 스위치를 쓰지 않습니다. 모델은 PC 도구의 <code>load linear</code>·<code>load mlp</code>로 싣고, 숫자는 <code>digit 시험번호</code>로 보냅니다.</li>
       </ol>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>순서</th><th>PC 명령 (<code>p03_send.py</code>)</th><th>보드 응답 (UART)</th></tr></thead>
         <tbody><tr><td>1</td><td class="nw"><code>S</code></td><td class="nw"><code>I\r\n</code></td></tr><tr><td>2</td><td class="nw"><code>F 64 (시험 #0, 숫자 7)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td>3</td><td class="nw"><code>p 0</code></td><td class="nw"><code>P:00\r\n</code></td></tr><tr><td>4</td><td class="nw"><code>p 27</code></td><td class="nw"><code>P:00\r\n</code></td></tr><tr><td>5</td><td class="nw"><code>p 36</code></td><td class="nw"><code>P:17\r\n</code></td></tr><tr><td>6</td><td class="nw"><code>F 63 (짧은 프레임)</code></td><td class="nw"><code>F:SHORT\r\n</code></td></tr><tr><td>7</td><td class="nw"><code>p 0</code></td><td class="nw"><code>ERR\r\n</code></td></tr><tr><td>8</td><td class="nw"><code>F 65 (긴 프레임)</code></td><td class="nw"><code>F:LONG\r\n</code></td></tr><tr><td>9</td><td class="nw"><code>F 64 (시험 #0, 숫자 7)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td>10</td><td class="nw"><code>R</code></td><td class="nw"><code>?\r\n</code></td></tr></tbody>
       </table></div>
-      <p>끝난 뒤 LED: <code>0x8000</code> (LED[9:0] 마지막 클래스 원-핫, LED15 프레임 보관, LED14 짧은 프레임, LED13 긴 프레임. 7세그먼트는 클래스 또는 읽은 화소). 응답 출처: 장 Top 시뮬레이션 STAGE=1 (<code>p03/validation/rtl_sim_20261123.log</code>, 바이트 단위 대조).</p>
-      <h3>추가 코드 (구 13장 그대로, VS Code 판)</h3>
+      <p>끝나면 LED가 <code>0x8000</code>입니다 (LED[9:0]은 마지막 클래스 번호 하나가 켜지고, LED15는 프레임 보관, LED14는 짧은 프레임, LED13은 긴 프레임입니다. 7세그먼트에는 클래스나 읽은 화소가 보입니다).</p>
+      <h3>작성할 코드</h3>
 
       <div class="codeblock">
-        <div class="codebar"><span>part03/ch13/rtl/p3_frame64_buffer.v · verilog · 원본 · RTL_SIM 통과 날짜 미기록</span></div>
+        <div class="codebar"><span>part03/ch13/rtl/p3_frame64_buffer.v · verilog</span></div>
         <pre tabindex="0"><code class="language-verilog">`timescale 1ns/1ps
 // (추가) 13장: 8×8(64원소) signed INT8 입력 프레임 수신 버퍼.
 // 바이트 스트림(valid/ready/last)을 행 우선 순서(addr=row*8+col)로 저장한다.
@@ -1219,16 +1218,17 @@ module p3_frame64_buffer(
     end
 endmodule</code></pre>
       </div>
-      <h3>시뮬레이션 기대 화면</h3>
-      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 서브젝트 단독 시험</span></div>
+      <h3>시뮬레이션</h3>
+      <p>보드에 올리기 전에 이 서브젝트 모듈만 먼저 시험합니다. 아래와 같은 줄이 나오면 됩니다.</p>
+      <div class="codeblock"><div class="codebar"><span>터미널 · 저장소 루트</span></div>
         <pre tabindex="0"><code>bash part03/ch13/scripts/run_sim.sh</code></pre></div>
-      <div class="codeblock"><div class="codebar"><span>기대 출력 (Icarus Verilog 12.0 · 날짜 미기록 · 출처 part03/ch13/validation/rtl_sim.log)</span></div>
+      <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
         <pre tabindex="0"><code>PYTHON_FRAME64_SELF_TEST_PASS items=2664 frames=36 short=2 long=3 seed=1313
 RTL_SIM_PASS FRAME64 frames=36 short=2 long=3
 PYTHON_RTL_COMPARE_PASS frames=36 bit_exact=1</code></pre></div>
-      <details class="full"><summary>이 서브젝트의 테스트벤치·기준 모델 (전체 코드 3개)</summary>
+      <details class="full"><summary>테스트벤치와 기준 모델 (전체 코드 3개)</summary>
       <div class="codeblock">
-        <div class="codebar"><span>part03/ch13/tb/tb_p3_frame64_buffer.sv · systemverilog · 원본 · RTL_SIM 통과 날짜 미기록</span></div>
+        <div class="codebar"><span>part03/ch13/tb/tb_p3_frame64_buffer.sv · systemverilog</span></div>
         <pre tabindex="0"><code class="language-systemverilog">// (추가) 13장 p3_frame64_buffer 자동 판정 테스트벤치.
 // Python이 만든 스트림(D 데이터/R Reset/Q FULL 중 Reset)을 무작위 valid 간격으로 넣고,
 // 유효 프레임을 1클록 지연 읽기 포트로 64개 모두 읽어 actual 파일에 기록한다(Python이 비트 단위 비교).
@@ -1389,7 +1389,7 @@ module tb_p3_frame64_buffer;
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>part03/ch13/reference/frame64_reference.py · python · 원본 · RTL_SIM 통과 날짜 미기록</span></div>
+        <div class="codebar"><span>part03/ch13/reference/frame64_reference.py · python</span></div>
         <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
 """13장: 8×8 INT8 입력 프레임 계약 기준모델·시험 벡터 생성·RTL 결과 비교.
 
@@ -1585,7 +1585,7 @@ if __name__ == "__main__":
         generate(a.out)</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>part03/host_tools/p3_integer_reference.py · python · 원본 · RTL_SIM 통과 날짜 미기록</span></div>
+        <div class="codebar"><span>part03/host_tools/p3_integer_reference.py · python</span></div>
         <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
 """제3부 13~19/28장: PC 정수 기준모델. RTL 동작 검증 결과와 별개."""
 from __future__ import annotations
@@ -1675,48 +1675,29 @@ if __name__ == "__main__":
     selftest()</code></pre>
       </div>
       </details>
-      <h3>판정 줄</h3>
+      <h3>확인할 것</h3>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
-        <tbody><tr><td><code>RTL_SIM_PASS FRAME64 frames=36 short=2 long=3</code></td><td>정상 36·짧은 2·긴 3 프레임 판정</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS bit_exact=1</code></td><td>저장된 64원소가 Python 기준과 비트 단위로 같음</td></tr><tr><td>장 Top STAGE=1 시뮬레이션</td><td>위 '보드에서 볼 것' 응답과 바이트 단위로 같음 · 통과</td></tr>
-        <tr><td>장 Top STAGE=1 합성·타이밍</td><td>통과 · WNS=2.863 WHS=0.042 DRC_ERRORS=0 LUT=504 FF=317 DSP48E1=0 RAMB18=0</td></tr></tbody>
+        <tbody><tr><td><code>RTL_SIM_PASS FRAME64 frames=36 short=2 long=3</code></td><td>정상 프레임 36개, 짧은 프레임 2개, 긴 프레임 3개를 올바르게 판정합니다.</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS bit_exact=1</code></td><td>저장된 64원소가 Python 기준과 비트 단위로 같습니다.</td></tr><tr><td>보드 응답</td><td>위 '보드에서 볼 것' 표의 응답과 한 글자도 다르지 않아야 합니다.</td></tr></tbody>
       </table></div>
-      <div class="gate-row">
-        <div class="gate pass">
-          <b>HOST_MODEL_PASS</b>
-          <span>PYTHON_FRAME64_SELF_TEST_PASS items=2664 frames=36 short=2 long=3 seed=1313</span>
-        </div>
-        <div class="gate pass">
-          <b>RTL_SIM_PASS</b>
-          <span>RTL_SIM_PASS FRAME64 frames=36 short=2 long=3 · Icarus Verilog 12.0 · 날짜 미기록</span>
-        </div>
-        <div class="gate pass">
-          <b>SYNTH_TIMING_PASS</b>
-          <span>장 Top STAGE 1 배선 후 WNS 2.863 ns · WHS 0.042 ns (구 장 단독 OOC 판정 없음) · 2026-11-23</span>
-        </div>
-        <div class="gate todo">
-          <b>BOARD_PASS</b>
-          <span>⚠ 미실시 · 현재 실물 보드 확인 불가</span>
-        </div>
-      </div>
     </section>
     <section class="section" id="s3_2">
-      <h2><span class="num">04</span> 서브젝트 3-2 · 4PE 3그룹 10분류 코어 <small>(구 14장)</small></h2>
-      <p class="verdict"><b>학습목표 (보드):</b> 선형 모델 650개 명령을 적재한 뒤 숫자 7·0·3 그림마다 <code>R</code> → <code>R7</code>·<code>R0</code>·<code>R5</code>와 점수 10개. 숫자 3을 5로 잘못 고르는 것도 그대로 보인다 (정확도 91.3%).</p>
+      <h2><span class="num">04</span> 서브젝트 3-2 · 4PE 3그룹 10분류 코어</h2>
+      <p class="verdict"><b>학습목표:</b> 선형 모델(명령 650개)을 실은 뒤 숫자 7·0·3 그림마다 <code>R</code>을 보내면 <code>R7</code>·<code>R0</code>·<code>R5</code>와 점수 10개가 옵니다. 숫자 3을 5로 잘못 고르는 것도 그대로 보입니다(이 모델의 정확도는 91.3%).</p>
       <h3>보드에서 볼 것</h3>
       <ol>
-        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다: <code>vivado -mode batch -nojournal -source p03/vivado/build_p03.tcl -tclargs 2</code> → <code>build/vivado/p03_s2/basys3_p03_top.bit</code></li>
-        <li>Hardware Manager로 보드에 내려받고 <code>python3 p03/host/p03_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다 (115200 8N1). 3장 Top은 스위치를 쓰지 않습니다. 모델 적재는 PC 도구의 <code>load linear</code>·<code>load mlp</code>, 숫자 전송은 <code>digit 시험번호</code>.</li>
+        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다.<br><code>vivado -mode batch -nojournal -source p03/vivado/build_p03.tcl -tclargs 2</code><br>결과: <code>build/vivado/p03_s2/basys3_p03_top.bit</code></li>
+        <li>Hardware Manager로 보드에 내려받고, <code>python3 p03/host/p03_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다 (115200 8N1). 이 장은 스위치를 쓰지 않습니다. 모델은 PC 도구의 <code>load linear</code>·<code>load mlp</code>로 싣고, 숫자는 <code>digit 시험번호</code>로 보냅니다.</li>
       </ol>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>순서</th><th>PC 명령 (<code>p03_send.py</code>)</th><th>보드 응답 (UART)</th></tr></thead>
         <tbody><tr><td>1</td><td class="nw"><code>python3 … load linear (650개 명령)</code></td><td class="nw"><code>OK\r\n ×650</code></td></tr><tr><td>2</td><td class="nw"><code>F 64 (시험 #0, 숫자 7)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td>3</td><td class="nw"><code>R</code></td><td class="nw"><code>R7:000020E,FFFA34A,FFFF7E6,000189D,FFFD57A,FFFFA11,FFF9757,0005A9D,FFFEF87,00019AD\r\n</code></td></tr><tr><td>4</td><td class="nw"><code>F 64 (시험 #3, 숫자 0)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td>5</td><td class="nw"><code>R</code></td><td class="nw"><code>R0:00056AD,FFF5019,FFFF949,FFFE232,FFFB09F,00003AF,FFFF540,FFFE539,FFFE907,FFFE320\r\n</code></td></tr><tr><td>6</td><td class="nw"><code>F 64 (시험 #18, 숫자 3)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td>7</td><td class="nw"><code>R</code></td><td class="nw"><code>R5:FFFBEBD,FFFB224,FFFEC1F,FFFFEC3,FFFC97C,0000227,FFFE567,FFFB01B,FFFF259,FFF953F\r\n</code></td></tr></tbody>
       </table></div>
-      <p>끝난 뒤 LED: <code>0x8020</code> (LED[9:0] 마지막 클래스 원-핫, LED15 프레임 보관, LED14 짧은 프레임, LED13 긴 프레임. 7세그먼트는 클래스 또는 읽은 화소). 응답 출처: 장 Top 시뮬레이션 STAGE=2 (<code>p03/validation/rtl_sim_20261123.log</code>, 바이트 단위 대조).</p>
-      <h3>추가 코드 (구 14장 그대로, VS Code 판)</h3>
+      <p>끝나면 LED가 <code>0x8020</code>입니다 (LED[9:0]은 마지막 클래스 번호 하나가 켜지고, LED15는 프레임 보관, LED14는 짧은 프레임, LED13은 긴 프레임입니다. 7세그먼트에는 클래스나 읽은 화소가 보입니다).</p>
+      <h3>작성할 코드</h3>
 
       <div class="codeblock">
-        <div class="codebar"><span>part03/ch14/rtl/p3_group10_core.v · verilog · 원본 · RTL_SIM 통과 날짜 미기록</span></div>
+        <div class="codebar"><span>part03/ch14/rtl/p3_group10_core.v · verilog</span></div>
         <pre tabindex="0"><code class="language-verilog">`timescale 1ns/1ps
 // (추가) 14장: 4PE를 3그룹(4+4+2)으로 재사용하는 64입력·10분류 정수 Dense 코어.
 // class = 4*group + lane. group 2의 lane 2·3은 무효이므로 valid를 막아 누산하지 않고 점수에도 쓰지 않는다.
@@ -1961,16 +1942,17 @@ module p3_group10_core #(
     // synthesis translate_on
 endmodule</code></pre>
       </div>
-      <h3>시뮬레이션 기대 화면</h3>
-      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 서브젝트 단독 시험</span></div>
+      <h3>시뮬레이션</h3>
+      <p>보드에 올리기 전에 이 서브젝트 모듈만 먼저 시험합니다. 아래와 같은 줄이 나오면 됩니다.</p>
+      <div class="codeblock"><div class="codebar"><span>터미널 · 저장소 루트</span></div>
         <pre tabindex="0"><code>bash part03/ch14/scripts/run_sim.sh</code></pre></div>
-      <div class="codeblock"><div class="codebar"><span>기대 출력 (Icarus Verilog 12.0 · 날짜 미기록 · 출처 part03/ch14/validation/rtl_sim.log)</span></div>
+      <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
         <pre tabindex="0"><code>PYTHON_GROUP10_SELF_TEST_PASS cases=41 groups=4+4+2 seed=1414
 RTL_SIM_PASS GROUP10 cases=41 start_to_done_cycles=206 errors_checked=4
 PYTHON_RTL_COMPARE_PASS cases=41 scores=10 class=1 bit_exact=1</code></pre></div>
-      <details class="full"><summary>이 서브젝트의 테스트벤치·기준 모델 (전체 코드 2개)</summary>
+      <details class="full"><summary>테스트벤치와 기준 모델 (전체 코드 2개)</summary>
       <div class="codeblock">
-        <div class="codebar"><span>part03/ch14/tb/tb_p3_group10_core.sv · systemverilog · 원본 · RTL_SIM 통과 날짜 미기록</span></div>
+        <div class="codebar"><span>part03/ch14/tb/tb_p3_group10_core.sv · systemverilog</span></div>
         <pre tabindex="0"><code class="language-systemverilog">// (추가) 14장 p3_group10_core 자동 판정 테스트벤치.
 // 13장 p3_frame64_buffer 실제 RTL과 연결: 스트림 → 프레임 버퍼 → 4PE 3그룹 → 10점수·Class.
 // Python 벡터(가중치·Bias·입력)를 쓰기 포트로 적재하고 결과를 actual에 기록한다(Python이 비트 단위 비교).
@@ -2158,7 +2140,7 @@ module tb_p3_group10_core;
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>part03/ch14/reference/group10_reference.py · python · 원본 · RTL_SIM 통과 날짜 미기록</span></div>
+        <div class="codebar"><span>part03/ch14/reference/group10_reference.py · python</span></div>
         <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
 """14장: 4PE 3그룹(4+4+2) 10분류 코어 기준모델·시험 벡터 생성·RTL 결과 비교.
 
@@ -2289,51 +2271,33 @@ if __name__ == "__main__":
         generate(a.out)</code></pre>
       </div>
       </details>
-      <h3>판정 줄</h3>
+      <h3>확인할 것</h3>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
-        <tbody><tr><td><code>RTL_SIM_PASS GROUP10 start_to_done_cycles=206</code></td><td>3그룹(4+4+2) 처리 206클록, 오류 4종 확인</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS scores=10 class=1</code></td><td>점수 10개와 클래스가 Python 기준과 같음</td></tr><tr><td>장 Top STAGE=2 시뮬레이션</td><td>위 '보드에서 볼 것' 응답과 바이트 단위로 같음 · 통과</td></tr>
-        <tr><td>장 Top STAGE=2 합성·타이밍</td><td>통과 · WNS=1.084 WHS=0.014 DRC_ERRORS=0 LUT=1704 FF=1752 DSP48E1=4 RAMB18=4</td></tr></tbody>
+        <tbody><tr><td><code>RTL_SIM_PASS GROUP10 start_to_done_cycles=206</code></td><td>10클래스를 세 그룹(4+4+2)으로 나눠 206클록에 처리합니다. 오류 상황 4종도 확인합니다.</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS scores=10 class=1</code></td><td>점수 10개와 클래스가 Python 기준과 같습니다.</td></tr><tr><td>보드 응답</td><td>위 '보드에서 볼 것' 표의 응답과 한 글자도 다르지 않아야 합니다.</td></tr></tbody>
       </table></div>
-      <div class="gate-row">
-        <div class="gate pass">
-          <b>HOST_MODEL_PASS</b>
-          <span>PYTHON_GROUP10_SELF_TEST_PASS cases=41 groups=4+4+2 seed=1414</span>
-        </div>
-        <div class="gate pass">
-          <b>RTL_SIM_PASS</b>
-          <span>RTL_SIM_PASS GROUP10 cases=41 start_to_done_cycles=206 error… · Icarus Verilog 12.0 · 날짜 미기록</span>
-        </div>
-        <div class="gate pass">
-          <b>SYNTH_TIMING_PASS</b>
-          <span>장 Top STAGE 2 배선 후 WNS 1.084 ns · WHS 0.014 ns (구 장 단독 OOC 판정 없음) · 2026-11-23</span>
-        </div>
-        <div class="gate todo">
-          <b>BOARD_PASS</b>
-          <span>⚠ 미실시 · 현재 실물 보드 확인 불가</span>
-        </div>
-      </div>
     </section>
     <section class="section" id="s3_3">
-      <h2><span class="num">05</span> 서브젝트 3-3 · 64→10·64→8·8→10 Dense <small>(구 15장)</small></h2>
-      <p class="verdict"><b>학습목표 (보드):</b> 같은 코어를 모양만 바꿔: <code>H</code> → 64→8 점수 8개(MLP 1층 원시값), <code>G</code> → 8→10 (프레임 앞 8원소). 새 연산 RTL 없음.</p>
+      <h2><span class="num">05</span> 서브젝트 3-3 · 64→10·64→8·8→10 Dense</h2>
+      <p class="verdict"><b>학습목표:</b> 같은 코어를 크기만 바꿔 씁니다. <code>H</code>는 64→8 계산의 점수 8개(MLP 1층 값), <code>G</code>는 8→10 계산 결과를 돌려줍니다.</p>
       <h3>보드에서 볼 것</h3>
       <ol>
-        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다: <code>vivado -mode batch -nojournal -source p03/vivado/build_p03.tcl -tclargs 3</code> → <code>build/vivado/p03_s3/basys3_p03_top.bit</code></li>
-        <li>Hardware Manager로 보드에 내려받고 <code>python3 p03/host/p03_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다 (115200 8N1). 3장 Top은 스위치를 쓰지 않습니다. 모델 적재는 PC 도구의 <code>load linear</code>·<code>load mlp</code>, 숫자 전송은 <code>digit 시험번호</code>.</li>
+        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다.<br><code>vivado -mode batch -nojournal -source p03/vivado/build_p03.tcl -tclargs 3</code><br>결과: <code>build/vivado/p03_s3/basys3_p03_top.bit</code></li>
+        <li>Hardware Manager로 보드에 내려받고, <code>python3 p03/host/p03_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다 (115200 8N1). 이 장은 스위치를 쓰지 않습니다. 모델은 PC 도구의 <code>load linear</code>·<code>load mlp</code>로 싣고, 숫자는 <code>digit 시험번호</code>로 보냅니다.</li>
       </ol>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>순서</th><th>PC 명령 (<code>p03_send.py</code>)</th><th>보드 응답 (UART)</th></tr></thead>
         <tbody><tr><td>1</td><td class="nw"><code>python3 … load mlp (610개 명령)</code></td><td class="nw"><code>OK\r\n ×610</code></td></tr><tr><td>2</td><td class="nw"><code>F 64 (시험 #18, 숫자 3)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td>3</td><td class="nw"><code>H</code></td><td class="nw"><code>H4:000429E,0001A45,000420A,0003618,0004984,0003F12,FFFEB90,00001C4\r\n</code></td></tr><tr><td>4</td><td class="nw"><code>G</code></td><td class="nw"><code>G7:000006D,000037A,000000C,00002FE,FFFFB2A,00001EB,0000267,00004DD,FFFFE7E,FFFF6E3\r\n</code></td></tr></tbody>
       </table></div>
-      <p>끝난 뒤 LED: <code>0x8080</code> (LED[9:0] 마지막 클래스 원-핫, LED15 프레임 보관, LED14 짧은 프레임, LED13 긴 프레임. 7세그먼트는 클래스 또는 읽은 화소). 응답 출처: 장 Top 시뮬레이션 STAGE=3 (<code>p03/validation/rtl_sim_20261123.log</code>, 바이트 단위 대조).</p>
-      <h3>추가 코드 (구 15장 그대로, VS Code 판)</h3>
-      <p>새 RTL 파일이 없습니다. 3-2 <code>p3_group10_core</code>를 <code>IN_LEN</code>·<code>OUT_N</code> 파라미터만 바꿔 씁니다 (장 Top의 <code>u_h8</code>·<code>u_o10</code>).</p>
+      <p>끝나면 LED가 <code>0x8080</code>입니다 (LED[9:0]은 마지막 클래스 번호 하나가 켜지고, LED15는 프레임 보관, LED14는 짧은 프레임, LED13은 긴 프레임입니다. 7세그먼트에는 클래스나 읽은 화소가 보입니다).</p>
+      <h3>작성할 코드</h3>
+      <p>새로 작성할 RTL은 없습니다. 3-2의 <code>p3_group10_core</code>를 <code>IN_LEN</code>·<code>OUT_N</code> 파라미터만 바꿔 장 Top에 두 개 더 둡니다(<code>u_h8</code>, <code>u_o10</code>).</p>
 
-      <h3>시뮬레이션 기대 화면</h3>
-      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 서브젝트 단독 시험</span></div>
+      <h3>시뮬레이션</h3>
+      <p>보드에 올리기 전에 이 서브젝트 모듈만 먼저 시험합니다. 아래와 같은 줄이 나오면 됩니다.</p>
+      <div class="codeblock"><div class="codebar"><span>터미널 · 저장소 루트</span></div>
         <pre tabindex="0"><code>bash part03/ch15/scripts/run_sim.sh</code></pre></div>
-      <div class="codeblock"><div class="codebar"><span>기대 출력 (Icarus Verilog 12.0 · 날짜 미기록 · 출처 part03/ch15/validation/rtl_sim.log)</span></div>
+      <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
         <pre tabindex="0"><code>PYTHON_DENSE_SELF_TEST_PASS shape=64x10 ops=5238 frames=20
 RTL_SIM_PASS DENSE 64x10 frames=20 w_writes=5127 b_writes=91 cycles=206
 PYTHON_RTL_COMPARE_PASS frames=20 bit_exact=1
@@ -2343,9 +2307,9 @@ PYTHON_RTL_COMPARE_PASS frames=20 bit_exact=1
 PYTHON_DENSE_SELF_TEST_PASS shape=8x10 ops=758 frames=20
 RTL_SIM_PASS DENSE 8x10 frames=20 w_writes=647 b_writes=91 cycles=38
 PYTHON_RTL_COMPARE_PASS frames=20 bit_exact=1</code></pre></div>
-      <details class="full"><summary>이 서브젝트의 테스트벤치·기준 모델 (전체 코드 2개)</summary>
+      <details class="full"><summary>테스트벤치와 기준 모델 (전체 코드 2개)</summary>
       <div class="codeblock">
-        <div class="codebar"><span>part03/ch15/tb/tb_p3_dense_layer.sv · systemverilog · 원본 · RTL_SIM 통과 날짜 미기록</span></div>
+        <div class="codebar"><span>part03/ch15/tb/tb_p3_dense_layer.sv · systemverilog</span></div>
         <pre tabindex="0"><code class="language-systemverilog">// (추가) 15장 정수 Dense 계층 자동 판정 테스트벤치(64→10 분류기, 64→8, 8→10).
 // 14장 p3_group10_core를 IN_LEN/OUT_N 파라미터로 재사용하고, x는 13장 p3_frame64_buffer에서 읽는다.
 // 명령 파일(W/B/F)을 순서대로 실행해 모델을 유지·부분 갱신하며 프레임마다 점수·Class를 기록한다.
@@ -2463,7 +2427,7 @@ module tb_p3_dense_layer;
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>part03/ch15/reference/dense_reference.py · python · 원본 · RTL_SIM 통과 날짜 미기록</span></div>
+        <div class="codebar"><span>part03/ch15/reference/dense_reference.py · python</span></div>
         <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
 """15장: 정수 Dense 계층(64→10, 64→8, 8→10) 기준모델·시험 명령 생성·RTL 결과 비교.
 
@@ -2613,48 +2577,29 @@ if __name__ == "__main__":
         generate(a.out, a.in_len, a.out_n)</code></pre>
       </div>
       </details>
-      <h3>판정 줄</h3>
+      <h3>확인할 것</h3>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
-        <tbody><tr><td><code>RTL_SIM_PASS DENSE 64x10 / 64x8 / 8x10</code></td><td>세 모양 각 20프레임, 처리 206·138·38클록</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS bit_exact=1 (×3)</code></td><td>세 모양 모두 Python 기준과 같음</td></tr><tr><td>장 Top STAGE=3 시뮬레이션</td><td>위 '보드에서 볼 것' 응답과 바이트 단위로 같음 · 통과</td></tr>
-        <tr><td>장 Top STAGE=3 합성·타이밍</td><td>통과 · WNS=0.755 WHS=0.036 DRC_ERRORS=0 LUT=2797 FF=2849 DSP48E1=12 RAMB18=12</td></tr></tbody>
+        <tbody><tr><td><code>RTL_SIM_PASS DENSE 64x10 / 64x8 / 8x10</code></td><td>세 가지 크기를 각각 20프레임씩 돌리고, 처리 시간은 206·138·38클록입니다.</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS bit_exact=1 (×3)</code></td><td>세 크기 모두 Python 기준과 같습니다.</td></tr><tr><td>보드 응답</td><td>위 '보드에서 볼 것' 표의 응답과 한 글자도 다르지 않아야 합니다.</td></tr></tbody>
       </table></div>
-      <div class="gate-row">
-        <div class="gate pass">
-          <b>HOST_MODEL_PASS</b>
-          <span>PYTHON_DENSE_SELF_TEST_PASS shape=64x10 ops=5238 frames=20</span>
-        </div>
-        <div class="gate pass">
-          <b>RTL_SIM_PASS</b>
-          <span>RTL_SIM_PASS DENSE 64x10 frames=20 w_writes=5127 b_writes=91… 외 2건 · Icarus Verilog 12.0 · 날짜 미기록</span>
-        </div>
-        <div class="gate pass">
-          <b>SYNTH_TIMING_PASS</b>
-          <span>장 Top STAGE 3 배선 후 WNS 0.755 ns · WHS 0.036 ns (구 장 단독 OOC 판정 없음) · 2026-11-23</span>
-        </div>
-        <div class="gate todo">
-          <b>BOARD_PASS</b>
-          <span>⚠ 미실시 · 현재 실물 보드 확인 불가</span>
-        </div>
-      </div>
     </section>
     <section class="section" id="s3_4">
-      <h2><span class="num">06</span> 서브젝트 3-4 · MLP 64→8→10 <small>(구 16장)</small></h2>
-      <p class="verdict"><b>학습목표 (보드):</b> <code>Z 9</code>(은닉 shift) 뒤 숫자 0~9 그림마다 <code>M</code> → 은닉 8개·점수 10개·클래스. 10개 중 9개 맞음(숫자 5 → 6).</p>
+      <h2><span class="num">06</span> 서브젝트 3-4 · MLP 64→8→10</h2>
+      <p class="verdict"><b>학습목표:</b> <code>Z 9</code>로 은닉층 시프트를 정한 뒤 숫자 0~9 그림마다 <code>M</code>을 보내면 은닉값 8개, 점수 10개, 클래스가 옵니다. 10개 중 9개를 맞히고, 숫자 5는 6으로 틀립니다.</p>
       <h3>보드에서 볼 것</h3>
       <ol>
-        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다: <code>vivado -mode batch -nojournal -source p03/vivado/build_p03.tcl -tclargs 4</code> → <code>build/vivado/p03_s4/basys3_p03_top.bit</code></li>
-        <li>Hardware Manager로 보드에 내려받고 <code>python3 p03/host/p03_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다 (115200 8N1). 3장 Top은 스위치를 쓰지 않습니다. 모델 적재는 PC 도구의 <code>load linear</code>·<code>load mlp</code>, 숫자 전송은 <code>digit 시험번호</code>.</li>
+        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다.<br><code>vivado -mode batch -nojournal -source p03/vivado/build_p03.tcl -tclargs 4</code><br>결과: <code>build/vivado/p03_s4/basys3_p03_top.bit</code></li>
+        <li>Hardware Manager로 보드에 내려받고, <code>python3 p03/host/p03_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다 (115200 8N1). 이 장은 스위치를 쓰지 않습니다. 모델은 PC 도구의 <code>load linear</code>·<code>load mlp</code>로 싣고, 숫자는 <code>digit 시험번호</code>로 보냅니다.</li>
       </ol>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>순서</th><th>PC 명령 (<code>p03_send.py</code>)</th><th>보드 응답 (UART)</th></tr></thead>
         <tbody><tr><td>1</td><td class="nw"><code>Z 9</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>2</td><td class="nw"><code>F 64 (시험 #3, 숫자 0)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td>3</td><td class="nw"><code>M</code></td><td class="nw"><code>M0:45060C0A1500001F 0000C5A,FFFE009,FFFFF1D,FFFFAE6,FFFF486,000007B,FFFFC4A,FFFFF78,FFFFC5B,FFFF89E\r\n</code></td></tr><tr><td>4</td><td class="nw"><code>F 64 (시험 #2, 숫자 1)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td>5</td><td class="nw"><code>M</code></td><td class="nw"><code>M1:000D0F0010100006 FFFF877,0000796,00000B4,FFFFF92,FFFFBCE,FFFFEFB,FFFFE8F,FFFFFC3,FFFFF66,FFFFA59\r\n</code></td></tr><tr><td>6</td><td class="nw"><code>F 64 (시험 #1, 숫자 2)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td>7</td><td class="nw"><code>M</code></td><td class="nw"><code>M2:112F3F503000001A 000038F,FFFFFD0,0000FEB,000041B,FFFD02E,00008ED,000020E,FFFCFA6,0000726,FFFCEFA\r\n</code></td></tr><tr><td>8</td><td class="nw"><code>F 64 (시험 #18, 숫자 3)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td>9</td><td class="nw"><code>M</code></td><td class="nw"><code>M3:210D211B25200001 FFFF86C,FFFFA94,FFFFE0D,000027F,FFFF7C7,0000238,FFFFF97,FFFF0DC,00000C9,FFFF074\r\n</code></td></tr><tr><td>10</td><td class="nw"><code>F 64 (시험 #4, 숫자 4)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td>11</td><td class="nw"><code>M</code></td><td class="nw"><code>M4:370206002818000A FFFFBE7,FFFED06,FFFFC0A,FFFFA34,0000659,FFFFE5D,FFFFDD2,FFFFCC3,FFFFB77,000025A\r\n</code></td></tr><tr><td>12</td><td class="nw"><code>F 64 (시험 #8, 숫자 5)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td>13</td><td class="nw"><code>M</code></td><td class="nw"><code>M6:4C1A0E06360B0000 FFFFEF0,FFFE924,FFFFCA8,FFFF1FD,000058A,00001DA,0000897,FFFED9D,FFFFF5F,FFFF911\r\n</code></td></tr><tr><td>14</td><td class="nw"><code>F 64 (시험 #11, 숫자 6)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td>15</td><td class="nw"><code>M</code></td><td class="nw"><code>M6:36153105300C0007 FFFFDCB,FFFF145,0000059,FFFFCEF,FFFFB26,FFFFE0F,00008CA,FFFF814,0000269,FFFEC2C\r\n</code></td></tr><tr><td>16</td><td class="nw"><code>F 64 (시험 #0, 숫자 7)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td>17</td><td class="nw"><code>M</code></td><td class="nw"><code>M7:210000070323002D 00000BF,FFFF0D4,FFFFC87,00001DA,FFFEF33,FFFFB31,FFFEAF5,0000C9A,FFFFC18,0000316\r\n</code></td></tr><tr><td>18</td><td class="nw"><code>F 64 (시험 #61, 숫자 8)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td>19</td><td class="nw"><code>M</code></td><td class="nw"><code>M8:4E2E110E36280022 FFFFA44,FFFEB0A,FFFFCCA,FFFF1CF,FFFF268,FFFFBB8,FFFF8F5,FFFEFEA,000036E,FFFF7B3\r\n</code></td></tr><tr><td>20</td><td class="nw"><code>F 64 (시험 #7, 숫자 9)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td>21</td><td class="nw"><code>M</code></td><td class="nw"><code>M9:2B10000C2C3B0011 FFFEFFA,FFFF898,FFFF9B7,FFFFA9D,FFFFF84,FFFFC5B,FFFF2C8,FFFF6BC,FFFFE2D,000052D\r\n</code></td></tr></tbody>
       </table></div>
-      <p>끝난 뒤 LED: <code>0x8200</code> (LED[9:0] 마지막 클래스 원-핫, LED15 프레임 보관, LED14 짧은 프레임, LED13 긴 프레임. 7세그먼트는 클래스 또는 읽은 화소). 응답 출처: 장 Top 시뮬레이션 STAGE=4 (<code>p03/validation/rtl_sim_20261123.log</code>, 바이트 단위 대조).</p>
-      <h3>추가 코드 (구 16장 그대로, VS Code 판)</h3>
+      <p>끝나면 LED가 <code>0x8200</code>입니다 (LED[9:0]은 마지막 클래스 번호 하나가 켜지고, LED15는 프레임 보관, LED14는 짧은 프레임, LED13은 긴 프레임입니다. 7세그먼트에는 클래스나 읽은 화소가 보입니다).</p>
+      <h3>작성할 코드</h3>
 
       <div class="codeblock">
-        <div class="codebar"><span>part03/ch16/rtl/p3_relu_requant.v · verilog · 원본 · RTL_SIM 통과 날짜 미기록</span></div>
+        <div class="codebar"><span>part03/ch16/rtl/p3_relu_requant.v · verilog</span></div>
         <pre tabindex="0"><code class="language-verilog">`timescale 1ns/1ps
 // (추가) 16장: 은닉층 출력 재양자화 = sat_int8(round_shift_away(max(0, score), shift)).
 // ReLU 이후 값은 0 이상이므로 절반 반올림은 (v + 2^(shift-1)) &gt;&gt; shift 와 같다(shift=0이면 그대로).
@@ -2674,7 +2619,7 @@ module p3_relu_requant(
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>part03/ch16/rtl/p3_mlp_64_8_10.v · verilog · 원본 · RTL_SIM 통과 날짜 미기록</span></div>
+        <div class="codebar"><span>part03/ch16/rtl/p3_mlp_64_8_10.v · verilog</span></div>
         <pre tabindex="0"><code class="language-verilog">`timescale 1ns/1ps
 // (추가) 16장: 64→8→10 정수 MLP. 14장 코어를 두 계층으로 재사용한다.
 //   1층: p3_group10_core #(64, 8)  x = 13장 프레임 버퍼(외부 읽기 포트)
@@ -2815,16 +2760,17 @@ module p3_mlp_64_8_10(
     end
 endmodule</code></pre>
       </div>
-      <h3>시뮬레이션 기대 화면</h3>
-      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 서브젝트 단독 시험</span></div>
+      <h3>시뮬레이션</h3>
+      <p>보드에 올리기 전에 이 서브젝트 모듈만 먼저 시험합니다. 아래와 같은 줄이 나오면 됩니다.</p>
+      <div class="codeblock"><div class="codebar"><span>터미널 · 저장소 루트</span></div>
         <pre tabindex="0"><code>bash part03/ch16/scripts/run_sim.sh</code></pre></div>
-      <div class="codeblock"><div class="codebar"><span>기대 출력 (Icarus Verilog 12.0 · 날짜 미기록 · 출처 part03/ch16/validation/rtl_sim.log)</span></div>
+      <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
         <pre tabindex="0"><code>PYTHON_MLP_SELF_TEST_PASS ops=4933 frames=27 seed=1616
 RTL_SIM_PASS MLP64_8_10 frames=27 start_to_done_cycles=180 errors_checked=5
 PYTHON_RTL_COMPARE_PASS frames=27 hidden=8 scores=10 class=1 bit_exact=1</code></pre></div>
-      <details class="full"><summary>이 서브젝트의 테스트벤치·기준 모델 (전체 코드 2개)</summary>
+      <details class="full"><summary>테스트벤치와 기준 모델 (전체 코드 2개)</summary>
       <div class="codeblock">
-        <div class="codebar"><span>part03/ch16/tb/tb_p3_mlp_64_8_10.sv · systemverilog · 원본 · RTL_SIM 통과 날짜 미기록</span></div>
+        <div class="codebar"><span>part03/ch16/tb/tb_p3_mlp_64_8_10.sv · systemverilog</span></div>
         <pre tabindex="0"><code class="language-systemverilog">// (추가) 16장 64→8→10 정수 MLP 자동 판정 테스트벤치.
 // 13장 프레임 버퍼 + p3_mlp_64_8_10. 명령(W/B/S/F)으로 두 계층 모델과 shift를 적재·유지하며,
 // 프레임마다 은닉 8개·출력 점수 10개·Class를 기록한다(Python mlp_64_8_10과 비트 단위 비교).
@@ -2994,7 +2940,7 @@ module tb_p3_mlp_64_8_10;
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>part03/ch16/reference/mlp_reference.py · python · 원본 · RTL_SIM 통과 날짜 미기록</span></div>
+        <div class="codebar"><span>part03/ch16/reference/mlp_reference.py · python</span></div>
         <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
 """16장: 64→8→10 정수 MLP 기준모델·시험 명령 생성·RTL 결과 비교.
 
@@ -3160,47 +3106,30 @@ if __name__ == "__main__":
         generate(a.out)</code></pre>
       </div>
       </details>
-      <h3>판정 줄</h3>
+      <h3>확인할 것</h3>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
-        <tbody><tr><td><code>RTL_SIM_PASS MLP64_8_10 start_to_done_cycles=180</code></td><td>1층 138 + 은닉 저장 + 2층 38 = 180클록, 오류 5종</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS hidden=8 scores=10 class=1</code></td><td>은닉 8개·점수 10개·클래스가 Python 기준과 같음</td></tr><tr><td>장 Top STAGE=4 시뮬레이션</td><td>위 '보드에서 볼 것' 응답과 바이트 단위로 같음 · 통과</td></tr>
-        <tr><td>장 Top STAGE=4 합성·타이밍</td><td>통과 · WNS=0.547 WHS=0.032 DRC_ERRORS=0 LUT=4332 FF=4014 DSP48E1=20 RAMB18=20</td></tr></tbody>
+        <tbody><tr><td><code>RTL_SIM_PASS MLP64_8_10 start_to_done_cycles=180</code></td><td>1층 138클록, 은닉값 저장, 2층 38클록을 합쳐 180클록입니다. 오류 상황 5종도 확인합니다.</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS hidden=8 scores=10 class=1</code></td><td>은닉값 8개, 점수 10개, 클래스가 Python 기준과 같습니다.</td></tr><tr><td>보드 응답</td><td>위 '보드에서 볼 것' 표의 응답과 한 글자도 다르지 않아야 합니다.</td></tr></tbody>
       </table></div>
-      <div class="gate-row">
-        <div class="gate pass">
-          <b>HOST_MODEL_PASS</b>
-          <span>PYTHON_MLP_SELF_TEST_PASS ops=4933 frames=27 seed=1616</span>
-        </div>
-        <div class="gate pass">
-          <b>RTL_SIM_PASS</b>
-          <span>RTL_SIM_PASS MLP64_8_10 frames=27 start_to_done_cycles=180 e… · Icarus Verilog 12.0 · 날짜 미기록</span>
-        </div>
-        <div class="gate pass">
-          <b>SYNTH_TIMING_PASS</b>
-          <span>장 Top STAGE 4 배선 후 WNS 0.547 ns · WHS 0.032 ns (구 장 단독 OOC 판정 없음) · 2026-11-23</span>
-        </div>
-        <div class="gate todo">
-          <b>BOARD_PASS</b>
-          <span>⚠ 미실시 · 현재 실물 보드 확인 불가</span>
-        </div>
-      </div>
     </section>
     <section class="section" id="demo">
       <h2><span class="num">07</span> 장 시연</h2>
-      <p>STAGE=4 비트스트림 하나로 모든 서브젝트를 차례로 보여 줍니다. 아래 응답은 장 Top 시뮬레이션이 바이트 단위로 대조한 값입니다.</p>
+      <p>STAGE=4 비트스트림 하나로 모든 서브젝트를 처음부터 끝까지 이어서 보여 줍니다. 아래 순서대로 보내고 응답을 표와 비교합니다.</p>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th class="nw">서브젝트</th><th>PC 명령</th><th>보드 응답</th></tr></thead>
         <tbody><tr><td class="nw">3-1</td><td class="nw"><code>S</code></td><td class="nw"><code>I\r\n</code></td></tr><tr><td class="nw">3-1</td><td class="nw"><code>F 64 (시험 #0, 숫자 7)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td class="nw">3-1</td><td class="nw"><code>p 0</code></td><td class="nw"><code>P:00\r\n</code></td></tr><tr><td class="nw">3-1</td><td class="nw"><code>p 27</code></td><td class="nw"><code>P:00\r\n</code></td></tr><tr><td class="nw">3-1</td><td class="nw"><code>p 36</code></td><td class="nw"><code>P:17\r\n</code></td></tr><tr><td class="nw">3-1</td><td class="nw"><code>F 63 (짧은 프레임)</code></td><td class="nw"><code>F:SHORT\r\n</code></td></tr><tr><td class="nw">3-1</td><td class="nw"><code>p 0</code></td><td class="nw"><code>ERR\r\n</code></td></tr><tr><td class="nw">3-1</td><td class="nw"><code>F 65 (긴 프레임)</code></td><td class="nw"><code>F:LONG\r\n</code></td></tr><tr><td class="nw">3-1</td><td class="nw"><code>F 64 (시험 #0, 숫자 7)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td class="nw">3-2</td><td class="nw"><code>python3 … load linear (650개 명령)</code></td><td class="nw"><code>OK\r\n ×650</code></td></tr><tr><td class="nw">3-2</td><td class="nw"><code>F 64 (시험 #0, 숫자 7)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td class="nw">3-2</td><td class="nw"><code>R</code></td><td class="nw"><code>R7:000020E,FFFA34A,FFFF7E6,000189D,FFFD57A,FFFFA11,FFF9757,0005A9D,FFFEF87,00019AD\r\n</code></td></tr><tr><td class="nw">3-2</td><td class="nw"><code>F 64 (시험 #3, 숫자 0)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td class="nw">3-2</td><td class="nw"><code>R</code></td><td class="nw"><code>R0:00056AD,FFF5019,FFFF949,FFFE232,FFFB09F,00003AF,FFFF540,FFFE539,FFFE907,FFFE320\r\n</code></td></tr><tr><td class="nw">3-2</td><td class="nw"><code>F 64 (시험 #18, 숫자 3)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td class="nw">3-2</td><td class="nw"><code>R</code></td><td class="nw"><code>R5:FFFBEBD,FFFB224,FFFEC1F,FFFFEC3,FFFC97C,0000227,FFFE567,FFFB01B,FFFF259,FFF953F\r\n</code></td></tr><tr><td class="nw">3-3</td><td class="nw"><code>python3 … load mlp (610개 명령)</code></td><td class="nw"><code>OK\r\n ×610</code></td></tr><tr><td class="nw">3-3</td><td class="nw"><code>F 64 (시험 #18, 숫자 3)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td class="nw">3-3</td><td class="nw"><code>H</code></td><td class="nw"><code>H4:000429E,0001A45,000420A,0003618,0004984,0003F12,FFFEB90,00001C4\r\n</code></td></tr><tr><td class="nw">3-3</td><td class="nw"><code>G</code></td><td class="nw"><code>G7:000006D,000037A,000000C,00002FE,FFFFB2A,00001EB,0000267,00004DD,FFFFE7E,FFFF6E3\r\n</code></td></tr><tr><td class="nw">3-4</td><td class="nw"><code>Z 9</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">3-4</td><td class="nw"><code>F 64 (시험 #3, 숫자 0)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td class="nw">3-4</td><td class="nw"><code>M</code></td><td class="nw"><code>M0:45060C0A1500001F 0000C5A,FFFE009,FFFFF1D,FFFFAE6,FFFF486,000007B,FFFFC4A,FFFFF78,FFFFC5B,FFFF89E\r\n</code></td></tr><tr><td class="nw">3-4</td><td class="nw"><code>F 64 (시험 #2, 숫자 1)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td class="nw">3-4</td><td class="nw"><code>M</code></td><td class="nw"><code>M1:000D0F0010100006 FFFF877,0000796,00000B4,FFFFF92,FFFFBCE,FFFFEFB,FFFFE8F,FFFFFC3,FFFFF66,FFFFA59\r\n</code></td></tr><tr><td class="nw">3-4</td><td class="nw"><code>F 64 (시험 #1, 숫자 2)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td class="nw">3-4</td><td class="nw"><code>M</code></td><td class="nw"><code>M2:112F3F503000001A 000038F,FFFFFD0,0000FEB,000041B,FFFD02E,00008ED,000020E,FFFCFA6,0000726,FFFCEFA\r\n</code></td></tr><tr><td class="nw">3-4</td><td class="nw"><code>F 64 (시험 #18, 숫자 3)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td class="nw">3-4</td><td class="nw"><code>M</code></td><td class="nw"><code>M3:210D211B25200001 FFFF86C,FFFFA94,FFFFE0D,000027F,FFFF7C7,0000238,FFFFF97,FFFF0DC,00000C9,FFFF074\r\n</code></td></tr><tr><td class="nw">3-4</td><td class="nw"><code>F 64 (시험 #4, 숫자 4)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td class="nw">3-4</td><td class="nw"><code>M</code></td><td class="nw"><code>M4:370206002818000A FFFFBE7,FFFED06,FFFFC0A,FFFFA34,0000659,FFFFE5D,FFFFDD2,FFFFCC3,FFFFB77,000025A\r\n</code></td></tr><tr><td class="nw">3-4</td><td class="nw"><code>F 64 (시험 #8, 숫자 5)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td class="nw">3-4</td><td class="nw"><code>M</code></td><td class="nw"><code>M6:4C1A0E06360B0000 FFFFEF0,FFFE924,FFFFCA8,FFFF1FD,000058A,00001DA,0000897,FFFED9D,FFFFF5F,FFFF911\r\n</code></td></tr><tr><td class="nw">3-4</td><td class="nw"><code>F 64 (시험 #11, 숫자 6)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td class="nw">3-4</td><td class="nw"><code>M</code></td><td class="nw"><code>M6:36153105300C0007 FFFFDCB,FFFF145,0000059,FFFFCEF,FFFFB26,FFFFE0F,00008CA,FFFF814,0000269,FFFEC2C\r\n</code></td></tr><tr><td class="nw">3-4</td><td class="nw"><code>F 64 (시험 #0, 숫자 7)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td class="nw">3-4</td><td class="nw"><code>M</code></td><td class="nw"><code>M7:210000070323002D 00000BF,FFFF0D4,FFFFC87,00001DA,FFFEF33,FFFFB31,FFFEAF5,0000C9A,FFFFC18,0000316\r\n</code></td></tr><tr><td class="nw">3-4</td><td class="nw"><code>F 64 (시험 #61, 숫자 8)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td class="nw">3-4</td><td class="nw"><code>M</code></td><td class="nw"><code>M8:4E2E110E36280022 FFFFA44,FFFEB0A,FFFFCCA,FFFF1CF,FFFF268,FFFFBB8,FFFF8F5,FFFEFEA,000036E,FFFF7B3\r\n</code></td></tr><tr><td class="nw">3-4</td><td class="nw"><code>F 64 (시험 #7, 숫자 9)</code></td><td class="nw"><code>F:OK\r\n</code></td></tr><tr><td class="nw">3-4</td><td class="nw"><code>M</code></td><td class="nw"><code>M9:2B10000C2C3B0011 FFFEFFA,FFFF898,FFFF9B7,FFFFA9D,FFFFF84,FFFFC5B,FFFF2C8,FFFF6BC,FFFFE2D,000052D\r\n</code></td></tr></tbody>
       </table></div>
-      <p>끝난 뒤 LED: <code>0x8200</code> (LED[9:0] 마지막 클래스 원-핫, LED15 프레임 보관, LED14 짧은 프레임, LED13 긴 프레임. 7세그먼트는 클래스 또는 읽은 화소). btnC를 누르면 처음 상태로 돌아갑니다.</p>
+      <p>끝나면 LED가 <code>0x8200</code>입니다 (LED[9:0]은 마지막 클래스 번호 하나가 켜지고, LED15는 프레임 보관, LED14는 짧은 프레임, LED13은 긴 프레임입니다. 7세그먼트에는 클래스나 읽은 화소가 보입니다). btnC를 누르면 처음 상태로 돌아갑니다.</p>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
-        <thead><tr><th>PC 결과 (모델·데이터)</th><th>값 · 출처 로그</th></tr></thead>
-        <tbody><tr><td>8×8 선형 64→10 (3-2), MNIST 시험 10,000장</td><td><code>float=0.9132 int8=0.9130 test=10000</code> · <code>p03/validation/pc_train_20261119.log</code></td></tr><tr><td>8×8 MLP 64→8→10 (3-4), MNIST 시험 10,000장</td><td><code>float=0.9085 int8=0.9087 shift=9 test=10000</code> · <code>p03/validation/pc_train_20261119.log</code></td></tr><tr><td>장 시연 숫자 0~9 (시험 세트 숫자별 첫 그림)</td><td><code>9/10 (MLP, t10k 숫자별 첫 그림)</code> · <code>p03/validation/rtl_sim_20261123.log</code></td></tr></tbody>
+        <thead><tr><th>PC에서 미리 확인하는 값</th><th>결과</th></tr></thead>
+        <tbody><tr><td>선형 64→10 (3-2), MNIST 시험 10,000장</td><td><code>float=0.9132 int8=0.9130 test=10000</code></td></tr><tr><td>MLP 64→8→10 (3-4), MNIST 시험 10,000장</td><td><code>float=0.9085 int8=0.9087 shift=9 test=10000</code></td></tr><tr><td>장 시연 숫자 0~9</td><td><code>9/10 (MLP, t10k 숫자별 첫 그림)</code></td></tr></tbody>
       </table></div>
-      <p>은닉층이 8개뿐이라 MLP가 선형보다 정확하지 않습니다. 4장(784 입력)에서 입력 크기를 늘리면 차이가 납니다 (⚠ 4장 전환 때 확인).</p>
-      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 장 Top 시뮬레이션 (STAGE 1~4)</span></div>
+      <p>은닉층이 8개뿐이라 MLP가 선형 모델보다 정확하지는 않습니다.</p>
+      <h3>시연 전 점검</h3>
+      <p>보드에 올리기 전에 장 Top 전체를 시뮬레이션합니다. STAGE마다 <code>P03_TOP_RTL_SIM_PASS</code>가 나오면 됩니다.</p>
+      <div class="codeblock"><div class="codebar"><span>터미널 · 장 Top 시뮬레이션 (STAGE 1~4)</span></div>
         <pre tabindex="0"><code>bash p03/scripts/run_sim.sh</code></pre></div>
-      <div class="codeblock"><div class="codebar"><span>기대 출력 (Icarus Verilog 12.0 · 2026-11-23 · 출처 p03/validation/rtl_sim_20261123.log)</span></div>
+      <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
         <pre tabindex="0"><code>PYTHON_P03_SELF_TEST_PASS
 PYTHON_P03_VECTORS stage=1 cases=10 final_led=0x8000
 PYTHON_P03_VECTORS stage=2 cases=665 final_led=0x8020
@@ -3211,15 +3140,12 @@ P03_TOP_RTL_SIM_PASS stage=2 cases=665 bytes=2925
 P03_TOP_RTL_SIM_PASS stage=3 cases=1278 bytes=5523
 P03_TOP_RTL_SIM_PASS stage=4 cases=1299 bytes=6597
 RTL_SIM_PASS stages=4</code></pre></div>
-      <div class="codeblock"><div class="codebar"><span>Vivado (VS Code) · STAGE 1~4 비트스트림</span></div>
-        <pre tabindex="0"><code>vivado -mode batch -nojournal -source p03/vivado/build_p03.tcl
-SYNTH_TIMING_PASS p03 basys3_p03_top STAGE=1 WNS=2.863 WHS=0.042 DRC_ERRORS=0 LUT=504 FF=317 DSP48E1=0 RAMB18=0
-SYNTH_TIMING_PASS p03 basys3_p03_top STAGE=2 WNS=1.084 WHS=0.014 DRC_ERRORS=0 LUT=1704 FF=1752 DSP48E1=4 RAMB18=4
-SYNTH_TIMING_PASS p03 basys3_p03_top STAGE=3 WNS=0.755 WHS=0.036 DRC_ERRORS=0 LUT=2797 FF=2849 DSP48E1=12 RAMB18=12
-SYNTH_TIMING_PASS p03 basys3_p03_top STAGE=4 WNS=0.547 WHS=0.032 DRC_ERRORS=0 LUT=4332 FF=4014 DSP48E1=20 RAMB18=20</code></pre></div>
-      <details class="full"><summary>장 Top 테스트벤치·기준 모델 (전체 코드)</summary>
+      <p>비트스트림은 아래 명령 한 번으로 STAGE 1~4을 모두 만듭니다. STAGE마다 <code>SYNTH_TIMING_PASS</code> 줄이 나오면 됩니다.</p>
+      <div class="codeblock"><div class="codebar"><span>터미널 · Vivado</span></div>
+        <pre tabindex="0"><code>vivado -mode batch -nojournal -source p03/vivado/build_p03.tcl</code></pre></div>
+      <details class="full"><summary>장 Top 테스트벤치와 기준 모델 (전체 코드)</summary>
       <div class="codeblock">
-        <div class="codebar"><span>p03/tb/tb_p03_top.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-23</span></div>
+        <div class="codebar"><span>p03/tb/tb_p03_top.sv · systemverilog</span></div>
         <pre tabindex="0"><code class="language-systemverilog">// 3장 보드 Top 시험: UART 핀으로 명령을 보내고 TX 핀을 복조해 기준 모델(p03_cases_sN.txt)과 바이트 단위로 대조한다.
 // 3장 Top에는 스위치 입력이 없다 (사례 파일의 sw 칸은 늘 0).
 // 시뮬레이션 시간을 줄이려고 BAUD 6.25 Mbps(CPB 16), REFRESH_BITS 6으로 돌린다. 보드 Top 기본값은 115200 bps.
@@ -3323,7 +3249,7 @@ module tb_p03_top;
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>p03/reference/p03_model.py · python · 원본 · RTL_SIM 통과 2026-11-23</span></div>
+        <div class="codebar"><span>p03/reference/p03_model.py · python</span></div>
         <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
 """3장 8×8 MNIST 보드 기준 모델.
 
@@ -3547,43 +3473,16 @@ if __name__ == "__main__":
       </details>
     </section>
     <section class="section" id="s_report">
-      <h2><span class="num">08</span> 누적 보고·인계</h2>
+      <h2><span class="num">08</span> 장 정리·다음 장으로</h2>
+      <p>이 장에서 만든 것을 한눈에 정리합니다. 모두 보드에서 확인했다면 다음 장으로 넘어갑니다.</p>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
-        <thead><tr><th>서브젝트</th><th>구 장</th><th>추가 RTL</th><th>시뮬레이션 (단독 + 장 Top)</th><th>합성 (장 Top STAGE)</th><th>보드</th></tr></thead>
-        <tbody><tr><td>3-1</td><td>13장</td><td><code>p3_frame64_buffer.v</code></td><td>통과</td><td>통과</td><td>⚠ 미검증</td></tr><tr><td>3-2</td><td>14장</td><td><code>p3_group10_core.v</code></td><td>통과</td><td>통과</td><td>⚠ 미검증</td></tr><tr><td>3-3</td><td>15장</td><td></td><td>통과</td><td>통과</td><td>⚠ 미검증</td></tr><tr><td>3-4</td><td>16장</td><td><code>p3_relu_requant.v</code><br><code>p3_mlp_64_8_10.v</code></td><td>통과</td><td>통과</td><td>⚠ 미검증</td></tr></tbody>
+        <thead><tr><th>서브젝트</th><th>장 Top에 들어간 모듈</th><th>보드에서 확인한 것</th></tr></thead>
+        <tbody><tr><td class="nw">3-1 8×8 입력 프레임</td><td><code>p3_frame64_buffer.v</code></td><td>숫자 그림 64바이트를 보내면 <code>F:OK</code>가 오고, <code>p 36</code>으로 화소를 되읽으면 <code>P:17</code>입니다. 63바이트는 <code>F:SHORT</code>, 65바이트는 <code>F:LONG</code>이고, 프레임이 없을 때 <code>p</code>는 <code>ERR</code>입니다.</td></tr><tr><td class="nw">3-2 4PE 3그룹 10분류 코어</td><td><code>p3_group10_core.v</code></td><td>선형 모델(명령 650개)을 실은 뒤 숫자 7·0·3 그림마다 <code>R</code>을 보내면 <code>R7</code>·<code>R0</code>·<code>R5</code>와 점수 10개가 옵니다. 숫자 3을 5로 잘못 고르는 것도 그대로 보입니다(이 모델의 정확도는 91.3%).</td></tr><tr><td class="nw">3-3 64→10·64→8·8→10 Dense</td><td>—</td><td>같은 코어를 크기만 바꿔 씁니다. <code>H</code>는 64→8 계산의 점수 8개(MLP 1층 값), <code>G</code>는 8→10 계산 결과를 돌려줍니다.</td></tr><tr><td class="nw">3-4 MLP 64→8→10</td><td><code>p3_relu_requant.v</code><br><code>p3_mlp_64_8_10.v</code></td><td><code>Z 9</code>로 은닉층 시프트를 정한 뒤 숫자 0~9 그림마다 <code>M</code>을 보내면 은닉값 8개, 점수 10개, 클래스가 옵니다. 10개 중 9개를 맞히고, 숫자 5는 6으로 틀립니다.</td></tr></tbody>
       </table></div>
-      <p>※ = 구 장 단독 실습 파일이라 장 Top 빌드(<code>p03/vivado/build_p03.tcl</code>)에는 들어가지 않음.</p>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>다음 장으로 넘기는 파일</th><th>사용처</th></tr></thead>
-        <tbody><tr><td><code>part03/ch14/rtl/p3_group10_core.v</code></td><td>4장 784 가속기(구 17장 p3_tile784_10)가 64원소 타일 코어로 그대로 쓴다 (VS Code 판)</td></tr><tr><td><code>part03/ch13/rtl/p3_frame64_buffer.v</code></td><td>4장 구 17·18장 시뮬레이션이 타일 입력 연결에 쓴다 (VS Code 판 run_sim.sh)</td></tr><tr><td><code>p03/model/train_p03.py · p03/host/p03_send.py</code></td><td>4장 784 입력 모델 학습·전송으로 확장 (4장 전환 때)</td></tr></tbody>
+        <tbody><tr><td><code>part03/ch14/rtl/p3_group10_core.v</code></td><td>4장 784 가속기가 64원소 타일 코어로 그대로 씁니다</td></tr><tr><td><code>part03/ch13/rtl/p3_frame64_buffer.v</code></td><td>4장에서 INT8 타일 입력을 담는 버퍼로 씁니다</td></tr><tr><td><code>p03/model/train_p03.py · p03/host/p03_send.py</code></td><td>4장에서 같은 방식으로 784 입력 모델을 다룹니다</td></tr></tbody>
       </table></div>
-      <p>장 게이트 (<code>p03/validation/</code> 증거 기준 자동 표시):</p>
-      <div class="gate-row">
-        <div class="gate pass">
-          <b>HTML_PASS</b>
-          <span>v01 · 생성기</span>
-        </div>
-        <div class="gate pass">
-          <b>HOST_MODEL_PASS</b>
-          <span>PYTHON_P03_SELF_TEST_PASS</span>
-        </div>
-        <div class="gate pass">
-          <b>RTL_SIM_PASS</b>
-          <span>장 Top STAGE 1~4 · Icarus Verilog 12.0 · 2026-11-23</span>
-        </div>
-        <div class="gate pass">
-          <b>SYNTH_TIMING_PASS</b>
-          <span>STAGE 1~4 비트스트림 · 2026-11-23</span>
-        </div>
-        <div class="gate todo">
-          <b>XSIM_RTL_PASS</b>
-          <span>⚠ 미검증 · Vivado 시뮬레이터(xsim) 실행 대기 — 현재 근거는 Icarus Verilog</span>
-        </div>
-        <div class="gate todo">
-          <b>BOARD_PASS</b>
-          <span>⚠ 미실시 · 실물 보드 확인 대기</span>
-        </div>
-      </div>
     </section>
     <div class="chapter-links" id="chapter-links"></div>
   </main>
