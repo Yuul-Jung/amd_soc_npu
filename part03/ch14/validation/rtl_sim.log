@@ -1,8 +1,6 @@
 Python 3.12.3
-Icarus Verilog version 12.0 (stable) ()
+Vivado Simulator v2024.2.0
 PYTHON_GROUP10_SELF_TEST_PASS cases=41 groups=4+4+2 seed=1414
-part03/mini_npu/rtl/npu_dsp_mac_lane.v:2: warning: timescale for npu_dsp_mac_lane inherited from another file.
-part03/ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
 RTL_SIM_PASS GROUP10 cases=41 start_to_done_cycles=206 errors_checked=4
-part03/ch14/tb/tb_p3_group10_core.sv:182: $finish called at 387080000 (1ps)
+$finish called at time : 387080 ns : File "part03/ch14/tb/tb_p3_group10_core.sv" Line 182
 PYTHON_RTL_COMPARE_PASS cases=41 scores=10 class=1 bit_exact=1

@@ -1,7 +1,7 @@
 Python 3.12.3
 gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
 Icarus Verilog version 12.0 (stable) ()
-SECURE_REFERENCE_SELFTEST_PASS aes_kat=2 ctr_kat=1 sha_kat=2 hmac_kat=2 cross=cryptography_match_50 model_a=18496ca4 model_b=b7491f99 test_key_fp=e7950043
+SECURE_REFERENCE_SELFTEST_PASS aes_kat=2 ctr_kat=1 sha_kat=2 hmac_kat=2 cross=cryptography_not_installed model_a=18496ca4 model_b=b7491f99 test_key_fp=e7950043
 SECURE_HEADER_DONE test_key=1 key_fp=e7950043 model_a=18496ca4
 CRYPTO_RTL_VECTORS aes=204 sha_msgs=50 sha_blocks=136
 C_CRYPTO_KAT_PASS aes=1 ctr=1 sha=2 hmac=2

@@ -1,6 +1,6 @@
 Python 3.12.3
-Icarus Verilog version 12.0 (stable) ()
+Vivado Simulator v2024.2.0
 PYTHON_CONV_SELF_TEST_PASS frames=26 out=6x6 macs_per_frame=324 first_spec=-6 seed=2626
 RTL_SIM_PASS CONV3X3 frames=26 outputs_per_frame=36 latency=5 errors_checked=4
-part03/ch26/tb/tb_p3_conv3x3_8x8.sv:135: $finish called at 27570000 (1ps)
+$finish called at time : 27570 ns : File "part03/ch26/tb/tb_p3_conv3x3_8x8.sv" Line 135
 PYTHON_RTL_COMPARE_PASS frames=26 outputs=936 bit_exact=1
