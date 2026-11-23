@@ -1,4 +1,4 @@
-# 18장 MNIST 784→10 정밀도 비교 결과 (PC 실행)
+# 4-3 MNIST 784→10 정밀도 비교 결과 (PC 실행)
 
 > `precision_reference.py --eval` 실제 실행 결과. RTL·Vivado 결과와 별개.
 

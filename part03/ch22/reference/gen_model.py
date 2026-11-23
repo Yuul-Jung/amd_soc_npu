@@ -24,7 +24,7 @@ def main():
     qm = quantize_model(json.loads(MODEL.read_text()), 8)
     rows = [list(map(int, l.split())) for l in SAMPLES.read_text().splitlines() if not l.startswith("#")]
     picked = rows[:2] + [r for r in rows if r[3] != r[2]][:1] + [r for r in rows if r[2] != r[1]][:1]
-    lines = ["/* 자동 생성: part03/ch22/reference/gen_model.py (18장 INT8 모델, MNIST t10k 표본) */",
+    lines = ["/* 자동 생성: part03/ch22/reference/gen_model.py (4-3 INT8 모델, MNIST t10k 표본) */",
              "#ifndef MODEL_DATA_H", "#define MODEL_DATA_H", "#include <stdint.h>",
              f"#define MODEL_N_SAMPLES {len(picked)}",
              "static const int8_t model_w[10][784] = {"]

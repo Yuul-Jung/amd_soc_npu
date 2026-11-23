@@ -26,10 +26,10 @@ update_compile_order -fileset sources_1
 set bd_file [get_files -filter {FILE_TYPE == "Block Designs"}]
 open_bd_design $bd_file
 puts "BD [current_bd_design]"
-check {[llength [get_bd_cells -quiet ip06_seg7]] == 1 && [llength [get_bd_cells -quiet p3_npu_0]] == 1 && [llength [get_bd_cells -quiet axi_gpio_btn]] == 1} "21장 안 A SoC(NPU + BTN + SEG7)에서 시작"
+check {[llength [get_bd_cells -quiet ip06_seg7]] == 1 && [llength [get_bd_cells -quiet p3_npu_0]] == 1 && [llength [get_bd_cells -quiet axi_gpio_btn]] == 1} "5-2 SoC(NPU + BTN + SEG7)에서 시작"
 
 set smc [get_bd_cells axi_smc]
-check {[get_property CONFIG.NUM_MI $smc] == 7} "SmartConnect NUM_MI 7 (21장 안 A)"
+check {[get_property CONFIG.NUM_MI $smc] == 7} "SmartConnect NUM_MI 7 (5-2 SoC)"
 set_property CONFIG.NUM_MI 8 $smc
 set g [create_bd_cell -type ip -vlnv xilinx.com:ip:axi_gpio:2.0 axi_gpio_motor]
 set_property -dict [list CONFIG.C_IS_DUAL 1 CONFIG.C_GPIO_WIDTH 32 CONFIG.C_ALL_OUTPUTS 1 CONFIG.C_DOUT_DEFAULT 0x00000000 \
@@ -91,7 +91,7 @@ foreach {cell base rng} $map_a {
 }
 if {[llength $segs] != [expr {[llength $map_a] / 3}]} { puts "ADDR_MAP_A extra segments: [llength $segs]"; set addr_ok 0 }
 puts [expr {$addr_ok ? "ADDR_MAP_A_PASS" : "ADDR_MAP_A_FAIL"}]
-check {$addr_ok} "address map A (21장 8줄 + 모터 1줄)"
+check {$addr_ok} "address map (5-2 8줄 + 모터 1줄)"
 # 인터럽트 대조: 5-2와 같아야 한다(모터는 인터럽트 없음, In4 = 0)
 set irq_map_a {0 axi_timer_0/interrupt 1 axi_uartlite_0/interrupt 3 axi_gpio_btn/ip2intc_irpt 12 p3_npu_0/irq_o}
 set irq_ok 1
@@ -106,7 +106,7 @@ for {set i 0} {$i < 16} {incr i} {
 }
 if {[get_property CONFIG.NUM_PORTS [get_bd_cells irq_concat]] != 16} { set irq_ok 0 }
 puts [expr {$irq_ok ? "IRQ_MAP_A_PASS" : "IRQ_MAP_A_FAIL"}]
-check {$irq_ok} "irq map A (21장과 같음)"
+check {$irq_ok} "irq map (5-2와 같음)"
 check {[get_bd_nets -of_objects [get_bd_pins motor_safety_0/clk]] eq [get_bd_nets -of_objects [get_bd_pins axi_smc/aclk]]} "motor clock = SmartConnect clock"
 check {[get_bd_nets -of_objects [get_bd_pins motor_safety_0/resetn]] eq [get_bd_nets -of_objects [get_bd_pins rst_clk_wiz_1_100M/peripheral_aresetn]]} "motor reset = peripheral_aresetn"
 foreach port {estop_ok estop_btn fault otemp lim_f lim_r in1 in2 ena trip} {

@@ -8,14 +8,14 @@ chapter_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 part03=$(cd -- "$chapter_dir/.." && pwd)
 xsa="$part03/ch21/build/out/soc21_npu.xsa"
 bit="$part03/ch21/build/out/basys3_soc21_top.bit"
-if [[ ! -f "$xsa" || ! -f "$bit" ]]; then echo "NOT_RUN SECURE_SW_BUILD: 21장 build_soc.sh 먼저"; exit 2; fi
+if [[ ! -f "$xsa" || ! -f "$bit" ]]; then echo "NOT_RUN SECURE_SW_BUILD: 5-2 build_soc.sh 먼저"; exit 2; fi
 # shellcheck disable=SC1090
 [[ -n "${VITIS_SETTINGS:-}" ]] && source "$VITIS_SETTINGS"
 command -v vitis >/dev/null || { echo "NOT_RUN SECURE_SW_BUILD: vitis 없음"; exit 2; }
 build="$chapter_dir/build"
 rm -rf "$build"; mkdir -p "$build"
 export PYTHONDONTWRITEBYTECODE=1
-echo "HW (21장 그대로) $(sha256sum "$xsa" | cut -c1-16) soc21_npu.xsa, $(sha256sum "$bit" | cut -c1-16) basys3_soc21_top.bit"
+echo "HW (5-2 그대로) $(sha256sum "$xsa" | cut -c1-16) soc21_npu.xsa, $(sha256sum "$bit" | cut -c1-16) basys3_soc21_top.bit"
 python3 "$chapter_dir/reference/secure_reference.py" --header "$build/secure_keys.h" ${P3_KEY_FILE:+--key-file "$P3_KEY_FILE"}
 python3 "$part03/ch29/reference/sensor_reference.py" --header "$build/sensor_model.h" > /dev/null
 sw22="$part03/ch22/sw"; sw29="$part03/ch29/sw"; sw="$chapter_dir/sw"

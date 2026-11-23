@@ -147,7 +147,7 @@ def evaluate(mnist_dir, m, out_dir):
 def write_report(out_dir, s, conf, rows):
     n = s["test_samples"]
     pct = lambda k: f"{100.0 * k / n:.2f}%"  # noqa: E731
-    lines = ["# 18장 MNIST 784→10 정밀도 비교 결과 (PC 실행)", "",
+    lines = ["# 4-3 MNIST 784→10 정밀도 비교 결과 (PC 실행)", "",
              "> `precision_reference.py --eval` 실제 실행 결과. RTL·Vivado 결과와 별개.", "",
              "| 모델 | 정답 수 | Accuracy | Float 대비 클래스 일치 | 최대 역양자화 Logit 오차 | 평균(표본별 최대) |",
              "|---|---:|---:|---:|---:|---:|",

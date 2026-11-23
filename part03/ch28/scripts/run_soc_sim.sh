@@ -9,7 +9,7 @@ part03=$(cd -- "$chapter_dir/.." && pwd)
 build="$chapter_dir/build"
 elf=$(find "$build/ws/digit_app" -name digit_app.elf 2>/dev/null | head -1)
 src_proj="$part03/ch21/build/soc21_npu"
-if [[ -z "$elf" || ! -f "$src_proj/soc11_user_top.xpr" ]]; then echo "NOT_RUN SOC28_SIM: 21장 build_soc.sh·28장 build_sw.sh 먼저"; exit 2; fi
+if [[ -z "$elf" || ! -f "$src_proj/soc11_user_top.xpr" ]]; then echo "NOT_RUN SOC28_SIM: 5-2 build_soc.sh·6-1 build_sw.sh 먼저"; exit 2; fi
 # shellcheck disable=SC1090
 [[ -n "${VIVADO_SETTINGS:-}" ]] && source "$VIVADO_SETTINGS"
 command -v vivado >/dev/null || { echo "NOT_RUN SOC28_SIM: vivado 없음"; exit 2; }

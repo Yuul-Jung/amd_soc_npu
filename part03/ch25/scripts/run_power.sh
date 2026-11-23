@@ -7,7 +7,7 @@ chapter_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 part03=$(cd -- "$chapter_dir/.." && pwd)
 p21="$part03/ch21/build/soc21_npu/soc11_user_top.xpr"
 p23="$part03/ch23/build/soc23_sim"
-[[ -f "$p21" && -d "$p23" ]] || { echo "NOT_RUN POWER: 21장·23장 build 먼저"; exit 2; }
+[[ -f "$p21" && -d "$p23" ]] || { echo "NOT_RUN POWER: 5-2·5-4 build 먼저"; exit 2; }
 # shellcheck disable=SC1090
 [[ -n "${VIVADO_SETTINGS:-}" ]] && source "$VIVADO_SETTINGS"
 command -v vivado >/dev/null || { echo "NOT_RUN POWER: vivado 없음"; exit 2; }

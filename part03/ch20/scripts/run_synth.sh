@@ -23,5 +23,5 @@ echo "Vivado $version"
 grep -E "^Synthesis finished|^ERROR|^CRITICAL WARNING" "$build_dir/vivado.log"
 python3 "$part03/ch19/reference/synth_summary.py" --rpt "$build_dir/rpt" \
   --out "$chapter_dir/validation/synth_ooc_summary.md" --version "$version" \
-  --title "20장 AXI4-Lite NPU 제어 IP Vivado OOC 합성·배선 (실제 실행)" \
-  --config axi_npu_int8 "AXI NPU INT8" "p3_npu_axi_lite 기본(17장 Tile + 04장 x 버퍼)"
+  --title "5-1 AXI4-Lite NPU 제어 IP Vivado OOC 합성·배선 (실제 실행)" \
+  --config axi_npu_int8 "AXI NPU INT8" "p3_npu_axi_lite 기본(4-2 Tile + 2-1 x 버퍼)"
