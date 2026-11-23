@@ -118,12 +118,12 @@ details.full>summary{cursor:pointer;font-weight:600}
       <p>5장 비트스트림에 <code>digit_app.elf</code>를 올리고, PC에서 <code>python3 part03/ch28/host/p3_digit_host.py --port &lt;포트&gt; …</code>로 그림을 보냅니다.</p>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th class="nw">순서</th><th>할 일</th><th>보드에서 보이는 것</th></tr></thead>
-        <tbody><tr><td class="nw">1</td><td>5장 비트스트림 다운로드, <code>digit_app.elf</code> 실행</td><td>7세그먼트 <code>F16C</code>(모델 ID 상위), LED 모두 꺼짐</td></tr><tr><td class="nw">2</td><td><code>python3 part03/ch28/host/p3_digit_host.py --port &lt;포트&gt; --error-suite --csv b28.csv --log b28_uart.log</code></td><td><code>MODEL_ID host=f16c4f12 device=f16c4f12</code>, 22장 <code>scores_match=1 display_ok=1</code>, <code>error_suite=11/11</code>, <code>DIGIT_HOST_PASS</code></td></tr><tr><td class="nw">3</td><td>마지막 정상 결과 뒤 7세그먼트·LED를 눈으로 확인</td><td>7세그먼트 <code>07 _7</code>(img 7, Class 7), LED7·LED15 켜짐. 오류 시험 중에는 <code>E</code>+코드·LED14</td></tr><tr><td class="nw">4</td><td>(선택) <code>--mnist-dir &lt;MNIST raw&gt; --limit 200</code></td><td>장치 class = PC 기준 class 200/200, 정확도는 PC 기준·장치를 따로 기록</td></tr><tr><td class="nw">5</td><td>(선택) 직접 그린 28×28 PNG <code>--images a.png [--invert]</code></td><td>응답·표시가 오는지 확인(정확도 주장은 하지 않음)</td></tr><tr><td class="nw">6</td><td>실행 중 btnU를 누른 채 XSDB <code>mrd 0x40010000</code></td><td><code>8</code> — 이 펌웨어는 버튼을 쓰지 않으므로 표시·UART에 변화 없음</td></tr></tbody>
+        <tbody><tr><td class="nw">1</td><td>5장 비트스트림 다운로드, <code>digit_app.elf</code> 실행</td><td>7세그먼트 <code>F16C</code>(모델 ID 상위), LED 모두 꺼짐</td></tr><tr><td class="nw">2</td><td><code>python3 part03/ch28/host/p3_digit_host.py --port &lt;포트&gt; --error-suite --csv b28.csv --log b28_uart.log</code></td><td><code>MODEL_ID host=f16c4f12 device=f16c4f12</code>, 표본 22장 <code>scores_match=1 display_ok=1</code>, <code>error_suite=11/11</code>, <code>DIGIT_HOST_PASS</code></td></tr><tr><td class="nw">3</td><td>마지막 정상 결과 뒤 7세그먼트·LED를 눈으로 확인</td><td>7세그먼트 <code>07 _7</code>(img 7, Class 7), LED7·LED15 켜짐. 오류 시험 중에는 <code>E</code>+코드·LED14</td></tr><tr><td class="nw">4</td><td>(선택) <code>--mnist-dir &lt;MNIST raw&gt; --limit 200</code></td><td>장치 class = PC 기준 class 200/200, 정확도는 PC 기준·장치를 따로 기록</td></tr><tr><td class="nw">5</td><td>(선택) 직접 그린 28×28 PNG <code>--images a.png [--invert]</code></td><td>응답·표시가 오는지 확인(정확도 주장은 하지 않음)</td></tr><tr><td class="nw">6</td><td>실행 중 btnU를 누른 채 XSDB <code>mrd 0x40010000</code></td><td><code>8</code> — 이 펌웨어는 버튼을 쓰지 않으므로 표시·UART에 변화 없음</td></tr></tbody>
       </table></div>
       <h3>작성할 코드</h3>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch28/sw/main.c · c</span></div>
-        <pre tabindex="0"><code class="language-c">/* (추가) 28장: MicroBlaze V main. NPU 베이스 주소는 Vivado Address Editor 값(xparameters.h)을 쓴다. */
+        <pre tabindex="0"><code class="language-c">/* MicroBlaze V main. NPU 베이스 주소는 Vivado Address Editor 값(xparameters.h)을 쓴다. */
 #include "xparameters.h"
 #include "digit_app.h"
 
@@ -135,7 +135,7 @@ int main(void)
       </div>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch28/sw/digit_app.h · c</span></div>
-        <pre tabindex="0"><code class="language-c">/* (추가) 28장: UART 숫자 인식 응용(784 입력·INT8·13타일 NPU). 규약은 reference/digit_reference.py 머리말과 같다. */
+        <pre tabindex="0"><code class="language-c">/* UART 숫자 인식 응용(784 입력·INT8·13타일 NPU). 규약은 reference/digit_reference.py 머리말과 같다. */
 #ifndef DIGIT_APP_H
 #define DIGIT_APP_H
 #include &lt;stdint.h&gt;
@@ -163,7 +163,7 @@ int digit_app_run(uintptr_t npu_base);
       </div>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch28/sw/digit_app.c · c</span></div>
-        <pre tabindex="0"><code class="language-c">/* (추가) 28장: UART 손글씨 숫자 → 784 INT8 → 20장 NPU(13타일) → 10개 점수·Class → UART·LED·FND.
+        <pre tabindex="0"><code class="language-c">/* UART 손글씨 숫자 → 784 INT8 → 5-1 NPU(13타일) → 10개 점수·Class → UART·LED·FND.
  * MicroBlaze V는 프레임 수신·검사, NPU 버스 제어, 결과 전송만 한다. 10개 점수의 MAC은 NPU RTL이 한다.
  * 같은 입력으로 CPU 정수 추론(cpu_infer)도 실행해 NPU 점수와 비교한다(불일치면 표시하지 않고 오류 7).
  * 표시 규칙: Class는 NPU DONE·rc=0·모델 ID 일치·NPU=CPU일 때만 FND/LED에 쓴다. 그 밖에는 오류 표시.
@@ -419,7 +419,7 @@ int digit_app_run(uintptr_t npu_base)
       </div>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch28/sw/digit_io.h · c</span></div>
-        <pre tabindex="0"><code class="language-c">/* (추가) 28장: 숫자 인식 응용의 플랫폼 경계. 같은 digit_app.c를 MicroBlaze V와 PC 협동 시뮬레이션이 함께 쓴다.
+        <pre tabindex="0"><code class="language-c">/* 숫자 인식 응용의 플랫폼 경계. 같은 digit_app.c를 MicroBlaze V와 PC 시뮬레이션이 함께 쓴다.
  *   MicroBlaze V: digit_io_xil.c (AXI UART Lite 폴링 수신, AXI GPIO 0 = LED, AXI GPIO 1 = FND 표시 워드)
  *   PC          : host/digit_io_host.c (표준 입력 = UART 수신, 표시 값은 DISP 줄로만 확인)
  */
@@ -439,8 +439,8 @@ void dio_flush(void);
       </div>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch28/sw/digit_io_xil.c · c</span></div>
-        <pre tabindex="0"><code class="language-c">/* (추가) 28장: MicroBlaze V 플랫폼 경계. AXI UART Lite(stdin/stdout과 같은 장치) 폴링 수신,
- * AXI GPIO 0 채널 1 = LED[15:0], 표시 워드 → 표준 7세그먼트 IP(ip06_seg7). (변경) 안 A: 21장 SoC로 옮기며 AXI GPIO 1·p3_fnd_scan을 대체.
+        <pre tabindex="0"><code class="language-c">/* MicroBlaze V 플랫폼 경계. AXI UART Lite(stdin/stdout과 같은 장치) 폴링 수신,
+ * AXI GPIO 0 채널 1 = LED[15:0], 표시 워드 → 표준 7세그먼트 IP(ip06_seg7). AXI GPIO 1·p3_fnd_scan은 쓰지 않는다.
  */
 #include "xparameters.h"
 #include "xil_io.h"
@@ -466,7 +466,7 @@ int dio_getc(int wait_forever)
 
 void dio_display(uint32_t fnd_word, uint32_t led)
 {
-    p3_seg7_write(p3_seg7_from_fnd_word(fnd_word));   /* (변경) 안 A: 표준 7세그먼트 IP */
+    p3_seg7_write(p3_seg7_from_fnd_word(fnd_word));   /* 표준 7세그먼트 IP */
     Xil_Out32(LED_GPIO, led);
 }
 
@@ -475,11 +475,11 @@ void dio_flush(void) {}</code></pre>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch28/host/p3_digit_host.py · python</span></div>
         <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
-"""28장 PC 호스트: 손글씨 숫자 이미지 → 784 INT8 전처리 → UART 프레임 → 보드(또는 협동 시뮬레이션) 결과 → CSV.
+"""PC 호스트: 손글씨 숫자 이미지 → 784 INT8 전처리 → UART 프레임 → 보드(또는 PC 시뮬레이션) 결과 → CSV.
 
 전송 경로(같은 규약, reference/digit_reference.py 머리말):
   --port /dev/ttyUSBx   실제 Basys3(USB-UART 115200 8N1, pyserial)             → target=fpga
-  --cosim "&lt;명령&gt;"       PC용으로 빌드한 같은 펌웨어 + Icarus NPU RTL(표준 입출력) → target=rtl_cosim
+  --cosim "&lt;명령&gt;"       PC용으로 빌드한 같은 펌웨어 + NPU RTL(표준 입출력) → target=rtl_cosim
 입력:  --samples(기본: reference/digit_samples.txt), --mnist-dir D --indices 0,1,..., --images a.png ...(28×28)
 CSV:   target,img_id,source,index,label,golden_class,cpu_class,dev_class,scores_match,display_ok,rc,category
   category: OK / MODEL_MISCLASS(골든 = 장치, 하지만 정답과 다름: 모델 한계) / HW_MISMATCH(장치 ≠ 골든)
@@ -505,7 +505,7 @@ from part03.ch28.reference.digit_reference import (  # noqa: E402
 
 
 class ProcTransport:
-    """협동 시뮬레이션: 펌웨어 프로세스의 표준 입출력."""
+    """PC 시뮬레이션: 펌웨어 프로세스의 표준 입출력."""
 
     def __init__(self, cmd):
         import selectors
@@ -771,8 +771,8 @@ PYTHON_RTL_COMPARE_PASS ch28 host-&gt;uart_frame-&gt;c_firmware-&gt;axi_npu_rtl 
       <details class="full"><summary>테스트벤치와 기준 모델 (전체 코드 4개)</summary>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch28/host/digit_cosim_main.c · c</span></div>
-        <pre tabindex="0"><code class="language-c">/* (추가) 28장: PC 협동 시뮬레이션 main. digit_app_run()은 보드와 같은 코드이고, NPU 레지스터 접근은
- * 22장 npu_io_cosim.c가 FIFO로 Icarus RTL(20장 AXI NPU)에 전달한다. UART는 표준 입출력.
+        <pre tabindex="0"><code class="language-c">/* PC 시뮬레이션 main. digit_app_run()은 보드와 같은 코드이고, NPU 레지스터 접근은
+ * 5-3 npu_io_cosim.c가 FIFO로 RTL(5-1 AXI NPU)에 전달한다. UART는 표준 입출력.
  * 시작 전에 CRC16 검사값(0x29B1)을 확인해 C 구현이 Python 규약과 같은지 본다.
  */
 #include &lt;stdio.h&gt;
@@ -801,7 +801,7 @@ int main(int argc, char **argv)
       </div>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch28/host/digit_io_host.c · c</span></div>
-        <pre tabindex="0"><code class="language-c">/* (추가) 28장: PC 협동 시뮬레이션 플랫폼 경계. 표준 입력 = UART 수신(PC 호스트 도구가 파이프로 프레임을 보냄),
+        <pre tabindex="0"><code class="language-c">/* PC 시뮬레이션 플랫폼 경계. 표준 입력 = UART 수신(PC 호스트 도구가 파이프로 프레임을 보냄),
  * 표준 출력 = UART 송신. 바이트 간격 제한은 poll()의 밀리초 제한으로 흉내 낸다. 표시 값은 DISP 줄로만 확인한다.
  */
 #include &lt;poll.h&gt;
@@ -835,7 +835,7 @@ void dio_flush(void) { fflush(stdout); }</code></pre>
       </div>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch28/tb/tb_p3_fnd_scan.sv · systemverilog</span></div>
-        <pre tabindex="0"><code class="language-systemverilog">// (추가) 28장: FND 스캔 시험. Python(digit_reference.fnd_segments)이 만든 (워드, 자리) → (an, seg, dp) 기대값과
+        <pre tabindex="0"><code class="language-systemverilog">// FND 스캔 시험. Python(digit_reference.fnd_segments)이 만든 (워드, 자리) → (an, seg, dp) 기대값과
 // 핀 값을 비교한다. 각 자리 구간 한가운데에서 표본을 잡고, 자리 순서 0→1→2→3 반복과 Reset 출력(모두 꺼짐)도 확인한다.
 `timescale 1ns/1ps
 module tb_p3_fnd_scan;
@@ -902,13 +902,13 @@ endmodule</code></pre>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch28/reference/digit_reference.py · python</span></div>
         <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
-"""28장: 손글씨 숫자 인식 NPU 시스템 기준모델·UART 프레임 규약(표준 라이브러리만, PNG는 Pillow 선택).
+"""손글씨 숫자 인식 NPU 시스템 기준모델·UART 프레임 규약(표준 라이브러리만, PNG는 Pillow 선택).
 
-실습 모드: **28×28·784 타일링**(17장 13타일 하드웨어, 18장 INT8 학습 모델). 8×8·64 모드는 쓰지 않는다.
-모델 연결: 18장 mnist_linear_f32.json → quantize_model(…, 8) → model_w[10][784]·model_b[10]
+실습 모드: **28×28·784 타일링**(4-2 13타일 하드웨어, 4-3 INT8 학습 모델). 8×8·64 모드는 쓰지 않는다.
+모델 연결: 4-3 mnist_linear_f32.json → quantize_model(…, 8) → model_w[10][784]·model_b[10]
   MODEL_ID = zlib.crc32(w 바이트(class 우선, int8 2의 보수) ‖ b 각 int64 little-endian)  — 펌웨어도 부팅 때 같은 값을 계산
 전처리: 28×28 8비트 회색조(MNIST 극성: 흰 글씨·검은 바탕), x_q = div_round_away(pixel·127, 255) ∈ 0..127
-Golden: 17장 model(x, w, b, 41, 40, 8) → 10개 점수·class(동점은 낮은 번호)
+Golden: 4-2 model(x, w, b, 41, 40, 8) → 10개 점수·class(동점은 낮은 번호)
 
 UART 프레임(PC → 보드, 115200 8N1):
   'P' '3' CMD  PAYLOAD  CRC16(상위 먼저)    CRC16/CCITT-FALSE(poly 0x1021, init 0xFFFF)를 CMD‖PAYLOAD에 계산
@@ -1034,7 +1034,7 @@ def read_samples(path=SAMPLES):
 
 
 def make_samples(mnist_dir, out):
-    """t10k에서 숫자별 첫 2장 + 18장 INT8 모델이 틀리는 첫 2장(모델 오분류 분류 확인용)."""
+    """t10k에서 숫자별 첫 2장 + 4-3 INT8 모델이 틀리는 첫 2장(모델 오분류 분류 확인용)."""
     xs = read_idx(mnist_dir / "t10k-images-idx3-ubyte")
     ys = read_idx(mnist_dir / "t10k-labels-idx1-ubyte")
     qm = load_qmodel()
@@ -1133,12 +1133,12 @@ if __name__ == "__main__":
       <div class="codeblock">
         <div class="codebar"><span>part03/ch26/rtl/p3_conv3x3_8x8.v · verilog</span></div>
         <pre tabindex="0"><code class="language-verilog">`timescale 1ns/1ps
-// (추가) 26장: 8×8 단일채널 signed INT8 영상의 3×3 합성곱(Cross-Correlation, stride 1, padding 0) + Bias + ReLU.
-// 출력 6×6 = 36픽셀, 픽셀당 9 MAC. 02장 dsp_multiplier 9개로 등록 곱을 만들고, 덧셈 트리를 두 단으로 나눠 합한다
+// 8×8 단일채널 signed INT8 영상의 3×3 합성곱(Cross-Correlation, stride 1, padding 0) + Bias + ReLU.
+// 출력 6×6 = 36픽셀, 픽셀당 9 MAC. 1-3 dsp_multiplier 9개로 등록 곱을 만들고, 덧셈 트리를 두 단으로 나눠 합한다
 // (3개씩 부분합 → 부분합 3개 + Bias). 한 클록 9항 합은 100 MHz를 넘지 못해(OOC 배선 WNS −8.1 ns) 나눴다.
 // 입력은 행 우선 픽셀 스트림(valid/last). 64번째 픽셀에만 last가 있어야 한다.
 //   짧은 프레임(이른 last): 오류 펄스, 다음 픽셀부터 새 프레임. 긴 프레임(64번째에 last 없음): 오류 펄스,
-//   다음 last까지 버린 뒤 새 프레임(13장 프레임 버퍼와 같은 재동기 규칙). 이미 나간 출력은 취소하지 않는다.
+//   다음 last까지 버린 뒤 새 프레임(3-1 프레임 버퍼와 같은 재동기 규칙). 이미 나간 출력은 취소하지 않는다.
 // 창 생성: 라인 버퍼 2줄(행 r-1, r-2)과 3×3 창 레지스터. (r, c) 픽셀이 들어오면 창 = 행 r-2..r, 열 c-2..c,
 //   r ≥ 2 &amp;&amp; c ≥ 2일 때 유효하며 출력 위치는 (r-2, c-2). valid가 없는 클록(버블)에는 창이 움직이지 않는다.
 // 지연: 픽셀 수락 → out_valid 5클록(창, 곱, 부분합, 합+Bias, ReLU·출력 레지스터). 처리량 1픽셀/클록.
@@ -1179,7 +1179,7 @@ module p3_conv3x3_8x8(
     integer k;
 
     reg drop_q;                        // 긴 프레임: 다음 last까지 버림
-    // 9개 등록 곱(02장 dsp_multiplier 재사용): 창 레지스터 → 곱(1클록)
+    // 9개 등록 곱(1-3 dsp_multiplier 재사용): 창 레지스터 → 곱(1클록)
     wire signed [15:0] prod [0:8];
     wire [8:0] pvalid;
     wire pv = pvalid[0];
@@ -1292,7 +1292,7 @@ PYTHON_RTL_COMPARE_PASS frames=26 outputs=936 bit_exact=1</code></pre></div>
       <details class="full"><summary>테스트벤치와 기준 모델 (전체 코드 2개)</summary>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch26/tb/tb_p3_conv3x3_8x8.sv · systemverilog</span></div>
-        <pre tabindex="0"><code class="language-systemverilog">// (추가) 26장 p3_conv3x3_8x8 자동 판정 TB. 프레임마다 커널·Bias를 쓰고 64픽셀을 LFSR 버블과 함께 보낸다.
+        <pre tabindex="0"><code class="language-systemverilog">// p3_conv3x3_8x8 자동 판정 TB. 프레임마다 커널·Bias를 쓰고 64픽셀을 LFSR 버블과 함께 보낸다.
 // 출력 36개의 값(행 우선)을 actual에 기록(Python 비교). 상시 검사: 출력 위치 순서·out_last·지연 3클록·처리량.
 // 추가: 프레임 붙여 보내기(버블 없음), 짧은·긴 프레임 재동기, 프레임 중 커널 쓰기 거부, 잘못된 커널 주소, 프레임 중 Reset.
 `timescale 1ns/1ps
@@ -1434,7 +1434,7 @@ endmodule</code></pre>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch26/reference/conv_reference.py · python</span></div>
         <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
-"""26장: 8×8·3×3 합성곱(Cross-Correlation, stride 1, padding 0)+Bias+ReLU 기준모델·시험 벡터·RTL 비교.
+"""8×8·3×3 합성곱(Cross-Correlation, stride 1, padding 0)+Bias+ReLU 기준모델·시험 벡터·RTL 비교.
 
 창마다 host_tools의 dot_signed로 9항 내적을 구한다. 출력 6×6을 행 우선으로 비교한다.
 """
@@ -1484,7 +1484,7 @@ def cases(rng):
 def selftest():
     img = [[r * 8 + c for c in range(8)] for r in range(8)]
     out = conv3x3(img, [[1, 0, -1]] * 3, 0, 0)
-    assert len(out) == 36 and out[0] == -6                    # 26장 규격 예제
+    assert len(out) == 36 and out[0] == -6                    # 규격 예제
     assert sum(1 for _ in range(6) for _ in range(6)) * 9 == 324   # 필터 1개 324 MAC
     ident = [[0, 0, 0], [0, 1, 0], [0, 0, 0]]
     assert conv3x3(img, ident, 0, 0) == [img[r + 1][c + 1] for r in range(6) for c in range(6)]
@@ -1547,7 +1547,7 @@ if __name__ == "__main__":
       <h3>작성할 코드</h3>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch29/sw/main.c · c</span></div>
-        <pre tabindex="0"><code class="language-c">/* (추가) 29장: MicroBlaze V main. NPU 베이스 주소는 Vivado Address Editor 값(xparameters.h, 28장 XSA). */
+        <pre tabindex="0"><code class="language-c">/* MicroBlaze V main. NPU 베이스 주소는 Vivado Address Editor 값(xparameters.h, 6-1 XSA). */
 #include "xparameters.h"
 #include "sensor_app.h"
 
@@ -1559,7 +1559,7 @@ int main(void)
       </div>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch29/sw/sensor_app.h · c</span></div>
-        <pre tabindex="0"><code class="language-c">/* (추가) 29장: 센서 융합 상태 감시 응용. 규약·규칙의 정본은 reference/sensor_reference.py 머리말. */
+        <pre tabindex="0"><code class="language-c">/* 센서 융합 상태 감시 응용. 규약·규칙의 정본은 reference/sensor_reference.py 머리말. */
 #ifndef SENSOR_APP_H
 #define SENSOR_APP_H
 #include &lt;stdint.h&gt;
@@ -1599,10 +1599,10 @@ int sensor_app_run(uintptr_t npu_base);
       </div>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch29/sw/sensor_app.c · c</span></div>
-        <pre tabindex="0"><code class="language-c">/* (추가) 29장: 센서 융합 상태 감시(교육용). UART 센서 창 → 규칙 검사(guard) → 특징 6개 → 20장 NPU(0번 타일)
+        <pre tabindex="0"><code class="language-c">/* 센서 융합 상태 감시(교육용). UART 센서 창 → 규칙 검사(guard) → 특징 6개 → 5-1 NPU(0번 타일)
  * → 3상태 후보 → 경보 정책(부팅 UNKNOWN, 상향 즉시·하향 3회 연속, FAULT는 ACK까지 래치) → UART·LED·FND.
  * 입력 실패(결측·지연·범위·고착·링크)는 NPU보다 먼저 규칙으로 판정하고, 그때 NPU는 실행하지 않는다.
- * LED15(경보)는 표시·기록용이다. 실제 위험 장치의 정지·인터록에 쓰지 않는다(30장: 독립 보호 로직이 우선).
+ * LED15(경보)는 표시·기록용이다. 실제 위험 장치의 정지·인터록에 쓰지 않는다(6-4: 독립 보호 로직이 우선).
  * 같은 입력으로 CPU 정수 추론도 실행해 NPU 점수와 비교한다(불일치 = UNKNOWN).
  */
 #include "app.h"
@@ -1744,7 +1744,7 @@ static uint32_t crc32_byte(uint32_t crc, uint8_t v)
     return crc;
 }
 
-/* zlib.crc32(w[10][784] ‖ b[10] int64 LE) — ROM 모델 = Python 모델 확인(28장과 같은 규칙) */
+/* zlib.crc32(w[10][784] ‖ b[10] int64 LE) — ROM 모델 = Python 모델 확인(6-1과 같은 규칙) */
 uint32_t sensor_model_crc32(void)
 {
     uint32_t crc = 0xFFFFFFFFu;
@@ -2002,8 +2002,8 @@ int sensor_app_run(uintptr_t npu_base)
       </div>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch29/sw/sensor_io.h · c</span></div>
-        <pre tabindex="0"><code class="language-c">/* (추가) 29장: 센서 감시 응용의 플랫폼 경계(28장 digit_io.h와 같은 구조, 대기 방식만 다르다).
- *   MicroBlaze V: sensor_io_xil.c (AXI UART Lite 폴링, AXI GPIO 0 = LED, AXI GPIO 1 = FND 표시 워드) — 28장 Bitstream 그대로
+        <pre tabindex="0"><code class="language-c">/* 센서 감시 응용의 플랫폼 경계(6-1 digit_io.h와 같은 구조, 대기 방식만 다르다).
+ *   MicroBlaze V: sensor_io_xil.c (AXI UART Lite 폴링, AXI GPIO 0 = LED, AXI GPIO 1 = FND 표시 워드) — 6-1 Bitstream 그대로
  *   PC          : host/sensor_io_host.c (표준 입력 = UART 수신)
  */
 #ifndef SENSOR_IO_H
@@ -2024,7 +2024,7 @@ void sio_flush(void);
       </div>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch29/sw/sensor_io_xil.c · c</span></div>
-        <pre tabindex="0"><code class="language-c">/* (추가) 29장: MicroBlaze V 플랫폼 경계. (변경) 안 A: 21장 SoC(Bitstream·XSA) 그대로: AXI UART Lite 폴링,
+        <pre tabindex="0"><code class="language-c">/* MicroBlaze V 플랫폼 경계. 5-2 SoC(Bitstream·XSA) 그대로: AXI UART Lite 폴링,
  * AXI GPIO 0 채널 1 = LED[15:0], 표시 워드 → 표준 7세그먼트 IP(ip06_seg7, AXI GPIO 1·p3_fnd_scan 대체).
  * 시간 제한은 폴링 횟수다(실제 시간은 빌드 최적화에 따라 다르므로 보드에서 측정해 기록한다).
  */
@@ -2035,7 +2035,7 @@ void sio_flush(void);
 #include "sensor_io.h"
 
 #ifndef SENSOR_RX_POLLS
-#define SENSOR_RX_POLLS   3000000u    /* 프레임 도중 바이트 간격 제한(28장과 같은 값) */
+#define SENSOR_RX_POLLS   3000000u    /* 프레임 도중 바이트 간격 제한(6-1과 같은 값) */
 #endif
 #ifndef SENSOR_LINK_POLLS
 #define SENSOR_LINK_POLLS 10000000u   /* 링크 감시: 프레임 시작 대기 제한(폴링 횟수) */
@@ -2055,7 +2055,7 @@ int sio_getc(int mode)
 
 void sio_display(uint32_t fnd_word, uint32_t led)
 {
-    p3_seg7_write(p3_seg7_from_fnd_word(fnd_word));   /* (변경) 안 A: 표준 7세그먼트 IP */
+    p3_seg7_write(p3_seg7_from_fnd_word(fnd_word));   /* 표준 7세그먼트 IP */
     Xil_Out32(LED_GPIO, led);
 }
 
@@ -2063,14 +2063,14 @@ void sio_flush(void) {}</code></pre>
       </div>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch29/rtl/p3_alarm_policy.v · verilog</span></div>
-        <pre tabindex="0"><code class="language-verilog">// (추가) 29장: 경보 정책 RTL(펌웨어 policy_cand/policy_ack, Python sensor_reference.Policy와 같은 규칙).
+        <pre tabindex="0"><code class="language-verilog">// 경보 정책 RTL(펌웨어 policy_cand/policy_ack, Python sensor_reference.Policy와 같은 규칙).
 //   상태 코드: NORMAL 0, WARNING 1, FAULT 2, UNKNOWN 3. 심각도: NORMAL &lt; WARNING &lt; UNKNOWN &lt; FAULT
 //   rst(동기, High) → UNKNOWN(데이터를 보기 전 안전한 기본값), latch 0
 //   cand_valid: 후보 심각도 ≥ 현재 → 즉시 그 상태(cnt 0), FAULT면 latch 1
 //               후보 &lt; 현재 → latch면 cnt 0(하향 없음), 아니면 연속 CLEAR_N번째에 그 후보들 중 가장 심각한 상태로
 //   ack(cand_valid 없을 때만): latch면 latch 0·cnt 0·ack_ok 1클록. 같은 클록에 후보가 오면 ACK는 무시(보수적)
-//   alarm_o = state ≠ NORMAL. 표시·기록용이며 위험 장치 정지에는 독립 보호 로직을 쓴다(30장).
-// 복합 우선순위 판단은 이 모듈에만 두고 Top에는 두지 않는다(29장 가이드 6절).
+//   alarm_o = state ≠ NORMAL. 표시·기록용이며 위험 장치 정지에는 독립 보호 로직을 쓴다(6-4).
+// 복합 우선순위 판단은 이 모듈에만 두고 Top에는 두지 않는다(6-3 가이드 6절).
 `timescale 1ns/1ps
 module p3_alarm_policy #(
     parameter integer CLEAR_N = 3          // 2..4
@@ -2155,11 +2155,11 @@ endmodule</code></pre>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch29/host/p3_sensor_host.py · python</span></div>
         <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
-"""29장 PC 호스트: 가상 센서 창(합성 데이터·고장 주입) → UART 프레임 → 보드(또는 협동 시뮬레이션) → 응답 판정·CSV.
+"""PC 호스트: 가상 센서 창(합성 데이터·고장 주입) → UART 프레임 → 보드(또는 PC 시뮬레이션) → 응답 판정·CSV.
 
 전송 경로(같은 규약, reference/sensor_reference.py 머리말):
-  --port /dev/ttyUSBx   실제 Basys3(28장 Bitstream + 29장 ELF)                  → target=fpga
-  --cosim "&lt;명령&gt;"       PC 빌드 펌웨어 + Icarus NPU RTL(표준 입출력)              → target=rtl_cosim
+  --port /dev/ttyUSBx   실제 Basys3(6-1 Bitstream + 6-3 ELF)                  → target=fpga
+  --cosim "&lt;명령&gt;"       PC 빌드 펌웨어 + NPU RTL(표준 입출력)              → target=rtl_cosim
 시험 묶음(기본 모두):
   scenario  정책 전이(부팅 UNKNOWN → 3회 연속 하향, 즉시 상향, FAULT 래치·ACK)와 센서 고장 주입
             (결측·지연·범위 밖·고착 → NPU 없이 UNKNOWN/FAULT)
@@ -2524,8 +2524,8 @@ PYTHON_RTL_COMPARE_PASS ch29 host-&gt;uart_frame-&gt;c_firmware(guard,policy)-&g
       <details class="full"><summary>테스트벤치와 기준 모델 (전체 코드 5개)</summary>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch29/host/sensor_cosim_main.c · c</span></div>
-        <pre tabindex="0"><code class="language-c">/* (추가) 29장: PC 협동 시뮬레이션 main. sensor_app_run()은 보드와 같은 코드이고, NPU 레지스터 접근은
- * 22장 npu_io_cosim.c가 FIFO로 Icarus RTL(20장 AXI NPU)에 전달한다. UART는 표준 입출력.
+        <pre tabindex="0"><code class="language-c">/* PC 시뮬레이션 main. sensor_app_run()은 보드와 같은 코드이고, NPU 레지스터 접근은
+ * 5-3 npu_io_cosim.c가 FIFO로 RTL(5-1 AXI NPU)에 전달한다. UART는 표준 입출력.
  */
 #include &lt;stdio.h&gt;
 #include "sensor_app.h"
@@ -2549,7 +2549,7 @@ int main(int argc, char **argv)
       </div>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch29/host/sensor_io_host.c · c</span></div>
-        <pre tabindex="0"><code class="language-c">/* (추가) 29장: PC 협동 시뮬레이션 플랫폼 경계. 표준 입력 = UART 수신, 표준 출력 = UART 송신.
+        <pre tabindex="0"><code class="language-c">/* PC 시뮬레이션 플랫폼 경계. 표준 입력 = UART 수신, 표준 출력 = UART 송신.
  * 시간 제한은 poll()의 밀리초 제한으로 흉내 낸다. 표시 값은 DISP 줄로만 확인한다.
  */
 #include &lt;poll.h&gt;
@@ -2586,7 +2586,7 @@ void sio_flush(void) { fflush(stdout); }</code></pre>
       </div>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch29/tb/tb_p3_alarm_policy.sv · systemverilog</span></div>
-        <pre tabindex="0"><code class="language-systemverilog">// (추가) 29장: p3_alarm_policy 벡터 시험. Python sensor_reference.policy_vectors가 만든 클록별 입력·기대값
+        <pre tabindex="0"><code class="language-systemverilog">// p3_alarm_policy 벡터 시험. Python sensor_reference.policy_vectors가 만든 클록별 입력·기대값
 //   (rst cv cand ack | state latch cnt ack_ok alarm)을 그대로 대조한다. 지정 시나리오 + 무작위 4000클록.
 `timescale 1ns/1ps
 module tb_p3_alarm_policy;
@@ -2643,7 +2643,7 @@ endmodule</code></pre>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch29/reference/sensor_reference.py · python</span></div>
         <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
-"""29장: 센서 융합 상태 감시 기준모델(정본, 표준 라이브러리만). 교육용 합성 데이터이며 산업 안전 보증이 아니다.
+"""센서 융합 상태 감시 기준모델(정본, 표준 라이브러리만). 교육용 합성 데이터이며 산업 안전 보증이 아니다.
 
 센서 3종(제2부 IP 기준, 창 8표본·100 ms 간격):
   온도  DS18B20  int16, 1/16 °C   결측 0x7FFF   유효 -20.0..100.0 °C (-320..1600)
@@ -2654,7 +2654,7 @@ endmodule</code></pre>
 판정 순서(AI보다 규칙이 먼저, guard):
   센서별 범위 밖·고착 → FAULT 비트(온도 1, 진동 2, 거리 4) / 결측·지연 → UNKNOWN 비트(같은 위치)
   FAULT 비트가 하나라도 있으면 후보 FAULT, 아니면 UNKNOWN 비트가 있으면 후보 UNKNOWN. 이때 NPU는 실행하지 않는다.
-  모두 유효할 때만 특징 6개 → NPU(20장 IP, 0번 타일만 사용) → 후보 = NPU class(0 NORMAL, 1 WARNING, 2 FAULT)
+  모두 유효할 때만 특징 6개 → NPU(5-1 IP, 0번 타일만 사용) → 후보 = NPU class(0 NORMAL, 1 WARNING, 2 FAULT)
   링크: 프레임 대기 시간 초과 또는 연속 프로토콜 오류 3회 → 후보 UNKNOWN(이유 비트 8). NPU 오류·CPU 불일치도 UNKNOWN.
 
 특징 6개(센서별로 따로 정한 심각도 눈금, 단위를 섞지 않는다). q(n, d) = min(127, max(0, n)·127 // d)
@@ -2666,16 +2666,16 @@ endmodule</code></pre>
   f4 거리 근접    q(125 - min d, 160)           125 cm → 0, 45 cm → 63
   f5 접근 속도    q((d0 - d7) - 10, 120)        창 안 10 cm → 0, 70 cm → 63
 
-NPU 모델: 학습(float, train_sensor_model.py) → 18장 quantize_model(…, 8) → w[3][6]·b[3]
-  20장 IP는 784 입력·10 class 고정 → x[0..5] = 특징, x[6..783] = 0, w 행 3..9 = 0, b[3..9] = UNUSED_BIAS(-2^38)
-  MODEL_ID = zlib.crc32(w[10][784] 바이트 ‖ b[10] int64 LE) (28장과 같은 규칙)
+NPU 모델: 학습(float, train_sensor_model.py) → 4-3 quantize_model(…, 8) → w[3][6]·b[3]
+  5-1 IP는 784 입력·10 class 고정 → x[0..5] = 특징, x[6..783] = 0, w 행 3..9 = 0, b[3..9] = UNUSED_BIAS(-2^38)
+  MODEL_ID = zlib.crc32(w[10][784] 바이트 ‖ b[10] int64 LE) (6-1과 같은 규칙)
 
 경보 정책(상태 코드 NORMAL 0, WARNING 1, FAULT 2, UNKNOWN 3, 심각도 NORMAL &lt; WARNING &lt; UNKNOWN &lt; FAULT):
   Reset·부팅 = UNKNOWN. 후보 심각도 ≥ 현재 → 즉시 그 상태(cnt 0), 후보가 FAULT면 latch = 1
   후보 &lt; 현재: latch면 cnt 0(진행 없음), 아니면 연속 CLEAR_N(3)번째에 그 3개 중 가장 심각한 상태로 내림
   ACK: latch면 latch 0·cnt 0(ok=1), 아니면 무시(ok=0). 같은 클록에 후보와 ACK가 오면(RTL) ACK는 무시한다(보수적)
 
-UART 프레임: 28장과 같은 'P' '3' CMD PAYLOAD CRC16(CCITT-FALSE, 상위 먼저)
+UART 프레임: 6-1과 같은 'P' '3' CMD PAYLOAD CRC16(CCITT-FALSE, 상위 먼저)
   'I' 식별 → P3_SENSOR READY …     'A' ACK → ACK ok=… state=… latch=…
   'S' seq u16 ‖ model_id u32 ‖ age_t,age_v,age_d u16 ‖ 8 × (t i16, v u16, d u16)  (모두 LE, 60바이트)
       → STATE src=FRAME … (guard·특징·점수·후보·상태)
@@ -2986,7 +2986,7 @@ def selftest():
     f = sensor_frame(0x0102, model_id(qm), s)
     assert len(f) == 2 + 1 + PAYLOAD_BYTES + 2 and crc16(f[2:]) == 0
     assert golden([0] * N_FEAT, qm)[0] == qm["b"][:N_CLS]
-    # 29장 가이드 예제와 같은 순서: 결측 → UNKNOWN, 범위 밖 → FAULT, 정상 → 모델 입력
+    # 가이드 예제와 같은 순서: 결측 → UNKNOWN, 범위 밖 → FAULT, 정상 → 모델 입력
     ok = {"age": [0, 0, 0], "t": [23 * 16] * 8, "v": [2048 + (60 if i % 2 else -60) for i in range(8)], "d": [60] * 8}
     assert guard(ok) == (0, 0)
     assert guard(dict(ok, t=[T_MISS] + ok["t"][1:])) == (0, B_T)
@@ -3036,10 +3036,10 @@ if __name__ == "__main__":
       <div class="codeblock">
         <div class="codebar"><span>part03/ch29/reference/train_sensor_model.py · python</span></div>
         <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
-"""29장: 센서 특징 8개 → 3상태(NORMAL·WARNING·FAULT) Float32 선형 분류기 학습(PC 전용, PyTorch 필요).
+"""센서 특징 8개 → 3상태(NORMAL·WARNING·FAULT) Float32 선형 분류기 학습(PC 전용, PyTorch 필요).
 
 데이터: sensor_reference.dataset(TRAIN) — 교육용 합성 데이터(고정 seed), 실제 설비 라벨이 아니다.
-입력: x = feature / 127 (특징은 0..127 정수, zero-point 0 → 18장 quantize_model 그대로 사용).
+입력: x = feature / 127 (특징은 0..127 정수, zero-point 0 → 4-3 quantize_model 그대로 사용).
 결과: 같은 폴더 sensor_model_f32.json. 정수 평가는 sensor_reference.py --eval(표준 라이브러리).
 실행: &lt;torch venv&gt;/bin/python part03/ch29/reference/train_sensor_model.py
 """
@@ -3123,7 +3123,7 @@ if __name__ == "__main__":
       <h3>작성할 코드</h3>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch30/rtl/p3_motor_safety.v · verilog</span></div>
-        <pre tabindex="0"><code class="language-verilog">// (추가) 30장: NPU 추천과 독립된 모터 안전 코어(L298N 계열 IN1/IN2/ENA, 제2부 07장 motor_controller 구조를 확장).
+        <pre tabindex="0"><code class="language-verilog">// NPU 추천과 독립된 모터 안전 코어(L298N 계열 IN1/IN2/ENA, 제2부 07장 motor_controller 구조를 확장).
 //   CPU(NPU 추천)는 명령 워드만 쓴다. IN1/IN2/ENA는 이 코어만 구동하고, 아래 조건이 하나라도 참이면
 //   클록을 기다리지 않고(조합) 모두 0이다: E-Stop, 고장(과전류 등), 과열, 워치독 만료, 트립 래치, 진행 방향 리밋.
 //   입력 estop/fault/otemp/lim_*는 Top에서 2단 동기화한 신호다(Top: 비상정지는 NC 접점 + 풀업, 끊기면 정지).
@@ -3263,7 +3263,7 @@ endmodule</code></pre>
       </div>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch30/rtl/p3_motor_safety_bd.v · verilog</span></div>
-        <pre tabindex="0"><code class="language-verilog">// (추가) 30장: BD 모듈 참조용 모터 안전 코어 래퍼. AXI GPIO 2와 같은 클록·peripheral_aresetn을 쓴다.
+        <pre tabindex="0"><code class="language-verilog">// BD 모듈 참조용 모터 안전 코어 래퍼. AXI GPIO 2와 같은 클록·peripheral_aresetn을 쓴다.
 //   cmd_i ← GPIO 2 채널 1(명령 워드), status_o → GPIO 2 채널 2(상태 워드). CPU는 이 두 레지스터로만 닿는다.
 //   외부 입력은 2단 동기화한다(비동기 버튼·스위치·외부 회로). 비상정지는 두 경로의 OR:
 //     estop_ok_i: 외부 NC 비상정지 루프(닫힘 = 1). XDC PULLDOWN → 끊김·미연결이면 0 → 정지(fail-safe)
@@ -3307,13 +3307,13 @@ endmodule</code></pre>
       </div>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch30/rtl/basys3_soc30_top.v · verilog</span></div>
-        <pre tabindex="0"><code class="language-verilog">// (추가) 30장 사용자 Top: 보드 핀 연결만 한다(판단 로직 없음, MBV_SOC §4).
-// (변경) 안 A(2026-11-20): 21장 동결 주소맵 SoC 복제본 BD(MicroBlaze V + NPU + BTN GPIO + 표준 7세그먼트 IP)에
+        <pre tabindex="0"><code class="language-verilog">// 사용자 Top: 보드 핀 연결만 한다(판단 로직 없음, MBV_SOC §4).
+// 5-2 동결 주소맵 SoC 복제본 BD(MicroBlaze V + NPU + BTN GPIO + 표준 7세그먼트 IP)에
 //   모터 GPIO(axi_gpio_motor, 0x4007_0000) + 모터 안전 코어를 더한 Wrapper. 7세그먼트는 BD 안 ip06_seg7이 구동한다.
 // LED9..12는 코어 출력을 직접 보여 준다(CPU와 무관): LED12 ENA(PWM 밝기), LED11 IN1(FWD), LED10 IN2(REV), LED9 트립.
 //   나머지 LED는 CPU(AXI GPIO 0).
 // Pmod JB: JB1 A14 → IN1, JB2 A16 → IN2, JB3 B15 → ENA(제2부 07장과 같은 핀), JB4 B16 ← 비상정지 루프(PULLDOWN).
-// 버튼: btn[3] = btnU는 21장처럼 axi_gpio_btn으로 가고, 같은 핀을 비상정지 버튼(estop_btn)에도 연결한다.
+// 버튼: btn[3] = btnU는 5-2처럼 axi_gpio_btn으로 가고, 같은 핀을 비상정지 버튼(estop_btn)에도 연결한다.
 // 스위치(시험 주입용, CPU도 읽음): sw[14] 정방향 리밋, sw[13] 역방향 리밋, sw[12] 고장, sw[11] 과열.
 module basys3_soc30_top (
     input  wire        clk,    // Basys3 W5: 외부 100 MHz
@@ -3359,11 +3359,11 @@ endmodule</code></pre>
       </div>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch30/constraints/basys3_soc30.xdc · xdc</span></div>
-        <pre tabindex="0"><code class="language-xdc">## (변경) 안 A(2026-11-20) 30장: 21장 XDC 전체(아래 그대로, btn[3] = btnU T18 포함) + Pmod JB(모터 드라이버 IN1·IN2·ENA, 비상정지 루프 PULLDOWN).
-## btnU는 21장처럼 btn[3](axi_gpio_btn)으로 들어가고, Top이 같은 핀을 모터 안전 코어 비상정지 입력에도 연결한다.
-## (추가) 21장: 제1부 11장 성공 프로젝트가 쓰는 Basys3 Master XDC(Digilent)의 활성 줄만 그대로 옮긴 제약.
+        <pre tabindex="0"><code class="language-xdc">## 5-2 XDC 전체(아래 그대로, btn[3] = btnU T18 포함) + Pmod JB(모터 드라이버 IN1·IN2·ENA, 비상정지 루프 PULLDOWN).
+## btnU는 5-2처럼 btn[3](axi_gpio_btn)으로 들어가고, Top이 같은 핀을 모터 안전 코어 비상정지 입력에도 연결한다.
+## 5-2: 제1부 11장 성공 프로젝트가 쓰는 Basys3 Master XDC(Digilent)의 활성 줄만 그대로 옮긴 제약.
 ## 포트: clk(W5 100 MHz), btnC, sw[15:0], led[15:0], RsRx/RsTx(USB-UART). NPU는 내부 AXI라 핀이 없다.
-## (변경) 안 A: btn[3:0](U·D·L·R), 7세그먼트 seg[6:0]·dp·an[3:0]. 핀은 Basys-3-Master.xdc와 같다.
+## btn[3:0](U·D·L·R), 7세그먼트 seg[6:0]·dp·an[3:0]. 핀은 Basys-3-Master.xdc와 같다.
 set_property -dict { PACKAGE_PIN W5   IOSTANDARD LVCMOS33 } [get_ports clk]
 create_clock -name sys_clk_pin -period 10.00 -waveform {0 5} [get_ports clk]
 set_property -dict { PACKAGE_PIN V17   IOSTANDARD LVCMOS33 } [get_ports {sw[0]}]
@@ -3423,7 +3423,7 @@ set_property BITSTREAM.GENERAL.COMPRESS TRUE [current_design]
 set_property BITSTREAM.CONFIG.CONFIGRATE 33 [current_design]
 set_property CONFIG_MODE SPIx4 [current_design]
 
-## ---- 30장 추가: Pmod JB (Basys-3-Master.xdc 핀)
+## ---- 6-4 모터: Pmod JB (Basys-3-Master.xdc 핀)
 set_property -dict { PACKAGE_PIN A14   IOSTANDARD LVCMOS33 } [get_ports {JB[0]}]
 set_property -dict { PACKAGE_PIN A16   IOSTANDARD LVCMOS33 } [get_ports {JB[1]}]
 set_property -dict { PACKAGE_PIN B15   IOSTANDARD LVCMOS33 } [get_ports {JB[2]}]
@@ -3432,12 +3432,12 @@ set_property -dict { PACKAGE_PIN B16   IOSTANDARD LVCMOS33 PULLDOWN TRUE } [get_
       </div>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch30/synth/soc30_bd.tcl · tcl</span></div>
-        <pre tabindex="0"><code class="language-tcl"># (추가) 30장: SoC 복제본에 모터 안전 경로를 더하고 Bitstream·XSA까지 만든다.
-# (변경) 안 A(2026-11-20): 출발점을 28장 SoC에서 21장 동결 주소맵 SoC(ch21/build/soc21_npu)로 바꾼다.
-#   21장 주소·인터럽트는 바꾸지 않고, 빈 칸 0x4007_0000(64 KB)에 모터 GPIO(axi_gpio_motor, 듀얼:
+        <pre tabindex="0"><code class="language-tcl"># SoC 복제본에 모터 안전 경로를 더하고 Bitstream·XSA까지 만든다.
+# 출발점은 5-2 동결 주소맵 SoC(ch21/build/soc21_npu)다.
+#   5-2 주소·인터럽트는 바꾸지 않고, 빈 칸 0x4007_0000(64 KB)에 모터 GPIO(axi_gpio_motor, 듀얼:
 #   채널 1 출력 = 명령 워드, 채널 2 입력 = 상태 워드)만 더한다. 모터 경로는 인터럽트를 쓰지 않는다(In4 예약 그대로 0).
 #   p3_motor_safety_bd(BD 모듈 참조, GPIO와 같은 클록·peripheral_aresetn) → 외부 포트(비상정지·고장·과열·리밋 입력,
-#   IN1·IN2·ENA·트립 출력). 사용자 Top: basys3_soc30_top(핀 연결만). 21장 결과물은 build_soc.sh가 cp -a로 복제한다.
+#   IN1·IN2·ENA·트립 출력). 사용자 Top: basys3_soc30_top(핀 연결만). 5-2 결과물은 build_soc.sh가 cp -a로 복제한다.
 # 사용: vivado -mode batch -source soc30_bd.tcl -tclargs &lt;복제 xpr&gt; &lt;ch30 폴더&gt; &lt;출력 폴더&gt; &lt;jobs&gt;
 set xpr [lindex $argv 0]
 set ch [file normalize [lindex $argv 1]]
@@ -3507,7 +3507,7 @@ foreach a $rows {
 check {$overlap == 0} "data address segments do not overlap"
 set gseg [get_bd_addr_segs -of_objects [get_bd_addr_spaces /microblaze_riscv_0/Data] -filter {NAME =~ "*axi_gpio_motor*"}]
 check {[get_property OFFSET $gseg] == $gpio_base} "motor GPIO base $gpio_base"
-# (변경) 안 A 주소맵 대조: 21장 8줄 + 모터 1줄이 셀 이름 → 베이스·범위로 한 줄씩 같아야 한다
+# 주소맵 대조: 5-2 8줄 + 모터 1줄이 셀 이름 → 베이스·범위로 한 줄씩 같아야 한다
 proc data_seg {cell} {
   return [get_bd_addr_segs -of_objects [get_bd_addr_spaces /microblaze_riscv_0/Data] -filter "NAME =~ *_${cell}_*"]
 }
@@ -3526,7 +3526,7 @@ foreach {cell base rng} $map_a {
 if {[llength $segs] != [expr {[llength $map_a] / 3}]} { puts "ADDR_MAP_A extra segments: [llength $segs]"; set addr_ok 0 }
 puts [expr {$addr_ok ? "ADDR_MAP_A_PASS" : "ADDR_MAP_A_FAIL"}]
 check {$addr_ok} "address map A (21장 8줄 + 모터 1줄)"
-# (변경) 안 A 인터럽트 대조: 21장과 같아야 한다(모터는 인터럽트 없음, In4 = 0)
+# 인터럽트 대조: 5-2와 같아야 한다(모터는 인터럽트 없음, In4 = 0)
 set irq_map_a {0 axi_timer_0/interrupt 1 axi_uartlite_0/interrupt 3 axi_gpio_btn/ip2intc_irpt 12 p3_npu_0/irq_o}
 set irq_ok 1
 for {set i 0} {$i &lt; 16} {incr i} {
@@ -3589,7 +3589,7 @@ puts "SOC30_BUILD_DONE"</code></pre>
       </div>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch30/sw/main.c · c</span></div>
-        <pre tabindex="0"><code class="language-c">/* (추가) 30장: MicroBlaze V main. NPU·모터 GPIO 주소는 Vivado Address Editor 값(xparameters.h, 30장 XSA). (변경) 안 A: 모터 GPIO = axi_gpio_motor 0x4007_0000. */
+        <pre tabindex="0"><code class="language-c">/* MicroBlaze V main. NPU·모터 GPIO 주소는 Vivado Address Editor 값(xparameters.h, 6-4 XSA). 모터 GPIO = axi_gpio_motor 0x4007_0000. */
 #include "xparameters.h"
 #include "motor_app.h"
 
@@ -3601,7 +3601,7 @@ int main(void)
       </div>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch30/sw/motor_app.h · c</span></div>
-        <pre tabindex="0"><code class="language-c">/* (추가) 30장: NPU 추천 + 독립 모터 안전 코어 응용. 규칙 정본은 reference/motor_reference.py·rtl/p3_motor_safety.v. */
+        <pre tabindex="0"><code class="language-c">/* NPU 추천 + 독립 모터 안전 코어 응용. 규칙 정본은 reference/motor_reference.py·rtl/p3_motor_safety.v. */
 #ifndef MOTOR_APP_H
 #define MOTOR_APP_H
 #include &lt;stdint.h&gt;
@@ -3610,7 +3610,7 @@ int main(void)
 #define M_FWD  1
 #define M_REV  2
 
-/* 명령 워드(모터 GPIO axi_gpio_motor 채널 1, 안 A 0x4007_0000): [6:0] duty, [9:8] dir, [12] clear 토글, [15] kick 토글 */
+/* 명령 워드(모터 GPIO axi_gpio_motor 채널 1, 0x4007_0000): [6:0] duty, [9:8] dir, [12] clear 토글, [15] kick 토글 */
 #define MOTOR_CMD(dir, duty, kick, clr) \
     ((uint32_t)(duty) | ((uint32_t)(dir) &lt;&lt; 8) | ((uint32_t)(clr) &lt;&lt; 12) | ((uint32_t)(kick) &lt;&lt; 15))
 #define MOTOR_REG_CMD    0x0u   /* AXI GPIO 채널 1 DATA */
@@ -3621,17 +3621,17 @@ int main(void)
 #define MST_DRIVE(s)   (((s) &gt;&gt; 8) &amp; 3u)
 #define MST_TRIP(s)    (((s) &gt;&gt; 14) &amp; 1u)
 
-/* 추천: 29장 정책 상태 → (방향, 속도). NORMAL 80 %, WARNING 30 %, FAULT·UNKNOWN STOP */
+/* 추천: 6-3 정책 상태 → (방향, 속도). NORMAL 80 %, WARNING 30 %, FAULT·UNKNOWN STOP */
 void motor_recommend(int state, int op_dir, int *dir, int *duty);
-/* inject_base: PC 협동 시뮬레이션의 시험 주입 주소(보드 빌드에서는 0 = 'J' 명령 거부) */
+/* inject_base: PC 시뮬레이션의 시험 주입 주소(보드 빌드에서는 0 = 'J' 명령 거부) */
 int motor_app_run(uintptr_t npu_base, uintptr_t motor_base, uintptr_t inject_base);
 
 #endif</code></pre>
       </div>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch30/sw/motor_app.c · c</span></div>
-        <pre tabindex="0"><code class="language-c">/* (추가) 30장: NPU 추천 → 독립 모터 안전 코어. 29장 센서 감시(guard·특징·NPU·경보 정책)를 그대로 재사용하고
- * (29장 sensor_app.c를 수정 없이 링크), 정책 상태를 방향·속도 추천으로 바꿔 명령 워드로만 쓴다.
+        <pre tabindex="0"><code class="language-c">/* NPU 추천 → 독립 모터 안전 코어. 6-3 센서 감시(guard·특징·NPU·경보 정책)를 그대로 재사용하고
+ * (6-3 sensor_app.c를 수정 없이 링크), 정책 상태를 방향·속도 추천으로 바꿔 명령 워드로만 쓴다.
  * CPU는 IN1/IN2/ENA를 직접 구동하지 않는다. E-Stop·고장·과열·워치독·트립·리밋은 RTL 코어가 AI 결과와 무관하게 우선한다.
  * 명령을 쓸 때마다 kick 비트를 토글한다(워치독 갱신). 센서 프레임이 멈추면 kick도 멈추고 코어가 정지·트립한다.
  * 트립 해제('C')는 운전자 명령이며 STOP 명령을 먼저 쓴 뒤 다음 쓰기에서 clear 비트를 토글한다.
@@ -3741,7 +3741,7 @@ static void sensor_frame(npu_t *npu, int junk)
         s.v[i] = (uint16_t)(p[2] | (p[3] &lt;&lt; 8));
         s.d[i] = (uint16_t)(p[4] | (p[5] &lt;&lt; 8));
     }
-    sensor_guard(&amp;s, &amp;fmask, &amp;umask);                 /* 29장: 규칙 먼저 */
+    sensor_guard(&amp;s, &amp;fmask, &amp;umask);                 /* 6-3: 규칙 먼저 */
     if (fmask || umask) {
         policy_cand(&amp;pol, fmask ? ST_FAULT : ST_UNKNOWN);
         command_from_policy();
@@ -3772,7 +3772,7 @@ static void sensor_frame(npu_t *npu, int junk)
     report("FRAME", seq, "OK", ncls, -1, junk);
 }
 
-/* 'J' 시험 주입(PC 협동 시뮬레이션 전용): op 1 = 입력 비트 {lim_r, lim_f, otemp, fault, estop}, op 2 = N클록 진행 */
+/* 'J' 시험 주입(PC 시뮬레이션 전용): op 1 = 입력 비트 {lim_r, lim_f, otemp, fault, estop}, op 2 = N클록 진행 */
 static void inject(int junk)
 {
     int op = rx_buf[0];
@@ -3861,7 +3861,7 @@ static int handle(npu_t *npu)
         command_from_policy();
         report("DIR", -1, "-", -1, -1, junk);
         break;
-    case 'A':                                          /* 29장 경보 래치 ACK(모터 트립 해제가 아니다) */
+    case 'A':                                          /* 6-3 경보 래치 ACK(모터 트립 해제가 아니다) */
         c = policy_ack(&amp;pol);
         report("ACK", -1, "-", -1, c, junk);
         break;
@@ -3890,7 +3890,7 @@ int motor_app_run(uintptr_t npu_base, uintptr_t motor_base, uintptr_t inject_bas
     uint32_t mcrc = sensor_model_crc32();
     mbase = motor_base;
     ibase = inject_base;
-    policy_reset(&amp;pol);                                /* 29장: 부팅 UNKNOWN → 추천 STOP */
+    policy_reset(&amp;pol);                                /* 6-3: 부팅 UNKNOWN → 추천 STOP */
     motor_recommend(pol.state, op_dir, &amp;rec_dir, &amp;rec_duty);
     npu_io_write(mbase + MOTOR_REG_CMD, MOTOR_CMD(rec_dir, rec_duty, kick, clr));   /* kick 토글 없음: 명령 아님 */
     npu_init(&amp;npu, npu_base);
@@ -3906,14 +3906,14 @@ int motor_app_run(uintptr_t npu_base, uintptr_t motor_base, uintptr_t inject_bas
       <div class="codeblock">
         <div class="codebar"><span>part03/ch30/host/p3_motor_host.py · python</span></div>
         <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
-"""30장 PC 호스트: 가상 센서 창 → 보드(또는 협동 시뮬레이션) → 정책 상태·추천·모터 상태 워드 판정 → CSV.
+"""PC 호스트: 가상 센서 창 → 보드(또는 PC 시뮬레이션) → 정책 상태·추천·모터 상태 워드 판정 → CSV.
 
-  --cosim "&lt;명령&gt;"  PC 빌드 펌웨어 + Icarus(20장 NPU + 30장 모터 안전 코어). 'J' 주입으로 E-Stop·고장·과열·리밋·
+  --cosim "&lt;명령&gt;"  PC 빌드 펌웨어 + RTL(5-1 NPU + 6-4 모터 안전 코어). 'J' 주입으로 E-Stop·고장·과열·리밋·
                     클록 진행(워치독)을 넣는다. 코어 파라미터는 motor_reference.COSIM.
-  --port &lt;포트&gt;     Basys3(30장 Bitstream + ELF). 'J'는 거부된다 → 자동 단계만 하고 버튼·스위치 단계는 점검표(B18~)로.
-판정: 정책(state·latch·npu·guard)은 29장 Firmware 모델과 같아야 하고, 추천(rec_dir·rec_duty)은 motor_recommend 규칙,
+  --port &lt;포트&gt;     Basys3(6-4 Bitstream + ELF). 'J'는 거부된다 → 자동 단계만 하고 버튼·스위치 단계는 점검표(B18~)로.
+판정: 정책(state·latch·npu·guard)은 6-3 Firmware 모델과 같아야 하고, 추천(rec_dir·rec_duty)은 motor_recommend 규칙,
       모터 상태 워드(st)는 단계별 술어(예: E-Stop 중 in1=0·ESTOP 래치, AI가 NORMAL이어도 구동 없음)를 만족해야 한다.
-      핀 단위 안전 불변식은 협동 시뮬레이션 브리지 TB가 모든 클록에서 따로 센다(SAFETY_SUMMARY).
+      핀 단위 안전 불변식은 PC 시뮬레이션 브리지 TB가 모든 클록에서 따로 센다(SAFETY_SUMMARY).
 """
 import argparse
 import csv
@@ -3964,7 +3964,7 @@ class Host:
                 return lines
 
     def run(self, name, data, kind="MOTOR", src=None, policy=None, pred=None, why=""):
-        """policy: 정책 기대(29장 Firmware 결과 dict) 또는 None. pred(f): 모터 상태 술어 → 실패 설명 목록."""
+        """policy: 정책 기대(6-3 Firmware 결과 dict) 또는 None. pred(f): 모터 상태 술어 → 실패 설명 목록."""
         if data:
             self.tr.write(data)
         lines = self.block()
@@ -4217,7 +4217,7 @@ PYTHON_RTL_COMPARE_PASS ch30 motor_safety_rtl=reference(cycle) host-&gt;fw(ch29 
       <details class="full"><summary>테스트벤치와 기준 모델 (전체 코드 4개)</summary>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch30/tb/tb_p3_motor_safety.sv · systemverilog</span></div>
-        <pre tabindex="0"><code class="language-systemverilog">// (추가) 30장: p3_motor_safety 클록 단위 벡터 시험(UNIT 파라미터). Python motor_reference.unit_vectors가 만든
+        <pre tabindex="0"><code class="language-systemverilog">// p3_motor_safety 클록 단위 벡터 시험(UNIT 파라미터). Python motor_reference.unit_vectors가 만든
 //   입력(rst cmd estop fault otemp lim_f lim_r)과 기대 출력(in1 in2 ena status 32비트)을 클록마다 대조한다.
 //   Python 쪽에서 같은 출력이 안전 불변식(정지 조건 중 출력 0, IN1·IN2 동시 금지, 반전 데드타임)을 지키는지도 확인한다.
 `timescale 1ns/1ps
@@ -4268,8 +4268,8 @@ endmodule</code></pre>
       </div>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch30/tb/tb_p3_motor_bridge.sv · systemverilog</span></div>
-        <pre tabindex="0"><code class="language-systemverilog">// (추가) 30장 협동 시뮬레이션 브리지. 22장 tb_p3_npu_bridge와 같은 FIFO 규약에 모터 안전 코어를 더했다.
-//   주소 0x00..0x3F → 20장 AXI NPU(BFM), 0x100 쓰기 → 명령 워드(AXI GPIO 2 채널 1과 같은 값), 0x108 읽기 → 상태 워드
+        <pre tabindex="0"><code class="language-systemverilog">// PC 시뮬레이션 브리지. 5-3 tb_p3_npu_bridge와 같은 FIFO 규약에 모터 안전 코어를 더했다.
+//   주소 0x00..0x3F → 5-1 AXI NPU(BFM), 0x100 쓰기 → 명령 워드(AXI GPIO 2 채널 1과 같은 값), 0x108 읽기 → 상태 워드
 //   (채널 2), 0x200 쓰기 → 시험 주입: 입력 {lim_r, lim_f, otemp, fault, estop}, 0x204 쓰기 → N클록 진행.
 //   주입 주소는 시험 장치(보드의 버튼·스위치·외부 회로에 해당)이며 펌웨어의 PC 빌드만 쓴다.
 //   모든 클록에서 핀(IN1·IN2·ENA)의 안전 불변식을 감시하고 끝에 SAFETY_SUMMARY를 낸다.
@@ -4391,8 +4391,8 @@ endmodule</code></pre>
       </div>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch30/host/motor_cosim_main.c · c</span></div>
-        <pre tabindex="0"><code class="language-c">/* (추가) 30장: PC 협동 시뮬레이션 main. NPU(0x00)·모터 GPIO(0x100)·시험 주입(0x200) 접근은 22장 npu_io_cosim.c가
- * FIFO로 Icarus 브리지(tb_p3_motor_bridge)에 전달한다. UART는 표준 입출력(29장 sensor_io_host.c).
+        <pre tabindex="0"><code class="language-c">/* PC 시뮬레이션 main. NPU(0x00)·모터 GPIO(0x100)·시험 주입(0x200) 접근은 5-3 npu_io_cosim.c가
+ * FIFO로 RTL 브리지(tb_p3_motor_bridge)에 전달한다. UART는 표준 입출력(6-3 sensor_io_host.c).
  */
 #include &lt;stdio.h&gt;
 #include "motor_app.h"
@@ -4417,13 +4417,13 @@ int main(int argc, char **argv)
       <div class="codeblock">
         <div class="codebar"><span>part03/ch30/reference/motor_reference.py · python</span></div>
         <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
-"""30장: NPU 추천 + 독립 모터 안전 코어 기준모델(정본, 표준 라이브러리만). 교육용이며 기능안전 인증 로직이 아니다.
+"""NPU 추천 + 독립 모터 안전 코어 기준모델(정본, 표준 라이브러리만). 교육용이며 기능안전 인증 로직이 아니다.
 
-구조(가이드 1절): 센서 창 → 29장 guard·NPU·경보 정책(펌웨어) → 추천(방향·속도) → AXI GPIO 명령 워드
+구조(가이드 1절): 센서 창 → 6-3 guard·NPU·경보 정책(펌웨어) → 추천(방향·속도) → AXI GPIO 명령 워드
                 → p3_motor_safety(명령 승인·워치독 → 독립 인터록 → 방향·데드타임·램프·PWM) → IN1/IN2/ENA
 NPU·CPU는 명령 워드만 쓴다. 핀은 코어만 구동하며 E-Stop·고장·과열·워치독·트립·리밋은 AI 점수와 무관하게 우선한다.
 
-추천 규칙(펌웨어 recommend): 29장 정책 상태 NORMAL → 운전자 방향·80 %, WARNING → 운전자 방향·30 %,
+추천 규칙(펌웨어 recommend): 6-3 정책 상태 NORMAL → 운전자 방향·80 %, WARNING → 운전자 방향·30 %,
                              FAULT·UNKNOWN → STOP. 운전자 방향은 'D' 명령(기본 FWD).
 코어 클록 규칙은 rtl/p3_motor_safety.v 머리말과 같다. Core.step()은 (현재 상태·입력의 조합 출력) 후 클록 갱신.
 """
@@ -4694,7 +4694,7 @@ if __name__ == "__main__":
       <h3>작성할 코드</h3>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch31/sw/main.c · c</span></div>
-        <pre tabindex="0"><code class="language-c">/* (추가) 31장: MicroBlaze V main. 28장 SoC(Bitstream·XSA) 그대로, NPU 주소는 xparameters.h. */
+        <pre tabindex="0"><code class="language-c">/* MicroBlaze V main. 6-1 SoC(Bitstream·XSA) 그대로, NPU 주소는 xparameters.h. */
 #include "xparameters.h"
 #include "secure_app.h"
 
@@ -4706,7 +4706,7 @@ int main(void)
       </div>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch31/sw/p3_crypto.h · c</span></div>
-        <pre tabindex="0"><code class="language-c">/* (추가) 31장: 교육용 AES-128(암호화 방향)·CTR, SHA-256, HMAC-SHA-256, 일정시간 비교. 부채널 대책 없음. */
+        <pre tabindex="0"><code class="language-c">/* 교육용 AES-128(암호화 방향)·CTR, SHA-256, HMAC-SHA-256, 일정시간 비교. 부채널 대책 없음. */
 #ifndef P3_CRYPTO_H
 #define P3_CRYPTO_H
 #include &lt;stdint.h&gt;
@@ -4734,8 +4734,8 @@ int ct_equal(const uint8_t *a, const uint8_t *b, uint32_t n);
       </div>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch31/sw/p3_crypto.c · c</span></div>
-        <pre tabindex="0"><code class="language-c">/* (추가) 31장: 교육용 암호 구현. S-box 표는 reference/secure_reference.py(SBOX 계산)에서 생성했다.
- * 정답 확인: NIST FIPS 197·SP 800-38A·FIPS 180-4 예제, RFC 4231 HMAC — host/crypto_selftest.c와 협동 시뮬레이션.
+        <pre tabindex="0"><code class="language-c">/* 교육용 암호 구현. S-box 표는 reference/secure_reference.py(SBOX 계산)에서 생성했다.
+ * 정답 확인: NIST FIPS 197·SP 800-38A·FIPS 180-4 예제, RFC 4231 HMAC — host/crypto_selftest.c와 PC 시뮬레이션.
  */
 #include "p3_crypto.h"
 
@@ -4908,7 +4908,7 @@ int ct_equal(const uint8_t *a, const uint8_t *b, uint32_t n)
       </div>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch31/sw/secure_app.h · c</span></div>
-        <pre tabindex="0"><code class="language-c">/* (추가) 31장: 보안 UART 모델 적재 응용. 규격은 reference/secure_reference.py 머리말. */
+        <pre tabindex="0"><code class="language-c">/* 보안 UART 모델 적재 응용. 규격은 reference/secure_reference.py 머리말. */
 #ifndef SECURE_APP_H
 #define SECURE_APP_H
 #include &lt;stdint.h&gt;
@@ -4917,11 +4917,11 @@ int secure_app_run(uintptr_t npu_base);   /* PC 빌드는 입력이 끝나면 �
       </div>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch31/sw/secure_app.c · c</span></div>
-        <pre tabindex="0"><code class="language-c">/* (추가) 31장: 보안 UART 모델 적재 + 추론. 규격의 정본은 reference/secure_reference.py 머리말.
+        <pre tabindex="0"><code class="language-c">/* 보안 UART 모델 적재 + 추론. 규격의 정본은 reference/secure_reference.py 머리말.
  *   'M' 보안 모델 프레임: CRC16(전송) → ver → len ≤ 256 → HMAC 검증(일정시간) → seq &gt; last_seq → iv 결속
  *       → last_seq 소비 → AES-CTR 복호(스테이징 뱅크) → 모델 검사 → 원자적 커밋(활성 뱅크 전환 + NPU Bias 재적재)
  *       MAC 확인 전에는 복호하지 않고, 검사·커밋이 실패하면 활성 모델은 그대로다.
- *   'S' 추론(29장 센서 창, guard·특징 재사용): 프레임의 model_id가 활성 모델과 같아야 한다.
+ *   'S' 추론(6-3 센서 창, guard·특징 재사용): 프레임의 model_id가 활성 모델과 같아야 한다.
  *   'I' 식별(활성 모델·키 지문·last_seq). 키 값은 출력하지 않는다.
  * 키는 build/secure_keys.h(저장소 제외)에만 있다. 교육용: Basys3에는 키 보호 저장소·Secure Boot·Tamper 방어가 없다.
  * last_seq는 RAM에만 있어 Reset 뒤 0으로 돌아간다(재부팅 뒤 Replay 가능 — 알려진 한계, README 참조).
@@ -4950,7 +4950,7 @@ typedef struct {
 
 static model_bank_t bank[2];          /* bank[active] = 사용 중, bank[!active] = 스테이징 */
 static int active;
-static int8_t w_exp[NPU_N_CLASS][NPU_N_IN];   /* 활성 뱅크에서 만든 20장 IP 형태(나머지 0) */
+static int8_t w_exp[NPU_N_CLASS][NPU_N_IN];   /* 활성 뱅크에서 만든 5-1 IP 형태(나머지 0) */
 static int64_t b_exp[NPU_N_CLASS];
 static uint32_t last_seq;
 static int last_reject;
@@ -4969,7 +4969,7 @@ static uint32_t crc32_byte(uint32_t crc, uint8_t v)
     return crc;
 }
 
-/* 29장 MODEL_ID 규칙: 20장 IP 형태 w[10][784] ‖ b[10](int64 LE)의 CRC32. 빈 칸은 0, 쓰지 않는 Bias는 -2^38 */
+/* 6-3 MODEL_ID 규칙: 5-1 IP 형태 w[10][784] ‖ b[10](int64 LE)의 CRC32. 빈 칸은 0, 쓰지 않는 Bias는 -2^38 */
 static uint32_t bank_id(const model_bank_t *m)
 {
     uint32_t crc = 0xFFFFFFFFu;
@@ -5004,7 +5004,7 @@ static int parse_blob(const uint8_t *p, uint32_t n, model_bank_t *m)
         for (i = 7; i &gt;= 0; i--)
             v = (v &lt;&lt; 8) | p[30 + 8 * c + i];
         m-&gt;b[c] = (int64_t)v;
-        if (m-&gt;b[c] &lt; -((int64_t)1 &lt;&lt; 39) || m-&gt;b[c] &gt;= ((int64_t)1 &lt;&lt; 39))   /* 20장 Bias 40비트 */
+        if (m-&gt;b[c] &lt; -((int64_t)1 &lt;&lt; 39) || m-&gt;b[c] &gt;= ((int64_t)1 &lt;&lt; 39))   /* 5-1 Bias 40비트 */
             return 0;
     }
     m-&gt;id = bank_id(m);
@@ -5197,7 +5197,7 @@ static int handle(npu_t *npu)
         if (c == SIO_EOF)
             return -1;
         if (c == SIO_TIMEOUT)
-            continue;                                  /* 31장은 링크 감시 동작 없음(대기 계속) */
+            continue;                                  /* 6-5는 링크 감시 동작 없음(대기 계속) */
         if (prev == 'P' &amp;&amp; c == '3')
             break;
         prev = c;
@@ -5283,9 +5283,9 @@ int secure_app_run(uintptr_t npu_base)
       <div class="codeblock">
         <div class="codebar"><span>part03/ch31/host/p3_secure_host.py · python</span></div>
         <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
-"""31장 PC 호스트: 보안 모델 적재(Encrypt-then-MAC) + 공격·고장 시험 + 적재 전후 추론 확인 → CSV.
+"""PC 호스트: 보안 모델 적재(Encrypt-then-MAC) + 공격·고장 시험 + 적재 전후 추론 확인 → CSV.
 
-  --cosim "&lt;명령&gt;"  PC 빌드 펌웨어 + Icarus NPU RTL      --port &lt;포트&gt;  Basys3(28장 Bitstream + 31장 ELF)
+  --cosim "&lt;명령&gt;"  PC 빌드 펌웨어 + NPU RTL      --port &lt;포트&gt;  Basys3(6-1 Bitstream + 6-5 ELF)
   --key-file F     보드용 키(저장소 밖, 16진 96자). 없으면 TEST 키(펌웨어도 TEST 키로 빌드됐어야 한다)
 시험: 모델 A로 추론 → 모델 B 보안 적재(COMMIT) → B로 추론(점수 = B 골든) → 거부·전송 오류 시험 17종(각각 활성 모델 B 유지)
       → 인증 실패가 시퀀스를 소비하지 않음 → A 재적재(seq 6) → A로 추론.
@@ -5495,7 +5495,7 @@ if __name__ == "__main__":
       </div>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch31/rtl/p3_aes128_enc.v · verilog</span></div>
-        <pre tabindex="0"><code class="language-verilog">// (추가) 31장: AES-128 암호화 코어(FIPS 197, 암호화 방향만 — CTR 모드 키스트림에는 이것만 필요하다).
+        <pre tabindex="0"><code class="language-verilog">// AES-128 암호화 코어(FIPS 197, 암호화 방향만 — CTR 모드 키스트림에는 이것만 필요하다).
 //   반복형: 1클록에 1라운드, 라운드 키는 즉석 생성. start 뒤 10클록에 done 1클록, result 유지.
 //   바이트 순서: key/block/result[127:120]이 FIPS 197의 첫 바이트(in0). 상태는 열 우선(바이트 i = 행 i%4, 열 i/4).
 //   S-box 표는 reference/secure_reference.py의 SBOX(GF(2^8) 역원 + 아핀 변환으로 계산)에서 생성했다.
@@ -5843,7 +5843,7 @@ endmodule</code></pre>
       </div>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch31/rtl/p3_sha256_core.v · verilog</span></div>
-        <pre tabindex="0"><code class="language-verilog">// (추가) 31장: SHA-256 압축 코어(FIPS 180-4). 반복형: 1클록에 1라운드, 블록당 64클록 + 1.
+        <pre tabindex="0"><code class="language-verilog">// SHA-256 압축 코어(FIPS 180-4). 반복형: 1클록에 1라운드, 블록당 64클록 + 1.
 //   init = IV로 새 메시지의 첫 블록, next = 이전 결과에 이어 다음 블록. 패딩은 호출 쪽(펌웨어·TB)이 한다.
 //   block[511:480] = 첫 32비트 워드(big-endian). digest[255:224] = H0. done 1클록, digest 유지.
 //   HMAC-SHA-256은 이 코어를 두 번(내부·외부 해시) 쓰는 메시지 단위 구성이다(FIPS 198-1). K 표는 처음 64개 소수
@@ -6002,7 +6002,7 @@ PYTHON_RTL_COMPARE_PASS ch31 crypto_rtl=kat+random host-&gt;secure_frame-&gt;c_f
       <details class="full"><summary>테스트벤치와 기준 모델 (전체 코드 6개)</summary>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch31/tb/tb_p3_aes128.sv · systemverilog</span></div>
-        <pre tabindex="0"><code class="language-systemverilog">// (추가) 31장: AES-128 코어 시험. FIPS 197 부록 C.1·B, SP 800-38A F.5.1 CTR 키스트림 블록, 무작위 200개(Python 정본)
+        <pre tabindex="0"><code class="language-systemverilog">// AES-128 코어 시험. FIPS 197 부록 C.1·B, SP 800-38A F.5.1 CTR 키스트림 블록, 무작위 200개(Python 정본)
 `timescale 1ns/1ps
 module tb_p3_aes128;
     reg clk = 0, rst = 1, start = 0;
@@ -6040,7 +6040,7 @@ endmodule</code></pre>
       </div>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch31/tb/tb_p3_sha256.sv · systemverilog</span></div>
-        <pre tabindex="0"><code class="language-systemverilog">// (추가) 31장: SHA-256 압축 코어 시험. FIPS 180-4 예제("abc", 448비트), RFC 4231 HMAC 1·2의 내부·외부 해시 메시지,
+        <pre tabindex="0"><code class="language-systemverilog">// SHA-256 압축 코어 시험. FIPS 180-4 예제("abc", 448비트), RFC 4231 HMAC 1·2의 내부·외부 해시 메시지,
 //   빈 메시지·경계 길이·무작위 메시지(Python이 패딩한 블록). 메시지마다 init → next … 순서로 넣고 최종 digest 대조.
 `timescale 1ns/1ps
 module tb_p3_sha256;
@@ -6084,7 +6084,7 @@ endmodule</code></pre>
       </div>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch31/host/secure_cosim_main.c · c</span></div>
-        <pre tabindex="0"><code class="language-c">/* (추가) 31장: PC 협동 시뮬레이션 main(22장 FIFO 브리지 → 20장 NPU RTL, UART = 표준 입출력). */
+        <pre tabindex="0"><code class="language-c">/* PC 시뮬레이션 main(5-3 FIFO 브리지 → 5-1 NPU RTL, UART = 표준 입출력). */
 #include &lt;stdio.h&gt;
 #include "secure_app.h"
 
@@ -6107,7 +6107,7 @@ int main(int argc, char **argv)
       </div>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch31/host/crypto_selftest.c · c</span></div>
-        <pre tabindex="0"><code class="language-c">/* (추가) 31장: C 암호 구현 알려진 정답 시험(PC). FIPS 197 C.1, SP 800-38A F.5.1(2블록), FIPS 180-4 "abc"·448비트,
+        <pre tabindex="0"><code class="language-c">/* C 암호 구현 알려진 정답 시험(PC). FIPS 197 C.1, SP 800-38A F.5.1(2블록), FIPS 180-4 "abc"·448비트,
  * RFC 4231 HMAC 1·2. 모두 맞으면 C_CRYPTO_KAT_PASS. */
 #include &lt;stdio.h&gt;
 #include &lt;string.h&gt;
@@ -6153,7 +6153,7 @@ int main(void)
       <div class="codeblock">
         <div class="codebar"><span>part03/ch31/reference/secure_reference.py · python</span></div>
         <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
-"""31장: 보안 모델 적재(Encrypt-then-MAC: AES-128-CTR + HMAC-SHA-256) 기준모델(정본, 표준 라이브러리만).
+"""보안 모델 적재(Encrypt-then-MAC: AES-128-CTR + HMAC-SHA-256) 기준모델(정본, 표준 라이브러리만).
 교육용 구현이다. 상용 보안 제품이 아니며 Basys3는 키 보호 저장소·Secure Boot·Tamper 방어를 제공하지 않는다.
 
 역할 구분: AES-128(FIPS 197)·CTR(SP 800-38A) = 기밀성만, HMAC-SHA-256(FIPS 198-1) = 키 기반 무결성·인증.
@@ -6163,7 +6163,7 @@ SHA-256 Digest만으로는 인증이 아니고, AES-CTR만으로는 변조를 �
     보드용 키는 저장소 밖 파일(P3_KEY_FILE: 16진 48바이트)에서 build/ 헤더로 만든다. 로그에는 지문만:
     key_fp = SHA-256("P3KF" ‖ enc ‖ mac)[0:4] (big-endian u32)
 모델 평문(blob, 54바이트): "P3MD" ‖ ver u16=1 ‖ n_cls u8=3 ‖ n_feat u8=6 ‖ model_id u32 ‖ w[3][6] int8 ‖ b[3] int64
-    model_id는 29장 규칙(20장 IP 형태로 늘린 w[10][784] ‖ b[10]의 CRC32)
+    model_id는 6-3 규칙(5-1 IP 형태로 늘린 w[10][784] ‖ b[10]의 CRC32)
 보안 프레임('M' 명령 payload, 정수는 LE):
     ver u8=1 ‖ seq u32 ‖ model_id u32 ‖ iv 16 ‖ len u16 ‖ ct[len] ‖ tag 32
     iv = nonce64 ‖ seq u32(BE) ‖ ctr u32(BE)=0   (CTR 카운터는 마지막 32비트 BE 증가, SP 800-38A)
@@ -6280,7 +6280,7 @@ def blob(qm):
 
 
 def parse_blob(p):
-    """장치와 같은 스테이징 검사. 반환 qm(20장 형태) 또는 None."""
+    """장치와 같은 스테이징 검사. 반환 qm(5-1 형태) 또는 None."""
     if len(p) != BLOB_LEN or p[:4] != b"P3MD":
         return None
     ver, nc, nf, mid = struct.unpack_from("&lt;HBBI", p, 4)
@@ -6470,8 +6470,8 @@ if __name__ == "__main__":
       <div class="codeblock">
         <div class="codebar"><span>part03/ch31/reference/train_model_b.py · python</span></div>
         <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
-"""31장: 보안 적재 시험용 '모델 B'(29장과 같은 6→3 구조, 다른 seed·학습 길이). PC 전용, PyTorch 필요.
-29장 train_sensor_model.py를 seed·epoch만 바꿔 실행하고 결과를 이 폴더의 model_b_f32.json으로 저장한다."""
+"""보안 적재 시험용 '모델 B'(6-3과 같은 6→3 구조, 다른 seed·학습 길이). PC 전용, PyTorch 필요.
+6-3 train_sensor_model.py를 seed·epoch만 바꿔 실행하고 결과를 이 폴더의 model_b_f32.json으로 저장한다."""
 import json
 import sys
 from pathlib import Path
@@ -6481,7 +6481,7 @@ import part03.ch29.reference.train_sensor_model as t  # noqa: E402
 
 out = Path(__file__).with_name("model_b_f32.json")
 t.SEED, t.EPOCHS = 3131, 700
-t.MODEL_JSON = out                     # 29장 파일은 건드리지 않는다
+t.MODEL_JSON = out                     # 6-3 파일은 건드리지 않는다
 t.main()
 doc = json.loads(out.read_text())
 doc["model"] = "sensor_linear_6x3_f32_model_b"
@@ -6499,7 +6499,7 @@ out.write_text(json.dumps(doc) + "\n")</code></pre>
       <p>5장 비트스트림 하나에 ELF만 바꿔 가며 6-1과 고른 응용을 차례로 시연합니다. 아래는 6-1 + 6-3 + 6-5를 고른 경우의 순서입니다.</p>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th class="nw">순서</th><th>할 일</th><th>보드에서 보이는 것</th></tr></thead>
-        <tbody><tr><td class="nw">1</td><td>5장 비트스트림 다운로드, <code>digit_app.elf</code> 실행</td><td>7세그먼트 <code>F16C</code>(모델 ID 상위), LED 모두 꺼짐</td></tr><tr><td class="nw">2</td><td><code>python3 part03/ch28/host/p3_digit_host.py --port &lt;포트&gt; --error-suite --csv b28.csv --log b28_uart.log</code></td><td><code>MODEL_ID host=f16c4f12 device=f16c4f12</code>, 22장 <code>scores_match=1 display_ok=1</code>, <code>error_suite=11/11</code>, <code>DIGIT_HOST_PASS</code></td></tr><tr><td class="nw">3</td><td>마지막 정상 결과 뒤 7세그먼트·LED를 눈으로 확인</td><td>7세그먼트 <code>07 _7</code>(img 7, Class 7), LED7·LED15 켜짐. 오류 시험 중에는 <code>E</code>+코드·LED14</td></tr><tr><td class="nw">4</td><td>5장 비트스트림 다운로드, <code>sensor_app.elf</code> 실행</td><td>7세그먼트 <code>3 _00</code>(UNKNOWN), LED3·LED15 켜짐</td></tr><tr><td class="nw">5</td><td><code>python3 part03/ch29/host/p3_sensor_host.py --port &lt;포트&gt; --limit 200 --csv b29.csv --log b29_uart.log</code>, 안내가 나오면 btnC</td><td><code>BOOT PASS</code>, 모든 STEP PASS, <code>SENSOR_HOST_PASS</code></td></tr><tr><td class="nw">6</td><td>실행 중 7세그먼트·LED를 눈으로 확인</td><td>FAULT 래치 때 자리 3의 점과 LED13, ACK 뒤 점이 꺼지고 3회 정상 뒤 <code>0</code></td></tr><tr><td class="nw">7</td><td><code>python3 part03/ch31/host/p3_secure_host.py --port &lt;포트&gt; --csv b31.csv --log b31_uart.log</code>, 안내가 나오면 btnC</td><td>부팅 <code>key_fp</code> 일치, 모든 STEP PASS(모델 B 적재·추론, 거부 17종, A 재적재), <code>SECURE_HOST_PASS</code></td></tr><tr><td class="nw">8</td><td>모델 B 적재 뒤 7세그먼트 확인, XSDB <code>mrd 0x40010000</code>(btnD 누른 채)</td><td>7세그먼트 <code>b749</code>(모델 B ID 상위), LED0·LED13 켜짐(<code>DISP fnd=000fb749 led=2001</code>), <code>4</code></td></tr></tbody>
+        <tbody><tr><td class="nw">1</td><td>5장 비트스트림 다운로드, <code>digit_app.elf</code> 실행</td><td>7세그먼트 <code>F16C</code>(모델 ID 상위), LED 모두 꺼짐</td></tr><tr><td class="nw">2</td><td><code>python3 part03/ch28/host/p3_digit_host.py --port &lt;포트&gt; --error-suite --csv b28.csv --log b28_uart.log</code></td><td><code>MODEL_ID host=f16c4f12 device=f16c4f12</code>, 표본 22장 <code>scores_match=1 display_ok=1</code>, <code>error_suite=11/11</code>, <code>DIGIT_HOST_PASS</code></td></tr><tr><td class="nw">3</td><td>마지막 정상 결과 뒤 7세그먼트·LED를 눈으로 확인</td><td>7세그먼트 <code>07 _7</code>(img 7, Class 7), LED7·LED15 켜짐. 오류 시험 중에는 <code>E</code>+코드·LED14</td></tr><tr><td class="nw">4</td><td>5장 비트스트림 다운로드, <code>sensor_app.elf</code> 실행</td><td>7세그먼트 <code>3 _00</code>(UNKNOWN), LED3·LED15 켜짐</td></tr><tr><td class="nw">5</td><td><code>python3 part03/ch29/host/p3_sensor_host.py --port &lt;포트&gt; --limit 200 --csv b29.csv --log b29_uart.log</code>, 안내가 나오면 btnC</td><td><code>BOOT PASS</code>, 모든 STEP PASS, <code>SENSOR_HOST_PASS</code></td></tr><tr><td class="nw">6</td><td>실행 중 7세그먼트·LED를 눈으로 확인</td><td>FAULT 래치 때 자리 3의 점과 LED13, ACK 뒤 점이 꺼지고 3회 정상 뒤 <code>0</code></td></tr><tr><td class="nw">7</td><td><code>python3 part03/ch31/host/p3_secure_host.py --port &lt;포트&gt; --csv b31.csv --log b31_uart.log</code>, 안내가 나오면 btnC</td><td>부팅 <code>key_fp</code> 일치, 모든 STEP PASS(모델 B 적재·추론, 거부 17종, A 재적재), <code>SECURE_HOST_PASS</code></td></tr><tr><td class="nw">8</td><td>모델 B 적재 뒤 7세그먼트 확인, XSDB <code>mrd 0x40010000</code>(btnD 누른 채)</td><td>7세그먼트 <code>b749</code>(모델 B ID 상위), LED0·LED13 켜짐(<code>DISP fnd=000fb749 led=2001</code>), <code>4</code></td></tr></tbody>
       </table></div>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>미리 알아 둘 값</th><th>결과</th></tr></thead>

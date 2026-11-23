@@ -1192,8 +1192,8 @@ RTL_SIM_PASS stages=1</code></pre></div>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch17/rtl/p3_tile784_10.v · verilog</span></div>
         <pre tabindex="0"><code class="language-verilog">`timescale 1ns/1ps
-// (추가) 17장: 784입력(28×28)·10분류를 64원소 타일 13개(64×12 + 16)로 나눠 계산하는 Tile Controller.
-// 14장 p3_group10_core(64→10, 4PE 4+4+2 그룹)를 변경 없이 타일마다 한 번 실행한다.
+// 784입력(28×28)·10분류를 64원소 타일 13개(64×12 + 16)로 나눠 계산하는 Tile Controller.
+// 3-2 p3_group10_core(64→10, 4PE 4+4+2 그룹)를 변경 없이 타일마다 한 번 실행한다.
 // 코어는 그룹마다 내부 누산기를 지우므로, 타일 결과(부분합)를 클래스별 외부 누산기 acc[c]에 더한다.
 //   score[c] = sum_t part[t][c] + bias[c]
 // Bias 중복 방지: 코어 Bias 쓰기 포트를 0으로 고정 → 코어 Bias는 Reset 값 0 유지 → 코어 점수 = 순수 부분합.
@@ -1203,15 +1203,15 @@ RTL_SIM_PASS stages=1</code></pre></div>
 // 순서: start → [W 적재 + x 프레임 + tile_go(t)] × 13 → done.
 //   W 쓰기는 IDLE·LOAD에서만 받는다. 다음 타일 프레임은 이전 타일의 4+4+2 그룹 계산과
 //   결과 수락(외부 누산, frame_ack)이 끝나야 프레임 버퍼가 비워져 들어올 수 있다.
-// (변경) 18장: x·W 데이터 폭을 파라미터로 둔다. 기본 DATA_W 8 / CORE_ACC_W 24 / PART_W 25가 17장 INT8 동작이다.
+// 4-3: x·W 데이터 폭을 파라미터로 둔다. 기본 DATA_W 8 / CORE_ACC_W 24 / PART_W 25가 4-2 INT8 동작이다.
 //   INT16: DATA_W 16 / CORE_ACC_W 38(64항 최악 2^36) / PART_W 39(코어 점수 = max(38, 코어 Bias 24) + 1).
 module p3_tile784_10 #(
     parameter integer ACC_W = 41,   // 외부 누산 폭. INT16 784항 최악 841,813,590,016 → signed 41
     parameter integer BIAS_W = 40,  // 외부 Bias 폭
     parameter integer SCORE_W = 42, // 최종 점수 폭 ≥ max(ACC_W, BIAS_W) + 1
     parameter integer DATA_W = 8,   // x·W signed 폭
-    parameter integer CORE_ACC_W = 24, // 14장 코어 lane 누산 폭(타일 64항)
-    parameter integer PART_W = 25   // 14장 코어 점수(부분합) 폭
+    parameter integer CORE_ACC_W = 24, // 3-2 코어 lane 누산 폭(타일 64항)
+    parameter integer PART_W = 25   // 3-2 코어 점수(부분합) 폭
 )(
     input wire clk,
     input wire resetn,
@@ -1219,7 +1219,7 @@ module p3_tile784_10 #(
     input wire abort_i,                 // LOAD 중 취소: 보관 프레임 해제 후 IDLE
     input wire tile_go_i,               // 현재 프레임·가중치로 타일 tile_id_i 실행
     input wire [3:0] tile_id_i,
-    input wire x_valid_i,               // 13장 프레임 버퍼 frame_valid
+    input wire x_valid_i,               // 3-1 프레임 버퍼 frame_valid
     output wire x_rd_en_o,
     output wire [5:0] x_rd_addr_o,
     input wire signed [DATA_W-1:0] x_rd_data_i,
@@ -1295,10 +1295,10 @@ module p3_tile784_10 #(
         end
     endgenerate
 
-    // 10개 점수 최대값, 동점은 낮은 번호(14장 코어와 같은 규칙)
-    // (변경) 19장 타이밍 결함 수정: 9단 직렬 비교 → 4단 토너먼트 트리를 두 클록으로 나눈다.
+    // 10개 점수 최대값, 동점은 낮은 번호(3-2 코어와 같은 규칙)
+    // argmax는 4단 토너먼트 트리를 두 클록으로 나눈다(9단 직렬 비교는 100 MHz를 넘긴다).
     //   마지막 타일 ACK에서 score_q 확정, SCORE에서 1·2단 결과를 레지스터에, FINISH에서 3·4단.
-    //   왼쪽(낮은 번호)은 오른쪽이 엄격히 클 때만 진다. done 시점은 그대로.
+    //   왼쪽(낮은 번호)은 오른쪽이 엄격히 클 때만 진다.
     integer k;
     reg signed [SCORE_W-1:0] a2s0_q, a2s1_q, a2s2_q;
     reg [3:0] a2c0_q, a2c1_q, a2c2_q;

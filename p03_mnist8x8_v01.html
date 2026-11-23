@@ -1146,7 +1146,7 @@ if __name__ == "__main__":
       <div class="codeblock">
         <div class="codebar"><span>part03/ch13/rtl/p3_frame64_buffer.v · verilog</span></div>
         <pre tabindex="0"><code class="language-verilog">`timescale 1ns/1ps
-// (추가) 13장: 8×8(64원소) signed INT8 입력 프레임 수신 버퍼.
+// 8×8(64원소) signed INT8 입력 프레임 수신 버퍼.
 // 바이트 스트림(valid/ready/last)을 행 우선 순서(addr=row*8+col)로 저장한다.
 // 정확히 64번째 바이트에 last가 있어야 유효 프레임. 짧은/긴 프레임은 버리고 오류 펄스를 낸다.
 // 유효 프레임은 frame_ack_i까지 유지되며, 그동안 s_ready_o=0(Busy)으로 다음 입력을 막는다.
@@ -1262,15 +1262,15 @@ RTL_SIM_PASS stages=1</code></pre></div>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch14/rtl/p3_group10_core.v · verilog</span></div>
         <pre tabindex="0"><code class="language-verilog">`timescale 1ns/1ps
-// (추가) 14장: 4PE를 3그룹(4+4+2)으로 재사용하는 64입력·10분류 정수 Dense 코어.
+// 4PE를 3그룹(4+4+2)으로 재사용하는 64입력·10분류 정수 Dense 코어.
 // class = 4*group + lane. group 2의 lane 2·3은 무효이므로 valid를 막아 누산하지 않고 점수에도 쓰지 않는다.
-// x는 13장 p3_frame64_buffer 읽기 포트(1클록 지연)에서 읽는다.
+// x는 3-1 p3_frame64_buffer 읽기 포트(1클록 지연)에서 읽는다.
 // 가중치는 lane별 bank(bank l = class l, l+4, l+8)에 저장해 매 클록 4개를 병렬로 읽는다.
 // score[c] = sum_i x[i]*W[c][i] + bias[c] (signed 25비트, 정수 기준모델 linear_64x10과 동일)
 // class_o = 최대 점수 class, 동점이면 낮은 번호(argmax_lowest)
-// (변경) 15장 Dense 계층 재사용을 위해 입력 길이·출력 수를 파라미터로 둔다. 기본값 64→10이 14장 동작이다.
-// (변경) 18장 정밀도 비교를 위해 데이터·누산·Bias·점수 폭을 파라미터로 둔다.
-//   기본값 DATA_W 8 / ACC_W 24 / BIAS_W 24 / SCORE_W 25가 14장 INT8 동작이다.
+// 3-3 Dense 계층 재사용을 위해 입력 길이·출력 수를 파라미터로 둔다. 기본값 64→10이 3-2 동작이다.
+// 4-3 정밀도 비교를 위해 데이터·누산·Bias·점수 폭을 파라미터로 둔다.
+//   기본값 DATA_W 8 / ACC_W 24 / BIAS_W 24 / SCORE_W 25가 3-2 INT8 동작이다.
 //   INT16 예: DATA_W 16 / ACC_W 38(64항 최악 2^36) / SCORE_W ≥ max(ACC_W, BIAS_W) + 1.
 module p3_group10_core #(
     parameter integer IN_LEN = 64,
@@ -1315,14 +1315,14 @@ module p3_group10_core #(
     reg signed [DATA_W-1:0] w_q0, w_q1, w_q2, w_q3;
     reg signed [BIAS_W-1:0] bias [0:OUT_N-1];
     reg signed [SCORE_W-1:0] score_q [0:OUT_N-1];
-    // (변경) 마지막 그룹 번호: 출력 수를 4개 차선으로 나눈 그룹 수 - 1
+    // 마지막 그룹 번호: 출력 수를 4개 차선으로 나눈 그룹 수 - 1
     localparam [1:0] LAST_GROUP = (OUT_N - 1) / 4;
 
     assign load_ready_o = resetn &amp;&amp; !busy_o;
     assign x_rd_en_o = (state == RUN);
     assign x_rd_addr_o = idx_q;
 
-    // (변경) class = 4*group + lane &lt; OUT_N 인 차선만 유효(10분류: group 2는 lane 0·1만)
+    // class = 4*group + lane &lt; OUT_N 인 차선만 유효(10분류: group 2는 lane 0·1만)
     wire [3:0] lane_en = {({group_q, 2'd3} &lt; OUT_N), ({group_q, 2'd2} &lt; OUT_N),
                           ({group_q, 2'd1} &lt; OUT_N), ({group_q, 2'd0} &lt; OUT_N)};
     wire lane_clear = (state == CLEAR);
@@ -1364,10 +1364,10 @@ module p3_group10_core #(
         end
     end
 
-    // (변경) 19장 타이밍 결함 수정: 10개 점수를 한 클록에 직렬 비교(9단)하던 argmax를 누적형으로 바꾼다.
+    // argmax는 누적형이다. 10개 점수를 한 클록에 직렬 비교(9단)하면 100 MHz를 넘기므로 나눈다.
     //   CAPT에서 lane 쌍(0·1, 2·3)의 승자를 레지스터에 저장하고(1단), 다음 CLEAR에서 두 승자와
     //   누적 최대값(best_s_q)을 비교해 합친다(2단). 마지막 그룹은 FINISH에서 합친다.
-    //   class_o·done 시점과 동점 규칙(낮은 번호)은 그대로.
+    //   동점이면 낮은 번호가 이긴다.
     integer k;
     reg have_best_q;
     reg [3:0] best_c_q;
@@ -3506,7 +3506,7 @@ RTL_SIM_PASS stages=1</code></pre></div>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch16/rtl/p3_relu_requant.v · verilog</span></div>
         <pre tabindex="0"><code class="language-verilog">`timescale 1ns/1ps
-// (추가) 16장: 은닉층 출력 재양자화 = sat_int8(round_shift_away(max(0, score), shift)).
+// 은닉층 출력 재양자화 = sat_int8(round_shift_away(max(0, score), shift)).
 // ReLU 이후 값은 0 이상이므로 절반 반올림은 (v + 2^(shift-1)) &gt;&gt; shift 와 같다(shift=0이면 그대로).
 // 조합 회로. 입력 signed 25비트 점수, 출력 signed INT8(0..127).
 module p3_relu_requant(
@@ -3526,8 +3526,8 @@ endmodule</code></pre>
       <div class="codeblock">
         <div class="codebar"><span>part03/ch16/rtl/p3_mlp_64_8_10.v · verilog</span></div>
         <pre tabindex="0"><code class="language-verilog">`timescale 1ns/1ps
-// (추가) 16장: 64→8→10 정수 MLP. 14장 코어를 두 계층으로 재사용한다.
-//   1층: p3_group10_core #(64, 8)  x = 13장 프레임 버퍼(외부 읽기 포트)
+// 64→8→10 정수 MLP. 3-2 코어를 두 계층으로 재사용한다.
+//   1층: p3_group10_core #(64, 8)  x = 3-1 프레임 버퍼(외부 읽기 포트)
 //   재양자화: p3_relu_requant × 8  hidden = sat_int8(round_shift_away(max(0, s1), shift))
 //   2층: p3_group10_core #(8, 10)  x = 내부 은닉 레지스터(1클록 지연 읽기)
 // 가중치·Bias 쓰기는 wr_layer_i(0=1층, 1=2층)로 선택하며, MLP 동작 중에는 두 계층 모두 쓰기를 막는다.
@@ -3599,7 +3599,7 @@ module p3_mlp_64_8_10(
         end
     endgenerate
 
-    // 2층 x 읽기: 13장 버퍼와 같은 1클록 지연 계약
+    // 2층 x 읽기: 3-1 버퍼와 같은 1클록 지연 계약
     always @(posedge clk)
         if (h_rd_en)
             hid_rd_data &lt;= hidden[h_rd_addr[2:0]];
