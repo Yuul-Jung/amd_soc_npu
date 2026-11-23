@@ -46,11 +46,11 @@ def main():
         if mode in CYCLES:
             sec = CYCLES[mode] * CLK_NS * 1e-9
             energy.append((mode, sec, tot, dyn))
-    lines = ["# 25장 SoC 전력·추론당 에너지 추정 (Vivado 2024.2 report_power, 실제 실행)", "",
-             "> 21장 배선 완료 설계. SAIF는 23장과 같은 SoC 행동 시뮬레이션의 구간별 토글률. **추정치이며 보드 전력 측정이 아니다.**",
+    lines = ["# 5-6 SoC 전력·추론당 에너지 추정 (Vivado 2024.2 report_power, 실제 실행)", "",
+             "> 5-2 배선 완료 설계. SAIF는 5-4와 같은 SoC 행동 시뮬레이션의 구간별 토글률. **추정치이며 보드 전력 측정이 아니다.**",
              "", "| 활동률 | 전체(W) | 동적(W) | 정적(W) | p3_npu_0(W) | microblaze_riscv_0(W) | 신뢰도 |",
              "|---|---:|---:|---:|---:|---:|---|", *rows, "",
-             "| 추론 경로 | 시간(23장, 100 MHz) | 전체 전력(W) | 추론당 에너지(mJ) | 동적만(mJ) |",
+             "| 추론 경로 | 시간(5-4, 100 MHz) | 전체 전력(W) | 추론당 에너지(mJ) | 동적만(mJ) |",
              "|---|---:|---:|---:|---:|"]
     for mode, sec, tot, dyn in energy:
         lines.append(f"| {'CPU 정수 추론' if mode == 'cpu' else 'NPU 종단간'} | {sec * 1e3:.3f} ms | {tot:.3f} | "

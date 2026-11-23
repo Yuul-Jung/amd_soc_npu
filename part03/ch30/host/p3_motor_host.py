@@ -184,7 +184,7 @@ def cosim_suite(h, picks):
     h.advance("dead_time_done", run_up, P(drive=FWD, in1=1))
     s(FAULT, "npu_fault_stop", all_of(stopped, P(req=STOP, trip=0)), "AI FAULT → STOP 추천")
     for i in range(3):
-        s(NORMAL, f"policy_latched_{i}", all_of(stopped, P(req=STOP)), "29장 FAULT 래치")
+        s(NORMAL, f"policy_latched_{i}", all_of(stopped, P(req=STOP)), "6-3 FAULT 래치")
     h.ack("policy_ack")
     for i in range(3):
         s(NORMAL, f"after_ack_{i}", None)

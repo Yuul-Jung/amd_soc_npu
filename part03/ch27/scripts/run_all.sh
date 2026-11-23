@@ -49,7 +49,7 @@ step soc_sim_ch23 full bash "$part03/ch23/scripts/run_soc_bench.sh"
 step power_ch25 full bash "$part03/ch25/scripts/run_power.sh"
 step soc_sim_ch28 full bash "$part03/ch28/scripts/run_soc_sim.sh"
 {
-  echo "# 27장 run_all 결과 (LEVEL=$level, $(date -u +%Y-%m-%dT%H:%MZ), commit $(git -C "$part03" rev-parse --short HEAD))"
+  echo "# 5-7 run_all 결과 (LEVEL=$level, $(date -u +%Y-%m-%dT%H:%MZ), commit $(git -C "$part03" rev-parse --short HEAD))"
   echo; echo "| 단계 | 결과 |"; echo "|---|---|"; printf '%s\n' "${rows[@]}"
   echo; echo "실물 Basys3 검증은 포함하지 않는다(docs/BOARD_CHECKLIST.md)."
 } > "$summary"

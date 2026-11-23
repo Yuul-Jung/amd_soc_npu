@@ -62,3 +62,24 @@
 
 - 17-1 확인(main 05d6c6e 병합 뒤): `bash p01/scripts/run_sim.sh` → `# tool: Vivado Simulator v2024.2.0`, `RTL_SIM_PASS stages=4`. `bash p02/scripts/run_sim.sh 3` → 사례 줄 + `RTL_SIM_PASS stages=1`. 새 판정 시험: Traceback만 찍고 죽는 가짜 `python3`를 PATH 앞에 두면 RTL 줄이 PASS여도 `RTL_SIM_FAIL`, rc=1 — 의도대로.
 - 17-2~17-4(= 16-2~16-4)는 4절 그대로이며 이 PR(`vscode/xsim-stage1` → main)에 들어 있다. 병합 충돌은 생성 HTML(p05) 한 곳뿐이었고 생성기로 다시 만들었다(`--check` 둘 다 UP_TO_DATE).
+
+## 6. 지시 19 회신
+
+브랜치 `vscode/directive19` (main e700de4 기준), VS Code 판 `vscode/part03-ch13-31` 40838a8·2074dd3.
+
+### 19-1 C 펌웨어 PC 시뮬레이션의 Vivado 전환: PASS
+- **방식: 지금의 FIFO 연결 그대로.** xsim에서도 TB의 `$fopen(cpath,"r")`·`$fopen(rpath,"w")`가 `mkfifo`로 만든 이름 있는 파이프를 그대로 열고, `$fscanf`·`$fwrite`·`$fflush`가 iverilog와 같이 동작한다. DPI-C(`xsc`)는 필요 없었다. TB·C 소스·Python 판정은 바꾸지 않았다.
+- 22·28·29·30·31장 `run_sim.sh`: `iverilog`/`vvp` → `p3_sim_build`/`p3_sim_run` (13~20·26장과 같은 `part03/common/scripts/p3_sim.sh`, 선택 규칙 `SIM=` → `xvlog` 있으면 xsim → iverilog). 장치 단위 TB(FND·경보 정책·모터 안전·AES·SHA)와 RTL 변이 시험도 같은 함수로 돈다. Vivado가 없는 CI는 iverilog 그대로.
+- **5개 장 모두 `SIM=xsim`·`SIM=iverilog` 양쪽 PASS.** 도구 줄·iverilog timescale 경고·gcc 경고 속 임시 경로를 뺀 출력 전체 diff 0줄 (PASS·SUMMARY 줄 22장 2, 28장 18, 29장 10, 30장 11, 31장 12 — 변이 KILLED 줄 포함). `validation/rtl_cosim.csv`·`rtl_cosim_uart.log`도 두 도구에서 같다.
+- 시간(동시 실행): xsim 11/291/332/169/137 s, iverilog 7/335/475/258/106 s (22/28/29/30/31장).
+- `p3_sim_run`이 xsim의 `run: Time (s): …` 줄을 거르게 했다(13~20·26장 출력 영향 없음).
+- Vivado 환경 `LEVEL=sim run_all`: `host_integer_reference` PASS, `rtl_ch13_26` PASS — **14개 장(13~20·22·26·28~31) `validation/rtl_sim.log`의 도구 줄이 모두 `Vivado Simulator v2024.2.0`**. `run_all_summary.md`는 LEVEL=fpga 표를 유지(제목 문구만 19-2).
+
+### 19-2 문자열 속 옛 장 번호·안 A
+- 바꾼 것 (소스 42곳): `NOT_RUN …: 21장 build_soc.sh 먼저` → `5-2 build_soc.sh 먼저` 류 8곳, `HW (21장 그대로)` → `HW (5-2 그대로)` 3곳, 합성·스윕·전력 요약 제목과 구성 이름(`4-4 Vivado OOC 합성 요약`, `4-2 Tile INT8`, `5-1 AXI NPU IP`, `# 5-5 클록 주기 스윕`, `# 5-6 SoC 전력…` 등), `# 5-7 run_all 결과`, `#error "axi_intc_0 입력은 16개여야 한다 …"`, `soc30_bd.tcl` check 4개(`5-2 SoC(NPU + BTN + SEG7)에서 시작`, `NUM_MI 7 (5-2 SoC)`, `address map (5-2 8줄 + 모터 1줄)`, `irq map (5-2와 같음)`), 생성 헤더 주석(`gen_model.py`·`digit_reference.py`의 `4-3 INT8 모델`, `sensor_reference.py`의 `5-1 IP`, `secure_reference.py`의 `6-3 모델과 같음`), 예외 문구 `3-2 코어 DATA_W 계약`, 30장 시험 이름 `6-3 FAULT 래치`.
+- 커밋된 생성 결과도 같은 문구로 맞췄다: `ch18 precision_report.md`, `synth_ooc_summary.md`(19·20·26·29·30·31장), `ch24 timing_sweep.md`, `ch25 power_summary.md`, `run_all_summary.md` 제목, `ch28/reference/digit_samples.txt` 머리 줄(주석 줄 — `model_id`는 가중치로만 정해져 그대로). Vivado 보고서를 다시 돌리지 않고 생성기와 같은 치환만 했다(숫자 변화 없음). `ch30 rtl_cosim.csv`는 다시 돌려 시험 이름만 바뀌었다.
+- **재빌드 없음, SHA 영향 없음**: 바뀐 것은 echo·#error(조건 거짓이면 컴파일에 안 들어감)·check 메시지·md 제목·C 헤더 주석뿐이다. 생성 헤더(`model_data.h` 등)는 저장소에 커밋돼 있지 않고 빌드 때 만든다. **다음 ELF 빌드 때 확인할 항목**: `digit_app`·`sensor_app`·`secure_app` ELF sha256이 `build_sw.log`의 값과 같을 것(헤더 주석만 바뀜).
+- 그대로 둔 것: `build_sw.log`·`build_soc_mapA_20261120.log`·`ch27/validation/logs/*` 등 **실행 기록** 속 옛 문구(그 실행이 실제로 찍은 줄), 이 기록을 인용한 `ch28·ch30 docs/README.md`의 `21장 안 A` 인용, `ch28/scripts/run_sim.sh`의 `표본 22장`(개수). main에 없는 VS Code 판 파일(`ch11`·`mini_npu`·`part03/scripts`·`part03/validation/check_static.py`)의 주석은 이번 범위 밖.
+- 23·29~31장 `run_synth.sh`·`build_*.sh`는 Vivado 실행 장이라 문구 변경 후 실행하지 않았다(`bash -n` 통과).
+
+장 페이지 재생성: `build_projects.py`·`build_guides.py` `--check` 둘 다 UP_TO_DATE.

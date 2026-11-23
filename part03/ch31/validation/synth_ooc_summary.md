@@ -1,4 +1,4 @@
-# 31장 AES-128·SHA-256 코어 Vivado OOC 합성·배선 (실제 실행)
+# 6-5 AES-128·SHA-256 코어 Vivado OOC 합성·배선 (실제 실행)
 
 > Vivado 2024.2, `synth_design -mode out_of_context`, xc7a35tcpg236-1, `create_clock -period 10.000 clk`.
 > 첫 표는 **합성 직후 추정치**, 배선 후 결과는 아래 별도 표. 비트스트림·실물은 하지 않았다.

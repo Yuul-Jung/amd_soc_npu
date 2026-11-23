@@ -12,16 +12,17 @@ part03=$(cd -- "$chapter_dir/.." && pwd)
 build_dir=$(mktemp -d "${TMPDIR:-/tmp}/p3-29.XXXXXXXX")
 trap 'rm -rf "$build_dir"' EXIT
 export PYTHONDONTWRITEBYTECODE=1
+source "$chapter_dir/../common/scripts/p3_sim.sh"   # Vivado 있으면 xsim, 없으면 iverilog (SIM=로 고정)
 python3 --version
 gcc --version | sed -n '1p'
-iverilog -V 2>&1 | sed -n '1p'
+p3_sim_version
 ref="$chapter_dir/reference/sensor_reference.py"
 python3 "$ref" --selftest --eval --header "$build_dir/sensor_model.h" --policy-vectors "$build_dir/policy.txt"
 
 # 2) 경보 정책 RTL
 pol_run() {   # $1 = RTL 소스
-  iverilog -g2012 -Wall -s tb_p3_alarm_policy -o "$build_dir/pol" "$1" "$chapter_dir/tb/tb_p3_alarm_policy.sv"
-  vvp -n "$build_dir/pol" +VEC="$build_dir/policy.txt" | grep -v "finish called"
+  p3_sim_build "$build_dir/pol" tb_p3_alarm_policy -- "$1" "$chapter_dir/tb/tb_p3_alarm_policy.sv"
+  p3_sim_run "$build_dir/pol" +VEC="$build_dir/policy.txt" | grep -v "finish called"
 }
 pol_run "$chapter_dir/rtl/p3_alarm_policy.v" | tee "$build_dir/pol.log"
 grep -q RTL_SIM_PASS "$build_dir/pol.log"
@@ -49,7 +50,7 @@ echo "RTL_MUTATION_SUMMARY killed=$rk total=$rt"
 [[ $rk -eq $rt ]]
 
 # 3) PC 시뮬레이션
-iverilog -g2012 -Wall -s tb_p3_npu_bridge -o "$build_dir/sim" -I"$part03/ch20/tb" \
+p3_sim_build "$build_dir/sim" tb_p3_npu_bridge -- -I"$part03/ch20/tb" \
   "$part03/ch02/rtl/dsp_multiplier.v" "$part03/mini_npu/rtl/npu_dsp_mac_lane.v" \
   "$part03/ch04/rtl/bram_sync_buffer.v" "$part03/ch14/rtl/p3_group10_core.v" \
   "$part03/ch17/rtl/p3_tile784_10.v" "$part03/ch20/rtl/p3_npu_axi_lite.v" \
@@ -64,7 +65,7 @@ run_cosim() {   # $1 = 펌웨어 소스, $2 = 이름, 나머지 = 호스트 인�
     "$part03/ch22/sw/npu_driver.c" "$app" \
     "$part03/ch22/host/npu_io_cosim.c" "$chapter_dir/host/sensor_io_host.c" "$chapter_dir/host/sensor_cosim_main.c"
   mkfifo "$d/cmd" "$d/rsp"
-  vvp "$build_dir/sim" +CMD="$d/cmd" +RSP="$d/rsp" > "$d/sim.log" 2>&1 &
+  p3_sim_run "$build_dir/sim" +CMD="$d/cmd" +RSP="$d/rsp" > "$d/sim.log" 2>&1 &
   local sim_pid=$! host_rc=0 sim_rc=0
   python3 "$chapter_dir/host/p3_sensor_host.py" --cosim "$d/fw $d/cmd $d/rsp" "$@" > "$d/host.log" 2>&1 || host_rc=$?
   wait "$sim_pid" || sim_rc=$?

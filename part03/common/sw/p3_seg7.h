@@ -36,7 +36,7 @@ static inline p3_seg7_regs_t p3_seg7_from_fnd_word(uint32_t w)
 #include "xparameters.h"
 #include "xil_io.h"
 #if defined(XPAR_AXI_INTC_0_NUM_INTR_INPUTS) && (XPAR_AXI_INTC_0_NUM_INTR_INPUTS != 16)
-#error "안 A: axi_intc_0 입력은 16개여야 한다 (NPU = In12)"
+#error "axi_intc_0 입력은 16개여야 한다 (NPU = In12)"
 #endif
 #define P3_SEG7_BASE XPAR_IP06_SEG7_BASEADDR
 static inline void p3_seg7_write(p3_seg7_regs_t r)

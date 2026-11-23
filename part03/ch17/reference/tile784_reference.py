@@ -68,7 +68,7 @@ def model(x, w, b, acc_w, bias_w, data_w=8):
     assert len(x) == N_IN and len(w) == N_CLASS and len(b) == N_CLASS
     for v in x + [e for row in w for e in row]:
         if not fits(v, data_w):
-            raise ValueError(f"x/w must be signed {data_w}-bit (14장 코어 DATA_W 계약)")
+            raise ValueError(f"x/w must be signed {data_w}-bit (3-2 코어 DATA_W 계약)")
     for v in b:
         if not fits(v, bias_w):
             raise ValueError(f"bias must be signed {bias_w}-bit")

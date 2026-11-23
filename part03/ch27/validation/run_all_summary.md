@@ -1,4 +1,4 @@
-# 27장 run_all 결과 (LEVEL=fpga, 2026-11-20T01:02Z, commit d484dfe)
+# 5-7 run_all 결과 (LEVEL=fpga, 2026-11-20T01:02Z, commit d484dfe)
 
 | 단계 | 결과 |
 |---|---|

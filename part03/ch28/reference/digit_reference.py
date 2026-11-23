@@ -148,7 +148,7 @@ def make_samples(mnist_dir, out):
             wrong.append(i)
             if len(wrong) == 2:
                 break
-    lines = ["# index label pixel0..783 (MNIST t10k, Yann LeCun et al.; 28장 숫자별 2장 + INT8 오분류 2장)"]
+    lines = ["# index label pixel0..783 (MNIST t10k, Yann LeCun et al.; 6-1: 숫자별 2장 + INT8 오분류 2장)"]
     lines += [" ".join(map(str, [i, ys[i]] + xs[i])) for i in sorted(picked) + wrong]
     out.write_text("\n".join(lines) + "\n")
     print(f"SAMPLES_DONE n={len(picked) + len(wrong)} wrong={wrong}")
@@ -157,7 +157,7 @@ def make_samples(mnist_dir, out):
 def write_header(out):
     qm = load_qmodel()
     mid = model_id(qm)
-    lines = ["/* 자동 생성: part03/ch28/reference/digit_reference.py (18장 INT8 모델, 28×28·784 모드) */",
+    lines = ["/* 자동 생성: part03/ch28/reference/digit_reference.py (4-3 INT8 모델, 28×28·784 모드) */",
              "#ifndef DIGIT_MODEL_H", "#define DIGIT_MODEL_H", "#include <stdint.h>",
              f"#define DIGIT_MODEL_ID 0x{mid:08x}u",
              "static const int8_t model_w[10][784] = {"]

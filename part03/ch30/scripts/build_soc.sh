@@ -6,7 +6,7 @@ set -euo pipefail
 chapter_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 part03=$(cd -- "$chapter_dir/.." && pwd)
 src_proj="$part03/ch21/build/soc21_npu"
-if [[ ! -f "$src_proj/soc11_user_top.xpr" ]]; then echo "NOT_RUN SOC30_BUILD: 21장 build_soc.sh 먼저"; exit 2; fi
+if [[ ! -f "$src_proj/soc11_user_top.xpr" ]]; then echo "NOT_RUN SOC30_BUILD: 5-2 build_soc.sh 먼저"; exit 2; fi
 # shellcheck disable=SC1090
 [[ -n "${VIVADO_SETTINGS:-}" ]] && source "$VIVADO_SETTINGS"
 # shellcheck disable=SC1090
