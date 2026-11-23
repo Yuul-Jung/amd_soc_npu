@@ -1,6 +1,6 @@
 // 2장 NPU 경로 (2-7부터): 명령 해석기 + 엔진 선택.
-//   2-7 (STAGE 7): 엔진 = 누적 npu_core (p02_bank 엔진 포트). 점수는 Dense 결과(ReLU·16비트)를 41비트로 늘린 값.
-//   2-8 (STAGE 8): npu_engine4를 더한다. sw[3] = 0 누적 core, 1 = 통합 엔진(원시 점수, ReLU 없음).
+//   2-7 (STAGE 7): 엔진 = 2-6 npu_core (p02_bank 엔진 포트). 점수는 Dense 결과(ReLU·16비트)를 41비트로 늘린 값.
+//   2-8 (STAGE 8): npu_engine4를 더한다. sw[3] = 0 2-6 core, 1 = 통합 엔진(원시 점수, ReLU 없음).
 //                  두 엔진은 같은 쓰기·시작을 함께 받으므로 스위치를 바꿔도 다시 적재할 필요가 없다.
 `timescale 1ns/1ps
 `default_nettype none

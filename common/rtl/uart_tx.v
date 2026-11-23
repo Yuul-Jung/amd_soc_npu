@@ -1,4 +1,4 @@
-// (추가) 8N1 송신. valid/ready handshake, 10bit start/data/stop.
+// 8N1 송신. valid/ready handshake, 10bit start/data/stop.
 module uart_tx #(
     parameter integer CLK_HZ=100000000, BAUD=115200
 )(

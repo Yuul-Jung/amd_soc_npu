@@ -68,13 +68,15 @@ details.full>summary{cursor:pointer;font-weight:600}
   <nav class="toc" id="course-nav" aria-label="전체 장과 절 탐색"></nav>
   <main class="content" id="main-content">
     <section class="section" id="s00">
-      <h2><span class="num">00</span> 장 목표</h2>
-      <p><b>장 시연 (보드):</b> 5장 비트스트림에 프로그램만 바꿔 올립니다. PC가 보낸 28×28 손글씨를 NPU가 분류해 7세그먼트·LED에 띄우고(6-1), 고른 응용 2개를 같은 방식으로 시연합니다.</p>
+      <h2><span class="num">00</span> 이 장에서 만드는 것</h2>
+      <p>5장에서 CPU와 NPU가 한 칩에 들어간 SoC가 완성됐습니다. 이 장에서는 그 위에 실제 쓰임새를 올립니다. 하드웨어는 그대로 두고 프로그램만 바꿔 서로 다른 응용을 만들 수 있다는 것이 SoC의 장점입니다.</p>
+      <p>먼저 모두 함께 손글씨 숫자 인식기를 만들고, 이어서 합성곱 연산, 센서 상태 감시, 모터 안전 제어, 암호화된 모델 적재 가운데 두 가지를 골라 진행합니다. 어느 응용이든 PC가 보낸 데이터를 검사하고, NPU로 판단하고, 결과를 표시하는 같은 흐름을 따릅니다.</p>
+      <p><b>장 끝에서 보드로 보여 줄 것:</b> 5장 비트스트림에 프로그램만 바꿔 올립니다. PC가 보낸 28×28 손글씨를 NPU가 분류해 7세그먼트·LED에 띄우고(6-1), 고른 응용 2개를 같은 방식으로 시연합니다.</p>
       <p>2일 과정, 서브젝트 5개입니다. 6-1은 모두 하고, 6-2~6-5 중 2개를 골라 보드에서 확인합니다. 6-1·6-3·6-5는 5장 비트스트림에 ELF만 바꾸고, 6-4는 모터 GPIO를 더한 전용 비트스트림을 쓰며, 6-2는 RTL 시뮬레이션으로 끝납니다.</p>
       <ol class="steps" aria-label="이 장의 서브젝트와 순서"><li><span class="code">6-1</span><span><a href="#s6_1">손글씨 숫자 인식 (공통)</a><br><code>digit_app.elf</code>를 실행하면 7세그먼트에 모델 ID <code>F16C</code>가 뜹니다. PC에서 28×28 그림을 보내면 보드가 분류한 숫자가 PC 기준과 같고(22장 모두), 마지막에 7세그먼트 <code>07 _7</code>, LED7이 켜집니다. 깨진 프레임 11종은 거부하고 <code>E</code>와 오류 코드를 돌려줍니다.</span><span class="st">1일 오전</span></li><li><span class="code">6-2</span><span><a href="#s6_2">3×3 합성곱 (선택)</a><br>8×8 그림 26장을 3×3 커널로 합성곱해 6×6 출력 936개가 Python 기준과 비트 단위로 같은 것을 시뮬레이션으로 봅니다.</span><span class="st">1일 오후</span></li><li><span class="code">6-3</span><span><a href="#s6_3">센서 상태 감시</a><br><code>sensor_app.elf</code>를 실행하면 7세그먼트에 <code>3 _00</code>(상태 미정)이 뜹니다. PC가 가상 센서 값을 보내면 규칙 검사 → NPU 3상태 분류 → 경보 정책을 거친 결과가 UART·7세그먼트·LED에 나옵니다. 고장(FAULT)은 확인(ACK)을 보낼 때까지 유지됩니다(소수점과 LED13).</span><span class="st">1일 오후</span></li><li><span class="code">6-4</span><span><a href="#s6_4">모터 안전 (가상 부하)</a><br>전용 비트스트림과 <code>motor_app.elf</code>를 올리고, 모터는 연결하지 않은 채 LED로 봅니다. JB4가 열려 있으면 LED9(차단)가 켜지고, 점퍼를 꽂은 뒤 PC 단계에 따라 LED11·12가 정상 80 % → 경고 30 % → NPU가 고장으로 판단하면 정지로 바뀝니다. btnU(비상정지)·리밋·고장 스위치는 즉시 정지시킵니다.</span><span class="st">2일 오전</span></li><li><span class="code">6-5</span><span><a href="#s6_5">보안 모델 적재</a><br><code>secure_app.elf</code>를 실행한 뒤, PC가 AES-128-CTR로 암호화하고 HMAC-SHA-256으로 인증한 새 모델을 보냅니다. 보드가 받아들이면 7세그먼트에 <code>b749</code>(모델 B)가 뜹니다. 변조·재전송 등 17종은 거부합니다.</span><span class="st">2일 오전</span></li><li class="demo"><span class="code">시연</span><span><a href="#demo">장 시연</a><br>5장 비트스트림에 프로그램만 바꿔 올립니다. PC가 보낸 28×28 손글씨를 NPU가 분류해 7세그먼트·LED에 띄우고(6-1), 고른 응용 2개를 같은 방식으로 시연합니다.</span><span class="st">장 끝</span></li></ol>
     </section>
     <section class="section" id="s01">
-      <h2><span class="num">01</span> 최종 구조도·주소맵</h2>
+      <h2><span class="num">01</span> 전체 구조와 주소맵</h2>
       <div class="figure-wrap" tabindex="0" role="region" aria-label="도면 (가로 스크롤 가능)"><svg style="min-width:819px" id="p06-socmap" xmlns="http://www.w3.org/2000/svg" width="1170" height="640" viewBox="0 0 1170 640" aria-label="6장 응용 지도" role="img" version="1.1"><!-- 원본: p06/diagrams/app_map.json · json-sha256: 63afbaf56a7931668c9698d41a9bf2e7fa4848966a53b45d801a3283c655dae6 · 생성: svg-flow-editor (로컬 사본) · 직접 수정 금지 --><defs><marker id="p06-socmap-arrowhead-0" markerWidth="13" markerHeight="13" refX="11.375" refY="6.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 13 6.5 L 0 13 z" fill="#1F3A5F"/></marker><marker id="p06-socmap-arrowhead-1" markerWidth="13" markerHeight="13" refX="11.375" refY="6.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 13 6.5 L 0 13 z" fill="#1F3A5F"/></marker><marker id="p06-socmap-arrowhead-2" markerWidth="13" markerHeight="13" refX="11.375" refY="6.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 13 6.5 L 0 13 z" fill="#1F3A5F"/></marker><marker id="p06-socmap-arrowhead-3" markerWidth="13" markerHeight="13" refX="11.375" refY="6.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 13 6.5 L 0 13 z" fill="#6b6b6b"/></marker><marker id="p06-socmap-arrowhead-4" markerWidth="13" markerHeight="13" refX="11.375" refY="6.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 13 6.5 L 0 13 z" fill="#1F3A5F"/></marker></defs><rect x="0" y="0" width="1170" height="640" fill="#fff"/><g data-heading="title"><text x="47" y="57.52" font-size="28" font-weight="780" fill="#172439" text-anchor="start" class="heading-text" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">6장 응용 지도 · 5장 SoC 위에 올리는 응용</text></g><g data-heading="subtitle"><text x="47" y="101.44" font-size="16" font-weight="400" fill="#617083" text-anchor="start" class="heading-text" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">보라 = 공통 서브젝트, 남색 = ELF만 교체, 회색 = 전용 비트스트림 또는 시뮬레이션</text></g><g id="edges"><g data-edge="pc-soc" class="edge"><path d="M 260 360 L 400 360" fill="none" stroke="#1F3A5F" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#p06-socmap-arrowhead-0)"/><text x="330" y="351" text-anchor="middle" font-size="15" font-weight="750" fill="#1F3A5F" class="edge-label" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">UART 115200</text></g><g data-edge="soc-a0" class="edge"><path d="M 720 360 L 740 360 L 740 160 L 760 160" fill="none" stroke="#1F3A5F" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#p06-socmap-arrowhead-1)"/></g><g data-edge="soc-a2" class="edge"><path d="M 720 360 L 760 360" fill="none" stroke="#1F3A5F" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#p06-socmap-arrowhead-2)"/></g><g data-edge="soc-a3" class="edge"><path d="M 720 360 L 740 360 L 740 460 L 760 460" fill="none" stroke="#6b6b6b" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#p06-socmap-arrowhead-3)"/></g><g data-edge="soc-a4" class="edge"><path d="M 720 360 L 740 360 L 740 560 L 760 560" fill="none" stroke="#1F3A5F" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#p06-socmap-arrowhead-4)"/></g></g><g id="nodes"><g data-node="pc" class="node"><rect x="20" y="324" width="240" height="72" fill="none" stroke="#1F3A5F" stroke-width="3" class="node-shape" pointer-events="all"/><text x="140" y="349.5" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="20" font-weight="750" fill="#172439" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">PC 호스트 (Python)</text><text x="140" y="373" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="15" font-weight="400" fill="#273e5e" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">그림·센서 창·모델 프레임</text></g><g data-node="soc" class="node"><rect x="400" y="312" width="320" height="96" fill="none" stroke="#1F3A5F" stroke-width="3" class="node-shape" pointer-events="all"/><text x="560" y="349.5" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="20" font-weight="750" fill="#172439" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">5장 비트스트림</text><text x="560" y="373" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="15" font-weight="400" fill="#273e5e" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">MicroBlaze V + NPU</text></g><g data-node="a0" class="node"><rect x="760" y="124" width="380" height="72" fill="none" stroke="#4635B1" stroke-width="3.6" class="node-shape" pointer-events="all"/><text x="950" y="149.5" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="20" font-weight="750" fill="#2a1f78" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">6-1 손글씨 숫자 인식 (공통)</text><text x="950" y="173" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="15" font-weight="400" fill="#3b2d99" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">ELF만 교체</text></g><g data-node="a1" class="node"><rect x="760" y="224" width="380" height="72" fill="none" stroke="#6b6b6b" stroke-width="3" class="node-shape" pointer-events="all"/><text x="950" y="249.5" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="20" font-weight="750" fill="#333333" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">6-2 3×3 합성곱 (선택)</text><text x="950" y="273" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="15" font-weight="400" fill="#555555" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">RTL 시뮬레이션</text></g><g data-node="a2" class="node"><rect x="760" y="324" width="380" height="72" fill="none" stroke="#1F3A5F" stroke-width="3" class="node-shape" pointer-events="all"/><text x="950" y="349.5" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="20" font-weight="750" fill="#172439" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">6-3 센서 상태 감시</text><text x="950" y="373" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="15" font-weight="400" fill="#273e5e" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">ELF만 교체</text></g><g data-node="a3" class="node"><rect x="760" y="424" width="380" height="72" fill="none" stroke="#6b6b6b" stroke-width="3" class="node-shape" pointer-events="all"/><text x="950" y="449.5" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="20" font-weight="750" fill="#333333" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">6-4 모터 안전 (가상 부하)</text><text x="950" y="473" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="15" font-weight="400" fill="#555555" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">전용 비트스트림 (5장 SoC + 모터 GPIO)</text></g><g data-node="a4" class="node"><rect x="760" y="524" width="380" height="72" fill="none" stroke="#1F3A5F" stroke-width="3" class="node-shape" pointer-events="all"/><text x="950" y="549.5" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="20" font-weight="750" fill="#172439" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">6-5 보안 모델 적재</text><text x="950" y="573" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="15" font-weight="400" fill="#273e5e" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">ELF만 교체</text></g></g></svg></div>
       <p>어느 응용이 5장 비트스트림을 그대로 쓰는지 보여 줍니다. 아래 주소맵과 포트는 5장과 같습니다.</p>
       <h3>주소맵 (Vivado Address Editor)</h3>
@@ -108,8 +110,11 @@ details.full>summary{cursor:pointer;font-weight:600}
     </section>
     <section class="section" id="s6_1">
       <h2><span class="num">03</span> 서브젝트 6-1 · 손글씨 숫자 인식 (공통)</h2>
-      <p class="verdict"><b>학습목표:</b> <code>digit_app.elf</code>를 실행하면 7세그먼트에 모델 ID <code>F16C</code>가 뜹니다. PC에서 28×28 그림을 보내면 보드가 분류한 숫자가 PC 기준과 같고(22장 모두), 마지막에 7세그먼트 <code>07 _7</code>, LED7이 켜집니다. 깨진 프레임 11종은 거부하고 <code>E</code>와 오류 코드를 돌려줍니다.</p>
-      <h3>보드에서 볼 것</h3>
+      <p class="verdict"><b>목표:</b> <code>digit_app.elf</code>를 실행하면 7세그먼트에 모델 ID <code>F16C</code>가 뜹니다. PC에서 28×28 그림을 보내면 보드가 분류한 숫자가 PC 기준과 같고(22장 모두), 마지막에 7세그먼트 <code>07 _7</code>, LED7이 켜집니다. 깨진 프레임 11종은 거부하고 <code>E</code>와 오류 코드를 돌려줍니다.</p>
+      <h3>해설</h3>
+      <p>PC가 28×28 그림을 정해진 틀(프레임)에 담아 UART로 보내면, 보드의 프로그램이 틀의 길이와 검사값(CRC), 모델 번호를 확인한 뒤 NPU로 분류하고 결과를 돌려줍니다.</p>
+      <p>통신에서는 데이터가 깨지거나 잘못된 요청이 올 수 있습니다. 그래서 이 응용의 절반은 '틀린 입력을 틀렸다고 답하는 것'입니다. 깨진 프레임 11가지를 일부러 보내 모두 거부하는지 확인합니다.</p>
+      <h3>보드에서 확인</h3>
       <p>5장 비트스트림에 <code>digit_app.elf</code>를 올리고, PC에서 <code>python3 part03/ch28/host/p3_digit_host.py --port &lt;포트&gt; …</code>로 그림을 보냅니다.</p>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th class="nw">순서</th><th>할 일</th><th>보드에서 보이는 것</th></tr></thead>
@@ -752,7 +757,7 @@ def main():
 if __name__ == "__main__":
     sys.exit(main())</code></pre>
       </div>
-      <h3>실행과 기대 화면</h3>
+      <h3>실행과 기대 출력</h3>
       <div class="codeblock"><div class="codebar"><span>터미널 · 저장소 루트</span></div>
         <pre tabindex="0"><code>bash part03/ch28/scripts/run_sim.sh   # PC 프로그램 → UART → 펌웨어 → NPU RTL (약 6분)</code></pre></div>
       <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
@@ -1117,8 +1122,11 @@ if __name__ == "__main__":
     </section>
     <section class="section" id="s6_2">
       <h2><span class="num">04</span> 서브젝트 6-2 · 3×3 합성곱 (선택)</h2>
-      <p class="verdict"><b>학습목표:</b> 8×8 그림 26장을 3×3 커널로 합성곱해 6×6 출력 936개가 Python 기준과 비트 단위로 같은 것을 시뮬레이션으로 봅니다.</p>
-      <h3>보드에서 볼 것</h3>
+      <p class="verdict"><b>목표:</b> 8×8 그림 26장을 3×3 커널로 합성곱해 6×6 출력 936개가 Python 기준과 비트 단위로 같은 것을 시뮬레이션으로 봅니다.</p>
+      <h3>해설</h3>
+      <p>합성곱은 그림 위에서 작은 창(3×3)을 한 칸씩 옮겨 가며 창 안의 화소와 가중치를 곱해 더하는 연산입니다. 그림의 윤곽이나 무늬 같은 특징을 뽑아내며, CNN의 기본 부품입니다. <code>p3_conv3x3_8x8</code>은 8×8 그림에서 6×6 결과를 만듭니다.</p>
+      <p>화소가 한 줄씩 흘러 들어오므로 앞의 두 줄을 기억해 두는 버퍼가 필요합니다. 이 모듈은 아직 SoC에 연결하지 않고 단독으로 시뮬레이션합니다.</p>
+      <h3>보드에서 확인</h3>
       <p>이 모듈은 아직 AXI 래퍼가 없어 SoC에 붙지 않으므로 시뮬레이션으로 확인합니다. SoC 연결은 7장 종합과제 주제로 남겨 둡니다.</p>
 
       <h3>작성할 코드</h3>
@@ -1274,7 +1282,7 @@ module p3_conv3x3_8x8(
     end
 endmodule</code></pre>
       </div>
-      <h3>실행과 기대 화면</h3>
+      <h3>실행과 기대 출력</h3>
       <div class="codeblock"><div class="codebar"><span>터미널 · 저장소 루트</span></div>
         <pre tabindex="0"><code>bash part03/ch26/scripts/run_sim.sh</code></pre></div>
       <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
@@ -1526,8 +1534,11 @@ if __name__ == "__main__":
     </section>
     <section class="section" id="s6_3">
       <h2><span class="num">05</span> 서브젝트 6-3 · 센서 상태 감시</h2>
-      <p class="verdict"><b>학습목표:</b> <code>sensor_app.elf</code>를 실행하면 7세그먼트에 <code>3 _00</code>(상태 미정)이 뜹니다. PC가 가상 센서 값을 보내면 규칙 검사 → NPU 3상태 분류 → 경보 정책을 거친 결과가 UART·7세그먼트·LED에 나옵니다. 고장(FAULT)은 확인(ACK)을 보낼 때까지 유지됩니다(소수점과 LED13).</p>
-      <h3>보드에서 볼 것</h3>
+      <p class="verdict"><b>목표:</b> <code>sensor_app.elf</code>를 실행하면 7세그먼트에 <code>3 _00</code>(상태 미정)이 뜹니다. PC가 가상 센서 값을 보내면 규칙 검사 → NPU 3상태 분류 → 경보 정책을 거친 결과가 UART·7세그먼트·LED에 나옵니다. 고장(FAULT)은 확인(ACK)을 보낼 때까지 유지됩니다(소수점과 LED13).</p>
+      <h3>해설</h3>
+      <p>NPU의 판단을 그대로 믿지 않는 구조를 만듭니다. 센서 값이 들어오면 먼저 정해진 규칙으로 범위를 검사하고, NPU가 정상·경고·고장 세 가지로 분류한 뒤, 경보 정책이 최종 상태를 정합니다.</p>
+      <p>고장은 한 번 뜨면 사람이 확인(ACK)할 때까지 지워지지 않습니다. 잠깐 나타났다 사라진 이상을 놓치지 않기 위한 장치입니다. 이 장에서는 실제 센서 대신 PC가 센서 값을 보냅니다.</p>
+      <h3>보드에서 확인</h3>
       <p>5장 비트스트림에 <code>sensor_app.elf</code>를 올립니다. 센서는 연결하지 않고, PC가 센서 값을 UART로 대신 보냅니다.</p>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th class="nw">순서</th><th>할 일</th><th>보드에서 보이는 것</th></tr></thead>
@@ -2481,7 +2492,7 @@ def main():
 if __name__ == "__main__":
     sys.exit(main())</code></pre>
       </div>
-      <h3>실행과 기대 화면</h3>
+      <h3>실행과 기대 출력</h3>
       <div class="codeblock"><div class="codebar"><span>터미널 · 저장소 루트</span></div>
         <pre tabindex="0"><code>bash part03/ch29/scripts/run_sim.sh   # 경보 정책 RTL + 펌웨어 시뮬레이션 (약 10분)</code></pre></div>
       <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
@@ -3099,8 +3110,11 @@ if __name__ == "__main__":
     </section>
     <section class="section" id="s6_4">
       <h2><span class="num">06</span> 서브젝트 6-4 · 모터 안전 (가상 부하)</h2>
-      <p class="verdict"><b>학습목표:</b> 전용 비트스트림과 <code>motor_app.elf</code>를 올리고, 모터는 연결하지 않은 채 LED로 봅니다. JB4가 열려 있으면 LED9(차단)가 켜지고, 점퍼를 꽂은 뒤 PC 단계에 따라 LED11·12가 정상 80 % → 경고 30 % → NPU가 고장으로 판단하면 정지로 바뀝니다. btnU(비상정지)·리밋·고장 스위치는 즉시 정지시킵니다.</p>
-      <h3>보드에서 볼 것</h3>
+      <p class="verdict"><b>목표:</b> 전용 비트스트림과 <code>motor_app.elf</code>를 올리고, 모터는 연결하지 않은 채 LED로 봅니다. JB4가 열려 있으면 LED9(차단)가 켜지고, 점퍼를 꽂은 뒤 PC 단계에 따라 LED11·12가 정상 80 % → 경고 30 % → NPU가 고장으로 판단하면 정지로 바뀝니다. btnU(비상정지)·리밋·고장 스위치는 즉시 정지시킵니다.</p>
+      <h3>해설</h3>
+      <p>모터처럼 위험할 수 있는 장치는 소프트웨어나 NPU가 잘못돼도 안전해야 합니다. 그래서 역할을 나눕니다. CPU와 NPU는 '어느 방향으로 얼마나 빠르게'라는 명령만 쓰고, 모터 신호는 <code>p3_motor_safety</code>라는 독립된 하드웨어 회로만 내보냅니다.</p>
+      <p>이 회로는 비상정지, 리밋 스위치, 고장 입력, 명령이 끊긴 경우(워치독)를 감지하면 프로그램의 명령과 상관없이 출력을 끊습니다. 한 번 끊기면 원인이 사라지고 운전자가 해제 명령을 보낼 때까지 다시 움직이지 않습니다. 여기서는 모터를 연결하지 않고 출력 신호를 LED로 확인합니다.</p>
+      <h3>보드에서 확인</h3>
       <p>비트스트림 <code>basys3_soc30_top.bit</code>(5장 SoC에 모터 GPIO를 더한 것)에 <code>motor_app.elf</code>를 올립니다. 여기서는 LED로만 확인하고, 실제 드라이버와 모터 연결은 다루지 않습니다.</p>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th class="nw">순서</th><th>할 일</th><th>보드에서 보이는 것</th></tr></thead>
@@ -4186,7 +4200,7 @@ def main():
 if __name__ == "__main__":
     sys.exit(main())</code></pre>
       </div>
-      <h3>실행과 기대 화면</h3>
+      <h3>실행과 기대 출력</h3>
       <div class="codeblock"><div class="codebar"><span>터미널 · 저장소 루트</span></div>
         <pre tabindex="0"><code>bash part03/ch30/scripts/run_sim.sh   # 안전 코어 RTL + 펌웨어 시뮬레이션</code></pre></div>
       <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
@@ -4667,8 +4681,11 @@ if __name__ == "__main__":
     </section>
     <section class="section" id="s6_5">
       <h2><span class="num">07</span> 서브젝트 6-5 · 보안 모델 적재</h2>
-      <p class="verdict"><b>학습목표:</b> <code>secure_app.elf</code>를 실행한 뒤, PC가 AES-128-CTR로 암호화하고 HMAC-SHA-256으로 인증한 새 모델을 보냅니다. 보드가 받아들이면 7세그먼트에 <code>b749</code>(모델 B)가 뜹니다. 변조·재전송 등 17종은 거부합니다.</p>
-      <h3>보드에서 볼 것</h3>
+      <p class="verdict"><b>목표:</b> <code>secure_app.elf</code>를 실행한 뒤, PC가 AES-128-CTR로 암호화하고 HMAC-SHA-256으로 인증한 새 모델을 보냅니다. 보드가 받아들이면 7세그먼트에 <code>b749</code>(모델 B)가 뜹니다. 변조·재전송 등 17종은 거부합니다.</p>
+      <h3>해설</h3>
+      <p>모델을 새로 보낼 때 누가 엿보거나 바꿔치기하지 못하게 합니다. PC는 모델을 AES-128로 암호화하고, 받는 쪽이 변조 여부를 알 수 있게 HMAC-SHA-256 인증값을 붙여 보냅니다.</p>
+      <p>보드는 인증값이 맞을 때만 모델을 받아들입니다. 내용이 한 비트라도 바뀌었거나, 이미 받은 것을 다시 보낸 경우에는 거부합니다. 다만 재전송 방지 번호를 전원이 꺼져도 남는 곳에 저장하지 않으므로, 보드를 다시 시작한 뒤에는 예전 전송을 구분하지 못합니다. 이 한계도 보드에서 직접 확인합니다.</p>
+      <h3>보드에서 확인</h3>
       <p>5장 비트스트림에 <code>secure_app.elf</code>를 올립니다. 키는 저장소에 들어 있는 시험용 키입니다.</p>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th class="nw">순서</th><th>할 일</th><th>보드에서 보이는 것</th></tr></thead>
@@ -5966,7 +5983,7 @@ module p3_sha256_core (
     end
 endmodule</code></pre>
       </div>
-      <h3>실행과 기대 화면</h3>
+      <h3>실행과 기대 출력</h3>
       <div class="codeblock"><div class="codebar"><span>터미널 · 저장소 루트</span></div>
         <pre tabindex="0"><code>bash part03/ch31/scripts/run_sim.sh</code></pre></div>
       <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
@@ -6501,10 +6518,10 @@ out.write_text(json.dumps(doc) + "\n")</code></pre>
     </section>
     <section class="section" id="s_report">
       <h2><span class="num">09</span> 장 정리·다음 장으로</h2>
-      <p>이 장에서 만든 것을 한눈에 정리합니다.</p>
+      <p>이 장에서 만든 것과 배운 점을 정리합니다.</p>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
-        <thead><tr><th>서브젝트</th><th>확인한 것</th></tr></thead>
-        <tbody><tr><td class="nw">6-1 손글씨 숫자 인식 (공통)</td><td><code>digit_app.elf</code>를 실행하면 7세그먼트에 모델 ID <code>F16C</code>가 뜹니다. PC에서 28×28 그림을 보내면 보드가 분류한 숫자가 PC 기준과 같고(22장 모두), 마지막에 7세그먼트 <code>07 _7</code>, LED7이 켜집니다. 깨진 프레임 11종은 거부하고 <code>E</code>와 오류 코드를 돌려줍니다.</td></tr><tr><td class="nw">6-2 3×3 합성곱 (선택)</td><td>8×8 그림 26장을 3×3 커널로 합성곱해 6×6 출력 936개가 Python 기준과 비트 단위로 같은 것을 시뮬레이션으로 봅니다.</td></tr><tr><td class="nw">6-3 센서 상태 감시</td><td><code>sensor_app.elf</code>를 실행하면 7세그먼트에 <code>3 _00</code>(상태 미정)이 뜹니다. PC가 가상 센서 값을 보내면 규칙 검사 → NPU 3상태 분류 → 경보 정책을 거친 결과가 UART·7세그먼트·LED에 나옵니다. 고장(FAULT)은 확인(ACK)을 보낼 때까지 유지됩니다(소수점과 LED13).</td></tr><tr><td class="nw">6-4 모터 안전 (가상 부하)</td><td>전용 비트스트림과 <code>motor_app.elf</code>를 올리고, 모터는 연결하지 않은 채 LED로 봅니다. JB4가 열려 있으면 LED9(차단)가 켜지고, 점퍼를 꽂은 뒤 PC 단계에 따라 LED11·12가 정상 80 % → 경고 30 % → NPU가 고장으로 판단하면 정지로 바뀝니다. btnU(비상정지)·리밋·고장 스위치는 즉시 정지시킵니다.</td></tr><tr><td class="nw">6-5 보안 모델 적재</td><td><code>secure_app.elf</code>를 실행한 뒤, PC가 AES-128-CTR로 암호화하고 HMAC-SHA-256으로 인증한 새 모델을 보냅니다. 보드가 받아들이면 7세그먼트에 <code>b749</code>(모델 B)가 뜹니다. 변조·재전송 등 17종은 거부합니다.</td></tr></tbody>
+        <thead><tr><th>서브젝트</th><th>핵심</th></tr></thead>
+        <tbody><tr><td class="nw">6-1 손글씨 숫자 인식 (공통)</td><td>프레임 검사 → NPU 분류 → 표시. 깨진 입력은 거부합니다.</td></tr><tr><td class="nw">6-2 3×3 합성곱 (선택)</td><td>3×3 창을 옮기며 곱해 더하는 합성곱. CNN의 기본 부품.</td></tr><tr><td class="nw">6-3 센서 상태 감시</td><td>규칙 검사 → NPU 분류 → 경보 정책. 고장은 확인할 때까지 유지됩니다.</td></tr><tr><td class="nw">6-4 모터 안전 (가상 부하)</td><td>CPU·NPU는 명령만, 모터 신호와 차단은 독립된 안전 회로가.</td></tr><tr><td class="nw">6-5 보안 모델 적재</td><td>암호화(AES) + 인증(HMAC). 인증에 통과한 모델만 받아들입니다.</td></tr></tbody>
       </table></div>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>다음 장으로 넘기는 것</th><th>사용처</th></tr></thead>

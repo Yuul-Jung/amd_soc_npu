@@ -1,4 +1,4 @@
-// (추가) Shell top: no logic except instances and wires.
+// Shell top: no logic except instances and wires.
 module basys3_uart_echo_top(
     input wire clk,resetn,uart_rxd,
     output wire uart_txd

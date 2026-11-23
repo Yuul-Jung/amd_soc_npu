@@ -68,13 +68,15 @@ details.full>summary{cursor:pointer;font-weight:600}
   <nav class="toc" id="course-nav" aria-label="전체 장과 절 탐색"></nav>
   <main class="content" id="main-content">
     <section class="section" id="s00">
-      <h2><span class="num">00</span> 장 목표</h2>
-      <p><b>장 시연 (보드):</b> PC가 입력과 가중치를 보내면 보드가 뉴런 4개짜리 추론을 하고, UART로 점수를, LED와 7세그먼트로 클래스를 보여 줍니다. 두 가지 엔진을 스위치로 바꿔 가며 같은 클래스가 나오는지도 확인합니다.</p>
-      <p>2일 과정입니다. 서브젝트 8개를 차례로 끝내며 그때마다 보드에서 확인하고, 마지막에 장 전체를 시연합니다.</p>
-      <ol class="steps" aria-label="이 장의 서브젝트와 순서"><li><span class="code">2-1</span><span><a href="#s2_1">BRAM 동기 버퍼</a><br><code>X</code>·<code>W</code>로 쓴 값을 <code>x</code>·<code>w</code>로 되읽으면 같은 값이 나옵니다(<code>X:0003</code>, <code>X:FFFE</code>, <code>W:0005</code>). 범위를 벗어난 주소 64는 <code>ERR</code>입니다.</span><span class="st">1일 오전</span></li><li><span class="code">2-2</span><span><a href="#s2_2">고정소수점 양자화</a><br>32비트 값을 8비트로 줄입니다. 768은 <code>03</code>, 384(=1.5)는 반올림되어 <code>02</code>, 65536은 최댓값 <code>7F</code>로 막히고 넘침 표시 <code>O:1</code>이 붙습니다.</span><span class="st">1일 오전</span></li><li><span class="code">2-3</span><span><a href="#s2_3">벡터 내적</a><br>X=(1,2,3,4)와 W0=(5,6,7,8)의 내적은 <code>D:0000000046</code>(70)입니다. W0[3]을 −8로 바꾸면 6이 되고, 길이 0을 주면 <code>ERR</code>입니다.</span><span class="st">1일 오후</span></li><li><span class="code">2-4</span><span><a href="#s2_4">4PE 병렬 어레이</a><br>같은 X에 대해 W0~W3 네 개의 내적을 한 번에 계산합니다. <code>P:</code> 뒤에 6, 10, −10(<code>…FFF6</code>), 8이 나옵니다.</span><span class="st">1일 오후</span></li><li><span class="code">2-5</span><span><a href="#s2_5">Dense 4뉴런 레이어</a><br>Bias를 더하고 ReLU와 16비트 포화를 거칩니다. <code>L:0006,0000,005A,7FFF O:8</code>에서 음수는 0이 되고, 65544는 7FFF로 막히며 넘침이 표시됩니다.</span><span class="st">2일 오전</span></li><li><span class="code">2-6</span><span><a href="#s2_6">4뉴런 NPU Core</a><br>npu_core가 자기 BRAM에서 값을 읽어 같은 Dense 계산을 합니다. <code>N 4</code>의 답은 <code>L 4</code>와 같고, 길이 2에서는 <code>0011,0000,0061,7FFF</code>입니다.</span><span class="st">2일 오전</span></li><li><span class="code">2-7</span><span><a href="#s2_7">UART 모델 적재</a><br>sw2를 올리면 명령 해석기가 UART를 받습니다. 고정 그룹 <code>0</code>~<code>3</code>을 보내면 <code>C0</code>~<code>C3</code>이 돌아옵니다. sw2를 내리고 <code>x 0</code>을 보내면 <code>X:FFFF</code>가 나와, 명령 해석기가 쓴 값을 콘솔로 확인할 수 있습니다.</span><span class="st">2일 오후</span></li><li><span class="code">2-8</span><span><a href="#s2_8">통합 NPU Top</a><br>sw3을 올리면 통합 엔진으로 바뀝니다. 같은 그룹에서 음수 점수(<code>…FFE</code>, ReLU 없음)가 보이지만 클래스는 같습니다. LED0~3과 7세그먼트에 클래스가, LED14에 끝남 표시가 나옵니다.</span><span class="st">2일 오후</span></li><li class="demo"><span class="code">시연</span><span><a href="#demo">장 시연</a><br>PC가 입력과 가중치를 보내면 보드가 뉴런 4개짜리 추론을 하고, UART로 점수를, LED와 7세그먼트로 클래스를 보여 줍니다. 두 가지 엔진을 스위치로 바꿔 가며 같은 클래스가 나오는지도 확인합니다.</span><span class="st">장 끝</span></li></ol>
+      <h2><span class="num">00</span> 이 장에서 만드는 것</h2>
+      <p>1장의 MAC 하나를 뉴런 4개짜리 작은 신경망 층으로 키웁니다. 뉴런 하나는 입력 벡터 X와 가중치 벡터 W를 원소끼리 곱해 모두 더한 값(내적)에 Bias를 더하고, 음수를 0으로 자르는 ReLU를 거쳐 출력을 냅니다.</p>
+      <p>그러려면 X와 W를 담아 둘 메모리(BRAM), 큰 값을 정해진 비트 폭으로 줄이는 양자화, 내적, 뉴런 4개를 한꺼번에 계산하는 병렬 구조가 차례로 필요합니다. 서브젝트마다 부품 하나를 더하고 UART 명령 하나로 그 부품만 확인하며 쌓아 올립니다. 마지막에는 PC가 모델을 통째로 싣고 추론을 시키는 완성된 NPU가 됩니다.</p>
+      <p><b>장 끝에서 보드로 보여 줄 것:</b> PC가 입력과 가중치를 보내면 보드가 뉴런 4개짜리 추론을 하고, UART로 점수를, LED와 7세그먼트로 클래스를 보여 줍니다. 두 가지 엔진을 스위치로 바꿔 가며 같은 클래스가 나오는지도 확인합니다.</p>
+      <p>2일 과정입니다. 아래 서브젝트 8개를 차례로 끝내며 그때마다 보드에서 확인하고, 마지막에 장 전체를 시연합니다.</p>
+      <ol class="steps" aria-label="이 장의 서브젝트와 순서"><li><span class="code">2-1</span><span><a href="#s2_1">BRAM 동기 버퍼</a><br><code>X</code>·<code>W</code>로 쓴 값을 <code>x</code>·<code>w</code>로 되읽으면 같은 값이 나옵니다(<code>X:0003</code>, <code>X:FFFE</code>, <code>W:0005</code>). 범위를 벗어난 주소 64는 <code>ERR</code>입니다.</span><span class="st">1일 오전</span></li><li><span class="code">2-2</span><span><a href="#s2_2">고정소수점 양자화</a><br>32비트 값을 8비트로 줄입니다. 768은 <code>03</code>, 384는 256으로 나누면 1.5이므로 반올림되어 <code>02</code>, 65536은 최댓값 <code>7F</code>로 막히고 넘침 표시 <code>O:1</code>이 붙습니다.</span><span class="st">1일 오전</span></li><li><span class="code">2-3</span><span><a href="#s2_3">벡터 내적</a><br>X=(1,2,3,4)와 W0=(5,6,7,8)의 내적은 <code>D:0000000046</code>(70)입니다. W0[3]을 −8로 바꾸면 6이 되고, 길이 0을 주면 <code>ERR</code>입니다.</span><span class="st">1일 오후</span></li><li><span class="code">2-4</span><span><a href="#s2_4">4PE 병렬 어레이</a><br>같은 X에 대해 W0~W3 네 개의 내적을 한 번에 계산합니다. <code>P:</code> 뒤에 6, 10, −10(<code>…FFF6</code>), 8이 나옵니다.</span><span class="st">1일 오후</span></li><li><span class="code">2-5</span><span><a href="#s2_5">Dense 4뉴런 레이어</a><br>Bias를 더하고 ReLU와 16비트 포화를 거칩니다. <code>L:0006,0000,005A,7FFF O:8</code>에서 음수는 0이 되고, 65544는 7FFF로 막히며 넘침이 표시됩니다.</span><span class="st">2일 오전</span></li><li><span class="code">2-6</span><span><a href="#s2_6">4뉴런 NPU Core</a><br>npu_core가 자기 BRAM에서 값을 읽어 같은 Dense 계산을 합니다. <code>N 4</code>의 답은 <code>L 4</code>와 같고, 길이 2에서는 <code>0011,0000,0061,7FFF</code>입니다.</span><span class="st">2일 오전</span></li><li><span class="code">2-7</span><span><a href="#s2_7">UART 모델 적재</a><br>sw2를 올리면 명령 해석기가 UART를 받습니다. 숫자 <code>0</code>~<code>3</code>을 보내면 <code>C0</code>~<code>C3</code>이 돌아옵니다. sw2를 내리고 <code>x 0</code>을 보내면 <code>X:FFFF</code>가 나와, 명령 해석기가 쓴 값을 콘솔로 확인할 수 있습니다.</span><span class="st">2일 오후</span></li><li><span class="code">2-8</span><span><a href="#s2_8">통합 NPU Top</a><br>sw3을 올리면 통합 엔진으로 바뀝니다. 같은 그룹에서 음수 점수(<code>…FFE</code>, ReLU 없음)가 보이지만 클래스는 같습니다. LED0~3과 7세그먼트에 클래스가, LED14에 끝남 표시가 나옵니다.</span><span class="st">2일 오후</span></li><li class="demo"><span class="code">시연</span><span><a href="#demo">장 시연</a><br>PC가 입력과 가중치를 보내면 보드가 뉴런 4개짜리 추론을 하고, UART로 점수를, LED와 7세그먼트로 클래스를 보여 줍니다. 두 가지 엔진을 스위치로 바꿔 가며 같은 클래스가 나오는지도 확인합니다.</span><span class="st">장 끝</span></li></ol>
     </section>
     <section class="section" id="s01">
-      <h2><span class="num">01</span> 최종 구조도·가져오는 파일</h2>
+      <h2><span class="num">01</span> 전체 구조와 파일</h2>
       <div class="figure-wrap" tabindex="0" role="region" aria-label="도면 (가로 스크롤 가능)"><svg viewBox="0 0 980 433" role="img" aria-label="basys3_p02_top 실제 포트와 하위 모듈 구조">
 <rect x="250" y="30" width="480" height="343" rx="10" fill="#fff" stroke="#4635b1" stroke-width="2"/>
 <text x="490" y="54" font-size="18" font-weight="700" text-anchor="middle">basys3_p02_top</text>
@@ -125,7 +127,7 @@ details.full>summary{cursor:pointer;font-weight:600}
 </svg></div>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>방향</th><th>포트</th><th>폭</th><th>구분</th><th>설명</th></tr></thead>
-        <tbody><tr><td>input</td><td class="nw"><code>clk</code></td><td class="nw"><code>1</code></td><td class="nw">클록</td><td>보드 100 MHz 발진기 (W5)</td></tr><tr><td>input</td><td class="nw"><code>btnC</code></td><td class="nw"><code>1</code></td><td class="nw">리셋</td><td>가운데 버튼, 누르면 리셋 (Active-High, 놓으면 동기 해제). BRAM 내용은 남는다</td></tr><tr><td>input</td><td class="nw"><code>uart_rxd</code></td><td class="nw"><code>1</code></td><td class="nw">보드 핀</td><td>USB-UART에서 들어오는 직렬 입력 (B18), 115200 bps 8N1</td></tr><tr><td>input</td><td class="nw"><code>sw</code></td><td class="nw"><code>[3:2]</code></td><td class="nw">보드 핀</td><td>sw[2] UART를 받는 쪽 (0 = 디버그 콘솔, 1 = 2-7 명령 해석기), sw[3] 엔진 (0 = 누적 npu_core, 1 = 2-8 npu_engine4)</td></tr><tr><td>output</td><td class="nw"><code>uart_txd</code></td><td class="nw"><code>1</code></td><td class="nw">보드 핀</td><td>PC로 나가는 직렬 출력 (A18)</td></tr><tr><td>output</td><td class="nw"><code>led</code></td><td class="nw"><code>[15:0]</code></td><td class="nw">보드 핀</td><td>STAGE 1~7: 콘솔 마지막 결과 아래 16비트. STAGE 8: [3:0] 클래스, [13] busy, [14] 끝남, [15] 오류</td></tr><tr><td>output</td><td class="nw"><code>seg</code></td><td class="nw"><code>[6:0]</code></td><td class="nw">보드 핀</td><td>7세그먼트 a~g (active-low). STAGE 1~7: LED와 같은 값 16진수, STAGE 8: 클래스</td></tr><tr><td>output</td><td class="nw"><code>an</code></td><td class="nw"><code>[3:0]</code></td><td class="nw">보드 핀</td><td>7세그먼트 자리 선택 (active-low)</td></tr><tr><td>output</td><td class="nw"><code>dp</code></td><td class="nw"><code>1</code></td><td class="nw">보드 핀</td><td>소수점 (항상 끔)</td></tr></tbody>
+        <tbody><tr><td>input</td><td class="nw"><code>clk</code></td><td class="nw"><code>1</code></td><td class="nw">클록</td><td>보드 100 MHz 발진기 (W5)</td></tr><tr><td>input</td><td class="nw"><code>btnC</code></td><td class="nw"><code>1</code></td><td class="nw">리셋</td><td>가운데 버튼, 누르면 리셋 (Active-High, 놓으면 동기 해제). BRAM 내용은 남는다</td></tr><tr><td>input</td><td class="nw"><code>uart_rxd</code></td><td class="nw"><code>1</code></td><td class="nw">보드 핀</td><td>USB-UART에서 들어오는 직렬 입력 (B18), 115200 bps 8N1</td></tr><tr><td>input</td><td class="nw"><code>sw</code></td><td class="nw"><code>[3:2]</code></td><td class="nw">보드 핀</td><td>sw[2] UART를 받는 쪽 (0 = 디버그 콘솔, 1 = 2-7 명령 해석기), sw[3] 엔진 (0 = 2-6 npu_core, 1 = 2-8 npu_engine4)</td></tr><tr><td>output</td><td class="nw"><code>uart_txd</code></td><td class="nw"><code>1</code></td><td class="nw">보드 핀</td><td>PC로 나가는 직렬 출력 (A18)</td></tr><tr><td>output</td><td class="nw"><code>led</code></td><td class="nw"><code>[15:0]</code></td><td class="nw">보드 핀</td><td>STAGE 1~7: 콘솔 마지막 결과 아래 16비트. STAGE 8: [3:0] 클래스, [13] busy, [14] 끝남, [15] 오류</td></tr><tr><td>output</td><td class="nw"><code>seg</code></td><td class="nw"><code>[6:0]</code></td><td class="nw">보드 핀</td><td>7세그먼트 a~g (active-low). STAGE 1~7: LED와 같은 값 16진수, STAGE 8: 클래스</td></tr><tr><td>output</td><td class="nw"><code>an</code></td><td class="nw"><code>[3:0]</code></td><td class="nw">보드 핀</td><td>7세그먼트 자리 선택 (active-low)</td></tr><tr><td>output</td><td class="nw"><code>dp</code></td><td class="nw"><code>1</code></td><td class="nw">보드 핀</td><td>소수점 (항상 끔)</td></tr></tbody>
       </table></div>
       <p>장 Top은 배선만 합니다. 기능은 하위 모듈에 있고, 서브젝트 모듈은 <code>STAGE</code>(끝낸 서브젝트 수)에 따라 하나씩 들어옵니다.</p>
       <p>NPU 묶음입니다. 2-1~2-6 서브젝트 모듈이 여기에 차례로 들어옵니다. X·W 쓰기는 BRAM과 npu_core에 함께 들어가고, 2-7부터는 명령 해석기가 엔진 포트로 npu_core를 씁니다.</p>
@@ -215,7 +217,7 @@ details.full>summary{cursor:pointer;font-weight:600}
 <rect x="370" y="545" width="16" height="12" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="4 2"/><text x="392" y="556" font-size="13">서브젝트에서 작성</text>
 <text x="600" y="556" font-size="13">왼쪽 input · 오른쪽 output · 점선 = 클록·리셋</text>
 </svg></div>
-      <p>NPU 경로입니다(2-7·2-8). 명령 해석기가 누적 npu_core와 통합 npu_engine4에 같은 쓰기와 시작 신호를 보내고, sw3으로 고른 엔진의 점수와 클래스를 받습니다.</p>
+      <p>NPU 경로입니다(2-7·2-8). 명령 해석기가 2-6 npu_core와 통합 npu_engine4에 같은 쓰기와 시작 신호를 보내고, sw3으로 고른 엔진의 점수와 클래스를 받습니다.</p>
       <div class="figure-wrap" tabindex="0" role="region" aria-label="도면 (가로 스크롤 가능)"><svg viewBox="0 0 980 501" role="img" aria-label="p02_npu_path 실제 포트와 하위 모듈 구조">
 <rect x="250" y="30" width="480" height="431" rx="10" fill="#fff" stroke="#4635b1" stroke-width="2"/>
 <text x="490" y="54" font-size="18" font-weight="700" text-anchor="middle">p02_npu_path</text>
@@ -293,17 +295,27 @@ details.full>summary{cursor:pointer;font-weight:600}
         <tbody>
           <tr><td>이전 장에서 가져오는 파일</td><td><ul><li><code>common/rtl/uart_rx.v · uart_tx.v · uart_core.v (1-1)</code></li><li><code>ch01/rtl/mac_core.v (1-2, 2-3 내적 안에서)</code></li><li><code>ch02/rtl/dsp_multiplier.v (1-3, 2-8 통합 엔진 안에서)</code></li><li><code>p01/rtl/p01_reset_sync.v · p01_hex4_display.v (1장 뼈대)</code></li></ul></td></tr>
           <tr><td>2-1 BRAM 동기 버퍼</td><td><code>ch04/rtl/bram_sync_buffer.v</code></td></tr><tr><td>2-2 고정소수점 양자화</td><td><code>ch05/rtl/fixed_quantizer.v</code></td></tr><tr><td>2-3 벡터 내적</td><td><code>ch07/rtl/vector_dot_core.v</code></td></tr><tr><td>2-4 4PE 병렬 어레이</td><td><code>ch08/rtl/pe_array4.v</code></td></tr><tr><td>2-5 Dense 4뉴런 레이어</td><td><code>ch09/rtl/dense_layer4.v</code></td></tr><tr><td>2-6 4뉴런 NPU Core</td><td><code>ch10/rtl/npu_core.v</code></td></tr><tr><td>2-7 UART 모델 적재</td><td><code>mini_npu/rtl/uart_npu_command_controller.v</code></td></tr><tr><td>2-8 통합 NPU Top</td><td><code>mini_npu/rtl/npu_dsp_mac_lane.v</code><br><code>mini_npu/rtl/npu_engine4.v</code><br><code>mini_npu/rtl/npu_display_controller.v</code><br><code>mini_npu/rtl/npu_reset_controller.v</code><br><code>mini_npu/rtl/basys3_npu_top.v</code><br><code>mini_npu/constraints/basys3_npu.xdc</code><br><code>mini_npu/scripts/vivado_impl.tcl</code><br><code>mini_npu/scripts/run_timing_sim.sh</code></td></tr>
-          <tr><td>장 뼈대 (다음 절에서 입력)</td><td><code>p02/rtl/p02_console.v</code><br><code>p02/rtl/p02_bank.v</code><br><code>p02/rtl/p02_uart_switch.v</code><br><code>p02/rtl/p02_npu_path.v</code><br><code>p02/rtl/p02_view.v</code><br><code>p02/rtl/basys3_p02_top.v</code><br><code>p02/constraints/basys3_p02.xdc</code><br><code>p02/vivado/build_p02.tcl</code><br><code>p02/host/p02_send.py</code></td></tr>
+          <tr><td>장 뼈대 (준비 절에 수록)</td><td><code>p02/rtl/p02_console.v</code><br><code>p02/rtl/p02_bank.v</code><br><code>p02/rtl/p02_uart_switch.v</code><br><code>p02/rtl/p02_npu_path.v</code><br><code>p02/rtl/p02_view.v</code><br><code>p02/rtl/basys3_p02_top.v</code><br><code>p02/constraints/basys3_p02.xdc</code><br><code>p02/vivado/build_p02.tcl</code><br><code>p02/host/p02_send.py</code></td></tr>
         </tbody>
       </table></div>
     </section>
     <section class="section" id="s02">
-      <h2><span class="num">02</span> 준비 · 장 뼈대</h2>
+      <h2><span class="num">02</span> 준비</h2>
       <ol>
         <li>VS Code에서 저장소 루트(<code>amd_soc_npu/</code>)를 엽니다. 필요한 도구는 Vivado 2024.2(합성·시뮬레이션), <code>python3</code>, 그리고 PC에서 보드로 명령을 보낼 <code>pyserial</code>(<code>pip install pyserial</code>)입니다. 터미널에서 Vivado 명령이 잡히도록 <code>settings64.sh</code>를 먼저 불러옵니다.</li>
-        <li>아래 장 뼈대 파일을 경로 그대로 입력합니다. 서브젝트 모듈은 각 서브젝트 절에서 작성합니다.</li>
+        <li>코드는 저장소에 모두 들어 있고, 안내서에도 전체를 실었습니다. 직접 입력하며 따라 해도 되고, 읽고 실행만 해도 됩니다. 아래는 장 전체의 틀이 되는 뼈대 파일이고, 서브젝트 모듈은 각 서브젝트 절에 있습니다.</li>
+        <li>파일 경로의 <code>ch01</code>, <code>part03/ch14</code> 같은 폴더는 모듈별 작업 폴더 이름입니다. 이 안내서의 장·서브젝트 번호와는 관계가 없으므로 경로 그대로 쓰면 됩니다.</li>
+        <li><code>&lt;포트&gt;</code>는 보드의 USB 시리얼 포트 이름입니다. Windows는 <code>COM3</code>, Linux는 <code>/dev/ttyUSB1</code> 같은 이름이고, 통신 설정은 115200 bps 8N1입니다.</li>
+        <li>sw2는 UART를 누가 받는지(0 = 디버그 콘솔, 1 = 2-7 명령 해석기), sw3은 엔진(0 = 2-6 npu_core, 1 = 2-8 통합 엔진)을 고릅니다. 스위치는 명령과 명령 사이에 바꿉니다.</li>
         <li><code>STAGE</code>는 끝낸 서브젝트 수입니다. 2-1만 끝냈으면 1, 2-8까지 끝냈으면 8입니다. 아직 작성하지 않은 모듈은 빌드에 들어가지 않으므로, 서브젝트를 하나 끝낼 때마다 바로 보드에 올려 볼 수 있습니다.</li>
       </ol>
+      <h3>PC 명령 한눈에 보기</h3>
+      <p>PC 도구 <code>p02/host/p02_send.py</code>가 아래 명령을 바이트로 바꿔 보내고, 보드의 응답 한 줄을 화면에 보여 줍니다. 응답을 받은 뒤에 다음 명령을 보냅니다.</p>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>명령</th><th>하는 일</th><th>보드 응답</th></tr></thead>
+        <tbody><tr><td class="nw"><code>S</code></td><td>준비 확인</td><td><code>I</code></td></tr><tr><td class="nw"><code>X addr v</code></td><td>입력 X의 addr번(0~63)에 값 v를 씁니다</td><td><code>OK</code></td></tr><tr><td class="nw"><code>W n addr v</code></td><td>뉴런 n(0~3)의 가중치 addr번에 v를 씁니다</td><td><code>OK</code></td></tr><tr><td class="nw"><code>x addr · w n addr</code></td><td>쓴 값을 되읽습니다</td><td><code>X:16진수 4자리 · W:16진수 4자리</code></td></tr><tr><td class="nw"><code>Q v</code></td><td>32비트 값 v를 8비트로 양자화합니다</td><td><code>Q:2자리 O:넘침</code></td></tr><tr><td class="nw"><code>D len</code></td><td>X와 W0의 앞 len개 내적</td><td><code>D:10자리</code></td></tr><tr><td class="nw"><code>P len</code></td><td>X와 W0~W3 네 개의 내적</td><td><code>P:10자리 ×4</code></td></tr><tr><td class="nw"><code>B n v</code></td><td>뉴런 n의 Bias를 씁니다</td><td><code>OK</code></td></tr><tr><td class="nw"><code>L len</code></td><td>Dense 층 계산 (Bias, ReLU, 16비트)</td><td><code>L:4자리 ×4 O:넘침</code></td></tr><tr><td class="nw"><code>N len</code></td><td>npu_core로 같은 계산</td><td><code>N:4자리 ×4 O:넘침</code></td></tr><tr><td class="nw"><code>0 ~ 3 (sw2 올림)</code></td><td>미리 정해 둔 표본으로 추론합니다</td><td><code>C클래스:점수 ×4</code></td></tr><tr><td class="nw"><code>아직 넣지 않은 서브젝트의 명령</code></td><td>그 단계의 비트스트림에는 해당 모듈이 없습니다</td><td><code>?</code></td></tr><tr><td class="nw"><code>범위를 벗어난 값</code></td><td>주소 64, 길이 0 등</td><td><code>ERR</code></td></tr></tbody>
+      </table></div>
+      <h3>장 뼈대 코드</h3>
       <div class="codeblock">
         <div class="codebar"><span>p02/rtl/p02_console.v · verilog</span></div>
         <pre tabindex="0"><code class="language-verilog">// 2장 디버그 콘솔: 서브젝트 모듈을 UART 명령 하나씩으로 확인한다. 명령 해석기와 같은 형식
@@ -817,8 +829,8 @@ endmodule
       <div class="codeblock">
         <div class="codebar"><span>p02/rtl/p02_npu_path.v · verilog</span></div>
         <pre tabindex="0"><code class="language-verilog">// 2장 NPU 경로 (2-7부터): 명령 해석기 + 엔진 선택.
-//   2-7 (STAGE 7): 엔진 = 누적 npu_core (p02_bank 엔진 포트). 점수는 Dense 결과(ReLU·16비트)를 41비트로 늘린 값.
-//   2-8 (STAGE 8): npu_engine4를 더한다. sw[3] = 0 누적 core, 1 = 통합 엔진(원시 점수, ReLU 없음).
+//   2-7 (STAGE 7): 엔진 = 2-6 npu_core (p02_bank 엔진 포트). 점수는 Dense 결과(ReLU·16비트)를 41비트로 늘린 값.
+//   2-8 (STAGE 8): npu_engine4를 더한다. sw[3] = 0 2-6 core, 1 = 통합 엔진(원시 점수, ReLU 없음).
 //                  두 엔진은 같은 쓰기·시작을 함께 받으므로 스위치를 바꿔도 다시 적재할 필요가 없다.
 `timescale 1ns/1ps
 `default_nettype none
@@ -989,7 +1001,7 @@ endmodule
         <div class="codebar"><span>p02/rtl/basys3_p02_top.v · verilog</span></div>
         <pre tabindex="0"><code class="language-verilog">// 2장 보드 Top: 4뉴런 NPU 보드. 인스턴스와 배선만 둔다 (기능은 하위 모듈).
 //   2-1~2-6: 디버그 콘솔로 BRAM → 양자화 → 내적 → 4PE → Dense → Core를 UART 명령 하나씩 확인
-//   2-7: sw[2] = 1이면 명령 해석기가 UART를 맡고 누적 npu_core로 추론 ("Ck:…")
+//   2-7: sw[2] = 1이면 명령 해석기가 UART를 맡고 2-6 npu_core로 추론 ("Ck:…")
 //   2-8: sw[3] = 1이면 npu_engine4로 추론, LED·7세그먼트에 클래스 표시
 // STAGE = 끝낸 서브젝트 수 (1~8). 서브젝트마다 그 단계 비트스트림으로 보드에서 확인한다.
 `timescale 1ns/1ps
@@ -1128,7 +1140,7 @@ create_clock -name sys_clk_pin -period 10.000 -waveform {0 5} [get_ports clk]</c
 # 실행 (저장소 루트): vivado -mode batch -nojournal -source p02/vivado/build_p02.tcl
 #   한 단계만: vivado -mode batch -nojournal -source p02/vivado/build_p02.tcl -tclargs 5
 # 결과: build/vivado/p02_s&lt;STAGE&gt;/ (timing_route.rpt, util_route.rpt, drc_route.rpt, basys3_p02_top.bit)
-#       p02/validation/vivado_impl_YYYYMMDD.txt (증거, 커밋 대상. 한 줄씩: SYNTH_TIMING_PASS|FAIL p02 basys3_p02_top STAGE=n WNS=… …)
+#       p02/validation/vivado_impl_YYYYMMDD.txt (결과 기록. 한 줄씩: SYNTH_TIMING_PASS|FAIL p02 basys3_p02_top STAGE=n WNS=… …)
 # 판정: 배선 후 setup WNS &gt;= 0, hold WHS &gt;= 0, DRC Error 0
 
 set root  [file normalize [file join [file dirname [info script]] ../..]]
@@ -1275,17 +1287,10 @@ if __name__ == "__main__":
     </section>
     <section class="section" id="s2_1">
       <h2><span class="num">03</span> 서브젝트 2-1 · BRAM 동기 버퍼</h2>
-      <p class="verdict"><b>학습목표:</b> <code>X</code>·<code>W</code>로 쓴 값을 <code>x</code>·<code>w</code>로 되읽으면 같은 값이 나옵니다(<code>X:0003</code>, <code>X:FFFE</code>, <code>W:0005</code>). 범위를 벗어난 주소 64는 <code>ERR</code>입니다.</p>
-      <h3>보드에서 볼 것</h3>
-      <ol>
-        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다.<br><code>vivado -mode batch -nojournal -source p02/vivado/build_p02.tcl -tclargs 1</code><br>결과: <code>build/vivado/p02_s1/basys3_p02_top.bit</code></li>
-        <li>Hardware Manager로 보드에 내려받고, <code>python3 p02/host/p02_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다 (115200 8N1). sw2는 UART를 누가 받는지(0 = 디버그 콘솔, 1 = 2-7 명령 해석기), sw3은 엔진(0 = 누적 npu_core, 1 = 2-8 통합 엔진)을 고릅니다. 스위치는 명령과 명령 사이에 바꿉니다.</li>
-      </ol>
-      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
-        <thead><tr><th>순서</th><th>sw[3:2]</th><th>PC 명령 (<code>p02_send.py</code>)</th><th>보드 응답 (UART)</th></tr></thead>
-        <tbody><tr><td>1</td><td class="nw"><code>00</code></td><td class="nw"><code>S</code></td><td class="nw"><code>I\r\n</code></td></tr><tr><td>2</td><td class="nw"><code>00</code></td><td class="nw"><code>X 0 3</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>3</td><td class="nw"><code>00</code></td><td class="nw"><code>X 1 -2</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>4</td><td class="nw"><code>00</code></td><td class="nw"><code>x 0</code></td><td class="nw"><code>X:0003\r\n</code></td></tr><tr><td>5</td><td class="nw"><code>00</code></td><td class="nw"><code>x 1</code></td><td class="nw"><code>X:FFFE\r\n</code></td></tr><tr><td>6</td><td class="nw"><code>00</code></td><td class="nw"><code>W 0 0 5</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>7</td><td class="nw"><code>00</code></td><td class="nw"><code>w 0 0</code></td><td class="nw"><code>W:0005\r\n</code></td></tr><tr><td>8</td><td class="nw"><code>00</code></td><td class="nw"><code>x 64</code></td><td class="nw"><code>ERR\r\n</code></td></tr><tr><td>9</td><td class="nw"><code>00</code></td><td class="nw"><code>Q</code></td><td class="nw"><code>?\r\n</code></td></tr></tbody>
-      </table></div>
-      <p>끝나면 LED가 <code>0x0005</code>입니다 (콘솔이 마지막으로 낸 결과의 아래 16비트이고, 7세그먼트에도 같은 값이 16진수 4자리로 보입니다).</p>
+      <p class="verdict"><b>목표:</b> <code>X</code>·<code>W</code>로 쓴 값을 <code>x</code>·<code>w</code>로 되읽으면 같은 값이 나옵니다(<code>X:0003</code>, <code>X:FFFE</code>, <code>W:0005</code>). 범위를 벗어난 주소 64는 <code>ERR</code>입니다.</p>
+      <h3>해설</h3>
+      <p>X와 W를 담아 둘 메모리입니다. BRAM(Block RAM)은 FPGA 안에 미리 만들어져 있는 메모리 블록이고, <code>bram_sync_buffer</code>는 Vivado가 이 블록을 쓰도록 유도하는 형태로 쓴 동기 메모리입니다.</p>
+      <p>'동기'라는 말은 주소를 준 다음 클록에 데이터가 나온다는 뜻입니다. 이 한 클록 지연은 뒤의 모든 모듈이 읽기 타이밍을 맞출 때 기준이 됩니다. 여기서는 X 버퍼 1개와 W 버퍼 4개에 값을 쓰고 되읽어 봅니다.</p>
       <h3>작성할 코드</h3>
 
       <div class="codeblock">
@@ -1317,7 +1322,7 @@ endmodule
 `default_nettype wire</code></pre>
       </div>
       <h3>시뮬레이션</h3>
-      <p>보드에 올리기 전에, 이 서브젝트까지 넣은 장 Top을 시뮬레이션합니다. 위 표와 같은 명령을 UART 핀으로 넣고 응답을 한 바이트씩 비교합니다. 마지막 줄이 <code>RTL_SIM_PASS</code>이면 됩니다.</p>
+      <p>보드에 올리기 전에, 이 서브젝트까지 넣은 장 Top을 시뮬레이션합니다. 테스트벤치가 아래 '보드에서 확인' 표와 같은 명령을 UART 핀으로 넣고 응답을 한 바이트씩 비교합니다. 줄마다 <code>rx="…"</code>가 보드가 돌려준 응답이고, 마지막 줄이 <code>RTL_SIM_PASS</code>이면 통과입니다.</p>
       <div class="codeblock"><div class="codebar"><span>터미널 · 저장소 루트</span></div>
         <pre tabindex="0"><code>bash p02/scripts/run_sim.sh 1</code></pre></div>
       <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
@@ -1332,20 +1337,24 @@ P02_CASE_PASS stage=1 2-1 sw=0 rx="ERR\r\n"
 P02_CASE_PASS stage=1 2-1 sw=0 rx="?\r\n"
 P02_TOP_RTL_SIM_PASS stage=1 cases=9 bytes=47
 RTL_SIM_PASS stages=1</code></pre></div>
+      <h3>보드에서 확인</h3>
+      <ol>
+        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다.<br><code>vivado -mode batch -nojournal -source p02/vivado/build_p02.tcl -tclargs 1</code><br>결과 파일: <code>build/vivado/p02_s1/basys3_p02_top.bit</code></li>
+        <li>Vivado Hardware Manager로 보드에 내려받습니다.</li>
+        <li>PC에서 아래 표의 명령을 순서대로 보내고 응답을 비교합니다. 명령은 <code>python3 p02/host/p02_send.py &lt;포트&gt; 명령</code> 꼴로 보냅니다.</li>
+      </ol>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>순서</th><th>sw[3:2]</th><th>PC 명령</th><th>보드 응답</th></tr></thead>
+        <tbody><tr><td>1</td><td class="nw"><code>00</code></td><td class="nw"><code>S</code></td><td class="nw"><code>I</code></td></tr><tr><td>2</td><td class="nw"><code>00</code></td><td class="nw"><code>X 0 3</code></td><td class="nw"><code>OK</code></td></tr><tr><td>3</td><td class="nw"><code>00</code></td><td class="nw"><code>X 1 -2</code></td><td class="nw"><code>OK</code></td></tr><tr><td>4</td><td class="nw"><code>00</code></td><td class="nw"><code>x 0</code></td><td class="nw"><code>X:0003</code></td></tr><tr><td>5</td><td class="nw"><code>00</code></td><td class="nw"><code>x 1</code></td><td class="nw"><code>X:FFFE</code></td></tr><tr><td>6</td><td class="nw"><code>00</code></td><td class="nw"><code>W 0 0 5</code></td><td class="nw"><code>OK</code></td></tr><tr><td>7</td><td class="nw"><code>00</code></td><td class="nw"><code>w 0 0</code></td><td class="nw"><code>W:0005</code></td></tr><tr><td>8</td><td class="nw"><code>00</code></td><td class="nw"><code>x 64</code></td><td class="nw"><code>ERR</code></td></tr><tr><td>9</td><td class="nw"><code>00</code></td><td class="nw"><code>Q</code></td><td class="nw"><code>?</code></td></tr></tbody>
+      </table></div>
+      <p>끝나면 LED가 <code>0x0005</code>입니다 (콘솔이 마지막으로 낸 결과의 아래 16비트이고, 7세그먼트에도 같은 값이 16진수 4자리로 보입니다).</p>
     </section>
     <section class="section" id="s2_2">
       <h2><span class="num">04</span> 서브젝트 2-2 · 고정소수점 양자화</h2>
-      <p class="verdict"><b>학습목표:</b> 32비트 값을 8비트로 줄입니다. 768은 <code>03</code>, 384(=1.5)는 반올림되어 <code>02</code>, 65536은 최댓값 <code>7F</code>로 막히고 넘침 표시 <code>O:1</code>이 붙습니다.</p>
-      <h3>보드에서 볼 것</h3>
-      <ol>
-        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다.<br><code>vivado -mode batch -nojournal -source p02/vivado/build_p02.tcl -tclargs 2</code><br>결과: <code>build/vivado/p02_s2/basys3_p02_top.bit</code></li>
-        <li>Hardware Manager로 보드에 내려받고, <code>python3 p02/host/p02_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다 (115200 8N1). sw2는 UART를 누가 받는지(0 = 디버그 콘솔, 1 = 2-7 명령 해석기), sw3은 엔진(0 = 누적 npu_core, 1 = 2-8 통합 엔진)을 고릅니다. 스위치는 명령과 명령 사이에 바꿉니다.</li>
-      </ol>
-      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
-        <thead><tr><th>순서</th><th>sw[3:2]</th><th>PC 명령 (<code>p02_send.py</code>)</th><th>보드 응답 (UART)</th></tr></thead>
-        <tbody><tr><td>1</td><td class="nw"><code>00</code></td><td class="nw"><code>Q 768</code></td><td class="nw"><code>Q:03 O:0\r\n</code></td></tr><tr><td>2</td><td class="nw"><code>00</code></td><td class="nw"><code>Q 384</code></td><td class="nw"><code>Q:02 O:0\r\n</code></td></tr><tr><td>3</td><td class="nw"><code>00</code></td><td class="nw"><code>Q -384</code></td><td class="nw"><code>Q:FE O:0\r\n</code></td></tr><tr><td>4</td><td class="nw"><code>00</code></td><td class="nw"><code>Q 65536</code></td><td class="nw"><code>Q:7F O:1\r\n</code></td></tr><tr><td>5</td><td class="nw"><code>00</code></td><td class="nw"><code>Q -65536</code></td><td class="nw"><code>Q:80 O:1\r\n</code></td></tr></tbody>
-      </table></div>
-      <p>끝나면 LED가 <code>0xFF80</code>입니다 (콘솔이 마지막으로 낸 결과의 아래 16비트이고, 7세그먼트에도 같은 값이 16진수 4자리로 보입니다).</p>
+      <p class="verdict"><b>목표:</b> 32비트 값을 8비트로 줄입니다. 768은 <code>03</code>, 384는 256으로 나누면 1.5이므로 반올림되어 <code>02</code>, 65536은 최댓값 <code>7F</code>로 막히고 넘침 표시 <code>O:1</code>이 붙습니다.</p>
+      <h3>해설</h3>
+      <p>곱해서 더한 값은 32비트나 40비트로 커지는데, 다음 계산에 넣으려면 다시 8비트나 16비트로 줄여야 합니다. 이것이 양자화입니다. <code>fixed_quantizer</code>는 오른쪽으로 8비트 밀어(256으로 나눔) 소수 아래를 반올림하고, 범위를 넘으면 최댓값·최솟값으로 막습니다(포화).</p>
+      <p>포화가 일어나면 값이 잘린 것이므로 넘침 표시를 함께 냅니다. 반올림과 포화가 PC의 계산과 한 비트도 다르지 않아야 보드와 PC의 추론 결과가 같아집니다.</p>
       <h3>작성할 코드</h3>
 
       <div class="codeblock">
@@ -1361,7 +1370,7 @@ module fixed_quantizer #(
 );
     wire signed [63:0] wide, rounded, scaled, lower, upper;
     wire ov;
-    // (변경) 입력이 초기 0에서 변하지 않아도 조합 계산을 시작하는 연속 할당이다.
+    // 입력이 초기 0에서 변하지 않아도 조합 계산을 시작하는 연속 할당이다.
     assign wide = $signed(x_i);
     assign lower = -(64'sd1 &lt;&lt;&lt; (OUT_WIDTH-1));
     assign upper = (64'sd1 &lt;&lt;&lt; (OUT_WIDTH-1))-1;
@@ -1386,7 +1395,7 @@ module fixed_quantizer #(
 endmodule</code></pre>
       </div>
       <h3>시뮬레이션</h3>
-      <p>보드에 올리기 전에, 이 서브젝트까지 넣은 장 Top을 시뮬레이션합니다. 위 표와 같은 명령을 UART 핀으로 넣고 응답을 한 바이트씩 비교합니다. 마지막 줄이 <code>RTL_SIM_PASS</code>이면 됩니다.</p>
+      <p>보드에 올리기 전에, 이 서브젝트까지 넣은 장 Top을 시뮬레이션합니다. 테스트벤치가 아래 '보드에서 확인' 표와 같은 명령을 UART 핀으로 넣고 응답을 한 바이트씩 비교합니다. 줄마다 <code>rx="…"</code>가 보드가 돌려준 응답이고, 마지막 줄이 <code>RTL_SIM_PASS</code>이면 통과입니다.</p>
       <div class="codeblock"><div class="codebar"><span>터미널 · 저장소 루트</span></div>
         <pre tabindex="0"><code>bash p02/scripts/run_sim.sh 2</code></pre></div>
       <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
@@ -1405,20 +1414,24 @@ P02_CASE_PASS stage=2 2-2 sw=0 rx="Q:7F O:1\r\n"
 P02_CASE_PASS stage=2 2-2 sw=0 rx="Q:80 O:1\r\n"
 P02_TOP_RTL_SIM_PASS stage=2 cases=13 bytes=94
 RTL_SIM_PASS stages=1</code></pre></div>
+      <h3>보드에서 확인</h3>
+      <ol>
+        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다.<br><code>vivado -mode batch -nojournal -source p02/vivado/build_p02.tcl -tclargs 2</code><br>결과 파일: <code>build/vivado/p02_s2/basys3_p02_top.bit</code></li>
+        <li>Vivado Hardware Manager로 보드에 내려받습니다.</li>
+        <li>PC에서 아래 표의 명령을 순서대로 보내고 응답을 비교합니다. 명령은 <code>python3 p02/host/p02_send.py &lt;포트&gt; 명령</code> 꼴로 보냅니다.</li>
+      </ol>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>순서</th><th>sw[3:2]</th><th>PC 명령</th><th>보드 응답</th></tr></thead>
+        <tbody><tr><td>1</td><td class="nw"><code>00</code></td><td class="nw"><code>Q 768</code></td><td class="nw"><code>Q:03 O:0</code></td></tr><tr><td>2</td><td class="nw"><code>00</code></td><td class="nw"><code>Q 384</code></td><td class="nw"><code>Q:02 O:0</code></td></tr><tr><td>3</td><td class="nw"><code>00</code></td><td class="nw"><code>Q -384</code></td><td class="nw"><code>Q:FE O:0</code></td></tr><tr><td>4</td><td class="nw"><code>00</code></td><td class="nw"><code>Q 65536</code></td><td class="nw"><code>Q:7F O:1</code></td></tr><tr><td>5</td><td class="nw"><code>00</code></td><td class="nw"><code>Q -65536</code></td><td class="nw"><code>Q:80 O:1</code></td></tr></tbody>
+      </table></div>
+      <p>끝나면 LED가 <code>0xFF80</code>입니다 (콘솔이 마지막으로 낸 결과의 아래 16비트이고, 7세그먼트에도 같은 값이 16진수 4자리로 보입니다).</p>
     </section>
     <section class="section" id="s2_3">
       <h2><span class="num">05</span> 서브젝트 2-3 · 벡터 내적</h2>
-      <p class="verdict"><b>학습목표:</b> X=(1,2,3,4)와 W0=(5,6,7,8)의 내적은 <code>D:0000000046</code>(70)입니다. W0[3]을 −8로 바꾸면 6이 되고, 길이 0을 주면 <code>ERR</code>입니다.</p>
-      <h3>보드에서 볼 것</h3>
-      <ol>
-        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다.<br><code>vivado -mode batch -nojournal -source p02/vivado/build_p02.tcl -tclargs 3</code><br>결과: <code>build/vivado/p02_s3/basys3_p02_top.bit</code></li>
-        <li>Hardware Manager로 보드에 내려받고, <code>python3 p02/host/p02_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다 (115200 8N1). sw2는 UART를 누가 받는지(0 = 디버그 콘솔, 1 = 2-7 명령 해석기), sw3은 엔진(0 = 누적 npu_core, 1 = 2-8 통합 엔진)을 고릅니다. 스위치는 명령과 명령 사이에 바꿉니다.</li>
-      </ol>
-      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
-        <thead><tr><th>순서</th><th>sw[3:2]</th><th>PC 명령 (<code>p02_send.py</code>)</th><th>보드 응답 (UART)</th></tr></thead>
-        <tbody><tr><td>1</td><td class="nw"><code>00</code></td><td class="nw"><code>X 0 1</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>2</td><td class="nw"><code>00</code></td><td class="nw"><code>X 1 2</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>3</td><td class="nw"><code>00</code></td><td class="nw"><code>X 2 3</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>4</td><td class="nw"><code>00</code></td><td class="nw"><code>X 3 4</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>5</td><td class="nw"><code>00</code></td><td class="nw"><code>W 0 0 5</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>6</td><td class="nw"><code>00</code></td><td class="nw"><code>W 0 1 6</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>7</td><td class="nw"><code>00</code></td><td class="nw"><code>W 0 2 7</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>8</td><td class="nw"><code>00</code></td><td class="nw"><code>W 0 3 8</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>9</td><td class="nw"><code>00</code></td><td class="nw"><code>D 4</code></td><td class="nw"><code>D:0000000046\r\n</code></td></tr><tr><td>10</td><td class="nw"><code>00</code></td><td class="nw"><code>W 0 3 -8</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>11</td><td class="nw"><code>00</code></td><td class="nw"><code>D 4</code></td><td class="nw"><code>D:0000000006\r\n</code></td></tr><tr><td>12</td><td class="nw"><code>00</code></td><td class="nw"><code>D 0</code></td><td class="nw"><code>ERR\r\n</code></td></tr></tbody>
-      </table></div>
-      <p>끝나면 LED가 <code>0x0006</code>입니다 (콘솔이 마지막으로 낸 결과의 아래 16비트이고, 7세그먼트에도 같은 값이 16진수 4자리로 보입니다).</p>
+      <p class="verdict"><b>목표:</b> X=(1,2,3,4)와 W0=(5,6,7,8)의 내적은 <code>D:0000000046</code>(70)입니다. W0[3]을 −8로 바꾸면 6이 되고, 길이 0을 주면 <code>ERR</code>입니다.</p>
+      <h3>해설</h3>
+      <p><code>vector_dot_core</code>는 X와 W를 앞에서부터 하나씩 읽어 1장의 MAC으로 곱하고 더합니다. 길이가 len이면 len번 반복해 내적 하나를 만듭니다.</p>
+      <p>BRAM에서 값이 한 클록 늦게 나오므로 '주소 내기 → 값 받기 → 누산'의 순서를 상태 기계로 맞춥니다. 길이 0처럼 잘못된 요청은 계산하지 않고 오류로 답합니다.</p>
       <h3>작성할 코드</h3>
 
       <div class="codeblock">
@@ -1466,7 +1479,7 @@ module vector_dot_core #(parameter integer DATA_WIDTH=16,ACC_WIDTH=40,MAX_LEN=25
 endmodule</code></pre>
       </div>
       <h3>시뮬레이션</h3>
-      <p>보드에 올리기 전에, 이 서브젝트까지 넣은 장 Top을 시뮬레이션합니다. 위 표와 같은 명령을 UART 핀으로 넣고 응답을 한 바이트씩 비교합니다. 마지막 줄이 <code>RTL_SIM_PASS</code>이면 됩니다.</p>
+      <p>보드에 올리기 전에, 이 서브젝트까지 넣은 장 Top을 시뮬레이션합니다. 테스트벤치가 아래 '보드에서 확인' 표와 같은 명령을 UART 핀으로 넣고 응답을 한 바이트씩 비교합니다. 줄마다 <code>rx="…"</code>가 보드가 돌려준 응답이고, 마지막 줄이 <code>RTL_SIM_PASS</code>이면 통과입니다.</p>
       <div class="codeblock"><div class="codebar"><span>터미널 · 저장소 루트</span></div>
         <pre tabindex="0"><code>bash p02/scripts/run_sim.sh 3</code></pre></div>
       <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
@@ -1497,20 +1510,24 @@ P02_CASE_PASS stage=3 2-3 sw=0 rx="D:0000000006\r\n"
 P02_CASE_PASS stage=3 2-3 sw=0 rx="ERR\r\n"
 P02_TOP_RTL_SIM_PASS stage=3 cases=25 bytes=163
 RTL_SIM_PASS stages=1</code></pre></div>
+      <h3>보드에서 확인</h3>
+      <ol>
+        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다.<br><code>vivado -mode batch -nojournal -source p02/vivado/build_p02.tcl -tclargs 3</code><br>결과 파일: <code>build/vivado/p02_s3/basys3_p02_top.bit</code></li>
+        <li>Vivado Hardware Manager로 보드에 내려받습니다.</li>
+        <li>PC에서 아래 표의 명령을 순서대로 보내고 응답을 비교합니다. 명령은 <code>python3 p02/host/p02_send.py &lt;포트&gt; 명령</code> 꼴로 보냅니다.</li>
+      </ol>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>순서</th><th>sw[3:2]</th><th>PC 명령</th><th>보드 응답</th></tr></thead>
+        <tbody><tr><td>1</td><td class="nw"><code>00</code></td><td class="nw"><code>X 0 1</code></td><td class="nw"><code>OK</code></td></tr><tr><td>2</td><td class="nw"><code>00</code></td><td class="nw"><code>X 1 2</code></td><td class="nw"><code>OK</code></td></tr><tr><td>3</td><td class="nw"><code>00</code></td><td class="nw"><code>X 2 3</code></td><td class="nw"><code>OK</code></td></tr><tr><td>4</td><td class="nw"><code>00</code></td><td class="nw"><code>X 3 4</code></td><td class="nw"><code>OK</code></td></tr><tr><td>5</td><td class="nw"><code>00</code></td><td class="nw"><code>W 0 0 5</code></td><td class="nw"><code>OK</code></td></tr><tr><td>6</td><td class="nw"><code>00</code></td><td class="nw"><code>W 0 1 6</code></td><td class="nw"><code>OK</code></td></tr><tr><td>7</td><td class="nw"><code>00</code></td><td class="nw"><code>W 0 2 7</code></td><td class="nw"><code>OK</code></td></tr><tr><td>8</td><td class="nw"><code>00</code></td><td class="nw"><code>W 0 3 8</code></td><td class="nw"><code>OK</code></td></tr><tr><td>9</td><td class="nw"><code>00</code></td><td class="nw"><code>D 4</code></td><td class="nw"><code>D:0000000046</code></td></tr><tr><td>10</td><td class="nw"><code>00</code></td><td class="nw"><code>W 0 3 -8</code></td><td class="nw"><code>OK</code></td></tr><tr><td>11</td><td class="nw"><code>00</code></td><td class="nw"><code>D 4</code></td><td class="nw"><code>D:0000000006</code></td></tr><tr><td>12</td><td class="nw"><code>00</code></td><td class="nw"><code>D 0</code></td><td class="nw"><code>ERR</code></td></tr></tbody>
+      </table></div>
+      <p>끝나면 LED가 <code>0x0006</code>입니다 (콘솔이 마지막으로 낸 결과의 아래 16비트이고, 7세그먼트에도 같은 값이 16진수 4자리로 보입니다).</p>
     </section>
     <section class="section" id="s2_4">
       <h2><span class="num">06</span> 서브젝트 2-4 · 4PE 병렬 어레이</h2>
-      <p class="verdict"><b>학습목표:</b> 같은 X에 대해 W0~W3 네 개의 내적을 한 번에 계산합니다. <code>P:</code> 뒤에 6, 10, −10(<code>…FFF6</code>), 8이 나옵니다.</p>
-      <h3>보드에서 볼 것</h3>
-      <ol>
-        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다.<br><code>vivado -mode batch -nojournal -source p02/vivado/build_p02.tcl -tclargs 4</code><br>결과: <code>build/vivado/p02_s4/basys3_p02_top.bit</code></li>
-        <li>Hardware Manager로 보드에 내려받고, <code>python3 p02/host/p02_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다 (115200 8N1). sw2는 UART를 누가 받는지(0 = 디버그 콘솔, 1 = 2-7 명령 해석기), sw3은 엔진(0 = 누적 npu_core, 1 = 2-8 통합 엔진)을 고릅니다. 스위치는 명령과 명령 사이에 바꿉니다.</li>
-      </ol>
-      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
-        <thead><tr><th>순서</th><th>sw[3:2]</th><th>PC 명령 (<code>p02_send.py</code>)</th><th>보드 응답 (UART)</th></tr></thead>
-        <tbody><tr><td>1</td><td class="nw"><code>00</code></td><td class="nw"><code>W 1 0 1</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>2</td><td class="nw"><code>00</code></td><td class="nw"><code>W 1 1 1</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>3</td><td class="nw"><code>00</code></td><td class="nw"><code>W 1 2 1</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>4</td><td class="nw"><code>00</code></td><td class="nw"><code>W 1 3 1</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>5</td><td class="nw"><code>00</code></td><td class="nw"><code>W 2 0 -1</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>6</td><td class="nw"><code>00</code></td><td class="nw"><code>W 2 1 -1</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>7</td><td class="nw"><code>00</code></td><td class="nw"><code>W 2 2 -1</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>8</td><td class="nw"><code>00</code></td><td class="nw"><code>W 2 3 -1</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>9</td><td class="nw"><code>00</code></td><td class="nw"><code>W 3 0 0</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>10</td><td class="nw"><code>00</code></td><td class="nw"><code>W 3 1 0</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>11</td><td class="nw"><code>00</code></td><td class="nw"><code>W 3 2 0</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>12</td><td class="nw"><code>00</code></td><td class="nw"><code>W 3 3 2</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>13</td><td class="nw"><code>00</code></td><td class="nw"><code>P 4</code></td><td class="nw"><code>P:0000000006,000000000A,FFFFFFFFF6,0000000008\r\n</code></td></tr></tbody>
-      </table></div>
-      <p>끝나면 LED가 <code>0x0006</code>입니다 (콘솔이 마지막으로 낸 결과의 아래 16비트이고, 7세그먼트에도 같은 값이 16진수 4자리로 보입니다).</p>
+      <p class="verdict"><b>목표:</b> 같은 X에 대해 W0~W3 네 개의 내적을 한 번에 계산합니다. <code>P:</code> 뒤에 6, 10, −10(<code>…FFF6</code>), 8이 나옵니다.</p>
+      <h3>해설</h3>
+      <p>뉴런 4개는 같은 X를 쓰고 W만 다릅니다. <code>pe_array4</code>는 내적 코어 4개를 나란히 두고 X를 한 번만 읽어 네 곳에 동시에 넣습니다. 이렇게 연산기 하나하나를 PE(Processing Element)라고 부릅니다.</p>
+      <p>PE가 4개이므로 뉴런 4개를 계산하는 시간이 내적 한 번과 같습니다. NPU가 빠른 이유가 바로 이 병렬 구조입니다.</p>
       <h3>작성할 코드</h3>
 
       <div class="codeblock">
@@ -1565,7 +1582,7 @@ module pe_array4 #(parameter integer DATA_WIDTH=16,ACC_WIDTH=40)(
 endmodule</code></pre>
       </div>
       <h3>시뮬레이션</h3>
-      <p>보드에 올리기 전에, 이 서브젝트까지 넣은 장 Top을 시뮬레이션합니다. 위 표와 같은 명령을 UART 핀으로 넣고 응답을 한 바이트씩 비교합니다. 마지막 줄이 <code>RTL_SIM_PASS</code>이면 됩니다.</p>
+      <p>보드에 올리기 전에, 이 서브젝트까지 넣은 장 Top을 시뮬레이션합니다. 테스트벤치가 아래 '보드에서 확인' 표와 같은 명령을 UART 핀으로 넣고 응답을 한 바이트씩 비교합니다. 줄마다 <code>rx="…"</code>가 보드가 돌려준 응답이고, 마지막 줄이 <code>RTL_SIM_PASS</code>이면 통과입니다.</p>
       <div class="codeblock"><div class="codebar"><span>터미널 · 저장소 루트</span></div>
         <pre tabindex="0"><code>bash p02/scripts/run_sim.sh 4</code></pre></div>
       <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
@@ -1609,20 +1626,24 @@ P02_CASE_PASS stage=4 2-4 sw=0 rx="OK\r\n"
 P02_CASE_PASS stage=4 2-4 sw=0 rx="P:0000000006,000000000A,FFFFFFFFF6,0000000008\r\n"
 P02_TOP_RTL_SIM_PASS stage=4 cases=38 bytes=258
 RTL_SIM_PASS stages=1</code></pre></div>
+      <h3>보드에서 확인</h3>
+      <ol>
+        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다.<br><code>vivado -mode batch -nojournal -source p02/vivado/build_p02.tcl -tclargs 4</code><br>결과 파일: <code>build/vivado/p02_s4/basys3_p02_top.bit</code></li>
+        <li>Vivado Hardware Manager로 보드에 내려받습니다.</li>
+        <li>PC에서 아래 표의 명령을 순서대로 보내고 응답을 비교합니다. 명령은 <code>python3 p02/host/p02_send.py &lt;포트&gt; 명령</code> 꼴로 보냅니다.</li>
+      </ol>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>순서</th><th>sw[3:2]</th><th>PC 명령</th><th>보드 응답</th></tr></thead>
+        <tbody><tr><td>1</td><td class="nw"><code>00</code></td><td class="nw"><code>W 1 0 1</code></td><td class="nw"><code>OK</code></td></tr><tr><td>2</td><td class="nw"><code>00</code></td><td class="nw"><code>W 1 1 1</code></td><td class="nw"><code>OK</code></td></tr><tr><td>3</td><td class="nw"><code>00</code></td><td class="nw"><code>W 1 2 1</code></td><td class="nw"><code>OK</code></td></tr><tr><td>4</td><td class="nw"><code>00</code></td><td class="nw"><code>W 1 3 1</code></td><td class="nw"><code>OK</code></td></tr><tr><td>5</td><td class="nw"><code>00</code></td><td class="nw"><code>W 2 0 -1</code></td><td class="nw"><code>OK</code></td></tr><tr><td>6</td><td class="nw"><code>00</code></td><td class="nw"><code>W 2 1 -1</code></td><td class="nw"><code>OK</code></td></tr><tr><td>7</td><td class="nw"><code>00</code></td><td class="nw"><code>W 2 2 -1</code></td><td class="nw"><code>OK</code></td></tr><tr><td>8</td><td class="nw"><code>00</code></td><td class="nw"><code>W 2 3 -1</code></td><td class="nw"><code>OK</code></td></tr><tr><td>9</td><td class="nw"><code>00</code></td><td class="nw"><code>W 3 0 0</code></td><td class="nw"><code>OK</code></td></tr><tr><td>10</td><td class="nw"><code>00</code></td><td class="nw"><code>W 3 1 0</code></td><td class="nw"><code>OK</code></td></tr><tr><td>11</td><td class="nw"><code>00</code></td><td class="nw"><code>W 3 2 0</code></td><td class="nw"><code>OK</code></td></tr><tr><td>12</td><td class="nw"><code>00</code></td><td class="nw"><code>W 3 3 2</code></td><td class="nw"><code>OK</code></td></tr><tr><td>13</td><td class="nw"><code>00</code></td><td class="nw"><code>P 4</code></td><td class="nw"><code>P:0000000006,000000000A,FFFFFFFFF6,0000000008</code></td></tr></tbody>
+      </table></div>
+      <p>끝나면 LED가 <code>0x0006</code>입니다 (콘솔이 마지막으로 낸 결과의 아래 16비트이고, 7세그먼트에도 같은 값이 16진수 4자리로 보입니다).</p>
     </section>
     <section class="section" id="s2_5">
       <h2><span class="num">07</span> 서브젝트 2-5 · Dense 4뉴런 레이어</h2>
-      <p class="verdict"><b>학습목표:</b> Bias를 더하고 ReLU와 16비트 포화를 거칩니다. <code>L:0006,0000,005A,7FFF O:8</code>에서 음수는 0이 되고, 65544는 7FFF로 막히며 넘침이 표시됩니다.</p>
-      <h3>보드에서 볼 것</h3>
-      <ol>
-        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다.<br><code>vivado -mode batch -nojournal -source p02/vivado/build_p02.tcl -tclargs 5</code><br>결과: <code>build/vivado/p02_s5/basys3_p02_top.bit</code></li>
-        <li>Hardware Manager로 보드에 내려받고, <code>python3 p02/host/p02_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다 (115200 8N1). sw2는 UART를 누가 받는지(0 = 디버그 콘솔, 1 = 2-7 명령 해석기), sw3은 엔진(0 = 누적 npu_core, 1 = 2-8 통합 엔진)을 고릅니다. 스위치는 명령과 명령 사이에 바꿉니다.</li>
-      </ol>
-      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
-        <thead><tr><th>순서</th><th>sw[3:2]</th><th>PC 명령 (<code>p02_send.py</code>)</th><th>보드 응답 (UART)</th></tr></thead>
-        <tbody><tr><td>1</td><td class="nw"><code>00</code></td><td class="nw"><code>B 0 0</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>2</td><td class="nw"><code>00</code></td><td class="nw"><code>B 1 -20</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>3</td><td class="nw"><code>00</code></td><td class="nw"><code>B 2 100</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>4</td><td class="nw"><code>00</code></td><td class="nw"><code>B 3 65536</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>5</td><td class="nw"><code>00</code></td><td class="nw"><code>L 4</code></td><td class="nw"><code>L:0006,0000,005A,7FFF O:8\r\n</code></td></tr></tbody>
-      </table></div>
-      <p>끝나면 LED가 <code>0x0006</code>입니다 (콘솔이 마지막으로 낸 결과의 아래 16비트이고, 7세그먼트에도 같은 값이 16진수 4자리로 보입니다).</p>
+      <p class="verdict"><b>목표:</b> Bias를 더하고 ReLU와 16비트 포화를 거칩니다. <code>L:0006,0000,005A,7FFF O:8</code>에서 음수는 0이 되고, 65544는 7FFF로 막히며 넘침이 표시됩니다.</p>
+      <h3>해설</h3>
+      <p><code>dense_layer4</code>는 4PE의 내적 결과에 뉴런별 Bias를 더하고, 음수를 0으로 바꾸는 ReLU를 적용한 뒤 16비트로 포화시킵니다. 이것으로 신경망의 완전연결(Dense) 층 하나가 완성됩니다.</p>
+      <p>응답 끝의 <code>O:</code>는 뉴런별 넘침 표시입니다. <code>O:8</code>은 2진수 1000, 곧 3번 뉴런의 값이 16비트를 넘어 최댓값 7FFF로 막혔다는 뜻입니다.</p>
       <h3>작성할 코드</h3>
 
       <div class="codeblock">
@@ -1676,7 +1697,7 @@ module dense_layer4 #(parameter integer DATA_WIDTH=16,ACC_WIDTH=40,SHIFT=0)(
 endmodule</code></pre>
       </div>
       <h3>시뮬레이션</h3>
-      <p>보드에 올리기 전에, 이 서브젝트까지 넣은 장 Top을 시뮬레이션합니다. 위 표와 같은 명령을 UART 핀으로 넣고 응답을 한 바이트씩 비교합니다. 마지막 줄이 <code>RTL_SIM_PASS</code>이면 됩니다.</p>
+      <p>보드에 올리기 전에, 이 서브젝트까지 넣은 장 Top을 시뮬레이션합니다. 테스트벤치가 아래 '보드에서 확인' 표와 같은 명령을 UART 핀으로 넣고 응답을 한 바이트씩 비교합니다. 줄마다 <code>rx="…"</code>가 보드가 돌려준 응답이고, 마지막 줄이 <code>RTL_SIM_PASS</code>이면 통과입니다.</p>
       <div class="codeblock"><div class="codebar"><span>터미널 · 저장소 루트</span></div>
         <pre tabindex="0"><code>bash p02/scripts/run_sim.sh 5</code></pre></div>
       <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
@@ -1725,20 +1746,24 @@ P02_CASE_PASS stage=5 2-5 sw=0 rx="OK\r\n"
 P02_CASE_PASS stage=5 2-5 sw=0 rx="L:0006,0000,005A,7FFF O:8\r\n"
 P02_TOP_RTL_SIM_PASS stage=5 cases=43 bytes=301
 RTL_SIM_PASS stages=1</code></pre></div>
+      <h3>보드에서 확인</h3>
+      <ol>
+        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다.<br><code>vivado -mode batch -nojournal -source p02/vivado/build_p02.tcl -tclargs 5</code><br>결과 파일: <code>build/vivado/p02_s5/basys3_p02_top.bit</code></li>
+        <li>Vivado Hardware Manager로 보드에 내려받습니다.</li>
+        <li>PC에서 아래 표의 명령을 순서대로 보내고 응답을 비교합니다. 명령은 <code>python3 p02/host/p02_send.py &lt;포트&gt; 명령</code> 꼴로 보냅니다.</li>
+      </ol>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>순서</th><th>sw[3:2]</th><th>PC 명령</th><th>보드 응답</th></tr></thead>
+        <tbody><tr><td>1</td><td class="nw"><code>00</code></td><td class="nw"><code>B 0 0</code></td><td class="nw"><code>OK</code></td></tr><tr><td>2</td><td class="nw"><code>00</code></td><td class="nw"><code>B 1 -20</code></td><td class="nw"><code>OK</code></td></tr><tr><td>3</td><td class="nw"><code>00</code></td><td class="nw"><code>B 2 100</code></td><td class="nw"><code>OK</code></td></tr><tr><td>4</td><td class="nw"><code>00</code></td><td class="nw"><code>B 3 65536</code></td><td class="nw"><code>OK</code></td></tr><tr><td>5</td><td class="nw"><code>00</code></td><td class="nw"><code>L 4</code></td><td class="nw"><code>L:0006,0000,005A,7FFF O:8</code></td></tr></tbody>
+      </table></div>
+      <p>끝나면 LED가 <code>0x0006</code>입니다 (콘솔이 마지막으로 낸 결과의 아래 16비트이고, 7세그먼트에도 같은 값이 16진수 4자리로 보입니다).</p>
     </section>
     <section class="section" id="s2_6">
       <h2><span class="num">08</span> 서브젝트 2-6 · 4뉴런 NPU Core</h2>
-      <p class="verdict"><b>학습목표:</b> npu_core가 자기 BRAM에서 값을 읽어 같은 Dense 계산을 합니다. <code>N 4</code>의 답은 <code>L 4</code>와 같고, 길이 2에서는 <code>0011,0000,0061,7FFF</code>입니다.</p>
-      <h3>보드에서 볼 것</h3>
-      <ol>
-        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다.<br><code>vivado -mode batch -nojournal -source p02/vivado/build_p02.tcl -tclargs 6</code><br>결과: <code>build/vivado/p02_s6/basys3_p02_top.bit</code></li>
-        <li>Hardware Manager로 보드에 내려받고, <code>python3 p02/host/p02_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다 (115200 8N1). sw2는 UART를 누가 받는지(0 = 디버그 콘솔, 1 = 2-7 명령 해석기), sw3은 엔진(0 = 누적 npu_core, 1 = 2-8 통합 엔진)을 고릅니다. 스위치는 명령과 명령 사이에 바꿉니다.</li>
-      </ol>
-      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
-        <thead><tr><th>순서</th><th>sw[3:2]</th><th>PC 명령 (<code>p02_send.py</code>)</th><th>보드 응답 (UART)</th></tr></thead>
-        <tbody><tr><td>1</td><td class="nw"><code>00</code></td><td class="nw"><code>N 4</code></td><td class="nw"><code>N:0006,0000,005A,7FFF O:8\r\n</code></td></tr><tr><td>2</td><td class="nw"><code>00</code></td><td class="nw"><code>N 2</code></td><td class="nw"><code>N:0011,0000,0061,7FFF O:8\r\n</code></td></tr></tbody>
-      </table></div>
-      <p>끝나면 LED가 <code>0x0011</code>입니다 (콘솔이 마지막으로 낸 결과의 아래 16비트이고, 7세그먼트에도 같은 값이 16진수 4자리로 보입니다).</p>
+      <p class="verdict"><b>목표:</b> npu_core가 자기 BRAM에서 값을 읽어 같은 Dense 계산을 합니다. <code>N 4</code>의 답은 <code>L 4</code>와 같고, 길이 2에서는 <code>0011,0000,0061,7FFF</code>입니다.</p>
+      <h3>해설</h3>
+      <p>지금까지는 메모리와 연산기가 따로 있었습니다. <code>npu_core</code>는 X·W 메모리와 Dense 계산을 한 모듈 안에 넣고, 밖으로는 '쓰기'와 '시작', '결과'만 보이게 묶습니다. 이렇게 묶어야 뒤에서 어떤 제어기든 같은 방식으로 NPU를 쓸 수 있습니다.</p>
+      <p><code>N</code> 명령의 답이 2-5의 <code>L</code> 명령과 같다는 것으로, 묶은 뒤에도 계산이 그대로임을 확인합니다.</p>
       <h3>작성할 코드</h3>
 
       <div class="codeblock">
@@ -1821,7 +1846,7 @@ module npu_core #(parameter integer DATA_WIDTH=16,ACC_WIDTH=40)(
 endmodule</code></pre>
       </div>
       <h3>시뮬레이션</h3>
-      <p>보드에 올리기 전에, 이 서브젝트까지 넣은 장 Top을 시뮬레이션합니다. 위 표와 같은 명령을 UART 핀으로 넣고 응답을 한 바이트씩 비교합니다. 마지막 줄이 <code>RTL_SIM_PASS</code>이면 됩니다.</p>
+      <p>보드에 올리기 전에, 이 서브젝트까지 넣은 장 Top을 시뮬레이션합니다. 테스트벤치가 아래 '보드에서 확인' 표와 같은 명령을 UART 핀으로 넣고 응답을 한 바이트씩 비교합니다. 줄마다 <code>rx="…"</code>가 보드가 돌려준 응답이고, 마지막 줄이 <code>RTL_SIM_PASS</code>이면 통과입니다.</p>
       <div class="codeblock"><div class="codebar"><span>터미널 · 저장소 루트</span></div>
         <pre tabindex="0"><code>bash p02/scripts/run_sim.sh 6</code></pre></div>
       <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
@@ -1872,20 +1897,24 @@ P02_CASE_PASS stage=6 2-6 sw=0 rx="N:0006,0000,005A,7FFF O:8\r\n"
 P02_CASE_PASS stage=6 2-6 sw=0 rx="N:0011,0000,0061,7FFF O:8\r\n"
 P02_TOP_RTL_SIM_PASS stage=6 cases=45 bytes=355
 RTL_SIM_PASS stages=1</code></pre></div>
+      <h3>보드에서 확인</h3>
+      <ol>
+        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다.<br><code>vivado -mode batch -nojournal -source p02/vivado/build_p02.tcl -tclargs 6</code><br>결과 파일: <code>build/vivado/p02_s6/basys3_p02_top.bit</code></li>
+        <li>Vivado Hardware Manager로 보드에 내려받습니다.</li>
+        <li>PC에서 아래 표의 명령을 순서대로 보내고 응답을 비교합니다. 명령은 <code>python3 p02/host/p02_send.py &lt;포트&gt; 명령</code> 꼴로 보냅니다.</li>
+      </ol>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>순서</th><th>sw[3:2]</th><th>PC 명령</th><th>보드 응답</th></tr></thead>
+        <tbody><tr><td>1</td><td class="nw"><code>00</code></td><td class="nw"><code>N 4</code></td><td class="nw"><code>N:0006,0000,005A,7FFF O:8</code></td></tr><tr><td>2</td><td class="nw"><code>00</code></td><td class="nw"><code>N 2</code></td><td class="nw"><code>N:0011,0000,0061,7FFF O:8</code></td></tr></tbody>
+      </table></div>
+      <p>끝나면 LED가 <code>0x0011</code>입니다 (콘솔이 마지막으로 낸 결과의 아래 16비트이고, 7세그먼트에도 같은 값이 16진수 4자리로 보입니다).</p>
     </section>
     <section class="section" id="s2_7">
       <h2><span class="num">09</span> 서브젝트 2-7 · UART 모델 적재</h2>
-      <p class="verdict"><b>학습목표:</b> sw2를 올리면 명령 해석기가 UART를 받습니다. 고정 그룹 <code>0</code>~<code>3</code>을 보내면 <code>C0</code>~<code>C3</code>이 돌아옵니다. sw2를 내리고 <code>x 0</code>을 보내면 <code>X:FFFF</code>가 나와, 명령 해석기가 쓴 값을 콘솔로 확인할 수 있습니다.</p>
-      <h3>보드에서 볼 것</h3>
-      <ol>
-        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다.<br><code>vivado -mode batch -nojournal -source p02/vivado/build_p02.tcl -tclargs 7</code><br>결과: <code>build/vivado/p02_s7/basys3_p02_top.bit</code></li>
-        <li>Hardware Manager로 보드에 내려받고, <code>python3 p02/host/p02_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다 (115200 8N1). sw2는 UART를 누가 받는지(0 = 디버그 콘솔, 1 = 2-7 명령 해석기), sw3은 엔진(0 = 누적 npu_core, 1 = 2-8 통합 엔진)을 고릅니다. 스위치는 명령과 명령 사이에 바꿉니다.</li>
-      </ol>
-      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
-        <thead><tr><th>순서</th><th>sw[3:2]</th><th>PC 명령 (<code>p02_send.py</code>)</th><th>보드 응답 (UART)</th></tr></thead>
-        <tbody><tr><td>1</td><td class="nw"><code>01</code></td><td class="nw"><code>S</code></td><td class="nw"><code>I\r\n</code></td></tr><tr><td>2</td><td class="nw"><code>01</code></td><td class="nw"><code>0</code></td><td class="nw"><code>C0:00000000002,00000000000,00000000000,00000000000\r\n</code></td></tr><tr><td>3</td><td class="nw"><code>01</code></td><td class="nw"><code>1</code></td><td class="nw"><code>C1:00000000000,00000000002,00000000000,00000000000\r\n</code></td></tr><tr><td>4</td><td class="nw"><code>01</code></td><td class="nw"><code>2</code></td><td class="nw"><code>C2:00000000000,00000000000,00000000002,00000000000\r\n</code></td></tr><tr><td>5</td><td class="nw"><code>01</code></td><td class="nw"><code>3</code></td><td class="nw"><code>C3:00000000000,00000000000,00000000000,00000000002\r\n</code></td></tr><tr><td>6</td><td class="nw"><code>00</code></td><td class="nw"><code>x 0</code></td><td class="nw"><code>X:FFFF\r\n</code></td></tr></tbody>
-      </table></div>
-      <p>끝나면 LED가 <code>0xFFFF</code>입니다 (콘솔이 마지막으로 낸 결과의 아래 16비트이고, 7세그먼트에도 같은 값이 16진수 4자리로 보입니다).</p>
+      <p class="verdict"><b>목표:</b> sw2를 올리면 명령 해석기가 UART를 받습니다. 숫자 <code>0</code>~<code>3</code>을 보내면 <code>C0</code>~<code>C3</code>이 돌아옵니다. sw2를 내리고 <code>x 0</code>을 보내면 <code>X:FFFF</code>가 나와, 명령 해석기가 쓴 값을 콘솔로 확인할 수 있습니다.</p>
+      <h3>해설</h3>
+      <p>이제 디버그용 명령이 아니라 실제 사용 방식으로 넘어갑니다. <code>uart_npu_command_controller</code>는 PC가 보낸 모델(X·W·Bias)을 NPU에 싣고, 추론을 시작시키고, 점수와 클래스를 한 줄로 돌려주는 명령 해석기입니다.</p>
+      <p>sw2를 올리면 UART가 디버그 콘솔 대신 이 해석기로 연결됩니다. 숫자 0~3은 미리 정해 둔 표본 입력으로 추론하는 명령이고, 답으로 가장 점수가 높은 뉴런 번호(클래스)가 옵니다.</p>
       <h3>작성할 코드</h3>
 
       <div class="codeblock">
@@ -2076,7 +2105,7 @@ module uart_npu_command_controller(
 endmodule</code></pre>
       </div>
       <h3>시뮬레이션</h3>
-      <p>보드에 올리기 전에, 이 서브젝트까지 넣은 장 Top을 시뮬레이션합니다. 위 표와 같은 명령을 UART 핀으로 넣고 응답을 한 바이트씩 비교합니다. 마지막 줄이 <code>RTL_SIM_PASS</code>이면 됩니다.</p>
+      <p>보드에 올리기 전에, 이 서브젝트까지 넣은 장 Top을 시뮬레이션합니다. 테스트벤치가 아래 '보드에서 확인' 표와 같은 명령을 UART 핀으로 넣고 응답을 한 바이트씩 비교합니다. 줄마다 <code>rx="…"</code>가 보드가 돌려준 응답이고, 마지막 줄이 <code>RTL_SIM_PASS</code>이면 통과입니다.</p>
       <div class="codeblock"><div class="codebar"><span>터미널 · 저장소 루트</span></div>
         <pre tabindex="0"><code>bash p02/scripts/run_sim.sh 7</code></pre></div>
       <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
@@ -2133,20 +2162,24 @@ P02_CASE_PASS stage=7 2-7 sw=1 rx="C3:00000000000,00000000000,00000000000,000000
 P02_CASE_PASS stage=7 2-7 sw=0 rx="X:FFFF\r\n"
 P02_TOP_RTL_SIM_PASS stage=7 cases=51 bytes=574
 RTL_SIM_PASS stages=1</code></pre></div>
+      <h3>보드에서 확인</h3>
+      <ol>
+        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다.<br><code>vivado -mode batch -nojournal -source p02/vivado/build_p02.tcl -tclargs 7</code><br>결과 파일: <code>build/vivado/p02_s7/basys3_p02_top.bit</code></li>
+        <li>Vivado Hardware Manager로 보드에 내려받습니다.</li>
+        <li>PC에서 아래 표의 명령을 순서대로 보내고 응답을 비교합니다. 명령은 <code>python3 p02/host/p02_send.py &lt;포트&gt; 명령</code> 꼴로 보냅니다.</li>
+      </ol>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>순서</th><th>sw[3:2]</th><th>PC 명령</th><th>보드 응답</th></tr></thead>
+        <tbody><tr><td>1</td><td class="nw"><code>01</code></td><td class="nw"><code>S</code></td><td class="nw"><code>I</code></td></tr><tr><td>2</td><td class="nw"><code>01</code></td><td class="nw"><code>0</code></td><td class="nw"><code>C0:00000000002,00000000000,00000000000,00000000000</code></td></tr><tr><td>3</td><td class="nw"><code>01</code></td><td class="nw"><code>1</code></td><td class="nw"><code>C1:00000000000,00000000002,00000000000,00000000000</code></td></tr><tr><td>4</td><td class="nw"><code>01</code></td><td class="nw"><code>2</code></td><td class="nw"><code>C2:00000000000,00000000000,00000000002,00000000000</code></td></tr><tr><td>5</td><td class="nw"><code>01</code></td><td class="nw"><code>3</code></td><td class="nw"><code>C3:00000000000,00000000000,00000000000,00000000002</code></td></tr><tr><td>6</td><td class="nw"><code>00</code></td><td class="nw"><code>x 0</code></td><td class="nw"><code>X:FFFF</code></td></tr></tbody>
+      </table></div>
+      <p>끝나면 LED가 <code>0xFFFF</code>입니다 (콘솔이 마지막으로 낸 결과의 아래 16비트이고, 7세그먼트에도 같은 값이 16진수 4자리로 보입니다).</p>
     </section>
     <section class="section" id="s2_8">
       <h2><span class="num">10</span> 서브젝트 2-8 · 통합 NPU Top</h2>
-      <p class="verdict"><b>학습목표:</b> sw3을 올리면 통합 엔진으로 바뀝니다. 같은 그룹에서 음수 점수(<code>…FFE</code>, ReLU 없음)가 보이지만 클래스는 같습니다. LED0~3과 7세그먼트에 클래스가, LED14에 끝남 표시가 나옵니다.</p>
-      <h3>보드에서 볼 것</h3>
-      <ol>
-        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다.<br><code>vivado -mode batch -nojournal -source p02/vivado/build_p02.tcl -tclargs 8</code><br>결과: <code>build/vivado/p02_s8/basys3_p02_top.bit</code></li>
-        <li>Hardware Manager로 보드에 내려받고, <code>python3 p02/host/p02_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다 (115200 8N1). sw2는 UART를 누가 받는지(0 = 디버그 콘솔, 1 = 2-7 명령 해석기), sw3은 엔진(0 = 누적 npu_core, 1 = 2-8 통합 엔진)을 고릅니다. 스위치는 명령과 명령 사이에 바꿉니다.</li>
-      </ol>
-      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
-        <thead><tr><th>순서</th><th>sw[3:2]</th><th>PC 명령 (<code>p02_send.py</code>)</th><th>보드 응답 (UART)</th></tr></thead>
-        <tbody><tr><td>1</td><td class="nw"><code>01</code></td><td class="nw"><code>2</code></td><td class="nw"><code>C2:00000000000,00000000000,00000000002,00000000000\r\n</code></td></tr><tr><td>2</td><td class="nw"><code>11</code></td><td class="nw"><code>2</code></td><td class="nw"><code>C2:00000000000,FFFFFFFFFFE,00000000002,00000000000\r\n</code></td></tr><tr><td>3</td><td class="nw"><code>11</code></td><td class="nw"><code>1</code></td><td class="nw"><code>C1:00000000000,00000000002,FFFFFFFFFFE,00000000000\r\n</code></td></tr></tbody>
-      </table></div>
-      <p>끝나면 LED가 <code>0x4002</code>입니다 (LED[3:0]은 클래스 번호 하나만 켜지고, LED14는 끝남, LED15는 오류이며, 7세그먼트 오른쪽 자리에 클래스가 보입니다).</p>
+      <p class="verdict"><b>목표:</b> sw3을 올리면 통합 엔진으로 바뀝니다. 같은 그룹에서 음수 점수(<code>…FFE</code>, ReLU 없음)가 보이지만 클래스는 같습니다. LED0~3과 7세그먼트에 클래스가, LED14에 끝남 표시가 나옵니다.</p>
+      <h3>해설</h3>
+      <p>마지막으로 엔진을 하나 더 만듭니다. <code>npu_engine4</code>는 1-3의 DSP 곱셈기를 쓰는 MAC 4개와 BRAM을 직접 묶은 통합 엔진으로, 점수 4개 중 가장 큰 것을 골라(argmax) 클래스를 냅니다.</p>
+      <p>sw3으로 두 엔진을 바꿔 가며 같은 입력을 넣어 봅니다. 통합 엔진은 ReLU를 거치지 않은 원래 점수를 내므로 음수가 보이지만, 가장 큰 점수의 번호인 클래스는 같습니다. 결과는 LED와 7세그먼트에도 표시됩니다.</p>
       <h3>작성할 코드</h3>
       <p><code>npu_reset_controller.v</code>·<code>basys3_npu_top.v</code>는 이 서브젝트를 따로 시험할 때만 쓰고, 장 Top 빌드에는 넣지 않습니다.</p>
       <div class="codeblock">
@@ -2470,7 +2503,7 @@ create_clock -name sys_clk_pin -period 10.000 -waveform {0 5} [get_ports clk]</c
       </div>
       <div class="codeblock">
         <div class="codebar"><span>mini_npu/scripts/vivado_impl.tcl · tcl</span></div>
-        <pre tabindex="0"><code class="language-tcl"># 12장 통합 NPU Top: 합성 → 구현 → 타이밍 판정 → 비트스트림 → 타이밍 시뮬레이션용 넷리스트.
+        <pre tabindex="0"><code class="language-tcl"># 통합 NPU Top (2-8): 합성 → 구현 → 타이밍 판정 → 비트스트림 → 타이밍 시뮬레이션용 넷리스트.
 # 실행 (저장소 루트): vivado -mode batch -nojournal -source mini_npu/scripts/vivado_impl.tcl
 # 결과: mini_npu/build/impl/
 #   post_synth.dcp, post_route.dcp           (GUI 확인: File → Checkpoint → Open)
@@ -2550,12 +2583,12 @@ if {!$ok} { error "IMPL_TIMING_FAILED" }</code></pre>
       <div class="codeblock">
         <div class="codebar"><span>mini_npu/scripts/run_timing_sim.sh · bash</span></div>
         <pre tabindex="0"><code class="language-bash">#!/usr/bin/env bash
-# 12장 배선 후 타이밍 시뮬레이션 (Vivado xsim + SDF slow corner).
+# 통합 NPU Top(2-8) 배선 후 타이밍 시뮬레이션 (Vivado xsim + SDF slow corner).
 # 입력: vivado_impl.tcl 이 만든 mini_npu/build/impl/basys3_npu_top_timesim.{v,sdf}
 # 시험: RTL 시뮬레이션과 같은 tb_npu_uart.sv (UART 핀 파형).
 #   기본 = RTL과 같은 전체 시나리오: 분류 6 · Bias 변경 · ERR (시뮬 시간 약 29.2 ms) → TIMING_SIM_PASS
 #   TIMESIM_SHORT=1 = 짧은 smoke 시험: 분류 1 · Bias 변경 뒤 재분류 1 · ERR 1 (약 10.8 ms) → TIMING_SIM_SMOKE_PASS
-#     smoke는 클래스 1·2를 만들지 않아 LED1·2 고장 같은 결함을 놓친다. 게이트 증거로 쓰지 않는다.
+#     smoke는 클래스 1·2를 만들지 않아 LED1·2 고장 같은 결함을 놓친다. 정식 판정에는 전체 시나리오를 쓴다.
 #   시간은 대부분 115200 bps UART 송신(응답 1줄 52바이트 ≈ 4.5 ms)이다.
 # 판정: INTEGRATED_UART_RTL_SIM_PASS + PC_GOLDEN_COMPARE_PASS → TIMING_SIM_PASS
 set -Eeuo pipefail
@@ -2599,13 +2632,12 @@ echo "TIMESIM_MODE $mode"
 xsim tb_timesim -R -testplusarg "CSV=$ts/predictions.csv" "${plus[@]}" | tee timesim.log
 grep -q 'INTEGRATED_UART_RTL_SIM_PASS' timesim.log || { echo "TIMING_SIM_FAIL"; exit 1; }
 python3 "$root/mini_npu/reference/check_results.py" "$ts/predictions.csv" "${chk[@]}" | tee -a timesim.log
-# xsim 타이밍 검사 경고("Timing violation" 줄) 수를 판정 줄에 함께 남긴다. 0이 아니면 증거를 볼 때 원인을 확인해야 한다
-# (경고 문구 형식은 Vivado xsim 실제 로그로 확인할 것 — 웹에서는 xsim을 돌리지 못했다).
+# xsim 타이밍 검사 경고("Timing violation" 줄) 수를 판정 줄에 함께 남긴다. 0이 아니면 원인을 확인해야 한다
 viol=$(grep -ci "timing violation" timesim.log || true)
 echo "$tag ch12 basys3_npu_top post-route SDF(slow) classes=$n model_edit=1 invalid_length=1 timing_violations=$viol scenario=$mode" | tee -a timesim.log</code></pre>
       </div>
       <h3>시뮬레이션</h3>
-      <p>보드에 올리기 전에, 이 서브젝트까지 넣은 장 Top을 시뮬레이션합니다. 위 표와 같은 명령을 UART 핀으로 넣고 응답을 한 바이트씩 비교합니다. 마지막 줄이 <code>RTL_SIM_PASS</code>이면 됩니다.</p>
+      <p>보드에 올리기 전에, 이 서브젝트까지 넣은 장 Top을 시뮬레이션합니다. 테스트벤치가 아래 '보드에서 확인' 표와 같은 명령을 UART 핀으로 넣고 응답을 한 바이트씩 비교합니다. 줄마다 <code>rx="…"</code>가 보드가 돌려준 응답이고, 마지막 줄이 <code>RTL_SIM_PASS</code>이면 통과입니다.</p>
       <div class="codeblock"><div class="codebar"><span>터미널 · 저장소 루트</span></div>
         <pre tabindex="0"><code>bash p02/scripts/run_sim.sh 8</code></pre></div>
       <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
@@ -2665,13 +2697,24 @@ P02_CASE_PASS stage=8 2-8 sw=3 rx="C2:00000000000,FFFFFFFFFFE,00000000002,000000
 P02_CASE_PASS stage=8 2-8 sw=3 rx="C1:00000000000,00000000002,FFFFFFFFFFE,00000000000\r\n"
 P02_TOP_RTL_SIM_PASS stage=8 cases=54 bytes=730
 RTL_SIM_PASS stages=1</code></pre></div>
+      <h3>보드에서 확인</h3>
+      <ol>
+        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다.<br><code>vivado -mode batch -nojournal -source p02/vivado/build_p02.tcl -tclargs 8</code><br>결과 파일: <code>build/vivado/p02_s8/basys3_p02_top.bit</code></li>
+        <li>Vivado Hardware Manager로 보드에 내려받습니다.</li>
+        <li>PC에서 아래 표의 명령을 순서대로 보내고 응답을 비교합니다. 명령은 <code>python3 p02/host/p02_send.py &lt;포트&gt; 명령</code> 꼴로 보냅니다.</li>
+      </ol>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
+        <thead><tr><th>순서</th><th>sw[3:2]</th><th>PC 명령</th><th>보드 응답</th></tr></thead>
+        <tbody><tr><td>1</td><td class="nw"><code>01</code></td><td class="nw"><code>2</code></td><td class="nw"><code>C2:00000000000,00000000000,00000000002,00000000000</code></td></tr><tr><td>2</td><td class="nw"><code>11</code></td><td class="nw"><code>2</code></td><td class="nw"><code>C2:00000000000,FFFFFFFFFFE,00000000002,00000000000</code></td></tr><tr><td>3</td><td class="nw"><code>11</code></td><td class="nw"><code>1</code></td><td class="nw"><code>C1:00000000000,00000000002,FFFFFFFFFFE,00000000000</code></td></tr></tbody>
+      </table></div>
+      <p>끝나면 LED가 <code>0x4002</code>입니다 (LED[3:0]은 클래스 번호 하나만 켜지고, LED14는 끝남, LED15는 오류이며, 7세그먼트 오른쪽 자리에 클래스가 보입니다).</p>
     </section>
     <section class="section" id="demo">
       <h2><span class="num">11</span> 장 시연</h2>
       <p>STAGE=8 비트스트림 하나로 모든 서브젝트를 처음부터 끝까지 이어서 보여 줍니다. 아래 순서대로 보내고 응답을 표와 비교합니다.</p>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th class="nw">서브젝트</th><th>sw[3:2]</th><th>PC 명령</th><th>보드 응답</th></tr></thead>
-        <tbody><tr><td class="nw">2-1</td><td class="nw"><code>00</code></td><td class="nw"><code>S</code></td><td class="nw"><code>I\r\n</code></td></tr><tr><td class="nw">2-1</td><td class="nw"><code>00</code></td><td class="nw"><code>X 0 3</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-1</td><td class="nw"><code>00</code></td><td class="nw"><code>X 1 -2</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-1</td><td class="nw"><code>00</code></td><td class="nw"><code>x 0</code></td><td class="nw"><code>X:0003\r\n</code></td></tr><tr><td class="nw">2-1</td><td class="nw"><code>00</code></td><td class="nw"><code>x 1</code></td><td class="nw"><code>X:FFFE\r\n</code></td></tr><tr><td class="nw">2-1</td><td class="nw"><code>00</code></td><td class="nw"><code>W 0 0 5</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-1</td><td class="nw"><code>00</code></td><td class="nw"><code>w 0 0</code></td><td class="nw"><code>W:0005\r\n</code></td></tr><tr><td class="nw">2-1</td><td class="nw"><code>00</code></td><td class="nw"><code>x 64</code></td><td class="nw"><code>ERR\r\n</code></td></tr><tr><td class="nw">2-2</td><td class="nw"><code>00</code></td><td class="nw"><code>Q 768</code></td><td class="nw"><code>Q:03 O:0\r\n</code></td></tr><tr><td class="nw">2-2</td><td class="nw"><code>00</code></td><td class="nw"><code>Q 384</code></td><td class="nw"><code>Q:02 O:0\r\n</code></td></tr><tr><td class="nw">2-2</td><td class="nw"><code>00</code></td><td class="nw"><code>Q -384</code></td><td class="nw"><code>Q:FE O:0\r\n</code></td></tr><tr><td class="nw">2-2</td><td class="nw"><code>00</code></td><td class="nw"><code>Q 65536</code></td><td class="nw"><code>Q:7F O:1\r\n</code></td></tr><tr><td class="nw">2-2</td><td class="nw"><code>00</code></td><td class="nw"><code>Q -65536</code></td><td class="nw"><code>Q:80 O:1\r\n</code></td></tr><tr><td class="nw">2-3</td><td class="nw"><code>00</code></td><td class="nw"><code>X 0 1</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-3</td><td class="nw"><code>00</code></td><td class="nw"><code>X 1 2</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-3</td><td class="nw"><code>00</code></td><td class="nw"><code>X 2 3</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-3</td><td class="nw"><code>00</code></td><td class="nw"><code>X 3 4</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-3</td><td class="nw"><code>00</code></td><td class="nw"><code>W 0 0 5</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-3</td><td class="nw"><code>00</code></td><td class="nw"><code>W 0 1 6</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-3</td><td class="nw"><code>00</code></td><td class="nw"><code>W 0 2 7</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-3</td><td class="nw"><code>00</code></td><td class="nw"><code>W 0 3 8</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-3</td><td class="nw"><code>00</code></td><td class="nw"><code>D 4</code></td><td class="nw"><code>D:0000000046\r\n</code></td></tr><tr><td class="nw">2-3</td><td class="nw"><code>00</code></td><td class="nw"><code>W 0 3 -8</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-3</td><td class="nw"><code>00</code></td><td class="nw"><code>D 4</code></td><td class="nw"><code>D:0000000006\r\n</code></td></tr><tr><td class="nw">2-3</td><td class="nw"><code>00</code></td><td class="nw"><code>D 0</code></td><td class="nw"><code>ERR\r\n</code></td></tr><tr><td class="nw">2-4</td><td class="nw"><code>00</code></td><td class="nw"><code>W 1 0 1</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-4</td><td class="nw"><code>00</code></td><td class="nw"><code>W 1 1 1</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-4</td><td class="nw"><code>00</code></td><td class="nw"><code>W 1 2 1</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-4</td><td class="nw"><code>00</code></td><td class="nw"><code>W 1 3 1</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-4</td><td class="nw"><code>00</code></td><td class="nw"><code>W 2 0 -1</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-4</td><td class="nw"><code>00</code></td><td class="nw"><code>W 2 1 -1</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-4</td><td class="nw"><code>00</code></td><td class="nw"><code>W 2 2 -1</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-4</td><td class="nw"><code>00</code></td><td class="nw"><code>W 2 3 -1</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-4</td><td class="nw"><code>00</code></td><td class="nw"><code>W 3 0 0</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-4</td><td class="nw"><code>00</code></td><td class="nw"><code>W 3 1 0</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-4</td><td class="nw"><code>00</code></td><td class="nw"><code>W 3 2 0</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-4</td><td class="nw"><code>00</code></td><td class="nw"><code>W 3 3 2</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-4</td><td class="nw"><code>00</code></td><td class="nw"><code>P 4</code></td><td class="nw"><code>P:0000000006,000000000A,FFFFFFFFF6,0000000008\r\n</code></td></tr><tr><td class="nw">2-5</td><td class="nw"><code>00</code></td><td class="nw"><code>B 0 0</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-5</td><td class="nw"><code>00</code></td><td class="nw"><code>B 1 -20</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-5</td><td class="nw"><code>00</code></td><td class="nw"><code>B 2 100</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-5</td><td class="nw"><code>00</code></td><td class="nw"><code>B 3 65536</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-5</td><td class="nw"><code>00</code></td><td class="nw"><code>L 4</code></td><td class="nw"><code>L:0006,0000,005A,7FFF O:8\r\n</code></td></tr><tr><td class="nw">2-6</td><td class="nw"><code>00</code></td><td class="nw"><code>N 4</code></td><td class="nw"><code>N:0006,0000,005A,7FFF O:8\r\n</code></td></tr><tr><td class="nw">2-6</td><td class="nw"><code>00</code></td><td class="nw"><code>N 2</code></td><td class="nw"><code>N:0011,0000,0061,7FFF O:8\r\n</code></td></tr><tr><td class="nw">2-7</td><td class="nw"><code>01</code></td><td class="nw"><code>S</code></td><td class="nw"><code>I\r\n</code></td></tr><tr><td class="nw">2-7</td><td class="nw"><code>01</code></td><td class="nw"><code>0</code></td><td class="nw"><code>C0:00000000002,00000000000,00000000000,00000000000\r\n</code></td></tr><tr><td class="nw">2-7</td><td class="nw"><code>01</code></td><td class="nw"><code>1</code></td><td class="nw"><code>C1:00000000000,00000000002,00000000000,00000000000\r\n</code></td></tr><tr><td class="nw">2-7</td><td class="nw"><code>01</code></td><td class="nw"><code>2</code></td><td class="nw"><code>C2:00000000000,00000000000,00000000002,00000000000\r\n</code></td></tr><tr><td class="nw">2-7</td><td class="nw"><code>01</code></td><td class="nw"><code>3</code></td><td class="nw"><code>C3:00000000000,00000000000,00000000000,00000000002\r\n</code></td></tr><tr><td class="nw">2-7</td><td class="nw"><code>00</code></td><td class="nw"><code>x 0</code></td><td class="nw"><code>X:FFFF\r\n</code></td></tr><tr><td class="nw">2-8</td><td class="nw"><code>01</code></td><td class="nw"><code>2</code></td><td class="nw"><code>C2:00000000000,00000000000,00000000002,00000000000\r\n</code></td></tr><tr><td class="nw">2-8</td><td class="nw"><code>11</code></td><td class="nw"><code>2</code></td><td class="nw"><code>C2:00000000000,FFFFFFFFFFE,00000000002,00000000000\r\n</code></td></tr><tr><td class="nw">2-8</td><td class="nw"><code>11</code></td><td class="nw"><code>1</code></td><td class="nw"><code>C1:00000000000,00000000002,FFFFFFFFFFE,00000000000\r\n</code></td></tr></tbody>
+        <tbody><tr><td class="nw">2-1</td><td class="nw"><code>00</code></td><td class="nw"><code>S</code></td><td class="nw"><code>I</code></td></tr><tr><td class="nw">2-1</td><td class="nw"><code>00</code></td><td class="nw"><code>X 0 3</code></td><td class="nw"><code>OK</code></td></tr><tr><td class="nw">2-1</td><td class="nw"><code>00</code></td><td class="nw"><code>X 1 -2</code></td><td class="nw"><code>OK</code></td></tr><tr><td class="nw">2-1</td><td class="nw"><code>00</code></td><td class="nw"><code>x 0</code></td><td class="nw"><code>X:0003</code></td></tr><tr><td class="nw">2-1</td><td class="nw"><code>00</code></td><td class="nw"><code>x 1</code></td><td class="nw"><code>X:FFFE</code></td></tr><tr><td class="nw">2-1</td><td class="nw"><code>00</code></td><td class="nw"><code>W 0 0 5</code></td><td class="nw"><code>OK</code></td></tr><tr><td class="nw">2-1</td><td class="nw"><code>00</code></td><td class="nw"><code>w 0 0</code></td><td class="nw"><code>W:0005</code></td></tr><tr><td class="nw">2-1</td><td class="nw"><code>00</code></td><td class="nw"><code>x 64</code></td><td class="nw"><code>ERR</code></td></tr><tr><td class="nw">2-2</td><td class="nw"><code>00</code></td><td class="nw"><code>Q 768</code></td><td class="nw"><code>Q:03 O:0</code></td></tr><tr><td class="nw">2-2</td><td class="nw"><code>00</code></td><td class="nw"><code>Q 384</code></td><td class="nw"><code>Q:02 O:0</code></td></tr><tr><td class="nw">2-2</td><td class="nw"><code>00</code></td><td class="nw"><code>Q -384</code></td><td class="nw"><code>Q:FE O:0</code></td></tr><tr><td class="nw">2-2</td><td class="nw"><code>00</code></td><td class="nw"><code>Q 65536</code></td><td class="nw"><code>Q:7F O:1</code></td></tr><tr><td class="nw">2-2</td><td class="nw"><code>00</code></td><td class="nw"><code>Q -65536</code></td><td class="nw"><code>Q:80 O:1</code></td></tr><tr><td class="nw">2-3</td><td class="nw"><code>00</code></td><td class="nw"><code>X 0 1</code></td><td class="nw"><code>OK</code></td></tr><tr><td class="nw">2-3</td><td class="nw"><code>00</code></td><td class="nw"><code>X 1 2</code></td><td class="nw"><code>OK</code></td></tr><tr><td class="nw">2-3</td><td class="nw"><code>00</code></td><td class="nw"><code>X 2 3</code></td><td class="nw"><code>OK</code></td></tr><tr><td class="nw">2-3</td><td class="nw"><code>00</code></td><td class="nw"><code>X 3 4</code></td><td class="nw"><code>OK</code></td></tr><tr><td class="nw">2-3</td><td class="nw"><code>00</code></td><td class="nw"><code>W 0 0 5</code></td><td class="nw"><code>OK</code></td></tr><tr><td class="nw">2-3</td><td class="nw"><code>00</code></td><td class="nw"><code>W 0 1 6</code></td><td class="nw"><code>OK</code></td></tr><tr><td class="nw">2-3</td><td class="nw"><code>00</code></td><td class="nw"><code>W 0 2 7</code></td><td class="nw"><code>OK</code></td></tr><tr><td class="nw">2-3</td><td class="nw"><code>00</code></td><td class="nw"><code>W 0 3 8</code></td><td class="nw"><code>OK</code></td></tr><tr><td class="nw">2-3</td><td class="nw"><code>00</code></td><td class="nw"><code>D 4</code></td><td class="nw"><code>D:0000000046</code></td></tr><tr><td class="nw">2-3</td><td class="nw"><code>00</code></td><td class="nw"><code>W 0 3 -8</code></td><td class="nw"><code>OK</code></td></tr><tr><td class="nw">2-3</td><td class="nw"><code>00</code></td><td class="nw"><code>D 4</code></td><td class="nw"><code>D:0000000006</code></td></tr><tr><td class="nw">2-3</td><td class="nw"><code>00</code></td><td class="nw"><code>D 0</code></td><td class="nw"><code>ERR</code></td></tr><tr><td class="nw">2-4</td><td class="nw"><code>00</code></td><td class="nw"><code>W 1 0 1</code></td><td class="nw"><code>OK</code></td></tr><tr><td class="nw">2-4</td><td class="nw"><code>00</code></td><td class="nw"><code>W 1 1 1</code></td><td class="nw"><code>OK</code></td></tr><tr><td class="nw">2-4</td><td class="nw"><code>00</code></td><td class="nw"><code>W 1 2 1</code></td><td class="nw"><code>OK</code></td></tr><tr><td class="nw">2-4</td><td class="nw"><code>00</code></td><td class="nw"><code>W 1 3 1</code></td><td class="nw"><code>OK</code></td></tr><tr><td class="nw">2-4</td><td class="nw"><code>00</code></td><td class="nw"><code>W 2 0 -1</code></td><td class="nw"><code>OK</code></td></tr><tr><td class="nw">2-4</td><td class="nw"><code>00</code></td><td class="nw"><code>W 2 1 -1</code></td><td class="nw"><code>OK</code></td></tr><tr><td class="nw">2-4</td><td class="nw"><code>00</code></td><td class="nw"><code>W 2 2 -1</code></td><td class="nw"><code>OK</code></td></tr><tr><td class="nw">2-4</td><td class="nw"><code>00</code></td><td class="nw"><code>W 2 3 -1</code></td><td class="nw"><code>OK</code></td></tr><tr><td class="nw">2-4</td><td class="nw"><code>00</code></td><td class="nw"><code>W 3 0 0</code></td><td class="nw"><code>OK</code></td></tr><tr><td class="nw">2-4</td><td class="nw"><code>00</code></td><td class="nw"><code>W 3 1 0</code></td><td class="nw"><code>OK</code></td></tr><tr><td class="nw">2-4</td><td class="nw"><code>00</code></td><td class="nw"><code>W 3 2 0</code></td><td class="nw"><code>OK</code></td></tr><tr><td class="nw">2-4</td><td class="nw"><code>00</code></td><td class="nw"><code>W 3 3 2</code></td><td class="nw"><code>OK</code></td></tr><tr><td class="nw">2-4</td><td class="nw"><code>00</code></td><td class="nw"><code>P 4</code></td><td class="nw"><code>P:0000000006,000000000A,FFFFFFFFF6,0000000008</code></td></tr><tr><td class="nw">2-5</td><td class="nw"><code>00</code></td><td class="nw"><code>B 0 0</code></td><td class="nw"><code>OK</code></td></tr><tr><td class="nw">2-5</td><td class="nw"><code>00</code></td><td class="nw"><code>B 1 -20</code></td><td class="nw"><code>OK</code></td></tr><tr><td class="nw">2-5</td><td class="nw"><code>00</code></td><td class="nw"><code>B 2 100</code></td><td class="nw"><code>OK</code></td></tr><tr><td class="nw">2-5</td><td class="nw"><code>00</code></td><td class="nw"><code>B 3 65536</code></td><td class="nw"><code>OK</code></td></tr><tr><td class="nw">2-5</td><td class="nw"><code>00</code></td><td class="nw"><code>L 4</code></td><td class="nw"><code>L:0006,0000,005A,7FFF O:8</code></td></tr><tr><td class="nw">2-6</td><td class="nw"><code>00</code></td><td class="nw"><code>N 4</code></td><td class="nw"><code>N:0006,0000,005A,7FFF O:8</code></td></tr><tr><td class="nw">2-6</td><td class="nw"><code>00</code></td><td class="nw"><code>N 2</code></td><td class="nw"><code>N:0011,0000,0061,7FFF O:8</code></td></tr><tr><td class="nw">2-7</td><td class="nw"><code>01</code></td><td class="nw"><code>S</code></td><td class="nw"><code>I</code></td></tr><tr><td class="nw">2-7</td><td class="nw"><code>01</code></td><td class="nw"><code>0</code></td><td class="nw"><code>C0:00000000002,00000000000,00000000000,00000000000</code></td></tr><tr><td class="nw">2-7</td><td class="nw"><code>01</code></td><td class="nw"><code>1</code></td><td class="nw"><code>C1:00000000000,00000000002,00000000000,00000000000</code></td></tr><tr><td class="nw">2-7</td><td class="nw"><code>01</code></td><td class="nw"><code>2</code></td><td class="nw"><code>C2:00000000000,00000000000,00000000002,00000000000</code></td></tr><tr><td class="nw">2-7</td><td class="nw"><code>01</code></td><td class="nw"><code>3</code></td><td class="nw"><code>C3:00000000000,00000000000,00000000000,00000000002</code></td></tr><tr><td class="nw">2-7</td><td class="nw"><code>00</code></td><td class="nw"><code>x 0</code></td><td class="nw"><code>X:FFFF</code></td></tr><tr><td class="nw">2-8</td><td class="nw"><code>01</code></td><td class="nw"><code>2</code></td><td class="nw"><code>C2:00000000000,00000000000,00000000002,00000000000</code></td></tr><tr><td class="nw">2-8</td><td class="nw"><code>11</code></td><td class="nw"><code>2</code></td><td class="nw"><code>C2:00000000000,FFFFFFFFFFE,00000000002,00000000000</code></td></tr><tr><td class="nw">2-8</td><td class="nw"><code>11</code></td><td class="nw"><code>1</code></td><td class="nw"><code>C1:00000000000,00000000002,FFFFFFFFFFE,00000000000</code></td></tr></tbody>
       </table></div>
       <p>끝나면 LED가 <code>0x4002</code>입니다 (LED[3:0]은 클래스 번호 하나만 켜지고, LED14는 끝남, LED15는 오류이며, 7세그먼트 오른쪽 자리에 클래스가 보입니다). btnC를 누르면 처음 상태로 돌아갑니다.</p>
 
@@ -2925,7 +2968,7 @@ class Board:
                 self.err = True
                 return "ERR" + CRLF
             scores = [wrap(dot(xs, r, 40) + b, 41) for r, b in zip(ws, self.bias)]
-        else:                                    # 누적 npu_core: Dense 결과(ReLU, 16비트)를 41비트로
+        else:                                    # 2-6 npu_core: Dense 결과(ReLU, 16비트)를 41비트로
             scores, _ = dense(xs, ws, self.bias, 16, 40, 0)
         cls = 0
         for i in range(1, 4):
@@ -3028,7 +3071,7 @@ def self_test():
     assert b.console(Q(65536)) == "Q:7F O:1\r\n"               # 포화
     b.console(X(0, 1)); b.console(W(0, 0, -3))
     assert b.console(cmd("D", 1)) == "D:FFFFFFFFFD\r\n"
-    # 고정 그룹 1: X = (+1, -1). 원시 점수 0, 2, -2, 0 → 2-8 엔진은 그대로, 누적 core는 ReLU로 -2 → 0
+    # 고정 그룹 1: X = (+1, -1). 원시 점수 0, 2, -2, 0 → 2-8 엔진은 그대로, 2-6 core는 ReLU로 -2 → 0
     assert b.engine(cmd("1"), True) == "C1:00000000000,00000000002,FFFFFFFFFFE,00000000000\r\n"
     assert b.engine(cmd("1"), False) == "C1:00000000000,00000000002,00000000000,00000000000\r\n"
     assert Board(1).console(cmd("Q")) == "?\r\n"
@@ -3062,10 +3105,10 @@ if __name__ == "__main__":
     </section>
     <section class="section" id="s_report">
       <h2><span class="num">12</span> 장 정리·다음 장으로</h2>
-      <p>이 장에서 만든 것을 한눈에 정리합니다. 모두 보드에서 확인했다면 다음 장으로 넘어갑니다.</p>
+      <p>이 장에서 만든 것과 배운 점을 정리합니다.</p>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
-        <thead><tr><th>서브젝트</th><th>장 Top에 들어간 모듈</th><th>보드에서 확인한 것</th></tr></thead>
-        <tbody><tr><td class="nw">2-1 BRAM 동기 버퍼</td><td><code>bram_sync_buffer.v</code></td><td><code>X</code>·<code>W</code>로 쓴 값을 <code>x</code>·<code>w</code>로 되읽으면 같은 값이 나옵니다(<code>X:0003</code>, <code>X:FFFE</code>, <code>W:0005</code>). 범위를 벗어난 주소 64는 <code>ERR</code>입니다.</td></tr><tr><td class="nw">2-2 고정소수점 양자화</td><td><code>fixed_quantizer.v</code></td><td>32비트 값을 8비트로 줄입니다. 768은 <code>03</code>, 384(=1.5)는 반올림되어 <code>02</code>, 65536은 최댓값 <code>7F</code>로 막히고 넘침 표시 <code>O:1</code>이 붙습니다.</td></tr><tr><td class="nw">2-3 벡터 내적</td><td><code>vector_dot_core.v</code></td><td>X=(1,2,3,4)와 W0=(5,6,7,8)의 내적은 <code>D:0000000046</code>(70)입니다. W0[3]을 −8로 바꾸면 6이 되고, 길이 0을 주면 <code>ERR</code>입니다.</td></tr><tr><td class="nw">2-4 4PE 병렬 어레이</td><td><code>pe_array4.v</code></td><td>같은 X에 대해 W0~W3 네 개의 내적을 한 번에 계산합니다. <code>P:</code> 뒤에 6, 10, −10(<code>…FFF6</code>), 8이 나옵니다.</td></tr><tr><td class="nw">2-5 Dense 4뉴런 레이어</td><td><code>dense_layer4.v</code></td><td>Bias를 더하고 ReLU와 16비트 포화를 거칩니다. <code>L:0006,0000,005A,7FFF O:8</code>에서 음수는 0이 되고, 65544는 7FFF로 막히며 넘침이 표시됩니다.</td></tr><tr><td class="nw">2-6 4뉴런 NPU Core</td><td><code>npu_core.v</code></td><td>npu_core가 자기 BRAM에서 값을 읽어 같은 Dense 계산을 합니다. <code>N 4</code>의 답은 <code>L 4</code>와 같고, 길이 2에서는 <code>0011,0000,0061,7FFF</code>입니다.</td></tr><tr><td class="nw">2-7 UART 모델 적재</td><td><code>uart_npu_command_controller.v</code></td><td>sw2를 올리면 명령 해석기가 UART를 받습니다. 고정 그룹 <code>0</code>~<code>3</code>을 보내면 <code>C0</code>~<code>C3</code>이 돌아옵니다. sw2를 내리고 <code>x 0</code>을 보내면 <code>X:FFFF</code>가 나와, 명령 해석기가 쓴 값을 콘솔로 확인할 수 있습니다.</td></tr><tr><td class="nw">2-8 통합 NPU Top</td><td><code>npu_dsp_mac_lane.v</code><br><code>npu_engine4.v</code><br><code>npu_display_controller.v</code></td><td>sw3을 올리면 통합 엔진으로 바뀝니다. 같은 그룹에서 음수 점수(<code>…FFE</code>, ReLU 없음)가 보이지만 클래스는 같습니다. LED0~3과 7세그먼트에 클래스가, LED14에 끝남 표시가 나옵니다.</td></tr></tbody>
+        <thead><tr><th>서브젝트</th><th>장 Top에 들어간 모듈</th><th>핵심</th></tr></thead>
+        <tbody><tr><td class="nw">2-1 BRAM 동기 버퍼</td><td><code>bram_sync_buffer.v</code></td><td>BRAM 동기 메모리. 읽기는 주소 다음 클록에 나옵니다.</td></tr><tr><td class="nw">2-2 고정소수점 양자화</td><td><code>fixed_quantizer.v</code></td><td>시프트 + 반올림 + 포화. PC 계산과 비트 단위로 같아야 합니다.</td></tr><tr><td class="nw">2-3 벡터 내적</td><td><code>vector_dot_core.v</code></td><td>BRAM에서 읽어 MAC으로 누산하는 내적 한 개.</td></tr><tr><td class="nw">2-4 4PE 병렬 어레이</td><td><code>pe_array4.v</code></td><td>PE 4개 병렬. 뉴런 4개를 내적 한 번 시간에.</td></tr><tr><td class="nw">2-5 Dense 4뉴런 레이어</td><td><code>dense_layer4.v</code></td><td>내적 + Bias + ReLU + 16비트 포화 = Dense 층.</td></tr><tr><td class="nw">2-6 4뉴런 NPU Core</td><td><code>npu_core.v</code></td><td>메모리 + Dense를 한 모듈로. 쓰기·시작·결과만 밖으로.</td></tr><tr><td class="nw">2-7 UART 모델 적재</td><td><code>uart_npu_command_controller.v</code></td><td>PC가 모델을 싣고 추론을 시키는 UART 명령 해석기.</td></tr><tr><td class="nw">2-8 통합 NPU Top</td><td><code>npu_dsp_mac_lane.v</code><br><code>npu_engine4.v</code><br><code>npu_display_controller.v</code></td><td>DSP 4PE + BRAM + argmax 통합 엔진. 두 엔진의 클래스가 같습니다.</td></tr></tbody>
       </table></div>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>다음 장으로 넘기는 파일</th><th>사용처</th></tr></thead>

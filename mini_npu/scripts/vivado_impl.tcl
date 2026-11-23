@@ -1,4 +1,4 @@
-# 12장 통합 NPU Top: 합성 → 구현 → 타이밍 판정 → 비트스트림 → 타이밍 시뮬레이션용 넷리스트.
+# 통합 NPU Top (2-8): 합성 → 구현 → 타이밍 판정 → 비트스트림 → 타이밍 시뮬레이션용 넷리스트.
 # 실행 (저장소 루트): vivado -mode batch -nojournal -source mini_npu/scripts/vivado_impl.tcl
 # 결과: mini_npu/build/impl/
 #   post_synth.dcp, post_route.dcp           (GUI 확인: File → Checkpoint → Open)

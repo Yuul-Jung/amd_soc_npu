@@ -3,7 +3,7 @@
 # 실행 (저장소 루트): vivado -mode batch -nojournal -source p01/vivado/build_p01.tcl
 #   한 단계만: vivado -mode batch -nojournal -source p01/vivado/build_p01.tcl -tclargs 2
 # 결과: build/vivado/p01_s<STAGE>/ (timing_route.rpt, util_route.rpt, drc_route.rpt, basys3_p01_top.bit)
-#       p01/validation/vivado_impl_YYYYMMDD.txt (증거, 커밋 대상. 한 줄씩: SYNTH_TIMING_PASS|FAIL p01 basys3_p01_top STAGE=n WNS=… …)
+#       p01/validation/vivado_impl_YYYYMMDD.txt (결과 기록. 한 줄씩: SYNTH_TIMING_PASS|FAIL p01 basys3_p01_top STAGE=n WNS=… …)
 # 판정: 배선 후 setup WNS >= 0, hold WHS >= 0, DRC Error 0
 
 set root  [file normalize [file join [file dirname [info script]] ../..]]
