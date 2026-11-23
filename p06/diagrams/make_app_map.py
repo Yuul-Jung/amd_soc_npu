@@ -35,14 +35,14 @@ def main():
     y0, dy = 160, 100
     mid = y0 + dy * (len(subs) - 1) // 2
     nodes = [node("pc", 140, mid, 240, "PC 호스트 (Python)", "그림·센서 창·모델 프레임"),
-             node("soc", 560, mid, 320, "21장 비트스트림 (5장)", "MicroBlaze V + NPU · 동결 주소맵 안 A", h=96)]
+             node("soc", 560, mid, 320, "5장 비트스트림", "MicroBlaze V + NPU", h=96)]
     edges = [edge("pc", "soc", "right", "left", "UART 115200")]
     for k, s in enumerate(subs):
         kind = s["app"]
         preset = "accent" if s.get("common") else ("gray" if kind != "elf" else "navy")
-        tag = {"elf": "ELF만 교체", "own": "별도 비트스트림 (21장 + 모터 GPIO)", "none": "RTL만 · 보드 없음"}[kind]
+        tag = {"elf": "ELF만 교체", "own": "전용 비트스트림 (5장 SoC + 모터 GPIO)", "none": "RTL 시뮬레이션"}[kind]
         nid = f"a{k}"
-        nodes.append(node(nid, 950, y0 + dy * k, 380, f"{s['code']} {s['title']}", f"구 {int(s['ch'][2:]):02d}장 · {tag}", preset))
+        nodes.append(node(nid, 950, y0 + dy * k, 380, f"{s['code']} {s['title']}", tag, preset))
         if kind == "elf":
             edges.append(edge("soc", nid, "right", "left"))
         elif kind == "own":
@@ -50,7 +50,7 @@ def main():
     doc = {
         "version": 3, "chapter": "P06", "verification": "p06/project.json 서브젝트 목록",
         "pageTitle": "6장 응용 지도", "title": "6장 응용 지도 · 5장 SoC 위에 올리는 응용",
-        "subtitle": "보라 = 공통 서브젝트, 남색 = ELF만 교체, 회색 = 별도 비트스트림 또는 보드 없음",
+        "subtitle": "보라 = 공통 서브젝트, 남색 = ELF만 교체, 회색 = 전용 비트스트림 또는 시뮬레이션",
         "width": 1170, "height": y0 + dy * (len(subs) - 1) + 80,
         "headings": {"title": {"x": 585.0, "y": 48, "w": 1100, "h": 56, "size": 28, "align": "left", "autoFit": True},
                      "subtitle": {"x": 585.0, "y": 96, "w": 1100, "h": 34, "size": 16, "align": "left", "autoFit": True}},

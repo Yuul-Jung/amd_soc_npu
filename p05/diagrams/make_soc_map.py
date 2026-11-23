@@ -35,7 +35,7 @@ def table_after(text, title_prefix):
 
 
 ROLE = {"axi_gpio_0": "GPIO LED·SW", "axi_gpio_btn": "GPIO 버튼", "axi_uartlite_0": "UART Lite 115200",
-        "axi_timer_0": "Timer", "axi_intc_0": "INTC", "ip06_seg7": "7세그먼트 (ip_seg7)", "p3_npu_0": "NPU (구 20장 IP)"}
+        "axi_timer_0": "Timer", "axi_intc_0": "INTC", "ip06_seg7": "7세그먼트 (ip_seg7)", "p3_npu_0": "NPU (5-1 AXI IP)"}
 
 
 def node(i, x, y, w, title, sub, preset="navy", h=72):
@@ -92,8 +92,8 @@ def main():
             intc = nid
     doc = {
         "version": 3, "chapter": "P05", "verification": "VS Code 판 21장 Vivado Address Editor 값 (soc_summary.md)",
-        "pageTitle": "5장 SoC 구조 · 동결 주소맵 (안 A)", "title": "5장 SoC 구조 · 동결 주소맵 (안 A)",
-        "subtitle": "MicroBlaze V가 AXI로 주변 장치 7개를 읽고 쓴다. NPU(구 20장 IP)는 0x44A0_0000, 인터럽트 In12",
+        "pageTitle": "5장 SoC 구조와 주소맵", "title": "5장 SoC 구조와 주소맵",
+        "subtitle": "MicroBlaze V가 AXI로 주변 장치 7개를 읽고 쓴다. NPU는 0x44A0_0000, 인터럽트 In12",
         "width": W, "height": 150 + 92 * (len(periph) - 1) + 80,
         "headings": {"title": {"x": 640.0, "y": 48, "w": 1200, "h": 56, "size": 28, "align": "left", "autoFit": True},
                      "subtitle": {"x": 640.0, "y": 96, "w": 1200, "h": 34, "size": 16, "align": "left", "autoFit": True}},

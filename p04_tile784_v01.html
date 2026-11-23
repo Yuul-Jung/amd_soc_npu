@@ -61,7 +61,7 @@ details.full>summary{cursor:pointer;font-weight:600}
   <div class="hero-inner">
     <p class="kicker">BASYS3 · NPU 고도화판 · 4장 프로젝트 · 1일 <span class="vbadge">v01</span></p>
     <h1>제4장 · 784 가속기 설계 공간</h1>
-    <p>28×28 손글씨 → 13타일 누산 → INT8/INT16 차이 → PE 수와 클록. 서브젝트 4개.</p>
+    <p>784 입력을 타일 13개로 나눠 누산하고, INT8과 INT16의 차이, PE 개수에 따른 클록 수를 비교합니다.</p>
   </div>
 </header>
 <div class="wrap">
@@ -69,10 +69,10 @@ details.full>summary{cursor:pointer;font-weight:600}
   <main class="content" id="main-content">
     <section class="section" id="s00">
       <h2><span class="num">00</span> 장 목표·진행 위치</h2>
-      <p><b>장 시연 (보드):</b> PC가 28×28 원본 손글씨를 타일 13개로 나눠 보내면 보드가 3장 코어로 784 입력을 누산해 분류한다. 같은 그림이 INT8에서는 4, INT16에서는 9(정답)로 갈리고, 1PE·4PE·8PE 클록 수가 보드에서 나온다.</p>
-      <p>편성: 1일 · 서브젝트 4개 · 서브젝트마다 보드 확인 1번 + 장 시연.</p>
+      <p><b>장 시연 (보드):</b> PC가 28×28 원본 손글씨를 타일 13개로 나눠 보내면, 보드가 3장 코어로 784개 입력을 누산해 분류합니다. 같은 그림이 INT8에서는 4, INT16에서는 정답 9로 갈리고, 1PE·4PE·8PE의 클록 수를 보드에서 직접 읽습니다.</p>
+      <p>1일 과정입니다. 서브젝트 4개를 차례로 끝내며 그때마다 보드에서 확인하고, 마지막에 장 전체를 시연합니다.</p>
       <ol class="road" aria-label="전체 장에서 지금 위치"><li class=""><a href="p01_uart_calc_v01.html"><b>1장</b>UART 계산기</a></li><li class=""><a href="p02_npu4_board_v01.html"><b>2장</b>4뉴런 NPU 보드</a></li><li class=""><a href="p03_mnist8x8_v01.html"><b>3장</b>8×8 MNIST (CPU 없음)</a></li><li class="now" aria-current="step"><b>4장</b>784 가속기 설계 공간</li><li class=""><a href="p05_mbv_soc_v01.html"><b>5장</b>MicroBlaze V SoC</a></li><li class=""><a href="p06_npu_apps_v01.html"><b>6장</b>응용 확장</a></li><li class="plan"><b>7장</b>종합과제</li></ol>
-      <ol class="steps" aria-label="이 장의 서브젝트와 진행 상태"><li class=""><span class="code">4-1</span><span><a href="#s4_1">INT8·INT16 정밀도 비교</a> <small>(구 06장 · 오전)</small><br>같은 32비트 값을 두 정밀도로: 768 → <code>Q:03,0030</code>, 65536 → INT8은 <code>7F</code>로 포화(넘침 1), INT16은 <code>1000</code>으로 정확.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">4-2</span><span><a href="#s4_2">784 입력 13타일 누산 (INT8)</a> <small>(구 17장 · 오전)</small><br>시험 #92(숫자 9)를 타일 13개로: 타일마다 가중치 640개 + x 64개를 싣고 <code>T</code> → <code>T0</code>…<code>TB</code>, 마지막에 <code>C4</code> (INT8은 4로 틀림). 시작 전 <code>T</code>는 <code>E1</code>.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">4-3</span><span><a href="#s4_3">INT8·INT16 MNIST 정밀도</a> <small>(구 18장 · 오후)</small><br>같은 그림을 INT16 엔진으로: 가중치·x가 2바이트라 보낼 양이 두 배, 결과 <code>C9</code> (정답). LED가 4번에서 9번으로 옮겨 간다.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">4-4</span><span><a href="#s4_4">PE 병렬도·메모리 구조</a> <small>(구 19장 · 오후)</small><br>같은 타일 하나를 4PE <code>K4:00CE</code>(206클록), 8PE <code>K8:008A</code>(138), 1PE는 class마다 가중치를 다시 실어 <code>K1:0046</code>(70) × 10. 세 구성의 점수는 같다.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class="demo"><span class="code">시연</span><span><a href="#demo">장 시연</a><br>PC가 28×28 원본 손글씨를 타일 13개로 나눠 보내면 보드가 3장 코어로 784 입력을 누산해 분류한다. 같은 그림이 INT8에서는 4, INT16에서는 9(정답)로 갈리고, 1PE·4PE·8PE 클록 수가 보드에서 나온다.</span><span class="st">보드 ⚠ 미실시</span></li></ol>
+      <ol class="steps" aria-label="이 장의 서브젝트와 순서"><li><span class="code">4-1</span><span><a href="#s4_1">INT8·INT16 정밀도 비교</a><br>같은 32비트 값을 두 정밀도로 줄여 봅니다. 768은 <code>Q:03,0030</code>입니다. 65536은 INT8에서 <code>7F</code>로 막히고(넘침 1), INT16에서는 <code>1000</code>으로 정확합니다.</span><span class="st">오전</span></li><li><span class="code">4-2</span><span><a href="#s4_2">784 입력 13타일 누산 (INT8)</a><br>시험 #92(숫자 9)를 타일 13개로 나눠 보냅니다. 타일마다 가중치 640개와 입력 64개를 싣고 <code>T</code>를 보내면 <code>T0</code>…<code>TB</code>가 차례로 오고, 마지막에 <code>C4</code>가 옵니다(INT8은 4로 틀립니다). 준비 없이 <code>T</code>를 보내면 <code>E1</code>입니다.</span><span class="st">오전</span></li><li><span class="code">4-3</span><span><a href="#s4_3">INT8·INT16 MNIST 정밀도</a><br>같은 그림을 INT16 엔진으로 보냅니다. 가중치와 입력이 2바이트라 보낼 양이 두 배이고, 결과는 정답 <code>C9</code>입니다. LED가 4번에서 9번으로 옮겨 갑니다.</span><span class="st">오후</span></li><li><span class="code">4-4</span><span><a href="#s4_4">PE 병렬도·메모리 구조</a><br>같은 타일 하나를 세 가지 구성으로 계산합니다. 4PE는 <code>K4:00CE</code>(206클록), 8PE는 <code>K8:008A</code>(138클록)입니다. 1PE는 클래스마다 가중치를 다시 실어야 해서 <code>K1:0046</code>(70클록)을 10번 반복합니다. 세 구성의 점수는 같습니다.</span><span class="st">오후</span></li><li class="demo"><span class="code">시연</span><span><a href="#demo">장 시연</a><br>PC가 28×28 원본 손글씨를 타일 13개로 나눠 보내면, 보드가 3장 코어로 784개 입력을 누산해 분류합니다. 같은 그림이 INT8에서는 4, INT16에서는 정답 9로 갈리고, 1PE·4PE·8PE의 클록 수를 보드에서 직접 읽습니다.</span><span class="st">장 끝</span></li></ol>
     </section>
     <section class="section" id="s01">
       <h2><span class="num">01</span> 최종 구조도·가져오는 파일</h2>
@@ -121,7 +121,7 @@ details.full>summary{cursor:pointer;font-weight:600}
         <tbody><tr><td>input</td><td class="nw"><code>clk</code></td><td class="nw"><code>1</code></td><td class="nw">클록</td><td>보드 100 MHz 발진기 (W5)</td></tr><tr><td>input</td><td class="nw"><code>btnC</code></td><td class="nw"><code>1</code></td><td class="nw">리셋</td><td>가운데 버튼, 누르면 리셋 (Active-High). 코어 가중치 BRAM은 남고 누산·Bias·타일은 지워진다</td></tr><tr><td>input</td><td class="nw"><code>uart_rxd</code></td><td class="nw"><code>1</code></td><td class="nw">보드 핀</td><td>USB-UART에서 들어오는 직렬 입력 (B18), 115200 bps 8N1</td></tr><tr><td>output</td><td class="nw"><code>uart_txd</code></td><td class="nw"><code>1</code></td><td class="nw">보드 핀</td><td>PC로 나가는 직렬 출력 (A18)</td></tr><tr><td>output</td><td class="nw"><code>led</code></td><td class="nw"><code>[15:0]</code></td><td class="nw">보드 핀</td><td>[9:0] 마지막 784 추론 클래스 원-핫, [14] INT16 x 타일 보관, [15] INT8 x 타일 보관</td></tr><tr><td>output</td><td class="nw"><code>seg</code></td><td class="nw"><code>[6:0]</code></td><td class="nw">보드 핀</td><td>7세그먼트 a~g (active-low): 타일 번호·클래스·클록 수·INT16 값</td></tr><tr><td>output</td><td class="nw"><code>an</code></td><td class="nw"><code>[3:0]</code></td><td class="nw">보드 핀</td><td>7세그먼트 자리 선택 (active-low)</td></tr><tr><td>output</td><td class="nw"><code>dp</code></td><td class="nw"><code>1</code></td><td class="nw">보드 핀</td><td>소수점 (항상 끔)</td></tr></tbody>
       </table></div>
       <p>장 Top은 배선만 합니다. 기능은 하위 모듈에 있고, 서브젝트 모듈은 <code>STAGE</code>(끝낸 서브젝트 수)에 따라 하나씩 들어옵니다.</p>
-      <p>784 가속기 묶음: 4-2·4-3의 타일 엔진은 안에서 3-2 코어를 그대로 쓰고, 4-4의 PE 구성도 같은 코어를 #(64,1)·#(64,10)·#(64,6)+#(64,4)로 만든다. INT8 x 타일은 3-1 버퍼, INT16 x 타일은 2-1 BRAM.</p>
+      <p>784 가속기 묶음입니다. 4-2·4-3의 타일 엔진은 안에서 3-2 코어를 그대로 쓰고, 4-4의 PE 구성도 같은 코어의 크기만 바꾼 것입니다. INT8 타일 입력은 3-1 버퍼에, INT16 타일 입력은 2-1 BRAM에 담습니다.</p>
       <div class="figure-wrap" tabindex="0" role="region" aria-label="도면 (가로 스크롤 가능)"><svg viewBox="0 0 980 685" role="img" aria-label="p04_bank 실제 포트와 하위 모듈 구조">
 <rect x="250" y="30" width="480" height="615" rx="10" fill="#fff" stroke="#4635b1" stroke-width="2"/>
 <text x="490" y="54" font-size="18" font-weight="700" text-anchor="middle">p04_bank</text>
@@ -219,7 +219,7 @@ details.full>summary{cursor:pointer;font-weight:600}
 <text x="698" y="107" font-size="12" text-anchor="end" fill="#4635b1">2-1 (2장에서 가져옴)</text>
 <rect x="270" y="124" width="440" height="28" rx="5" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="5 3"/>
 <text x="282" y="143" font-size="14" font-family="monospace">precision_compare  (u_prec)</text>
-<text x="698" y="143" font-size="12" text-anchor="end" fill="#4635b1">4-1 (구 06장)</text>
+<text x="698" y="143" font-size="12" text-anchor="end" fill="#4635b1">4-1에서 작성</text>
 <rect x="270" y="161" width="440" height="28" rx="5" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="5 3"/>
 <text x="282" y="180" font-size="14" font-family="monospace">p3_frame64_buffer  (u_buf8)</text>
 <text x="698" y="180" font-size="12" text-anchor="end" fill="#4635b1">3-1 (3장에서 가져옴)</text>
@@ -228,7 +228,7 @@ details.full>summary{cursor:pointer;font-weight:600}
 <text x="698" y="217" font-size="12" text-anchor="end" fill="#4635b1">3-2 (3장에서 가져옴)</text>
 <rect x="270" y="235" width="440" height="28" rx="5" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="5 3"/>
 <text x="282" y="254" font-size="14" font-family="monospace">p3_tile784_10 ×2  (u_t8 · u_t16)</text>
-<text x="698" y="254" font-size="12" text-anchor="end" fill="#4635b1">4-2 (구 17장)</text>
+<text x="698" y="254" font-size="12" text-anchor="end" fill="#4635b1">4-2에서 작성</text>
 <rect x="250" y="660" width="16" height="12" fill="#edeafa" stroke="#4635b1"/><text x="272" y="671" font-size="13">장 뼈대 (제공)</text>
 <rect x="370" y="660" width="16" height="12" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="4 2"/><text x="392" y="671" font-size="13">서브젝트에서 작성</text>
 <text x="600" y="671" font-size="13">왼쪽 input · 오른쪽 output · 점선 = 클록·리셋</text>
@@ -236,22 +236,21 @@ details.full>summary{cursor:pointer;font-weight:600}
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>구분</th><th>파일</th></tr></thead>
         <tbody>
-          <tr><td>이전 장에서 가져오는 파일</td><td><ul><li><code>common/rtl/uart_*.v (1-1) · p01/rtl/p01_reset_sync.v · p01_hex4_display.v (1장 뼈대)</code></li><li><code>ch05/rtl/fixed_quantizer.v (2-2, 4-1 정밀도 비교 안에서)</code></li><li><code>part03/ch04/rtl/bram_sync_buffer.v (2-1과 같은 파일, 4-3 INT16 x 타일)</code></li><li><code>part03/ch13/rtl/p3_frame64_buffer.v (3-1, INT8 x 타일) · part03/ch14/rtl/p3_group10_core.v (3-2, 모든 타일 엔진·PE 구성)</code></li><li><code>part03/ch02/rtl/dsp_multiplier.v · part03/mini_npu/rtl/npu_dsp_mac_lane.v (1-3·2-8, 코어 안에서)</code></li></ul></td></tr>
+          <tr><td>이전 장에서 가져오는 파일</td><td><ul><li><code>common/rtl/uart_*.v (1-1) · p01/rtl/p01_reset_sync.v · p01_hex4_display.v (1장 뼈대)</code></li><li><code>ch05/rtl/fixed_quantizer.v (2-2, 4-1 정밀도 비교에 씁니다)</code></li><li><code>part03/ch04/rtl/bram_sync_buffer.v (2-1, 4-3 INT16 타일 입력)</code></li><li><code>part03/ch13/rtl/p3_frame64_buffer.v (3-1, INT8 타일 입력) · part03/ch14/rtl/p3_group10_core.v (3-2, 모든 타일 엔진)</code></li><li><code>part03/ch02/rtl/dsp_multiplier.v · part03/mini_npu/rtl/npu_dsp_mac_lane.v (1-3·2-8, 코어 안에서 씁니다)</code></li></ul></td></tr>
           <tr><td>4-1 INT8·INT16 정밀도 비교</td><td><code>ch06/rtl/precision_compare.v</code></td></tr><tr><td>4-2 784 입력 13타일 누산 (INT8)</td><td><code>part03/ch17/rtl/p3_tile784_10.v</code></td></tr><tr><td>4-3 INT8·INT16 MNIST 정밀도</td><td></td></tr><tr><td>4-4 PE 병렬도·메모리 구조</td><td></td></tr>
-          <tr><td>장 뼈대 (02절에서 입력)</td><td><code>p04/rtl/p04_console.v</code><br><code>p04/rtl/p04_bank.v</code><br><code>p04/rtl/p04_view.v</code><br><code>p04/rtl/basys3_p04_top.v</code><br><code>p04/constraints/basys3_p04.xdc</code><br><code>p04/vivado/build_p04.tcl</code><br><code>p04/host/p04_send.py</code></td></tr>
+          <tr><td>장 뼈대 (다음 절에서 입력)</td><td><code>p04/rtl/p04_console.v</code><br><code>p04/rtl/p04_bank.v</code><br><code>p04/rtl/p04_view.v</code><br><code>p04/rtl/basys3_p04_top.v</code><br><code>p04/constraints/basys3_p04.xdc</code><br><code>p04/vivado/build_p04.tcl</code><br><code>p04/host/p04_send.py</code></td></tr>
         </tbody>
       </table></div>
     </section>
     <section class="section" id="s02">
       <h2><span class="num">02</span> 준비 · 장 뼈대</h2>
       <ol>
-        <li>VS Code에서 저장소 루트(<code>amd_soc_npu/</code>)를 엽니다. 도구: <code>iverilog</code> 12 이상, <code>python3</code>, Vivado 2024.2 (합성·비트스트림), 보드 터미널(115200 8N1) 또는 <code>pip install pyserial</code>.</li>
-        <li>아래 장 뼈대 파일을 경로 그대로 입력합니다. 서브젝트 모듈은 각 서브젝트 절에서 씁니다.</li>
-        <li>구06장은 이 저장소 코드, 구17~19장은 VS Code 판(커밋 9203bfa)의 part03/ch17~19를 고치지 않고 가져왔다 (docs/plan/part03_snapshot.md).</li>
-        <li>STAGE 값 = 끝낸 서브젝트 수: 4-1만 끝냈으면 1, 4-4까지 끝냈으면 4. 아직 없는 모듈은 들어가지 않으므로 빌드가 됩니다.</li>
+        <li>VS Code에서 저장소 루트(<code>amd_soc_npu/</code>)를 엽니다. 필요한 도구는 Vivado 2024.2, <code>python3</code>, 시뮬레이터 <code>iverilog</code> 12 이상, 그리고 PC에서 보드로 명령을 보낼 <code>pyserial</code>(<code>pip install pyserial</code>)입니다.</li>
+        <li>아래 장 뼈대 파일을 경로 그대로 입력합니다. 서브젝트 모듈은 각 서브젝트 절에서 작성합니다.</li>
+        <li><code>STAGE</code>는 끝낸 서브젝트 수입니다. 4-1만 끝냈으면 1, 4-4까지 끝냈으면 4입니다. 아직 작성하지 않은 모듈은 빌드에 들어가지 않으므로, 서브젝트를 하나 끝낼 때마다 바로 보드에 올려 볼 수 있습니다.</li>
       </ol>
       <div class="codeblock">
-        <div class="codebar"><span>p04/rtl/p04_console.v · verilog · 원본 · RTL_SIM 통과 2026-11-23</span></div>
+        <div class="codebar"><span>p04/rtl/p04_console.v · verilog</span></div>
         <pre tabindex="0"><code class="language-verilog">// 4장 디버그 콘솔: 784 가속기 서브젝트를 UART 명령으로 확인한다. 1~3장과 같은 형식 (1바이트 명령 + 바이너리).
 // p = 엔진 (0 INT8, 1 INT16), 원소 하나 = INT8 1바이트 / INT16 2바이트(빅엔디언). g = PE 구성 1·4·8.
 //
@@ -545,7 +544,7 @@ endmodule
 `default_nettype wire</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>p04/rtl/p04_bank.v · verilog · 원본 · RTL_SIM 통과 2026-11-23</span></div>
+        <div class="codebar"><span>p04/rtl/p04_bank.v · verilog</span></div>
         <pre tabindex="0"><code class="language-verilog">// 4장 784 가속기 묶음: 서브젝트 모듈을 STAGE만큼 쌓는다. 서브젝트 모듈 파일은 고치지 않는다.
 //   4-1 (STAGE&gt;=1) precision_compare: 같은 32비트 값을 INT8·INT16으로 (구 06장, 안에 05장 양자화기 2개)
 //   4-2 (STAGE&gt;=2) p3_tile784_10 INT8: 784 = 64×12 + 16, 13타일 외부 누산 (구 17장, 안에 3-2 코어)
@@ -774,7 +773,7 @@ endmodule
 `default_nettype wire</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>p04/rtl/p04_view.v · verilog · 원본 · RTL_SIM 통과 2026-11-23</span></div>
+        <div class="codebar"><span>p04/rtl/p04_view.v · verilog</span></div>
         <pre tabindex="0"><code class="language-verilog">// 4장 LED·7세그먼트.
 //   LED[9:0]  마지막 784 추론 클래스 원-핫 (추론 전 꺼짐)
 //   LED[14]   INT16 x 타일 보관 중,  LED[15] INT8 x 타일 보관 중
@@ -805,7 +804,7 @@ endmodule
 `default_nettype wire</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>p04/rtl/basys3_p04_top.v · verilog · 원본 · RTL_SIM 통과 2026-11-23</span></div>
+        <div class="codebar"><span>p04/rtl/basys3_p04_top.v · verilog</span></div>
         <pre tabindex="0"><code class="language-verilog">// 4장 보드 Top: 784 가속기 설계 공간. 인스턴스와 배선만 둔다 (기능은 하위 모듈).
 //   4-1 INT8/INT16 양자화 비교 → 4-2 784 INT8 13타일 → 4-3 INT16 → 4-4 1PE·4PE·8PE 클록 비교.
 //   PC가 타일마다 가중치 640개와 x 64개를 보내고 T로 실행한다 (가중치 재적재 = 19장의 적재 병목).
@@ -886,7 +885,7 @@ endmodule
 `default_nettype wire</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>p04/constraints/basys3_p04.xdc · xdc · 원본 · Vivado 실행 통과</span></div>
+        <div class="codebar"><span>p04/constraints/basys3_p04.xdc · xdc</span></div>
         <pre tabindex="0"><code class="language-xdc"># 4장 보드 Top (basys3_p04_top) 핀. Basys-3-Master.xdc 이름·핀 그대로 (12장 basys3_npu.xdc와 같은 핀, 스위치 없음).
 set_property -dict { PACKAGE_PIN W5 IOSTANDARD LVCMOS33 } [get_ports clk]
 set_property -dict { PACKAGE_PIN U18 IOSTANDARD LVCMOS33 } [get_ports btnC]
@@ -923,7 +922,7 @@ set_property -dict { PACKAGE_PIN L1 IOSTANDARD LVCMOS33 } [get_ports {led[15]}]
 create_clock -name sys_clk_pin -period 10.000 -waveform {0 5} [get_ports clk]</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>p04/vivado/build_p04.tcl · tcl · 원본 · Vivado 실행 통과</span></div>
+        <div class="codebar"><span>p04/vivado/build_p04.tcl · tcl</span></div>
         <pre tabindex="0"><code class="language-tcl"># 4장 보드 Top (784 가속기 설계 공간): STAGE 1~4 각각 합성 → 구현 → 타이밍 판정 → 비트스트림.
 # STAGE = 끝낸 서브젝트 수 (1 = 4-1 정밀도 … 4 = 4-4 PE 비교). 서브젝트 모듈은 구06장과 VS Code 판 part03/ 파일 그대로.
 # 실행 (저장소 루트): vivado -mode batch -nojournal -source p04/vivado/build_p04.tcl
@@ -1009,7 +1008,7 @@ close $fh
 if {!$all_ok} { error "P04_IMPL_TIMING_FAILED" }</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>p04/host/p04_send.py · python · 원본 · RTL_SIM 통과 2026-11-23</span></div>
+        <div class="codebar"><span>p04/host/p04_send.py · python</span></div>
         <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
 """4장 784 가속기 보드 PC 쪽 도구: 명령을 바이트로 바꿔 보내고 응답을 출력한다.
 
@@ -1121,22 +1120,22 @@ if __name__ == "__main__":
       </div>
     </section>
     <section class="section" id="s4_1">
-      <h2><span class="num">03</span> 서브젝트 4-1 · INT8·INT16 정밀도 비교 <small>(구 06장)</small></h2>
-      <p class="verdict"><b>학습목표 (보드):</b> 같은 32비트 값을 두 정밀도로: 768 → <code>Q:03,0030</code>, 65536 → INT8은 <code>7F</code>로 포화(넘침 1), INT16은 <code>1000</code>으로 정확.</p>
+      <h2><span class="num">03</span> 서브젝트 4-1 · INT8·INT16 정밀도 비교</h2>
+      <p class="verdict"><b>학습목표:</b> 같은 32비트 값을 두 정밀도로 줄여 봅니다. 768은 <code>Q:03,0030</code>입니다. 65536은 INT8에서 <code>7F</code>로 막히고(넘침 1), INT16에서는 <code>1000</code>으로 정확합니다.</p>
       <h3>보드에서 볼 것</h3>
       <ol>
-        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다: <code>vivado -mode batch -nojournal -source p04/vivado/build_p04.tcl -tclargs 1</code> → <code>build/vivado/p04_s1/basys3_p04_top.bit</code></li>
-        <li>Hardware Manager로 보드에 내려받고 <code>python3 p04/host/p04_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다 (115200 8N1). 스위치는 쓰지 않습니다. 784 추론 한 번은 PC 도구 <code>digit 92 int8</code>(명령 167개, 9,352바이트, 115200 bps로 약 0.8초)으로 보냅니다.</li>
+        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다.<br><code>vivado -mode batch -nojournal -source p04/vivado/build_p04.tcl -tclargs 1</code><br>결과: <code>build/vivado/p04_s1/basys3_p04_top.bit</code></li>
+        <li>Hardware Manager로 보드에 내려받고, <code>python3 p04/host/p04_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다 (115200 8N1). 이 장은 스위치를 쓰지 않습니다. 784 추론 한 번은 PC 도구의 <code>digit 92 int8</code>으로 보냅니다(명령 167개, 9,352바이트, 115200 bps에서 약 0.8초).</li>
       </ol>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>순서</th><th>PC 명령 (<code>p04_send.py</code>)</th><th>보드 응답 (UART)</th></tr></thead>
         <tbody><tr><td>1</td><td class="nw"><code>S</code></td><td class="nw"><code>I\r\n</code></td></tr><tr><td>2</td><td class="nw"><code>Q 768</code></td><td class="nw"><code>Q:03,0030 O:00\r\n</code></td></tr><tr><td>3</td><td class="nw"><code>Q 384</code></td><td class="nw"><code>Q:02,0018 O:00\r\n</code></td></tr><tr><td>4</td><td class="nw"><code>Q -384</code></td><td class="nw"><code>Q:FE,FFE8 O:00\r\n</code></td></tr><tr><td>5</td><td class="nw"><code>Q 65536</code></td><td class="nw"><code>Q:7F,1000 O:10\r\n</code></td></tr><tr><td>6</td><td class="nw"><code>Q 2147483647</code></td><td class="nw"><code>Q:7F,7FFF O:11\r\n</code></td></tr><tr><td>7</td><td class="nw"><code>A 0</code></td><td class="nw"><code>?\r\n</code></td></tr></tbody>
       </table></div>
-      <p>끝난 뒤 LED: <code>0x0000</code> (LED[9:0] 마지막 784 추론 클래스 원-핫, LED15 INT8 x 타일 보관, LED14 INT16 x 타일 보관. 7세그먼트는 타일 번호·클래스·클록 수). 응답 출처: 장 Top 시뮬레이션 STAGE=1 (<code>p04/validation/rtl_sim_20261123.log</code>, 바이트 단위 대조).</p>
-      <h3>추가 코드 (구 06장 그대로)</h3>
+      <p>끝나면 LED가 <code>0x0000</code>입니다 (LED[9:0]은 마지막 784 추론의 클래스 번호 하나가 켜지고, LED15는 INT8 타일 보관, LED14는 INT16 타일 보관입니다. 7세그먼트에는 타일 번호·클래스·클록 수가 보입니다).</p>
+      <h3>작성할 코드</h3>
 
       <div class="codeblock">
-        <div class="codebar"><span>ch06/rtl/precision_compare.v · verilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <div class="codebar"><span>ch06/rtl/precision_compare.v · verilog</span></div>
         <pre tabindex="0"><code class="language-verilog">`timescale 1ns/1ps
 module precision_compare #(parameter integer SATURATE=1)(
     input wire clk, resetn, valid_i,
@@ -1152,18 +1151,19 @@ module precision_compare #(parameter integer SATURATE=1)(
       (.clk(clk),.resetn(resetn),.valid_i(valid_i),.x_i(x_i),.q_o(q16_o),.valid_o(),.overflow_o(overflow16_o));
 endmodule</code></pre>
       </div>
-      <h3>시뮬레이션 기대 화면</h3>
-      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 서브젝트 단독 시험</span></div>
+      <h3>시뮬레이션</h3>
+      <p>보드에 올리기 전에 이 서브젝트 모듈만 먼저 시험합니다. 아래와 같은 줄이 나오면 됩니다.</p>
+      <div class="codeblock"><div class="codebar"><span>터미널 · 저장소 루트</span></div>
         <pre tabindex="0"><code>bash ch06/scripts/run_sim.sh</code></pre></div>
-      <div class="codeblock"><div class="codebar"><span>기대 출력 (도구 버전 미기록 · 2026-11-18 · 출처 ch06/validation/rtl_sim_20261118.log)</span></div>
+      <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
         <pre tabindex="0"><code>PYTHON_FIXED_SELF_TEST_PASS
 PYTHON_VECTORS PRECISION cycles=2020 seed=306
 RTL_SIM_PASS PRECISION cycles=2020
 PYTHON_FIXED_SELF_TEST_PASS
 PYTHON_RTL_COMPARE_PASS cycles=2020</code></pre></div>
-      <details class="full"><summary>이 서브젝트의 테스트벤치·기준 모델 (전체 코드 2개)</summary>
+      <details class="full"><summary>테스트벤치와 기준 모델 (전체 코드 2개)</summary>
       <div class="codeblock">
-        <div class="codebar"><span>ch06/tb/tb_precision_compare.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <div class="codebar"><span>ch06/tb/tb_precision_compare.sv · systemverilog</span></div>
         <pre tabindex="0"><code class="language-systemverilog">`timescale 1ns/1ps
 module tb_precision_compare;
     reg clk=0,rn=0,vi=0;
@@ -1202,7 +1202,7 @@ module tb_precision_compare;
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>ch06/reference/precision_reference.py · python · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <div class="codebar"><span>ch06/reference/precision_reference.py · python</span></div>
         <pre tabindex="0"><code class="language-python">import argparse
 import csv
 import random
@@ -1246,48 +1246,29 @@ if __name__=='__main__':
     else: generate(a.out)</code></pre>
       </div>
       </details>
-      <h3>판정 줄</h3>
+      <h3>확인할 것</h3>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
-        <tbody><tr><td><code>RTL_SIM_PASS PRECISION cycles=2020</code></td><td>INT8·INT16 동시 출력 통과</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS</code></td><td>RTL 출력 파일과 Python 기준값이 모든 사이클에서 일치</td></tr><tr><td>장 Top STAGE=1 시뮬레이션</td><td>위 '보드에서 볼 것' 응답과 바이트 단위로 같음 · 통과</td></tr>
-        <tr><td>장 Top STAGE=1 합성·타이밍</td><td>통과 · WNS=0.583 WHS=0.024 DRC_ERRORS=0 LUT=814 FF=390 DSP48E1=0 RAMB18=0</td></tr></tbody>
+        <tbody><tr><td><code>RTL_SIM_PASS PRECISION cycles=2020</code></td><td>INT8·INT16 동시 출력 통과</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS</code></td><td>RTL 출력 파일과 Python 기준값이 모든 사이클에서 일치</td></tr><tr><td>보드 응답</td><td>위 '보드에서 볼 것' 표의 응답과 한 글자도 다르지 않아야 합니다.</td></tr></tbody>
       </table></div>
-      <div class="gate-row">
-        <div class="gate pass">
-          <b>HOST_MODEL_PASS</b>
-          <span>PYTHON_FIXED_SELF_TEST_PASS</span>
-        </div>
-        <div class="gate pass">
-          <b>RTL_SIM_PASS</b>
-          <span>RTL_SIM_PASS PRECISION cycles=2020 · 도구 버전 미기록 · 2026-11-18</span>
-        </div>
-        <div class="gate pass">
-          <b>SYNTH_TIMING_PASS</b>
-          <span>ch06 precision_compare WNS=8.710 WHS=0.230 LUT=323 FF=27 DSP48E1=0 RAM… · 2026-11-20</span>
-        </div>
-        <div class="gate todo">
-          <b>BOARD_PASS</b>
-          <span>⚠ 미실시 · 현재 실물 보드 확인 불가</span>
-        </div>
-      </div>
     </section>
     <section class="section" id="s4_2">
-      <h2><span class="num">04</span> 서브젝트 4-2 · 784 입력 13타일 누산 (INT8) <small>(구 17장)</small></h2>
-      <p class="verdict"><b>학습목표 (보드):</b> 시험 #92(숫자 9)를 타일 13개로: 타일마다 가중치 640개 + x 64개를 싣고 <code>T</code> → <code>T0</code>…<code>TB</code>, 마지막에 <code>C4</code> (INT8은 4로 틀림). 시작 전 <code>T</code>는 <code>E1</code>.</p>
+      <h2><span class="num">04</span> 서브젝트 4-2 · 784 입력 13타일 누산 (INT8)</h2>
+      <p class="verdict"><b>학습목표:</b> 시험 #92(숫자 9)를 타일 13개로 나눠 보냅니다. 타일마다 가중치 640개와 입력 64개를 싣고 <code>T</code>를 보내면 <code>T0</code>…<code>TB</code>가 차례로 오고, 마지막에 <code>C4</code>가 옵니다(INT8은 4로 틀립니다). 준비 없이 <code>T</code>를 보내면 <code>E1</code>입니다.</p>
       <h3>보드에서 볼 것</h3>
       <ol>
-        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다: <code>vivado -mode batch -nojournal -source p04/vivado/build_p04.tcl -tclargs 2</code> → <code>build/vivado/p04_s2/basys3_p04_top.bit</code></li>
-        <li>Hardware Manager로 보드에 내려받고 <code>python3 p04/host/p04_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다 (115200 8N1). 스위치는 쓰지 않습니다. 784 추론 한 번은 PC 도구 <code>digit 92 int8</code>(명령 167개, 9,352바이트, 115200 bps로 약 0.8초)으로 보냅니다.</li>
+        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다.<br><code>vivado -mode batch -nojournal -source p04/vivado/build_p04.tcl -tclargs 2</code><br>결과: <code>build/vivado/p04_s2/basys3_p04_top.bit</code></li>
+        <li>Hardware Manager로 보드에 내려받고, <code>python3 p04/host/p04_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다 (115200 8N1). 이 장은 스위치를 쓰지 않습니다. 784 추론 한 번은 PC 도구의 <code>digit 92 int8</code>으로 보냅니다(명령 167개, 9,352바이트, 115200 bps에서 약 0.8초).</li>
       </ol>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>순서</th><th>PC 명령 (<code>p04_send.py</code>)</th><th>보드 응답 (UART)</th></tr></thead>
         <tbody><tr><td>1</td><td class="nw"><code>T 0 5</code></td><td class="nw"><code>E1\r\n</code></td></tr><tr><td>2</td><td class="nw"><code>python3 … load Bias INT8 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td>3</td><td class="nw"><code>A 0</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>4</td><td class="nw"><code>python3 … load W INT8 타일 0 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td>5</td><td class="nw"><code>X 0 64 (INT8 타일 0 x)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>6</td><td class="nw"><code>T 0 0</code></td><td class="nw"><code>T0\r\n</code></td></tr><tr><td>7</td><td class="nw"><code>python3 … load W INT8 타일 1 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td>8</td><td class="nw"><code>X 0 64 (INT8 타일 1 x)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>9</td><td class="nw"><code>T 0 1</code></td><td class="nw"><code>T1\r\n</code></td></tr><tr><td>10</td><td class="nw"><code>python3 … load W INT8 타일 2 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td>11</td><td class="nw"><code>X 0 64 (INT8 타일 2 x)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>12</td><td class="nw"><code>T 0 2</code></td><td class="nw"><code>T2\r\n</code></td></tr><tr><td>13</td><td class="nw"><code>python3 … load W INT8 타일 3 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td>14</td><td class="nw"><code>X 0 64 (INT8 타일 3 x)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>15</td><td class="nw"><code>T 0 3</code></td><td class="nw"><code>T3\r\n</code></td></tr><tr><td>16</td><td class="nw"><code>python3 … load W INT8 타일 4 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td>17</td><td class="nw"><code>X 0 64 (INT8 타일 4 x)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>18</td><td class="nw"><code>T 0 4</code></td><td class="nw"><code>T4\r\n</code></td></tr><tr><td>19</td><td class="nw"><code>python3 … load W INT8 타일 5 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td>20</td><td class="nw"><code>X 0 64 (INT8 타일 5 x)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>21</td><td class="nw"><code>T 0 5</code></td><td class="nw"><code>T5\r\n</code></td></tr><tr><td>22</td><td class="nw"><code>python3 … load W INT8 타일 6 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td>23</td><td class="nw"><code>X 0 64 (INT8 타일 6 x)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>24</td><td class="nw"><code>T 0 6</code></td><td class="nw"><code>T6\r\n</code></td></tr><tr><td>25</td><td class="nw"><code>python3 … load W INT8 타일 7 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td>26</td><td class="nw"><code>X 0 64 (INT8 타일 7 x)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>27</td><td class="nw"><code>T 0 7</code></td><td class="nw"><code>T7\r\n</code></td></tr><tr><td>28</td><td class="nw"><code>python3 … load W INT8 타일 8 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td>29</td><td class="nw"><code>X 0 64 (INT8 타일 8 x)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>30</td><td class="nw"><code>T 0 8</code></td><td class="nw"><code>T8\r\n</code></td></tr><tr><td>31</td><td class="nw"><code>python3 … load W INT8 타일 9 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td>32</td><td class="nw"><code>X 0 64 (INT8 타일 9 x)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>33</td><td class="nw"><code>T 0 9</code></td><td class="nw"><code>T9\r\n</code></td></tr><tr><td>34</td><td class="nw"><code>python3 … load W INT8 타일 10 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td>35</td><td class="nw"><code>X 0 64 (INT8 타일 10 x)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>36</td><td class="nw"><code>T 0 10</code></td><td class="nw"><code>TA\r\n</code></td></tr><tr><td>37</td><td class="nw"><code>python3 … load W INT8 타일 11 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td>38</td><td class="nw"><code>X 0 64 (INT8 타일 11 x)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>39</td><td class="nw"><code>T 0 11</code></td><td class="nw"><code>TB\r\n</code></td></tr><tr><td>40</td><td class="nw"><code>python3 … load W INT8 타일 12 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td>41</td><td class="nw"><code>X 0 64 (INT8 타일 12 x, 16 + 0 48개)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>42</td><td class="nw"><code>T 0 12</code></td><td class="nw"><code>C4:FFFFFFF106C,FFFFFFF6D9B,FFFFFFFCE00,FFFFFFFB921,00000005789,FFFFFFFC374,FFFFFFF9447,FFFFFFFC67A,FFFFFFFFFCA,0000000568C\r\n</code></td></tr></tbody>
       </table></div>
-      <p>끝난 뒤 LED: <code>0x0010</code> (LED[9:0] 마지막 784 추론 클래스 원-핫, LED15 INT8 x 타일 보관, LED14 INT16 x 타일 보관. 7세그먼트는 타일 번호·클래스·클록 수). 응답 출처: 장 Top 시뮬레이션 STAGE=2 (<code>p04/validation/rtl_sim_20261123.log</code>, 바이트 단위 대조).</p>
-      <h3>추가 코드 (구 17장 그대로, VS Code 판)</h3>
+      <p>끝나면 LED가 <code>0x0010</code>입니다 (LED[9:0]은 마지막 784 추론의 클래스 번호 하나가 켜지고, LED15는 INT8 타일 보관, LED14는 INT16 타일 보관입니다. 7세그먼트에는 타일 번호·클래스·클록 수가 보입니다).</p>
+      <h3>작성할 코드</h3>
 
       <div class="codeblock">
-        <div class="codebar"><span>part03/ch17/rtl/p3_tile784_10.v · verilog · 원본 · RTL_SIM 통과 날짜 미기록</span></div>
+        <div class="codebar"><span>part03/ch17/rtl/p3_tile784_10.v · verilog</span></div>
         <pre tabindex="0"><code class="language-verilog">`timescale 1ns/1ps
 // (추가) 17장: 784입력(28×28)·10분류를 64원소 타일 13개(64×12 + 16)로 나눠 계산하는 Tile Controller.
 // 14장 p3_group10_core(64→10, 4PE 4+4+2 그룹)를 변경 없이 타일마다 한 번 실행한다.
@@ -1534,10 +1515,11 @@ module p3_tile784_10 #(
     // synthesis translate_on
 endmodule</code></pre>
       </div>
-      <h3>시뮬레이션 기대 화면</h3>
-      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 서브젝트 단독 시험</span></div>
+      <h3>시뮬레이션</h3>
+      <p>보드에 올리기 전에 이 서브젝트 모듈만 먼저 시험합니다. 아래와 같은 줄이 나오면 됩니다.</p>
+      <div class="codeblock"><div class="codebar"><span>터미널 · 저장소 루트</span></div>
         <pre tabindex="0"><code>bash part03/ch17/scripts/run_sim.sh</code></pre></div>
-      <div class="codeblock"><div class="codebar"><span>기대 출력 (Icarus Verilog 12.0 · 날짜 미기록 · 출처 part03/ch17/validation/rtl_sim.log)</span></div>
+      <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
         <pre tabindex="0"><code>PYTHON_TILE784_SELF_TEST_PASS suite=full cases=26 tiles=13 last_len=16 acc_w=41 bias_w=40 overflow_cases=0 seed=1717
 RTL_SIM_PASS TILE784 cases=26 tiles=13 tile_go_to_accept_cycles=207 acc_w=41 bias_w=40 score_w=42 errors_checked=14
 PYTHON_RTL_COMPARE_PASS cases=26 tile_partials=3380 scores=10 class=1 overflow=1 bit_exact=1
@@ -1547,9 +1529,9 @@ PYTHON_RTL_COMPARE_PASS cases=4 tile_partials=520 scores=10 class=1 overflow=1 b
 PYTHON_TILE784_SELF_TEST_PASS suite=width cases=4 tiles=13 last_len=16 acc_w=24 bias_w=24 overflow_cases=2 seed=1717
 RTL_SIM_PASS TILE784 cases=4 tiles=13 tile_go_to_accept_cycles=207 acc_w=24 bias_w=24 score_w=25 errors_checked=0
 PYTHON_RTL_COMPARE_PASS cases=4 tile_partials=520 scores=10 class=1 overflow=1 bit_exact=1</code></pre></div>
-      <details class="full"><summary>이 서브젝트의 테스트벤치·기준 모델 (전체 코드 2개)</summary>
+      <details class="full"><summary>테스트벤치와 기준 모델 (전체 코드 2개)</summary>
       <div class="codeblock">
-        <div class="codebar"><span>part03/ch17/tb/tb_p3_tile784_10.sv · systemverilog · 원본 · RTL_SIM 통과 날짜 미기록</span></div>
+        <div class="codebar"><span>part03/ch17/tb/tb_p3_tile784_10.sv · systemverilog</span></div>
         <pre tabindex="0"><code class="language-systemverilog">// (추가) 17장 p3_tile784_10 자동 판정 테스트벤치.
 // 13장 p3_frame64_buffer 실제 RTL과 연결: 타일마다 W 적재 → 64바이트 프레임 → tile_go → 부분합 누산.
 // 마지막 타일은 W를 16주소만 다시 쓰고(나머지 48주소는 타일 11 가중치 잔류), x 주소 16~63에는 0이 아닌
@@ -1923,7 +1905,7 @@ module tb_p3_tile784_10;
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>part03/ch17/reference/tile784_reference.py · python · 원본 · RTL_SIM 통과 날짜 미기록</span></div>
+        <div class="codebar"><span>part03/ch17/reference/tile784_reference.py · python</span></div>
         <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
 """17장: 784입력 13타일 외부 부분합 누산 기준모델·시험 벡터 생성·RTL 결과 비교.
 
@@ -2151,51 +2133,33 @@ if __name__ == "__main__":
         generate(a.out, a.suite, a.acc_w, a.bias_w, a.data_w)</code></pre>
       </div>
       </details>
-      <h3>판정 줄</h3>
+      <h3>확인할 것</h3>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
-        <tbody><tr><td><code>RTL_SIM_PASS TILE784 tile_go_to_accept_cycles=207</code></td><td>26사례 × 13타일, 타일 하나 207클록, 오류 14종</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS tile_partials=3380</code></td><td>타일 부분합 3,380개·점수·클래스가 Python 기준과 같음</td></tr><tr><td>장 Top STAGE=2 시뮬레이션</td><td>위 '보드에서 볼 것' 응답과 바이트 단위로 같음 · 통과</td></tr>
-        <tr><td>장 Top STAGE=2 합성·타이밍</td><td>통과 · WNS=0.423 WHS=0.035 DRC_ERRORS=0 LUT=3966 FF=2790 DSP48E1=4 RAMB18=4</td></tr></tbody>
+        <tbody><tr><td><code>RTL_SIM_PASS TILE784 tile_go_to_accept_cycles=207</code></td><td>26가지 경우를 타일 13개씩 돌리고, 타일 하나에 207클록이 걸립니다. 오류 상황 14종도 확인합니다.</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS tile_partials=3380</code></td><td>타일 부분합 3,380개와 점수·클래스가 Python 기준과 같습니다.</td></tr><tr><td>보드 응답</td><td>위 '보드에서 볼 것' 표의 응답과 한 글자도 다르지 않아야 합니다.</td></tr></tbody>
       </table></div>
-      <div class="gate-row">
-        <div class="gate pass">
-          <b>HOST_MODEL_PASS</b>
-          <span>PYTHON_TILE784_SELF_TEST_PASS suite=full cases=26 tiles=13 last_len=16 acc_w=41 bias_w=40 …</span>
-        </div>
-        <div class="gate pass">
-          <b>RTL_SIM_PASS</b>
-          <span>RTL_SIM_PASS TILE784 cases=26 tiles=13 tile_go_to_accept_cyc… 외 2건 · Icarus Verilog 12.0 · 날짜 미기록</span>
-        </div>
-        <div class="gate pass">
-          <b>SYNTH_TIMING_PASS</b>
-          <span>OOC 배선 후 WNS +0.712 ns (구 19장 OOC 기록) · <code>part03/ch19/validation/synth_ooc_summary.md</code></span>
-        </div>
-        <div class="gate todo">
-          <b>BOARD_PASS</b>
-          <span>⚠ 미실시 · 현재 실물 보드 확인 불가</span>
-        </div>
-      </div>
     </section>
     <section class="section" id="s4_3">
-      <h2><span class="num">05</span> 서브젝트 4-3 · INT8·INT16 MNIST 정밀도 <small>(구 18장)</small></h2>
-      <p class="verdict"><b>학습목표 (보드):</b> 같은 그림을 INT16 엔진으로: 가중치·x가 2바이트라 보낼 양이 두 배, 결과 <code>C9</code> (정답). LED가 4번에서 9번으로 옮겨 간다.</p>
+      <h2><span class="num">05</span> 서브젝트 4-3 · INT8·INT16 MNIST 정밀도</h2>
+      <p class="verdict"><b>학습목표:</b> 같은 그림을 INT16 엔진으로 보냅니다. 가중치와 입력이 2바이트라 보낼 양이 두 배이고, 결과는 정답 <code>C9</code>입니다. LED가 4번에서 9번으로 옮겨 갑니다.</p>
       <h3>보드에서 볼 것</h3>
       <ol>
-        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다: <code>vivado -mode batch -nojournal -source p04/vivado/build_p04.tcl -tclargs 3</code> → <code>build/vivado/p04_s3/basys3_p04_top.bit</code></li>
-        <li>Hardware Manager로 보드에 내려받고 <code>python3 p04/host/p04_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다 (115200 8N1). 스위치는 쓰지 않습니다. 784 추론 한 번은 PC 도구 <code>digit 92 int8</code>(명령 167개, 9,352바이트, 115200 bps로 약 0.8초)으로 보냅니다.</li>
+        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다.<br><code>vivado -mode batch -nojournal -source p04/vivado/build_p04.tcl -tclargs 3</code><br>결과: <code>build/vivado/p04_s3/basys3_p04_top.bit</code></li>
+        <li>Hardware Manager로 보드에 내려받고, <code>python3 p04/host/p04_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다 (115200 8N1). 이 장은 스위치를 쓰지 않습니다. 784 추론 한 번은 PC 도구의 <code>digit 92 int8</code>으로 보냅니다(명령 167개, 9,352바이트, 115200 bps에서 약 0.8초).</li>
       </ol>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>순서</th><th>PC 명령 (<code>p04_send.py</code>)</th><th>보드 응답 (UART)</th></tr></thead>
         <tbody><tr><td>1</td><td class="nw"><code>python3 … load Bias INT16 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td>2</td><td class="nw"><code>A 1</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>3</td><td class="nw"><code>python3 … load W INT16 타일 0 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td>4</td><td class="nw"><code>X 1 64 (INT16 타일 0 x)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>5</td><td class="nw"><code>T 1 0</code></td><td class="nw"><code>T0\r\n</code></td></tr><tr><td>6</td><td class="nw"><code>python3 … load W INT16 타일 1 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td>7</td><td class="nw"><code>X 1 64 (INT16 타일 1 x)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>8</td><td class="nw"><code>T 1 1</code></td><td class="nw"><code>T1\r\n</code></td></tr><tr><td>9</td><td class="nw"><code>python3 … load W INT16 타일 2 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td>10</td><td class="nw"><code>X 1 64 (INT16 타일 2 x)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>11</td><td class="nw"><code>T 1 2</code></td><td class="nw"><code>T2\r\n</code></td></tr><tr><td>12</td><td class="nw"><code>python3 … load W INT16 타일 3 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td>13</td><td class="nw"><code>X 1 64 (INT16 타일 3 x)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>14</td><td class="nw"><code>T 1 3</code></td><td class="nw"><code>T3\r\n</code></td></tr><tr><td>15</td><td class="nw"><code>python3 … load W INT16 타일 4 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td>16</td><td class="nw"><code>X 1 64 (INT16 타일 4 x)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>17</td><td class="nw"><code>T 1 4</code></td><td class="nw"><code>T4\r\n</code></td></tr><tr><td>18</td><td class="nw"><code>python3 … load W INT16 타일 5 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td>19</td><td class="nw"><code>X 1 64 (INT16 타일 5 x)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>20</td><td class="nw"><code>T 1 5</code></td><td class="nw"><code>T5\r\n</code></td></tr><tr><td>21</td><td class="nw"><code>python3 … load W INT16 타일 6 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td>22</td><td class="nw"><code>X 1 64 (INT16 타일 6 x)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>23</td><td class="nw"><code>T 1 6</code></td><td class="nw"><code>T6\r\n</code></td></tr><tr><td>24</td><td class="nw"><code>python3 … load W INT16 타일 7 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td>25</td><td class="nw"><code>X 1 64 (INT16 타일 7 x)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>26</td><td class="nw"><code>T 1 7</code></td><td class="nw"><code>T7\r\n</code></td></tr><tr><td>27</td><td class="nw"><code>python3 … load W INT16 타일 8 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td>28</td><td class="nw"><code>X 1 64 (INT16 타일 8 x)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>29</td><td class="nw"><code>T 1 8</code></td><td class="nw"><code>T8\r\n</code></td></tr><tr><td>30</td><td class="nw"><code>python3 … load W INT16 타일 9 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td>31</td><td class="nw"><code>X 1 64 (INT16 타일 9 x)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>32</td><td class="nw"><code>T 1 9</code></td><td class="nw"><code>T9\r\n</code></td></tr><tr><td>33</td><td class="nw"><code>python3 … load W INT16 타일 10 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td>34</td><td class="nw"><code>X 1 64 (INT16 타일 10 x)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>35</td><td class="nw"><code>T 1 10</code></td><td class="nw"><code>TA\r\n</code></td></tr><tr><td>36</td><td class="nw"><code>python3 … load W INT16 타일 11 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td>37</td><td class="nw"><code>X 1 64 (INT16 타일 11 x)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>38</td><td class="nw"><code>T 1 11</code></td><td class="nw"><code>TB\r\n</code></td></tr><tr><td>39</td><td class="nw"><code>python3 … load W INT16 타일 12 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td>40</td><td class="nw"><code>X 1 64 (INT16 타일 12 x, 16 + 0 48개)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>41</td><td class="nw"><code>T 1 12</code></td><td class="nw"><code>C9:FFF0DFD86ED,FFF6AA4E599,FFFCC0D46DF,FFFB6DD58A3,000573B2080,FFFC39AF0FB,FFF92379101,FFFC4ED2D76,FFFFFB4E432,00057CEF570\r\n</code></td></tr></tbody>
       </table></div>
-      <p>끝난 뒤 LED: <code>0x0200</code> (LED[9:0] 마지막 784 추론 클래스 원-핫, LED15 INT8 x 타일 보관, LED14 INT16 x 타일 보관. 7세그먼트는 타일 번호·클래스·클록 수). 응답 출처: 장 Top 시뮬레이션 STAGE=3 (<code>p04/validation/rtl_sim_20261123.log</code>, 바이트 단위 대조).</p>
-      <h3>추가 코드 (구 18장 그대로, VS Code 판)</h3>
-      <p>새 RTL 파일이 없습니다. 4-2 <code>p3_tile784_10</code>을 <code>DATA_W=16</code>(코어 누산 38비트, 부분합 39비트)으로 하나 더 두고, x 타일은 2-1 <code>bram_sync_buffer</code> 16×64에 담습니다 (장 Top의 <code>u_t16</code>·<code>u_x16</code>).</p>
+      <p>끝나면 LED가 <code>0x0200</code>입니다 (LED[9:0]은 마지막 784 추론의 클래스 번호 하나가 켜지고, LED15는 INT8 타일 보관, LED14는 INT16 타일 보관입니다. 7세그먼트에는 타일 번호·클래스·클록 수가 보입니다).</p>
+      <h3>작성할 코드</h3>
+      <p>새로 작성할 RTL은 없습니다. 4-2의 <code>p3_tile784_10</code>을 <code>DATA_W=16</code>으로 하나 더 두고, 타일 입력은 2-1 <code>bram_sync_buffer</code>에 담습니다(장 Top의 <code>u_t16</code>, <code>u_x16</code>).</p>
 
-      <h3>시뮬레이션 기대 화면</h3>
-      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 서브젝트 단독 시험</span></div>
+      <h3>시뮬레이션</h3>
+      <p>보드에 올리기 전에 이 서브젝트 모듈만 먼저 시험합니다. 아래와 같은 줄이 나오면 됩니다.</p>
+      <div class="codeblock"><div class="codebar"><span>터미널 · 저장소 루트</span></div>
         <pre tabindex="0"><code>bash part03/ch18/scripts/run_sim.sh</code></pre></div>
-      <div class="codeblock"><div class="codebar"><span>기대 출력 (Icarus Verilog 12.0 · 날짜 미기록 · 출처 part03/ch18/validation/rtl_sim.log)</span></div>
+      <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
         <pre tabindex="0"><code>== config i16_full data_w=16 acc_w=41 bias_w=40
 PYTHON_TILE784_SELF_TEST_PASS suite=full cases=26 tiles=13 last_len=16 acc_w=41 bias_w=40 overflow_cases=0 seed=1717 data_w=16
 RTL_SIM_PASS TILE784 cases=26 tiles=13 tile_go_to_accept_cycles=207 acc_w=41 bias_w=40 score_w=42 errors_checked=14 data_w=16 part_w=39
@@ -2216,9 +2180,9 @@ PYTHON_RTL_COMPARE_PASS cases=16 tile_partials=2080 scores=10 class=1 overflow=1
 PYTHON_PRECISION_VECTORS_PASS data_w=16 samples=16 class_differs_from_float=0 acc_w=41 bias_w=40 seed=1818
 RTL_SIM_PASS TILE784 cases=16 tiles=13 tile_go_to_accept_cycles=207 acc_w=41 bias_w=40 score_w=42 errors_checked=0 data_w=16 part_w=39
 PYTHON_RTL_COMPARE_PASS cases=16 tile_partials=2080 scores=10 class=1 overflow=1 bit_exact=1</code></pre></div>
-      <details class="full"><summary>이 서브젝트의 테스트벤치·기준 모델 (전체 코드 2개)</summary>
+      <details class="full"><summary>테스트벤치와 기준 모델 (전체 코드 2개)</summary>
       <div class="codeblock">
-        <div class="codebar"><span>part03/ch18/reference/precision_reference.py · python · 원본 · RTL_SIM 통과 날짜 미기록</span></div>
+        <div class="codebar"><span>part03/ch18/reference/precision_reference.py · python</span></div>
         <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
 """18장: MNIST 784→10 Float·INT8·INT16 정밀도 비교 기준모델(표준 라이브러리만 사용).
 
@@ -2454,7 +2418,7 @@ if __name__ == "__main__":
         rtl_vectors(a.out, a.data_w, mdl)</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>part03/ch18/reference/train_mnist_linear.py · python · 원본 · RTL_SIM 통과 날짜 미기록</span></div>
+        <div class="codebar"><span>part03/ch18/reference/train_mnist_linear.py · python</span></div>
         <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
 """18장: MNIST 784→10 Float32 선형 분류기 학습(PC 전용, PyTorch·NumPy 필요).
 
@@ -2538,57 +2502,39 @@ if __name__ == "__main__":
     main()</code></pre>
       </div>
       </details>
-      <h3>판정 줄</h3>
+      <h3>확인할 것</h3>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
-        <tbody><tr><td><code>PC_EVAL_PASS float=9260 int8=9256 int16=9260</code></td><td>MNIST 시험 10,000장: Float 92.60%, INT8 92.56%, INT16 92.60%</td></tr><tr><td><code>RTL_SIM_PASS TILE784 data_w=16</code></td><td>INT16 784 추론 RTL이 Python 기준과 비트 단위로 같음 (표본 16개 포함)</td></tr><tr><td>장 Top STAGE=3 시뮬레이션</td><td>위 '보드에서 볼 것' 응답과 바이트 단위로 같음 · 통과</td></tr>
-        <tr><td>장 Top STAGE=3 합성·타이밍</td><td>통과 · WNS=0.201 WHS=0.036 DRC_ERRORS=0 LUT=6488 FF=4638 DSP48E1=8 RAMB18=9</td></tr></tbody>
+        <tbody><tr><td><code>PC_EVAL_PASS float=9260 int8=9256 int16=9260</code></td><td>MNIST 시험 10,000장에서 Float 92.60%, INT8 92.56%, INT16 92.60%입니다.</td></tr><tr><td><code>RTL_SIM_PASS TILE784 data_w=16</code></td><td>INT16 784 추론 RTL이 Python 기준과 비트 단위로 같습니다.</td></tr><tr><td>보드 응답</td><td>위 '보드에서 볼 것' 표의 응답과 한 글자도 다르지 않아야 합니다.</td></tr></tbody>
       </table></div>
-      <div class="gate-row">
-        <div class="gate pass">
-          <b>HOST_MODEL_PASS</b>
-          <span>PYTHON_TILE784_SELF_TEST_PASS suite=full cases=26 tiles=13 last_len=16 acc_w=41 bias_w=40 …</span>
-        </div>
-        <div class="gate pass">
-          <b>RTL_SIM_PASS</b>
-          <span>RTL_SIM_PASS TILE784 cases=26 tiles=13 tile_go_to_accept_cyc… 외 4건 · Icarus Verilog 12.0 · 날짜 미기록</span>
-        </div>
-        <div class="gate pass">
-          <b>SYNTH_TIMING_PASS</b>
-          <span>OOC 배선 후 WNS +0.625 ns (구 19장 OOC 기록) · <code>part03/ch19/validation/synth_ooc_summary.md</code></span>
-        </div>
-        <div class="gate todo">
-          <b>BOARD_PASS</b>
-          <span>⚠ 미실시 · 현재 실물 보드 확인 불가</span>
-        </div>
-      </div>
     </section>
     <section class="section" id="s4_4">
-      <h2><span class="num">06</span> 서브젝트 4-4 · PE 병렬도·메모리 구조 <small>(구 19장)</small></h2>
-      <p class="verdict"><b>학습목표 (보드):</b> 같은 타일 하나를 4PE <code>K4:00CE</code>(206클록), 8PE <code>K8:008A</code>(138), 1PE는 class마다 가중치를 다시 실어 <code>K1:0046</code>(70) × 10. 세 구성의 점수는 같다.</p>
+      <h2><span class="num">06</span> 서브젝트 4-4 · PE 병렬도·메모리 구조</h2>
+      <p class="verdict"><b>학습목표:</b> 같은 타일 하나를 세 가지 구성으로 계산합니다. 4PE는 <code>K4:00CE</code>(206클록), 8PE는 <code>K8:008A</code>(138클록)입니다. 1PE는 클래스마다 가중치를 다시 실어야 해서 <code>K1:0046</code>(70클록)을 10번 반복합니다. 세 구성의 점수는 같습니다.</p>
       <h3>보드에서 볼 것</h3>
       <ol>
-        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다: <code>vivado -mode batch -nojournal -source p04/vivado/build_p04.tcl -tclargs 4</code> → <code>build/vivado/p04_s4/basys3_p04_top.bit</code></li>
-        <li>Hardware Manager로 보드에 내려받고 <code>python3 p04/host/p04_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다 (115200 8N1). 스위치는 쓰지 않습니다. 784 추론 한 번은 PC 도구 <code>digit 92 int8</code>(명령 167개, 9,352바이트, 115200 bps로 약 0.8초)으로 보냅니다.</li>
+        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다.<br><code>vivado -mode batch -nojournal -source p04/vivado/build_p04.tcl -tclargs 4</code><br>결과: <code>build/vivado/p04_s4/basys3_p04_top.bit</code></li>
+        <li>Hardware Manager로 보드에 내려받고, <code>python3 p04/host/p04_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다 (115200 8N1). 이 장은 스위치를 쓰지 않습니다. 784 추론 한 번은 PC 도구의 <code>digit 92 int8</code>으로 보냅니다(명령 167개, 9,352바이트, 115200 bps에서 약 0.8초).</li>
       </ol>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>순서</th><th>PC 명령 (<code>p04_send.py</code>)</th><th>보드 응답 (UART)</th></tr></thead>
         <tbody><tr><td>1</td><td class="nw"><code>python3 … load PE4 타일 6 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td>2</td><td class="nw"><code>python3 … load PE8 타일 6 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td>3</td><td class="nw"><code>X 0 64 (INT8 타일 6 x)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>4</td><td class="nw"><code>K 4</code></td><td class="nw"><code>K4:00CE FFF5418,0001A95,FFFFCE5,FFFF5A3,0006089,FFFD7DD,000353C,FFF84B3,0001F33,0001C53\r\n</code></td></tr><tr><td>5</td><td class="nw"><code>K 8</code></td><td class="nw"><code>K8:008A FFF5418,0001A95,FFFFCE5,FFFF5A3,0006089,FFFD7DD,000353C,FFF84B3,0001F33,0001C53\r\n</code></td></tr><tr><td>6</td><td class="nw"><code>U 1 0 64 (PE1에 class 0 가중치)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>7</td><td class="nw"><code>K 1</code></td><td class="nw"><code>K1:0046 FFF5418\r\n</code></td></tr><tr><td>8</td><td class="nw"><code>U 1 1 64 (PE1에 class 1 가중치)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>9</td><td class="nw"><code>K 1</code></td><td class="nw"><code>K1:0046 0001A95\r\n</code></td></tr><tr><td>10</td><td class="nw"><code>U 1 2 64 (PE1에 class 2 가중치)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>11</td><td class="nw"><code>K 1</code></td><td class="nw"><code>K1:0046 FFFFCE5\r\n</code></td></tr><tr><td>12</td><td class="nw"><code>U 1 3 64 (PE1에 class 3 가중치)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>13</td><td class="nw"><code>K 1</code></td><td class="nw"><code>K1:0046 FFFF5A3\r\n</code></td></tr><tr><td>14</td><td class="nw"><code>U 1 4 64 (PE1에 class 4 가중치)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>15</td><td class="nw"><code>K 1</code></td><td class="nw"><code>K1:0046 0006089\r\n</code></td></tr><tr><td>16</td><td class="nw"><code>U 1 5 64 (PE1에 class 5 가중치)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>17</td><td class="nw"><code>K 1</code></td><td class="nw"><code>K1:0046 FFFD7DD\r\n</code></td></tr><tr><td>18</td><td class="nw"><code>U 1 6 64 (PE1에 class 6 가중치)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>19</td><td class="nw"><code>K 1</code></td><td class="nw"><code>K1:0046 000353C\r\n</code></td></tr><tr><td>20</td><td class="nw"><code>U 1 7 64 (PE1에 class 7 가중치)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>21</td><td class="nw"><code>K 1</code></td><td class="nw"><code>K1:0046 FFF84B3\r\n</code></td></tr><tr><td>22</td><td class="nw"><code>U 1 8 64 (PE1에 class 8 가중치)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>23</td><td class="nw"><code>K 1</code></td><td class="nw"><code>K1:0046 0001F33\r\n</code></td></tr><tr><td>24</td><td class="nw"><code>U 1 9 64 (PE1에 class 9 가중치)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>25</td><td class="nw"><code>K 1</code></td><td class="nw"><code>K1:0046 0001C53\r\n</code></td></tr></tbody>
       </table></div>
-      <p>끝난 뒤 LED: <code>0x8200</code> (LED[9:0] 마지막 784 추론 클래스 원-핫, LED15 INT8 x 타일 보관, LED14 INT16 x 타일 보관. 7세그먼트는 타일 번호·클래스·클록 수). 응답 출처: 장 Top 시뮬레이션 STAGE=4 (<code>p04/validation/rtl_sim_20261123.log</code>, 바이트 단위 대조).</p>
-      <h3>추가 코드 (구 19장 그대로, VS Code 판)</h3>
-      <p>새 RTL 모듈이 없습니다. 3-2 <code>p3_group10_core</code>를 <code>#(64,1)</code>·<code>#(64,10)</code>·<code>#(64,6)</code>+<code>#(64,4)</code>로 두고 (장 Top의 <code>u_pe1</code>·<code>u_pe4</code>·<code>u_pe8a</code>·<code>u_pe8b</code>), 시작부터 끝까지 클록을 셉니다.</p>
+      <p>끝나면 LED가 <code>0x8200</code>입니다 (LED[9:0]은 마지막 784 추론의 클래스 번호 하나가 켜지고, LED15는 INT8 타일 보관, LED14는 INT16 타일 보관입니다. 7세그먼트에는 타일 번호·클래스·클록 수가 보입니다).</p>
+      <h3>작성할 코드</h3>
+      <p>새로 작성할 RTL 모듈은 없습니다. 3-2의 <code>p3_group10_core</code>를 크기만 바꿔 네 개 두고(<code>u_pe1</code>, <code>u_pe4</code>, <code>u_pe8a</code>, <code>u_pe8b</code>), 시작부터 끝까지 클록을 셉니다.</p>
 
-      <h3>시뮬레이션 기대 화면</h3>
-      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 서브젝트 단독 시험</span></div>
+      <h3>시뮬레이션</h3>
+      <p>보드에 올리기 전에 이 서브젝트 모듈만 먼저 시험합니다. 아래와 같은 줄이 나오면 됩니다.</p>
+      <div class="codeblock"><div class="codebar"><span>터미널 · 저장소 루트</span></div>
         <pre tabindex="0"><code>bash part03/ch19/scripts/run_sim.sh</code></pre></div>
-      <div class="codeblock"><div class="codebar"><span>기대 출력 (Icarus Verilog 12.0 · 날짜 미기록 · 출처 part03/ch19/validation/rtl_sim.log)</span></div>
+      <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
         <pre tabindex="0"><code>PYTHON_ARCH_SELF_TEST_PASS samples=4 tile_runs=52 cycles PE1=700 PE4=206 PE8=138 load_w=640
 RTL_SIM_PASS PE_SCALE tile_runs=52 PE1=70x10 PE4=206 PE8=138(A 138, B 70) load_w=640
 PYTHON_RTL_COMPARE_PASS tile_runs=52 configs=PE1,PE4,PE8 partials_bit_exact=1 cycles_match_model=1 mnist_samples=4 class_match_ch18_int8=1</code></pre></div>
-      <details class="full"><summary>이 서브젝트의 테스트벤치·기준 모델 (전체 코드 2개)</summary>
+      <details class="full"><summary>테스트벤치와 기준 모델 (전체 코드 2개)</summary>
       <div class="codeblock">
-        <div class="codebar"><span>part03/ch19/tb/tb_p3_pe_scale.sv · systemverilog · 원본 · RTL_SIM 통과 날짜 미기록</span></div>
+        <div class="codebar"><span>part03/ch19/tb/tb_p3_pe_scale.sv · systemverilog</span></div>
         <pre tabindex="0"><code class="language-systemverilog">// (추가) 19장 PE 병렬도 비교 테스트벤치. 14장 p3_group10_core(변경 없음)로 세 구성을 만들어 같은 타일을 계산한다.
 //   PE1 : 코어 #(64,1)  — lane 0만 유효. class마다 가중치 64개 재적재 후 10회 실행
 //   PE4 : 코어 #(64,10) — 4+4+2 그룹
@@ -2821,7 +2767,7 @@ module tb_p3_pe_scale;
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>part03/ch19/reference/arch_reference.py · python · 원본 · RTL_SIM 통과 날짜 미기록</span></div>
+        <div class="codebar"><span>part03/ch19/reference/arch_reference.py · python</span></div>
         <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
 """19장: PE 병렬도(1·4·8PE)·BRAM 공급 포트·메모리 구조 비교 기준모델(표준 라이브러리).
 
@@ -3003,47 +2949,30 @@ if __name__ == "__main__":
         generate(a.out, a.samples)</code></pre>
       </div>
       </details>
-      <h3>판정 줄</h3>
+      <h3>확인할 것</h3>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
-        <tbody><tr><td><code>RTL_SIM_PASS PE_SCALE PE1=70x10 PE4=206 PE8=138</code></td><td>같은 52타일 작업에서 세 구성의 클록 수</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS cycles_match_model=1</code></td><td>부분합 비트 단위 일치, 클록 수가 모델과 같음</td></tr><tr><td>장 Top STAGE=4 시뮬레이션</td><td>위 '보드에서 볼 것' 응답과 바이트 단위로 같음 · 통과</td></tr>
-        <tr><td>장 Top STAGE=4 합성·타이밍</td><td>통과 · WNS=0.195 WHS=0.036 DRC_ERRORS=0 LUT=7401 FF=5536 DSP48E1=21 RAMB18=22</td></tr></tbody>
+        <tbody><tr><td><code>RTL_SIM_PASS PE_SCALE PE1=70x10 PE4=206 PE8=138</code></td><td>같은 작업(타일 52개)에서 세 구성이 쓰는 클록 수입니다.</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS cycles_match_model=1</code></td><td>부분합이 비트 단위로 같고, 클록 수도 모델의 예측과 같습니다.</td></tr><tr><td>보드 응답</td><td>위 '보드에서 볼 것' 표의 응답과 한 글자도 다르지 않아야 합니다.</td></tr></tbody>
       </table></div>
-      <div class="gate-row">
-        <div class="gate pass">
-          <b>HOST_MODEL_PASS</b>
-          <span>PYTHON_ARCH_SELF_TEST_PASS samples=4 tile_runs=52 cycles PE1=700 PE4=206 PE8=138 load_w=64…</span>
-        </div>
-        <div class="gate pass">
-          <b>RTL_SIM_PASS</b>
-          <span>RTL_SIM_PASS PE_SCALE tile_runs=52 PE1=70x10 PE4=206 PE8=138… · Icarus Verilog 12.0 · 날짜 미기록</span>
-        </div>
-        <div class="gate pass">
-          <b>SYNTH_TIMING_PASS</b>
-          <span>OOC 배선 후 5구성 WNS 최소 +0.901 ns (OOC) · <code>part03/ch19/validation/synth_ooc_summary.md</code></span>
-        </div>
-        <div class="gate todo">
-          <b>BOARD_PASS</b>
-          <span>⚠ 미실시 · 현재 실물 보드 확인 불가</span>
-        </div>
-      </div>
     </section>
     <section class="section" id="demo">
       <h2><span class="num">07</span> 장 시연</h2>
-      <p>STAGE=4 비트스트림 하나로 모든 서브젝트를 차례로 보여 줍니다. 아래 응답은 장 Top 시뮬레이션이 바이트 단위로 대조한 값입니다.</p>
+      <p>STAGE=4 비트스트림 하나로 모든 서브젝트를 처음부터 끝까지 이어서 보여 줍니다. 아래 순서대로 보내고 응답을 표와 비교합니다.</p>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th class="nw">서브젝트</th><th>PC 명령</th><th>보드 응답</th></tr></thead>
         <tbody><tr><td class="nw">4-1</td><td class="nw"><code>S</code></td><td class="nw"><code>I\r\n</code></td></tr><tr><td class="nw">4-1</td><td class="nw"><code>Q 768</code></td><td class="nw"><code>Q:03,0030 O:00\r\n</code></td></tr><tr><td class="nw">4-1</td><td class="nw"><code>Q 384</code></td><td class="nw"><code>Q:02,0018 O:00\r\n</code></td></tr><tr><td class="nw">4-1</td><td class="nw"><code>Q -384</code></td><td class="nw"><code>Q:FE,FFE8 O:00\r\n</code></td></tr><tr><td class="nw">4-1</td><td class="nw"><code>Q 65536</code></td><td class="nw"><code>Q:7F,1000 O:10\r\n</code></td></tr><tr><td class="nw">4-1</td><td class="nw"><code>Q 2147483647</code></td><td class="nw"><code>Q:7F,7FFF O:11\r\n</code></td></tr><tr><td class="nw">4-2</td><td class="nw"><code>T 0 5</code></td><td class="nw"><code>E1\r\n</code></td></tr><tr><td class="nw">4-2</td><td class="nw"><code>python3 … load Bias INT8 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td class="nw">4-2</td><td class="nw"><code>A 0</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">4-2</td><td class="nw"><code>python3 … load W INT8 타일 0 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td class="nw">4-2</td><td class="nw"><code>X 0 64 (INT8 타일 0 x)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">4-2</td><td class="nw"><code>T 0 0</code></td><td class="nw"><code>T0\r\n</code></td></tr><tr><td class="nw">4-2</td><td class="nw"><code>python3 … load W INT8 타일 1 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td class="nw">4-2</td><td class="nw"><code>X 0 64 (INT8 타일 1 x)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">4-2</td><td class="nw"><code>T 0 1</code></td><td class="nw"><code>T1\r\n</code></td></tr><tr><td class="nw">4-2</td><td class="nw"><code>python3 … load W INT8 타일 2 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td class="nw">4-2</td><td class="nw"><code>X 0 64 (INT8 타일 2 x)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">4-2</td><td class="nw"><code>T 0 2</code></td><td class="nw"><code>T2\r\n</code></td></tr><tr><td class="nw">4-2</td><td class="nw"><code>python3 … load W INT8 타일 3 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td class="nw">4-2</td><td class="nw"><code>X 0 64 (INT8 타일 3 x)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">4-2</td><td class="nw"><code>T 0 3</code></td><td class="nw"><code>T3\r\n</code></td></tr><tr><td class="nw">4-2</td><td class="nw"><code>python3 … load W INT8 타일 4 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td class="nw">4-2</td><td class="nw"><code>X 0 64 (INT8 타일 4 x)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">4-2</td><td class="nw"><code>T 0 4</code></td><td class="nw"><code>T4\r\n</code></td></tr><tr><td class="nw">4-2</td><td class="nw"><code>python3 … load W INT8 타일 5 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td class="nw">4-2</td><td class="nw"><code>X 0 64 (INT8 타일 5 x)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">4-2</td><td class="nw"><code>T 0 5</code></td><td class="nw"><code>T5\r\n</code></td></tr><tr><td class="nw">4-2</td><td class="nw"><code>python3 … load W INT8 타일 6 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td class="nw">4-2</td><td class="nw"><code>X 0 64 (INT8 타일 6 x)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">4-2</td><td class="nw"><code>T 0 6</code></td><td class="nw"><code>T6\r\n</code></td></tr><tr><td class="nw">4-2</td><td class="nw"><code>python3 … load W INT8 타일 7 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td class="nw">4-2</td><td class="nw"><code>X 0 64 (INT8 타일 7 x)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">4-2</td><td class="nw"><code>T 0 7</code></td><td class="nw"><code>T7\r\n</code></td></tr><tr><td class="nw">4-2</td><td class="nw"><code>python3 … load W INT8 타일 8 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td class="nw">4-2</td><td class="nw"><code>X 0 64 (INT8 타일 8 x)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">4-2</td><td class="nw"><code>T 0 8</code></td><td class="nw"><code>T8\r\n</code></td></tr><tr><td class="nw">4-2</td><td class="nw"><code>python3 … load W INT8 타일 9 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td class="nw">4-2</td><td class="nw"><code>X 0 64 (INT8 타일 9 x)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">4-2</td><td class="nw"><code>T 0 9</code></td><td class="nw"><code>T9\r\n</code></td></tr><tr><td class="nw">4-2</td><td class="nw"><code>python3 … load W INT8 타일 10 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td class="nw">4-2</td><td class="nw"><code>X 0 64 (INT8 타일 10 x)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">4-2</td><td class="nw"><code>T 0 10</code></td><td class="nw"><code>TA\r\n</code></td></tr><tr><td class="nw">4-2</td><td class="nw"><code>python3 … load W INT8 타일 11 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td class="nw">4-2</td><td class="nw"><code>X 0 64 (INT8 타일 11 x)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">4-2</td><td class="nw"><code>T 0 11</code></td><td class="nw"><code>TB\r\n</code></td></tr><tr><td class="nw">4-2</td><td class="nw"><code>python3 … load W INT8 타일 12 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td class="nw">4-2</td><td class="nw"><code>X 0 64 (INT8 타일 12 x, 16 + 0 48개)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">4-2</td><td class="nw"><code>T 0 12</code></td><td class="nw"><code>C4:FFFFFFF106C,FFFFFFF6D9B,FFFFFFFCE00,FFFFFFFB921,00000005789,FFFFFFFC374,FFFFFFF9447,FFFFFFFC67A,FFFFFFFFFCA,0000000568C\r\n</code></td></tr><tr><td class="nw">4-3</td><td class="nw"><code>python3 … load Bias INT16 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td class="nw">4-3</td><td class="nw"><code>A 1</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">4-3</td><td class="nw"><code>python3 … load W INT16 타일 0 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td class="nw">4-3</td><td class="nw"><code>X 1 64 (INT16 타일 0 x)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">4-3</td><td class="nw"><code>T 1 0</code></td><td class="nw"><code>T0\r\n</code></td></tr><tr><td class="nw">4-3</td><td class="nw"><code>python3 … load W INT16 타일 1 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td class="nw">4-3</td><td class="nw"><code>X 1 64 (INT16 타일 1 x)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">4-3</td><td class="nw"><code>T 1 1</code></td><td class="nw"><code>T1\r\n</code></td></tr><tr><td class="nw">4-3</td><td class="nw"><code>python3 … load W INT16 타일 2 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td class="nw">4-3</td><td class="nw"><code>X 1 64 (INT16 타일 2 x)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">4-3</td><td class="nw"><code>T 1 2</code></td><td class="nw"><code>T2\r\n</code></td></tr><tr><td class="nw">4-3</td><td class="nw"><code>python3 … load W INT16 타일 3 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td class="nw">4-3</td><td class="nw"><code>X 1 64 (INT16 타일 3 x)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">4-3</td><td class="nw"><code>T 1 3</code></td><td class="nw"><code>T3\r\n</code></td></tr><tr><td class="nw">4-3</td><td class="nw"><code>python3 … load W INT16 타일 4 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td class="nw">4-3</td><td class="nw"><code>X 1 64 (INT16 타일 4 x)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">4-3</td><td class="nw"><code>T 1 4</code></td><td class="nw"><code>T4\r\n</code></td></tr><tr><td class="nw">4-3</td><td class="nw"><code>python3 … load W INT16 타일 5 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td class="nw">4-3</td><td class="nw"><code>X 1 64 (INT16 타일 5 x)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">4-3</td><td class="nw"><code>T 1 5</code></td><td class="nw"><code>T5\r\n</code></td></tr><tr><td class="nw">4-3</td><td class="nw"><code>python3 … load W INT16 타일 6 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td class="nw">4-3</td><td class="nw"><code>X 1 64 (INT16 타일 6 x)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">4-3</td><td class="nw"><code>T 1 6</code></td><td class="nw"><code>T6\r\n</code></td></tr><tr><td class="nw">4-3</td><td class="nw"><code>python3 … load W INT16 타일 7 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td class="nw">4-3</td><td class="nw"><code>X 1 64 (INT16 타일 7 x)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">4-3</td><td class="nw"><code>T 1 7</code></td><td class="nw"><code>T7\r\n</code></td></tr><tr><td class="nw">4-3</td><td class="nw"><code>python3 … load W INT16 타일 8 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td class="nw">4-3</td><td class="nw"><code>X 1 64 (INT16 타일 8 x)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">4-3</td><td class="nw"><code>T 1 8</code></td><td class="nw"><code>T8\r\n</code></td></tr><tr><td class="nw">4-3</td><td class="nw"><code>python3 … load W INT16 타일 9 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td class="nw">4-3</td><td class="nw"><code>X 1 64 (INT16 타일 9 x)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">4-3</td><td class="nw"><code>T 1 9</code></td><td class="nw"><code>T9\r\n</code></td></tr><tr><td class="nw">4-3</td><td class="nw"><code>python3 … load W INT16 타일 10 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td class="nw">4-3</td><td class="nw"><code>X 1 64 (INT16 타일 10 x)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">4-3</td><td class="nw"><code>T 1 10</code></td><td class="nw"><code>TA\r\n</code></td></tr><tr><td class="nw">4-3</td><td class="nw"><code>python3 … load W INT16 타일 11 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td class="nw">4-3</td><td class="nw"><code>X 1 64 (INT16 타일 11 x)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">4-3</td><td class="nw"><code>T 1 11</code></td><td class="nw"><code>TB\r\n</code></td></tr><tr><td class="nw">4-3</td><td class="nw"><code>python3 … load W INT16 타일 12 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td class="nw">4-3</td><td class="nw"><code>X 1 64 (INT16 타일 12 x, 16 + 0 48개)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">4-3</td><td class="nw"><code>T 1 12</code></td><td class="nw"><code>C9:FFF0DFD86ED,FFF6AA4E599,FFFCC0D46DF,FFFB6DD58A3,000573B2080,FFFC39AF0FB,FFF92379101,FFFC4ED2D76,FFFFFB4E432,00057CEF570\r\n</code></td></tr><tr><td class="nw">4-4</td><td class="nw"><code>python3 … load PE4 타일 6 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td class="nw">4-4</td><td class="nw"><code>python3 … load PE8 타일 6 (10개 명령)</code></td><td class="nw"><code>OK\r\n ×10</code></td></tr><tr><td class="nw">4-4</td><td class="nw"><code>X 0 64 (INT8 타일 6 x)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">4-4</td><td class="nw"><code>K 4</code></td><td class="nw"><code>K4:00CE FFF5418,0001A95,FFFFCE5,FFFF5A3,0006089,FFFD7DD,000353C,FFF84B3,0001F33,0001C53\r\n</code></td></tr><tr><td class="nw">4-4</td><td class="nw"><code>K 8</code></td><td class="nw"><code>K8:008A FFF5418,0001A95,FFFFCE5,FFFF5A3,0006089,FFFD7DD,000353C,FFF84B3,0001F33,0001C53\r\n</code></td></tr><tr><td class="nw">4-4</td><td class="nw"><code>U 1 0 64 (PE1에 class 0 가중치)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">4-4</td><td class="nw"><code>K 1</code></td><td class="nw"><code>K1:0046 FFF5418\r\n</code></td></tr><tr><td class="nw">4-4</td><td class="nw"><code>U 1 1 64 (PE1에 class 1 가중치)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">4-4</td><td class="nw"><code>K 1</code></td><td class="nw"><code>K1:0046 0001A95\r\n</code></td></tr><tr><td class="nw">4-4</td><td class="nw"><code>U 1 2 64 (PE1에 class 2 가중치)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">4-4</td><td class="nw"><code>K 1</code></td><td class="nw"><code>K1:0046 FFFFCE5\r\n</code></td></tr><tr><td class="nw">4-4</td><td class="nw"><code>U 1 3 64 (PE1에 class 3 가중치)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">4-4</td><td class="nw"><code>K 1</code></td><td class="nw"><code>K1:0046 FFFF5A3\r\n</code></td></tr><tr><td class="nw">4-4</td><td class="nw"><code>U 1 4 64 (PE1에 class 4 가중치)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">4-4</td><td class="nw"><code>K 1</code></td><td class="nw"><code>K1:0046 0006089\r\n</code></td></tr><tr><td class="nw">4-4</td><td class="nw"><code>U 1 5 64 (PE1에 class 5 가중치)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">4-4</td><td class="nw"><code>K 1</code></td><td class="nw"><code>K1:0046 FFFD7DD\r\n</code></td></tr><tr><td class="nw">4-4</td><td class="nw"><code>U 1 6 64 (PE1에 class 6 가중치)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">4-4</td><td class="nw"><code>K 1</code></td><td class="nw"><code>K1:0046 000353C\r\n</code></td></tr><tr><td class="nw">4-4</td><td class="nw"><code>U 1 7 64 (PE1에 class 7 가중치)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">4-4</td><td class="nw"><code>K 1</code></td><td class="nw"><code>K1:0046 FFF84B3\r\n</code></td></tr><tr><td class="nw">4-4</td><td class="nw"><code>U 1 8 64 (PE1에 class 8 가중치)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">4-4</td><td class="nw"><code>K 1</code></td><td class="nw"><code>K1:0046 0001F33\r\n</code></td></tr><tr><td class="nw">4-4</td><td class="nw"><code>U 1 9 64 (PE1에 class 9 가중치)</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">4-4</td><td class="nw"><code>K 1</code></td><td class="nw"><code>K1:0046 0001C53\r\n</code></td></tr></tbody>
       </table></div>
-      <p>끝난 뒤 LED: <code>0x8200</code> (LED[9:0] 마지막 784 추론 클래스 원-핫, LED15 INT8 x 타일 보관, LED14 INT16 x 타일 보관. 7세그먼트는 타일 번호·클래스·클록 수). btnC를 누르면 처음 상태로 돌아갑니다.</p>
+      <p>끝나면 LED가 <code>0x8200</code>입니다 (LED[9:0]은 마지막 784 추론의 클래스 번호 하나가 켜지고, LED15는 INT8 타일 보관, LED14는 INT16 타일 보관입니다. 7세그먼트에는 타일 번호·클래스·클록 수가 보입니다). btnC를 누르면 처음 상태로 돌아갑니다.</p>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
-        <thead><tr><th>PC 결과 (모델·데이터)</th><th>값 · 출처 로그</th></tr></thead>
-        <tbody><tr><td>784→10 선형, MNIST 시험 10,000장 (구 18장 PC 평가)</td><td><code>samples=10000 float=9260 int8=9256 int16=9260 torch_f32=9260 agree_int8_float=9976 agree_int16_float=10000</code> · <code>part03/ch18/validation/pc_eval.log</code></td></tr><tr><td>장 시연 그림 (18장 표본 파일)</td><td><code>sample=#92 label=9 pc_pred_float=9 int8=4 int16=9</code> · <code>p04/validation/rtl_sim_20261123.log</code></td></tr></tbody>
+        <thead><tr><th>PC에서 미리 확인하는 값</th><th>결과</th></tr></thead>
+        <tbody><tr><td>784→10 선형, MNIST 시험 10,000장</td><td><code>samples=10000 float=9260 int8=9256 int16=9260 torch_f32=9260 agree_int8_float=9976 agree_int16_float=10000</code></td></tr><tr><td>장 시연 그림 (#92)</td><td><code>sample=#92 label=9 pc_pred_float=9 int8=4 int16=9</code></td></tr></tbody>
       </table></div>
-      <p>정답 수 차이는 10,000장 중 4장(INT8 9,256 · INT16 9,260)뿐이지만, INT8이 Float와 다른 클래스를 내는 그림은 24장(일치 9,976)이고 시험 #92가 그중 하나다. 가중치 재적재(그림 한 장에 9,352바이트)가 연산(타일당 206클록)보다 훨씬 오래 걸리는 것이 4-4의 결론이다.</p>
-      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 장 Top 시뮬레이션 (STAGE 1~4)</span></div>
+      <p>정답 수 차이는 10,000장 중 4장(INT8 9,256, INT16 9,260)뿐입니다. 그러나 INT8이 Float와 다른 클래스를 내는 그림은 24장이고, 시험 #92가 그중 하나입니다. 또 그림 한 장에 가중치 9,352바이트를 다시 싣는 시간이 연산(타일당 206클록)보다 훨씬 깁니다. 이것이 4-4의 결론입니다.</p>
+      <h3>시연 전 점검</h3>
+      <p>보드에 올리기 전에 장 Top 전체를 시뮬레이션합니다. STAGE마다 <code>P04_TOP_RTL_SIM_PASS</code>가 나오면 됩니다.</p>
+      <div class="codeblock"><div class="codebar"><span>터미널 · 장 Top 시뮬레이션 (STAGE 1~4)</span></div>
         <pre tabindex="0"><code>bash p04/scripts/run_sim.sh</code></pre></div>
-      <div class="codeblock"><div class="codebar"><span>기대 출력 (Icarus Verilog 12.0 · 2026-11-23 · 출처 p04/validation/rtl_sim_20261123.log)</span></div>
+      <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
         <pre tabindex="0"><code>PYTHON_P04_SELF_TEST_PASS
 PYTHON_P04_VECTORS stage=1 cases=7 tx_bytes=28 final_led=0x0000
 PYTHON_P04_VECTORS stage=2 cases=174 tx_bytes=9381 final_led=0x0010
@@ -3054,15 +2983,12 @@ P04_TOP_RTL_SIM_PASS stage=2 cases=174 bytes=875
 P04_TOP_RTL_SIM_PASS stage=3 cases=341 bytes=1663
 P04_TOP_RTL_SIM_PASS stage=4 cases=384 bytes=2135
 RTL_SIM_PASS stages=4</code></pre></div>
-      <div class="codeblock"><div class="codebar"><span>Vivado (VS Code) · STAGE 1~4 비트스트림</span></div>
-        <pre tabindex="0"><code>vivado -mode batch -nojournal -source p04/vivado/build_p04.tcl
-SYNTH_TIMING_PASS p04 basys3_p04_top STAGE=1 WNS=0.583 WHS=0.024 DRC_ERRORS=0 LUT=814 FF=390 DSP48E1=0 RAMB18=0
-SYNTH_TIMING_PASS p04 basys3_p04_top STAGE=2 WNS=0.423 WHS=0.035 DRC_ERRORS=0 LUT=3966 FF=2790 DSP48E1=4 RAMB18=4
-SYNTH_TIMING_PASS p04 basys3_p04_top STAGE=3 WNS=0.201 WHS=0.036 DRC_ERRORS=0 LUT=6488 FF=4638 DSP48E1=8 RAMB18=9
-SYNTH_TIMING_PASS p04 basys3_p04_top STAGE=4 WNS=0.195 WHS=0.036 DRC_ERRORS=0 LUT=7401 FF=5536 DSP48E1=21 RAMB18=22</code></pre></div>
-      <details class="full"><summary>장 Top 테스트벤치·기준 모델 (전체 코드)</summary>
+      <p>비트스트림은 아래 명령 한 번으로 STAGE 1~4을 모두 만듭니다. STAGE마다 <code>SYNTH_TIMING_PASS</code> 줄이 나오면 됩니다.</p>
+      <div class="codeblock"><div class="codebar"><span>터미널 · Vivado</span></div>
+        <pre tabindex="0"><code>vivado -mode batch -nojournal -source p04/vivado/build_p04.tcl</code></pre></div>
+      <details class="full"><summary>장 Top 테스트벤치와 기준 모델 (전체 코드)</summary>
       <div class="codeblock">
-        <div class="codebar"><span>p04/tb/tb_p04_top.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-23</span></div>
+        <div class="codebar"><span>p04/tb/tb_p04_top.sv · systemverilog</span></div>
         <pre tabindex="0"><code class="language-systemverilog">// 4장 보드 Top 시험: UART 핀으로 명령을 보내고 TX 핀을 복조해 기준 모델(p04_cases_sN.txt)과 바이트 단위로 대조한다.
 // 4장 Top에는 스위치 입력이 없다. 784 추론 한 번에 약 1만 바이트라 UART를 12.5 Mbps(비트당 8클록)로 돌린다.
 // 시뮬레이션 시간을 줄이려고 BAUD 6.25 Mbps(CPB 16), REFRESH_BITS 6으로 돌린다. 보드 Top 기본값은 115200 bps.
@@ -3166,7 +3092,7 @@ module tb_p04_top;
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>p04/reference/p04_model.py · python · 원본 · RTL_SIM 통과 2026-11-23</span></div>
+        <div class="codebar"><span>p04/reference/p04_model.py · python</span></div>
         <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
 """4장 784 가속기 보드 기준 모델.
 
@@ -3429,43 +3355,16 @@ if __name__ == "__main__":
       </details>
     </section>
     <section class="section" id="s_report">
-      <h2><span class="num">08</span> 누적 보고·인계</h2>
+      <h2><span class="num">08</span> 장 정리·다음 장으로</h2>
+      <p>이 장에서 만든 것을 한눈에 정리합니다. 모두 보드에서 확인했다면 다음 장으로 넘어갑니다.</p>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
-        <thead><tr><th>서브젝트</th><th>구 장</th><th>추가 RTL</th><th>시뮬레이션 (단독 + 장 Top)</th><th>합성 (장 Top STAGE)</th><th>보드</th></tr></thead>
-        <tbody><tr><td>4-1</td><td>06장</td><td><code>precision_compare.v</code></td><td>통과</td><td>통과</td><td>⚠ 미검증</td></tr><tr><td>4-2</td><td>17장</td><td><code>p3_tile784_10.v</code></td><td>통과</td><td>통과</td><td>⚠ 미검증</td></tr><tr><td>4-3</td><td>18장</td><td></td><td>통과</td><td>통과</td><td>⚠ 미검증</td></tr><tr><td>4-4</td><td>19장</td><td></td><td>통과</td><td>통과</td><td>⚠ 미검증</td></tr></tbody>
+        <thead><tr><th>서브젝트</th><th>장 Top에 들어간 모듈</th><th>보드에서 확인한 것</th></tr></thead>
+        <tbody><tr><td class="nw">4-1 INT8·INT16 정밀도 비교</td><td><code>precision_compare.v</code></td><td>같은 32비트 값을 두 정밀도로 줄여 봅니다. 768은 <code>Q:03,0030</code>입니다. 65536은 INT8에서 <code>7F</code>로 막히고(넘침 1), INT16에서는 <code>1000</code>으로 정확합니다.</td></tr><tr><td class="nw">4-2 784 입력 13타일 누산 (INT8)</td><td><code>p3_tile784_10.v</code></td><td>시험 #92(숫자 9)를 타일 13개로 나눠 보냅니다. 타일마다 가중치 640개와 입력 64개를 싣고 <code>T</code>를 보내면 <code>T0</code>…<code>TB</code>가 차례로 오고, 마지막에 <code>C4</code>가 옵니다(INT8은 4로 틀립니다). 준비 없이 <code>T</code>를 보내면 <code>E1</code>입니다.</td></tr><tr><td class="nw">4-3 INT8·INT16 MNIST 정밀도</td><td>—</td><td>같은 그림을 INT16 엔진으로 보냅니다. 가중치와 입력이 2바이트라 보낼 양이 두 배이고, 결과는 정답 <code>C9</code>입니다. LED가 4번에서 9번으로 옮겨 갑니다.</td></tr><tr><td class="nw">4-4 PE 병렬도·메모리 구조</td><td>—</td><td>같은 타일 하나를 세 가지 구성으로 계산합니다. 4PE는 <code>K4:00CE</code>(206클록), 8PE는 <code>K8:008A</code>(138클록)입니다. 1PE는 클래스마다 가중치를 다시 실어야 해서 <code>K1:0046</code>(70클록)을 10번 반복합니다. 세 구성의 점수는 같습니다.</td></tr></tbody>
       </table></div>
-      <p>※ = 구 장 단독 실습 파일이라 장 Top 빌드(<code>p04/vivado/build_p04.tcl</code>)에는 들어가지 않음.</p>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>다음 장으로 넘기는 파일</th><th>사용처</th></tr></thead>
-        <tbody><tr><td><code>part03/ch17/rtl/p3_tile784_10.v</code></td><td>5장 AXI NPU IP(구 20장 p3_npu_axi_lite)가 안에 그대로 넣어 MicroBlaze V에 붙인다 (VS Code 판)</td></tr><tr><td><code>p04/host/p04_send.py</code></td><td>5장에서 같은 784 추론을 CPU 드라이버가 대신 하므로, PC 도구와 드라이버 시간 비교에 쓴다 (5장 전환 때)</td></tr></tbody>
+        <tbody><tr><td><code>part03/ch17/rtl/p3_tile784_10.v</code></td><td>5장 AXI NPU IP가 안에 그대로 넣어 MicroBlaze V에 붙입니다</td></tr><tr><td><code>p04/host/p04_send.py</code></td><td>5장에서는 같은 784 추론을 CPU 드라이버가 대신 합니다. 걸리는 시간을 비교할 때 씁니다</td></tr></tbody>
       </table></div>
-      <p>장 게이트 (<code>p04/validation/</code> 증거 기준 자동 표시):</p>
-      <div class="gate-row">
-        <div class="gate pass">
-          <b>HTML_PASS</b>
-          <span>v01 · 생성기</span>
-        </div>
-        <div class="gate pass">
-          <b>HOST_MODEL_PASS</b>
-          <span>PYTHON_P04_SELF_TEST_PASS</span>
-        </div>
-        <div class="gate pass">
-          <b>RTL_SIM_PASS</b>
-          <span>장 Top STAGE 1~4 · Icarus Verilog 12.0 · 2026-11-23</span>
-        </div>
-        <div class="gate pass">
-          <b>SYNTH_TIMING_PASS</b>
-          <span>STAGE 1~4 비트스트림 · 2026-11-23</span>
-        </div>
-        <div class="gate todo">
-          <b>XSIM_RTL_PASS</b>
-          <span>⚠ 미검증 · Vivado 시뮬레이터(xsim) 실행 대기 — 현재 근거는 Icarus Verilog</span>
-        </div>
-        <div class="gate todo">
-          <b>BOARD_PASS</b>
-          <span>⚠ 미실시 · 실물 보드 확인 대기</span>
-        </div>
-      </div>
     </section>
     <div class="chapter-links" id="chapter-links"></div>
   </main>

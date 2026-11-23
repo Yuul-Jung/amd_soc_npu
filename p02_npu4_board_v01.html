@@ -61,7 +61,7 @@ details.full>summary{cursor:pointer;font-weight:600}
   <div class="hero-inner">
     <p class="kicker">BASYS3 · NPU 고도화판 · 2장 프로젝트 · 2일 <span class="vbadge">v01</span></p>
     <h1>제2장 · 4뉴런 NPU 보드</h1>
-    <p>BRAM→양자화→내적→4PE→Dense→Core를 쌓아 보드 4뉴런 추론. 서브젝트 8개마다 확인.</p>
+    <p>BRAM, 양자화, 내적, 4PE, Dense, Core를 차례로 쌓아 보드에서 4뉴런 추론을 완성합니다.</p>
   </div>
 </header>
 <div class="wrap">
@@ -69,10 +69,10 @@ details.full>summary{cursor:pointer;font-weight:600}
   <main class="content" id="main-content">
     <section class="section" id="s00">
       <h2><span class="num">00</span> 장 목표·진행 위치</h2>
-      <p><b>장 시연 (보드):</b> PC가 적재한 입력·가중치로 보드가 4뉴런 추론을 하고 UART에 점수, LED·7세그먼트에 클래스를 띄운다. 누적 npu_core와 12장 엔진을 sw로 바꿔 같은 클래스를 확인한다.</p>
-      <p>편성: 2일 · 서브젝트 8개 · 서브젝트마다 보드 확인 1번 + 장 시연.</p>
+      <p><b>장 시연 (보드):</b> PC가 입력과 가중치를 보내면 보드가 뉴런 4개짜리 추론을 하고, UART로 점수를, LED와 7세그먼트로 클래스를 보여 줍니다. 두 가지 엔진을 스위치로 바꿔 가며 같은 클래스가 나오는지도 확인합니다.</p>
+      <p>2일 과정입니다. 서브젝트 8개를 차례로 끝내며 그때마다 보드에서 확인하고, 마지막에 장 전체를 시연합니다.</p>
       <ol class="road" aria-label="전체 장에서 지금 위치"><li class=""><a href="p01_uart_calc_v01.html"><b>1장</b>UART 계산기</a></li><li class="now" aria-current="step"><b>2장</b>4뉴런 NPU 보드</li><li class=""><a href="p03_mnist8x8_v01.html"><b>3장</b>8×8 MNIST (CPU 없음)</a></li><li class=""><a href="p04_tile784_v01.html"><b>4장</b>784 가속기 설계 공간</a></li><li class=""><a href="p05_mbv_soc_v01.html"><b>5장</b>MicroBlaze V SoC</a></li><li class=""><a href="p06_npu_apps_v01.html"><b>6장</b>응용 확장</a></li><li class="plan"><b>7장</b>종합과제</li></ol>
-      <ol class="steps" aria-label="이 장의 서브젝트와 진행 상태"><li class=""><span class="code">2-1</span><span><a href="#s2_1">BRAM 동기 버퍼</a> <small>(구 04장 · 1일 오전)</small><br><code>X</code>·<code>W</code>로 쓴 값을 <code>x</code>·<code>w</code>로 되읽으면 같은 값(<code>X:0003</code>, <code>X:FFFE</code>, <code>W:0005</code>). 주소 64는 <code>ERR</code>.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">2-2</span><span><a href="#s2_2">고정소수점 양자화</a> <small>(구 05장 · 1일 오전)</small><br>32비트 → 8비트: 768 → <code>03</code>, 384(=1.5) → <code>02</code>(반올림), 65536 → <code>7F</code>와 넘침 <code>O:1</code>.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">2-3</span><span><a href="#s2_3">벡터 내적</a> <small>(구 07장 · 1일 오후)</small><br>X=(1,2,3,4)·W0=(5,6,7,8) → <code>D:0000000046</code>(70). W0[3]을 −8로 바꾸면 6. 길이 0은 <code>ERR</code>.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">2-4</span><span><a href="#s2_4">4PE 병렬 어레이</a> <small>(구 08장 · 1일 오후)</small><br>같은 X에 W0~W3 네 내적을 한 번에: <code>P:</code> 6, 10, −10(<code>…FFF6</code>), 8.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">2-5</span><span><a href="#s2_5">Dense 4뉴런 레이어</a> <small>(구 09장 · 2일 오전)</small><br>Bias를 더하고 ReLU·16비트 포화: <code>L:0006,0000,005A,7FFF O:8</code> (음수 → 0, 65544 → 7FFF와 넘침).</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">2-6</span><span><a href="#s2_6">4뉴런 NPU Core</a> <small>(구 10장 · 2일 오전)</small><br>npu_core가 자체 BRAM에서 읽어 같은 Dense를 한다: <code>N 4</code>가 <code>L 4</code>와 같은 답. 길이 2면 <code>0011,0000,0061,7FFF</code>.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">2-7</span><span><a href="#s2_7">UART 모델 적재</a> <small>(구 11장 · 2일 오후)</small><br>sw2를 올리면 11장 명령: 고정 그룹 <code>0</code>~<code>3</code> → <code>C0</code>~<code>C3</code>. 내리고 <code>x 0</code> → <code>X:FFFF</code> (11장이 쓴 값을 콘솔이 읽음).</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class=""><span class="code">2-8</span><span><a href="#s2_8">통합 NPU Top</a> <small>(구 12장 · 2일 오후)</small><br>sw3을 올리면 12장 엔진: 같은 그룹에서 음수 점수(<code>…FFE</code>, ReLU 없음)가 보이고 클래스는 같다. LED0~3에 클래스, LED14 끝남, 7세그먼트에 클래스.</span><span class="st">시뮬 통과 · 보드 ⚠ 미검증</span></li><li class="demo"><span class="code">시연</span><span><a href="#demo">장 시연</a><br>PC가 적재한 입력·가중치로 보드가 4뉴런 추론을 하고 UART에 점수, LED·7세그먼트에 클래스를 띄운다. 누적 npu_core와 12장 엔진을 sw로 바꿔 같은 클래스를 확인한다.</span><span class="st">보드 ⚠ 미실시</span></li></ol>
+      <ol class="steps" aria-label="이 장의 서브젝트와 순서"><li><span class="code">2-1</span><span><a href="#s2_1">BRAM 동기 버퍼</a><br><code>X</code>·<code>W</code>로 쓴 값을 <code>x</code>·<code>w</code>로 되읽으면 같은 값이 나옵니다(<code>X:0003</code>, <code>X:FFFE</code>, <code>W:0005</code>). 범위를 벗어난 주소 64는 <code>ERR</code>입니다.</span><span class="st">1일 오전</span></li><li><span class="code">2-2</span><span><a href="#s2_2">고정소수점 양자화</a><br>32비트 값을 8비트로 줄입니다. 768은 <code>03</code>, 384(=1.5)는 반올림되어 <code>02</code>, 65536은 최댓값 <code>7F</code>로 막히고 넘침 표시 <code>O:1</code>이 붙습니다.</span><span class="st">1일 오전</span></li><li><span class="code">2-3</span><span><a href="#s2_3">벡터 내적</a><br>X=(1,2,3,4)와 W0=(5,6,7,8)의 내적은 <code>D:0000000046</code>(70)입니다. W0[3]을 −8로 바꾸면 6이 되고, 길이 0을 주면 <code>ERR</code>입니다.</span><span class="st">1일 오후</span></li><li><span class="code">2-4</span><span><a href="#s2_4">4PE 병렬 어레이</a><br>같은 X에 대해 W0~W3 네 개의 내적을 한 번에 계산합니다. <code>P:</code> 뒤에 6, 10, −10(<code>…FFF6</code>), 8이 나옵니다.</span><span class="st">1일 오후</span></li><li><span class="code">2-5</span><span><a href="#s2_5">Dense 4뉴런 레이어</a><br>Bias를 더하고 ReLU와 16비트 포화를 거칩니다. <code>L:0006,0000,005A,7FFF O:8</code>에서 음수는 0이 되고, 65544는 7FFF로 막히며 넘침이 표시됩니다.</span><span class="st">2일 오전</span></li><li><span class="code">2-6</span><span><a href="#s2_6">4뉴런 NPU Core</a><br>npu_core가 자기 BRAM에서 값을 읽어 같은 Dense 계산을 합니다. <code>N 4</code>의 답은 <code>L 4</code>와 같고, 길이 2에서는 <code>0011,0000,0061,7FFF</code>입니다.</span><span class="st">2일 오전</span></li><li><span class="code">2-7</span><span><a href="#s2_7">UART 모델 적재</a><br>sw2를 올리면 명령 해석기가 UART를 받습니다. 고정 그룹 <code>0</code>~<code>3</code>을 보내면 <code>C0</code>~<code>C3</code>이 돌아옵니다. sw2를 내리고 <code>x 0</code>을 보내면 <code>X:FFFF</code>가 나와, 명령 해석기가 쓴 값을 콘솔로 확인할 수 있습니다.</span><span class="st">2일 오후</span></li><li><span class="code">2-8</span><span><a href="#s2_8">통합 NPU Top</a><br>sw3을 올리면 통합 엔진으로 바뀝니다. 같은 그룹에서 음수 점수(<code>…FFE</code>, ReLU 없음)가 보이지만 클래스는 같습니다. LED0~3과 7세그먼트에 클래스가, LED14에 끝남 표시가 나옵니다.</span><span class="st">2일 오후</span></li><li class="demo"><span class="code">시연</span><span><a href="#demo">장 시연</a><br>PC가 입력과 가중치를 보내면 보드가 뉴런 4개짜리 추론을 하고, UART로 점수를, LED와 7세그먼트로 클래스를 보여 줍니다. 두 가지 엔진을 스위치로 바꿔 가며 같은 클래스가 나오는지도 확인합니다.</span><span class="st">장 끝</span></li></ol>
     </section>
     <section class="section" id="s01">
       <h2><span class="num">01</span> 최종 구조도·가져오는 파일</h2>
@@ -126,10 +126,10 @@ details.full>summary{cursor:pointer;font-weight:600}
 </svg></div>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>방향</th><th>포트</th><th>폭</th><th>구분</th><th>설명</th></tr></thead>
-        <tbody><tr><td>input</td><td class="nw"><code>clk</code></td><td class="nw"><code>1</code></td><td class="nw">클록</td><td>보드 100 MHz 발진기 (W5)</td></tr><tr><td>input</td><td class="nw"><code>btnC</code></td><td class="nw"><code>1</code></td><td class="nw">리셋</td><td>가운데 버튼, 누르면 리셋 (Active-High, 놓으면 동기 해제). BRAM 내용은 남는다</td></tr><tr><td>input</td><td class="nw"><code>uart_rxd</code></td><td class="nw"><code>1</code></td><td class="nw">보드 핀</td><td>USB-UART에서 들어오는 직렬 입력 (B18), 115200 bps 8N1</td></tr><tr><td>input</td><td class="nw"><code>sw</code></td><td class="nw"><code>[3:2]</code></td><td class="nw">보드 핀</td><td>sw[2] UART 주인 (0 디버그 콘솔, 1 = 11장 명령 해석기), sw[3] 엔진 (0 누적 npu_core, 1 = 12장 npu_engine4)</td></tr><tr><td>output</td><td class="nw"><code>uart_txd</code></td><td class="nw"><code>1</code></td><td class="nw">보드 핀</td><td>PC로 나가는 직렬 출력 (A18)</td></tr><tr><td>output</td><td class="nw"><code>led</code></td><td class="nw"><code>[15:0]</code></td><td class="nw">보드 핀</td><td>STAGE 1~7: 콘솔 마지막 결과 아래 16비트. STAGE 8: [3:0] 클래스, [13] busy, [14] 끝남, [15] 오류</td></tr><tr><td>output</td><td class="nw"><code>seg</code></td><td class="nw"><code>[6:0]</code></td><td class="nw">보드 핀</td><td>7세그먼트 a~g (active-low). STAGE 1~7: LED와 같은 값 16진수, STAGE 8: 클래스</td></tr><tr><td>output</td><td class="nw"><code>an</code></td><td class="nw"><code>[3:0]</code></td><td class="nw">보드 핀</td><td>7세그먼트 자리 선택 (active-low)</td></tr><tr><td>output</td><td class="nw"><code>dp</code></td><td class="nw"><code>1</code></td><td class="nw">보드 핀</td><td>소수점 (항상 끔)</td></tr></tbody>
+        <tbody><tr><td>input</td><td class="nw"><code>clk</code></td><td class="nw"><code>1</code></td><td class="nw">클록</td><td>보드 100 MHz 발진기 (W5)</td></tr><tr><td>input</td><td class="nw"><code>btnC</code></td><td class="nw"><code>1</code></td><td class="nw">리셋</td><td>가운데 버튼, 누르면 리셋 (Active-High, 놓으면 동기 해제). BRAM 내용은 남는다</td></tr><tr><td>input</td><td class="nw"><code>uart_rxd</code></td><td class="nw"><code>1</code></td><td class="nw">보드 핀</td><td>USB-UART에서 들어오는 직렬 입력 (B18), 115200 bps 8N1</td></tr><tr><td>input</td><td class="nw"><code>sw</code></td><td class="nw"><code>[3:2]</code></td><td class="nw">보드 핀</td><td>sw[2] UART를 받는 쪽 (0 = 디버그 콘솔, 1 = 2-7 명령 해석기), sw[3] 엔진 (0 = 누적 npu_core, 1 = 2-8 npu_engine4)</td></tr><tr><td>output</td><td class="nw"><code>uart_txd</code></td><td class="nw"><code>1</code></td><td class="nw">보드 핀</td><td>PC로 나가는 직렬 출력 (A18)</td></tr><tr><td>output</td><td class="nw"><code>led</code></td><td class="nw"><code>[15:0]</code></td><td class="nw">보드 핀</td><td>STAGE 1~7: 콘솔 마지막 결과 아래 16비트. STAGE 8: [3:0] 클래스, [13] busy, [14] 끝남, [15] 오류</td></tr><tr><td>output</td><td class="nw"><code>seg</code></td><td class="nw"><code>[6:0]</code></td><td class="nw">보드 핀</td><td>7세그먼트 a~g (active-low). STAGE 1~7: LED와 같은 값 16진수, STAGE 8: 클래스</td></tr><tr><td>output</td><td class="nw"><code>an</code></td><td class="nw"><code>[3:0]</code></td><td class="nw">보드 핀</td><td>7세그먼트 자리 선택 (active-low)</td></tr><tr><td>output</td><td class="nw"><code>dp</code></td><td class="nw"><code>1</code></td><td class="nw">보드 핀</td><td>소수점 (항상 끔)</td></tr></tbody>
       </table></div>
       <p>장 Top은 배선만 합니다. 기능은 하위 모듈에 있고, 서브젝트 모듈은 <code>STAGE</code>(끝낸 서브젝트 수)에 따라 하나씩 들어옵니다.</p>
-      <p>NPU 묶음: 2-1~2-6 서브젝트 모듈. X·W 쓰기는 BRAM과 npu_core에 함께 들어가고, 2-7부터는 엔진 포트로 11장 명령 해석기가 npu_core를 쓴다.</p>
+      <p>NPU 묶음입니다. 2-1~2-6 서브젝트 모듈이 여기에 차례로 들어옵니다. X·W 쓰기는 BRAM과 npu_core에 함께 들어가고, 2-7부터는 명령 해석기가 엔진 포트로 npu_core를 씁니다.</p>
       <div class="figure-wrap" tabindex="0" role="region" aria-label="도면 (가로 스크롤 가능)"><svg viewBox="0 0 1017 570" role="img" aria-label="p02_bank 실제 포트와 하위 모듈 구조">
 <rect x="250" y="30" width="517" height="500" rx="10" fill="#fff" stroke="#4635b1" stroke-width="2"/>
 <text x="508" y="54" font-size="18" font-weight="700" text-anchor="middle">p02_bank</text>
@@ -196,27 +196,27 @@ details.full>summary{cursor:pointer;font-weight:600}
 <text x="795" y="272" font-size="14" font-family="monospace">e_scores_o[163:0]</text>
 <rect x="270" y="88" width="477" height="28" rx="5" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="5 3"/>
 <text x="282" y="107" font-size="14" font-family="monospace">bram_sync_buffer ×5  (u_xmem · u_wmem[4])</text>
-<text x="735" y="107" font-size="12" text-anchor="end" fill="#4635b1">2-1 (구 04장)</text>
+<text x="735" y="107" font-size="12" text-anchor="end" fill="#4635b1">2-1에서 작성</text>
 <rect x="270" y="124" width="477" height="28" rx="5" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="5 3"/>
 <text x="282" y="143" font-size="14" font-family="monospace">fixed_quantizer  (u_q)</text>
-<text x="735" y="143" font-size="12" text-anchor="end" fill="#4635b1">2-2 (구 05장)</text>
+<text x="735" y="143" font-size="12" text-anchor="end" fill="#4635b1">2-2에서 작성</text>
 <rect x="270" y="161" width="477" height="28" rx="5" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="5 3"/>
 <text x="282" y="180" font-size="14" font-family="monospace">vector_dot_core  (u_dot)</text>
-<text x="735" y="180" font-size="12" text-anchor="end" fill="#4635b1">2-3 (구 07장)</text>
+<text x="735" y="180" font-size="12" text-anchor="end" fill="#4635b1">2-3에서 작성</text>
 <rect x="270" y="198" width="477" height="28" rx="5" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="5 3"/>
 <text x="282" y="217" font-size="14" font-family="monospace">pe_array4  (u_pe)</text>
-<text x="735" y="217" font-size="12" text-anchor="end" fill="#4635b1">2-4 (구 08장)</text>
+<text x="735" y="217" font-size="12" text-anchor="end" fill="#4635b1">2-4에서 작성</text>
 <rect x="270" y="235" width="477" height="28" rx="5" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="5 3"/>
 <text x="282" y="254" font-size="14" font-family="monospace">dense_layer4  (u_dense)</text>
-<text x="735" y="254" font-size="12" text-anchor="end" fill="#4635b1">2-5 (구 09장)</text>
+<text x="735" y="254" font-size="12" text-anchor="end" fill="#4635b1">2-5에서 작성</text>
 <rect x="270" y="272" width="477" height="28" rx="5" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="5 3"/>
 <text x="282" y="291" font-size="14" font-family="monospace">npu_core  (u_core)</text>
-<text x="735" y="291" font-size="12" text-anchor="end" fill="#4635b1">2-6 (구 10장)</text>
+<text x="735" y="291" font-size="12" text-anchor="end" fill="#4635b1">2-6에서 작성</text>
 <rect x="250" y="545" width="16" height="12" fill="#edeafa" stroke="#4635b1"/><text x="272" y="556" font-size="13">장 뼈대 (제공)</text>
 <rect x="370" y="545" width="16" height="12" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="4 2"/><text x="392" y="556" font-size="13">서브젝트에서 작성</text>
 <text x="600" y="556" font-size="13">왼쪽 input · 오른쪽 output · 점선 = 클록·리셋</text>
 </svg></div>
-      <p>NPU 경로 (2-7·2-8): 11장 명령 해석기가 누적 npu_core(엔진 포트)와 12장 npu_engine4에 같은 쓰기·시작을 보내고, sw3으로 고른 엔진의 점수·클래스를 받는다.</p>
+      <p>NPU 경로입니다(2-7·2-8). 명령 해석기가 누적 npu_core와 통합 npu_engine4에 같은 쓰기와 시작 신호를 보내고, sw3으로 고른 엔진의 점수와 클래스를 받습니다.</p>
       <div class="figure-wrap" tabindex="0" role="region" aria-label="도면 (가로 스크롤 가능)"><svg viewBox="0 0 980 501" role="img" aria-label="p02_npu_path 실제 포트와 하위 모듈 구조">
 <rect x="250" y="30" width="480" height="431" rx="10" fill="#fff" stroke="#4635b1" stroke-width="2"/>
 <text x="490" y="54" font-size="18" font-weight="700" text-anchor="middle">p02_npu_path</text>
@@ -281,10 +281,10 @@ details.full>summary{cursor:pointer;font-weight:600}
 <text x="758" y="433" font-size="14" font-family="monospace">error_o</text>
 <rect x="270" y="88" width="440" height="28" rx="5" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="5 3"/>
 <text x="282" y="107" font-size="14" font-family="monospace">uart_npu_command_controller  (u_cmd)</text>
-<text x="698" y="107" font-size="12" text-anchor="end" fill="#4635b1">2-7 (구 11장)</text>
+<text x="698" y="107" font-size="12" text-anchor="end" fill="#4635b1">2-7에서 작성</text>
 <rect x="270" y="124" width="440" height="28" rx="5" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="5 3"/>
 <text x="282" y="143" font-size="14" font-family="monospace">npu_engine4  (u_e4)</text>
-<text x="698" y="143" font-size="12" text-anchor="end" fill="#4635b1">2-8 (구 12장)</text>
+<text x="698" y="143" font-size="12" text-anchor="end" fill="#4635b1">2-8에서 작성</text>
 <rect x="250" y="476" width="16" height="12" fill="#edeafa" stroke="#4635b1"/><text x="272" y="487" font-size="13">장 뼈대 (제공)</text>
 <rect x="370" y="476" width="16" height="12" fill="#f1f2ee" stroke="#4635b1" stroke-dasharray="4 2"/><text x="392" y="487" font-size="13">서브젝트에서 작성</text>
 <text x="600" y="487" font-size="13">왼쪽 input · 오른쪽 output · 점선 = 클록·리셋</text>
@@ -292,21 +292,21 @@ details.full>summary{cursor:pointer;font-weight:600}
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>구분</th><th>파일</th></tr></thead>
         <tbody>
-          <tr><td>이전 장에서 가져오는 파일</td><td><ul><li><code>common/rtl/uart_rx.v · uart_tx.v · uart_core.v (1-1)</code></li><li><code>ch01/rtl/mac_core.v (1-2, 2-3 내적 안에서)</code></li><li><code>ch02/rtl/dsp_multiplier.v (1-3, 2-8 12장 엔진 안에서)</code></li><li><code>p01/rtl/p01_reset_sync.v · p01_hex4_display.v (1장 뼈대)</code></li></ul></td></tr>
+          <tr><td>이전 장에서 가져오는 파일</td><td><ul><li><code>common/rtl/uart_rx.v · uart_tx.v · uart_core.v (1-1)</code></li><li><code>ch01/rtl/mac_core.v (1-2, 2-3 내적 안에서)</code></li><li><code>ch02/rtl/dsp_multiplier.v (1-3, 2-8 통합 엔진 안에서)</code></li><li><code>p01/rtl/p01_reset_sync.v · p01_hex4_display.v (1장 뼈대)</code></li></ul></td></tr>
           <tr><td>2-1 BRAM 동기 버퍼</td><td><code>ch04/rtl/bram_sync_buffer.v</code></td></tr><tr><td>2-2 고정소수점 양자화</td><td><code>ch05/rtl/fixed_quantizer.v</code></td></tr><tr><td>2-3 벡터 내적</td><td><code>ch07/rtl/vector_dot_core.v</code></td></tr><tr><td>2-4 4PE 병렬 어레이</td><td><code>ch08/rtl/pe_array4.v</code></td></tr><tr><td>2-5 Dense 4뉴런 레이어</td><td><code>ch09/rtl/dense_layer4.v</code></td></tr><tr><td>2-6 4뉴런 NPU Core</td><td><code>ch10/rtl/npu_core.v</code></td></tr><tr><td>2-7 UART 모델 적재</td><td><code>mini_npu/rtl/uart_npu_command_controller.v</code></td></tr><tr><td>2-8 통합 NPU Top</td><td><code>mini_npu/rtl/npu_dsp_mac_lane.v</code><br><code>mini_npu/rtl/npu_engine4.v</code><br><code>mini_npu/rtl/npu_display_controller.v</code><br><code>mini_npu/rtl/npu_reset_controller.v</code><br><code>mini_npu/rtl/basys3_npu_top.v</code><br><code>mini_npu/constraints/basys3_npu.xdc</code><br><code>mini_npu/scripts/vivado_impl.tcl</code><br><code>mini_npu/scripts/run_timing_sim.sh</code></td></tr>
-          <tr><td>장 뼈대 (02절에서 입력)</td><td><code>p02/rtl/p02_console.v</code><br><code>p02/rtl/p02_bank.v</code><br><code>p02/rtl/p02_uart_switch.v</code><br><code>p02/rtl/p02_npu_path.v</code><br><code>p02/rtl/p02_view.v</code><br><code>p02/rtl/basys3_p02_top.v</code><br><code>p02/constraints/basys3_p02.xdc</code><br><code>p02/vivado/build_p02.tcl</code><br><code>p02/host/p02_send.py</code></td></tr>
+          <tr><td>장 뼈대 (다음 절에서 입력)</td><td><code>p02/rtl/p02_console.v</code><br><code>p02/rtl/p02_bank.v</code><br><code>p02/rtl/p02_uart_switch.v</code><br><code>p02/rtl/p02_npu_path.v</code><br><code>p02/rtl/p02_view.v</code><br><code>p02/rtl/basys3_p02_top.v</code><br><code>p02/constraints/basys3_p02.xdc</code><br><code>p02/vivado/build_p02.tcl</code><br><code>p02/host/p02_send.py</code></td></tr>
         </tbody>
       </table></div>
     </section>
     <section class="section" id="s02">
       <h2><span class="num">02</span> 준비 · 장 뼈대</h2>
       <ol>
-        <li>VS Code에서 저장소 루트(<code>amd_soc_npu/</code>)를 엽니다. 도구: <code>iverilog</code> 12 이상, <code>python3</code>, Vivado 2024.2 (합성·비트스트림), 보드 터미널(115200 8N1) 또는 <code>pip install pyserial</code>.</li>
-        <li>아래 장 뼈대 파일을 경로 그대로 입력합니다. 서브젝트 모듈은 각 서브젝트 절에서 씁니다.</li>
-        <li>STAGE 값 = 끝낸 서브젝트 수: 2-1만 끝냈으면 1, 2-8까지 끝냈으면 8. 아직 없는 모듈은 들어가지 않으므로 빌드가 됩니다.</li>
+        <li>VS Code에서 저장소 루트(<code>amd_soc_npu/</code>)를 엽니다. 필요한 도구는 Vivado 2024.2, <code>python3</code>, 시뮬레이터 <code>iverilog</code> 12 이상, 그리고 PC에서 보드로 명령을 보낼 <code>pyserial</code>(<code>pip install pyserial</code>)입니다.</li>
+        <li>아래 장 뼈대 파일을 경로 그대로 입력합니다. 서브젝트 모듈은 각 서브젝트 절에서 작성합니다.</li>
+        <li><code>STAGE</code>는 끝낸 서브젝트 수입니다. 2-1만 끝냈으면 1, 2-8까지 끝냈으면 8입니다. 아직 작성하지 않은 모듈은 빌드에 들어가지 않으므로, 서브젝트를 하나 끝낼 때마다 바로 보드에 올려 볼 수 있습니다.</li>
       </ol>
       <div class="codeblock">
-        <div class="codebar"><span>p02/rtl/p02_console.v · verilog · 원본 · RTL_SIM 통과 2026-11-23</span></div>
+        <div class="codebar"><span>p02/rtl/p02_console.v · verilog</span></div>
         <pre tabindex="0"><code class="language-verilog">// 2장 디버그 콘솔: 서브젝트 모듈을 UART 명령 하나씩으로 확인한다. 11장 명령과 같은 형식
 // (1바이트 명령 + 바이너리 페이로드, 빅엔디언, stop-and-wait). X·W·B·S는 11장과 바이트까지 같다.
 //
@@ -508,7 +508,7 @@ endmodule
 `default_nettype wire</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>p02/rtl/p02_bank.v · verilog · 원본 · RTL_SIM 통과 2026-11-23</span></div>
+        <div class="codebar"><span>p02/rtl/p02_bank.v · verilog</span></div>
         <pre tabindex="0"><code class="language-verilog">// 2장 NPU 묶음: 서브젝트 모듈을 STAGE(끝낸 서브젝트 수)만큼 실제로 쌓는다.
 //   2-1 (STAGE&gt;=1) bram_sync_buffer 5개: X[64], W0~W3[64] (구 04장)       → 명령 x·w 되읽기
 //   2-2 (STAGE&gt;=2) fixed_quantizer 32→8비트, SHIFT 8 (구 05장)             → 명령 Q
@@ -765,7 +765,7 @@ endmodule
 `default_nettype wire</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>p02/rtl/p02_uart_switch.v · verilog · 원본 · RTL_SIM 통과 2026-11-23</span></div>
+        <div class="codebar"><span>p02/rtl/p02_uart_switch.v · verilog</span></div>
         <pre tabindex="0"><code class="language-verilog">// 2장 UART 주인 선택 (2-7부터): sw[2] = 0 디버그 콘솔, 1 = 11장 명령 해석기.
 // STAGE &lt; 7이면 콘솔만 있으므로 그대로 잇는다. 스위치는 명령을 주고받지 않을 때 바꾼다.
 `timescale 1ns/1ps
@@ -816,7 +816,7 @@ endmodule
 `default_nettype wire</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>p02/rtl/p02_npu_path.v · verilog · 원본 · RTL_SIM 통과 2026-11-23</span></div>
+        <div class="codebar"><span>p02/rtl/p02_npu_path.v · verilog</span></div>
         <pre tabindex="0"><code class="language-verilog">// 2장 NPU 경로 (2-7부터): 11장 명령 해석기 + 엔진 선택.
 //   2-7 (STAGE 7): 엔진 = 누적 npu_core (p02_bank 엔진 포트). 점수는 Dense 결과(ReLU·16비트)를 41비트로 늘린 값.
 //   2-8 (STAGE 8): 12장 npu_engine4를 더한다. sw[3] = 0 누적 core, 1 = 12장 엔진(원시 점수, ReLU 없음).
@@ -947,7 +947,7 @@ endmodule
 `default_nettype wire</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>p02/rtl/p02_view.v · verilog · 원본 · RTL_SIM 통과 2026-11-23</span></div>
+        <div class="codebar"><span>p02/rtl/p02_view.v · verilog</span></div>
         <pre tabindex="0"><code class="language-verilog">// 2장 LED·7세그먼트.
 //   STAGE 1~7: 콘솔 마지막 결과 아래 16비트 → LED 16개 + 7세그먼트 16진수 4자리 (1장 p01_hex4_display)
 //   STAGE 8  : 12장 npu_display_controller → LED[3:0] 클래스 원-핫, [13] busy, [14] 끝남, [15] 오류, 7세그먼트 클래스
@@ -987,7 +987,7 @@ endmodule
 `default_nettype wire</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>p02/rtl/basys3_p02_top.v · verilog · 원본 · RTL_SIM 통과 2026-11-23</span></div>
+        <div class="codebar"><span>p02/rtl/basys3_p02_top.v · verilog</span></div>
         <pre tabindex="0"><code class="language-verilog">// 2장 보드 Top: 4뉴런 NPU 보드. 인스턴스와 배선만 둔다 (기능은 하위 모듈).
 //   2-1~2-6: 디버그 콘솔로 BRAM → 양자화 → 내적 → 4PE → Dense → Core를 UART 명령 하나씩 확인
 //   2-7: sw[2] = 1이면 11장 명령 해석기가 UART를 맡고 누적 npu_core로 추론 ("Ck:…")
@@ -1084,7 +1084,7 @@ endmodule
 `default_nettype wire</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>p02/constraints/basys3_p02.xdc · xdc · 원본 · Vivado 실행 통과</span></div>
+        <div class="codebar"><span>p02/constraints/basys3_p02.xdc · xdc</span></div>
         <pre tabindex="0"><code class="language-xdc"># 2장 보드 Top (basys3_p02_top) 핀. Basys-3-Master.xdc 이름·핀 그대로 (12장 basys3_npu.xdc와 같은 핀 + sw[3:2]).
 set_property -dict { PACKAGE_PIN W5 IOSTANDARD LVCMOS33 } [get_ports clk]
 set_property -dict { PACKAGE_PIN U18 IOSTANDARD LVCMOS33 } [get_ports btnC]
@@ -1123,7 +1123,7 @@ set_property -dict { PACKAGE_PIN W17 IOSTANDARD LVCMOS33 } [get_ports {sw[3]}]
 create_clock -name sys_clk_pin -period 10.000 -waveform {0 5} [get_ports clk]</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>p02/vivado/build_p02.tcl · tcl · 원본 · Vivado 실행 통과</span></div>
+        <div class="codebar"><span>p02/vivado/build_p02.tcl · tcl</span></div>
         <pre tabindex="0"><code class="language-tcl"># 2장 보드 Top (4뉴런 NPU 보드): STAGE 1~8 각각 합성 → 구현 → 타이밍 판정 → 비트스트림.
 # STAGE = 끝낸 서브젝트 수 (1 = 2-1 BRAM … 8 = 2-8 통합). 서브젝트마다 보드에서 확인할 비트스트림을 만든다.
 # 실행 (저장소 루트): vivado -mode batch -nojournal -source p02/vivado/build_p02.tcl
@@ -1215,7 +1215,7 @@ close $fh
 if {!$all_ok} { error "P02_IMPL_TIMING_FAILED" }</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>p02/host/p02_send.py · python · 원본 · RTL_SIM 통과 2026-11-23</span></div>
+        <div class="codebar"><span>p02/host/p02_send.py · python</span></div>
         <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
 """2장 4뉴런 NPU 보드 PC 쪽 도구: 명령을 바이트로 바꿔 보내고 응답 한 줄을 받아 출력한다.
 
@@ -1275,22 +1275,22 @@ if __name__ == "__main__":
       </div>
     </section>
     <section class="section" id="s2_1">
-      <h2><span class="num">03</span> 서브젝트 2-1 · BRAM 동기 버퍼 <small>(구 04장)</small></h2>
-      <p class="verdict"><b>학습목표 (보드):</b> <code>X</code>·<code>W</code>로 쓴 값을 <code>x</code>·<code>w</code>로 되읽으면 같은 값(<code>X:0003</code>, <code>X:FFFE</code>, <code>W:0005</code>). 주소 64는 <code>ERR</code>.</p>
+      <h2><span class="num">03</span> 서브젝트 2-1 · BRAM 동기 버퍼</h2>
+      <p class="verdict"><b>학습목표:</b> <code>X</code>·<code>W</code>로 쓴 값을 <code>x</code>·<code>w</code>로 되읽으면 같은 값이 나옵니다(<code>X:0003</code>, <code>X:FFFE</code>, <code>W:0005</code>). 범위를 벗어난 주소 64는 <code>ERR</code>입니다.</p>
       <h3>보드에서 볼 것</h3>
       <ol>
-        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다: <code>vivado -mode batch -nojournal -source p02/vivado/build_p02.tcl -tclargs 1</code> → <code>build/vivado/p02_s1/basys3_p02_top.bit</code></li>
-        <li>Hardware Manager로 보드에 내려받고 <code>python3 p02/host/p02_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다 (115200 8N1). sw2 = UART 주인 (0 디버그 콘솔, 1 = 11장 명령), sw3 = 엔진 (0 누적 npu_core, 1 = 12장 엔진). 스위치는 명령 사이에 바꿉니다.</li>
+        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다.<br><code>vivado -mode batch -nojournal -source p02/vivado/build_p02.tcl -tclargs 1</code><br>결과: <code>build/vivado/p02_s1/basys3_p02_top.bit</code></li>
+        <li>Hardware Manager로 보드에 내려받고, <code>python3 p02/host/p02_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다 (115200 8N1). sw2는 UART를 누가 받는지(0 = 디버그 콘솔, 1 = 2-7 명령 해석기), sw3은 엔진(0 = 누적 npu_core, 1 = 2-8 통합 엔진)을 고릅니다. 스위치는 명령과 명령 사이에 바꿉니다.</li>
       </ol>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>순서</th><th>sw[3:2]</th><th>PC 명령 (<code>p02_send.py</code>)</th><th>보드 응답 (UART)</th></tr></thead>
         <tbody><tr><td>1</td><td class="nw"><code>00</code></td><td class="nw"><code>S</code></td><td class="nw"><code>I\r\n</code></td></tr><tr><td>2</td><td class="nw"><code>00</code></td><td class="nw"><code>X 0 3</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>3</td><td class="nw"><code>00</code></td><td class="nw"><code>X 1 -2</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>4</td><td class="nw"><code>00</code></td><td class="nw"><code>x 0</code></td><td class="nw"><code>X:0003\r\n</code></td></tr><tr><td>5</td><td class="nw"><code>00</code></td><td class="nw"><code>x 1</code></td><td class="nw"><code>X:FFFE\r\n</code></td></tr><tr><td>6</td><td class="nw"><code>00</code></td><td class="nw"><code>W 0 0 5</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>7</td><td class="nw"><code>00</code></td><td class="nw"><code>w 0 0</code></td><td class="nw"><code>W:0005\r\n</code></td></tr><tr><td>8</td><td class="nw"><code>00</code></td><td class="nw"><code>x 64</code></td><td class="nw"><code>ERR\r\n</code></td></tr><tr><td>9</td><td class="nw"><code>00</code></td><td class="nw"><code>Q</code></td><td class="nw"><code>?\r\n</code></td></tr></tbody>
       </table></div>
-      <p>끝난 뒤 LED: <code>0x0005</code> (콘솔 마지막 결과 아래 16비트, 7세그먼트도 같은 값 16진수 4자리). 응답 출처: 장 Top 시뮬레이션 STAGE=1 (<code>p02/validation/rtl_sim_20261123.log</code>, 바이트 단위 대조).</p>
-      <h3>추가 코드 (구 04장 그대로)</h3>
+      <p>끝나면 LED가 <code>0x0005</code>입니다 (콘솔이 마지막으로 낸 결과의 아래 16비트이고, 7세그먼트에도 같은 값이 16진수 4자리로 보입니다).</p>
+      <h3>작성할 코드</h3>
 
       <div class="codeblock">
-        <div class="codebar"><span>ch04/rtl/bram_sync_buffer.v · verilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <div class="codebar"><span>ch04/rtl/bram_sync_buffer.v · verilog</span></div>
         <pre tabindex="0"><code class="language-verilog">`timescale 1ns/1ps
 `default_nettype none
 module bram_sync_buffer #(
@@ -1317,10 +1317,11 @@ module bram_sync_buffer #(
 endmodule
 `default_nettype wire</code></pre>
       </div>
-      <h3>시뮬레이션 기대 화면</h3>
-      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 서브젝트 단독 시험</span></div>
+      <h3>시뮬레이션</h3>
+      <p>보드에 올리기 전에 이 서브젝트 모듈만 먼저 시험합니다. 아래와 같은 줄이 나오면 됩니다.</p>
+      <div class="codeblock"><div class="codebar"><span>터미널 · 저장소 루트</span></div>
         <pre tabindex="0"><code>bash ch04/scripts/run_sim.sh</code></pre></div>
-      <div class="codeblock"><div class="codebar"><span>기대 출력 (도구 버전 미기록 · 2026-11-18 · 출처 ch04/validation/rtl_sim_20261118.log)</span></div>
+      <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
         <pre tabindex="0"><code>PYTHON_SELF_TEST_PASS reset_retention,collision,uninitialized
 PYTHON_VECTORS width=16 depth=256 cycles=1016 seed=304
 RTL_SIM_PASS BRAM W=16 A=8 cycles=1016
@@ -1331,9 +1332,9 @@ PYTHON_VECTORS width=8 depth=8 cycles=520 seed=304
 RTL_SIM_PASS BRAM W=8 A=3 cycles=520
 PYTHON_SELF_TEST_PASS reset_retention,collision,uninitialized
 PYTHON_RTL_COMPARE_PASS cycles=520</code></pre></div>
-      <details class="full"><summary>이 서브젝트의 테스트벤치·기준 모델 (전체 코드 2개)</summary>
+      <details class="full"><summary>테스트벤치와 기준 모델 (전체 코드 2개)</summary>
       <div class="codeblock">
-        <div class="codebar"><span>ch04/tb/tb_bram_sync_buffer.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <div class="codebar"><span>ch04/tb/tb_bram_sync_buffer.sv · systemverilog</span></div>
         <pre tabindex="0"><code class="language-systemverilog">`timescale 1ns/1ps
 module tb_bram_sync_buffer;
     parameter W=16, A=8;
@@ -1402,7 +1403,7 @@ module tb_bram_sync_buffer;
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>ch04/reference/bram_reference.py · python · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <div class="codebar"><span>ch04/reference/bram_reference.py · python</span></div>
         <pre tabindex="0"><code class="language-python">import argparse
 import random
 import sys
@@ -1485,48 +1486,29 @@ if __name__ == '__main__':
     else: generate(a.width,a.addr,a.out)</code></pre>
       </div>
       </details>
-      <h3>판정 줄</h3>
+      <h3>확인할 것</h3>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
-        <tbody><tr><td><code>RTL_SIM_PASS BRAM W=16 A=8 cycles=1016</code></td><td>16비트·256깊이 설정 통과</td></tr><tr><td><code>RTL_SIM_PASS BRAM W=8 A=3 cycles=520</code></td><td>8비트·8깊이 설정 통과</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS</code></td><td>RTL 출력 파일과 Python 기준값이 모든 사이클에서 일치</td></tr><tr><td>장 Top STAGE=1 시뮬레이션</td><td>위 '보드에서 볼 것' 응답과 바이트 단위로 같음 · 통과</td></tr>
-        <tr><td>장 Top STAGE=1 합성·타이밍</td><td>통과 · WNS=3.272 WHS=0.083 DRC_ERRORS=0 LUT=576 FF=395 DSP48E1=0 RAMB18=5</td></tr></tbody>
+        <tbody><tr><td><code>RTL_SIM_PASS BRAM W=16 A=8 cycles=1016</code></td><td>16비트·256깊이 설정 통과</td></tr><tr><td><code>RTL_SIM_PASS BRAM W=8 A=3 cycles=520</code></td><td>8비트·8깊이 설정 통과</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS</code></td><td>RTL 출력 파일과 Python 기준값이 모든 사이클에서 일치</td></tr><tr><td>보드 응답</td><td>위 '보드에서 볼 것' 표의 응답과 한 글자도 다르지 않아야 합니다.</td></tr></tbody>
       </table></div>
-      <div class="gate-row">
-        <div class="gate pass">
-          <b>HOST_MODEL_PASS</b>
-          <span>PYTHON_SELF_TEST_PASS reset_retention,collision,uninitialized</span>
-        </div>
-        <div class="gate pass">
-          <b>RTL_SIM_PASS</b>
-          <span>RTL_SIM_PASS BRAM W=16 A=8 cycles=1016 외 1건 · 도구 버전 미기록 · 2026-11-18</span>
-        </div>
-        <div class="gate pass">
-          <b>SYNTH_TIMING_PASS</b>
-          <span>장 Top STAGE 1 배선 후 WNS 3.272 ns · WHS 0.083 ns (구 장 단독 OOC 판정 없음) · 2026-11-23</span>
-        </div>
-        <div class="gate todo">
-          <b>BOARD_PASS</b>
-          <span>⚠ 미실시 · 현재 실물 보드 확인 불가</span>
-        </div>
-      </div>
     </section>
     <section class="section" id="s2_2">
-      <h2><span class="num">04</span> 서브젝트 2-2 · 고정소수점 양자화 <small>(구 05장)</small></h2>
-      <p class="verdict"><b>학습목표 (보드):</b> 32비트 → 8비트: 768 → <code>03</code>, 384(=1.5) → <code>02</code>(반올림), 65536 → <code>7F</code>와 넘침 <code>O:1</code>.</p>
+      <h2><span class="num">04</span> 서브젝트 2-2 · 고정소수점 양자화</h2>
+      <p class="verdict"><b>학습목표:</b> 32비트 값을 8비트로 줄입니다. 768은 <code>03</code>, 384(=1.5)는 반올림되어 <code>02</code>, 65536은 최댓값 <code>7F</code>로 막히고 넘침 표시 <code>O:1</code>이 붙습니다.</p>
       <h3>보드에서 볼 것</h3>
       <ol>
-        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다: <code>vivado -mode batch -nojournal -source p02/vivado/build_p02.tcl -tclargs 2</code> → <code>build/vivado/p02_s2/basys3_p02_top.bit</code></li>
-        <li>Hardware Manager로 보드에 내려받고 <code>python3 p02/host/p02_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다 (115200 8N1). sw2 = UART 주인 (0 디버그 콘솔, 1 = 11장 명령), sw3 = 엔진 (0 누적 npu_core, 1 = 12장 엔진). 스위치는 명령 사이에 바꿉니다.</li>
+        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다.<br><code>vivado -mode batch -nojournal -source p02/vivado/build_p02.tcl -tclargs 2</code><br>결과: <code>build/vivado/p02_s2/basys3_p02_top.bit</code></li>
+        <li>Hardware Manager로 보드에 내려받고, <code>python3 p02/host/p02_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다 (115200 8N1). sw2는 UART를 누가 받는지(0 = 디버그 콘솔, 1 = 2-7 명령 해석기), sw3은 엔진(0 = 누적 npu_core, 1 = 2-8 통합 엔진)을 고릅니다. 스위치는 명령과 명령 사이에 바꿉니다.</li>
       </ol>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>순서</th><th>sw[3:2]</th><th>PC 명령 (<code>p02_send.py</code>)</th><th>보드 응답 (UART)</th></tr></thead>
         <tbody><tr><td>1</td><td class="nw"><code>00</code></td><td class="nw"><code>Q 768</code></td><td class="nw"><code>Q:03 O:0\r\n</code></td></tr><tr><td>2</td><td class="nw"><code>00</code></td><td class="nw"><code>Q 384</code></td><td class="nw"><code>Q:02 O:0\r\n</code></td></tr><tr><td>3</td><td class="nw"><code>00</code></td><td class="nw"><code>Q -384</code></td><td class="nw"><code>Q:FE O:0\r\n</code></td></tr><tr><td>4</td><td class="nw"><code>00</code></td><td class="nw"><code>Q 65536</code></td><td class="nw"><code>Q:7F O:1\r\n</code></td></tr><tr><td>5</td><td class="nw"><code>00</code></td><td class="nw"><code>Q -65536</code></td><td class="nw"><code>Q:80 O:1\r\n</code></td></tr></tbody>
       </table></div>
-      <p>끝난 뒤 LED: <code>0xFF80</code> (콘솔 마지막 결과 아래 16비트, 7세그먼트도 같은 값 16진수 4자리). 응답 출처: 장 Top 시뮬레이션 STAGE=2 (<code>p02/validation/rtl_sim_20261123.log</code>, 바이트 단위 대조).</p>
-      <h3>추가 코드 (구 05장 그대로)</h3>
+      <p>끝나면 LED가 <code>0xFF80</code>입니다 (콘솔이 마지막으로 낸 결과의 아래 16비트이고, 7세그먼트에도 같은 값이 16진수 4자리로 보입니다).</p>
+      <h3>작성할 코드</h3>
 
       <div class="codeblock">
-        <div class="codebar"><span>ch05/rtl/fixed_quantizer.v · verilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <div class="codebar"><span>ch05/rtl/fixed_quantizer.v · verilog</span></div>
         <pre tabindex="0"><code class="language-verilog">`timescale 1ns/1ps
 module fixed_quantizer #(
     parameter integer IN_WIDTH=32, OUT_WIDTH=8, SHIFT=8, ROUND=1, SATURATE=1
@@ -1562,10 +1544,11 @@ module fixed_quantizer #(
     // synthesis translate_on
 endmodule</code></pre>
       </div>
-      <h3>시뮬레이션 기대 화면</h3>
-      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 서브젝트 단독 시험</span></div>
+      <h3>시뮬레이션</h3>
+      <p>보드에 올리기 전에 이 서브젝트 모듈만 먼저 시험합니다. 아래와 같은 줄이 나오면 됩니다.</p>
+      <div class="codeblock"><div class="codebar"><span>터미널 · 저장소 루트</span></div>
         <pre tabindex="0"><code>bash ch05/scripts/run_sim.sh</code></pre></div>
-      <div class="codeblock"><div class="codebar"><span>기대 출력 (도구 버전 미기록 · 2026-11-18 · 출처 ch05/validation/rtl_sim_20261118.log)</span></div>
+      <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
         <pre tabindex="0"><code>PYTHON_FIXED_SELF_TEST_PASS
 PYTHON_VECTORS IN=32 OUT=8 SHIFT=8 cycles=2035 seed=305
 RTL_SIM_PASS FIXED IW=32 OW=8 SHIFT=8 cycles=2035
@@ -1581,9 +1564,9 @@ PYTHON_VECTORS IN=16 OUT=8 SHIFT=0 cycles=2035 seed=305
 RTL_SIM_PASS FIXED IW=16 OW=8 SHIFT=0 cycles=2035
 PYTHON_FIXED_SELF_TEST_PASS
 PYTHON_RTL_COMPARE_PASS cycles=2035</code></pre></div>
-      <details class="full"><summary>이 서브젝트의 테스트벤치·기준 모델 (전체 코드 2개)</summary>
+      <details class="full"><summary>테스트벤치와 기준 모델 (전체 코드 2개)</summary>
       <div class="codeblock">
-        <div class="codebar"><span>ch05/tb/tb_fixed_quantizer.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <div class="codebar"><span>ch05/tb/tb_fixed_quantizer.sv · systemverilog</span></div>
         <pre tabindex="0"><code class="language-systemverilog">`timescale 1ns/1ps
 module tb_fixed_quantizer;
     parameter IW=32,OW=8,S=8;
@@ -1626,7 +1609,7 @@ module tb_fixed_quantizer;
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>ch05/reference/fixed_reference.py · python · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <div class="codebar"><span>ch05/reference/fixed_reference.py · python</span></div>
         <pre tabindex="0"><code class="language-python">import argparse
 import random
 import sys
@@ -1691,48 +1674,29 @@ if __name__=='__main__':
     else: generate(a.in_width,a.out_width,a.shift,a.out)</code></pre>
       </div>
       </details>
-      <h3>판정 줄</h3>
+      <h3>확인할 것</h3>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
-        <tbody><tr><td><code>RTL_SIM_PASS FIXED IW=32 OW=8 SHIFT=8 cycles=2035</code></td><td>INT8 출력 설정 통과</td></tr><tr><td><code>RTL_SIM_PASS FIXED IW=32 OW=16 SHIFT=4 cycles=2035</code></td><td>INT16 출력 설정 통과</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS</code></td><td>RTL 출력 파일과 Python 기준값이 모든 사이클에서 일치</td></tr><tr><td>장 Top STAGE=2 시뮬레이션</td><td>위 '보드에서 볼 것' 응답과 바이트 단위로 같음 · 통과</td></tr>
-        <tr><td>장 Top STAGE=2 합성·타이밍</td><td>통과 · WNS=1.136 WHS=0.056 DRC_ERRORS=0 LUT=757 FF=441 DSP48E1=0 RAMB18=5</td></tr></tbody>
+        <tbody><tr><td><code>RTL_SIM_PASS FIXED IW=32 OW=8 SHIFT=8 cycles=2035</code></td><td>INT8 출력 설정 통과</td></tr><tr><td><code>RTL_SIM_PASS FIXED IW=32 OW=16 SHIFT=4 cycles=2035</code></td><td>INT16 출력 설정 통과</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS</code></td><td>RTL 출력 파일과 Python 기준값이 모든 사이클에서 일치</td></tr><tr><td>보드 응답</td><td>위 '보드에서 볼 것' 표의 응답과 한 글자도 다르지 않아야 합니다.</td></tr></tbody>
       </table></div>
-      <div class="gate-row">
-        <div class="gate pass">
-          <b>HOST_MODEL_PASS</b>
-          <span>PYTHON_FIXED_SELF_TEST_PASS</span>
-        </div>
-        <div class="gate pass">
-          <b>RTL_SIM_PASS</b>
-          <span>RTL_SIM_PASS FIXED IW=32 OW=8 SHIFT=8 cycles=2035 외 2건 · 도구 버전 미기록 · 2026-11-18</span>
-        </div>
-        <div class="gate pass">
-          <b>SYNTH_TIMING_PASS</b>
-          <span>ch05 fixed_quantizer WNS=8.872 WHS=0.230 LUT=164 FF=10 DSP48E1=0 RAMB=… · 2026-11-20</span>
-        </div>
-        <div class="gate todo">
-          <b>BOARD_PASS</b>
-          <span>⚠ 미실시 · 현재 실물 보드 확인 불가</span>
-        </div>
-      </div>
     </section>
     <section class="section" id="s2_3">
-      <h2><span class="num">05</span> 서브젝트 2-3 · 벡터 내적 <small>(구 07장)</small></h2>
-      <p class="verdict"><b>학습목표 (보드):</b> X=(1,2,3,4)·W0=(5,6,7,8) → <code>D:0000000046</code>(70). W0[3]을 −8로 바꾸면 6. 길이 0은 <code>ERR</code>.</p>
+      <h2><span class="num">05</span> 서브젝트 2-3 · 벡터 내적</h2>
+      <p class="verdict"><b>학습목표:</b> X=(1,2,3,4)와 W0=(5,6,7,8)의 내적은 <code>D:0000000046</code>(70)입니다. W0[3]을 −8로 바꾸면 6이 되고, 길이 0을 주면 <code>ERR</code>입니다.</p>
       <h3>보드에서 볼 것</h3>
       <ol>
-        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다: <code>vivado -mode batch -nojournal -source p02/vivado/build_p02.tcl -tclargs 3</code> → <code>build/vivado/p02_s3/basys3_p02_top.bit</code></li>
-        <li>Hardware Manager로 보드에 내려받고 <code>python3 p02/host/p02_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다 (115200 8N1). sw2 = UART 주인 (0 디버그 콘솔, 1 = 11장 명령), sw3 = 엔진 (0 누적 npu_core, 1 = 12장 엔진). 스위치는 명령 사이에 바꿉니다.</li>
+        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다.<br><code>vivado -mode batch -nojournal -source p02/vivado/build_p02.tcl -tclargs 3</code><br>결과: <code>build/vivado/p02_s3/basys3_p02_top.bit</code></li>
+        <li>Hardware Manager로 보드에 내려받고, <code>python3 p02/host/p02_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다 (115200 8N1). sw2는 UART를 누가 받는지(0 = 디버그 콘솔, 1 = 2-7 명령 해석기), sw3은 엔진(0 = 누적 npu_core, 1 = 2-8 통합 엔진)을 고릅니다. 스위치는 명령과 명령 사이에 바꿉니다.</li>
       </ol>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>순서</th><th>sw[3:2]</th><th>PC 명령 (<code>p02_send.py</code>)</th><th>보드 응답 (UART)</th></tr></thead>
         <tbody><tr><td>1</td><td class="nw"><code>00</code></td><td class="nw"><code>X 0 1</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>2</td><td class="nw"><code>00</code></td><td class="nw"><code>X 1 2</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>3</td><td class="nw"><code>00</code></td><td class="nw"><code>X 2 3</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>4</td><td class="nw"><code>00</code></td><td class="nw"><code>X 3 4</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>5</td><td class="nw"><code>00</code></td><td class="nw"><code>W 0 0 5</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>6</td><td class="nw"><code>00</code></td><td class="nw"><code>W 0 1 6</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>7</td><td class="nw"><code>00</code></td><td class="nw"><code>W 0 2 7</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>8</td><td class="nw"><code>00</code></td><td class="nw"><code>W 0 3 8</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>9</td><td class="nw"><code>00</code></td><td class="nw"><code>D 4</code></td><td class="nw"><code>D:0000000046\r\n</code></td></tr><tr><td>10</td><td class="nw"><code>00</code></td><td class="nw"><code>W 0 3 -8</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>11</td><td class="nw"><code>00</code></td><td class="nw"><code>D 4</code></td><td class="nw"><code>D:0000000006\r\n</code></td></tr><tr><td>12</td><td class="nw"><code>00</code></td><td class="nw"><code>D 0</code></td><td class="nw"><code>ERR\r\n</code></td></tr></tbody>
       </table></div>
-      <p>끝난 뒤 LED: <code>0x0006</code> (콘솔 마지막 결과 아래 16비트, 7세그먼트도 같은 값 16진수 4자리). 응답 출처: 장 Top 시뮬레이션 STAGE=3 (<code>p02/validation/rtl_sim_20261123.log</code>, 바이트 단위 대조).</p>
-      <h3>추가 코드 (구 07장 그대로)</h3>
+      <p>끝나면 LED가 <code>0x0006</code>입니다 (콘솔이 마지막으로 낸 결과의 아래 16비트이고, 7세그먼트에도 같은 값이 16진수 4자리로 보입니다).</p>
+      <h3>작성할 코드</h3>
 
       <div class="codeblock">
-        <div class="codebar"><span>ch07/rtl/vector_dot_core.v · verilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <div class="codebar"><span>ch07/rtl/vector_dot_core.v · verilog</span></div>
         <pre tabindex="0"><code class="language-verilog">`timescale 1ns/1ps
 module vector_dot_core #(parameter integer DATA_WIDTH=16,ACC_WIDTH=40,MAX_LEN=256)(
     input wire clk,resetn,start_i,valid_i,
@@ -1775,19 +1739,20 @@ module vector_dot_core #(parameter integer DATA_WIDTH=16,ACC_WIDTH=40,MAX_LEN=25
     // synthesis translate_on
 endmodule</code></pre>
       </div>
-      <h3>시뮬레이션 기대 화면</h3>
-      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 서브젝트 단독 시험</span></div>
+      <h3>시뮬레이션</h3>
+      <p>보드에 올리기 전에 이 서브젝트 모듈만 먼저 시험합니다. 아래와 같은 줄이 나오면 됩니다.</p>
+      <div class="codeblock"><div class="codebar"><span>터미널 · 저장소 루트</span></div>
         <pre tabindex="0"><code>bash ch07/scripts/run_sim.sh</code></pre></div>
-      <div class="codeblock"><div class="codebar"><span>기대 출력 (도구 버전 미기록 · 2026-11-18 · 출처 ch07/validation/rtl_sim_20261118.log)</span></div>
+      <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
         <pre tabindex="0"><code>PYTHON_DOT_SELF_TEST_PASS cases=78 INT16/40 seed=307
 RTL_SIM_PASS DOT INT16/40 cases=78
 PYTHON_RTL_COMPARE_PASS cycles=78
 PYTHON_DOT_SELF_TEST_PASS cases=78 INT8/32 seed=307
 RTL_SIM_PASS DOT INT8/32 cases=78
 PYTHON_RTL_COMPARE_PASS cycles=78</code></pre></div>
-      <details class="full"><summary>이 서브젝트의 테스트벤치·기준 모델 (전체 코드 2개)</summary>
+      <details class="full"><summary>테스트벤치와 기준 모델 (전체 코드 2개)</summary>
       <div class="codeblock">
-        <div class="codebar"><span>ch07/tb/tb_vector_dot.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <div class="codebar"><span>ch07/tb/tb_vector_dot.sv · systemverilog</span></div>
         <pre tabindex="0"><code class="language-systemverilog">`timescale 1ns/1ps
 module tb_vector_dot;
     parameter DW=16,AW=40;
@@ -1846,7 +1811,7 @@ module tb_vector_dot;
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>ch07/reference/dot_reference.py · python · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <div class="codebar"><span>ch07/reference/dot_reference.py · python</span></div>
         <pre tabindex="0"><code class="language-python">import argparse
 import random
 import sys
@@ -1885,48 +1850,29 @@ if __name__=='__main__':
     else:generate(a.dw,a.aw,a.out)</code></pre>
       </div>
       </details>
-      <h3>판정 줄</h3>
+      <h3>확인할 것</h3>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
-        <tbody><tr><td><code>RTL_SIM_PASS DOT INT16/40 cases=78</code></td><td>길이 0·최대·오류·연속 트랜잭션 포함 78건 통과</td></tr><tr><td><code>RTL_SIM_PASS DOT INT8/32 cases=78</code></td><td>INT8 설정 통과</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS</code></td><td>RTL 출력 파일과 Python 기준값이 모든 사이클에서 일치</td></tr><tr><td>장 Top STAGE=3 시뮬레이션</td><td>위 '보드에서 볼 것' 응답과 바이트 단위로 같음 · 통과</td></tr>
-        <tr><td>장 Top STAGE=3 합성·타이밍</td><td>통과 · WNS=0.628 WHS=0.024 DRC_ERRORS=0 LUT=956 FF=567 DSP48E1=1 RAMB18=5</td></tr></tbody>
+        <tbody><tr><td><code>RTL_SIM_PASS DOT INT16/40 cases=78</code></td><td>길이 0·최대·오류·연속 트랜잭션 포함 78건 통과</td></tr><tr><td><code>RTL_SIM_PASS DOT INT8/32 cases=78</code></td><td>INT8 설정 통과</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS</code></td><td>RTL 출력 파일과 Python 기준값이 모든 사이클에서 일치</td></tr><tr><td>보드 응답</td><td>위 '보드에서 볼 것' 표의 응답과 한 글자도 다르지 않아야 합니다.</td></tr></tbody>
       </table></div>
-      <div class="gate-row">
-        <div class="gate pass">
-          <b>HOST_MODEL_PASS</b>
-          <span>PYTHON_DOT_SELF_TEST_PASS cases=78 INT16/40 seed=307</span>
-        </div>
-        <div class="gate pass">
-          <b>RTL_SIM_PASS</b>
-          <span>RTL_SIM_PASS DOT INT16/40 cases=78 외 1건 · 도구 버전 미기록 · 2026-11-18</span>
-        </div>
-        <div class="gate pass">
-          <b>SYNTH_TIMING_PASS</b>
-          <span>ch07 vector_dot_core WNS=5.418 WHS=0.223 LUT=39 FF=62 DSP48E1=1 RAMB=0 · 2026-11-20</span>
-        </div>
-        <div class="gate todo">
-          <b>BOARD_PASS</b>
-          <span>⚠ 미실시 · 현재 실물 보드 확인 불가</span>
-        </div>
-      </div>
     </section>
     <section class="section" id="s2_4">
-      <h2><span class="num">06</span> 서브젝트 2-4 · 4PE 병렬 어레이 <small>(구 08장)</small></h2>
-      <p class="verdict"><b>학습목표 (보드):</b> 같은 X에 W0~W3 네 내적을 한 번에: <code>P:</code> 6, 10, −10(<code>…FFF6</code>), 8.</p>
+      <h2><span class="num">06</span> 서브젝트 2-4 · 4PE 병렬 어레이</h2>
+      <p class="verdict"><b>학습목표:</b> 같은 X에 대해 W0~W3 네 개의 내적을 한 번에 계산합니다. <code>P:</code> 뒤에 6, 10, −10(<code>…FFF6</code>), 8이 나옵니다.</p>
       <h3>보드에서 볼 것</h3>
       <ol>
-        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다: <code>vivado -mode batch -nojournal -source p02/vivado/build_p02.tcl -tclargs 4</code> → <code>build/vivado/p02_s4/basys3_p02_top.bit</code></li>
-        <li>Hardware Manager로 보드에 내려받고 <code>python3 p02/host/p02_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다 (115200 8N1). sw2 = UART 주인 (0 디버그 콘솔, 1 = 11장 명령), sw3 = 엔진 (0 누적 npu_core, 1 = 12장 엔진). 스위치는 명령 사이에 바꿉니다.</li>
+        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다.<br><code>vivado -mode batch -nojournal -source p02/vivado/build_p02.tcl -tclargs 4</code><br>결과: <code>build/vivado/p02_s4/basys3_p02_top.bit</code></li>
+        <li>Hardware Manager로 보드에 내려받고, <code>python3 p02/host/p02_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다 (115200 8N1). sw2는 UART를 누가 받는지(0 = 디버그 콘솔, 1 = 2-7 명령 해석기), sw3은 엔진(0 = 누적 npu_core, 1 = 2-8 통합 엔진)을 고릅니다. 스위치는 명령과 명령 사이에 바꿉니다.</li>
       </ol>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>순서</th><th>sw[3:2]</th><th>PC 명령 (<code>p02_send.py</code>)</th><th>보드 응답 (UART)</th></tr></thead>
         <tbody><tr><td>1</td><td class="nw"><code>00</code></td><td class="nw"><code>W 1 0 1</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>2</td><td class="nw"><code>00</code></td><td class="nw"><code>W 1 1 1</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>3</td><td class="nw"><code>00</code></td><td class="nw"><code>W 1 2 1</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>4</td><td class="nw"><code>00</code></td><td class="nw"><code>W 1 3 1</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>5</td><td class="nw"><code>00</code></td><td class="nw"><code>W 2 0 -1</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>6</td><td class="nw"><code>00</code></td><td class="nw"><code>W 2 1 -1</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>7</td><td class="nw"><code>00</code></td><td class="nw"><code>W 2 2 -1</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>8</td><td class="nw"><code>00</code></td><td class="nw"><code>W 2 3 -1</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>9</td><td class="nw"><code>00</code></td><td class="nw"><code>W 3 0 0</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>10</td><td class="nw"><code>00</code></td><td class="nw"><code>W 3 1 0</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>11</td><td class="nw"><code>00</code></td><td class="nw"><code>W 3 2 0</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>12</td><td class="nw"><code>00</code></td><td class="nw"><code>W 3 3 2</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>13</td><td class="nw"><code>00</code></td><td class="nw"><code>P 4</code></td><td class="nw"><code>P:0000000006,000000000A,FFFFFFFFF6,0000000008\r\n</code></td></tr></tbody>
       </table></div>
-      <p>끝난 뒤 LED: <code>0x0006</code> (콘솔 마지막 결과 아래 16비트, 7세그먼트도 같은 값 16진수 4자리). 응답 출처: 장 Top 시뮬레이션 STAGE=4 (<code>p02/validation/rtl_sim_20261123.log</code>, 바이트 단위 대조).</p>
-      <h3>추가 코드 (구 08장 그대로)</h3>
+      <p>끝나면 LED가 <code>0x0006</code>입니다 (콘솔이 마지막으로 낸 결과의 아래 16비트이고, 7세그먼트에도 같은 값이 16진수 4자리로 보입니다).</p>
+      <h3>작성할 코드</h3>
 
       <div class="codeblock">
-        <div class="codebar"><span>ch08/rtl/pe_array4.v · verilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <div class="codebar"><span>ch08/rtl/pe_array4.v · verilog</span></div>
         <pre tabindex="0"><code class="language-verilog">`timescale 1ns/1ps
 module pe_array4 #(parameter integer DATA_WIDTH=16,ACC_WIDTH=40)(
     input wire clk,resetn,start_i,
@@ -1976,19 +1922,20 @@ module pe_array4 #(parameter integer DATA_WIDTH=16,ACC_WIDTH=40)(
     end
 endmodule</code></pre>
       </div>
-      <h3>시뮬레이션 기대 화면</h3>
-      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 서브젝트 단독 시험</span></div>
+      <h3>시뮬레이션</h3>
+      <p>보드에 올리기 전에 이 서브젝트 모듈만 먼저 시험합니다. 아래와 같은 줄이 나오면 됩니다.</p>
+      <div class="codeblock"><div class="codebar"><span>터미널 · 저장소 루트</span></div>
         <pre tabindex="0"><code>bash ch08/scripts/run_sim.sh</code></pre></div>
-      <div class="codeblock"><div class="codebar"><span>기대 출력 (도구 버전 미기록 · 2026-11-18 · 출처 ch08/validation/rtl_sim_20261118.log)</span></div>
+      <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
         <pre tabindex="0"><code>PYTHON_PE_SELF_TEST_PASS INT16/40 cases=26 seed=308
 RTL_SIM_PASS PE4 INT16/40 cases=26
 PYTHON_RTL_COMPARE_PASS cycles=26
 PYTHON_PE_SELF_TEST_PASS INT8/32 cases=26 seed=308
 RTL_SIM_PASS PE4 INT8/32 cases=26
 PYTHON_RTL_COMPARE_PASS cycles=26</code></pre></div>
-      <details class="full"><summary>이 서브젝트의 테스트벤치·기준 모델 (전체 코드 2개)</summary>
+      <details class="full"><summary>테스트벤치와 기준 모델 (전체 코드 2개)</summary>
       <div class="codeblock">
-        <div class="codebar"><span>ch08/tb/tb_pe_array4.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <div class="codebar"><span>ch08/tb/tb_pe_array4.sv · systemverilog</span></div>
         <pre tabindex="0"><code class="language-systemverilog">`timescale 1ns/1ps
 module tb_pe_array4;
     parameter DW=16,AW=40;
@@ -2048,7 +1995,7 @@ module tb_pe_array4;
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>ch08/reference/pe_reference.py · python · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <div class="codebar"><span>ch08/reference/pe_reference.py · python</span></div>
         <pre tabindex="0"><code class="language-python">import argparse
 import random
 import sys
@@ -2081,48 +2028,29 @@ if __name__=='__main__':
     else:generate(a.dw,a.aw,a.out)</code></pre>
       </div>
       </details>
-      <h3>판정 줄</h3>
+      <h3>확인할 것</h3>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
-        <tbody><tr><td><code>RTL_SIM_PASS PE4 INT16/40 cases=26</code></td><td>4개 PE 결과·합산 26건 통과</td></tr><tr><td><code>RTL_SIM_PASS PE4 INT8/32 cases=26</code></td><td>INT8 설정 통과</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS</code></td><td>RTL 출력 파일과 Python 기준값이 모든 사이클에서 일치</td></tr><tr><td>장 Top STAGE=4 시뮬레이션</td><td>위 '보드에서 볼 것' 응답과 바이트 단위로 같음 · 통과</td></tr>
-        <tr><td>장 Top STAGE=4 합성·타이밍</td><td>통과 · WNS=1.642 WHS=0.022 DRC_ERRORS=0 LUT=1427 FF=1261 DSP48E1=5 RAMB18=5</td></tr></tbody>
+        <tbody><tr><td><code>RTL_SIM_PASS PE4 INT16/40 cases=26</code></td><td>4개 PE 결과·합산 26건 통과</td></tr><tr><td><code>RTL_SIM_PASS PE4 INT8/32 cases=26</code></td><td>INT8 설정 통과</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS</code></td><td>RTL 출력 파일과 Python 기준값이 모든 사이클에서 일치</td></tr><tr><td>보드 응답</td><td>위 '보드에서 볼 것' 표의 응답과 한 글자도 다르지 않아야 합니다.</td></tr></tbody>
       </table></div>
-      <div class="gate-row">
-        <div class="gate pass">
-          <b>HOST_MODEL_PASS</b>
-          <span>PYTHON_PE_SELF_TEST_PASS INT16/40 cases=26 seed=308</span>
-        </div>
-        <div class="gate pass">
-          <b>RTL_SIM_PASS</b>
-          <span>RTL_SIM_PASS PE4 INT16/40 cases=26 외 1건 · 도구 버전 미기록 · 2026-11-18</span>
-        </div>
-        <div class="gate pass">
-          <b>SYNTH_TIMING_PASS</b>
-          <span>ch08 pe_array4 WNS=3.937 WHS=0.146 LUT=267 FF=453 DSP48E1=4 RAMB=0 · 2026-11-20</span>
-        </div>
-        <div class="gate todo">
-          <b>BOARD_PASS</b>
-          <span>⚠ 미실시 · 현재 실물 보드 확인 불가</span>
-        </div>
-      </div>
     </section>
     <section class="section" id="s2_5">
-      <h2><span class="num">07</span> 서브젝트 2-5 · Dense 4뉴런 레이어 <small>(구 09장)</small></h2>
-      <p class="verdict"><b>학습목표 (보드):</b> Bias를 더하고 ReLU·16비트 포화: <code>L:0006,0000,005A,7FFF O:8</code> (음수 → 0, 65544 → 7FFF와 넘침).</p>
+      <h2><span class="num">07</span> 서브젝트 2-5 · Dense 4뉴런 레이어</h2>
+      <p class="verdict"><b>학습목표:</b> Bias를 더하고 ReLU와 16비트 포화를 거칩니다. <code>L:0006,0000,005A,7FFF O:8</code>에서 음수는 0이 되고, 65544는 7FFF로 막히며 넘침이 표시됩니다.</p>
       <h3>보드에서 볼 것</h3>
       <ol>
-        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다: <code>vivado -mode batch -nojournal -source p02/vivado/build_p02.tcl -tclargs 5</code> → <code>build/vivado/p02_s5/basys3_p02_top.bit</code></li>
-        <li>Hardware Manager로 보드에 내려받고 <code>python3 p02/host/p02_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다 (115200 8N1). sw2 = UART 주인 (0 디버그 콘솔, 1 = 11장 명령), sw3 = 엔진 (0 누적 npu_core, 1 = 12장 엔진). 스위치는 명령 사이에 바꿉니다.</li>
+        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다.<br><code>vivado -mode batch -nojournal -source p02/vivado/build_p02.tcl -tclargs 5</code><br>결과: <code>build/vivado/p02_s5/basys3_p02_top.bit</code></li>
+        <li>Hardware Manager로 보드에 내려받고, <code>python3 p02/host/p02_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다 (115200 8N1). sw2는 UART를 누가 받는지(0 = 디버그 콘솔, 1 = 2-7 명령 해석기), sw3은 엔진(0 = 누적 npu_core, 1 = 2-8 통합 엔진)을 고릅니다. 스위치는 명령과 명령 사이에 바꿉니다.</li>
       </ol>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>순서</th><th>sw[3:2]</th><th>PC 명령 (<code>p02_send.py</code>)</th><th>보드 응답 (UART)</th></tr></thead>
         <tbody><tr><td>1</td><td class="nw"><code>00</code></td><td class="nw"><code>B 0 0</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>2</td><td class="nw"><code>00</code></td><td class="nw"><code>B 1 -20</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>3</td><td class="nw"><code>00</code></td><td class="nw"><code>B 2 100</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>4</td><td class="nw"><code>00</code></td><td class="nw"><code>B 3 65536</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>5</td><td class="nw"><code>00</code></td><td class="nw"><code>L 4</code></td><td class="nw"><code>L:0006,0000,005A,7FFF O:8\r\n</code></td></tr></tbody>
       </table></div>
-      <p>끝난 뒤 LED: <code>0x0006</code> (콘솔 마지막 결과 아래 16비트, 7세그먼트도 같은 값 16진수 4자리). 응답 출처: 장 Top 시뮬레이션 STAGE=5 (<code>p02/validation/rtl_sim_20261123.log</code>, 바이트 단위 대조).</p>
-      <h3>추가 코드 (구 09장 그대로)</h3>
+      <p>끝나면 LED가 <code>0x0006</code>입니다 (콘솔이 마지막으로 낸 결과의 아래 16비트이고, 7세그먼트에도 같은 값이 16진수 4자리로 보입니다).</p>
+      <h3>작성할 코드</h3>
 
       <div class="codeblock">
-        <div class="codebar"><span>ch09/rtl/dense_layer4.v · verilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <div class="codebar"><span>ch09/rtl/dense_layer4.v · verilog</span></div>
         <pre tabindex="0"><code class="language-verilog">`timescale 1ns/1ps
 module dense_layer4 #(parameter integer DATA_WIDTH=16,ACC_WIDTH=40,SHIFT=0)(
     input wire clk,resetn,start_i,valid_i,
@@ -2171,19 +2099,20 @@ module dense_layer4 #(parameter integer DATA_WIDTH=16,ACC_WIDTH=40,SHIFT=0)(
     end
 endmodule</code></pre>
       </div>
-      <h3>시뮬레이션 기대 화면</h3>
-      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 서브젝트 단독 시험</span></div>
+      <h3>시뮬레이션</h3>
+      <p>보드에 올리기 전에 이 서브젝트 모듈만 먼저 시험합니다. 아래와 같은 줄이 나오면 됩니다.</p>
+      <div class="codeblock"><div class="codebar"><span>터미널 · 저장소 루트</span></div>
         <pre tabindex="0"><code>bash ch09/scripts/run_sim.sh</code></pre></div>
-      <div class="codeblock"><div class="codebar"><span>기대 출력 (도구 버전 미기록 · 2026-11-18 · 출처 ch09/validation/rtl_sim_20261118.log)</span></div>
+      <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
         <pre tabindex="0"><code>PYTHON_DENSE_SELF_TEST_PASS INT16/40 cases=46 seed=309
 RTL_SIM_PASS DENSE4 INT16/40 cases=46
 PYTHON_RTL_COMPARE_PASS cycles=46
 PYTHON_DENSE_SELF_TEST_PASS INT8/32 cases=46 seed=309
 RTL_SIM_PASS DENSE4 INT8/32 cases=46
 PYTHON_RTL_COMPARE_PASS cycles=46</code></pre></div>
-      <details class="full"><summary>이 서브젝트의 테스트벤치·기준 모델 (전체 코드 2개)</summary>
+      <details class="full"><summary>테스트벤치와 기준 모델 (전체 코드 2개)</summary>
       <div class="codeblock">
-        <div class="codebar"><span>ch09/tb/tb_dense_layer4.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <div class="codebar"><span>ch09/tb/tb_dense_layer4.sv · systemverilog</span></div>
         <pre tabindex="0"><code class="language-systemverilog">`timescale 1ns/1ps
 module tb_dense_layer4;
     parameter DW=16,AW=40;
@@ -2239,7 +2168,7 @@ module tb_dense_layer4;
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>ch09/reference/dense_reference.py · python · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <div class="codebar"><span>ch09/reference/dense_reference.py · python</span></div>
         <pre tabindex="0"><code class="language-python">import argparse
 import random
 import sys
@@ -2282,48 +2211,29 @@ if __name__=='__main__':
     else:generate(a.dw,a.aw,a.out)</code></pre>
       </div>
       </details>
-      <h3>판정 줄</h3>
+      <h3>확인할 것</h3>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
-        <tbody><tr><td><code>RTL_SIM_PASS DENSE4 INT16/40 cases=46</code></td><td>Bias·ReLU·포화 포함 46건 통과</td></tr><tr><td><code>RTL_SIM_PASS DENSE4 INT8/32 cases=46</code></td><td>INT8 설정 통과</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS</code></td><td>RTL 출력 파일과 Python 기준값이 모든 사이클에서 일치</td></tr><tr><td>장 Top STAGE=5 시뮬레이션</td><td>위 '보드에서 볼 것' 응답과 바이트 단위로 같음 · 통과</td></tr>
-        <tr><td>장 Top STAGE=5 합성·타이밍</td><td>통과 · WNS=1.381 WHS=0.024 DRC_ERRORS=0 LUT=2084 FF=2182 DSP48E1=9 RAMB18=5</td></tr></tbody>
+        <tbody><tr><td><code>RTL_SIM_PASS DENSE4 INT16/40 cases=46</code></td><td>Bias·ReLU·포화 포함 46건 통과</td></tr><tr><td><code>RTL_SIM_PASS DENSE4 INT8/32 cases=46</code></td><td>INT8 설정 통과</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS</code></td><td>RTL 출력 파일과 Python 기준값이 모든 사이클에서 일치</td></tr><tr><td>보드 응답</td><td>위 '보드에서 볼 것' 표의 응답과 한 글자도 다르지 않아야 합니다.</td></tr></tbody>
       </table></div>
-      <div class="gate-row">
-        <div class="gate pass">
-          <b>HOST_MODEL_PASS</b>
-          <span>PYTHON_DENSE_SELF_TEST_PASS INT16/40 cases=46 seed=309</span>
-        </div>
-        <div class="gate pass">
-          <b>RTL_SIM_PASS</b>
-          <span>RTL_SIM_PASS DENSE4 INT16/40 cases=46 외 1건 · 도구 버전 미기록 · 2026-11-18</span>
-        </div>
-        <div class="gate pass">
-          <b>SYNTH_TIMING_PASS</b>
-          <span>ch09 dense_layer4 WNS=1.339 WHS=0.123 LUT=486 FF=710 DSP48E1=4 RAMB=0 · 2026-11-20</span>
-        </div>
-        <div class="gate todo">
-          <b>BOARD_PASS</b>
-          <span>⚠ 미실시 · 현재 실물 보드 확인 불가</span>
-        </div>
-      </div>
     </section>
     <section class="section" id="s2_6">
-      <h2><span class="num">08</span> 서브젝트 2-6 · 4뉴런 NPU Core <small>(구 10장)</small></h2>
-      <p class="verdict"><b>학습목표 (보드):</b> npu_core가 자체 BRAM에서 읽어 같은 Dense를 한다: <code>N 4</code>가 <code>L 4</code>와 같은 답. 길이 2면 <code>0011,0000,0061,7FFF</code>.</p>
+      <h2><span class="num">08</span> 서브젝트 2-6 · 4뉴런 NPU Core</h2>
+      <p class="verdict"><b>학습목표:</b> npu_core가 자기 BRAM에서 값을 읽어 같은 Dense 계산을 합니다. <code>N 4</code>의 답은 <code>L 4</code>와 같고, 길이 2에서는 <code>0011,0000,0061,7FFF</code>입니다.</p>
       <h3>보드에서 볼 것</h3>
       <ol>
-        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다: <code>vivado -mode batch -nojournal -source p02/vivado/build_p02.tcl -tclargs 6</code> → <code>build/vivado/p02_s6/basys3_p02_top.bit</code></li>
-        <li>Hardware Manager로 보드에 내려받고 <code>python3 p02/host/p02_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다 (115200 8N1). sw2 = UART 주인 (0 디버그 콘솔, 1 = 11장 명령), sw3 = 엔진 (0 누적 npu_core, 1 = 12장 엔진). 스위치는 명령 사이에 바꿉니다.</li>
+        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다.<br><code>vivado -mode batch -nojournal -source p02/vivado/build_p02.tcl -tclargs 6</code><br>결과: <code>build/vivado/p02_s6/basys3_p02_top.bit</code></li>
+        <li>Hardware Manager로 보드에 내려받고, <code>python3 p02/host/p02_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다 (115200 8N1). sw2는 UART를 누가 받는지(0 = 디버그 콘솔, 1 = 2-7 명령 해석기), sw3은 엔진(0 = 누적 npu_core, 1 = 2-8 통합 엔진)을 고릅니다. 스위치는 명령과 명령 사이에 바꿉니다.</li>
       </ol>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>순서</th><th>sw[3:2]</th><th>PC 명령 (<code>p02_send.py</code>)</th><th>보드 응답 (UART)</th></tr></thead>
         <tbody><tr><td>1</td><td class="nw"><code>00</code></td><td class="nw"><code>N 4</code></td><td class="nw"><code>N:0006,0000,005A,7FFF O:8\r\n</code></td></tr><tr><td>2</td><td class="nw"><code>00</code></td><td class="nw"><code>N 2</code></td><td class="nw"><code>N:0011,0000,0061,7FFF O:8\r\n</code></td></tr></tbody>
       </table></div>
-      <p>끝난 뒤 LED: <code>0x0011</code> (콘솔 마지막 결과 아래 16비트, 7세그먼트도 같은 값 16진수 4자리). 응답 출처: 장 Top 시뮬레이션 STAGE=6 (<code>p02/validation/rtl_sim_20261123.log</code>, 바이트 단위 대조).</p>
-      <h3>추가 코드 (구 10장 그대로)</h3>
+      <p>끝나면 LED가 <code>0x0011</code>입니다 (콘솔이 마지막으로 낸 결과의 아래 16비트이고, 7세그먼트에도 같은 값이 16진수 4자리로 보입니다).</p>
+      <h3>작성할 코드</h3>
 
       <div class="codeblock">
-        <div class="codebar"><span>ch10/rtl/npu_core.v · verilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <div class="codebar"><span>ch10/rtl/npu_core.v · verilog</span></div>
         <pre tabindex="0"><code class="language-verilog">`timescale 1ns/1ps
 module npu_core #(parameter integer DATA_WIDTH=16,ACC_WIDTH=40)(
     input wire clk,resetn,start_i,
@@ -2401,19 +2311,20 @@ module npu_core #(parameter integer DATA_WIDTH=16,ACC_WIDTH=40)(
     end
 endmodule</code></pre>
       </div>
-      <h3>시뮬레이션 기대 화면</h3>
-      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 서브젝트 단독 시험</span></div>
+      <h3>시뮬레이션</h3>
+      <p>보드에 올리기 전에 이 서브젝트 모듈만 먼저 시험합니다. 아래와 같은 줄이 나오면 됩니다.</p>
+      <div class="codeblock"><div class="codebar"><span>터미널 · 저장소 루트</span></div>
         <pre tabindex="0"><code>bash ch10/scripts/run_sim.sh</code></pre></div>
-      <div class="codeblock"><div class="codebar"><span>기대 출력 (도구 버전 미기록 · 2026-11-18 · 출처 ch10/validation/rtl_sim_20261118.log)</span></div>
+      <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
         <pre tabindex="0"><code>PYTHON_NPU_SELF_TEST_PASS INT16/40 datasets=22 inferences=44 seed=310
 RTL_SIM_PASS NPU INT16/40 datasets=22 inferences=44
 PYTHON_RTL_COMPARE_PASS cycles=44
 PYTHON_NPU_SELF_TEST_PASS INT8/32 datasets=22 inferences=44 seed=310
 RTL_SIM_PASS NPU INT8/32 datasets=22 inferences=44
 PYTHON_RTL_COMPARE_PASS cycles=44</code></pre></div>
-      <details class="full"><summary>이 서브젝트의 테스트벤치·기준 모델 (전체 코드 2개)</summary>
+      <details class="full"><summary>테스트벤치와 기준 모델 (전체 코드 2개)</summary>
       <div class="codeblock">
-        <div class="codebar"><span>ch10/tb/tb_npu_core.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <div class="codebar"><span>ch10/tb/tb_npu_core.sv · systemverilog</span></div>
         <pre tabindex="0"><code class="language-systemverilog">`timescale 1ns/1ps
 module tb_npu_core;
     parameter DW=16,AW=40;
@@ -2487,7 +2398,7 @@ module tb_npu_core;
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>ch10/reference/npu_reference.py · python · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <div class="codebar"><span>ch10/reference/npu_reference.py · python</span></div>
         <pre tabindex="0"><code class="language-python">import argparse
 import random
 import sys
@@ -2526,48 +2437,29 @@ if __name__=='__main__':
     else:generate(a.dw,a.aw,a.out)</code></pre>
       </div>
       </details>
-      <h3>판정 줄</h3>
+      <h3>확인할 것</h3>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
-        <tbody><tr><td><code>RTL_SIM_PASS NPU INT16/40 datasets=22 inferences=44</code></td><td>22개 데이터셋·44회 추론 통과</td></tr><tr><td><code>RTL_SIM_PASS NPU INT8/32 datasets=22 inferences=44</code></td><td>INT8 설정 통과</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS</code></td><td>RTL 출력 파일과 Python 기준값이 모든 사이클에서 일치</td></tr><tr><td>장 Top STAGE=6 시뮬레이션</td><td>위 '보드에서 볼 것' 응답과 바이트 단위로 같음 · 통과</td></tr>
-        <tr><td>장 Top STAGE=6 합성·타이밍</td><td>통과 · WNS=0.560 WHS=0.019 DRC_ERRORS=0 LUT=2619 FF=3138 DSP48E1=13 RAMB18=10</td></tr></tbody>
+        <tbody><tr><td><code>RTL_SIM_PASS NPU INT16/40 datasets=22 inferences=44</code></td><td>22개 데이터셋·44회 추론 통과</td></tr><tr><td><code>RTL_SIM_PASS NPU INT8/32 datasets=22 inferences=44</code></td><td>INT8 설정 통과</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS</code></td><td>RTL 출력 파일과 Python 기준값이 모든 사이클에서 일치</td></tr><tr><td>보드 응답</td><td>위 '보드에서 볼 것' 표의 응답과 한 글자도 다르지 않아야 합니다.</td></tr></tbody>
       </table></div>
-      <div class="gate-row">
-        <div class="gate pass">
-          <b>HOST_MODEL_PASS</b>
-          <span>PYTHON_NPU_SELF_TEST_PASS INT16/40 datasets=22 inferences=44 seed=310</span>
-        </div>
-        <div class="gate pass">
-          <b>RTL_SIM_PASS</b>
-          <span>RTL_SIM_PASS NPU INT16/40 datasets=22 inferences=44 외 1건 · 도구 버전 미기록 · 2026-11-18</span>
-        </div>
-        <div class="gate pass">
-          <b>SYNTH_TIMING_PASS</b>
-          <span>ch10 npu_core WNS=1.130 WHS=0.117 LUT=529 FF=963 DSP48E1=4 RAMB=5 · 2026-11-20</span>
-        </div>
-        <div class="gate todo">
-          <b>BOARD_PASS</b>
-          <span>⚠ 미실시 · 현재 실물 보드 확인 불가</span>
-        </div>
-      </div>
     </section>
     <section class="section" id="s2_7">
-      <h2><span class="num">09</span> 서브젝트 2-7 · UART 모델 적재 <small>(구 11장)</small></h2>
-      <p class="verdict"><b>학습목표 (보드):</b> sw2를 올리면 11장 명령: 고정 그룹 <code>0</code>~<code>3</code> → <code>C0</code>~<code>C3</code>. 내리고 <code>x 0</code> → <code>X:FFFF</code> (11장이 쓴 값을 콘솔이 읽음).</p>
+      <h2><span class="num">09</span> 서브젝트 2-7 · UART 모델 적재</h2>
+      <p class="verdict"><b>학습목표:</b> sw2를 올리면 명령 해석기가 UART를 받습니다. 고정 그룹 <code>0</code>~<code>3</code>을 보내면 <code>C0</code>~<code>C3</code>이 돌아옵니다. sw2를 내리고 <code>x 0</code>을 보내면 <code>X:FFFF</code>가 나와, 명령 해석기가 쓴 값을 콘솔로 확인할 수 있습니다.</p>
       <h3>보드에서 볼 것</h3>
       <ol>
-        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다: <code>vivado -mode batch -nojournal -source p02/vivado/build_p02.tcl -tclargs 7</code> → <code>build/vivado/p02_s7/basys3_p02_top.bit</code></li>
-        <li>Hardware Manager로 보드에 내려받고 <code>python3 p02/host/p02_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다 (115200 8N1). sw2 = UART 주인 (0 디버그 콘솔, 1 = 11장 명령), sw3 = 엔진 (0 누적 npu_core, 1 = 12장 엔진). 스위치는 명령 사이에 바꿉니다.</li>
+        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다.<br><code>vivado -mode batch -nojournal -source p02/vivado/build_p02.tcl -tclargs 7</code><br>결과: <code>build/vivado/p02_s7/basys3_p02_top.bit</code></li>
+        <li>Hardware Manager로 보드에 내려받고, <code>python3 p02/host/p02_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다 (115200 8N1). sw2는 UART를 누가 받는지(0 = 디버그 콘솔, 1 = 2-7 명령 해석기), sw3은 엔진(0 = 누적 npu_core, 1 = 2-8 통합 엔진)을 고릅니다. 스위치는 명령과 명령 사이에 바꿉니다.</li>
       </ol>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>순서</th><th>sw[3:2]</th><th>PC 명령 (<code>p02_send.py</code>)</th><th>보드 응답 (UART)</th></tr></thead>
         <tbody><tr><td>1</td><td class="nw"><code>01</code></td><td class="nw"><code>S</code></td><td class="nw"><code>I\r\n</code></td></tr><tr><td>2</td><td class="nw"><code>01</code></td><td class="nw"><code>0</code></td><td class="nw"><code>C0:00000000002,00000000000,00000000000,00000000000\r\n</code></td></tr><tr><td>3</td><td class="nw"><code>01</code></td><td class="nw"><code>1</code></td><td class="nw"><code>C1:00000000000,00000000002,00000000000,00000000000\r\n</code></td></tr><tr><td>4</td><td class="nw"><code>01</code></td><td class="nw"><code>2</code></td><td class="nw"><code>C2:00000000000,00000000000,00000000002,00000000000\r\n</code></td></tr><tr><td>5</td><td class="nw"><code>01</code></td><td class="nw"><code>3</code></td><td class="nw"><code>C3:00000000000,00000000000,00000000000,00000000002\r\n</code></td></tr><tr><td>6</td><td class="nw"><code>00</code></td><td class="nw"><code>x 0</code></td><td class="nw"><code>X:FFFF\r\n</code></td></tr></tbody>
       </table></div>
-      <p>끝난 뒤 LED: <code>0xFFFF</code> (콘솔 마지막 결과 아래 16비트, 7세그먼트도 같은 값 16진수 4자리). 응답 출처: 장 Top 시뮬레이션 STAGE=7 (<code>p02/validation/rtl_sim_20261123.log</code>, 바이트 단위 대조).</p>
-      <h3>추가 코드 (구 11장 그대로)</h3>
+      <p>끝나면 LED가 <code>0xFFFF</code>입니다 (콘솔이 마지막으로 낸 결과의 아래 16비트이고, 7세그먼트에도 같은 값이 16진수 4자리로 보입니다).</p>
+      <h3>작성할 코드</h3>
 
       <div class="codeblock">
-        <div class="codebar"><span>mini_npu/rtl/uart_npu_command_controller.v · verilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <div class="codebar"><span>mini_npu/rtl/uart_npu_command_controller.v · verilog</span></div>
         <pre tabindex="0"><code class="language-verilog">// (추가) UART 명령·모델 적재·추론 결과 직렬화 Controller.
 // 단일 문자 '0'~'3'은 2원소 고정 표본. 11장 바이너리 명령은 아래 README 참조.
 // 요청/응답은 stop-and-wait: ACK 또는 결과 LF까지 다음 명령 송신 금지.
@@ -2753,15 +2645,16 @@ module uart_npu_command_controller(
     end
 endmodule</code></pre>
       </div>
-      <h3>시뮬레이션 기대 화면</h3>
-      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 서브젝트 단독 시험</span></div>
+      <h3>시뮬레이션</h3>
+      <p>보드에 올리기 전에 이 서브젝트 모듈만 먼저 시험합니다. 아래와 같은 줄이 나오면 됩니다.</p>
+      <div class="codeblock"><div class="codebar"><span>터미널 · 저장소 루트</span></div>
         <pre tabindex="0"><code>bash ch11/scripts/run_sim.sh</code></pre></div>
-      <div class="codeblock"><div class="codebar"><span>기대 출력 (Icarus Verilog 12.0 · 2026-11-18 · 출처 ch11/validation/rtl_sim_20261118.log)</span></div>
+      <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
         <pre tabindex="0"><code>INTEGRATED_UART_RTL_SIM_PASS classes=6 model_edit=1 invalid_length=1
 PC_GOLDEN_COMPARE_PASS predictions=6 model_edit=1</code></pre></div>
-      <details class="full"><summary>이 서브젝트의 테스트벤치·기준 모델 (전체 코드 2개)</summary>
+      <details class="full"><summary>테스트벤치와 기준 모델 (전체 코드 2개)</summary>
       <div class="codeblock">
-        <div class="codebar"><span>mini_npu/tb/tb_npu_uart.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <div class="codebar"><span>mini_npu/tb/tb_npu_uart.sv · systemverilog</span></div>
         <pre tabindex="0"><code class="language-systemverilog">// (추가) CPU/AXI 없이 실제 UART RX 핀→BRAM→DSP 4PE→UART TX 핀 파형 검증.
 `timescale 1ns/1ps
 module tb_npu_uart;
@@ -2911,7 +2804,7 @@ module tb_npu_uart;
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>mini_npu/reference/check_results.py · python · 원본 · RTL_SIM 통과 2026-11-18</span></div>
+        <div class="codebar"><span>mini_npu/reference/check_results.py · python</span></div>
         <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
 """12장: HDL이 기록한 실제 예측 CSV를 독립 정수 정답과 비교한다."""
 import csv
@@ -2955,48 +2848,29 @@ if __name__ == "__main__":
     main()</code></pre>
       </div>
       </details>
-      <h3>판정 줄</h3>
+      <h3>확인할 것</h3>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
-        <tbody><tr><td><code>INTEGRATED_UART_RTL_SIM_PASS classes=6 model_edit=1 invalid_length=1</code></td><td>6개 표본 분류 · Bias 변경 후 분류 변화 · 잘못된 길이 거부</td></tr><tr><td><code>PC_GOLDEN_COMPARE_PASS predictions=6 model_edit=1</code></td><td>mini_npu/outputs/predictions.csv가 PC 기준 모델과 일치</td></tr><tr><td>장 Top STAGE=7 시뮬레이션</td><td>위 '보드에서 볼 것' 응답과 바이트 단위로 같음 · 통과</td></tr>
-        <tr><td>장 Top STAGE=7 합성·타이밍</td><td>통과 · WNS=0.875 WHS=0.012 DRC_ERRORS=0 LUT=3037 FF=3431 DSP48E1=13 RAMB18=10</td></tr></tbody>
+        <tbody><tr><td><code>INTEGRATED_UART_RTL_SIM_PASS classes=6 model_edit=1 invalid_length=1</code></td><td>6개 표본 분류 · Bias 변경 후 분류 변화 · 잘못된 길이 거부</td></tr><tr><td><code>PC_GOLDEN_COMPARE_PASS predictions=6 model_edit=1</code></td><td>mini_npu/outputs/predictions.csv가 PC 기준 모델과 일치</td></tr><tr><td>보드 응답</td><td>위 '보드에서 볼 것' 표의 응답과 한 글자도 다르지 않아야 합니다.</td></tr></tbody>
       </table></div>
-      <div class="gate-row">
-        <div class="gate pass">
-          <b>HOST_MODEL_PASS</b>
-          <span>PC_GOLDEN_COMPARE_PASS predictions=6 model_edit=1</span>
-        </div>
-        <div class="gate pass">
-          <b>RTL_SIM_PASS</b>
-          <span>INTEGRATED_UART_RTL_SIM_PASS classes=6 model_edit=1 invalid_… · Icarus Verilog 12.0 · 2026-11-18</span>
-        </div>
-        <div class="gate pass">
-          <b>SYNTH_TIMING_PASS</b>
-          <span>ch12 basys3_npu_top WNS=1.993 WHS=0.024 DRC_ERRORS=0 LUT=1657 FF=1262 … (12장 통합 Top) · 2026-11-23</span>
-        </div>
-        <div class="gate todo">
-          <b>BOARD_PASS</b>
-          <span>⚠ 미실시 · 현재 실물 보드 확인 불가</span>
-        </div>
-      </div>
     </section>
     <section class="section" id="s2_8">
-      <h2><span class="num">10</span> 서브젝트 2-8 · 통합 NPU Top <small>(구 12장)</small></h2>
-      <p class="verdict"><b>학습목표 (보드):</b> sw3을 올리면 12장 엔진: 같은 그룹에서 음수 점수(<code>…FFE</code>, ReLU 없음)가 보이고 클래스는 같다. LED0~3에 클래스, LED14 끝남, 7세그먼트에 클래스.</p>
+      <h2><span class="num">10</span> 서브젝트 2-8 · 통합 NPU Top</h2>
+      <p class="verdict"><b>학습목표:</b> sw3을 올리면 통합 엔진으로 바뀝니다. 같은 그룹에서 음수 점수(<code>…FFE</code>, ReLU 없음)가 보이지만 클래스는 같습니다. LED0~3과 7세그먼트에 클래스가, LED14에 끝남 표시가 나옵니다.</p>
       <h3>보드에서 볼 것</h3>
       <ol>
-        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다: <code>vivado -mode batch -nojournal -source p02/vivado/build_p02.tcl -tclargs 8</code> → <code>build/vivado/p02_s8/basys3_p02_top.bit</code></li>
-        <li>Hardware Manager로 보드에 내려받고 <code>python3 p02/host/p02_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다 (115200 8N1). sw2 = UART 주인 (0 디버그 콘솔, 1 = 11장 명령), sw3 = 엔진 (0 누적 npu_core, 1 = 12장 엔진). 스위치는 명령 사이에 바꿉니다.</li>
+        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다.<br><code>vivado -mode batch -nojournal -source p02/vivado/build_p02.tcl -tclargs 8</code><br>결과: <code>build/vivado/p02_s8/basys3_p02_top.bit</code></li>
+        <li>Hardware Manager로 보드에 내려받고, <code>python3 p02/host/p02_send.py &lt;포트&gt; …</code>로 아래 순서대로 보냅니다 (115200 8N1). sw2는 UART를 누가 받는지(0 = 디버그 콘솔, 1 = 2-7 명령 해석기), sw3은 엔진(0 = 누적 npu_core, 1 = 2-8 통합 엔진)을 고릅니다. 스위치는 명령과 명령 사이에 바꿉니다.</li>
       </ol>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>순서</th><th>sw[3:2]</th><th>PC 명령 (<code>p02_send.py</code>)</th><th>보드 응답 (UART)</th></tr></thead>
         <tbody><tr><td>1</td><td class="nw"><code>01</code></td><td class="nw"><code>2</code></td><td class="nw"><code>C2:00000000000,00000000000,00000000002,00000000000\r\n</code></td></tr><tr><td>2</td><td class="nw"><code>11</code></td><td class="nw"><code>2</code></td><td class="nw"><code>C2:00000000000,FFFFFFFFFFE,00000000002,00000000000\r\n</code></td></tr><tr><td>3</td><td class="nw"><code>11</code></td><td class="nw"><code>1</code></td><td class="nw"><code>C1:00000000000,00000000002,FFFFFFFFFFE,00000000000\r\n</code></td></tr></tbody>
       </table></div>
-      <p>끝난 뒤 LED: <code>0x4002</code> (LED[3:0] 클래스 원-핫, LED14 끝남, LED15 오류, 7세그먼트 오른쪽 자리에 클래스). 응답 출처: 장 Top 시뮬레이션 STAGE=8 (<code>p02/validation/rtl_sim_20261123.log</code>, 바이트 단위 대조).</p>
-      <h3>추가 코드 (구 12장 그대로)</h3>
-      <p>※ <code>npu_reset_controller.v</code>·<code>basys3_npu_top.v</code>는 구 12장 단독 실습용이라 2장 Top 빌드에는 넣지 않습니다.</p>
+      <p>끝나면 LED가 <code>0x4002</code>입니다 (LED[3:0]은 클래스 번호 하나만 켜지고, LED14는 끝남, LED15는 오류이며, 7세그먼트 오른쪽 자리에 클래스가 보입니다).</p>
+      <h3>작성할 코드</h3>
+      <p><code>npu_reset_controller.v</code>·<code>basys3_npu_top.v</code>는 이 서브젝트를 따로 시험할 때만 쓰고, 장 Top 빌드에는 넣지 않습니다.</p>
       <div class="codeblock">
-        <div class="codebar"><span>mini_npu/rtl/npu_dsp_mac_lane.v · verilog · 원본 · RTL_SIM 통과 2026-11-19</span></div>
+        <div class="codebar"><span>mini_npu/rtl/npu_dsp_mac_lane.v · verilog</span></div>
         <pre tabindex="0"><code class="language-verilog">// (추가) 02장 등록 DSP 곱을 다음 에지에 누산한다. 곱을 다시 수행하지 않는다.
 module npu_dsp_mac_lane #(
     parameter integer DATA_WIDTH=16,
@@ -3024,7 +2898,7 @@ module npu_dsp_mac_lane #(
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>mini_npu/rtl/npu_engine4.v · verilog · 원본 · RTL_SIM 통과 2026-11-19</span></div>
+        <div class="codebar"><span>mini_npu/rtl/npu_engine4.v · verilog</span></div>
         <pre tabindex="0"><code class="language-verilog">// (추가) 04장 BRAM 구조 + 02장 DSP 레지스터 곱 + 4개 누산기 통합.
 // 12장 최종 경로는 기존 ch07 벡터 닷의 곱 경로를 중복 사용하지 않는다.
 // 메모리 쓰기는 IDLE에서만 허용하며 Reset 시 유효 비트만 지운다.
@@ -3155,7 +3029,7 @@ module npu_engine4(
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>mini_npu/rtl/npu_display_controller.v · verilog · 원본 · RTL_SIM 통과 2026-11-19</span></div>
+        <div class="codebar"><span>mini_npu/rtl/npu_display_controller.v · verilog</span></div>
         <pre tabindex="0"><code class="language-verilog">// (추가) FND와 LED 표현 정책은 Top이 아닌 Controller에서 처리.
 module npu_display_controller(
     input wire clk,resetn,
@@ -3206,7 +3080,7 @@ module npu_display_controller(
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>mini_npu/rtl/npu_reset_controller.v · verilog · 원본 · RTL_SIM 통과 2026-11-19</span></div>
+        <div class="codebar"><span>mini_npu/rtl/npu_reset_controller.v · verilog</span></div>
         <pre tabindex="0"><code class="language-verilog">// Basys3 btnC → 동기 Reset (Active-Low resetn).
 // (변경 2026-11-22) 비동기 assert를 없앴다. 이전에는 release_q가 btnC로 비동기 clear되어, 그 출력이 RAMB18의
 // EN·WE·RST 핀으로 들어가면 버튼을 누르는 순간 BRAM setup/hold를 어겨 내용이 깨질 수 있었다 (Vivado DRC REQP-1840).
@@ -3227,7 +3101,7 @@ module npu_reset_controller(
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>mini_npu/rtl/basys3_npu_top.v · verilog · 원본 · RTL_SIM 통과 2026-11-19</span></div>
+        <div class="codebar"><span>mini_npu/rtl/basys3_npu_top.v · verilog</span></div>
         <pre tabindex="0"><code class="language-verilog">// (추가) 12장 Basys3 Shell: 전원·UART·코어·Controller·FND 모듈 연결만 담당.
 module basys3_npu_top(
     input wire clk,btnC,uart_rxd,
@@ -3278,7 +3152,7 @@ module basys3_npu_top(
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>mini_npu/constraints/basys3_npu.xdc · xdc · 원본 · Vivado 실행 통과</span></div>
+        <div class="codebar"><span>mini_npu/constraints/basys3_npu.xdc · xdc</span></div>
         <pre tabindex="0"><code class="language-xdc"># Basys3 Master XDC 핀 기능을 제3부 Shell 포트명에 맞춰 선택 적용.
 set_property -dict { PACKAGE_PIN W5 IOSTANDARD LVCMOS33 } [get_ports clk]
 set_property -dict { PACKAGE_PIN U18 IOSTANDARD LVCMOS33 } [get_ports btnC]
@@ -3315,7 +3189,7 @@ set_property -dict { PACKAGE_PIN L1 IOSTANDARD LVCMOS33 } [get_ports {led[15]}]
 create_clock -name sys_clk_pin -period 10.000 -waveform {0 5} [get_ports clk]</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>mini_npu/scripts/vivado_impl.tcl · tcl · 원본 · Vivado 실행 통과</span></div>
+        <div class="codebar"><span>mini_npu/scripts/vivado_impl.tcl · tcl</span></div>
         <pre tabindex="0"><code class="language-tcl"># 12장 통합 NPU Top: 합성 → 구현 → 타이밍 판정 → 비트스트림 → 타이밍 시뮬레이션용 넷리스트.
 # 실행 (저장소 루트): vivado -mode batch -nojournal -source mini_npu/scripts/vivado_impl.tcl
 # 결과: mini_npu/build/impl/
@@ -3394,7 +3268,7 @@ puts $line
 if {!$ok} { error "IMPL_TIMING_FAILED" }</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>mini_npu/scripts/run_timing_sim.sh · bash · 원본 · Vivado 실행 통과</span></div>
+        <div class="codebar"><span>mini_npu/scripts/run_timing_sim.sh · bash</span></div>
         <pre tabindex="0"><code class="language-bash">#!/usr/bin/env bash
 # 12장 배선 후 타이밍 시뮬레이션 (Vivado xsim + SDF slow corner).
 # 입력: vivado_impl.tcl 이 만든 mini_npu/build/impl/basys3_npu_top_timesim.{v,sdf}
@@ -3450,10 +3324,11 @@ python3 "$root/mini_npu/reference/check_results.py" "$ts/predictions.csv" "${chk
 viol=$(grep -ci "timing violation" timesim.log || true)
 echo "$tag ch12 basys3_npu_top post-route SDF(slow) classes=$n model_edit=1 invalid_length=1 timing_violations=$viol scenario=$mode" | tee -a timesim.log</code></pre>
       </div>
-      <h3>시뮬레이션 기대 화면</h3>
-      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 서브젝트 단독 시험</span></div>
+      <h3>시뮬레이션</h3>
+      <p>보드에 올리기 전에 이 서브젝트 모듈만 먼저 시험합니다. 아래와 같은 줄이 나오면 됩니다.</p>
+      <div class="codeblock"><div class="codebar"><span>터미널 · 저장소 루트</span></div>
         <pre tabindex="0"><code>bash ch12/scripts/run_sim.sh</code></pre></div>
-      <div class="codeblock"><div class="codebar"><span>기대 출력 (Icarus Verilog 12.0 · 2026-11-19 · 출처 ch12/validation/rtl_sim_20261119.log)</span></div>
+      <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
         <pre tabindex="0"><code>| 단계 | 실제 결과 | 로그 |
 |---|---|---|
 | ch00 | RTL_SIM_PASS | … |
@@ -3470,9 +3345,9 @@ echo "$tag ch12 basys3_npu_top post-route SDF(slow) classes=$n model_edit=1 inva
 | dsp_engine | RTL_SIM_PASS | … |
 | ch11_ch12 | RTL_SIM_PASS | … |
 중요: SYNTH_TIMING_PASS, BOARD_PASS를 뜻하지 않음.</code></pre></div>
-      <details class="full"><summary>이 서브젝트의 테스트벤치·기준 모델 (전체 코드 3개)</summary>
+      <details class="full"><summary>테스트벤치와 기준 모델 (전체 코드 3개)</summary>
       <div class="codeblock">
-        <div class="codebar"><span>mini_npu/tb/tb_npu_engine4.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-19</span></div>
+        <div class="codebar"><span>mini_npu/tb/tb_npu_engine4.sv · systemverilog</span></div>
         <pre tabindex="0"><code class="language-systemverilog">// (추가) 실제 DSP 등록 곱→BRAM→4PE 누적 NPU 정수 독립 검증.
 `timescale 1ns/1ps
 module tb_npu_engine4;
@@ -3547,7 +3422,7 @@ module tb_npu_engine4;
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>mini_npu/tb/tb_uart_core_fifo.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-19</span></div>
+        <div class="codebar"><span>mini_npu/tb/tb_uart_core_fifo.sv · systemverilog</span></div>
         <pre tabindex="0"><code class="language-systemverilog">// (추가) uart_core 16바이트 RX/TX FIFO 적대적 경계 시험.
 // Empty/Full, 동시 Push/Pop, Ready/Valid, Reset 초기화, 연속 수신 손실, Overrun, Framing, 전송 중단.
 // 실제 직렬 비트파형으로 RX를 구동하고 TX 핀을 독립 uart_rx로 복조해 순서·값을 비교한다.
@@ -3861,7 +3736,7 @@ module tb_uart_core_fifo;
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>mini_npu/tb/tb_npu_uart_adversarial.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-19</span></div>
+        <div class="codebar"><span>mini_npu/tb/tb_npu_uart_adversarial.sv · systemverilog</span></div>
         <pre tabindex="0"><code class="language-systemverilog">// (추가) 11·12장 통합 Top 적대적 UART 시험(실제 RX 핀 구동, TX 핀 복조).
 // 잘못된 명령·주소·길이, CR/LF 무시, 응답 전송 중 다음 명령 수신(FIFO 버퍼링),
 // 연속 명령 폭주, 응답 전송 중 Reset, 명령 중단(Timeout 부재 관측), Framing error.
@@ -4054,47 +3929,26 @@ module tb_npu_uart_adversarial;
 endmodule</code></pre>
       </div>
       </details>
-      <h3>판정 줄</h3>
+      <h3>확인할 것</h3>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
-        <tbody><tr><td><code>결과 표 13행이 모두 RTL_SIM_PASS</code></td><td>ch00~ch10 · dsp_engine · ch11_ch12</td></tr><tr><td><code>UART_FIFO_ADVERSARIAL_SIM_PASS tests=11</code></td><td>FIFO Full·Reset·Framing·동시 Push/Pop</td></tr><tr><td><code>NPU_UART_ADVERSARIAL_SIM_PASS tests=8</code></td><td>잘못된 명령·필드, 응답 중 명령, 응답 중 Reset</td></tr><tr><td>장 Top STAGE=8 시뮬레이션</td><td>위 '보드에서 볼 것' 응답과 바이트 단위로 같음 · 통과</td></tr>
-        <tr><td>장 Top STAGE=8 합성·타이밍</td><td>통과 · WNS=0.642 WHS=0.019 DRC_ERRORS=0 LUT=4351 FF=4395 DSP48E1=17 RAMB18=15</td></tr></tbody>
+        <tbody><tr><td><code>결과 표 13행이 모두 RTL_SIM_PASS</code></td><td>ch00~ch10 · dsp_engine · ch11_ch12</td></tr><tr><td><code>UART_FIFO_ADVERSARIAL_SIM_PASS tests=11</code></td><td>FIFO Full·Reset·Framing·동시 Push/Pop</td></tr><tr><td><code>NPU_UART_ADVERSARIAL_SIM_PASS tests=8</code></td><td>잘못된 명령·필드, 응답 중 명령, 응답 중 Reset</td></tr><tr><td>보드 응답</td><td>위 '보드에서 볼 것' 표의 응답과 한 글자도 다르지 않아야 합니다.</td></tr></tbody>
       </table></div>
-      <div class="gate-row">
-        <div class="gate pass">
-          <b>HOST_MODEL_PASS</b>
-          <span>PC_GOLDEN_COMPARE_PASS predictions=6 model_edit=1 (11장 증거)</span>
-        </div>
-        <div class="gate pass">
-          <b>RTL_SIM_PASS</b>
-          <span>회귀 결과 표 13단계 모두 RTL_SIM_PASS · Icarus Verilog 12.0 · 2026-11-19</span>
-        </div>
-        <div class="gate pass">
-          <b>SYNTH_TIMING_PASS</b>
-          <span>ch12 basys3_npu_top WNS=1.993 WHS=0.024 DRC_ERRORS=0 LUT=1657 FF=1262 … · 2026-11-23</span>
-        </div>
-        <div class="gate pass">
-          <b>TIMING_SIM_PASS</b>
-          <span>TIMING_SIM_PASS ch12 basys3_npu_top post-route SDF(slow) classes=6 mod… · 2026-11-23</span>
-        </div>
-        <div class="gate todo">
-          <b>BOARD_PASS</b>
-          <span>⚠ 미실시 · 현재 실물 보드 확인 불가</span>
-        </div>
-      </div>
     </section>
     <section class="section" id="demo">
       <h2><span class="num">11</span> 장 시연</h2>
-      <p>STAGE=4 비트스트림 하나로 모든 서브젝트를 차례로 보여 줍니다. 아래 응답은 장 Top 시뮬레이션이 바이트 단위로 대조한 값입니다.</p>
+      <p>STAGE=8 비트스트림 하나로 모든 서브젝트를 처음부터 끝까지 이어서 보여 줍니다. 아래 순서대로 보내고 응답을 표와 비교합니다.</p>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th class="nw">서브젝트</th><th>sw[3:2]</th><th>PC 명령</th><th>보드 응답</th></tr></thead>
         <tbody><tr><td class="nw">2-1</td><td class="nw"><code>00</code></td><td class="nw"><code>S</code></td><td class="nw"><code>I\r\n</code></td></tr><tr><td class="nw">2-1</td><td class="nw"><code>00</code></td><td class="nw"><code>X 0 3</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-1</td><td class="nw"><code>00</code></td><td class="nw"><code>X 1 -2</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-1</td><td class="nw"><code>00</code></td><td class="nw"><code>x 0</code></td><td class="nw"><code>X:0003\r\n</code></td></tr><tr><td class="nw">2-1</td><td class="nw"><code>00</code></td><td class="nw"><code>x 1</code></td><td class="nw"><code>X:FFFE\r\n</code></td></tr><tr><td class="nw">2-1</td><td class="nw"><code>00</code></td><td class="nw"><code>W 0 0 5</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-1</td><td class="nw"><code>00</code></td><td class="nw"><code>w 0 0</code></td><td class="nw"><code>W:0005\r\n</code></td></tr><tr><td class="nw">2-1</td><td class="nw"><code>00</code></td><td class="nw"><code>x 64</code></td><td class="nw"><code>ERR\r\n</code></td></tr><tr><td class="nw">2-2</td><td class="nw"><code>00</code></td><td class="nw"><code>Q 768</code></td><td class="nw"><code>Q:03 O:0\r\n</code></td></tr><tr><td class="nw">2-2</td><td class="nw"><code>00</code></td><td class="nw"><code>Q 384</code></td><td class="nw"><code>Q:02 O:0\r\n</code></td></tr><tr><td class="nw">2-2</td><td class="nw"><code>00</code></td><td class="nw"><code>Q -384</code></td><td class="nw"><code>Q:FE O:0\r\n</code></td></tr><tr><td class="nw">2-2</td><td class="nw"><code>00</code></td><td class="nw"><code>Q 65536</code></td><td class="nw"><code>Q:7F O:1\r\n</code></td></tr><tr><td class="nw">2-2</td><td class="nw"><code>00</code></td><td class="nw"><code>Q -65536</code></td><td class="nw"><code>Q:80 O:1\r\n</code></td></tr><tr><td class="nw">2-3</td><td class="nw"><code>00</code></td><td class="nw"><code>X 0 1</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-3</td><td class="nw"><code>00</code></td><td class="nw"><code>X 1 2</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-3</td><td class="nw"><code>00</code></td><td class="nw"><code>X 2 3</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-3</td><td class="nw"><code>00</code></td><td class="nw"><code>X 3 4</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-3</td><td class="nw"><code>00</code></td><td class="nw"><code>W 0 0 5</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-3</td><td class="nw"><code>00</code></td><td class="nw"><code>W 0 1 6</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-3</td><td class="nw"><code>00</code></td><td class="nw"><code>W 0 2 7</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-3</td><td class="nw"><code>00</code></td><td class="nw"><code>W 0 3 8</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-3</td><td class="nw"><code>00</code></td><td class="nw"><code>D 4</code></td><td class="nw"><code>D:0000000046\r\n</code></td></tr><tr><td class="nw">2-3</td><td class="nw"><code>00</code></td><td class="nw"><code>W 0 3 -8</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-3</td><td class="nw"><code>00</code></td><td class="nw"><code>D 4</code></td><td class="nw"><code>D:0000000006\r\n</code></td></tr><tr><td class="nw">2-3</td><td class="nw"><code>00</code></td><td class="nw"><code>D 0</code></td><td class="nw"><code>ERR\r\n</code></td></tr><tr><td class="nw">2-4</td><td class="nw"><code>00</code></td><td class="nw"><code>W 1 0 1</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-4</td><td class="nw"><code>00</code></td><td class="nw"><code>W 1 1 1</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-4</td><td class="nw"><code>00</code></td><td class="nw"><code>W 1 2 1</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-4</td><td class="nw"><code>00</code></td><td class="nw"><code>W 1 3 1</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-4</td><td class="nw"><code>00</code></td><td class="nw"><code>W 2 0 -1</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-4</td><td class="nw"><code>00</code></td><td class="nw"><code>W 2 1 -1</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-4</td><td class="nw"><code>00</code></td><td class="nw"><code>W 2 2 -1</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-4</td><td class="nw"><code>00</code></td><td class="nw"><code>W 2 3 -1</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-4</td><td class="nw"><code>00</code></td><td class="nw"><code>W 3 0 0</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-4</td><td class="nw"><code>00</code></td><td class="nw"><code>W 3 1 0</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-4</td><td class="nw"><code>00</code></td><td class="nw"><code>W 3 2 0</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-4</td><td class="nw"><code>00</code></td><td class="nw"><code>W 3 3 2</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-4</td><td class="nw"><code>00</code></td><td class="nw"><code>P 4</code></td><td class="nw"><code>P:0000000006,000000000A,FFFFFFFFF6,0000000008\r\n</code></td></tr><tr><td class="nw">2-5</td><td class="nw"><code>00</code></td><td class="nw"><code>B 0 0</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-5</td><td class="nw"><code>00</code></td><td class="nw"><code>B 1 -20</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-5</td><td class="nw"><code>00</code></td><td class="nw"><code>B 2 100</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-5</td><td class="nw"><code>00</code></td><td class="nw"><code>B 3 65536</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td class="nw">2-5</td><td class="nw"><code>00</code></td><td class="nw"><code>L 4</code></td><td class="nw"><code>L:0006,0000,005A,7FFF O:8\r\n</code></td></tr><tr><td class="nw">2-6</td><td class="nw"><code>00</code></td><td class="nw"><code>N 4</code></td><td class="nw"><code>N:0006,0000,005A,7FFF O:8\r\n</code></td></tr><tr><td class="nw">2-6</td><td class="nw"><code>00</code></td><td class="nw"><code>N 2</code></td><td class="nw"><code>N:0011,0000,0061,7FFF O:8\r\n</code></td></tr><tr><td class="nw">2-7</td><td class="nw"><code>01</code></td><td class="nw"><code>S</code></td><td class="nw"><code>I\r\n</code></td></tr><tr><td class="nw">2-7</td><td class="nw"><code>01</code></td><td class="nw"><code>0</code></td><td class="nw"><code>C0:00000000002,00000000000,00000000000,00000000000\r\n</code></td></tr><tr><td class="nw">2-7</td><td class="nw"><code>01</code></td><td class="nw"><code>1</code></td><td class="nw"><code>C1:00000000000,00000000002,00000000000,00000000000\r\n</code></td></tr><tr><td class="nw">2-7</td><td class="nw"><code>01</code></td><td class="nw"><code>2</code></td><td class="nw"><code>C2:00000000000,00000000000,00000000002,00000000000\r\n</code></td></tr><tr><td class="nw">2-7</td><td class="nw"><code>01</code></td><td class="nw"><code>3</code></td><td class="nw"><code>C3:00000000000,00000000000,00000000000,00000000002\r\n</code></td></tr><tr><td class="nw">2-7</td><td class="nw"><code>00</code></td><td class="nw"><code>x 0</code></td><td class="nw"><code>X:FFFF\r\n</code></td></tr><tr><td class="nw">2-8</td><td class="nw"><code>01</code></td><td class="nw"><code>2</code></td><td class="nw"><code>C2:00000000000,00000000000,00000000002,00000000000\r\n</code></td></tr><tr><td class="nw">2-8</td><td class="nw"><code>11</code></td><td class="nw"><code>2</code></td><td class="nw"><code>C2:00000000000,FFFFFFFFFFE,00000000002,00000000000\r\n</code></td></tr><tr><td class="nw">2-8</td><td class="nw"><code>11</code></td><td class="nw"><code>1</code></td><td class="nw"><code>C1:00000000000,00000000002,FFFFFFFFFFE,00000000000\r\n</code></td></tr></tbody>
       </table></div>
-      <p>끝난 뒤 LED: <code>0x4002</code> (LED[3:0] 클래스 원-핫, LED14 끝남, LED15 오류, 7세그먼트 오른쪽 자리에 클래스). btnC를 누르면 처음 상태로 돌아갑니다.</p>
+      <p>끝나면 LED가 <code>0x4002</code>입니다 (LED[3:0]은 클래스 번호 하나만 켜지고, LED14는 끝남, LED15는 오류이며, 7세그먼트 오른쪽 자리에 클래스가 보입니다). btnC를 누르면 처음 상태로 돌아갑니다.</p>
 
-      <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 장 Top 시뮬레이션 (STAGE 1~4)</span></div>
+      <h3>시연 전 점검</h3>
+      <p>보드에 올리기 전에 장 Top 전체를 시뮬레이션합니다. STAGE마다 <code>P02_TOP_RTL_SIM_PASS</code>가 나오면 됩니다.</p>
+      <div class="codeblock"><div class="codebar"><span>터미널 · 장 Top 시뮬레이션 (STAGE 1~8)</span></div>
         <pre tabindex="0"><code>bash p02/scripts/run_sim.sh</code></pre></div>
-      <div class="codeblock"><div class="codebar"><span>기대 출력 (Icarus Verilog 12.0 · 2026-11-23 · 출처 p02/validation/rtl_sim_20261123.log)</span></div>
+      <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
         <pre tabindex="0"><code>PYTHON_P02_SELF_TEST_PASS
 PYTHON_P02_VECTORS stage=1 cases=9 final_led=0x0005
 PYTHON_P02_VECTORS stage=2 cases=13 final_led=0xFF80
@@ -4113,19 +3967,12 @@ P02_TOP_RTL_SIM_PASS stage=6 cases=45 bytes=355
 P02_TOP_RTL_SIM_PASS stage=7 cases=51 bytes=574
 P02_TOP_RTL_SIM_PASS stage=8 cases=54 bytes=730
 RTL_SIM_PASS stages=8</code></pre></div>
-      <div class="codeblock"><div class="codebar"><span>Vivado (VS Code) · STAGE 1~4 비트스트림</span></div>
-        <pre tabindex="0"><code>vivado -mode batch -nojournal -source p02/vivado/build_p02.tcl
-SYNTH_TIMING_PASS p02 basys3_p02_top STAGE=1 WNS=3.272 WHS=0.083 DRC_ERRORS=0 LUT=576 FF=395 DSP48E1=0 RAMB18=5
-SYNTH_TIMING_PASS p02 basys3_p02_top STAGE=2 WNS=1.136 WHS=0.056 DRC_ERRORS=0 LUT=757 FF=441 DSP48E1=0 RAMB18=5
-SYNTH_TIMING_PASS p02 basys3_p02_top STAGE=3 WNS=0.628 WHS=0.024 DRC_ERRORS=0 LUT=956 FF=567 DSP48E1=1 RAMB18=5
-SYNTH_TIMING_PASS p02 basys3_p02_top STAGE=4 WNS=1.642 WHS=0.022 DRC_ERRORS=0 LUT=1427 FF=1261 DSP48E1=5 RAMB18=5
-SYNTH_TIMING_PASS p02 basys3_p02_top STAGE=5 WNS=1.381 WHS=0.024 DRC_ERRORS=0 LUT=2084 FF=2182 DSP48E1=9 RAMB18=5
-SYNTH_TIMING_PASS p02 basys3_p02_top STAGE=6 WNS=0.560 WHS=0.019 DRC_ERRORS=0 LUT=2619 FF=3138 DSP48E1=13 RAMB18=10
-SYNTH_TIMING_PASS p02 basys3_p02_top STAGE=7 WNS=0.875 WHS=0.012 DRC_ERRORS=0 LUT=3037 FF=3431 DSP48E1=13 RAMB18=10
-SYNTH_TIMING_PASS p02 basys3_p02_top STAGE=8 WNS=0.642 WHS=0.019 DRC_ERRORS=0 LUT=4351 FF=4395 DSP48E1=17 RAMB18=15</code></pre></div>
-      <details class="full"><summary>장 Top 테스트벤치·기준 모델 (전체 코드)</summary>
+      <p>비트스트림은 아래 명령 한 번으로 STAGE 1~8을 모두 만듭니다. STAGE마다 <code>SYNTH_TIMING_PASS</code> 줄이 나오면 됩니다.</p>
+      <div class="codeblock"><div class="codebar"><span>터미널 · Vivado</span></div>
+        <pre tabindex="0"><code>vivado -mode batch -nojournal -source p02/vivado/build_p02.tcl</code></pre></div>
+      <details class="full"><summary>장 Top 테스트벤치와 기준 모델 (전체 코드)</summary>
       <div class="codeblock">
-        <div class="codebar"><span>p02/tb/tb_p02_top.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-23</span></div>
+        <div class="codebar"><span>p02/tb/tb_p02_top.sv · systemverilog</span></div>
         <pre tabindex="0"><code class="language-systemverilog">// 2장 보드 Top 시험: UART 핀으로 명령을 보내고 TX 핀을 복조해 기준 모델(p02_cases_sN.txt)과 바이트 단위로 대조한다.
 // sw 값은 보드 sw[3:2] (sw[2] = UART 주인, sw[3] = 12장 엔진).
 // 시뮬레이션 시간을 줄이려고 BAUD 6.25 Mbps(CPB 16), REFRESH_BITS 6으로 돌린다. 보드 Top 기본값은 115200 bps.
@@ -4229,7 +4076,7 @@ module tb_p02_top;
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>p02/reference/p02_model.py · python · 원본 · RTL_SIM 통과 2026-11-23</span></div>
+        <div class="codebar"><span>p02/reference/p02_model.py · python</span></div>
         <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
 """2장 4뉴런 NPU 보드 기준 모델.
 
@@ -4483,43 +4330,16 @@ if __name__ == "__main__":
       </details>
     </section>
     <section class="section" id="s_report">
-      <h2><span class="num">12</span> 누적 보고·인계</h2>
+      <h2><span class="num">12</span> 장 정리·다음 장으로</h2>
+      <p>이 장에서 만든 것을 한눈에 정리합니다. 모두 보드에서 확인했다면 다음 장으로 넘어갑니다.</p>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
-        <thead><tr><th>서브젝트</th><th>구 장</th><th>추가 RTL</th><th>시뮬레이션 (단독 + 장 Top)</th><th>합성 (장 Top STAGE)</th><th>보드</th></tr></thead>
-        <tbody><tr><td>2-1</td><td>04장</td><td><code>bram_sync_buffer.v</code></td><td>통과</td><td>통과</td><td>⚠ 미검증</td></tr><tr><td>2-2</td><td>05장</td><td><code>fixed_quantizer.v</code></td><td>통과</td><td>통과</td><td>⚠ 미검증</td></tr><tr><td>2-3</td><td>07장</td><td><code>vector_dot_core.v</code></td><td>통과</td><td>통과</td><td>⚠ 미검증</td></tr><tr><td>2-4</td><td>08장</td><td><code>pe_array4.v</code></td><td>통과</td><td>통과</td><td>⚠ 미검증</td></tr><tr><td>2-5</td><td>09장</td><td><code>dense_layer4.v</code></td><td>통과</td><td>통과</td><td>⚠ 미검증</td></tr><tr><td>2-6</td><td>10장</td><td><code>npu_core.v</code></td><td>통과</td><td>통과</td><td>⚠ 미검증</td></tr><tr><td>2-7</td><td>11장</td><td><code>uart_npu_command_controller.v</code></td><td>통과</td><td>통과</td><td>⚠ 미검증</td></tr><tr><td>2-8</td><td>12장</td><td><code>npu_dsp_mac_lane.v</code><br><code>npu_engine4.v</code><br><code>npu_display_controller.v</code><br><code>npu_reset_controller.v</code> ※<br><code>basys3_npu_top.v</code> ※</td><td>통과</td><td>통과</td><td>⚠ 미검증</td></tr></tbody>
+        <thead><tr><th>서브젝트</th><th>장 Top에 들어간 모듈</th><th>보드에서 확인한 것</th></tr></thead>
+        <tbody><tr><td class="nw">2-1 BRAM 동기 버퍼</td><td><code>bram_sync_buffer.v</code></td><td><code>X</code>·<code>W</code>로 쓴 값을 <code>x</code>·<code>w</code>로 되읽으면 같은 값이 나옵니다(<code>X:0003</code>, <code>X:FFFE</code>, <code>W:0005</code>). 범위를 벗어난 주소 64는 <code>ERR</code>입니다.</td></tr><tr><td class="nw">2-2 고정소수점 양자화</td><td><code>fixed_quantizer.v</code></td><td>32비트 값을 8비트로 줄입니다. 768은 <code>03</code>, 384(=1.5)는 반올림되어 <code>02</code>, 65536은 최댓값 <code>7F</code>로 막히고 넘침 표시 <code>O:1</code>이 붙습니다.</td></tr><tr><td class="nw">2-3 벡터 내적</td><td><code>vector_dot_core.v</code></td><td>X=(1,2,3,4)와 W0=(5,6,7,8)의 내적은 <code>D:0000000046</code>(70)입니다. W0[3]을 −8로 바꾸면 6이 되고, 길이 0을 주면 <code>ERR</code>입니다.</td></tr><tr><td class="nw">2-4 4PE 병렬 어레이</td><td><code>pe_array4.v</code></td><td>같은 X에 대해 W0~W3 네 개의 내적을 한 번에 계산합니다. <code>P:</code> 뒤에 6, 10, −10(<code>…FFF6</code>), 8이 나옵니다.</td></tr><tr><td class="nw">2-5 Dense 4뉴런 레이어</td><td><code>dense_layer4.v</code></td><td>Bias를 더하고 ReLU와 16비트 포화를 거칩니다. <code>L:0006,0000,005A,7FFF O:8</code>에서 음수는 0이 되고, 65544는 7FFF로 막히며 넘침이 표시됩니다.</td></tr><tr><td class="nw">2-6 4뉴런 NPU Core</td><td><code>npu_core.v</code></td><td>npu_core가 자기 BRAM에서 값을 읽어 같은 Dense 계산을 합니다. <code>N 4</code>의 답은 <code>L 4</code>와 같고, 길이 2에서는 <code>0011,0000,0061,7FFF</code>입니다.</td></tr><tr><td class="nw">2-7 UART 모델 적재</td><td><code>uart_npu_command_controller.v</code></td><td>sw2를 올리면 명령 해석기가 UART를 받습니다. 고정 그룹 <code>0</code>~<code>3</code>을 보내면 <code>C0</code>~<code>C3</code>이 돌아옵니다. sw2를 내리고 <code>x 0</code>을 보내면 <code>X:FFFF</code>가 나와, 명령 해석기가 쓴 값을 콘솔로 확인할 수 있습니다.</td></tr><tr><td class="nw">2-8 통합 NPU Top</td><td><code>npu_dsp_mac_lane.v</code><br><code>npu_engine4.v</code><br><code>npu_display_controller.v</code></td><td>sw3을 올리면 통합 엔진으로 바뀝니다. 같은 그룹에서 음수 점수(<code>…FFE</code>, ReLU 없음)가 보이지만 클래스는 같습니다. LED0~3과 7세그먼트에 클래스가, LED14에 끝남 표시가 나옵니다.</td></tr></tbody>
       </table></div>
-      <p>※ = 구 장 단독 실습 파일이라 장 Top 빌드(<code>p02/vivado/build_p02.tcl</code>)에는 들어가지 않음.</p>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>다음 장으로 넘기는 파일</th><th>사용처</th></tr></thead>
-        <tbody><tr><td><code>p02/rtl/p02_console.v</code></td><td>디버그 콘솔 방식(모듈 하나를 UART 명령 하나로 확인). 3장 서브젝트 확인에 같은 방식을 쓴다 (3장 전환 때 연결)</td></tr><tr><td><code>p02/host/p02_send.py</code></td><td>PC 바이너리 명령 도구. 3장에서 64픽셀 입력 적재용으로 확장 (3장 전환 때)</td></tr><tr><td><code>ch04/rtl/bram_sync_buffer.v · ch05/rtl/fixed_quantizer.v · ch09/rtl/dense_layer4.v</code></td><td>3장(구 13~16장, VS Code 판 p3_* 모듈)이 같은 기능을 다시 쓰는지 3장 전환 때 대조 (⚠ 미확인)</td></tr></tbody>
+        <tbody><tr><td><code>p02/rtl/p02_console.v</code></td><td>모듈 하나를 UART 명령 하나로 확인하는 디버그 콘솔 방식입니다. 3장에서도 같은 방식을 씁니다</td></tr><tr><td><code>p02/host/p02_send.py</code></td><td>PC 명령 도구입니다. 3장 도구가 같은 방식으로 64화소 입력을 보냅니다</td></tr><tr><td><code>ch04/rtl/bram_sync_buffer.v · ch05/rtl/fixed_quantizer.v · ch09/rtl/dense_layer4.v</code></td><td>3장은 같은 구조를 64입력·10클래스로 키워 다시 만듭니다</td></tr></tbody>
       </table></div>
-      <p>장 게이트 (<code>p02/validation/</code> 증거 기준 자동 표시):</p>
-      <div class="gate-row">
-        <div class="gate pass">
-          <b>HTML_PASS</b>
-          <span>v01 · 생성기</span>
-        </div>
-        <div class="gate pass">
-          <b>HOST_MODEL_PASS</b>
-          <span>PYTHON_P02_SELF_TEST_PASS</span>
-        </div>
-        <div class="gate pass">
-          <b>RTL_SIM_PASS</b>
-          <span>장 Top STAGE 1~8 · Icarus Verilog 12.0 · 2026-11-23</span>
-        </div>
-        <div class="gate pass">
-          <b>SYNTH_TIMING_PASS</b>
-          <span>STAGE 1~8 비트스트림 · 2026-11-23</span>
-        </div>
-        <div class="gate todo">
-          <b>XSIM_RTL_PASS</b>
-          <span>⚠ 미검증 · Vivado 시뮬레이터(xsim) 실행 대기 — 현재 근거는 Icarus Verilog</span>
-        </div>
-        <div class="gate todo">
-          <b>BOARD_PASS</b>
-          <span>⚠ 미실시 · 실물 보드 확인 대기</span>
-        </div>
-      </div>
     </section>
     <div class="chapter-links" id="chapter-links"></div>
   </main>

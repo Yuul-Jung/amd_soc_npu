@@ -735,7 +735,7 @@ def update_index(text, chs):
         rows += (f'<tr><td style="white-space:nowrap">{q["number"]}장</td><td><a href="{page}">{html.escape(q["title"])}</a></td><td style="white-space:nowrap">{q["days"]}일</td>'
                  f'<td>구 {html.escape(q["subjects"])}장</td><td>{re.sub(r"<[^>]+>", "", pp["demo"])}</td></tr>')
     pr_block = f"""<!-- projects:start -->
-      <p><strong>장 프로젝트판 (2026-11 개편)</strong> — 장마다 보드 Top 하나를 키워 가며 장 끝에서 보드 시연합니다. 아래 장 페이지가 현재 기준이고, 00~31장 안내서는 서브젝트의 단독 실습 자료로 남겨 두었습니다. 실물 보드 확인은 아직 하지 않았습니다(각 페이지 게이트 표시).</p>
+      <p><strong>장 프로젝트판 (2026-11 개편)</strong> — 장마다 보드 Top 하나를 키워 가며 장 끝에서 보드 시연합니다. 아래 장 페이지를 순서대로 따라가면 됩니다. 00~31장 안내서는 서브젝트를 따로 실습할 때 보는 자료입니다.</p>
       <div class="table-wrap"><table>
         <thead><tr><th>장</th><th>프로젝트</th><th>편성</th><th>서브젝트</th><th>장 시연 (보드)</th></tr></thead>
         <tbody>{rows}</tbody>
