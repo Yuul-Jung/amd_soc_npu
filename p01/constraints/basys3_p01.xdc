@@ -1,4 +1,4 @@
-# 1장 보드 Top (basys3_p01_top) 핀. Basys-3-Master.xdc 이름·핀 그대로 (12장 basys3_npu.xdc와 같은 핀 + sw[1:0]).
+# 1장 보드 Top (basys3_p01_top) 핀. Basys-3-Master.xdc 이름·핀 그대로 (2-8 basys3_npu.xdc와 같은 핀 + sw[1:0]).
 set_property -dict { PACKAGE_PIN W5 IOSTANDARD LVCMOS33 } [get_ports clk]
 set_property -dict { PACKAGE_PIN U18 IOSTANDARD LVCMOS33 } [get_ports btnC]
 set_property -dict { PACKAGE_PIN B18 IOSTANDARD LVCMOS33 } [get_ports uart_rxd]

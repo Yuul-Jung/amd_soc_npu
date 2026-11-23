@@ -1,5 +1,5 @@
-// (추가) 04장 BRAM 구조 + 02장 DSP 레지스터 곱 + 4개 누산기 통합.
-// 12장 최종 경로는 기존 ch07 벡터 닷의 곱 경로를 중복 사용하지 않는다.
+// BRAM 구조 + DSP 레지스터 곱 + 4개 누산기 통합.
+// 2-8 최종 경로는 2-3 벡터 내적의 곱 경로를 중복 사용하지 않는다.
 // 메모리 쓰기는 IDLE에서만 허용하며 Reset 시 유효 비트만 지운다.
 module npu_engine4(
     input wire clk,resetn,start_i,
@@ -56,8 +56,8 @@ module npu_engine4(
     wire signed [40:0] score1=$signed({acc1[39],acc1})+$signed({bias1[39],bias1});
     wire signed [40:0] score2=$signed({acc2[39],acc2})+$signed({bias2[39],bias2});
     wire signed [40:0] score3=$signed({acc3[39],acc3})+$signed({bias3[39],bias3});
-    // (수정 2026-11-19) argmax를 두 클록 토너먼트로 나눈다. 종전에는 누산값 + Bias 덧셈과 41비트 비교 3번을
-    // 한 클록에 직렬로 해 2장 누적 Top(STAGE 8)에서 WNS -1.952 ns (28단). 동점 규칙(앞 번호)은 그대로.
+    // argmax는 두 클록 토너먼트다. 누산값 + Bias 덧셈과 41비트 비교 3번을 한 클록에 직렬로 하면
+    // 100 MHz를 넘기므로 나눈다. 동점이면 앞 번호가 이긴다.
     //   DRAIN2: 점수 등록 → CMP1: (0,1)·(2,3) 쌍의 승자 등록 → CMP2: 두 승자 비교, class_o·done
     wire signed [40:0] s0=scores_o[40:0],s1=scores_o[81:41],s2=scores_o[122:82],s3=scores_o[163:123];
     reg [1:0] w01_q,w23_q;

@@ -3,7 +3,7 @@
 
 명령 순서를 정하고 보드가 돌려줄 응답을 계산해 p03/tb/p03_cases_s{STAGE}.txt (STAGE 1~4)로 쓴다.
 같은 줄 순서로 p03/tb/p03_case_labels_s{STAGE}.txt에 안내서 표시용 설명을 쓴다.
-계산은 서브젝트(VS Code 판 구 15·16장) 기준 모델 함수 dense · infer · argmax_lowest를 그대로 쓴다.
+계산은 서브젝트 3-3·3-4 기준 모델 함수 dense · infer · argmax_lowest를 그대로 쓴다.
 시연 프레임: MNIST t10k에서 숫자 0~9마다 첫 그림 (p03/model/train_p03.py의 to8x8 전처리).
 
   python3 p03/reference/p03_model.py
@@ -20,8 +20,8 @@ sys.path.insert(0, str(ROOT / "p03" / "model"))
 sys.path.insert(0, str(ROOT / "part03" / "ch15" / "reference"))
 sys.path.insert(0, str(ROOT / "part03" / "ch16" / "reference"))
 from part03.host_tools.p3_integer_reference import argmax_lowest   # noqa: E402
-from dense_reference import dense                                   # noqa: E402  (3-3 구15장)
-from mlp_reference import infer                                     # noqa: E402  (3-4 구16장)
+from dense_reference import dense                                   # noqa: E402  (3-3)
+from mlp_reference import infer                                     # noqa: E402  (3-4)
 from mnist_idx import images, labels                                # noqa: E402
 from train_p03 import to8x8                                         # noqa: E402
 

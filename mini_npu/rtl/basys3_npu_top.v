@@ -1,4 +1,4 @@
-// (추가) 12장 Basys3 Shell: 전원·UART·코어·Controller·FND 모듈 연결만 담당.
+// Basys3 Shell: 전원·UART·코어·Controller·FND 모듈 연결만 담당.
 module basys3_npu_top(
     input wire clk,btnC,uart_rxd,
     output wire uart_txd,

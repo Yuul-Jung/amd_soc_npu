@@ -15,10 +15,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 for ch in ("ch01", "ch05", "ch07", "ch09"):
     sys.path.insert(0, str(ROOT / ch / "reference"))
-from mac_reference import wrap              # noqa: E402  (1장 구01장)
-from fixed_reference import quantize        # noqa: E402  (2-2 구05장)
-from dot_reference import dot               # noqa: E402  (2-3 구07장)
-from dense_reference import dense           # noqa: E402  (2-5 구09장)
+from mac_reference import wrap              # noqa: E402  (1-2)
+from fixed_reference import quantize        # noqa: E402  (2-2)
+from dot_reference import dot               # noqa: E402  (2-3)
+from dense_reference import dense           # noqa: E402  (2-5)
 
 OUT = ROOT / "p02" / "tb" / "p02_cases_s%d.txt"
 CRLF = "\r\n"
@@ -37,7 +37,7 @@ class Board:
         self.w = [[None] * 64 for _ in range(4)]
         self.bias = [0] * 4
         self.view = 0
-        self.x_seen = [False] * 64               # 12장 엔진의 적재 확인 비트
+        self.x_seen = [False] * 64               # 2-8 엔진의 적재 확인 비트
         self.w_seen = [[False] * 64 for _ in range(4)]
         self.cls = 0                             # 마지막 추론 클래스 (STAGE 8 표시)
         self.done = False
@@ -97,7 +97,7 @@ class Board:
         self.view = vals[0] & 0xFFFF
         return c + ":" + ",".join(h(v, 4) for v in vals) + " O:%X" % mask + CRLF
 
-    # ── 11장 명령 해석기 (sw[2] = 1) ──
+    # ── 2-7 명령 해석기 (sw[2] = 1) ──
     def write(self, kind, n, a, v):
         if kind == "X":
             self.x[a] = v
@@ -110,7 +110,7 @@ class Board:
 
     def infer(self, length, engine4):
         xs, ws = self.x[:length], [r[:length] for r in self.w]
-        if engine4:                              # 12장 엔진: 원시 점수 = 내적 + Bias, 적재 확인
+        if engine4:                              # 2-8 엔진: 원시 점수 = 내적 + Bias, 적재 확인
             if not (all(self.x_seen[:length]) and all(all(r[:length]) for r in self.w_seen)):
                 self.err = True
                 return "ERR" + CRLF
@@ -218,7 +218,7 @@ def self_test():
     assert b.console(Q(65536)) == "Q:7F O:1\r\n"               # 포화
     b.console(X(0, 1)); b.console(W(0, 0, -3))
     assert b.console(cmd("D", 1)) == "D:FFFFFFFFFD\r\n"
-    # 고정 그룹 1: X = (+1, -1). 원시 점수 0, 2, -2, 0 → 12장 엔진은 그대로, 누적 core는 ReLU로 -2 → 0
+    # 고정 그룹 1: X = (+1, -1). 원시 점수 0, 2, -2, 0 → 2-8 엔진은 그대로, 누적 core는 ReLU로 -2 → 0
     assert b.engine(cmd("1"), True) == "C1:00000000000,00000000002,FFFFFFFFFFE,00000000000\r\n"
     assert b.engine(cmd("1"), False) == "C1:00000000000,00000000002,00000000000,00000000000\r\n"
     assert Board(1).console(cmd("Q")) == "?\r\n"

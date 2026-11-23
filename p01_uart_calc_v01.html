@@ -68,10 +68,9 @@ details.full>summary{cursor:pointer;font-weight:600}
   <nav class="toc" id="course-nav" aria-label="전체 장과 절 탐색"></nav>
   <main class="content" id="main-content">
     <section class="section" id="s00">
-      <h2><span class="num">00</span> 장 목표·진행 위치</h2>
+      <h2><span class="num">00</span> 장 목표</h2>
       <p><b>장 시연 (보드):</b> PC에서 두 수를 보내면 보드가 곱해서 누산하고, 결과를 UART·LED·7세그먼트로 돌려줍니다. 스위치로 곱셈 코어를 바꿔도 값은 같고 응답 지연만 달라집니다.</p>
       <p>1일 과정입니다. 서브젝트 4개를 차례로 끝내며 그때마다 보드에서 확인하고, 마지막에 장 전체를 시연합니다.</p>
-      <ol class="road" aria-label="전체 장에서 지금 위치"><li class="now" aria-current="step"><b>1장</b>UART 계산기</li><li class=""><a href="p02_npu4_board_v01.html"><b>2장</b>4뉴런 NPU 보드</a></li><li class=""><a href="p03_mnist8x8_v01.html"><b>3장</b>8×8 MNIST (CPU 없음)</a></li><li class=""><a href="p04_tile784_v01.html"><b>4장</b>784 가속기 설계 공간</a></li><li class=""><a href="p05_mbv_soc_v01.html"><b>5장</b>MicroBlaze V SoC</a></li><li class=""><a href="p06_npu_apps_v01.html"><b>6장</b>응용 확장</a></li><li class="plan"><b>7장</b>종합과제</li></ol>
       <ol class="steps" aria-label="이 장의 서브젝트와 순서"><li><span class="code">1-1</span><span><a href="#s1_1">UART 에코</a><br>보낸 글자가 그대로 돌아옵니다. <code>S</code>를 보내면 준비 신호 <code>I</code>가 옵니다. 아직 MAC 코어가 없으므로 <code>M</code>도 그대로 돌아옵니다.</span><span class="st">오전</span></li><li><span class="code">1-2</span><span><a href="#s1_2">MAC 누산</a><br><code>M 3 4</code>를 두 번 보내면 12, 24(0x18)로 누산되고 LED와 7세그먼트에 <code>0018</code>이 보입니다. 응답 끝의 <code>L:1</code>은 지연 1클록이라는 뜻입니다.</span><span class="st">오전</span></li><li><span class="code">1-3</span><span><a href="#s1_3">DSP48E1 곱셈</a><br>sw0을 올리면 DSP 코어(<code>L:2</code>), 내리면 1-2 코어(<code>L:1</code>)가 계산합니다. 두 코어의 누산값은 같습니다. Vivado 보고서에서 DSP48E1이 늘어난 것도 확인합니다.</span><span class="st">오후</span></li><li><span class="code">1-4</span><span><a href="#s1_4">MAC 파이프라인</a><br>sw1을 올리면 파이프라인 코어(<code>L:2</code>)가 계산합니다. 음수 경계값 −32768×32767을 넣어도 40비트 누산이 맞고, 마지막에 LED와 7세그먼트는 <code>7D45</code>입니다.</span><span class="st">오후</span></li><li class="demo"><span class="code">시연</span><span><a href="#demo">장 시연</a><br>PC에서 두 수를 보내면 보드가 곱해서 누산하고, 결과를 UART·LED·7세그먼트로 돌려줍니다. 스위치로 곱셈 코어를 바꿔도 값은 같고 응답 지연만 달라집니다.</span><span class="st">장 끝</span></li></ol>
     </section>
     <section class="section" id="s01">
@@ -173,15 +172,15 @@ details.full>summary{cursor:pointer;font-weight:600}
     <section class="section" id="s02">
       <h2><span class="num">02</span> 준비 · 장 뼈대</h2>
       <ol>
-        <li>VS Code에서 저장소 루트(<code>amd_soc_npu/</code>)를 엽니다. 필요한 도구는 Vivado 2024.2, <code>python3</code>, 시뮬레이터 <code>iverilog</code> 12 이상, 그리고 PC에서 보드로 명령을 보낼 <code>pyserial</code>(<code>pip install pyserial</code>)입니다.</li>
+        <li>VS Code에서 저장소 루트(<code>amd_soc_npu/</code>)를 엽니다. 필요한 도구는 Vivado 2024.2(합성·시뮬레이션), <code>python3</code>, 그리고 PC에서 보드로 명령을 보낼 <code>pyserial</code>(<code>pip install pyserial</code>)입니다. 터미널에서 Vivado 명령이 잡히도록 <code>settings64.sh</code>를 먼저 불러옵니다.</li>
         <li>아래 장 뼈대 파일을 경로 그대로 입력합니다. 서브젝트 모듈은 각 서브젝트 절에서 작성합니다.</li>
         <li><code>STAGE</code>는 끝낸 서브젝트 수입니다. 1-1만 끝냈으면 1, 1-4까지 끝냈으면 4입니다. 아직 작성하지 않은 모듈은 빌드에 들어가지 않으므로, 서브젝트를 하나 끝낼 때마다 바로 보드에 올려 볼 수 있습니다.</li>
       </ol>
       <div class="codeblock">
         <div class="codebar"><span>p01/rtl/p01_reset_sync.v · verilog</span></div>
-        <pre tabindex="0"><code class="language-verilog">// 장 Top 공용 리셋: btnC(Active-High)를 2단 동기화해 동기 resetn을 만든다 (12장 npu_reset_controller와 같은 동작).
-// (변경 2026-11-22) 비동기 assert 제거 — 비동기 clear되는 플립플롭 출력이 RAMB18 제어 핀으로 들어가면
-// 버튼을 누르는 순간 BRAM 내용이 깨질 수 있다 (Vivado DRC REQP-1840). 모든 플립플롭이 clk에만 반응한다.
+        <pre tabindex="0"><code class="language-verilog">// 장 Top 공용 리셋: btnC(Active-High)를 2단 동기화해 동기 resetn을 만든다 (npu_reset_controller와 같은 동작).
+// 모든 플립플롭이 clk에만 반응한다. 리셋이 비동기로 바뀌면 그 신호를 받는 BRAM 제어 핀이 setup/hold를 어겨
+// 내용이 깨질 수 있으므로(Vivado DRC REQP-1840), 걸 때도 풀 때도 클록에 맞춘다.
 `timescale 1ns/1ps
 `default_nettype none
 module p01_reset_sync (
@@ -201,7 +200,7 @@ endmodule
       </div>
       <div class="codeblock">
         <div class="codebar"><span>p01/rtl/p01_calc_controller.v · verilog</span></div>
-        <pre tabindex="0"><code class="language-verilog">// 1장 UART 계산기 명령 해석기. 11장과 같은 형식: 1바이트 명령 + 바이너리 페이로드(빅엔디언), stop-and-wait.
+        <pre tabindex="0"><code class="language-verilog">// 1장 UART 계산기 명령 해석기. 2-7과 같은 형식: 1바이트 명령 + 바이너리 페이로드(빅엔디언), stop-and-wait.
 //
 //   명령   페이로드                     응답
 //   'M'    a_hi a_lo b_hi b_lo (signed16)  "A:" + 누산값 16진수 10자리 + " L:" + 지연 클록 1자리 + "\r\n"
@@ -347,9 +346,9 @@ endmodule
         <div class="codebar"><span>p01/rtl/p01_mac_bank.v · verilog</span></div>
         <pre tabindex="0"><code class="language-verilog">// 1장 MAC 묶음: 1-2·1-3·1-4 서브젝트의 세 코어에 같은 입력을 넣고, sw로 고른 코어의 결과만 내보낸다.
 // STAGE = 지금까지 끝낸 서브젝트 수 (1~4). 아직 만들지 않은 코어는 넣지 않고, 그 sw 값은 앞 코어로 대신한다.
-//   sel 0 = 1-2 mac_core (01장)            지연 1클록
-//   sel 1 = 1-3 dsp_multiplier (02장) + 누산 지연 2클록 (곱 레지스터 1 + 누산 레지스터 1)
-//   sel 2·3 = 1-4 mac_pipeline_core (03장) 지연 2클록
+//   sel 0 = 1-2  mac_core                  지연 1클록
+//   sel 1 = 1-3 dsp_multiplier + 누산 지연 2클록 (곱 레지스터 1 + 누산 레지스터 1)
+//   sel 2·3 = 1-4 mac_pipeline_core 지연 2클록
 // 세 코어가 같은 입력을 늘 함께 받으므로 누산값은 항상 같다. sw를 바꿔도 값은 그대로이고 지연만 달라진다.
 `timescale 1ns/1ps
 `default_nettype none
@@ -384,7 +383,7 @@ module p01_mac_bank #(
     end
     assign sel_o = sel_sync;
 
-    // 1-2: 01장 mac_core
+    // 1-2: mac_core
     wire signed [ACC_WIDTH-1:0] acc_mac;
     wire                        valid_mac;
     generate if (STAGE &gt;= 2) begin : g_mac
@@ -396,7 +395,7 @@ module p01_mac_bank #(
         assign valid_mac = 1'b0;
     end endgenerate
 
-    // 1-3: 02장 dsp_multiplier + 누산 레지스터
+    // 1-3: dsp_multiplier + 누산 레지스터
     wire signed [ACC_WIDTH-1:0] acc_dsp;
     wire                        valid_dsp;
     generate if (STAGE &gt;= 3) begin : g_dsp
@@ -426,7 +425,7 @@ module p01_mac_bank #(
         assign valid_dsp = valid_mac;
     end endgenerate
 
-    // 1-4: 03장 mac_pipeline_core
+    // 1-4: mac_pipeline_core
     wire signed [ACC_WIDTH-1:0] acc_pipe;
     wire                        valid_pipe;
     generate if (STAGE &gt;= 4) begin : g_pipe
@@ -558,7 +557,7 @@ endmodule
       </div>
       <div class="codeblock">
         <div class="codebar"><span>p01/constraints/basys3_p01.xdc · xdc</span></div>
-        <pre tabindex="0"><code class="language-xdc"># 1장 보드 Top (basys3_p01_top) 핀. Basys-3-Master.xdc 이름·핀 그대로 (12장 basys3_npu.xdc와 같은 핀 + sw[1:0]).
+        <pre tabindex="0"><code class="language-xdc"># 1장 보드 Top (basys3_p01_top) 핀. Basys-3-Master.xdc 이름·핀 그대로 (2-8 basys3_npu.xdc와 같은 핀 + sw[1:0]).
 set_property -dict { PACKAGE_PIN W5 IOSTANDARD LVCMOS33 } [get_ports clk]
 set_property -dict { PACKAGE_PIN U18 IOSTANDARD LVCMOS33 } [get_ports btnC]
 set_property -dict { PACKAGE_PIN B18 IOSTANDARD LVCMOS33 } [get_ports uart_rxd]
@@ -944,59 +943,16 @@ module basys3_uart_echo_top(
 endmodule</code></pre>
       </div>
       <h3>시뮬레이션</h3>
-      <p>보드에 올리기 전에 이 서브젝트 모듈만 먼저 시험합니다. 아래와 같은 줄이 나오면 됩니다.</p>
+      <p>보드에 올리기 전에, 이 서브젝트까지 넣은 장 Top을 시뮬레이션합니다. 위 표와 같은 명령을 UART 핀으로 넣고 응답을 한 바이트씩 비교합니다. 마지막 줄이 <code>RTL_SIM_PASS</code>이면 됩니다.</p>
       <div class="codeblock"><div class="codebar"><span>터미널 · 저장소 루트</span></div>
-        <pre tabindex="0"><code>bash ch00/scripts/run_sim.sh</code></pre></div>
+        <pre tabindex="0"><code>bash p01/scripts/run_sim.sh 1</code></pre></div>
       <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
-        <pre tabindex="0"><code>UART_ECHO_RTL_SIM_PASS decoded=2</code></pre></div>
-      <details class="full"><summary>테스트벤치와 기준 모델 (전체 코드 1개)</summary>
-      <div class="codeblock">
-        <div class="codebar"><span>ch00/tb/tb_uart_echo.sv · systemverilog</span></div>
-        <pre tabindex="0"><code class="language-systemverilog">// (추가) UART 실핀 비트파형 8N1 입력 및 TX 재복조 자동 판정.
-`timescale 1ns/1ps
-module tb_uart_echo;
-    localparam integer CPB=868;
-    reg clk=0,resetn=0,rxd=1;
-    wire txd;
-    wire [7:0] decoded;
-    wire decoded_valid,fe,ov;
-    integer observed=0;
-    always #5 clk=~clk;
-    basys3_uart_echo_top dut(.clk(clk),.resetn(resetn),.uart_rxd(rxd),.uart_txd(txd));
-    uart_rx monitor(.clk(clk),.resetn(resetn),.rx_i(txd),
-        .out_data_o(decoded),.out_valid_o(decoded_valid),
-        .out_ready_i(1'b1),.framing_error_o(fe),.overrun_o(ov));
-    task automatic send_byte(input [7:0] b);
-        integer k;
-        begin
-            @(negedge clk);rxd=0;repeat(CPB)@(negedge clk);
-            for(k=0;k&lt;8;k=k+1)begin
-                rxd=b[k];repeat(CPB)@(negedge clk);
-            end
-            rxd=1;repeat(CPB)@(negedge clk);
-        end
-    endtask
-    always @(posedge clk)if(decoded_valid)begin
-        if(observed==0 &amp;&amp; decoded!==8'h41)$fatal(1,"Echo A mismatch");
-        if(observed==1 &amp;&amp; decoded!==8'h35)$fatal(1,"Echo 5 mismatch");
-        observed=observed+1;
-    end
-    initial begin
-        repeat(8)@(negedge clk);resetn=1;
-        send_byte("A");send_byte("5");
-        wait(observed==2);
-        if(fe||ov)$fatal(1,"Echo framing/overrun");
-        $display("UART_ECHO_RTL_SIM_PASS decoded=2");$finish;
-    end
-    initial begin #2000000;$fatal(1,"UART Echo TIMEOUT");end
-endmodule</code></pre>
-      </div>
-      </details>
-      <h3>확인할 것</h3>
-      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
-        <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
-        <tbody><tr><td><code>UART_ECHO_RTL_SIM_PASS decoded=2</code></td><td>TB가 보낸 'A'·'5'가 TX 핀에서 같은 값으로 복조됨</td></tr><tr><td><code>$fatal 없음</code></td><td>framing error·overrun 없이 종료</td></tr><tr><td>보드 응답</td><td>위 '보드에서 볼 것' 표의 응답과 한 글자도 다르지 않아야 합니다.</td></tr></tbody>
-      </table></div>
+        <pre tabindex="0"><code>P01_CASE_PASS stage=1 1-1 sw=0 rx="Z"
+P01_CASE_PASS stage=1 1-1 sw=0 rx="5"
+P01_CASE_PASS stage=1 1-1 sw=0 rx="I\r\n"
+P01_CASE_PASS stage=1 1-1 sw=0 rx="M"
+P01_TOP_RTL_SIM_PASS stage=1 cases=4 bytes=6
+RTL_SIM_PASS stages=1</code></pre></div>
     </section>
     <section class="section" id="s1_2">
       <h2><span class="num">04</span> 서브젝트 1-2 · MAC 누산</h2>
@@ -1070,216 +1026,18 @@ endmodule
 `default_nettype wire</code></pre>
       </div>
       <h3>시뮬레이션</h3>
-      <p>보드에 올리기 전에 이 서브젝트 모듈만 먼저 시험합니다. 아래와 같은 줄이 나오면 됩니다.</p>
+      <p>보드에 올리기 전에, 이 서브젝트까지 넣은 장 Top을 시뮬레이션합니다. 위 표와 같은 명령을 UART 핀으로 넣고 응답을 한 바이트씩 비교합니다. 마지막 줄이 <code>RTL_SIM_PASS</code>이면 됩니다.</p>
       <div class="codeblock"><div class="codebar"><span>터미널 · 저장소 루트</span></div>
-        <pre tabindex="0"><code>bash ch01/scripts/run_sim.sh</code></pre></div>
+        <pre tabindex="0"><code>bash p01/scripts/run_sim.sh 2</code></pre></div>
       <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
-        <pre tabindex="0"><code>PYTHON_SELF_TEST_PASS configurations=INT8/32,INT16/40
-PYTHON_VECTORS INT16/40 cycles=35304 seed=317
-RTL_SIM_PASS INT16/40 cycles=35304
-PYTHON_SELF_TEST_PASS configurations=INT8/32,INT16/40
-PYTHON_RTL_COMPARE_PASS cycles=35304
-PYTHON_SELF_TEST_PASS configurations=INT8/32,INT16/40
-PYTHON_VECTORS INT8/32 cycles=133224 seed=309
-RTL_SIM_PASS INT8/32 cycles=133224
-PYTHON_SELF_TEST_PASS configurations=INT8/32,INT16/40
-PYTHON_RTL_COMPARE_PASS cycles=133224</code></pre></div>
-      <details class="full"><summary>테스트벤치와 기준 모델 (전체 코드 2개)</summary>
-      <div class="codeblock">
-        <div class="codebar"><span>ch01/tb/tb_mac_core.sv · systemverilog</span></div>
-        <pre tabindex="0"><code class="language-systemverilog">`timescale 1ns/1ps
-`default_nettype none
-module tb_mac_core;
-    parameter integer DATA_WIDTH = 16;
-    parameter integer ACC_WIDTH = 40;
-    reg clk = 0;
-    reg resetn = 0, clear_i = 0, valid_i = 0;
-    reg signed [DATA_WIDTH-1:0] a_i = 0, b_i = 0;
-    wire signed [ACC_WIDTH-1:0] acc_o;
-    wire valid_o;
-    mac_core #(.DATA_WIDTH(DATA_WIDTH), .ACC_WIDTH(ACC_WIDTH)) dut (.*);
-    always #5 clk = ~clk;
-
-    integer vectors, actual, fields, cycle = 0;
-    integer rn, cl, vi, ai, bi, expected_valid;
-    reg signed [ACC_WIDTH-1:0] expected_acc;
-    reg signed [ACC_WIDTH-1:0] previous_acc;
-    reg previous_valid;
-    longint signed model_acc = 0;
-    longint signed model_product;
-    reg model_valid;
-    string vectors_path, actual_path;
-
-    initial begin
-        if (!$value$plusargs("VECTORS=%s", vectors_path) ||
-            !$value$plusargs("ACTUAL=%s", actual_path))
-            $fatal(1, "Missing VECTORS/ACTUAL path");
-        vectors = $fopen(vectors_path, "r");
-        actual = $fopen(actual_path, "w");
-        if (!vectors || !actual) $fatal(1, "Cannot open vector/trace file");
-        // 첫 상승 에지에서 동기식 Reset을 적용하여 알려진 상태를 만든다.
-        @(posedge clk); #1;
-        if (acc_o !== 0 || valid_o !== 0) $fatal(1, "Initial reset failed");
-        while (!$feof(vectors)) begin
-            fields = $fscanf(vectors, "%d %d %d %d %d %d %d\n",
-                              rn, cl, vi, ai, bi, expected_acc, expected_valid);
-            if (fields != 7) $fatal(1, "Malformed vector row");
-            @(negedge clk);
-            previous_acc = acc_o;
-            previous_valid = valid_o;
-            resetn = rn; clear_i = cl; valid_i = vi; a_i = ai; b_i = bi;
-            #1;
-            // 입력 변경만으로 출력이 변하면 동기식 타이밍 위반이다.
-            if (acc_o !== previous_acc || valid_o !== previous_valid)
-                $fatal(1, "Output changed before rising edge cycle=%0d", cycle+1);
-            @(posedge clk); #1; // NBA 갱신 이후 같은 에지의 결과를 검사한다.
-            cycle = cycle + 1;
-            // Python 파일 외에도 SV의 64비트 정수 산술로 독립 계산한다.
-            // 이 TB의 실행 설정은 ACC_WIDTH&lt;=40이므로 곱과 합이 64비트에 들어간다.
-            model_product = $signed(a_i);
-            model_product = model_product * $signed(b_i);
-            model_valid = rn &amp;&amp; !cl &amp;&amp; vi;
-            if (!rn || cl) model_acc = 0;
-            else if (vi) model_acc = model_acc + model_product;
-            model_acc = $signed(model_acc[ACC_WIDTH-1:0]);
-            if (expected_acc !== model_acc[ACC_WIDTH-1:0] || expected_valid[0] !== model_valid)
-                $fatal(1, "SV/Python reference mismatch cycle=%0d", cycle);
-            if (acc_o !== expected_acc || valid_o !== expected_valid[0])
-                $fatal(1, "cycle=%0d a=%0d b=%0d expected=%0d/%0d actual=%0d/%0d",
-                       cycle, a_i, b_i, expected_acc, expected_valid, acc_o, valid_o);
-            $fdisplay(actual, "%0d %0d %0d", cycle, acc_o, valid_o);
-        end
-        if (cycle == 0) $fatal(1, "Empty vector file");
-        $fclose(vectors); $fclose(actual);
-        $display("RTL_SIM_PASS INT%0d/%0d cycles=%0d", DATA_WIDTH, ACC_WIDTH, cycle);
-        $finish;
-    end
-    initial begin
-        #10000000;
-        $fatal(1, "Simulation timeout");
-    end
-endmodule
-`default_nettype wire</code></pre>
-      </div>
-      <div class="codeblock">
-        <div class="codebar"><span>ch01/reference/mac_reference.py · python</span></div>
-        <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
-"""P3-01 독립 정수 모델, 재현 가능한 자극 생성 및 RTL 전 사이클 대조."""
-import argparse
-import random
-from pathlib import Path
-
-
-def wrap(value, width):
-    """Python 무제한 정수를 signed 2의 보수 범위로 변환한다."""
-    modulus = 1 &lt;&lt; width
-    return (value + modulus // 2) % modulus - modulus // 2
-
-
-def step(acc, resetn, clear, valid, a, b, acc_width):
-    if not resetn or clear:
-        return 0, 0
-    return (wrap(acc + a * b, acc_width), 1) if valid else (acc, 0)
-
-
-def self_test():
-    # 별도의 상수 정답으로 산술/제어 및 각 설정의 양·음 오버플로를 검증한다.
-    for dw, aw in ((8, 32), (16, 40)):
-        maximum = (1 &lt;&lt; (aw - 1)) - 1
-        minimum = -(1 &lt;&lt; (aw - 1))
-        assert step(0, 1, 0, 1, 3, 4, aw) == (12, 1)
-        assert step(0, 1, 0, 1, 3, -4, aw) == (-12, 1)
-        assert step(0, 1, 0, 1, -3, -4, aw) == (12, 1)
-        assert step(maximum, 1, 0, 1, 1, 1, aw) == (minimum, 1)
-        assert step(minimum, 1, 0, 1, 1, -1, aw) == (maximum, 1)
-        assert step(7, 1, 0, 0, 3, 4, aw) == (7, 0)
-        assert step(7, 1, 1, 1, 3, 4, aw) == (0, 0)
-        assert step(7, 0, 1, 1, 3, 4, aw) == (0, 0)
-        assert wrap((-(1 &lt;&lt; (dw - 1))) ** 2, aw) == 1 &lt;&lt; (2 * dw - 2)
-    print("PYTHON_SELF_TEST_PASS configurations=INT8/32,INT16/40")
-
-
-def stimulus(dw, aw):
-    lo, hi = -(1 &lt;&lt; (dw - 1)), (1 &lt;&lt; (dw - 1)) - 1
-    yield (0, 0, 1, hi, lo)
-    yield (0, 1, 1, lo, lo)
-    yield (1, 0, 0, 0, 0)
-    # 부호 조합, 0, 입력 경계, 연속 valid 및 idle.
-    for a, b in ((3, 4), (3, -4), (-3, -4), (hi, hi),
-                 (lo, lo), (lo, hi), (hi, lo), (0, lo), (-1, -1)):
-        yield (1, 0, 1, a, b)
-    for _ in range(4):
-        yield (1, 0, 0, hi, hi)
-    yield (1, 1, 1, hi, hi)
-    yield (1, 1, 0, lo, lo)
-    # 내부 레지스터 force 없이 실제 포트로 최댓값에 도달한다.
-    target = (1 &lt;&lt; (aw - 1)) - 1
-    count, remainder = divmod(target, lo * lo)
-    for _ in range(count):
-        yield (1, 0, 1, lo, lo)
-    count, remainder = divmod(remainder, hi)
-    for _ in range(count):
-        yield (1, 0, 1, hi, 1)
-    if remainder:
-        yield (1, 0, 1, remainder, 1)
-    yield (1, 0, 0, hi, hi)  # 최댓값 유지
-    yield (1, 0, 1, 1, 1)    # max + 1 -&gt; min
-    yield (1, 0, 0, hi, hi)  # 최솟값 유지
-    yield (1, 0, 1, -1, 1)   # min - 1 -&gt; max
-    yield (0, 1, 1, lo, hi)  # Reset/Clear/Valid 동시 입력
-    rng = random.Random(301 + dw)
-    for _ in range(2000):
-        yield (int(rng.randrange(53) != 0), int(rng.randrange(29) == 0),
-               int(rng.randrange(4) != 0), rng.randint(lo, hi), rng.randint(lo, hi))
-    yield (1, 0, 0, 0, 0)
-
-
-def generate(dw, aw, vectors, expected):
-    acc = 0
-    count = 0
-    with vectors.open("w") as vf, expected.open("w") as ef:
-        for count, row in enumerate(stimulus(dw, aw), 1):
-            acc, valid = step(acc, *row, aw)
-            vf.write(" ".join(map(str, (*row, acc, valid))) + "\n")
-            ef.write(f"{count} {acc} {valid}\n")
-    print(f"PYTHON_VECTORS INT{dw}/{aw} cycles={count} seed={301 + dw}")
-
-
-def compare(expected, actual):
-    # 길이도 비교하여 조기 종료/누락 행이 PASS가 되지 않게 한다.
-    from itertools import zip_longest
-    count = 0
-    with expected.open() as ef, actual.open() as af:
-        for count, (e, a) in enumerate(zip_longest(ef, af), 1):
-            if e is None or a is None or e.split() != a.split():
-                raise AssertionError(f"cycle={count}: expected={e!r}, actual={a!r}")
-    if count == 0:
-        raise AssertionError("Empty comparison")
-    print(f"PYTHON_RTL_COMPARE_PASS cycles={count}")
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--data-width", type=int, default=16)
-    parser.add_argument("--acc-width", type=int, default=40)
-    parser.add_argument("--vectors", type=Path)
-    parser.add_argument("--expected", type=Path)
-    parser.add_argument("--actual", type=Path)
-    args = parser.parse_args()
-    if args.data_width &lt; 2 or args.acc_width &lt; 2 * args.data_width:
-        parser.error("Require DATA_WIDTH&gt;=2 and ACC_WIDTH&gt;=2*DATA_WIDTH")
-    self_test()
-    if args.actual:
-        compare(args.expected, args.actual)
-    elif args.vectors:
-        generate(args.data_width, args.acc_width, args.vectors, args.expected)</code></pre>
-      </div>
-      </details>
-      <h3>확인할 것</h3>
-      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
-        <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
-        <tbody><tr><td><code>RTL_SIM_PASS INT16/40 cycles=35304</code></td><td>INT16·40비트 누산 설정 통과</td></tr><tr><td><code>RTL_SIM_PASS INT8/32 cycles=133224</code></td><td>INT8·32비트 설정 통과</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS</code></td><td>RTL 출력 파일과 Python 기준값이 모든 사이클에서 일치</td></tr><tr><td>보드 응답</td><td>위 '보드에서 볼 것' 표의 응답과 한 글자도 다르지 않아야 합니다.</td></tr></tbody>
-      </table></div>
+        <pre tabindex="0"><code>P01_CASE_PASS stage=2 1-1 sw=0 rx="Z"
+P01_CASE_PASS stage=2 1-1 sw=0 rx="5"
+P01_CASE_PASS stage=2 1-1 sw=0 rx="I\r\n"
+P01_CASE_PASS stage=2 1-2 sw=0 rx="OK\r\n"
+P01_CASE_PASS stage=2 1-2 sw=0 rx="A:000000000C L:1\r\n"
+P01_CASE_PASS stage=2 1-2 sw=0 rx="A:0000000018 L:1\r\n"
+P01_TOP_RTL_SIM_PASS stage=2 cases=6 bytes=45
+RTL_SIM_PASS stages=1</code></pre></div>
     </section>
     <section class="section" id="s1_3">
       <h2><span class="num">05</span> 서브젝트 1-3 · DSP48E1 곱셈</h2>
@@ -1353,220 +1111,22 @@ endmodule
 `default_nettype wire</code></pre>
       </div>
       <h3>시뮬레이션</h3>
-      <p>보드에 올리기 전에 이 서브젝트 모듈만 먼저 시험합니다. 아래와 같은 줄이 나오면 됩니다.</p>
+      <p>보드에 올리기 전에, 이 서브젝트까지 넣은 장 Top을 시뮬레이션합니다. 위 표와 같은 명령을 UART 핀으로 넣고 응답을 한 바이트씩 비교합니다. 마지막 줄이 <code>RTL_SIM_PASS</code>이면 됩니다.</p>
       <div class="codeblock"><div class="codebar"><span>터미널 · 저장소 루트</span></div>
-        <pre tabindex="0"><code>bash ch02/scripts/run_sim.sh</code></pre></div>
+        <pre tabindex="0"><code>bash p01/scripts/run_sim.sh 3</code></pre></div>
       <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
-        <pre tabindex="0"><code>PYTHON_PRODUCT_SELF_TEST_PASS INT16,INT8,native25x18
-PYTHON_SELF_TEST_PASS configurations=INT8/32,INT16/40
-PYTHON_VECTORS A=16 B=16 ACC=40 cycles=37360
-RTL_SIM_PASS A=16 B=16 ACC=40 cycles=37360
-PYTHON_PRODUCT_SELF_TEST_PASS INT16,INT8,native25x18
-PYTHON_SELF_TEST_PASS configurations=INT8/32,INT16/40
-PYTHON_RTL_COMPARE_PASS cycles=37360
-PYTHON_PRODUCT_SELF_TEST_PASS INT16,INT8,native25x18
-PYTHON_SELF_TEST_PASS configurations=INT8/32,INT16/40
-PYTHON_VECTORS A=8 B=8 ACC=32 cycles=200816
-RTL_SIM_PASS A=8 B=8 ACC=32 cycles=200816
-PYTHON_PRODUCT_SELF_TEST_PASS INT16,INT8,native25x18
-PYTHON_SELF_TEST_PASS configurations=INT8/32,INT16/40
-PYTHON_RTL_COMPARE_PASS cycles=200816
-PYTHON_PRODUCT_SELF_TEST_PASS INT16,INT8,native25x18
-PYTHON_SELF_TEST_PASS configurations=INT8/32,INT16/40
-PYTHON_VECTORS A=25 B=18 ACC=56 cycles=2058
-RTL_SIM_PASS A=25 B=18 ACC=56 cycles=2058
-PYTHON_PRODUCT_SELF_TEST_PASS INT16,INT8,native25x18
-PYTHON_SELF_TEST_PASS configurations=INT8/32,INT16/40
-PYTHON_RTL_COMPARE_PASS cycles=2058</code></pre></div>
-      <details class="full"><summary>테스트벤치와 기준 모델 (전체 코드 2개)</summary>
-      <div class="codeblock">
-        <div class="codebar"><span>ch02/tb/tb_dsp_multiplier.sv · systemverilog</span></div>
-        <pre tabindex="0"><code class="language-systemverilog">`timescale 1ns/1ps
-`default_nettype none
-module tb_dsp_multiplier;
-    parameter integer A_WIDTH = 16;
-    parameter integer B_WIDTH = 16;
-    parameter integer ACC_WIDTH = 40;
-    localparam integer MAC_WIDTH = A_WIDTH &gt; B_WIDTH ? A_WIDTH : B_WIDTH;
-    reg clk = 0;
-    reg resetn = 0, clear_i = 0, valid_i = 0;
-    reg signed [A_WIDTH-1:0] a_i = 0;
-    reg signed [B_WIDTH-1:0] b_i = 0;
-    wire signed [A_WIDTH+B_WIDTH-1:0] product_o;
-    wire valid_o;
-    wire signed [ACC_WIDTH-1:0] acc_o;
-    wire mac_valid;
-    wire signed [MAC_WIDTH-1:0] a_mac = a_i;
-    wire signed [MAC_WIDTH-1:0] b_mac = b_i;
-    dsp_multiplier #(.A_WIDTH(A_WIDTH), .B_WIDTH(B_WIDTH)) dut (.*);
-    // 누산 로직은 복제하지 않고 P3-01 정상 모듈에 같은 입력을 연결한다.
-    mac_core #(.DATA_WIDTH(MAC_WIDTH), .ACC_WIDTH(ACC_WIDTH)) mac (
-        .clk(clk), .resetn(resetn), .clear_i(clear_i), .valid_i(valid_i),
-        .a_i(a_mac), .b_i(b_mac), .acc_o(acc_o), .valid_o(mac_valid)
-    );
-    always #5 clk = ~clk;
-    integer vf, af, fields, cycle = 0;
-    integer rn, cl, vi, ai, bi, ev;
-    reg signed [A_WIDTH+B_WIDTH-1:0] ep;
-    reg signed [ACC_WIDTH-1:0] ea;
-    longint signed model_product = 0, model_acc = 0, multiply_w;
-    reg signed [A_WIDTH+B_WIDTH-1:0] held_product;
-    reg signed [ACC_WIDTH-1:0] held_acc;
-    reg held_valid, held_mac_valid;
-    string vp, ap;
-
-    initial begin
-        if (ACC_WIDTH &gt; 56 || ACC_WIDTH &lt; 2*MAC_WIDTH)
-            $fatal(1, "TB requires 2*MAC_WIDTH&lt;=ACC_WIDTH&lt;=56");
-        if (!$value$plusargs("VECTORS=%s", vp) || !$value$plusargs("ACTUAL=%s", ap))
-            $fatal(1, "Missing vector/trace argument");
-        vf = $fopen(vp, "r"); af = $fopen(ap, "w");
-        if (!vf || !af) $fatal(1, "Cannot open test files");
-        @(posedge clk); #1;
-        if (product_o !== 0 || valid_o !== 0 || acc_o !== 0 || mac_valid !== 0)
-            $fatal(1, "Initial reset failed");
-        while (!$feof(vf)) begin
-            fields = $fscanf(vf, "%d %d %d %d %d %d %d %d\n", rn, cl, vi, ai, bi, ep, ea, ev);
-            if (fields != 8) $fatal(1, "Malformed vector");
-            @(negedge clk);
-            held_product = product_o; held_acc = acc_o;
-            held_valid = valid_o; held_mac_valid = mac_valid;
-            resetn = rn; clear_i = cl; valid_i = vi; a_i = ai; b_i = bi;
-            #1;
-            if (product_o !== held_product || acc_o !== held_acc ||
-                valid_o !== held_valid || mac_valid !== held_mac_valid)
-                $fatal(1, "Output changed before rising edge cycle=%0d", cycle+1);
-            @(posedge clk); #1;
-            cycle = cycle + 1;
-            // 64비트 정수로 먼저 확장하여 곱을 계산하고 명시적으로 누산 폭을 적용한다.
-            multiply_w = $signed(a_i);
-            multiply_w = multiply_w * $signed(b_i);
-            if (!rn || cl) begin
-                model_product = 0;
-                model_acc = 0;
-            end else if (vi) begin
-                model_product = multiply_w;
-                model_acc = model_acc + multiply_w;
-                model_acc = $signed(model_acc[ACC_WIDTH-1:0]);
-            end
-            if (ep !== model_product[A_WIDTH+B_WIDTH-1:0] ||
-                ea !== model_acc[ACC_WIDTH-1:0] || ev !== (rn &amp;&amp; !cl &amp;&amp; vi))
-                $fatal(1, "Python/SV reference mismatch cycle=%0d", cycle);
-            if (product_o !== ep || acc_o !== ea || valid_o !== ev[0] || mac_valid !== ev[0])
-                $fatal(1, "DUT mismatch cycle=%0d a=%0d b=%0d product=%0d expected=%0d acc=%0d expected=%0d",
-                       cycle, a_i, b_i, product_o, ep, acc_o, ea);
-            $fdisplay(af, "%0d %0d %0d %0d", cycle, product_o, acc_o, valid_o);
-        end
-        if (!cycle) $fatal(1, "Empty test");
-        $fclose(vf); $fclose(af);
-        $display("RTL_SIM_PASS A=%0d B=%0d ACC=%0d cycles=%0d", A_WIDTH, B_WIDTH, ACC_WIDTH, cycle);
-        $finish;
-    end
-    initial begin
-        #10000000;
-        $fatal(1, "Simulation timeout");
-    end
-endmodule
-`default_nettype wire</code></pre>
-      </div>
-      <div class="codeblock">
-        <div class="codebar"><span>ch02/reference/dsp_reference.py · python</span></div>
-        <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
-"""P3-02 signed 곱 기준 모델. P3-01의 누산/제어 모델과 trace 비교를 재사용한다."""
-import argparse
-import random
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "ch01" / "reference"))
-from mac_reference import compare, self_test, step, stimulus
-
-
-def vectors(a_width, b_width, acc_width):
-    # 대칭 INT16/INT8은 기존 누산 오버플로 자극도 그대로 사용한다.
-    if a_width == b_width:
-        yield from stimulus(a_width, acc_width)
-    else:
-        yield (0, 1, 1, 1, -1)
-        yield (1, 0, 0, 0, 0)
-    amin, amax = -(1 &lt;&lt; (a_width - 1)), (1 &lt;&lt; (a_width - 1)) - 1
-    bmin, bmax = -(1 &lt;&lt; (b_width - 1)), (1 &lt;&lt; (b_width - 1)) - 1
-    yield (1, 1, 1, amax, bmax)
-    for a in (amin, amin + 1, -1, 0, 1, amax - 1, amax):
-        for b in (bmin, bmin + 1, -1, 0, 1, bmax - 1, bmax):
-            yield (1, 0, 1, a, b)
-    # INT8의 65536개 입력 쌍은 전수 대조한다(제어 상태 전수 검증은 아님).
-    if (a_width, b_width) == (8, 8):
-        for a in range(amin, amax + 1):
-            for b in range(bmin, bmax + 1):
-                yield (1, 0, 1, a, b)
-    rng = random.Random(a_width * 1000 + b_width)
-    for _ in range(2000):
-        yield (int(rng.randrange(43) != 0), int(rng.randrange(31) == 0),
-               int(rng.randrange(4) != 0), rng.randint(amin, amax), rng.randint(bmin, bmax))
-    yield (0, 0, 1, amin, bmax)
-    yield (0, 1, 1, amin, bmin)
-    yield (1, 0, 1, amax, bmin)
-    yield (1, 0, 0, amin, bmax)
-    yield (1, 1, 0, 1, 1)
-    yield (1, 0, 0, 0, 0)
-
-
-def generate(a_width, b_width, acc_width, vector_path, expected_path):
-    product, acc = 0, 0
-    count = 0
-    with vector_path.open("w") as vf, expected_path.open("w") as ef:
-        for count, row in enumerate(vectors(a_width, b_width, acc_width), 1):
-            rn, clear, valid, a, b = row
-            if not rn or clear:
-                product = 0
-            elif valid:
-                product = a * b  # Python의 무제한 정수 곱, RTL 폭 변환에 의존하지 않는다.
-            acc, out_valid = step(acc, *row, acc_width)
-            if not -(1 &lt;&lt; (a_width+b_width-1)) &lt;= product &lt; (1 &lt;&lt; (a_width+b_width-1)):
-                raise AssertionError("Product outside full signed result width")
-            vf.write(" ".join(map(str, (*row, product, acc, out_valid))) + "\n")
-            ef.write(f"{count} {product} {acc} {out_valid}\n")
-    print(f"PYTHON_VECTORS A={a_width} B={b_width} ACC={acc_width} cycles={count}")
-
-
-def product_self_test():
-    assert (-32768) * (-32768) == 1073741824
-    assert (-32768) * 32767 == -1073709056
-    assert (-128) * (-128) == 16384
-    assert (-16777216) * (-131072) == 2199023255552
-    assert 16777215 * (-131072) == -2199023124480
-    print("PYTHON_PRODUCT_SELF_TEST_PASS INT16,INT8,native25x18")
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--a-width", type=int, default=16)
-    parser.add_argument("--b-width", type=int, default=16)
-    parser.add_argument("--acc-width", type=int, default=40)
-    parser.add_argument("--vectors", type=Path)
-    parser.add_argument("--expected", type=Path, required=True)
-    parser.add_argument("--actual", type=Path)
-    args = parser.parse_args()
-    # TB는 P3-01 MAC 입력 폭을 두 입력 중 큰 폭으로 맞춰 비교한다.
-    if not (2 &lt;= args.a_width &lt;= 25 and 2 &lt;= args.b_width &lt;= 18
-            and 2 * max(args.a_width, args.b_width) &lt;= args.acc_width &lt;= 56):
-        parser.error("Unsupported DSP input or TB accumulator width")
-    if bool(args.vectors) == bool(args.actual):
-        parser.error("Select exactly one of --vectors and --actual")
-    product_self_test()
-    self_test()
-    if args.actual:
-        compare(args.expected, args.actual)
-    else:
-        generate(args.a_width, args.b_width, args.acc_width, args.vectors, args.expected)</code></pre>
-      </div>
-      </details>
-      <h3>확인할 것</h3>
-      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
-        <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
-        <tbody><tr><td><code>RTL_SIM_PASS A=16 B=16 ACC=40 cycles=37360</code></td><td>INT16 곱·누산 교차 검증 통과</td></tr><tr><td><code>RTL_SIM_PASS A=8 B=8 ACC=32 cycles=200816</code></td><td>INT8 설정 통과</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS</code></td><td>RTL 출력 파일과 Python 기준값이 모든 사이클에서 일치</td></tr><tr><td>보드 응답</td><td>위 '보드에서 볼 것' 표의 응답과 한 글자도 다르지 않아야 합니다.</td></tr></tbody>
-      </table></div>
+        <pre tabindex="0"><code>P01_CASE_PASS stage=3 1-1 sw=0 rx="Z"
+P01_CASE_PASS stage=3 1-1 sw=0 rx="5"
+P01_CASE_PASS stage=3 1-1 sw=0 rx="I\r\n"
+P01_CASE_PASS stage=3 1-2 sw=0 rx="OK\r\n"
+P01_CASE_PASS stage=3 1-2 sw=0 rx="A:000000000C L:1\r\n"
+P01_CASE_PASS stage=3 1-2 sw=0 rx="A:0000000018 L:1\r\n"
+P01_CASE_PASS stage=3 1-3 sw=0 rx="OK\r\n"
+P01_CASE_PASS stage=3 1-3 sw=1 rx="A:000000000C L:2\r\n"
+P01_CASE_PASS stage=3 1-3 sw=0 rx="A:0000000018 L:1\r\n"
+P01_CASE_PASS stage=3 1-3 sw=1 rx="A:000000000E L:2\r\n"
+P01_TOP_RTL_SIM_PASS stage=3 cases=10 bytes=103
+RTL_SIM_PASS stages=1</code></pre></div>
     </section>
     <section class="section" id="s1_4">
       <h2><span class="num">06</span> 서브젝트 1-4 · MAC 파이프라인</h2>
@@ -1649,269 +1209,26 @@ endmodule
 `default_nettype wire</code></pre>
       </div>
       <h3>시뮬레이션</h3>
-      <p>보드에 올리기 전에 이 서브젝트 모듈만 먼저 시험합니다. 아래와 같은 줄이 나오면 됩니다.</p>
+      <p>보드에 올리기 전에, 이 서브젝트까지 넣은 장 Top을 시뮬레이션합니다. 위 표와 같은 명령을 UART 핀으로 넣고 응답을 한 바이트씩 비교합니다. 마지막 줄이 <code>RTL_SIM_PASS</code>이면 됩니다.</p>
       <div class="codeblock"><div class="codebar"><span>터미널 · 저장소 루트</span></div>
-        <pre tabindex="0"><code>bash ch03/scripts/run_sim.sh</code></pre></div>
+        <pre tabindex="0"><code>bash p01/scripts/run_sim.sh 4</code></pre></div>
       <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
-        <pre tabindex="0"><code>PYTHON_PIPELINE_SELF_TEST_PASS ACC=32,40
-PYTHON_VECTORS INT16/40 cycles=2546 seed=30316
-RTL_SIM_PASS INT16/40 cycles=2546
-PYTHON_PIPELINE_SELF_TEST_PASS ACC=32,40
-PYTHON_RTL_COMPARE_PASS cycles=2546
-PYTHON_PIPELINE_SELF_TEST_PASS ACC=32,40
-PYTHON_VECTORS INT8/32 cycles=133106 seed=30308
-RTL_SIM_PASS INT8/32 cycles=133106
-PYTHON_PIPELINE_SELF_TEST_PASS ACC=32,40
-PYTHON_RTL_COMPARE_PASS cycles=133106</code></pre></div>
-      <details class="full"><summary>테스트벤치와 기준 모델 (전체 코드 2개)</summary>
-      <div class="codeblock">
-        <div class="codebar"><span>ch03/tb/tb_mac_pipeline_core.sv · systemverilog</span></div>
-        <pre tabindex="0"><code class="language-systemverilog">`timescale 1ns/1ps
-`default_nettype none
-module tb_mac_pipeline_core;
-    parameter integer DATA_WIDTH = 16;
-    parameter integer ACC_WIDTH = 40;
-    reg clk = 0;
-    reg resetn = 0, clear_i = 0, valid_i = 0;
-    reg signed [DATA_WIDTH-1:0] a_i = 0, b_i = 0;
-    wire signed [ACC_WIDTH-1:0] acc_o;
-    wire valid_o;
-    mac_pipeline_core #(.DATA_WIDTH(DATA_WIDTH), .ACC_WIDTH(ACC_WIDTH)) dut (.*);
-    always #5 clk = ~clk;
-    integer vf, af, fields, cycle = 0;
-    integer rn, cl, vi, ai, bi, expected_pv, expected_v;
-    reg signed [2*DATA_WIDTH-1:0] expected_product;
-    reg signed [ACC_WIDTH-1:0] expected_acc;
-    longint signed previous_product = 0, model_acc = 0, multiply_w;
-    reg previous_valid = 0, model_valid;
-    reg signed [ACC_WIDTH-1:0] held_acc;
-    reg signed [2*DATA_WIDTH-1:0] held_product;
-    reg held_valid, held_pv;
-    string vp, ap;
-
-    initial begin
-        if (DATA_WIDTH &gt; 16 || ACC_WIDTH &gt; 40 || ACC_WIDTH &lt; 2*DATA_WIDTH)
-            $fatal(1, "Unsupported TB width");
-        if (!$value$plusargs("VECTORS=%s", vp) || !$value$plusargs("ACTUAL=%s", ap))
-            $fatal(1, "Missing vector/trace argument");
-        vf = $fopen(vp, "r"); af = $fopen(ap, "w");
-        if (!vf || !af) $fatal(1, "Cannot open test files");
-        @(posedge clk); #1;
-        if (acc_o !== 0 || valid_o !== 0 || dut.product_q !== 0 || dut.product_valid_q !== 0)
-            $fatal(1, "Initial reset failed");
-        while (!$feof(vf)) begin
-            fields = $fscanf(vf, "%d %d %d %d %d %d %d %d %d\n",
-                             rn, cl, vi, ai, bi, expected_product, expected_pv, expected_acc, expected_v);
-            if (fields != 9) $fatal(1, "Malformed vector");
-            @(negedge clk);
-            held_acc = acc_o; held_valid = valid_o;
-            held_product = dut.product_q; held_pv = dut.product_valid_q;
-            resetn = rn; clear_i = cl; valid_i = vi; a_i = ai; b_i = bi;
-            #1;
-            if (acc_o !== held_acc || valid_o !== held_valid ||
-                dut.product_q !== held_product || dut.product_valid_q !== held_pv)
-                $fatal(1, "Output changed before rising edge cycle=%0d", cycle+1);
-            @(posedge clk); #1;
-            cycle = cycle + 1;
-            // 현재 valid_i가 아니라 이전 에지의 곱 유효 상태로 누산 여부를 결정한다.
-            model_valid = rn &amp;&amp; !cl &amp;&amp; previous_valid;
-            if (!rn || cl) begin
-                model_acc = 0;
-                previous_product = 0;
-                previous_valid = 0;
-            end else begin
-                if (previous_valid) begin
-                    model_acc = model_acc + previous_product;
-                    model_acc = $signed(model_acc[ACC_WIDTH-1:0]);
-                end
-                previous_valid = vi;
-                if (vi) begin
-                    multiply_w = $signed(a_i);
-                    previous_product = multiply_w * $signed(b_i);
-                end
-            end
-            if (expected_acc !== model_acc[ACC_WIDTH-1:0] || expected_v[0] !== model_valid ||
-                expected_product !== previous_product[2*DATA_WIDTH-1:0] || expected_pv[0] !== previous_valid)
-                $fatal(1, "Python/SV reference mismatch cycle=%0d", cycle);
-            if (acc_o !== expected_acc || valid_o !== model_valid ||
-                dut.product_q !== expected_product || dut.product_valid_q !== previous_valid)
-                $fatal(1, "DUT mismatch cycle=%0d acc=%0d expected=%0d valid=%0d expected=%0d",
-                       cycle, acc_o, expected_acc, valid_o, model_valid);
-            $fdisplay(af, "%0d %0d %0d %0d %0d", cycle, dut.product_q,
-                      dut.product_valid_q, acc_o, valid_o);
-        end
-        if (!cycle || previous_valid) $fatal(1, "Empty test or pipeline not drained");
-        $fclose(vf); $fclose(af);
-        $display("RTL_SIM_PASS INT%0d/%0d cycles=%0d", DATA_WIDTH, ACC_WIDTH, cycle);
-        $finish;
-    end
-    initial begin
-        #10000000;
-        $fatal(1, "Simulation timeout");
-    end
-endmodule
-`default_nettype wire</code></pre>
-      </div>
-      <div class="codeblock">
-        <div class="codebar"><span>ch03/reference/mac_pipeline_reference.py · python</span></div>
-        <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
-"""P3-03 대기 큐 모델: 입력 수락 에지와 출력 에지를 분리한다."""
-import argparse
-import csv
-import random
-import sys
-from collections import deque
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "ch01" / "reference"))
-from mac_reference import compare, wrap
-
-
-class PipelineReference:
-    def __init__(self, acc_width):
-        self.acc_width = acc_width
-        self.pending = deque()
-        self.product = 0
-        self.acc = 0
-        self.edge = 0
-
-    def tick(self, resetn, clear, valid, a, b):
-        self.edge += 1
-        source_edge = 0
-        out_valid = 0
-        if not resetn or clear:
-            self.pending.clear()
-            self.product = 0
-            self.acc = 0
-        else:
-            # 먼저 이전 입력을 배출한 다음 현재 입력을 큐에 넣는다.
-            if self.pending:
-                product, source_edge = self.pending.popleft()
-                if source_edge != self.edge - 1:
-                    raise AssertionError("Pipeline latency must be one edge")
-                self.acc = wrap(self.acc + product, self.acc_width)
-                out_valid = 1
-            if valid:
-                self.product = a * b
-                self.pending.append((self.product, self.edge))
-        return self.product, int(bool(self.pending)), self.acc, out_valid, source_edge
-
-
-def self_test():
-    for aw in (32, 40):
-        m = PipelineReference(aw)
-        assert m.tick(0, 0, 1, 3, 4) == (0, 0, 0, 0, 0)
-        assert m.tick(1, 0, 1, 3, 4) == (12, 1, 0, 0, 0)
-        assert m.tick(1, 0, 1, 3, -4) == (-12, 1, 12, 1, 2)
-        assert m.tick(1, 0, 0, 9, 9) == (-12, 0, 0, 1, 3)
-        assert m.tick(1, 0, 0, 9, 9) == (-12, 0, 0, 0, 0)
-        assert m.tick(1, 0, 1, -3, -4) == (12, 1, 0, 0, 0)
-        assert m.tick(1, 1, 1, 9, 9) == (0, 0, 0, 0, 0)
-        assert m.tick(1, 0, 0, 9, 9) == (0, 0, 0, 0, 0)
-        m.tick(1, 0, 1, 9, 9)
-        assert m.tick(0, 1, 1, 9, 9) == (0, 0, 0, 0, 0)
-        assert m.tick(1, 0, 0, 9, 9) == (0, 0, 0, 0, 0)
-    print("PYTHON_PIPELINE_SELF_TEST_PASS ACC=32,40")
-
-
-def stimulus(dw, aw):
-    lo, hi = -(1 &lt;&lt; (dw - 1)), (1 &lt;&lt; (dw - 1)) - 1
-    yield (0, 0, 0, 0, 0)
-    for a, b in ((3, 4), (3, -4), (-3, -4)):
-        yield (1, 0, 1, a, b)
-    yield (1, 0, 0, hi, hi)
-    yield (1, 0, 0, lo, lo)
-    for a, b in ((0, lo), (lo, lo), (lo, hi), (hi, lo), (hi, hi)):
-        yield (1, 0, 1, a, b)
-    yield (1, 0, 0, 0, 0)
-    yield (1, 1, 0, 0, 0)
-    yield (1, 0, 1, 7, 9)
-    yield (1, 1, 1, hi, hi)  # 계류 곱과 동시 입력을 모두 취소
-    yield (1, 0, 0, 1, 1)
-    yield (1, 0, 0, 1, 1)
-    yield (1, 0, 1, -2, 3)   # Clear 직후 정상 회복과 단발 Valid
-    yield (1, 0, 0, 1, 1)
-    yield (1, 0, 0, 1, 1)
-    yield (1, 0, 1, 6, 7)
-    yield (0, 1, 1, hi, hi)  # Reset &gt; Clear &gt; Valid 및 계류 곱 취소
-    yield (1, 0, 0, 1, 1)
-    yield (1, 0, 1, 6, 7)
-    yield (0, 0, 1, hi, hi)  # Reset 단독으로도 파이프라인 취소
-    yield (1, 0, 0, 1, 1)
-    yield (1, 0, 0, 1, 1)
-    yield (1, 1, 0, 0, 0)
-    # 실제 입력을 누적해 양의 오버플로로 min 도달 후 min-1=max를 시험한다.
-    for _ in range(1 &lt;&lt; (aw - 2 * dw + 1)):
-        yield (1, 0, 1, lo, lo)
-    yield (1, 0, 0, 0, 0)  # 마지막 곱 배출 → 누산 min
-    yield (1, 0, 1, -1, 1)
-    yield (1, 0, 0, 0, 0)  # min-1 배출 → max
-    yield (1, 0, 0, 0, 0)
-    rng = random.Random(30300 + dw)
-    for _ in range(2000):
-        yield (int(rng.randrange(43) != 0), int(rng.randrange(29) == 0),
-               int(rng.randrange(4) != 0), rng.randint(lo, hi), rng.randint(lo, hi))
-    yield (1, 0, 0, 0, 0)
-    yield (1, 0, 0, 0, 0)
-
-
-def generate(dw, aw, vector_path, expected_path, timing_path):
-    model = PipelineReference(aw)
-    counts = dict(clear_pending=0, reset_pending=0, bubble_drain=0,
-                  positive_wrap=0, negative_wrap=0)
-    with vector_path.open("w") as vf, expected_path.open("w") as ef, timing_path.open("w") as tf:
-        timing = csv.writer(tf, lineterminator="\n")
-        timing.writerow(("edge", "resetn", "clear_i", "valid_i", "accepted_edge", "a_i", "b_i", "product_q",
-                         "product_valid_q", "output_source_edge", "output_edge", "acc_o", "valid_o"))
-        for edge, row in enumerate(stimulus(dw, aw), 1):
-            rn, clear, valid, a, b = row
-            if model.pending:
-                if not rn:
-                    counts["reset_pending"] += 1
-                elif clear:
-                    counts["clear_pending"] += 1
-                else:
-                    raw = model.acc + model.pending[0][0]
-                    counts["positive_wrap"] += int(raw &gt;= (1 &lt;&lt; (aw-1)))
-                    counts["negative_wrap"] += int(raw &lt; -(1 &lt;&lt; (aw-1)))
-                    counts["bubble_drain"] += int(not valid)
-            pq, pv, acc, out_valid, source = model.tick(*row)
-            vf.write(" ".join(map(str, (*row, pq, pv, acc, out_valid))) + "\n")
-            ef.write(f"{edge} {pq} {pv} {acc} {out_valid}\n")
-            if edge &lt;= 28:
-                timing.writerow((edge, rn, clear, valid, edge if rn and not clear and valid else "-", a, b,
-                                 pq, pv, source or "-", edge if out_valid else "-", acc, out_valid))
-    if model.pending or not all(counts.values()):
-        raise AssertionError(f"Missing directed coverage or final drain: {counts}")
-    print(f"PYTHON_VECTORS INT{dw}/{aw} cycles={edge} seed={30300+dw}")
-    print("SCENARIO_COUNTS " + " ".join(f"{key}={value}" for key, value in counts.items()))
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--data-width", type=int, default=16)
-    parser.add_argument("--acc-width", type=int, default=40)
-    parser.add_argument("--vectors", type=Path)
-    parser.add_argument("--expected", type=Path, required=True)
-    parser.add_argument("--actual", type=Path)
-    parser.add_argument("--timing", type=Path)
-    args = parser.parse_args()
-    if (args.data_width, args.acc_width) not in ((16, 40), (8, 32)):
-        parser.error("This test generator supports 16/40 and 8/32")
-    if bool(args.vectors) == bool(args.actual) or (args.vectors and not args.timing):
-        parser.error("Use --actual or --vectors with --timing")
-    self_test()
-    if args.actual:
-        compare(args.expected, args.actual)
-    else:
-        generate(args.data_width, args.acc_width, args.vectors, args.expected, args.timing)</code></pre>
-      </div>
-      </details>
-      <h3>확인할 것</h3>
-      <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
-        <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
-        <tbody><tr><td><code>RTL_SIM_PASS INT16/40 cycles=2546</code></td><td>INT16 설정 통과</td></tr><tr><td><code>RTL_SIM_PASS INT8/32 cycles=133106</code></td><td>INT8 설정 통과</td></tr><tr><td><code>PYTHON_RTL_COMPARE_PASS</code></td><td>RTL 출력 파일과 Python 기준값이 모든 사이클에서 일치</td></tr><tr><td>보드 응답</td><td>위 '보드에서 볼 것' 표의 응답과 한 글자도 다르지 않아야 합니다.</td></tr></tbody>
-      </table></div>
+        <pre tabindex="0"><code>P01_CASE_PASS stage=4 1-1 sw=0 rx="Z"
+P01_CASE_PASS stage=4 1-1 sw=0 rx="5"
+P01_CASE_PASS stage=4 1-1 sw=0 rx="I\r\n"
+P01_CASE_PASS stage=4 1-2 sw=0 rx="OK\r\n"
+P01_CASE_PASS stage=4 1-2 sw=0 rx="A:000000000C L:1\r\n"
+P01_CASE_PASS stage=4 1-2 sw=0 rx="A:0000000018 L:1\r\n"
+P01_CASE_PASS stage=4 1-3 sw=0 rx="OK\r\n"
+P01_CASE_PASS stage=4 1-3 sw=1 rx="A:000000000C L:2\r\n"
+P01_CASE_PASS stage=4 1-3 sw=0 rx="A:0000000018 L:1\r\n"
+P01_CASE_PASS stage=4 1-3 sw=1 rx="A:000000000E L:2\r\n"
+P01_CASE_PASS stage=4 1-4 sw=0 rx="OK\r\n"
+P01_CASE_PASS stage=4 1-4 sw=2 rx="A:FFC0008000 L:2\r\n"
+P01_CASE_PASS stage=4 1-4 sw=2 rx="A:FFC0007D44 L:2\r\n"
+P01_CASE_PASS stage=4 1-4 sw=0 rx="A:FFFFFF7D45 L:1\r\n"
+P01_TOP_RTL_SIM_PASS stage=4 cases=14 bytes=161
+RTL_SIM_PASS stages=1</code></pre></div>
     </section>
     <section class="section" id="demo">
       <h2><span class="num">07</span> 장 시연</h2>
@@ -1962,7 +1279,7 @@ module tb_p01_top;
         .clk(clk), .btnC(btnC), .uart_rxd(rxd), .sw(sw), .uart_txd(txd),
         .led(led), .seg(seg), .an(an), .dp(dp));
 
-    // TX 핀 복조 (00장 uart_rx 그대로)
+    // TX 핀 복조 (1-1 uart_rx 그대로)
     wire [7:0] got;
     wire got_valid, fe, ov;
     reg mon_resetn = 0;
@@ -2182,7 +1499,7 @@ if __name__ == "__main__":
 </div>
 <script>
 window.COURSE={
- "title": "Basys3 소형 NPU 실습 (프로젝트판)",
+ "title": "Basys3 소형 NPU 실습",
  "chapters": [
   {
    "id": "p01",

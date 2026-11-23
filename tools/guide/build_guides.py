@@ -686,79 +686,78 @@ python3 --version</code></pre></div>
 
 # ── index.html · course.json · 현황표 ────────────────────────────────────────
 def update_index(text, chs):
-    by = {c["number"]: c for c in chs}
-
-    def row(m):
-        r, num = m.group(0), int(m.group(1))
-        c = by.get(num)
-        if not c:
-            return r
-        cells = re.findall(r"<td>(.*?)</td>", r)
-        title = re.sub(r"<[^>]+>", "", cells[1])
-        cells[1] = f'<a href="{fname(c)}">{title}</a>'
-        cells[3] = f'<span class="badge badge-ok">{c["version"]} 완료</span>'
-        if num >= 13:  # 신규 구현 장: RTL 칸을 실제 실행 로그로 판정 (00~12장은 원본에서 이전한 RTL)
-            lp = latest(c["evidence"]["rtl_log"])
-            kind = c["evidence"].get("kind")
-            if kind in ("static", "host"):
-                pat = c["evidence"].get("gate_pattern", r"STATIC_CHECK_(PASS|FAIL)")
-                hits = re.findall(pat, rd(lp)) if lp else []
-                ok = bool(hits) and "FAIL" not in hits
-                what = "정적 검사" if kind == "static" else "PC 시험"
-                cells[4] = f'<span class="badge badge-ok">{what} 통과</span>' if ok else f'<span class="badge badge-todo">{what} 대기</span>'
-            else:
-                ok = bool(lp) and "RTL_SIM_PASS" in rd(lp)
-                cells[4] = '<span class="badge badge-ok">RTL 시뮬 통과</span>' if ok else '<span class="badge badge-todo">RTL 시뮬 대기</span>'
-        return "<tr>" + "".join(f"<td>{x}</td>" for x in cells) + "</tr>"
-
-    text = re.sub(r"<tr><td>(\d\d)</td>.*?</tr>", row, text)
-    # 01 전체 테크트리 절 맨 위에 과정 도면 (svg-flow-editor 원본)
-    figs = f"""<!-- diagrams:start -->
-      <p>과정 도면 (원본 <a href="{FLOW}.json"><code>{FLOW}.json</code></a>, <a href="{TREE}.json"><code>{TREE}.json</code></a> · <a href="{EDITOR_URL}">svg-flow-editor</a>에서 편집 후 <code>python3 tools/diagram/export_svg.py</code>):</p>
-      <div class="figure-wrap">{diagram_svg(FLOW, "course-flow", "제3부 00~31장 전체 흐름")}</div>
-      <div class="figure-wrap">{diagram_svg(TREE, "module-tree", "00~12장 모듈 테크트리")}</div>
-      <!-- diagrams:end -->"""
-    text = re.sub(r"\n?\s*<!-- diagrams:start -->.*?<!-- diagrams:end -->", "", text, flags=re.S)
-    text = re.sub(r'(<section class="section" id="techtree">\s*<h2>.*?</h2>)', lambda m: m.group(1) + "\n      " + figs, text, count=1, flags=re.S)
-    if ".figure-wrap{" not in text:
-        text = text.replace("</style>", ".figure-wrap{overflow-x:auto}\n.figure-wrap svg{width:100%;height:auto;min-width:860px}\n</style>", 1)
-    # 00 교육과정 개요 절 맨 위에 장 프로젝트(개편판) 바로가기 — 목록은 course_projects.json·pNN/project.json (tools/guide/build_projects.py)
+    """INDEX: 지금의 과정(장 프로젝트 1~6장)만 싣는다. 머리·꼬리 틀은 기존 index.html을 쓰고 본문을 통째로 새로 만든다."""
     cp = json.loads(rd("course_projects.json"))
-    rows = ""
+    rows, nav = "", []
     for q in cp["projects"]:
         pj = os.path.join(ROOT, q["id"], "project.json")
         if not os.path.exists(pj):
-            rows += f'<tr><td style="white-space:nowrap">{q["number"]}장</td><td>{html.escape(q["title"])}</td><td>—</td><td>{html.escape(q["subjects"])}</td><td>준비 중</td></tr>'
             continue
         pp = json.loads(rd(os.path.relpath(pj, ROOT)))
         page = f'{pp["id"]}_{pp["slug"]}_{pp["version"]}.html'
-        rows += (f'<tr><td style="white-space:nowrap">{q["number"]}장</td><td><a href="{page}">{html.escape(q["title"])}</a></td><td style="white-space:nowrap">{q["days"]}일</td>'
-                 f'<td>구 {html.escape(q["subjects"])}장</td><td>{re.sub(r"<[^>]+>", "", pp["demo"])}</td></tr>')
-    pr_block = f"""<!-- projects:start -->
-      <p><strong>장 프로젝트판 (2026-11 개편)</strong> — 장마다 보드 Top 하나를 키워 가며 장 끝에서 보드 시연합니다. 아래 장 페이지를 순서대로 따라가면 됩니다. 00~31장 안내서는 서브젝트를 따로 실습할 때 보는 자료입니다.</p>
-      <div class="table-wrap"><table>
-        <thead><tr><th>장</th><th>프로젝트</th><th>편성</th><th>서브젝트</th><th>장 시연 (보드)</th></tr></thead>
-        <tbody>{rows}</tbody>
-      </table></div>
-      <!-- projects:end -->"""
-    text = re.sub(r"\n?\s*<!-- projects:start -->.*?<!-- projects:end -->", "", text, flags=re.S)
-    text = re.sub(r'(<section class="section" id="intro">\s*<h2>.*?</h2>)', lambda m: m.group(1) + "\n      " + pr_block, text, count=1, flags=re.S)
-    # 00 교육과정 개요 절 끝에 제1부(선수 과정) 바로가기 — 목록은 part01/course.json (tools/part01/build_part01.py)
+        nav.append({"id": q["id"], "number": q["number"], "title": q["title"], "file": page})
+        rows += (f'<tr><td style="white-space:nowrap">{q["number"]}장</td><td><a href="{page}">{html.escape(q["title"])}</a></td>'
+                 f'<td style="white-space:nowrap">{q["days"]}일</td><td>{re.sub(r"<[^>]+>", "", pp["demo"])}</td></tr>')
     p1 = json.loads(rd("part01/course.json"))
     p1_links = " · ".join(f'<a href="part01/{c["file"]}">{c["number"]} {html.escape(c["title"])}</a>' for c in p1["chapters"])
-    p1_block = f"""<!-- part01:start -->
+    main = f"""
+    <section class="section" id="intro">
+      <h2><span class="num">00</span>교육과정 개요</h2>
+      <p>Basys3 보드 하나로 작은 NPU를 처음부터 만들어 보는 과정입니다. 곱셈기 하나에서 출발해 4뉴런 추론, 손글씨 숫자 분류, MicroBlaze V SoC와 응용까지 차례로 쌓아 갑니다.</p>
+      <p>장 하나가 프로젝트 하나입니다. 장마다 보드 Top 하나를 조금씩 키워 가고, 서브젝트를 끝낼 때마다 보드에서 확인한 뒤 장 끝에서 전체를 시연합니다.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>장</th><th>프로젝트</th><th style="white-space:nowrap">기간</th><th>장 시연 (보드)</th></tr></thead>
+        <tbody>{rows}</tbody>
+      </table></div>
+      <!-- part01:start -->
       <p><strong>선수 과정 · <a href="part01/index.html">{html.escape(p1["title"])}</a></strong> — CPU·BRAM·AXI 주변장치에서 사용자 Top까지: {p1_links}</p>
-      <!-- part01:end -->"""
-    text = re.sub(r"\n?\s*<!-- part01:start -->.*?<!-- part01:end -->", "", text, flags=re.S)
-    text = re.sub(r'(<section class="section" id="intro">.*?)(\n\s*</section>)', lambda m: m.group(1) + "\n      " + p1_block + m.group(2), text, count=1, flags=re.S)
-    # 장식용 칩 제거 (STANDARD 3절, 헤더 높이 160~220px)
-    text = re.sub(r'\n\s*<div class="chips">.*?</div>', "", text, count=1, flags=re.S)
-    if ".table-wrap{" not in text:
-        text = text.replace("</style>", ".table-wrap{overflow-x:auto}\n.table-wrap>table{min-width:620px}\n.section :not(pre)>code{overflow-wrap:anywhere}\n.codebar{gap:8px}\n.codebar span{min-width:0;overflow-wrap:anywhere}\n.access-skip{position:absolute;left:-9999px;top:0}\n.access-skip:focus{left:12px;top:12px;z-index:1003;background:#fff;color:#15171c;padding:6px 10px}\n.nw code{white-space:nowrap;overflow-wrap:normal}\n</style>", 1)
+      <!-- part01:end -->
+    </section>
+
+    <section class="section" id="how">
+      <h2><span class="num">01</span>진행 방법</h2>
+      <p>모든 장이 같은 순서로 진행됩니다. 서브젝트마다 아래 네 단계를 반복합니다.</p>
+      <ol>
+        <li><strong>코드 작성</strong> — 서브젝트 절의 '작성할 코드'를 경로 그대로 입력합니다.</li>
+        <li><strong>시뮬레이션</strong> — 그 서브젝트까지 넣은 장 Top을 시뮬레이션합니다. 보드에 보낼 명령을 그대로 넣고 응답을 비교합니다.</li>
+        <li><strong>비트스트림</strong> — 같은 단계의 비트스트림을 만들어 보드에 내려받습니다.</li>
+        <li><strong>보드 확인</strong> — PC에서 명령을 보내고, UART 응답과 LED·7세그먼트를 안내서의 표와 비교합니다.</li>
+      </ol>
+      <div class="codeblock"><div class="codebar"><span>터미널 · 저장소 루트 (1장 두 번째 서브젝트의 예)</span></div>
+        <pre><code>bash p01/scripts/run_sim.sh 2                                                  # 시뮬레이션
+vivado -mode batch -nojournal -source p01/vivado/build_p01.tcl -tclargs 2      # 비트스트림
+python3 p01/host/p01_send.py &lt;포트&gt; M 3 4                                      # 보드로 명령 보내기</code></pre></div>
+      <p>5장과 6장은 MicroBlaze V가 들어가므로, 비트스트림을 한 번 만든 뒤에는 프로그램(ELF)만 바꿔 가며 확인합니다.</p>
+    </section>
+
+    <section class="section" id="prep">
+      <h2><span class="num">02</span>준비물</h2>
+      <ul>
+        <li>Digilent Basys3 보드와 USB 케이블 하나 (전원·JTAG·UART 겸용)</li>
+        <li>Vivado 2024.2 — 합성, 시뮬레이션, 비트스트림. 5·6장은 Vitis 2024.2도 씁니다.</li>
+        <li><code>python3</code>와 <code>pyserial</code> — PC에서 보드로 명령을 보냅니다 (<code>pip install pyserial</code>).</li>
+        <li>시리얼 설정은 115200 bps, 8N1입니다.</li>
+      </ul>
+    </section>
+
+    <section class="section" id="links">
+      <h2><span class="num">03</span>참고 자료</h2>
+      <ul>
+        <li><a href="mini_npu/constraints/basys3_npu.xdc">Basys3 핀 제약 (XDC)</a></li>
+        <li><a href="mini_npu/README.md">통합 NPU 명령·모듈 설명</a></li>
+        <li><a href="https://github.com/Yuul-Jung/amd_soc_npu" target="_blank" rel="noopener">저장소 (전체 코드)</a></li>
+      </ul>
+    </section>
+
+    """
+    text = re.sub(r'(<main class="content" id="main-content">).*?(<div class="chapter-links")', lambda m: m.group(1) + "\n" + main + m.group(2), text, count=1, flags=re.S)
+    text = re.sub(r'<p class="kicker">.*?</p>\s*<h1>.*?</h1>\s*<p>.*?</p>',
+                  '<p class="kicker">BASYS3 · RTL · NPU</p>\n    <h1>소형 NPU 제작 학습안내서</h1>\n    '
+                  '<p>UART 계산기 → 4뉴런 NPU → 손글씨 분류 → 784 가속기 → MicroBlaze V SoC → 응용</p>', text, count=1, flags=re.S)
+    text = re.sub(r"<title>.*?</title>", "<title>소형 NPU 제작 학습안내서 · Basys3</title>", text, count=1, flags=re.S)
     text = wrap_tables(text)
-    # 책장 사진은 assets/education/hero-bookshelf.jpg (site.css) 를 쓴다. 외부 주소 덮어쓰기 제거.
-    text = re.sub(r"^\.hero:before\{background-image:[^\n]*raw\.githubusercontent[^\n]*\n", "", text, flags=re.M)
-    return re.sub(r"window\.COURSE=\{.*?\n\};", course_js(chs).rstrip(";") + ";", text, flags=re.S)
+    data = {"title": cp["title"], "short_title": "BASYS3 · SMALL NPU", "home_label": "전체 학습 안내서", "chapters": nav}
+    return re.sub(r"window\.COURSE=\{.*?\n\};", lambda m: "window.COURSE=" + json.dumps(data, ensure_ascii=False, indent=1) + ";", text, flags=re.S)
 
 
 def update_course(text, chs):
@@ -776,13 +775,13 @@ SYM = {"pass": "✅", "fail": "❌", "todo": "⏳", "na": "—"}
 
 def status_md(chs, all_gates, course):
     cols = ["HOST_MODEL_PASS", "RTL_SIM_PASS", "SYNTH_TIMING_PASS", "TIMING_SIM_PASS", "BOARD_PASS"]
-    out = ["# 학습안내서 현황 (자동 생성)", "",
+    out = ["# 서브젝트 단독 검증 현황 (자동 생성)", "",
            "`python3 tools/guide/build_guides.py`가 `chNN/chapter.json`과 `chNN/validation/` 증거로 만든다. 직접 수정하지 않는다.", "",
            "✅ 통과 · ❌ 실패 · ⏳ 실행 대기/미검증 · — 해당 없음", "",
            "**13~31장 줄은 웹 판 RTL(`chNN/rtl`) 기준이다.** 장 프로젝트판(3~6장 페이지)이 채택한 코드는 VS Code 판 `part03/chNN`이고, "
            "그 판정은 각 장 페이지 게이트와 `part03/ch27/docs/VSCODE_REPORT_A_20261120.md` 대조표에 있다 "
            "(예: 26·29장 OOC는 웹 판 ❌, 채택한 VS Code 판 통과). 00~12장은 판이 하나다.", "",
-           "| 장 | 제목 | 안내서 | HOST | RTL_SIM | SYNTH_TIMING | TIMING_SIM | BOARD |",
+           "| 번호 | 제목 | 폴더 | HOST | RTL_SIM | SYNTH_TIMING | TIMING_SIM | BOARD |",
            "|---|---|---|---|---|---|---|---|"]
     have = {c["id"]: c for c in chs}
     for ch in course["chapters"]:
@@ -792,7 +791,7 @@ def status_md(chs, all_gates, course):
             continue
         g = {name: cls for cls, name, _ in all_gates[c["id"]]}
         cells = [SYM[g[x]] if x in g else "—" for x in cols]
-        out.append(f"| {c['number']:02d} | {c['nav_title']} | [{fname(c)}](../{fname(c)}) | " + " | ".join(cells) + " |")
+        out.append(f"| {c['number']:02d} | {c['nav_title']} | `{c['id']}/` | " + " | ".join(cells) + " |")
     return "\n".join(out) + "\n"
 
 
@@ -802,19 +801,14 @@ def main(check):
     origin = module_origin(chs)
     check_techtree(TREE, chs, origin)
     outputs, all_gates = {}, {}
-    for c in chs:
-        h, g = build(c, chs, origin, by_id)
-        outputs[fname(c)] = h
+    for c in chs:          # 장 단위 옛 안내서(chNN_*.html)는 내지 않는다. 게이트 판정만 서브젝트 현황에 쓴다.
+        _, g = build(c, chs, origin, by_id)
         all_gates[c["id"]] = g
     course_text = rd("course.json")
     outputs["course.json"] = update_course(course_text, chs)
     outputs["index.html"] = update_index(rd("index.html"), chs)
     outputs["docs/GUIDE_STATUS.md"] = status_md(chs, all_gates, json.loads(outputs["course.json"]))
-    stale = []
-    for c in chs:   # 같은 장의 이전 버전 파일 (버전 규칙: 이전 파일 삭제)
-        for p in glob.glob(os.path.join(ROOT, f"{c['id']}_*_v*.html")):
-            if os.path.basename(p) != fname(c):
-                stale.append(os.path.relpath(p, ROOT))
+    stale = [os.path.relpath(p, ROOT) for p in glob.glob(os.path.join(ROOT, "ch[0-9][0-9]_*_v*.html"))]
     if check:
         diff = [p for p, t in outputs.items()
                 if not os.path.exists(os.path.join(ROOT, p)) or rd(p) != t] + [f"{p} (삭제 필요)" for p in stale]

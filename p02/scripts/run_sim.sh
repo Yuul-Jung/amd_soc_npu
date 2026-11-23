@@ -1,17 +1,19 @@
 #!/usr/bin/env bash
-# 2장 보드 Top RTL 시뮬레이션: 기준 모델 → 사례 파일 → 시뮬레이터(SIM=iverilog 기본 | SIM=xsim, STAGE 1~8) → 로그 (p02/validation/rtl_sim_YYYYMMDD.log)
+# 2장 보드 Top RTL 시뮬레이션: 기준 모델 → 사례 파일 → 시뮬레이터(STAGE마다) → 판정
 set -euo pipefail
 root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$root"
 build="$(mktemp -d "${TMPDIR:-/tmp}/p02.XXXXXXXX")"
 trap 'rm -rf "$build"' EXIT
-source tools/sim/sim_top.sh          # SIM=iverilog(기본, CI) | SIM=xsim(Vivado 시뮬레이터)
-if [ "${SIM:-iverilog}" = xsim ]; then log="p02/validation/xsim_rtl_$(date -u +%Y%m%d).log"; else log="p02/validation/rtl_sim_$(date -u +%Y%m%d).log"; fi
+source tools/sim/sim_top.sh
+stages="${1:-1 2 3 4 5 6 7 8}"                 # 인자 없으면 전 STAGE, 숫자를 주면 그 STAGE만 (예: run_sim.sh 2)
+if [ "$(sim_kind)" = xsim ]; then log="p02/validation/xsim_rtl_$(date -u +%Y%m%d).log"; else log="p02/validation/rtl_sim_$(date -u +%Y%m%d).log"; fi
+[ $# -gt 0 ] && log="$build/stage.log"   # 한 STAGE만 돌릴 때는 기록 파일을 남기지 않는다
 {
   echo "# p02 RTL simulation $(date -u +%Y-%m-%dT%H:%MZ)"
   echo "# tool: $(sim_tool_version)"
   python3 p02/reference/p02_model.py
-  for stage in 1 2 3 4 5 6 7 8; do      # 서브젝트마다 보드 확인용 빌드 (STAGE = 끝낸 서브젝트 수)
+  for stage in $stages; do      # STAGE = 끝낸 서브젝트 수
     echo "## STAGE=$stage"
     sim_top tb_p02_top "$stage" "$build" \
       common/rtl/uart_rx.v common/rtl/uart_tx.v common/rtl/uart_core.v \
@@ -25,11 +27,13 @@ if [ "${SIM:-iverilog}" = xsim ]; then log="p02/validation/xsim_rtl_$(date -u +%
       p02/rtl/p02_view.v p02/rtl/basys3_p02_top.v p02/tb/tb_p02_top.sv
   done
 } 2>&1 | sed "s|$root|<repo>|g" > "$build/out.log" || true
-if [ "$(grep -c '^P02_TOP_RTL_SIM_PASS' "$build/out.log")" = 8 ] && ! grep -qiE 'FATAL|_FAIL|^ERROR' "$build/out.log"; then
-  echo "RTL_SIM_PASS stages=8" >> "$build/out.log"
+want=$(echo $stages | wc -w)
+if [ "$(grep -c '^P02_TOP_RTL_SIM_PASS' "$build/out.log")" = "$want" ] && ! grep -qiE 'FATAL|_FAIL|^ERROR' "$build/out.log"; then
+  echo "RTL_SIM_PASS stages=$want" >> "$build/out.log"
 else
   echo "RTL_SIM_FAIL" >> "$build/out.log"
 fi
-cp "$build/out.log" "$log"
-grep -E '^(PYTHON_P02_(SELF|VEC)|P02_TOP|RTL_SIM|FATAL)' "$log"
+[ "$log" = "$build/stage.log" ] || cp "$build/out.log" "$log"
+log="$build/out.log"
+if [ $# -gt 0 ]; then grep -E '^(P02_CASE_PASS|P02_TOP|RTL_SIM|FATAL)' "$log"; else grep -E '^(PYTHON_P02_(SELF|VEC)|P02_TOP|RTL_SIM|FATAL)' "$log"; fi
 grep -q '^RTL_SIM_PASS' "$log"

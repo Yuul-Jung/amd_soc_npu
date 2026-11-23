@@ -1,6 +1,6 @@
 // 2장 LED·7세그먼트.
 //   STAGE 1~7: 콘솔 마지막 결과 아래 16비트 → LED 16개 + 7세그먼트 16진수 4자리 (1장 p01_hex4_display)
-//   STAGE 8  : 12장 npu_display_controller → LED[3:0] 클래스 원-핫, [13] busy, [14] 끝남, [15] 오류, 7세그먼트 클래스
+//   STAGE 8  : npu_display_controller → LED[3:0] 클래스 원-핫, [13] busy, [14] 끝남, [15] 오류, 7세그먼트 클래스
 `timescale 1ns/1ps
 `default_nettype none
 module p02_view #(

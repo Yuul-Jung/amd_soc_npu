@@ -1,8 +1,8 @@
-// 3장 8×8 MNIST 묶음: 서브젝트 모듈(VS Code 판 구13~16장)을 STAGE만큼 쌓는다. 모듈 파일은 고치지 않는다.
-//   3-1 (STAGE>=1) p3_frame64_buffer: 64원소 INT8 프레임 (구 13장)
-//   3-2 (STAGE>=2) p3_group10_core 64→10: 4PE 3그룹, 점수·argmax (구 14장)        → 층 0
-//   3-3 (STAGE>=3) p3_group10_core #(64,8)·#(8,10): 같은 코어를 모양만 바꿔 (구 15장) → 층 1·2
-//   3-4 (STAGE>=4) p3_mlp_64_8_10: 1층 → ReLU·재양자화 → 2층 (구 16장)             → 층 1·2를 함께 받음
+// 3장 8×8 MNIST 묶음: 서브젝트 모듈을 STAGE만큼 쌓는다.
+//   3-1 (STAGE>=1) p3_frame64_buffer: 64원소 INT8 프레임
+//   3-2 (STAGE>=2) p3_group10_core 64→10: 4PE 3그룹, 점수·argmax        → 층 0
+//   3-3 (STAGE>=3) p3_group10_core #(64,8)·#(8,10): 같은 코어를 모양만 바꿔 → 층 1·2
+//   3-4 (STAGE>=4) p3_mlp_64_8_10: 1층 → ReLU·재양자화 → 2층             → 층 1·2를 함께 받음
 // 프레임 버퍼 읽기 포트 하나를 콘솔(화소 읽기)과 코어들이 나눠 쓴다. 한 번에 하나만 돈다.
 `timescale 1ns/1ps
 `default_nettype none

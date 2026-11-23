@@ -1,5 +1,5 @@
 # 4장 보드 Top (784 가속기 설계 공간): STAGE 1~4 각각 합성 → 구현 → 타이밍 판정 → 비트스트림.
-# STAGE = 끝낸 서브젝트 수 (1 = 4-1 정밀도 … 4 = 4-4 PE 비교). 서브젝트 모듈은 구06장과 VS Code 판 part03/ 파일 그대로.
+# STAGE = 끝낸 서브젝트 수 (1 = 4-1 정밀도 … 4 = 4-4 PE 비교).
 # 실행 (저장소 루트): vivado -mode batch -nojournal -source p04/vivado/build_p04.tcl
 #   한 단계만: vivado -mode batch -nojournal -source p04/vivado/build_p04.tcl -tclargs 3
 # 결과: build/vivado/p04_s<STAGE>/ (timing_route.rpt, util_route.rpt, drc_route.rpt, basys3_p04_top.bit)

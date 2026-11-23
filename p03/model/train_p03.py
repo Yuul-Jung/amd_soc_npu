@@ -4,7 +4,7 @@
   python3 p03/model/train_p03.py            # 학습 → p03/model/p03_models.json, 평가 줄 출력
 
 전처리 (보드와 같음, 정수만):
-  28×28 → 가운데 24×24 → 3×3 칸 평균 (합 + 4) // 9 → 0..255 → 13장 규칙 sat_int8(round_shift_away(p, 1)) → 0..127
+  28×28 → 가운데 24×24 → 3×3 칸 평균 (합 + 4) // 9 → 0..255 → 3-1 규칙 sat_int8(round_shift_away(p, 1)) → 0..127
 모델 두 개 (같은 입력):
   선형 64→10        : 3-2 서브젝트 (p3_group10_core 64→10). 점수 = x·W + b
   MLP 64→8→10       : 3-4 서브젝트 (p3_mlp_64_8_10). 은닉 = sat_int8(round_shift_away(ReLU(x·W1 + b1), shift))

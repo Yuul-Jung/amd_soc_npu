@@ -1,11 +1,11 @@
 // 2장 NPU 묶음: 서브젝트 모듈을 STAGE(끝낸 서브젝트 수)만큼 실제로 쌓는다.
-//   2-1 (STAGE>=1) bram_sync_buffer 5개: X[64], W0~W3[64] (구 04장)       → 명령 x·w 되읽기
-//   2-2 (STAGE>=2) fixed_quantizer 32→8비트, SHIFT 8 (구 05장)             → 명령 Q
-//   2-3 (STAGE>=3) vector_dot_core: X·W0 (구 07장, 안에 1장 mac_core)       → 명령 D
-//   2-4 (STAGE>=4) pe_array4: X·W0~W3 (구 08장, 안에 07장 내적 4개)          → 명령 P
-//   2-5 (STAGE>=5) dense_layer4: + Bias, ReLU, 16비트 양자화 (구 09장)       → 명령 L
-//   2-6 (STAGE>=6) npu_core: 자체 BRAM + Dense (구 10장)                    → 명령 N
-//   2-7 (STAGE>=7) 엔진 포트: 11장 명령 해석기가 npu_core를 12장 엔진처럼 쓴다 (점수 41비트 확장, argmax)
+//   2-1 (STAGE>=1) bram_sync_buffer 5개: X[64], W0~W3[64]       → 명령 x·w 되읽기
+//   2-2 (STAGE>=2) fixed_quantizer 32→8비트, SHIFT 8             → 명령 Q
+//   2-3 (STAGE>=3) vector_dot_core: X·W0 (안에 1-2 mac_core)       → 명령 D
+//   2-4 (STAGE>=4) pe_array4: X·W0~W3 (안에 2-3 내적 4개)          → 명령 P
+//   2-5 (STAGE>=5) dense_layer4: + Bias, ReLU, 16비트 양자화       → 명령 L
+//   2-6 (STAGE>=6) npu_core: 자체 BRAM + Dense                    → 명령 N
+//   2-7 (STAGE>=7) 엔진 포트: 명령 해석기가 npu_core를 통합 엔진처럼 쓴다 (점수 41비트 확장, argmax)
 // D·P·L은 묶음의 BRAM에서 한 원소씩 읽어 각 모듈의 ready/valid로 넣는다. npu_core는 자체 BRAM을 쓰므로
 // X·W 쓰기는 묶음 BRAM과 npu_core에 같이 들어간다. Bias는 묶음 레지스터 4개.
 `timescale 1ns/1ps
@@ -28,7 +28,7 @@ module p02_bank #(
     output reg                op_error_o,
     output reg  [159:0]       res_o,
     output reg  [3:0]         flags_o,
-    // 엔진 포트 (11장 명령 해석기, STAGE>=7). owner = 1이면 메모리 쓰기·코어 실행을 엔진 포트가 가진다
+    // 엔진 포트 (명령 해석기, STAGE>=7). owner = 1이면 메모리 쓰기·코어 실행을 엔진 포트가 가진다
     input  wire               owner_engine_i,
     input  wire               e_start_i,
     input  wire [6:0]         e_length_i,
@@ -159,13 +159,13 @@ module p02_bank #(
         assign core_err = 1'b0; assign core_res = 64'd0; assign core_ov = 4'd0;
     end endgenerate
 
-    // ---------------- 2-7: 엔진 포트 (npu_core를 12장 엔진 모양으로) ----------------
+    // ---------------- 2-7: 엔진 포트 (npu_core를 통합 엔진 모양으로) ----------------
     generate if (STAGE >= 7) begin : g_eng
         wire signed [15:0] r0 = core_res[15:0],  r1 = core_res[31:16];
         wire signed [15:0] r2 = core_res[47:32], r3 = core_res[63:48];
         reg  [1:0] best;
         reg  signed [15:0] best_v;
-        always @(*) begin                         // 12장 엔진과 같은 규칙: 큰 값, 같으면 앞 번호
+        always @(*) begin                         // 통합 엔진과 같은 규칙: 큰 값, 같으면 앞 번호
             best = 2'd0; best_v = r0;
             if (r1 > best_v) begin best = 2'd1; best_v = r1; end
             if (r2 > best_v) begin best = 2'd2; best_v = r2; end

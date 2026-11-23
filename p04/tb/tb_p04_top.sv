@@ -18,7 +18,7 @@ module tb_p04_top;
         .clk(clk), .btnC(btnC), .uart_rxd(rxd), .uart_txd(txd),
         .led(led), .seg(seg), .an(an), .dp(dp));
 
-    // TX 핀 복조 (00장 uart_rx 그대로)
+    // TX 핀 복조 (1-1 uart_rx 그대로)
     wire [7:0] got;
     wire got_valid, fe, ov;
     reg mon_resetn = 0;

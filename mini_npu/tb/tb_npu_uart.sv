@@ -1,4 +1,4 @@
-// (추가) CPU/AXI 없이 실제 UART RX 핀→BRAM→DSP 4PE→UART TX 핀 파형 검증.
+// CPU/AXI 없이 실제 UART RX 핀→BRAM→DSP 4PE→UART TX 핀 파형 검증.
 `timescale 1ns/1ps
 module tb_npu_uart;
     localparam integer CPB=868;
@@ -57,7 +57,7 @@ module tb_npu_uart;
             gold_hex=hexchar((ext>>((10-pos)*4))&4'hf);
         end
     endfunction
-    // (추가) 실제 TX 라인에서 복조한 ASCII HEX를 signed 41-bit 값으로 변환.
+    // 실제 TX 라인에서 복조한 ASCII HEX를 signed 41-bit 값으로 변환.
     // CSV에 골든값을 복사하면 UART 검증 증거가 되지 않으므로 디코딩값을 기록.
     function automatic signed [40:0] decoded_score(input integer lane);
         integer p;
@@ -78,7 +78,7 @@ module tb_npu_uart;
     endfunction
 
     integer scenario,exp_cls;
-    // (추가) +SHORT: 배선 후 타이밍 시뮬레이션용 짧은 시나리오(분류 1 · Bias 변경 뒤 재분류 1 · ERR 1).
+    // +SHORT: 배선 후 타이밍 시뮬레이션용 짧은 시나리오(분류 1 · Bias 변경 뒤 재분류 1 · ERR 1).
     // 같은 넷리스트·같은 UART 경로를 쓰고 응답 수만 6 → 2로 줄인다 (UART 송신 시간이 대부분).
     reg short_mode=1'b0;
     reg signed [40:0] exp_score;
@@ -92,7 +92,7 @@ module tb_npu_uart;
                 exp_cls=(c_count==edit_idx)?3:scenario;
                 if(chars[1]!==("0"+exp_cls))$fatal(1,"UART CLASS mismatch");
                 if(chars[2]!==":")$fatal(1,"Bad UART result header");
-                // (추가) 응답 점수 구분자와 CR도 실제 비트 복조값으로 검증.
+                // 응답 점수 구분자와 CR도 실제 비트 복조값으로 검증.
                 if(chars[14]!=="," || chars[26]!=="," || chars[38]!=="," ||
                    chars[50]!==8'h0d)$fatal(1,"UART score separators or CR mismatch");
                 for(i=0;i<4;i=i+1)begin
@@ -102,7 +102,7 @@ module tb_npu_uart;
                             $fatal(1,"UART SCORE mismatch case=%0d lane=%0d hex=%0d",c_count,i,j);
                 end
                 if(led[exp_cls]!==1'b1)$fatal(1,"LED class mismatch");
-                // (변경) 예상값이 아니라 TX 비트파형에서 실제 수신한 4개 점수 기록.
+                // 예상값이 아니라 TX 비트파형에서 실제 수신한 4개 점수 기록.
                 $fdisplay(csv_file,"%0d,%0d,%0d,%0d,%0d,%0d",(c_count==edit_idx)?5:c_count,exp_cls,
                     decoded_score(0),decoded_score(1),
                     decoded_score(2),decoded_score(3));
@@ -129,7 +129,7 @@ module tb_npu_uart;
             wait(c_count==k+1);
         end
         if(!short_mode)begin send_byte("0");wait(c_count==5);end
-        // 11장: Bias3=+10으로 실제 모델 데이터를 변경한 뒤 재추론.
+        // 2-7: Bias3=+10으로 실제 모델 데이터를 변경한 뒤 재추론.
         send_byte("B");send_byte(8'h03);
         send_byte(0);send_byte(0);send_byte(0);send_byte(0);send_byte(10);
         wait(ack_count==1);

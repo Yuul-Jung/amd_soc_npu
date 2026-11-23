@@ -1,4 +1,4 @@
-// (추가) FND와 LED 표현 정책은 Top이 아닌 Controller에서 처리.
+// FND와 LED 표현 정책은 Top이 아닌 Controller에서 처리.
 module npu_display_controller(
     input wire clk,resetn,
     input wire [1:0] class_i,

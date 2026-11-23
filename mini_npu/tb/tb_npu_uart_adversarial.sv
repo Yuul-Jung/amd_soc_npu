@@ -1,4 +1,4 @@
-// (추가) 11·12장 통합 Top 적대적 UART 시험(실제 RX 핀 구동, TX 핀 복조).
+// 통합 Top 적대적 UART 시험(실제 RX 핀 구동, TX 핀 복조).
 // 잘못된 명령·주소·길이, CR/LF 무시, 응답 전송 중 다음 명령 수신(FIFO 버퍼링),
 // 연속 명령 폭주, 응답 전송 중 Reset, 명령 중단(Timeout 부재 관측), Framing error.
 `timescale 1ns/1ps

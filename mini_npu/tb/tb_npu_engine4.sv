@@ -1,4 +1,4 @@
-// (추가) 실제 DSP 등록 곱→BRAM→4PE 누적 NPU 정수 독립 검증.
+// 실제 DSP 등록 곱→BRAM→4PE 누적 NPU 정수 독립 검증.
 `timescale 1ns/1ps
 module tb_npu_engine4;
     reg clk=0,resetn=0,start=0,xwe=0,wwe=0,bwe=0;

@@ -1,5 +1,5 @@
 # 3장 보드 Top (8×8 MNIST, CPU 없음): STAGE 1~4 각각 합성 → 구현 → 타이밍 판정 → 비트스트림.
-# STAGE = 끝낸 서브젝트 수 (1 = 3-1 프레임 … 4 = 3-4 MLP). 서브젝트 모듈은 VS Code 판 part03/ 파일 그대로.
+# STAGE = 끝낸 서브젝트 수 (1 = 3-1 프레임 … 4 = 3-4 MLP).
 # 실행 (저장소 루트): vivado -mode batch -nojournal -source p03/vivado/build_p03.tcl
 #   한 단계만: vivado -mode batch -nojournal -source p03/vivado/build_p03.tcl -tclargs 3
 # 결과: build/vivado/p03_s<STAGE>/ (timing_route.rpt, util_route.rpt, drc_route.rpt, basys3_p03_top.bit)

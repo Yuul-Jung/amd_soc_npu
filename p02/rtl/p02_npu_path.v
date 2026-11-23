@@ -1,6 +1,6 @@
-// 2장 NPU 경로 (2-7부터): 11장 명령 해석기 + 엔진 선택.
+// 2장 NPU 경로 (2-7부터): 명령 해석기 + 엔진 선택.
 //   2-7 (STAGE 7): 엔진 = 누적 npu_core (p02_bank 엔진 포트). 점수는 Dense 결과(ReLU·16비트)를 41비트로 늘린 값.
-//   2-8 (STAGE 8): 12장 npu_engine4를 더한다. sw[3] = 0 누적 core, 1 = 12장 엔진(원시 점수, ReLU 없음).
+//   2-8 (STAGE 8): npu_engine4를 더한다. sw[3] = 0 누적 core, 1 = 통합 엔진(원시 점수, ReLU 없음).
 //                  두 엔진은 같은 쓰기·시작을 함께 받으므로 스위치를 바꿔도 다시 적재할 필요가 없다.
 `timescale 1ns/1ps
 `default_nettype none
@@ -10,7 +10,7 @@ module p02_npu_path #(
     input  wire               clk,
     input  wire               resetn,
     input  wire               sel_engine4_i,     // 보드 sw[3] (비동기)
-    // UART (p02_uart_switch의 11장 쪽)
+    // UART (p02_uart_switch의 명령 해석기 쪽)
     input  wire [7:0]         rx_data_i,
     input  wire               rx_valid_i,
     output wire               rx_ready_o,
@@ -85,12 +85,12 @@ module p02_npu_path #(
             assign c4 = 2'd0; assign s4 = 164'd0;
         end
 
-        // 쓰기는 두 엔진이 모두 받을 수 있을 때만 (11장 해석기는 load_ready를 보고 쓴다)
+        // 쓰기는 두 엔진이 모두 받을 수 있을 때만 (명령 해석기는 load_ready를 보고 쓴다)
         assign load_ready = e_load_ready_i && r4;
         assign busy   = use4 ? b4 : e_busy_i;
-        // (변경 2026-11-23) 고른 엔진의 완료·오류·클래스·점수를 레지스터 한 단에 받은 뒤 11장 해석기로 넘긴다.
-        // 이전에는 npu_core 결과 → p02_bank 조합 argmax → 엔진 선택 → 해석기 응답 버퍼가 한 클록 경로(13단, 10.07 ns)여서
-        // STAGE 8 배선에서 WNS -0.103 ns였다. 응답이 1클록 늦어질 뿐 값은 같다 (done·error는 1클록 펄스 그대로).
+        // 고른 엔진의 완료·오류·클래스·점수를 레지스터 한 단에 받은 뒤 명령 해석기로 넘긴다.
+        // npu_core 결과 → 조합 argmax → 엔진 선택 → 해석기 응답 버퍼를 한 클록에 묶으면 100 MHz를 넘기므로 여기서 끊는다.
+        // 응답이 1클록 늦을 뿐 값은 같다 (done·error는 1클록 펄스 그대로).
         reg          done_q, err_q;
         reg [1:0]    cls_r;
         reg [163:0]  scores_r;
