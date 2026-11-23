@@ -1,4 +1,4 @@
-// (추가) 준비 단계 UART Echo controller: pure combinational stream transfer.
+// 준비 단계 UART Echo controller: pure combinational stream transfer.
 module uart_echo_controller(
     input wire [7:0] rx_data_i,
     input wire rx_valid_i,

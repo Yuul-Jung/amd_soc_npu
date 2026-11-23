@@ -155,6 +155,18 @@
 
     **회신**: `part03/ch27/docs/VSCODE_TO_WEB_YYYYMMDD.md`에 xsim 결과(통과/오류 메시지), 주석 정리한 파일 수, run_all 결과.
 
+17. **(2026-11-23 16:00, VSCODE_TO_WEB_20261123 회신 반영 — 지금 실행할 것은 이 항목이다)**
+
+    **받은 것**: 1~4장 장 Top xsim PASS (PR #7 병합, ae36318). 웹에서도 사례 줄 diff 0을 다시 확인했다. 16번 1항은 이것으로 끝.
+    **반영한 것**: ① `run_sim.sh` 판정이 기준 모델 실패를 잡는다 — `PYTHON_PNN_SELF_TEST_PASS` 줄이 없거나 `Traceback`이 있으면 `RTL_SIM_FAIL` (python이 죽는 가짜 환경으로 확인) ② `.gitignore`에 `*.pb`·`*.wdb`·`xvlog.log`·`xelab.log`·`xsim*.log` 추가 (`pNN/validation/xsim_rtl_*.log`는 예외).
+
+    **VS Code 할 일** (main `git pull` 뒤)
+    1. 확인만: Vivado 환경에서 인자 없이 `bash p01/scripts/run_sim.sh`가 자동으로 xsim을 고르는지(`# tool: Vivado Simulator`), 한 STAGE만 도는 `bash p02/scripts/run_sim.sh 3`이 사례 줄과 `RTL_SIM_PASS stages=1`을 내는지. 증거 파일은 새로 올리지 않아도 된다(같은 날짜 파일이 이미 있다). 안 되면 메시지만 회신.
+    2. 16번 2항 — `part03/` 소스 주석 정리 (이력 꼬리표·옛 장 번호·도구 이름·`안 A`). 장 페이지 코드 상자에 약 470곳이 그대로 보인다. 주석만 바꾸고 `LEVEL=sim bash part03/ch27/scripts/run_all.sh` PASS 확인.
+    3. 16번 3항 — `BOARD_CHECKLIST.md`의 절차·기대 결과 칸 문구 정리.
+    4. 16번 4항 — `part03/chNN/scripts/run_sim.sh`도 Vivado가 있으면 xsim으로 (`tools/sim/sim_top.sh`의 `sim_kind`·`sim_top` 사용 가능. TB가 `-P` 파라미터를 쓰지 않으면 `-generic_top` 줄만 빼고 같은 흐름). 통과 로그는 `part03/chNN/validation/xsim_rtl_YYYYMMDD.log`.
+    5. `part03/` 변경은 평소처럼 `vscode/…` 브랜치 → main PR. 웹이 재생성·CI 확인 뒤 병합한다.
+
 ## 5. 웹 Claude가 그동안 하는 것
 
 1장(구 00~03장) 시범 전환: 생성기를 "장 페이지 + 서브젝트 절" 구조로 바꾸고 미리보기를 만든다. VS Code 작업과 파일이 겹치지 않는다.

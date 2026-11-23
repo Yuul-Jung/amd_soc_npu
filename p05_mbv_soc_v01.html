@@ -68,13 +68,15 @@ details.full>summary{cursor:pointer;font-weight:600}
   <nav class="toc" id="course-nav" aria-label="전체 장과 절 탐색"></nav>
   <main class="content" id="main-content">
     <section class="section" id="s00">
-      <h2><span class="num">00</span> 장 목표</h2>
-      <p><b>장 시연 (보드):</b> 비트스트림 하나에 MicroBlaze V와 NPU가 함께 들어갑니다. C 드라이버가 그림 4장을 NPU로 분류해 UART·LED·7세그먼트에 띄웁니다. 같은 추론이 CPU만으로는 1,816,547클록, NPU로는 1,080,161클록 걸립니다.</p>
+      <h2><span class="num">00</span> 이 장에서 만드는 것</h2>
+      <p>4장까지는 PC가 UART로 NPU를 직접 움직였습니다. 실제 제품에서는 CPU가 그 일을 합니다. 이 장에서는 4장의 784 가속기를 CPU가 쓸 수 있는 주변장치로 만들고, 소프트 CPU인 MicroBlaze V와 한 칩에 넣어 SoC(System on Chip)를 구성합니다.</p>
+      <p>CPU와 주변장치는 AXI라는 버스로 이어지고, CPU는 주변장치를 주소로 구분합니다. NPU에 주소를 주고, C 언어 드라이버로 레지스터를 읽고 써서 추론을 실행합니다. 그런 다음 같은 추론을 CPU 혼자 할 때와 NPU에 맡길 때의 시간, 회로 크기, 에너지를 비교합니다.</p>
+      <p><b>장 끝에서 보드로 보여 줄 것:</b> 비트스트림 하나에 MicroBlaze V와 NPU가 함께 들어갑니다. C 드라이버가 그림 4장을 NPU로 분류해 UART·LED·7세그먼트에 띄웁니다. 같은 추론이 CPU만으로는 1,816,547클록, NPU로는 1,080,161클록 걸립니다.</p>
       <p>2일 과정, 서브젝트 7개입니다. 비트스트림은 5-2에서 한 번만 만들고, 그다음 서브젝트부터는 프로그램(ELF)만 바꿔 보드에서 확인합니다.</p>
       <ol class="steps" aria-label="이 장의 서브젝트와 순서"><li><span class="code">5-1</span><span><a href="#s5_1">AXI4-Lite NPU IP</a><br>AXI 버스로 레지스터 15개를 읽고 써서 784 추론을 실행합니다. 추론 7번의 결과가 Python 기준과 비트 단위로 같고, 없는 주소를 건드리면 오류 응답(SLVERR)이 돌아오는 것을 시뮬레이션으로 봅니다.</span><span class="st">1일 오전</span></li><li><span class="code">5-2</span><span><a href="#s5_2">MicroBlaze V SoC 연결</a><br>비트스트림을 내려받으면 DONE LED가 켜집니다. XSDB에서 <code>mrd 0x4006FFF0</code>을 읽으면 7세그먼트 IP의 ID <code>53454737</code>이 나오고, 버튼을 누른 채 <code>mrd 0x40010000</code>을 읽으면 U·D·L·R이 <code>8</code>·<code>4</code>·<code>2</code>·<code>1</code>로 보입니다.</span><span class="st">1일 오전</span></li><li><span class="code">5-3</span><span><a href="#s5_3">C 드라이버와 표시</a><br><code>npu_app.elf</code>를 실행하면 그림 4장을 NPU로 분류하고, CPU로 계산한 값과 점수까지 같은지 비교합니다(<code>scores_match=1</code>). 끝나면 7세그먼트에 <code>03 4</code>, LED4가 켜집니다.</span><span class="st">1일 오후</span></li><li><span class="code">5-4</span><span><a href="#s5_4">CPU·NPU 추론 시간</a><br><code>bench_board.elf</code>를 실행하면 같은 그림을 CPU 정수 계산으로 1,816,547클록, NPU로 1,080,161클록(Bias 적재 3,076 포함)에 처리합니다. 1.68배 차이이고, 리셋 뒤 다시 실행해도 같은 값입니다.</span><span class="st">1일 오후</span></li><li><span class="code">5-5</span><span><a href="#s5_5">자원·타이밍 스윕</a><br>클록 주기를 10 → 8 → 7 → 6 ns로 줄여 가며 배선해 봅니다. AXI NPU IP는 10 ns에서 되고 8 ns에서 안 되므로 최고 주파수는 약 105 MHz, 4PE INT8 코어는 약 146 MHz입니다.</span><span class="st">2일 오전</span></li><li><span class="code">5-6</span><span><a href="#s5_6">전력·추론당 에너지</a><br>Vivado 전력 추정으로 추론 한 번에 드는 에너지를 비교합니다. CPU 4.596 mJ, NPU 2.765 mJ로 1.66배 차이입니다.</span><span class="st">2일 오전</span></li><li><span class="code">5-7</span><span><a href="#s5_7">시스템 통합</a><br><code>run_all.sh</code> 한 번으로 이 장의 시뮬레이션을 모두 다시 돌리고, 보드 확인 절차를 처음부터 끝까지 한 자리에서 실행합니다. 이것이 장 시연입니다.</span><span class="st">2일 오후</span></li><li class="demo"><span class="code">시연</span><span><a href="#demo">장 시연</a><br>비트스트림 하나에 MicroBlaze V와 NPU가 함께 들어갑니다. C 드라이버가 그림 4장을 NPU로 분류해 UART·LED·7세그먼트에 띄웁니다. 같은 추론이 CPU만으로는 1,816,547클록, NPU로는 1,080,161클록 걸립니다.</span><span class="st">장 끝</span></li></ol>
     </section>
     <section class="section" id="s01">
-      <h2><span class="num">01</span> 최종 구조도·주소맵</h2>
+      <h2><span class="num">01</span> 전체 구조와 주소맵</h2>
       <div class="figure-wrap" tabindex="0" role="region" aria-label="도면 (가로 스크롤 가능)"><svg style="min-width:896px" id="p05-socmap" xmlns="http://www.w3.org/2000/svg" width="1280" height="782" viewBox="0 0 1280 782" aria-label="5장 SoC 주소맵과 인터럽트 구조도" role="img" version="1.1"><!-- 원본: p05/diagrams/soc_map.json · json-sha256: fecd71dcec2544ea0441a820096cb95694532bde74c0b4feecbdc7734e824167 · 생성: svg-flow-editor (로컬 사본) · 직접 수정 금지 --><defs><marker id="p05-socmap-arrowhead-0" markerWidth="13" markerHeight="13" refX="11.375" refY="6.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 13 6.5 L 0 13 z" fill="#1F3A5F"/></marker><marker id="p05-socmap-arrowhead-1" markerWidth="13" markerHeight="13" refX="11.375" refY="6.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 13 6.5 L 0 13 z" fill="#1F3A5F"/></marker><marker id="p05-socmap-arrowhead-2" markerWidth="13" markerHeight="13" refX="11.375" refY="6.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 13 6.5 L 0 13 z" fill="#1F3A5F"/></marker><marker id="p05-socmap-arrowhead-3" markerWidth="13" markerHeight="13" refX="11.375" refY="6.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 13 6.5 L 0 13 z" fill="#1F3A5F"/></marker><marker id="p05-socmap-arrowhead-4" markerWidth="13" markerHeight="13" refX="11.375" refY="6.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 13 6.5 L 0 13 z" fill="#1F3A5F"/></marker><marker id="p05-socmap-arrowhead-5" markerWidth="13" markerHeight="13" refX="11.375" refY="6.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 13 6.5 L 0 13 z" fill="#1F3A5F"/></marker><marker id="p05-socmap-arrowhead-6" markerWidth="13" markerHeight="13" refX="11.375" refY="6.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 13 6.5 L 0 13 z" fill="#1F3A5F"/></marker><marker id="p05-socmap-arrowhead-7" markerWidth="13" markerHeight="13" refX="11.375" refY="6.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 13 6.5 L 0 13 z" fill="#1F3A5F"/></marker><marker id="p05-socmap-arrowhead-8" markerWidth="13" markerHeight="13" refX="11.375" refY="6.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 13 6.5 L 0 13 z" fill="#1F3A5F"/></marker></defs><rect x="0" y="0" width="1280" height="782" fill="#fff"/><g data-heading="title"><text x="52" y="57.52" font-size="28" font-weight="780" fill="#172439" text-anchor="start" class="heading-text" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">5장 SoC 구조와 주소맵</text></g><g data-heading="subtitle"><text x="52" y="101.44" font-size="16" font-weight="400" fill="#617083" text-anchor="start" class="heading-text" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">MicroBlaze V가 AXI로 주변 장치 7개를 읽고 쓴다. NPU는 0x44A0_0000, 인터럽트 In12</text></g><g id="edges"><g data-edge="cpu-smc" class="edge"><path d="M 307.5 426 L 422.5 426" fill="none" stroke="#1F3A5F" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#p05-socmap-arrowhead-0)"/><text x="365" y="417" text-anchor="middle" font-size="15" font-weight="750" fill="#1F3A5F" class="edge-label" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">M_AXI_DP</text></g><g data-edge="cpu-lmb" class="edge"><path d="M 190 458.5 L 190 563.5" fill="none" stroke="#1F3A5F" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#p05-socmap-arrowhead-1)"/><text x="200" y="516" text-anchor="start" font-size="15" font-weight="750" fill="#1F3A5F" class="edge-label" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">LMB</text></g><g data-edge="smc-d0" class="edge"><path d="M 617.5 426 L 653.75 426 L 653.75 150 L 690 150" fill="none" stroke="#1F3A5F" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#p05-socmap-arrowhead-2)"/></g><g data-edge="smc-d1" class="edge"><path d="M 617.5 426 L 653.75 426 L 653.75 242 L 690 242" fill="none" stroke="#1F3A5F" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#p05-socmap-arrowhead-3)"/></g><g data-edge="smc-d2" class="edge"><path d="M 617.5 426 L 653.75 426 L 653.75 334 L 690 334" fill="none" stroke="#1F3A5F" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#p05-socmap-arrowhead-4)"/></g><g data-edge="smc-d3" class="edge"><path d="M 617.5 426 L 690 426" fill="none" stroke="#1F3A5F" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#p05-socmap-arrowhead-5)"/></g><g data-edge="smc-d4" class="edge"><path d="M 617.5 426 L 653.75 426 L 653.75 518 L 690 518" fill="none" stroke="#1F3A5F" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#p05-socmap-arrowhead-6)"/></g><g data-edge="smc-d5" class="edge"><path d="M 617.5 426 L 653.75 426 L 653.75 610 L 690 610" fill="none" stroke="#1F3A5F" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#p05-socmap-arrowhead-7)"/></g><g data-edge="smc-d6" class="edge"><path d="M 617.5 426 L 653.75 426 L 653.75 702 L 690 702" fill="none" stroke="#1F3A5F" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#p05-socmap-arrowhead-8)"/></g></g><g id="nodes"><g data-node="cpu" class="node"><rect x="72.5" y="393.5" width="235" height="65" fill="none" stroke="#1F3A5F" stroke-width="3" class="node-shape" pointer-events="all"/><text x="190" y="415.5" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="20" font-weight="750" fill="#172439" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">MicroBlaze V (RV32)</text><text x="190" y="439" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="15" font-weight="400" fill="#273e5e" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">100 MHz · 인터럽트 ← axi_intc_0</text></g><g data-node="lmb" class="node"><rect x="52.5" y="563.5" width="275" height="65" fill="none" stroke="#1F3A5F" stroke-width="3" class="node-shape" pointer-events="all"/><text x="190" y="585.5" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="20" font-weight="750" fill="#172439" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">LMB BRAM</text><text x="190" y="609" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="15" font-weight="400" fill="#273e5e" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">0x0000_0000 · 64 KB · 프로그램·데이터</text></g><g data-node="smc" class="node"><rect x="422.5" y="393.5" width="195" height="65" fill="none" stroke="#1F3A5F" stroke-width="3" class="node-shape" pointer-events="all"/><text x="520" y="415.5" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="20" font-weight="750" fill="#172439" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">AXI SmartConnect</text><text x="520" y="439" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="15" font-weight="400" fill="#273e5e" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">axi_smc · 마스터 1 → 7</text></g><g data-node="d0" class="node"><rect x="690" y="114" width="540" height="72" fill="none" stroke="#1F3A5F" stroke-width="3" class="node-shape" pointer-events="all"/><text x="960" y="139.5" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="20" font-weight="750" fill="#172439" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">[00] GPIO LED·SW</text><text x="960" y="163" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="15" font-weight="400" fill="#273e5e" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">axi_gpio_0 · 0x4000_0000</text></g><g data-node="d1" class="node"><rect x="690" y="206" width="540" height="72" fill="none" stroke="#1F3A5F" stroke-width="3" class="node-shape" pointer-events="all"/><text x="960" y="231.5" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="20" font-weight="750" fill="#172439" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">[01] GPIO 버튼</text><text x="960" y="255" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="15" font-weight="400" fill="#273e5e" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">axi_gpio_btn · 0x4001_0000 · In3</text></g><g data-node="d2" class="node"><rect x="690" y="298" width="540" height="72" fill="none" stroke="#1F3A5F" stroke-width="3" class="node-shape" pointer-events="all"/><text x="960" y="323.5" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="20" font-weight="750" fill="#172439" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">[02] UART Lite 115200</text><text x="960" y="347" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="15" font-weight="400" fill="#273e5e" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">axi_uartlite_0 · 0x4002_0000 · In1</text></g><g data-node="d3" class="node"><rect x="690" y="390" width="540" height="72" fill="none" stroke="#1F3A5F" stroke-width="3" class="node-shape" pointer-events="all"/><text x="960" y="415.5" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="20" font-weight="750" fill="#172439" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">[03] Timer</text><text x="960" y="439" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="15" font-weight="400" fill="#273e5e" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">axi_timer_0 · 0x4003_0000 · In0</text></g><g data-node="d4" class="node"><rect x="690" y="482" width="540" height="72" fill="none" stroke="#1F3A5F" stroke-width="3" class="node-shape" pointer-events="all"/><text x="960" y="507.5" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="20" font-weight="750" fill="#172439" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">[04] INTC</text><text x="960" y="531" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="15" font-weight="400" fill="#273e5e" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">axi_intc_0 · 0x4004_0000 · In0 Timer, In1 UART, In3 BTN, In12 NPU</text></g><g data-node="d5" class="node"><rect x="690" y="574" width="540" height="72" fill="none" stroke="#1F3A5F" stroke-width="3" class="node-shape" pointer-events="all"/><text x="960" y="599.5" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="20" font-weight="750" fill="#172439" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">[06] 7세그먼트 (ip_seg7)</text><text x="960" y="623" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="15" font-weight="400" fill="#273e5e" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">ip06_seg7 · 0x4006_0000</text></g><g data-node="d6" class="node"><rect x="690" y="666" width="540" height="72" fill="none" stroke="#4635B1" stroke-width="3.6" class="node-shape" pointer-events="all"/><text x="960" y="691.5" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="20" font-weight="750" fill="#2a1f78" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">NPU (5-1 AXI IP)</text><text x="960" y="715" text-anchor="middle" dominant-baseline="middle" pointer-events="none" font-size="15" font-weight="400" fill="#3b2d99" font-family="Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, sans-serif">p3_npu_0 · 0x44A0_0000 · In12</text></g></g></svg></div>
       <p>CPU가 버스를 통해 각 주변장치와 NPU를 주소로 구분해 읽고 씁니다. 아래 표가 그 주소입니다.</p>
       <h3>주소맵 (Vivado Address Editor)</h3>
@@ -108,8 +110,11 @@ details.full>summary{cursor:pointer;font-weight:600}
     </section>
     <section class="section" id="s5_1">
       <h2><span class="num">03</span> 서브젝트 5-1 · AXI4-Lite NPU IP</h2>
-      <p class="verdict"><b>학습목표:</b> AXI 버스로 레지스터 15개를 읽고 써서 784 추론을 실행합니다. 추론 7번의 결과가 Python 기준과 비트 단위로 같고, 없는 주소를 건드리면 오류 응답(SLVERR)이 돌아오는 것을 시뮬레이션으로 봅니다.</p>
-      <h3>보드에서 볼 것</h3>
+      <p class="verdict"><b>목표:</b> AXI 버스로 레지스터 15개를 읽고 써서 784 추론을 실행합니다. 추론 7번의 결과가 Python 기준과 비트 단위로 같고, 없는 주소를 건드리면 오류 응답(SLVERR)이 돌아오는 것을 시뮬레이션으로 봅니다.</p>
+      <h3>해설</h3>
+      <p>NPU를 CPU가 쓸 수 있게 하려면 버스 규격에 맞는 접속부가 필요합니다. <code>p3_npu_axi_lite</code>는 4장의 가속기를 AXI4-Lite 버스 뒤에 두고, 제어·상태·가중치·입력·결과를 레지스터 15개로 보여 줍니다. CPU는 이 레지스터 주소에 값을 쓰고 읽는 것만으로 NPU를 움직입니다.</p>
+      <p>없는 주소에 접근하면 조용히 넘어가지 않고 오류 응답을 돌려줍니다. 소프트웨어의 실수를 하드웨어가 알려 주는 장치입니다.</p>
+      <h3>보드에서 확인</h3>
       <p>IP 하나만으로는 보드에 올릴 수 없으므로 이 서브젝트는 시뮬레이션으로 확인합니다. 보드 확인은 5-2에서 이 IP를 주소 <code>0x44A0_0000</code>에 붙인 뒤에 합니다.</p>
 
       <h3>작성할 코드</h3>
@@ -450,7 +455,7 @@ foreach mm [ipx::get_memory_maps -of_objects $core] {
 }
 puts "IP_PACKAGE_DONE"</code></pre>
       </div>
-      <h3>실행과 기대 화면</h3>
+      <h3>실행과 기대 출력</h3>
       <div class="codeblock"><div class="codebar"><span>터미널 · 저장소 루트</span></div>
         <pre tabindex="0"><code>bash part03/ch20/scripts/run_sim.sh</code></pre></div>
       <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
@@ -984,8 +989,11 @@ if __name__ == "__main__":
     </section>
     <section class="section" id="s5_2">
       <h2><span class="num">04</span> 서브젝트 5-2 · MicroBlaze V SoC 연결</h2>
-      <p class="verdict"><b>학습목표:</b> 비트스트림을 내려받으면 DONE LED가 켜집니다. XSDB에서 <code>mrd 0x4006FFF0</code>을 읽으면 7세그먼트 IP의 ID <code>53454737</code>이 나오고, 버튼을 누른 채 <code>mrd 0x40010000</code>을 읽으면 U·D·L·R이 <code>8</code>·<code>4</code>·<code>2</code>·<code>1</code>로 보입니다.</p>
-      <h3>보드에서 볼 것</h3>
+      <p class="verdict"><b>목표:</b> 비트스트림을 내려받으면 DONE LED가 켜집니다. XSDB에서 <code>mrd 0x4006FFF0</code>을 읽으면 7세그먼트 IP의 ID <code>53454737</code>이 나오고, 버튼을 누른 채 <code>mrd 0x40010000</code>을 읽으면 U·D·L·R이 <code>8</code>·<code>4</code>·<code>2</code>·<code>1</code>로 보입니다.</p>
+      <h3>해설</h3>
+      <p>MicroBlaze V, 메모리, UART, 타이머, 버튼·LED, 7세그먼트, 그리고 5-1의 NPU를 Vivado 블록 설계에서 버스로 잇습니다. 각 주변장치에 서로 겹치지 않는 주소 구간을 주는 것이 주소맵이고, 소프트웨어는 이 주소를 보고 장치를 찾습니다.</p>
+      <p>프로그램을 올리기 전에 디버거(XSDB)로 주소를 직접 읽어, 장치가 약속한 자리에 있는지부터 확인합니다.</p>
+      <h3>보드에서 확인</h3>
       <p>비트스트림 <code>basys3_soc21_top.bit</code>만 내려받고, 프로그램 없이 XSDB 읽기만으로 주소맵을 확인합니다.</p>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th class="nw">순서</th><th>할 일</th><th>보드에서 보이는 것</th></tr></thead>
@@ -1314,7 +1322,7 @@ if [[ "$before" == "$after" ]]; then echo "ORIGINAL_PROJECT_UNCHANGED tree_sha=$
 grep -q "^SOC21_BUILD_DONE" "$build/stdout.txt"
 sha256sum "$build/out/soc21_npu.xsa" "$build"/out/*.bit | sed "s#$build/##"</code></pre>
       </div>
-      <h3>실행과 기대 화면</h3>
+      <h3>실행과 기대 출력</h3>
       <div class="codeblock"><div class="codebar"><span>터미널 · 저장소 루트</span></div>
         <pre tabindex="0"><code>bash part03/ch21/scripts/build_soc.sh   # 블록 설계 → 비트스트림·XSA (약 5분)</code></pre></div>
       <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
@@ -1346,8 +1354,11 @@ ORIGINAL_PROJECT_UNCHANGED tree_sha=7225b730e4ff1ff5</code></pre></div>
     </section>
     <section class="section" id="s5_3">
       <h2><span class="num">05</span> 서브젝트 5-3 · C 드라이버와 표시</h2>
-      <p class="verdict"><b>학습목표:</b> <code>npu_app.elf</code>를 실행하면 그림 4장을 NPU로 분류하고, CPU로 계산한 값과 점수까지 같은지 비교합니다(<code>scores_match=1</code>). 끝나면 7세그먼트에 <code>03 4</code>, LED4가 켜집니다.</p>
-      <h3>보드에서 볼 것</h3>
+      <p class="verdict"><b>목표:</b> <code>npu_app.elf</code>를 실행하면 그림 4장을 NPU로 분류하고, CPU로 계산한 값과 점수까지 같은지 비교합니다(<code>scores_match=1</code>). 끝나면 7세그먼트에 <code>03 4</code>, LED4가 켜집니다.</p>
+      <h3>해설</h3>
+      <p><code>npu_driver.c</code>는 5-1의 레지스터를 순서대로 읽고 쓰는 C 함수 모음입니다. Bias를 쓰고, 타일마다 가중치와 입력을 쓰고, 시작을 건 뒤 끝날 때까지 기다렸다가 점수를 읽습니다. 4장에서 PC 도구가 하던 일을 그대로 옮긴 것입니다.</p>
+      <p>같은 그림을 CPU가 소프트웨어로도 계산해 NPU의 점수와 비교합니다. 클래스뿐 아니라 점수 10개가 모두 같아야 통과입니다.</p>
+      <h3>보드에서 확인</h3>
       <p>5-2 비트스트림에 <code>npu_app.elf</code>를 올립니다. ELF는 Vitis에서 같은 XSA 플랫폼으로 빌드합니다.</p>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th class="nw">순서</th><th>할 일</th><th>보드에서 보이는 것</th></tr></thead>
@@ -1695,7 +1706,7 @@ static inline void p3_seg7_write(p3_seg7_regs_t r)
 #endif
 #endif</code></pre>
       </div>
-      <h3>실행과 기대 화면</h3>
+      <h3>실행과 기대 출력</h3>
       <div class="codeblock"><div class="codebar"><span>터미널 · 저장소 루트</span></div>
         <pre tabindex="0"><code>bash part03/ch22/scripts/run_sim.sh   # C 드라이버를 PC에서 컴파일해 RTL과 함께 시뮬레이션</code></pre></div>
       <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
@@ -1949,12 +1960,15 @@ if __name__ == "__main__":
     </section>
     <section class="section" id="s5_4">
       <h2><span class="num">06</span> 서브젝트 5-4 · CPU·NPU 추론 시간</h2>
-      <p class="verdict"><b>학습목표:</b> <code>bench_board.elf</code>를 실행하면 같은 그림을 CPU 정수 계산으로 1,816,547클록, NPU로 1,080,161클록(Bias 적재 3,076 포함)에 처리합니다. 1.68배 차이이고, 리셋 뒤 다시 실행해도 같은 값입니다.</p>
-      <h3>보드에서 볼 것</h3>
+      <p class="verdict"><b>목표:</b> <code>bench_board.elf</code>를 실행하면 같은 그림을 CPU 정수 계산으로 1,816,547클록, NPU로 1,080,161클록(Bias 적재 3,076 포함)에 처리합니다. 1.68배 차이이고, 리셋 뒤 다시 실행해도 같은 값입니다.</p>
+      <h3>해설</h3>
+      <p>타이머로 추론 한 번의 클록 수를 잽니다. CPU가 곱셈과 덧셈을 직접 반복하면 약 182만 클록, NPU에 맡기면 약 108만 클록입니다.</p>
+      <p>NPU의 계산 자체는 타일당 약 200클록으로 매우 짧습니다. 그런데도 차이가 1.68배에 그치는 것은, CPU가 가중치와 입력을 버스로 한 단어씩 써 넣는 데 대부분의 시간을 쓰기 때문입니다. 4-4에서 본 적재 병목이 여기서도 그대로 나타납니다.</p>
+      <h3>보드에서 확인</h3>
       <p>5-2 비트스트림에 <code>bench_board.elf</code>를 올립니다.</p>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th class="nw">순서</th><th>할 일</th><th>보드에서 보이는 것</th></tr></thead>
-        <tbody><tr><td class="nw">1</td><td><code>bench_board.elf</code> 실행</td><td><code>BENCH cpu_cycles=1816547 npu_bias_cycles=3076 npu_cycles=1080161 cpu_class=7 npu_class=7 match=1 rc=0</code> 부근. 차이가 있으면 원인 기록</td></tr><tr><td class="nw">2</td><td>같은 ELF 3회 반복 실행</td><td>사이클 값이 매번 같거나 차이를 기록(캐시 없음·같은 클록이면 같아야 함)</td></tr><tr><td class="nw">3</td><td>실행 중 btnC(Reset) 누른 뒤 다시 실행</td><td>처음부터 같은 출력</td></tr></tbody>
+        <tbody><tr><td class="nw">1</td><td><code>bench_board.elf</code> 실행</td><td><code>BENCH cpu_cycles=1816547 npu_bias_cycles=3076 npu_cycles=1080161 cpu_class=7 npu_class=7 match=1 rc=0</code> 부근. 차이가 있으면 원인 기록</td></tr><tr><td class="nw">2</td><td>같은 ELF 3회 반복 실행</td><td>클록 수가 매번 같습니다 (캐시가 없고 클록이 같으므로)</td></tr><tr><td class="nw">3</td><td>실행 중 btnC(Reset) 누른 뒤 다시 실행</td><td>처음부터 같은 출력</td></tr></tbody>
       </table></div>
       <h3>작성할 코드</h3>
       <div class="codeblock">
@@ -2095,7 +2109,7 @@ elf_sim=$(find "$build/ws/bench_sim" -name "bench_sim.elf" | head -1)
 grep -E "SOC_BENCH|SOC_RTL_SIM_PASS|Fatal|FATAL|^ERROR" "$build/sim_stdout.txt" | sed "s#$build#build#g"
 grep -q SOC_RTL_SIM_PASS "$build/sim_stdout.txt"</code></pre>
       </div>
-      <h3>실행과 기대 화면</h3>
+      <h3>실행과 기대 출력</h3>
       <div class="codeblock"><div class="codebar"><span>터미널 · 저장소 루트</span></div>
         <pre tabindex="0"><code>bash part03/ch23/scripts/run_soc_bench.sh   # SoC 전체 + bench.elf 시뮬레이션</code></pre></div>
       <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
@@ -2148,13 +2162,16 @@ endmodule</code></pre>
       <h3>확인할 것</h3>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>확인 항목</th><th>의미</th></tr></thead>
-        <tbody><tr><td><code>SOC_BENCH cpu_cycles=1816547 npu_cycles=1080161</code></td><td>SoC 전체를 시뮬레이션해서 잰 클록 수입니다. 보드에서도 같은 값이 나옵니다.</td></tr><tr><td><code>SOC_RTL_SIM_PASS</code></td><td>CPU와 NPU의 클래스·점수가 같습니다.</td></tr></tbody>
+        <tbody><tr><td><code>SOC_BENCH cpu_cycles=1816547 npu_cycles=1080161</code></td><td>SoC 전체를 시뮬레이션해서 잰 클록 수입니다. 보드에서 같은 값이 나오는지 확인합니다.</td></tr><tr><td><code>SOC_RTL_SIM_PASS</code></td><td>CPU와 NPU의 클래스·점수가 같습니다.</td></tr></tbody>
       </table></div>
     </section>
     <section class="section" id="s5_5">
       <h2><span class="num">07</span> 서브젝트 5-5 · 자원·타이밍 스윕</h2>
-      <p class="verdict"><b>학습목표:</b> 클록 주기를 10 → 8 → 7 → 6 ns로 줄여 가며 배선해 봅니다. AXI NPU IP는 10 ns에서 되고 8 ns에서 안 되므로 최고 주파수는 약 105 MHz, 4PE INT8 코어는 약 146 MHz입니다.</p>
-      <h3>보드에서 볼 것</h3>
+      <p class="verdict"><b>목표:</b> 클록 주기를 10 → 8 → 7 → 6 ns로 줄여 가며 배선해 봅니다. AXI NPU IP는 10 ns에서 되고 8 ns에서 안 되므로 최고 주파수는 약 105 MHz, 4PE INT8 코어는 약 146 MHz입니다.</p>
+      <h3>해설</h3>
+      <p>회로가 얼마나 빠른 클록까지 견디는지 알아봅니다. 목표 클록 주기를 10 ns에서 조금씩 줄여 가며 배치·배선을 반복하고, 타이밍을 만족하는 가장 짧은 주기를 찾습니다.</p>
+      <p>버스 접속부가 붙은 NPU IP는 약 105 MHz, 계산 코어만 보면 약 146 MHz입니다. 접속부와 제어 회로가 더해지면 최고 속도가 낮아진다는 것을 알 수 있습니다.</p>
+      <h3>보드에서 확인</h3>
       <p>보드 없이 Vivado 보고서를 읽는 서브젝트입니다.</p>
 
       <h3>작성할 코드</h3>
@@ -2267,7 +2284,7 @@ done
 export PYTHONDONTWRITEBYTECODE=1
 python3 "$chapter_dir/reference/sweep_summary.py" --build "$build" --out "$chapter_dir/validation/timing_sweep.md"</code></pre>
       </div>
-      <h3>실행과 기대 화면</h3>
+      <h3>실행과 기대 출력</h3>
       <div class="codeblock"><div class="codebar"><span>터미널 · 저장소 루트</span></div>
         <pre tabindex="0"><code>bash part03/ch24/scripts/run_sweep.sh   # 4구성 × 주기 4개</code></pre></div>
       <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
@@ -2289,8 +2306,11 @@ SWEEP_SUMMARY pe4_int8=146.1MHz pe4_int16=126.4MHz tile784_int8=101.0MHz axi_npu
     </section>
     <section class="section" id="s5_6">
       <h2><span class="num">08</span> 서브젝트 5-6 · 전력·추론당 에너지</h2>
-      <p class="verdict"><b>학습목표:</b> Vivado 전력 추정으로 추론 한 번에 드는 에너지를 비교합니다. CPU 4.596 mJ, NPU 2.765 mJ로 1.66배 차이입니다.</p>
-      <h3>보드에서 볼 것</h3>
+      <p class="verdict"><b>목표:</b> Vivado 전력 추정으로 추론 한 번에 드는 에너지를 비교합니다. CPU 4.596 mJ, NPU 2.765 mJ로 1.66배 차이입니다.</p>
+      <h3>해설</h3>
+      <p>속도만큼 중요한 것이 에너지입니다. Vivado는 시뮬레이션에서 기록한 신호의 변화량을 바탕으로 전력을 추정합니다. 전력에 추론 시간을 곱하면 추론 한 번에 드는 에너지가 됩니다.</p>
+      <p>NPU를 쓰면 회로가 늘어 순간 전력은 조금 오르지만, 추론이 빨리 끝나 한 번에 드는 에너지는 1.66배 적습니다.</p>
+      <h3>보드에서 확인</h3>
       <p>Basys3에는 전력 측정 회로가 없으므로 보드에서는 측정하지 않고 Vivado 추정값을 읽습니다.</p>
 
       <h3>작성할 코드</h3>
@@ -2438,7 +2458,7 @@ grep -E "SOC_POWER_REPORT_DONE|^ERROR" "$build/pwr_stdout.txt"
 export PYTHONDONTWRITEBYTECODE=1
 python3 "$chapter_dir/reference/power_summary.py" --rpt "$build/out" --out "$chapter_dir/validation/power_summary.md"</code></pre>
       </div>
-      <h3>실행과 기대 화면</h3>
+      <h3>실행과 기대 출력</h3>
       <div class="codeblock"><div class="codebar"><span>터미널 · 저장소 루트</span></div>
         <pre tabindex="0"><code>bash part03/ch25/scripts/run_power.sh</code></pre></div>
       <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
@@ -2452,8 +2472,11 @@ python3 "$chapter_dir/reference/power_summary.py" --rpt "$build/out" --out "$cha
     </section>
     <section class="section" id="s5_7">
       <h2><span class="num">09</span> 서브젝트 5-7 · 시스템 통합</h2>
-      <p class="verdict"><b>학습목표:</b> <code>run_all.sh</code> 한 번으로 이 장의 시뮬레이션을 모두 다시 돌리고, 보드 확인 절차를 처음부터 끝까지 한 자리에서 실행합니다. 이것이 장 시연입니다.</p>
-      <h3>보드에서 볼 것</h3>
+      <p class="verdict"><b>목표:</b> <code>run_all.sh</code> 한 번으로 이 장의 시뮬레이션을 모두 다시 돌리고, 보드 확인 절차를 처음부터 끝까지 한 자리에서 실행합니다. 이것이 장 시연입니다.</p>
+      <h3>해설</h3>
+      <p>지금까지 만든 것을 처음부터 끝까지 한 번에 다시 돌려, 어느 한 곳을 고쳤을 때 다른 곳이 망가지지 않았는지 확인합니다. 이렇게 전체를 되풀이해 돌리는 시험을 회귀 시험이라고 합니다.</p>
+      <p>그다음 보드 확인 절차를 순서대로 실행합니다. 이것이 이 장의 시연입니다.</p>
+      <h3>보드에서 확인</h3>
       <p>보드 확인 절차는 아래 장 시연 절에 모아 두었습니다.</p>
 
       <h3>작성할 코드</h3>
@@ -2619,7 +2642,7 @@ cat "$summary"
 - 29장 실제 센서(DS18B20·XADC·HC-SR04) 연결, 30장 실제 모터·드라이버 구동(B24는 사용자 판단으로 별도).
 - 클록을 100 MHz 위로 올리는 시험(24장 Fmax는 OOC 추정).</code></pre>
       </div>
-      <h3>실행과 기대 화면</h3>
+      <h3>실행과 기대 출력</h3>
       <div class="codeblock"><div class="codebar"><span>터미널 · 저장소 루트</span></div>
         <pre tabindex="0"><code>LEVEL=sim bash part03/ch27/scripts/run_all.sh</code></pre></div>
       <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
@@ -2652,7 +2675,7 @@ cat "$summary"
       <p>5-2 비트스트림 하나와 ELF 두 개(<code>npu_app.elf</code>, <code>bench_board.elf</code>)로 아래 순서를 한 자리에서 실행합니다.</p>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th class="nw">순서</th><th>할 일</th><th>보드에서 보이는 것</th></tr></thead>
-        <tbody><tr><td class="nw">1</td><td>Vivado Hardware Manager로 비트스트림 다운로드</td><td>DONE LED 점등, 오류 없음</td></tr><tr><td class="nw">2</td><td>Vitis에서 <code>npu_app.elf</code> 실행(같은 XSA 플랫폼)</td><td><code>P3 NPU driver test base=0x44a00000</code></td></tr><tr><td class="nw">3</td><td>이어지는 UART 4줄</td><td><code>SAMPLE 0 ... npu_class=7 cpu_class=7 expect=7 scores_match=1 rc=0</code><br><code>SAMPLE 1 ... npu_class=2 ...</code><br><code>SAMPLE 2 index=92 label=9 npu_class=4 ...</code><br><code>SAMPLE 3 index=1640 label=9 npu_class=4 ...</code></td></tr><tr><td class="nw">4</td><td>마지막 줄</td><td><code>NPU_APP_DONE samples=4 failures=0</code></td></tr><tr><td class="nw">5</td><td>실행 끝난 뒤 7세그먼트·LED를 눈으로 확인</td><td>7세그먼트 <code>03 4</code>(왼쪽 두 자리 = 그림 번호 3, 가운데 오른쪽 꺼짐, 오른쪽 = 클래스 4), LED4만 켜짐. 각 표본 직후 <code>00 7</code>·<code>01 2</code>·<code>02 4</code> 순서</td></tr><tr><td class="nw">6</td><td>XSDB <code>mrd 0x4006FFF0</code></td><td><code>53454737</code>("SEG7" ID)</td></tr><tr><td class="nw">7</td><td>XSDB <code>mrd 0x40010000</code>을 버튼을 누르지 않고 / btnU·btnD·btnL·btnR을 각각 누른 채로</td><td><code>0</code> / <code>8</code>·<code>4</code>·<code>2</code>·<code>1</code> (btn[3]=U … btn[0]=R)</td></tr><tr><td class="nw">8</td><td><code>bench_board.elf</code> 실행</td><td><code>BENCH cpu_cycles=1816547 npu_bias_cycles=3076 npu_cycles=1080161 cpu_class=7 npu_class=7 match=1 rc=0</code> 부근. 차이가 있으면 원인 기록</td></tr><tr><td class="nw">9</td><td>같은 ELF 3회 반복 실행</td><td>사이클 값이 매번 같거나 차이를 기록(캐시 없음·같은 클록이면 같아야 함)</td></tr><tr><td class="nw">10</td><td>실행 중 btnC(Reset) 누른 뒤 다시 실행</td><td>처음부터 같은 출력</td></tr></tbody>
+        <tbody><tr><td class="nw">1</td><td>Vivado Hardware Manager로 비트스트림 다운로드</td><td>DONE LED 점등, 오류 없음</td></tr><tr><td class="nw">2</td><td>Vitis에서 <code>npu_app.elf</code> 실행(같은 XSA 플랫폼)</td><td><code>P3 NPU driver test base=0x44a00000</code></td></tr><tr><td class="nw">3</td><td>이어지는 UART 4줄</td><td><code>SAMPLE 0 ... npu_class=7 cpu_class=7 expect=7 scores_match=1 rc=0</code><br><code>SAMPLE 1 ... npu_class=2 ...</code><br><code>SAMPLE 2 index=92 label=9 npu_class=4 ...</code><br><code>SAMPLE 3 index=1640 label=9 npu_class=4 ...</code></td></tr><tr><td class="nw">4</td><td>마지막 줄</td><td><code>NPU_APP_DONE samples=4 failures=0</code></td></tr><tr><td class="nw">5</td><td>실행 끝난 뒤 7세그먼트·LED를 눈으로 확인</td><td>7세그먼트 <code>03 4</code>(왼쪽 두 자리 = 그림 번호 3, 가운데 오른쪽 꺼짐, 오른쪽 = 클래스 4), LED4만 켜짐. 각 표본 직후 <code>00 7</code>·<code>01 2</code>·<code>02 4</code> 순서</td></tr><tr><td class="nw">6</td><td>XSDB <code>mrd 0x4006FFF0</code></td><td><code>53454737</code>("SEG7" ID)</td></tr><tr><td class="nw">7</td><td>XSDB <code>mrd 0x40010000</code>을 버튼을 누르지 않고 / btnU·btnD·btnL·btnR을 각각 누른 채로</td><td><code>0</code> / <code>8</code>·<code>4</code>·<code>2</code>·<code>1</code> (btn[3]=U … btn[0]=R)</td></tr><tr><td class="nw">8</td><td><code>bench_board.elf</code> 실행</td><td><code>BENCH cpu_cycles=1816547 npu_bias_cycles=3076 npu_cycles=1080161 cpu_class=7 npu_class=7 match=1 rc=0</code> 부근. 차이가 있으면 원인 기록</td></tr><tr><td class="nw">9</td><td>같은 ELF 3회 반복 실행</td><td>클록 수가 매번 같습니다 (캐시가 없고 클록이 같으므로)</td></tr><tr><td class="nw">10</td><td>실행 중 btnC(Reset) 누른 뒤 다시 실행</td><td>처음부터 같은 출력</td></tr></tbody>
       </table></div>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>미리 알아 둘 값</th><th>결과</th></tr></thead>
@@ -2671,10 +2694,10 @@ cat "$summary"
     </section>
     <section class="section" id="s_report">
       <h2><span class="num">11</span> 장 정리·다음 장으로</h2>
-      <p>이 장에서 만든 것을 한눈에 정리합니다.</p>
+      <p>이 장에서 만든 것과 배운 점을 정리합니다.</p>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
-        <thead><tr><th>서브젝트</th><th>확인한 것</th></tr></thead>
-        <tbody><tr><td class="nw">5-1 AXI4-Lite NPU IP</td><td>AXI 버스로 레지스터 15개를 읽고 써서 784 추론을 실행합니다. 추론 7번의 결과가 Python 기준과 비트 단위로 같고, 없는 주소를 건드리면 오류 응답(SLVERR)이 돌아오는 것을 시뮬레이션으로 봅니다.</td></tr><tr><td class="nw">5-2 MicroBlaze V SoC 연결</td><td>비트스트림을 내려받으면 DONE LED가 켜집니다. XSDB에서 <code>mrd 0x4006FFF0</code>을 읽으면 7세그먼트 IP의 ID <code>53454737</code>이 나오고, 버튼을 누른 채 <code>mrd 0x40010000</code>을 읽으면 U·D·L·R이 <code>8</code>·<code>4</code>·<code>2</code>·<code>1</code>로 보입니다.</td></tr><tr><td class="nw">5-3 C 드라이버와 표시</td><td><code>npu_app.elf</code>를 실행하면 그림 4장을 NPU로 분류하고, CPU로 계산한 값과 점수까지 같은지 비교합니다(<code>scores_match=1</code>). 끝나면 7세그먼트에 <code>03 4</code>, LED4가 켜집니다.</td></tr><tr><td class="nw">5-4 CPU·NPU 추론 시간</td><td><code>bench_board.elf</code>를 실행하면 같은 그림을 CPU 정수 계산으로 1,816,547클록, NPU로 1,080,161클록(Bias 적재 3,076 포함)에 처리합니다. 1.68배 차이이고, 리셋 뒤 다시 실행해도 같은 값입니다.</td></tr><tr><td class="nw">5-5 자원·타이밍 스윕</td><td>클록 주기를 10 → 8 → 7 → 6 ns로 줄여 가며 배선해 봅니다. AXI NPU IP는 10 ns에서 되고 8 ns에서 안 되므로 최고 주파수는 약 105 MHz, 4PE INT8 코어는 약 146 MHz입니다.</td></tr><tr><td class="nw">5-6 전력·추론당 에너지</td><td>Vivado 전력 추정으로 추론 한 번에 드는 에너지를 비교합니다. CPU 4.596 mJ, NPU 2.765 mJ로 1.66배 차이입니다.</td></tr><tr><td class="nw">5-7 시스템 통합</td><td><code>run_all.sh</code> 한 번으로 이 장의 시뮬레이션을 모두 다시 돌리고, 보드 확인 절차를 처음부터 끝까지 한 자리에서 실행합니다. 이것이 장 시연입니다.</td></tr></tbody>
+        <thead><tr><th>서브젝트</th><th>핵심</th></tr></thead>
+        <tbody><tr><td class="nw">5-1 AXI4-Lite NPU IP</td><td>NPU를 레지스터 15개짜리 AXI4-Lite 주변장치로.</td></tr><tr><td class="nw">5-2 MicroBlaze V SoC 연결</td><td>CPU + 주변장치 + NPU를 한 칩에. 주소맵이 하드웨어와 소프트웨어의 약속입니다.</td></tr><tr><td class="nw">5-3 C 드라이버와 표시</td><td>레지스터를 읽고 쓰는 C 드라이버. NPU 결과 = CPU 계산.</td></tr><tr><td class="nw">5-4 CPU·NPU 추론 시간</td><td>NPU가 1.68배 빠릅니다. 시간의 대부분은 계산이 아니라 데이터 전송입니다.</td></tr><tr><td class="nw">5-5 자원·타이밍 스윕</td><td>주기를 줄여 가며 최고 동작 주파수를 추정합니다.</td></tr><tr><td class="nw">5-6 전력·추론당 에너지</td><td>추론당 에너지 = 전력 × 시간. NPU 쪽이 1.66배 적습니다.</td></tr><tr><td class="nw">5-7 시스템 통합</td><td>전체를 한 번에 다시 돌리는 회귀 시험과 보드 시연.</td></tr></tbody>
       </table></div>
       <div class="table-wrap" tabindex="0" role="region" aria-label="표 (가로 스크롤 가능)"><table>
         <thead><tr><th>다음 장으로 넘기는 것</th><th>사용처</th></tr></thead>

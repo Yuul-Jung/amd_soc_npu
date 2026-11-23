@@ -261,6 +261,15 @@ def project_gates(p, e):
 STATUS = {}      # {장 id: [(구분, [(cls, 게이트, 설명)…])…]} — status_md()가 쓴다
 
 
+def resp(r):
+    """표에 보이는 보드 응답: 줄 끝 기호(\\r\\n)는 뺀다 (터미널에서는 줄바꿈으로 보인다)."""
+    return esc(r.replace("\\r\\n", ""))
+
+
+def paras(xs, cls=""):
+    return "\n".join(f'      <p{cls}>{x}</p>' for x in ([xs] if isinstance(xs, str) else xs))
+
+
 def pcode(path):
     """코드 상자 (경로 · 언어). 검증 상태 꼬리표는 붙이지 않는다."""
     return bg.code(path).replace(" · 원본</span>", "</span>", 1)
@@ -304,11 +313,11 @@ def board_table(p, e, s):
     swc = lambda sw: f"<td class=\"nw\"><code>{sw:0{p['sw_bits']}b}</code></td>" if p.get("sw_label") else ""
     swh = f"<th>{p['sw_label']}</th>" if p.get("sw_label") else ""
     rows = "".join(f"<tr><td>{i+1}</td>{swc(sw)}<td class=\"nw\"><code>{cmd_cell(t, n)}</code></td>"
-                   f"<td class=\"nw\"><code>{esc(r)}{f' ×{n}' if n > 1 else ''}</code></td></tr>" for i, (t, sw, r, n) in enumerate(merged(tx, rx)))
+                   f"<td class=\"nw\"><code>{resp(r)}{f' ×{n}' if n > 1 else ''}</code></td></tr>" for i, (t, sw, r, n) in enumerate(merged(tx, rx)))
     led = end_led(p, s["stage"])
     note = s.get("led_note", p["led_note"])
     return f"""      <table>
-        <thead><tr><th>순서</th>{swh}<th>PC 명령 (<code>{os.path.basename(p['host'])}</code>)</th><th>보드 응답 (UART)</th></tr></thead>
+        <thead><tr><th>순서</th>{swh}<th>PC 명령</th><th>보드 응답</th></tr></thead>
         <tbody>{rows}</tbody>
       </table>
       <p>끝나면 LED가 <code>0x{led}</code>입니다 ({note}).</p>"""
@@ -342,22 +351,25 @@ def subject_section(p, e, s, c, ce):
     STATUS.setdefault(p["id"], []).append((f"{s['code']} {s['title']}", subj_gates + [
         ("pass" if e.cases(n, s["code"]) else "todo", f"장 Top STAGE={n} 시뮬레이션", "응답 바이트 단위 대조" if e.cases(n, s["code"]) else "기록 없음"),
         ("pass" if syn and syn.startswith("SYNTH_TIMING_PASS") else ("fail" if syn else "todo"), f"장 Top STAGE={n} 합성·타이밍", plain(syn_txt))]))
-    return f"""      <p class="verdict"><b>학습목표:</b> {s['see']}</p>
-      <h3>보드에서 볼 것</h3>
-      <ol>
-        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다.<br><code>{build}</code><br>결과: <code>build/vivado/{p['id']}_s{n}/{top}.bit</code></li>
-        <li>Hardware Manager로 보드에 내려받고, <code>python3 {p['host']} &lt;포트&gt; …</code>로 아래 순서대로 보냅니다 (115200 8N1). {p.get('sw_note', '')}</li>
-      </ol>
-{board_table(p, e, s)}
+    return f"""      <p class="verdict"><b>목표:</b> {s['see']}</p>
+      <h3>해설</h3>
+{paras(s['concept'])}
       <h3>작성할 코드</h3>
 {unused_note}{f"      <p>{s['no_new_note']}</p>" if s.get("no_new_note") else ""}
 {chr(10).join(pcode(x) for x in c["new"])}
       <h3>시뮬레이션</h3>
-      <p>보드에 올리기 전에, 이 서브젝트까지 넣은 장 Top을 시뮬레이션합니다. 위 표와 같은 명령을 UART 핀으로 넣고 응답을 한 바이트씩 비교합니다. 마지막 줄이 <code>RTL_SIM_PASS</code>이면 됩니다.</p>
+      <p>보드에 올리기 전에, 이 서브젝트까지 넣은 장 Top을 시뮬레이션합니다. 테스트벤치가 아래 '보드에서 확인' 표와 같은 명령을 UART 핀으로 넣고 응답을 한 바이트씩 비교합니다. 줄마다 <code>rx="…"</code>가 보드가 돌려준 응답이고, 마지막 줄이 <code>RTL_SIM_PASS</code>이면 통과입니다.</p>
       <div class="codeblock"><div class="codebar"><span>터미널 · 저장소 루트</span></div>
         <pre><code>{esc(p['run'])} {n}</code></pre></div>
       <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
-        <pre><code>{esc(stage_out(e, n))}</code></pre></div>"""
+        <pre><code>{esc(stage_out(e, n))}</code></pre></div>
+      <h3>보드에서 확인</h3>
+      <ol>
+        <li>이 서브젝트까지 넣은 비트스트림을 만듭니다.<br><code>{build}</code><br>결과 파일: <code>build/vivado/{p['id']}_s{n}/{top}.bit</code></li>
+        <li>Vivado Hardware Manager로 보드에 내려받습니다.</li>
+        <li>PC에서 아래 표의 명령을 순서대로 보내고 응답을 비교합니다. 명령은 <code>python3 {p['host']} &lt;포트&gt; 명령</code> 꼴로 보냅니다.</li>
+      </ol>
+{board_table(p, e, s)}"""
 
 
 def stage_out(e, n):
@@ -415,8 +427,9 @@ def build(p, course, chs_by_id, all_chs, pages, all_projects):
     imports = "".join(f"<li><code>{x}</code></li>" for x in p["imports"]) or "<li>없음 (첫 장)</li>"
     made = "".join(f"<tr><td>{s['code']} {s['title']}</td><td>{'<br>'.join(f'<code>{x}</code>' for x in c['new'])}</td></tr>"
                    for s, c, _ in subj)
-    s00 = f"""      <p><b>장 시연 (보드):</b> {p['demo']}</p>
-      <p>{p['days']}일 과정입니다. 서브젝트 {len(p['subjects'])}개를 차례로 끝내며 그때마다 보드에서 확인하고, 마지막에 장 전체를 시연합니다.</p>
+    s00 = f"""{paras(p['intro'])}
+      <p><b>장 끝에서 보드로 보여 줄 것:</b> {p['demo']}</p>
+      <p>{p['days']}일 과정입니다. 아래 서브젝트 {len(p['subjects'])}개를 차례로 끝내며 그때마다 보드에서 확인하고, 마지막에 장 전체를 시연합니다.</p>
 {steps(p, e, state)}"""
     s01 = f"""      <div class="figure-wrap">{fig_top}</div>
 {bg.port_table(top_c, True)}
@@ -427,16 +440,25 @@ def build(p, course, chs_by_id, all_chs, pages, all_projects):
         <tbody>
           <tr><td>이전 장에서 가져오는 파일</td><td><ul>{imports}</ul></td></tr>
           {made}
-          <tr><td>장 뼈대 (다음 절에서 입력)</td><td>{'<br>'.join(f'<code>{x}</code>' for x in p['skeleton'])}</td></tr>
+          <tr><td>장 뼈대 (준비 절에 수록)</td><td>{'<br>'.join(f'<code>{x}</code>' for x in p['skeleton'])}</td></tr>
         </tbody>
       </table>"""
     s02 = f"""      <ol>
         <li>VS Code에서 저장소 루트(<code>amd_soc_npu/</code>)를 엽니다. 필요한 도구는 Vivado 2024.2(합성·시뮬레이션), <code>python3</code>, 그리고 PC에서 보드로 명령을 보낼 <code>pyserial</code>(<code>pip install pyserial</code>)입니다. 터미널에서 Vivado 명령이 잡히도록 <code>settings64.sh</code>를 먼저 불러옵니다.</li>
-        <li>아래 장 뼈대 파일을 경로 그대로 입력합니다. 서브젝트 모듈은 각 서브젝트 절에서 작성합니다.</li>
-        <li><code>STAGE</code>는 끝낸 서브젝트 수입니다. {p['subjects'][0]['code']}만 끝냈으면 1, {p['subjects'][-1]['code']}까지 끝냈으면 {len(p['subjects'])}입니다. 아직 작성하지 않은 모듈은 빌드에 들어가지 않으므로, 서브젝트를 하나 끝낼 때마다 바로 보드에 올려 볼 수 있습니다.</li>
+        <li>코드는 저장소에 모두 들어 있고, 안내서에도 전체를 실었습니다. 직접 입력하며 따라 해도 되고, 읽고 실행만 해도 됩니다. 아래는 장 전체의 틀이 되는 뼈대 파일이고, 서브젝트 모듈은 각 서브젝트 절에 있습니다.</li>
+        <li>파일 경로의 <code>ch01</code>, <code>part03/ch14</code> 같은 폴더는 모듈별 작업 폴더 이름입니다. 이 안내서의 장·서브젝트 번호와는 관계가 없으므로 경로 그대로 쓰면 됩니다.</li>
+        <li><code>&lt;포트&gt;</code>는 보드의 USB 시리얼 포트 이름입니다. Windows는 <code>COM3</code>, Linux는 <code>/dev/ttyUSB1</code> 같은 이름이고, 통신 설정은 115200 bps 8N1입니다.</li>
+{f"        <li>{p['sw_note']}</li>{chr(10)}" if p.get("sw_note") else ""}        <li><code>STAGE</code>는 끝낸 서브젝트 수입니다. {p['subjects'][0]['code']}만 끝냈으면 1, {p['subjects'][-1]['code']}까지 끝냈으면 {len(p['subjects'])}입니다. 아직 작성하지 않은 모듈은 빌드에 들어가지 않으므로, 서브젝트를 하나 끝낼 때마다 바로 보드에 올려 볼 수 있습니다.</li>
       </ol>
+      <h3>PC 명령 한눈에 보기</h3>
+      <p>PC 도구 <code>{p['host']}</code>가 아래 명령을 바이트로 바꿔 보내고, 보드의 응답 한 줄을 화면에 보여 줍니다. 응답을 받은 뒤에 다음 명령을 보냅니다.</p>
+      <table>
+        <thead><tr><th>명령</th><th>하는 일</th><th>보드 응답</th></tr></thead>
+        <tbody>{"".join(f'<tr><td class="nw"><code>{a}</code></td><td>{b}</td><td><code>{c_}</code></td></tr>' for a, b, c_ in p['commands'])}</tbody>
+      </table>
+      <h3>장 뼈대 코드</h3>
 {chr(10).join(pcode(x) for x in p['skeleton'])}"""
-    secs = [("장 목표", s00, "s00"), ("최종 구조도·가져오는 파일", s01, "s01"), ("준비 · 장 뼈대", s02, "s02")]
+    secs = [("이 장에서 만드는 것", s00, "s00"), ("전체 구조와 파일", s01, "s01"), ("준비", s02, "s02")]
     for s, c, ce in subj:
         secs.append((f"서브젝트 {s['code']} · {s['title']}", subject_section(p, e, s, c, ce), sid(s)))
 
@@ -447,7 +469,7 @@ def build(p, course, chs_by_id, all_chs, pages, all_projects):
     for t, sw, r, n in merged(tx, full):
         swc = f"<td class=\"nw\"><code>{sw:0{p['sw_bits']}b}</code></td>" if p.get("sw_label") else ""
         rows += (f"<tr><td class=\"nw\">{subj_of[k]}</td>{swc}<td class=\"nw\"><code>{cmd_cell(t, n)}</code></td>"
-                 f"<td class=\"nw\"><code>{esc(r)}{f' ×{n}' if n > 1 else ''}</code></td></tr>")
+                 f"<td class=\"nw\"><code>{resp(r)}{f' ×{n}' if n > 1 else ''}</code></td></tr>")
         k += n
     def result_row(label, pattern, tag):
         path = bg.latest(pattern)
@@ -484,11 +506,11 @@ def build(p, course, chs_by_id, all_chs, pages, all_projects):
 
     used = top_sources(p)
     rep = "".join(f"<tr><td class=\"nw\">{s['code']} {s['title']}</td><td>{'<br>'.join(f'<code>{os.path.basename(x)}</code>' for x in c['new'] if x.endswith(('.v', '.sv')) and x in used) or '—'}</td>"
-                  f"<td>{s['see']}</td></tr>" for s, c, _ in subj)
+                  f"<td>{s['point']}</td></tr>" for s, c, _ in subj)
     hand = "".join(f"<tr><td><code>{a}</code></td><td>{b}</td></tr>" for a, b in p["handoff"])
-    s_last = f"""      <p>이 장에서 만든 것을 한눈에 정리합니다. 모두 보드에서 확인했다면 다음 장으로 넘어갑니다.</p>
+    s_last = f"""      <p>이 장에서 만든 것과 배운 점을 정리합니다.</p>
       <table>
-        <thead><tr><th>서브젝트</th><th>장 Top에 들어간 모듈</th><th>보드에서 확인한 것</th></tr></thead>
+        <thead><tr><th>서브젝트</th><th>장 Top에 들어간 모듈</th><th>핵심</th></tr></thead>
         <tbody>{rep}</tbody>
       </table>
       <table>
@@ -562,7 +584,7 @@ def checklist(p):
 CK_SUBS = [(r"\s*\(22장 협동 시뮬레이션과 같은 줄\)", ""), (r"\s*\(안 A 22장 표시\)", ""), (r"\s*\(협동 시뮬레이션 SHOW 줄\)", ""),
            (r"\s*부근\(23장 SoC xsim 값\)\. 차이가 있으면 원인 기록", ""), (r"21장 비트스트림", "5장 비트스트림"),
            (r"\s*\(`ch2[89]/validation/rtl_cosim\.csv`와 같은 (class|판정)\)", ""), (r"28장 펌웨어는", "이 펌웨어는"),
-           (r", 협동 시뮬레이션\)", ")"), (r"골든", "PC 기준"), (r"이거나 차이를 기록", ""), (r"실측 주기\(초\)를 기록", "주기를 초 단위로 재 봅니다")]
+           (r", 협동 시뮬레이션\)", ")"), (r"골든", "PC 기준"), (r"사이클 값이 매번 같거나 차이를 기록\(캐시 없음·같은 클록이면 같아야 함\)", "클록 수가 매번 같습니다 (캐시가 없고 클록이 같으므로)"), (r"실측 주기\(초\)를 기록", "주기를 초 단위로 재 봅니다")]
 
 
 def ck_clean(s):
@@ -626,13 +648,15 @@ def soc_subject_section(p, s, c, ce, gs):
                                            + ([("todo", "주의", plain(s["warn"]))] if s.get("warn") else [])
                                            + ([("todo", "보드 점검표", "·".join(s["board_items"]) + " 미실시")] if s["board_items"] else [])))
     out = esc(bg.excerpt(bg.log_lines(ce.rtl_path), pat))
-    return f"""      <p class="verdict"><b>학습목표:</b> {s['see']}</p>
-      <h3>보드에서 볼 것</h3>
+    return f"""      <p class="verdict"><b>목표:</b> {s['see']}</p>
+      <h3>해설</h3>
+{paras(s['concept'])}
+      <h3>보드에서 확인</h3>
       <p>{s['board_note']}</p>
 {board}
       <h3>작성할 코드</h3>
 {chr(10).join(pcode(x) for x in c["new"])}
-      <h3>실행과 기대 화면</h3>
+      <h3>실행과 기대 출력</h3>
       <div class="codeblock"><div class="codebar"><span>터미널 · 저장소 루트</span></div>
         <pre><code>{esc(c['run'])}</code></pre></div>
       <div class="codeblock"><div class="codebar"><span>기대 출력</span></div>
@@ -663,7 +687,8 @@ def build_soc(p, course, pages):
 
     class _E:            # steps()가 쓰는 속성
         board = board_done
-    s00 = f"""      <p><b>장 시연 (보드):</b> {p['demo']}</p>
+    s00 = f"""{paras(p['intro'])}
+      <p><b>장 끝에서 보드로 보여 줄 것:</b> {p['demo']}</p>
       <p>{p['days']}일 과정, 서브젝트 {len(p['subjects'])}개입니다. {p['plan_note']}</p>
 {steps(p, _E, state)}"""
 
@@ -693,7 +718,7 @@ def build_soc(p, course, pages):
     s02 = f"""      <ol>
         {prep}
       </ol>"""
-    secs = [("장 목표", s00, "s00"), ("최종 구조도·주소맵", s01, "s01"), ("준비", s02, "s02")]
+    secs = [("이 장에서 만드는 것", s00, "s00"), ("전체 구조와 주소맵", s01, "s01"), ("준비", s02, "s02")]
     for s, c, ce, gs in subj:
         secs.append((f"서브젝트 {s['code']} · {s['title']}", soc_subject_section(p, s, c, ce, gs), sid(s)))
 
@@ -719,7 +744,7 @@ def build_soc(p, course, pages):
         <pre><code>{esc(p['run'])}</code></pre></div>"""
     secs.append(("장 시연", demo, "demo"))
 
-    rep = "".join(f"<tr><td class=\"nw\">{s['code']} {s['title']}</td><td>{s['see']}</td></tr>" for s, c, ce, gs in subj)
+    rep = "".join(f"<tr><td class=\"nw\">{s['code']} {s['title']}</td><td>{s['point']}</td></tr>" for s, c, ce, gs in subj)
     hand = "".join(f"<tr><td><code>{a}</code></td><td>{b}</td></tr>" for a, b in p["handoff"])
     syn = synth_from_grep(p["project_synth"])
     rtl_all = all(state[s["code"]][0] == "pass" for s in p["subjects"])
@@ -727,9 +752,9 @@ def build_soc(p, course, pages):
         ("pass" if rtl_all else "todo", "RTL_SIM_PASS", "서브젝트 시뮬레이션·정적 검사 모두 통과" if rtl_all else "미검증 서브젝트 있음"),
         (syn[0], "SYNTH_TIMING_PASS", plain(syn[1])),
         ("todo", "BOARD_PASS", f"미실시 · 보드 점검표 {p['demo_items'][0]}~{p['demo_items'][-1]} 대기")]))
-    s_last = f"""      <p>이 장에서 만든 것을 한눈에 정리합니다.</p>
+    s_last = f"""      <p>이 장에서 만든 것과 배운 점을 정리합니다.</p>
       <table>
-        <thead><tr><th>서브젝트</th><th>확인한 것</th></tr></thead>
+        <thead><tr><th>서브젝트</th><th>핵심</th></tr></thead>
         <tbody>{rep}</tbody>
       </table>
       <table>

@@ -55,3 +55,8 @@
 - 참고: 13장 TB는 무작위 valid 간격이라 `$finish` 시각이 다르다(xsim 131600 ns, iverilog 91940 ns, `$urandom` 수열 차이). actual 파일은 비트 단위로 같다.
 - C 펌웨어와 함께 도는 22·28~31장(PC 시뮬레이션: FIFO + vvp 프로세스)은 iverilog 그대로. xsim 방식은 시험 전 — 정해지면 회신한다.
 - Vivado 환경 `LEVEL=sim run_all`(13~20·26장이 xsim으로 돎)은 실행 중 — 결과는 다음 회신.
+
+## 5. 지시 17 회신
+
+- 17-1 확인(main 05d6c6e 병합 뒤): `bash p01/scripts/run_sim.sh` → `# tool: Vivado Simulator v2024.2.0`, `RTL_SIM_PASS stages=4`. `bash p02/scripts/run_sim.sh 3` → 사례 줄 + `RTL_SIM_PASS stages=1`. 새 판정 시험: Traceback만 찍고 죽는 가짜 `python3`를 PATH 앞에 두면 RTL 줄이 PASS여도 `RTL_SIM_FAIL`, rc=1 — 의도대로.
+- 17-2~17-4(= 16-2~16-4)는 4절 그대로이며 이 PR(`vscode/xsim-stage1` → main)에 들어 있다. 병합 충돌은 생성 HTML(p05) 한 곳뿐이었고 생성기로 다시 만들었다(`--check` 둘 다 UP_TO_DATE).
