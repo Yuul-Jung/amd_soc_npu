@@ -12,19 +12,20 @@ ch17="$part03/ch17"
 build_dir=$(mktemp -d "${TMPDIR:-/tmp}/p3-18.XXXXXXXX")
 trap 'rm -rf "$build_dir"' EXIT
 export PYTHONDONTWRITEBYTECODE=1
+source "$chapter_dir/../common/scripts/p3_sim.sh"   # Vivado 있으면 xsim, 없으면 iverilog (SIM=로 고정)
 python3 --version
-iverilog -V 2>&1 | sed -n '1p'
+p3_sim_version
 sha256sum "$chapter_dir/reference/mnist_linear_f32.json" "$chapter_dir/reference/mnist_rtl_samples.txt" \
   | sed "s#$part03#part03#g"
 
 sim() {  # name data_w acc_w bias_w plusargs
   local dir="$build_dir/$1"
-  iverilog -g2012 -Wall -s tb_p3_tile784_10 -Ptb_p3_tile784_10.DATA_W="$2" \
-    -Ptb_p3_tile784_10.ACC_W="$3" -Ptb_p3_tile784_10.BIAS_W="$4" -o "$dir/sim" \
+  p3_sim_build "$dir" tb_p3_tile784_10 -P DATA_W="$2" \
+    -P ACC_W="$3" -P BIAS_W="$4" -- \
     "$part03/ch02/rtl/dsp_multiplier.v" "$part03/mini_npu/rtl/npu_dsp_mac_lane.v" \
     "$part03/ch13/rtl/p3_frame64_buffer.v" "$part03/ch04/rtl/bram_sync_buffer.v" \
     "$part03/ch14/rtl/p3_group10_core.v" "$ch17/rtl/p3_tile784_10.v" "$ch17/tb/tb_p3_tile784_10.sv"
-  vvp "$dir/sim" +VECTORS="$dir/vectors.txt" +ACTUAL="$dir/actual.txt" $5
+  p3_sim_run "$dir" +VECTORS="$dir/vectors.txt" +ACTUAL="$dir/actual.txt" $5
 }
 
 for cfg in i16_full:full:41:40 i16_w41:width:41:40 i16_w40:width:40:40; do
