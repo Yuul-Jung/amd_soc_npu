@@ -1,5 +1,5 @@
-/* (추가) 29장: 센서 감시 응용의 플랫폼 경계(28장 digit_io.h와 같은 구조, 대기 방식만 다르다).
- *   MicroBlaze V: sensor_io_xil.c (AXI UART Lite 폴링, AXI GPIO 0 = LED, AXI GPIO 1 = FND 표시 워드) — 28장 Bitstream 그대로
+/* 센서 감시 응용의 플랫폼 경계(6-1 digit_io.h와 같은 구조, 대기 방식만 다르다).
+ *   MicroBlaze V: sensor_io_xil.c (AXI UART Lite 폴링, AXI GPIO 0 = LED, AXI GPIO 1 = FND 표시 워드) — 6-1 Bitstream 그대로
  *   PC          : host/sensor_io_host.c (표준 입력 = UART 수신)
  */
 #ifndef SENSOR_IO_H

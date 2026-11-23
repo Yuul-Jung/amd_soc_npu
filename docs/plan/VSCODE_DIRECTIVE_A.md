@@ -167,6 +167,17 @@
     4. 16번 4항 — `part03/chNN/scripts/run_sim.sh`도 Vivado가 있으면 xsim으로 (`tools/sim/sim_top.sh`의 `sim_kind`·`sim_top` 사용 가능. TB가 `-P` 파라미터를 쓰지 않으면 `-generic_top` 줄만 빼고 같은 흐름). 통과 로그는 `part03/chNN/validation/xsim_rtl_YYYYMMDD.log`.
     5. `part03/` 변경은 평소처럼 `vscode/…` 브랜치 → main PR. 웹이 재생성·CI 확인 뒤 병합한다.
 
+18. **(2026-11-23 17:00, `vscode/part03-ch13-31` fe7b0df 반영 — 지금 실행할 것은 이 항목이다)**
+
+    **받은 것**: 17번 2~4항 (2d9678a 주석 정리, f7bfe1a `part03/common/scripts/p3_sim.sh`, fe7b0df 점검표 문구). 바뀐 157개 파일만 내용 그대로 가져왔다.
+    **웹에서 확인한 것**: ① `.v`·`.sv`·`.c`·`.h`·`.tcl`·`.xdc`는 주석을 지운 뒤 비교해 코드 동일, `.py` 28개는 docstring을 뺀 구문 트리 동일 ② 코드가 바뀐 것은 `run_sim.sh` 9개와 새 `p3_sim.sh`뿐 ③ iverilog로 13~20·26장 `run_sim.sh` 9개 PASS, 3·4장 장 Top `run_sim.sh` PASS ④ 장 페이지 재생성 — 코드 상자의 이력 꼬리표·날짜·도구 이름 0건. 5-7 코드 목록에서 점검표 원문은 뺐다(절차는 서브젝트마다 표로 실린다).
+    **웹이 실행하지 못한 것**: `p3_sim.sh`의 xsim 분기 (VS Code 기록 "9개 장 양쪽 PASS, diff 0"을 따른다).
+
+    **VS Code 할 일** (main `git pull` 뒤, 급하지 않다)
+    1. 17번 1항 회신이 아직 없다 — Vivado 환경에서 인자 없는 `bash p01/scripts/run_sim.sh`의 `# tool:` 줄, `bash p02/scripts/run_sim.sh 3`의 `RTL_SIM_PASS stages=1`. 결과 한 줄씩만.
+    2. 장 페이지 코드 상자에 남은 옛 장 번호·`안 A`는 이제 **문자열 안**에만 있다 (`.sh` 18, `.py` 10, `.tcl` 4, `.h` 1 — 예: `echo "NOT_RUN SOC_BENCH: 21장 build_soc.sh 먼저"`, `check … "21장 안 A SoC…"`, `#error "안 A: …"`, `"# 24장 클록 주기 스윕 …"`). 비트스트림·ELF·기록 파일의 SHA가 바뀌지 않는 것만 서브젝트 번호로 바꾼다. 재빌드가 필요한 것은 그대로 두고 목록만 회신한다.
+    3. 회신은 `part03/ch27/docs/VSCODE_TO_WEB_YYYYMMDD.md`.
+
 ## 5. 웹 Claude가 그동안 하는 것
 
 1장(구 00~03장) 시범 전환: 생성기를 "장 페이지 + 서브젝트 절" 구조로 바꾸고 미리보기를 만든다. VS Code 작업과 파일이 겹치지 않는다.

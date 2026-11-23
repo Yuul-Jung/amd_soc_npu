@@ -1,5 +1,5 @@
-// (추가) 22장 C 드라이버 협동 시뮬레이션 브리지. PC에서 실행되는 C 드라이버의 레지스터 접근을 FIFO로 받아
-// 20장 AXI4-Lite BFM으로 실제 p3_npu_axi_lite RTL에 수행하고 응답을 돌려준다.
+// C 드라이버 PC 시뮬레이션 브리지. PC에서 실행되는 C 드라이버의 레지스터 접근을 FIFO로 받아
+// 5-1 AXI4-Lite BFM으로 실제 p3_npu_axi_lite RTL에 수행하고 응답을 돌려준다.
 //   명령(+CMD FIFO): "W <addr hex> <data hex>" / "R <addr hex>" / "Q"
 //   응답(+RSP FIFO): "B <bresp>" / "D <rdata hex> <rresp>"
 // 드라이버가 SLVERR을 일으키면 실패로 끝낸다(드라이버는 버스 규칙을 지켜야 한다).

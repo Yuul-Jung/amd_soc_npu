@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""18장: MNIST 784→10 Float·INT8·INT16 정밀도 비교 기준모델(표준 라이브러리만 사용).
+"""MNIST 784→10 Float·INT8·INT16 정밀도 비교 기준모델(표준 라이브러리만 사용).
 
 같은 Float32 가중치(mnist_linear_f32.json)를 INT8·INT16으로 양자화하고, 같은 시험셋·전처리로 비교한다.
 양자화 계약(대칭, zero-point 0, N = 8 또는 16, Q = 2^(N-1) - 1):
   x_q = round_half_away(pixel * Q / 255)                 0..Q      (s_x = 1/Q,  x ≈ x_q·s_x)
   w_q = sat_N(round_half_away(W / s_w)),  s_w = max|W|/Q  -Q..Q
   b_q = sat_40(round_half_away(b / (s_x·s_w)))           누산과 같은 단위
-  z_q[c] = Σ x_q·w_q[c] + b_q[c]  (17장 13타일 RTL과 같은 정수, 반올림·포화 없음)  → argmax(동점 낮은 번호)
+  z_q[c] = Σ x_q·w_q[c] + b_q[c]  (4-2 13타일 RTL과 같은 정수, 반올림·포화 없음)  → argmax(동점 낮은 번호)
 반올림·포화는 PC 양자화 단계에서 한 번만 일어난다. RTL은 넓은 폭으로 정확히 누산한다(ovf=0 확인).
 모드: --eval(시험셋 전체, MNIST 필요), --rtl-vectors(커밋된 표본으로 RTL 벡터), --actual(RTL 비교).
 """

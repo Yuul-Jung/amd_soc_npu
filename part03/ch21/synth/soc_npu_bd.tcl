@@ -1,6 +1,6 @@
-# (추가) 21장: 복제된 제1부 11장 MicroBlaze V 프로젝트에 20장 NPU AXI4-Lite IP를 추가하고 Bitstream·XSA까지 만든다.
+# 복제된 제1부 11장 MicroBlaze V 프로젝트에 5-1 NPU AXI4-Lite IP를 추가하고 Bitstream·XSA까지 만든다.
 # 원본 프로젝트는 열지 않는다(build_soc.sh가 cp -a로 복제한 사본만 연다). BD 이름·사용자 Top·Wrapper 이름은 그대로.
-# (변경) 안 A(2026-11-19): 동결 주소맵(UART 0x4002·Timer 0x4003·INTC 0x4004·BTN GPIO 0x4001·SEG7 0x4006, NPU 0x44A0 그대로),
+# 동결 주소맵(UART 0x4002·Timer 0x4003·INTC 0x4004·BTN GPIO 0x4001·SEG7 0x4006, NPU 0x44A0 그대로),
 #   표준 7세그먼트 IP ip_seg7(모듈 참조, part03/common/rtl/ip_std), BTN GPIO(인터럽트), xlconcat 16입력(NPU = In12).
 #   사용자 Top은 basys3_soc21_top(핀 연결만). 원본 Top basys3_soc11_top은 이 복제본에서만 비활성.
 # 사용: vivado -mode batch -source soc_npu_bd.tcl -tclargs <복제 xpr> <IP repo> <XDC> <출력 폴더> <jobs> <part03 폴더>
@@ -19,12 +19,12 @@ proc check {cond msg} {
 }
 
 open_project $xpr
-# 원본의 상대 경로 XDC($PPRDIR/../../Basys-3-Master.xdc)는 사본 위치에서 맞지 않으므로 같은 활성 줄의 21장 XDC로 바꾼다
+# 원본의 상대 경로 XDC($PPRDIR/../../Basys-3-Master.xdc)는 사본 위치에서 맞지 않으므로 같은 활성 줄의 5-2 XDC로 바꾼다
 foreach f [get_files -quiet -of_objects [get_filesets constrs_1]] { remove_files -fileset constrs_1 $f }
 add_files -fileset constrs_1 -norecurse $xdc
 set_property ip_repo_paths [list $ip_repo] [current_project]
 update_ip_catalog -rebuild
-# (변경) 안 A: 표준 IP 소스(모듈 참조)와 21장 사용자 Top
+# 표준 IP 소스(모듈 참조)와 5-2 사용자 Top
 add_files -norecurse [list $part03/common/rtl/ip_std/ip_seg7.v $part03/common/rtl/ip_std/axil_slave.v \
   $part03/common/rtl/ip_std/ip_std.v $part03/ch21/rtl/basys3_soc21_top.v]
 set_property is_enabled false [get_files basys3_soc11_top.v]
@@ -49,7 +49,7 @@ set rst_net [get_bd_nets -of_objects [get_bd_pins axi_gpio_0/s_axi_aresetn]]
 connect_bd_net -net $clk_net [get_bd_pins p3_npu_0/s_axi_aclk]
 connect_bd_net -net $rst_net [get_bd_pins p3_npu_0/s_axi_aresetn]
 
-# (변경) 안 A: BTN GPIO(4비트 입력, 인터럽트)와 표준 7세그먼트 IP(ip06_seg7). SmartConnect M05·M06
+# BTN GPIO(4비트 입력, 인터럽트)와 표준 7세그먼트 IP(ip06_seg7). SmartConnect M05·M06
 set_property CONFIG.NUM_MI 7 $smc
 set gb [create_bd_cell -type ip -vlnv xilinx.com:ip:axi_gpio:2.0 axi_gpio_btn]
 set_property -dict [list CONFIG.C_GPIO_WIDTH 4 CONFIG.C_ALL_INPUTS 1 CONFIG.C_INTERRUPT_PRESENT 1] $gb
@@ -63,7 +63,7 @@ connect_bd_net -net $clk_net [get_bd_pins ip06_seg7/s_axi_aclk]
 connect_bd_net -net $rst_net [get_bd_pins ip06_seg7/s_axi_aresetn]
 foreach port {seg dp an} { make_bd_pins_external -name $port [get_bd_pins ip06_seg7/$port] }
 
-# (변경) 안 A 인터럽트: xlconcat 16입력. In0 Timer, In1 UART(예약, 펌웨어는 켜지 않음), In3 BTN, In12 NPU, 나머지 상수 0
+# 인터럽트: xlconcat 16입력. In0 Timer, In1 UART(예약, 펌웨어는 켜지 않음), In3 BTN, In12 NPU, 나머지 상수 0
 set tmr_net [get_bd_nets -of_objects [get_bd_pins axi_timer_0/interrupt]]
 delete_bd_objs $tmr_net
 set cat [create_bd_cell -type ip -vlnv xilinx.com:ip:xlconcat:2.1 irq_concat]
@@ -80,7 +80,7 @@ connect_bd_net [get_bd_pins irq_concat/dout] [get_bd_pins axi_intc_0/intr]
 # 주소: 사용자 IP 기본 영역 0x44A0_0000, 4 KB
 assign_bd_address -target_address_space /microblaze_riscv_0/Data [get_bd_addr_segs p3_npu_0/s_axi/reg0] \
   -offset $npu_base -range $npu_range
-# (변경) 안 A 동결 주소맵: 기존 세그먼트를 옮기고(겹침 없는 순서) 새 블록을 배치한다
+# 동결 주소맵: 기존 세그먼트를 옮기고(겹침 없는 순서) 새 블록을 배치한다
 proc data_seg {cell} {
   return [get_bd_addr_segs -of_objects [get_bd_addr_spaces /microblaze_riscv_0/Data] -filter "NAME =~ *_${cell}_*"]
 }
@@ -115,7 +115,7 @@ foreach a $rows {
 check {$overlap == 0} "data address segments do not overlap"
 set nseg [get_bd_addr_segs -of_objects [get_bd_addr_spaces /microblaze_riscv_0/Data] -filter {NAME =~ "*p3_npu_0*"}]
 check {[get_property OFFSET $nseg] == $npu_base} "NPU base $npu_base"
-# (변경) 안 A 주소맵 대조: 셀 이름 → 베이스·범위가 지시문 2절 표와 한 줄씩 같아야 한다
+# 주소맵 대조: 셀 이름 → 베이스·범위가 지시문 2절 표와 한 줄씩 같아야 한다
 set map_a {dlmb_bram_if_cntlr 0x00000000 65536 axi_gpio_0 0x40000000 65536 axi_gpio_btn 0x40010000 65536
   axi_uartlite_0 0x40020000 65536 axi_timer_0 0x40030000 65536 axi_intc_0 0x40040000 65536
   ip06_seg7 0x40060000 65536 p3_npu_0 0x44A00000 4096}
@@ -131,7 +131,7 @@ foreach {cell base rng} $map_a {
 if {[llength $segs] != [expr {[llength $map_a] / 3}]} { puts "ADDR_MAP_A extra segments: [llength $segs]"; set addr_ok 0 }
 puts [expr {$addr_ok ? "ADDR_MAP_A_PASS" : "ADDR_MAP_A_FAIL"}]
 check {$addr_ok} "address map A"
-# (변경) 안 A 인터럽트 대조: concat 입력 번호마다 구동원을 확인한다(예약 칸은 irq_zero)
+# 인터럽트 대조: concat 입력 번호마다 구동원을 확인한다(예약 칸은 irq_zero)
 set irq_ok 1
 for {set i 0} {$i < 16} {incr i} {
   if {[dict exists $irq_map_a $i]} { set exp [dict get $irq_map_a $i] } else { set exp irq_zero/dout }
@@ -156,7 +156,7 @@ generate_target all $bd_file
 create_ip_run [get_files $bd_file]
 export_ip_user_files -of_objects $bd_file -no_script -sync -force -quiet
 
-# (변경) 안 A: 사용자 Top은 basys3_soc21_top(핀 연결만)
+# 사용자 Top은 basys3_soc21_top(핀 연결만)
 set_property top basys3_soc21_top [current_fileset]
 update_compile_order -fileset sources_1
 check {[get_property top [current_fileset]] eq "basys3_soc21_top"} "user top basys3_soc21_top"

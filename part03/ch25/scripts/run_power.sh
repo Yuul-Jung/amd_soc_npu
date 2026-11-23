@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# (추가) 25장: SoC 전력 추정(Vivado report_power). vectorless + 23장 시뮬레이션 구간별 SAIF.
-#   필요: 21장 build(배선 완료 프로젝트), 23장 build(TB·ELF가 연결된 시뮬레이션 프로젝트)
+# SoC 전력 추정(Vivado report_power). vectorless + 5-4 시뮬레이션 구간별 SAIF.
+#   필요: 5-2 build(배선 완료 프로젝트), 5-4 build(TB·ELF가 연결된 시뮬레이션 프로젝트)
 #   결과: build/(SAIF·보고서), validation/power_summary.md (reference/power_summary.py)
 set -euo pipefail
 chapter_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)

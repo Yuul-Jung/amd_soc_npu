@@ -1,8 +1,8 @@
-/* (추가) 31장: 보안 UART 모델 적재 + 추론. 규격의 정본은 reference/secure_reference.py 머리말.
+/* 보안 UART 모델 적재 + 추론. 규격의 정본은 reference/secure_reference.py 머리말.
  *   'M' 보안 모델 프레임: CRC16(전송) → ver → len ≤ 256 → HMAC 검증(일정시간) → seq > last_seq → iv 결속
  *       → last_seq 소비 → AES-CTR 복호(스테이징 뱅크) → 모델 검사 → 원자적 커밋(활성 뱅크 전환 + NPU Bias 재적재)
  *       MAC 확인 전에는 복호하지 않고, 검사·커밋이 실패하면 활성 모델은 그대로다.
- *   'S' 추론(29장 센서 창, guard·특징 재사용): 프레임의 model_id가 활성 모델과 같아야 한다.
+ *   'S' 추론(6-3 센서 창, guard·특징 재사용): 프레임의 model_id가 활성 모델과 같아야 한다.
  *   'I' 식별(활성 모델·키 지문·last_seq). 키 값은 출력하지 않는다.
  * 키는 build/secure_keys.h(저장소 제외)에만 있다. 교육용: Basys3에는 키 보호 저장소·Secure Boot·Tamper 방어가 없다.
  * last_seq는 RAM에만 있어 Reset 뒤 0으로 돌아간다(재부팅 뒤 Replay 가능 — 알려진 한계, README 참조).
@@ -31,7 +31,7 @@ typedef struct {
 
 static model_bank_t bank[2];          /* bank[active] = 사용 중, bank[!active] = 스테이징 */
 static int active;
-static int8_t w_exp[NPU_N_CLASS][NPU_N_IN];   /* 활성 뱅크에서 만든 20장 IP 형태(나머지 0) */
+static int8_t w_exp[NPU_N_CLASS][NPU_N_IN];   /* 활성 뱅크에서 만든 5-1 IP 형태(나머지 0) */
 static int64_t b_exp[NPU_N_CLASS];
 static uint32_t last_seq;
 static int last_reject;
@@ -50,7 +50,7 @@ static uint32_t crc32_byte(uint32_t crc, uint8_t v)
     return crc;
 }
 
-/* 29장 MODEL_ID 규칙: 20장 IP 형태 w[10][784] ‖ b[10](int64 LE)의 CRC32. 빈 칸은 0, 쓰지 않는 Bias는 -2^38 */
+/* 6-3 MODEL_ID 규칙: 5-1 IP 형태 w[10][784] ‖ b[10](int64 LE)의 CRC32. 빈 칸은 0, 쓰지 않는 Bias는 -2^38 */
 static uint32_t bank_id(const model_bank_t *m)
 {
     uint32_t crc = 0xFFFFFFFFu;
@@ -85,7 +85,7 @@ static int parse_blob(const uint8_t *p, uint32_t n, model_bank_t *m)
         for (i = 7; i >= 0; i--)
             v = (v << 8) | p[30 + 8 * c + i];
         m->b[c] = (int64_t)v;
-        if (m->b[c] < -((int64_t)1 << 39) || m->b[c] >= ((int64_t)1 << 39))   /* 20장 Bias 40비트 */
+        if (m->b[c] < -((int64_t)1 << 39) || m->b[c] >= ((int64_t)1 << 39))   /* 5-1 Bias 40비트 */
             return 0;
     }
     m->id = bank_id(m);
@@ -278,7 +278,7 @@ static int handle(npu_t *npu)
         if (c == SIO_EOF)
             return -1;
         if (c == SIO_TIMEOUT)
-            continue;                                  /* 31장은 링크 감시 동작 없음(대기 계속) */
+            continue;                                  /* 6-5는 링크 감시 동작 없음(대기 계속) */
         if (prev == 'P' && c == '3')
             break;
         prev = c;

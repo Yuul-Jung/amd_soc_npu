@@ -1,8 +1,8 @@
-## (변경) 안 A(2026-11-20) 30장: 21장 XDC 전체(아래 그대로, btn[3] = btnU T18 포함) + Pmod JB(모터 드라이버 IN1·IN2·ENA, 비상정지 루프 PULLDOWN).
-## btnU는 21장처럼 btn[3](axi_gpio_btn)으로 들어가고, Top이 같은 핀을 모터 안전 코어 비상정지 입력에도 연결한다.
-## (추가) 21장: 제1부 11장 성공 프로젝트가 쓰는 Basys3 Master XDC(Digilent)의 활성 줄만 그대로 옮긴 제약.
+## 5-2 XDC 전체(아래 그대로, btn[3] = btnU T18 포함) + Pmod JB(모터 드라이버 IN1·IN2·ENA, 비상정지 루프 PULLDOWN).
+## btnU는 5-2처럼 btn[3](axi_gpio_btn)으로 들어가고, Top이 같은 핀을 모터 안전 코어 비상정지 입력에도 연결한다.
+## 5-2: 제1부 11장 성공 프로젝트가 쓰는 Basys3 Master XDC(Digilent)의 활성 줄만 그대로 옮긴 제약.
 ## 포트: clk(W5 100 MHz), btnC, sw[15:0], led[15:0], RsRx/RsTx(USB-UART). NPU는 내부 AXI라 핀이 없다.
-## (변경) 안 A: btn[3:0](U·D·L·R), 7세그먼트 seg[6:0]·dp·an[3:0]. 핀은 Basys-3-Master.xdc와 같다.
+## btn[3:0](U·D·L·R), 7세그먼트 seg[6:0]·dp·an[3:0]. 핀은 Basys-3-Master.xdc와 같다.
 set_property -dict { PACKAGE_PIN W5   IOSTANDARD LVCMOS33 } [get_ports clk]
 create_clock -name sys_clk_pin -period 10.00 -waveform {0 5} [get_ports clk]
 set_property -dict { PACKAGE_PIN V17   IOSTANDARD LVCMOS33 } [get_ports {sw[0]}]
@@ -62,7 +62,7 @@ set_property BITSTREAM.GENERAL.COMPRESS TRUE [current_design]
 set_property BITSTREAM.CONFIG.CONFIGRATE 33 [current_design]
 set_property CONFIG_MODE SPIx4 [current_design]
 
-## ---- 30장 추가: Pmod JB (Basys-3-Master.xdc 핀)
+## ---- 6-4 모터: Pmod JB (Basys-3-Master.xdc 핀)
 set_property -dict { PACKAGE_PIN A14   IOSTANDARD LVCMOS33 } [get_ports {JB[0]}]
 set_property -dict { PACKAGE_PIN A16   IOSTANDARD LVCMOS33 } [get_ports {JB[1]}]
 set_property -dict { PACKAGE_PIN B15   IOSTANDARD LVCMOS33 } [get_ports {JB[2]}]

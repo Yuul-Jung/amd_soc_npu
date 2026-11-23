@@ -1,4 +1,4 @@
-# (추가) 20장: p3_npu_axi_lite를 Vivado IP(component.xml)로 패키징한다.
+# p3_npu_axi_lite를 Vivado IP(component.xml)로 패키징한다.
 # Vivado가 원본을 IP 폴더 src/로 복사하므로 IP 폴더는 저장소에 두지 않는 빌드 산출물이다(정본은 각 장 rtl/).
 # 사용: vivado -mode batch -source package_ip.tcl -tclargs <part03 경로> <임시 프로젝트 폴더> <IP 출력 폴더>
 set part03 [file normalize [lindex $argv 0]]

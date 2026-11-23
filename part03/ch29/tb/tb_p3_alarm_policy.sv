@@ -1,4 +1,4 @@
-// (추가) 29장: p3_alarm_policy 벡터 시험. Python sensor_reference.policy_vectors가 만든 클록별 입력·기대값
+// p3_alarm_policy 벡터 시험. Python sensor_reference.policy_vectors가 만든 클록별 입력·기대값
 //   (rst cv cand ack | state latch cnt ack_ok alarm)을 그대로 대조한다. 지정 시나리오 + 무작위 4000클록.
 `timescale 1ns/1ps
 module tb_p3_alarm_policy;

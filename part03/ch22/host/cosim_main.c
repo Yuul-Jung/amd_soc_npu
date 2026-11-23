@@ -1,9 +1,9 @@
-/* (추가) 22장: PC 협동 시뮬레이션 main. 같은 app_run()을 실행하고 레지스터 접근은 FIFO로 RTL에 보낸다. */
+/* PC 시뮬레이션 main. 같은 app_run()을 실행하고 레지스터 접근은 FIFO로 RTL에 보낸다. */
 #include <stdio.h>
 #include "app.h"
 #include "npu_driver.h"
 
-/* (변경) 안 A: 보드의 app_show_xil.c와 같은 값(SEG7 VALUE·MODE, LED)을 줄로 남긴다 */
+/* 보드의 app_show_xil.c와 같은 값(SEG7 VALUE·MODE, LED)을 줄로 남긴다 */
 void app_show(int picture, int cls)
 {
     printf("SHOW picture=%d class=%d seg7_value=%04x seg7_mode=%03x led=%04x\n", picture, cls,

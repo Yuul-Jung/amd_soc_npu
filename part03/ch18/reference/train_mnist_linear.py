@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""18장: MNIST 784→10 Float32 선형 분류기 학습(PC 전용, PyTorch·NumPy 필요).
+"""MNIST 784→10 Float32 선형 분류기 학습(PC 전용, PyTorch·NumPy 필요).
 
 전처리: x = pixel / 255 (0..1, 평균·표준편차 정규화 없음 → 정수화 zero-point 0).
 결과: 같은 폴더의 mnist_linear_f32.json (float32 가중치·Bias를 정확한 10진 표현으로 저장,

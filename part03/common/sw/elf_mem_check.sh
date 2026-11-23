@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# (추가) 31장: MicroBlaze V ELF 메모리 배치 검사. .stack ≥ 4096(p3_stack_4k.c 적용)이고 스택 끝이 LMB 64 KB 안이어야 PASS.
+# 6-5: MicroBlaze V ELF 메모리 배치 검사. .stack ≥ 4096(p3_stack_4k.c 적용)이고 스택 끝이 LMB 64 KB 안이어야 PASS.
 # 사용: elf_mem_check.sh <elf>   (Vitis settings를 source한 셸에서)
 set -euo pipefail
 elf=$1

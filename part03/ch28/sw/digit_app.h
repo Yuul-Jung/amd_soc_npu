@@ -1,4 +1,4 @@
-/* (추가) 28장: UART 숫자 인식 응용(784 입력·INT8·13타일 NPU). 규약은 reference/digit_reference.py 머리말과 같다. */
+/* UART 숫자 인식 응용(784 입력·INT8·13타일 NPU). 규약은 reference/digit_reference.py 머리말과 같다. */
 #ifndef DIGIT_APP_H
 #define DIGIT_APP_H
 #include <stdint.h>

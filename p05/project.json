@@ -410,8 +410,7 @@
         "id": "part03/ch27",
         "version": "VS Code 판",
         "new": [
-          "part03/ch27/scripts/run_all.sh",
-          "part03/ch27/docs/BOARD_CHECKLIST.md"
+          "part03/ch27/scripts/run_all.sh"
         ],
         "tb": [],
         "ref": [],

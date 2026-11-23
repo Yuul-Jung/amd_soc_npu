@@ -1,4 +1,4 @@
-# (추가) 28장: 28장 SoC 복제 프로젝트에 TB와 보드용 digit_app.elf를 연결해 xsim 행동 시뮬레이션을 실행한다.
+# SoC 복제 프로젝트에 TB와 보드용 digit_app.elf를 연결해 xsim 행동 시뮬레이션을 실행한다.
 # 사용: vivado -mode batch -source soc28_uart_sim.tcl -tclargs <복제 xpr> <tb_soc28_uart.sv> <digit_app.elf> <frame.hex> <record.txt>
 set xpr [lindex $argv 0]
 set tb [file normalize [lindex $argv 1]]

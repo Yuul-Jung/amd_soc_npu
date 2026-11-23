@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""29장: 센서 융합 상태 감시 기준모델(정본, 표준 라이브러리만). 교육용 합성 데이터이며 산업 안전 보증이 아니다.
+"""센서 융합 상태 감시 기준모델(정본, 표준 라이브러리만). 교육용 합성 데이터이며 산업 안전 보증이 아니다.
 
 센서 3종(제2부 IP 기준, 창 8표본·100 ms 간격):
   온도  DS18B20  int16, 1/16 °C   결측 0x7FFF   유효 -20.0..100.0 °C (-320..1600)
@@ -10,7 +10,7 @@
 판정 순서(AI보다 규칙이 먼저, guard):
   센서별 범위 밖·고착 → FAULT 비트(온도 1, 진동 2, 거리 4) / 결측·지연 → UNKNOWN 비트(같은 위치)
   FAULT 비트가 하나라도 있으면 후보 FAULT, 아니면 UNKNOWN 비트가 있으면 후보 UNKNOWN. 이때 NPU는 실행하지 않는다.
-  모두 유효할 때만 특징 6개 → NPU(20장 IP, 0번 타일만 사용) → 후보 = NPU class(0 NORMAL, 1 WARNING, 2 FAULT)
+  모두 유효할 때만 특징 6개 → NPU(5-1 IP, 0번 타일만 사용) → 후보 = NPU class(0 NORMAL, 1 WARNING, 2 FAULT)
   링크: 프레임 대기 시간 초과 또는 연속 프로토콜 오류 3회 → 후보 UNKNOWN(이유 비트 8). NPU 오류·CPU 불일치도 UNKNOWN.
 
 특징 6개(센서별로 따로 정한 심각도 눈금, 단위를 섞지 않는다). q(n, d) = min(127, max(0, n)·127 // d)
@@ -22,16 +22,16 @@
   f4 거리 근접    q(125 - min d, 160)           125 cm → 0, 45 cm → 63
   f5 접근 속도    q((d0 - d7) - 10, 120)        창 안 10 cm → 0, 70 cm → 63
 
-NPU 모델: 학습(float, train_sensor_model.py) → 18장 quantize_model(…, 8) → w[3][6]·b[3]
-  20장 IP는 784 입력·10 class 고정 → x[0..5] = 특징, x[6..783] = 0, w 행 3..9 = 0, b[3..9] = UNUSED_BIAS(-2^38)
-  MODEL_ID = zlib.crc32(w[10][784] 바이트 ‖ b[10] int64 LE) (28장과 같은 규칙)
+NPU 모델: 학습(float, train_sensor_model.py) → 4-3 quantize_model(…, 8) → w[3][6]·b[3]
+  5-1 IP는 784 입력·10 class 고정 → x[0..5] = 특징, x[6..783] = 0, w 행 3..9 = 0, b[3..9] = UNUSED_BIAS(-2^38)
+  MODEL_ID = zlib.crc32(w[10][784] 바이트 ‖ b[10] int64 LE) (6-1과 같은 규칙)
 
 경보 정책(상태 코드 NORMAL 0, WARNING 1, FAULT 2, UNKNOWN 3, 심각도 NORMAL < WARNING < UNKNOWN < FAULT):
   Reset·부팅 = UNKNOWN. 후보 심각도 ≥ 현재 → 즉시 그 상태(cnt 0), 후보가 FAULT면 latch = 1
   후보 < 현재: latch면 cnt 0(진행 없음), 아니면 연속 CLEAR_N(3)번째에 그 3개 중 가장 심각한 상태로 내림
   ACK: latch면 latch 0·cnt 0(ok=1), 아니면 무시(ok=0). 같은 클록에 후보와 ACK가 오면(RTL) ACK는 무시한다(보수적)
 
-UART 프레임: 28장과 같은 'P' '3' CMD PAYLOAD CRC16(CCITT-FALSE, 상위 먼저)
+UART 프레임: 6-1과 같은 'P' '3' CMD PAYLOAD CRC16(CCITT-FALSE, 상위 먼저)
   'I' 식별 → P3_SENSOR READY …     'A' ACK → ACK ok=… state=… latch=…
   'S' seq u16 ‖ model_id u32 ‖ age_t,age_v,age_d u16 ‖ 8 × (t i16, v u16, d u16)  (모두 LE, 60바이트)
       → STATE src=FRAME … (guard·특징·점수·후보·상태)
@@ -342,7 +342,7 @@ def selftest():
     f = sensor_frame(0x0102, model_id(qm), s)
     assert len(f) == 2 + 1 + PAYLOAD_BYTES + 2 and crc16(f[2:]) == 0
     assert golden([0] * N_FEAT, qm)[0] == qm["b"][:N_CLS]
-    # 29장 가이드 예제와 같은 순서: 결측 → UNKNOWN, 범위 밖 → FAULT, 정상 → 모델 입력
+    # 가이드 예제와 같은 순서: 결측 → UNKNOWN, 범위 밖 → FAULT, 정상 → 모델 입력
     ok = {"age": [0, 0, 0], "t": [23 * 16] * 8, "v": [2048 + (60 if i % 2 else -60) for i in range(8)], "d": [60] * 8}
     assert guard(ok) == (0, 0)
     assert guard(dict(ok, t=[T_MISS] + ok["t"][1:])) == (0, B_T)

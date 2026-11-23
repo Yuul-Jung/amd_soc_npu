@@ -1,4 +1,4 @@
-/* (추가) 31장: 보안 UART 모델 적재 응용. 규격은 reference/secure_reference.py 머리말. */
+/* 보안 UART 모델 적재 응용. 규격은 reference/secure_reference.py 머리말. */
 #ifndef SECURE_APP_H
 #define SECURE_APP_H
 #include <stdint.h>

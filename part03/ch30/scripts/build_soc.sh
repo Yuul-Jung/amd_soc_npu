@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# (추가) 30장: 모터 안전 SoC(21장 안 A SoC + 모터 GPIO 0x4007_0000 + p3_motor_safety) Bitstream·XSA와 펌웨어 ELF.
-#   필요: 21장 build_soc.sh 결과(ch21/build/soc21_npu). 그 폴더는 읽기만 하고 cp -a로 복제한다(전후 해시 확인).
+# 모터 안전 SoC(5-2 SoC + 모터 GPIO 0x4007_0000 + p3_motor_safety) Bitstream·XSA와 펌웨어 ELF.
+#   필요: 5-2 build_soc.sh 결과(ch21/build/soc21_npu). 그 폴더는 읽기만 하고 cp -a로 복제한다(전후 해시 확인).
 #   결과(build/, 저장소 제외): soc30 복제 프로젝트, out/*.bit, out/soc30_motor.xsa, ws/motor_app ELF
 set -euo pipefail
 chapter_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""13~19/28장 호스트 정수 기준모델의 독립 unittest. FPGA 검증과 별개."""
+"""3-1~4-4·6-1 호스트 정수 기준모델의 독립 unittest. FPGA 검증과 별개."""
 import random
 import unittest
 

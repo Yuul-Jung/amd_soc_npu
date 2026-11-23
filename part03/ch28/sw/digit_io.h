@@ -1,4 +1,4 @@
-/* (추가) 28장: 숫자 인식 응용의 플랫폼 경계. 같은 digit_app.c를 MicroBlaze V와 PC 협동 시뮬레이션이 함께 쓴다.
+/* 숫자 인식 응용의 플랫폼 경계. 같은 digit_app.c를 MicroBlaze V와 PC 시뮬레이션이 함께 쓴다.
  *   MicroBlaze V: digit_io_xil.c (AXI UART Lite 폴링 수신, AXI GPIO 0 = LED, AXI GPIO 1 = FND 표시 워드)
  *   PC          : host/digit_io_host.c (표준 입력 = UART 수신, 표시 값은 DISP 줄로만 확인)
  */

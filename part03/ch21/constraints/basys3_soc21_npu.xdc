@@ -1,6 +1,6 @@
-## (추가) 21장: 제1부 11장 성공 프로젝트가 쓰는 Basys3 Master XDC(Digilent)의 활성 줄만 그대로 옮긴 제약.
+## 제1부 11장 성공 프로젝트가 쓰는 Basys3 Master XDC(Digilent)의 활성 줄만 그대로 옮긴 제약.
 ## 포트: clk(W5 100 MHz), btnC, sw[15:0], led[15:0], RsRx/RsTx(USB-UART). NPU는 내부 AXI라 핀이 없다.
-## (변경) 안 A: btn[3:0](U·D·L·R), 7세그먼트 seg[6:0]·dp·an[3:0]. 핀은 Basys-3-Master.xdc와 같다.
+## btn[3:0](U·D·L·R), 7세그먼트 seg[6:0]·dp·an[3:0]. 핀은 Basys-3-Master.xdc와 같다.
 set_property -dict { PACKAGE_PIN W5   IOSTANDARD LVCMOS33 } [get_ports clk]
 create_clock -name sys_clk_pin -period 10.00 -waveform {0 5} [get_ports clk]
 set_property -dict { PACKAGE_PIN V17   IOSTANDARD LVCMOS33 } [get_ports {sw[0]}]

@@ -1,5 +1,5 @@
-// (추가) 14장 p3_group10_core 자동 판정 테스트벤치.
-// 13장 p3_frame64_buffer 실제 RTL과 연결: 스트림 → 프레임 버퍼 → 4PE 3그룹 → 10점수·Class.
+// p3_group10_core 자동 판정 테스트벤치.
+// 3-1 p3_frame64_buffer 실제 RTL과 연결: 스트림 → 프레임 버퍼 → 4PE 3그룹 → 10점수·Class.
 // Python 벡터(가중치·Bias·입력)를 쓰기 포트로 적재하고 결과를 actual에 기록한다(Python이 비트 단위 비교).
 // 추가 판정: 프레임 없는 start 거부, Busy 중 쓰기·start 거부, 범위 밖 class 거부, Busy 중 Reset 후 재실행,
 // done 1클록 펄스, 처리 클록 수 일정, x 읽기는 프레임 보관 중에만.
@@ -123,7 +123,7 @@ module tb_p3_group10_core;
         expect_error("class 10 write");
 
         for (cidx = 0; cidx < ncase; cidx = cidx + 1) begin
-            // Icarus는 배열 원소에 직접 $fscanf할 수 없어 임시 변수로 읽는다.
+            // 배열 원소에 직접 $fscanf하지 않고 임시 변수로 읽는다.
             for (i = 0; i < 64; i = i + 1) begin rc = $fscanf(vf, "%d", tmp); x[i] = tmp; end
             for (c = 0; c < 10; c = c + 1)
                 for (i = 0; i < 64; i = i + 1) begin rc = $fscanf(vf, "%d", tmp); w[c][i] = tmp; end

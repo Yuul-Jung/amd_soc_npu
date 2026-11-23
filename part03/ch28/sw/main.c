@@ -1,4 +1,4 @@
-/* (추가) 28장: MicroBlaze V main. NPU 베이스 주소는 Vivado Address Editor 값(xparameters.h)을 쓴다. */
+/* MicroBlaze V main. NPU 베이스 주소는 Vivado Address Editor 값(xparameters.h)을 쓴다. */
 #include "xparameters.h"
 #include "digit_app.h"
 

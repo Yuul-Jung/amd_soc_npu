@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""20장: AXI4-Lite NPU 제어 IP 시험 벡터·기대값 생성과 RTL 비교(표준 라이브러리).
+"""AXI4-Lite NPU 제어 IP 시험 벡터·기대값 생성과 RTL 비교(표준 라이브러리).
 
 CPU가 레지스터로 전체 784 추론을 수행했을 때 읽은 10개 점수(SCORE_LO/HI)·CLASS·OVF가
-17장 기준모델 model()과 같아야 한다. 사례: 18장 MNIST INT8 표본 3개(INT8≠Float 포함),
+4-2 기준모델 model()과 같아야 한다. 사례: 4-3 MNIST INT8 표본 3개(INT8≠Float 포함),
 INT8 극값 2개(Bias ±2^39 → SCORE_HI 사용), 무작위 1개, class 0·1 동점 1개.
 """
 import argparse
@@ -41,7 +41,7 @@ def cases(rng):
         picked.append((v[0], v[3], v[2], v[5:]))   # index, int8 예측, float 예측, pixels
     mnist = [picked[0], next(p for p in picked if p[1] != p[2]), picked[1]]
     out = [(quantize_x(px, 8), qm["w"], qm["b"]) for _, _, _, px in mnist]
-    ext = build_cases("width", BIAS_W, random.Random(1717))[:2]   # 17장 극값(Bias ±2^39)
+    ext = build_cases("width", BIAS_W, random.Random(1717))[:2]   # 4-2 극값(Bias ±2^39)
     out = [ext[0]] + out[:1] + [ext[1]] + out[1:]                 # 0: 극값(스냅샷 A), 1: MNIST(B)
     out.append(([rng.randint(-128, 127) for _ in range(N_IN)],
                 [[rng.randint(-128, 127) for _ in range(N_IN)] for _ in range(N_CLASS)],

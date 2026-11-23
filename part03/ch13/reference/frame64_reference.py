@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""13장: 8×8 INT8 입력 프레임 계약 기준모델·시험 벡터 생성·RTL 결과 비교.
+"""8×8 INT8 입력 프레임 계약 기준모델·시험 벡터 생성·RTL 결과 비교.
 
 계산 규칙은 host_tools/p3_integer_reference.py의 함수만 조합한다.
 - 픽셀 양자화: sat_int8(round_shift_away(pixel_u8, 1))  (0..255 -> 0..127)

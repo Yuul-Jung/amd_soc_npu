@@ -1,4 +1,4 @@
-// (추가) 20장: AXI4-Lite Master BFM 태스크(모듈 안에서 `include). 20장 TB와 22장 C 드라이버 브리지 TB가 함께 쓴다.
+// AXI4-Lite Master BFM 태스크(모듈 안에서 `include). 5-1 TB와 5-3 C 드라이버 브리지 TB가 함께 쓴다.
 // 필요한 모듈 신호: clk, awaddr, awvalid, awready, wdata, wstrb, wvalid, wready, bvalid, bready, bresp,
 //   araddr, arvalid, arready, rvalid, rready, rdata, rresp. 모든 구동은 negedge, 핸드셰이크는 posedge.
     task automatic send_aw(input [5:0] a, input integer delay);

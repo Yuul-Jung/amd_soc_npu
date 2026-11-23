@@ -1,11 +1,11 @@
-// (추가) 29장: 경보 정책 RTL(펌웨어 policy_cand/policy_ack, Python sensor_reference.Policy와 같은 규칙).
+// 경보 정책 RTL(펌웨어 policy_cand/policy_ack, Python sensor_reference.Policy와 같은 규칙).
 //   상태 코드: NORMAL 0, WARNING 1, FAULT 2, UNKNOWN 3. 심각도: NORMAL < WARNING < UNKNOWN < FAULT
 //   rst(동기, High) → UNKNOWN(데이터를 보기 전 안전한 기본값), latch 0
 //   cand_valid: 후보 심각도 ≥ 현재 → 즉시 그 상태(cnt 0), FAULT면 latch 1
 //               후보 < 현재 → latch면 cnt 0(하향 없음), 아니면 연속 CLEAR_N번째에 그 후보들 중 가장 심각한 상태로
 //   ack(cand_valid 없을 때만): latch면 latch 0·cnt 0·ack_ok 1클록. 같은 클록에 후보가 오면 ACK는 무시(보수적)
-//   alarm_o = state ≠ NORMAL. 표시·기록용이며 위험 장치 정지에는 독립 보호 로직을 쓴다(30장).
-// 복합 우선순위 판단은 이 모듈에만 두고 Top에는 두지 않는다(29장 가이드 6절).
+//   alarm_o = state ≠ NORMAL. 표시·기록용이며 위험 장치 정지에는 독립 보호 로직을 쓴다(6-4).
+// 복합 우선순위 판단은 이 모듈에만 두고 Top에는 두지 않는다(6-3 가이드 6절).
 `timescale 1ns/1ps
 module p3_alarm_policy #(
     parameter integer CLEAR_N = 3          // 2..4

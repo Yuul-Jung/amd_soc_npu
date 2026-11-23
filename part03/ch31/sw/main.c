@@ -1,4 +1,4 @@
-/* (추가) 31장: MicroBlaze V main. 28장 SoC(Bitstream·XSA) 그대로, NPU 주소는 xparameters.h. */
+/* MicroBlaze V main. 6-1 SoC(Bitstream·XSA) 그대로, NPU 주소는 xparameters.h. */
 #include "xparameters.h"
 #include "secure_app.h"
 

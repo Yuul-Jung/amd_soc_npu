@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# (추가) 19장: Vivado Out-of-Context 합성(7개 구성) → validation/synth_ooc_summary.md.
-# (변경) 기본으로 OOC 배치·배선까지 수행한다(IMPL=0이면 합성만). 비트스트림·실물 없음.
+# Vivado Out-of-Context 합성(7개 구성) → validation/synth_ooc_summary.md.
+# 기본으로 OOC 배치·배선까지 수행한다(IMPL=0이면 합성만). 비트스트림·실물 없음.
 # Vivado가 PATH에 없으면 VIVADO_SETTINGS로 settings64.sh 지정.
 set -euo pipefail
 chapter_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
