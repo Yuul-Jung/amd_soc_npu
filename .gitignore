@@ -7,3 +7,10 @@ vivado*.log
 xsim.dir/
 __pycache__/
 data/
+# Vivado 시뮬레이터(xsim) 산출물 — 증거 pNN/validation/xsim_rtl_*.log 는 커밋한다
+*.pb
+*.wdb
+xvlog.log
+xelab.log
+xsim*.log
+!p[0-9][0-9]/validation/xsim_rtl_*.log
