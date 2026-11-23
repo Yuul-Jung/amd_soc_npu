@@ -12,9 +12,10 @@ part03=$(cd -- "$chapter_dir/.." && pwd)
 build_dir=$(mktemp -d "${TMPDIR:-/tmp}/p3-31.XXXXXXXX")
 trap 'rm -rf "$build_dir"' EXIT
 export PYTHONDONTWRITEBYTECODE=1
+source "$chapter_dir/../common/scripts/p3_sim.sh"   # Vivado 있으면 xsim, 없으면 iverilog (SIM=로 고정)
 python3 --version
 gcc --version | sed -n '1p'
-iverilog -V 2>&1 | sed -n '1p'
+p3_sim_version
 ref="$chapter_dir/reference/secure_reference.py"
 python3 "$ref" --selftest --header "$build_dir/secure_keys.h" --rtl-vectors "$build_dir/aes.txt" "$build_dir/sha.txt"
 python3 "$part03/ch29/reference/sensor_reference.py" --header "$build_dir/sensor_model.h" > /dev/null
@@ -24,11 +25,11 @@ gcc -std=c99 -O2 -Wall -Wextra -Werror -I"$chapter_dir/sw" -o "$build_dir/kat" "
 # 3) RTL
 rtl_run() {   # $1 = aes|sha, $2 = RTL 소스
   if [[ $1 == aes ]]; then
-    iverilog -g2012 -Wall -s tb_p3_aes128 -o "$build_dir/aes" "$2" "$chapter_dir/tb/tb_p3_aes128.sv"
-    vvp -n "$build_dir/aes" +VEC="$build_dir/aes.txt" | grep -v "finish called"
+    p3_sim_build "$build_dir/aes" tb_p3_aes128 -- "$2" "$chapter_dir/tb/tb_p3_aes128.sv"
+    p3_sim_run "$build_dir/aes" +VEC="$build_dir/aes.txt" | grep -v "finish called"
   else
-    iverilog -g2012 -Wall -s tb_p3_sha256 -o "$build_dir/sha" "$2" "$chapter_dir/tb/tb_p3_sha256.sv"
-    vvp -n "$build_dir/sha" +VEC="$build_dir/sha.txt" | grep -v "finish called"
+    p3_sim_build "$build_dir/sha" tb_p3_sha256 -- "$2" "$chapter_dir/tb/tb_p3_sha256.sv"
+    p3_sim_run "$build_dir/sha" +VEC="$build_dir/sha.txt" | grep -v "finish called"
   fi
 }
 rtl_run aes "$chapter_dir/rtl/p3_aes128_enc.v" | tee "$build_dir/aes.log"
@@ -61,7 +62,7 @@ echo "RTL_MUTATION_SUMMARY killed=$rk total=$rt"
 [[ $rk -eq $rt ]]
 
 # 4) PC 시뮬레이션
-iverilog -g2012 -Wall -s tb_p3_npu_bridge -o "$build_dir/sim" -I"$part03/ch20/tb" \
+p3_sim_build "$build_dir/sim" tb_p3_npu_bridge -- -I"$part03/ch20/tb" \
   "$part03/ch02/rtl/dsp_multiplier.v" "$part03/mini_npu/rtl/npu_dsp_mac_lane.v" \
   "$part03/ch04/rtl/bram_sync_buffer.v" "$part03/ch14/rtl/p3_group10_core.v" \
   "$part03/ch17/rtl/p3_tile784_10.v" "$part03/ch20/rtl/p3_npu_axi_lite.v" \
@@ -76,7 +77,7 @@ run_cosim() {   # $1 = 펌웨어 소스, $2 = 이름, 나머지 = 호스트 인�
     "$part03/ch22/sw/npu_driver.c" "$part03/ch29/sw/sensor_app.c" "$app" "$chapter_dir/sw/p3_crypto.c" \
     "$part03/ch22/host/npu_io_cosim.c" "$part03/ch29/host/sensor_io_host.c" "$chapter_dir/host/secure_cosim_main.c"
   mkfifo "$d/cmd" "$d/rsp"
-  vvp "$build_dir/sim" +CMD="$d/cmd" +RSP="$d/rsp" > "$d/sim.log" 2>&1 &
+  p3_sim_run "$build_dir/sim" +CMD="$d/cmd" +RSP="$d/rsp" > "$d/sim.log" 2>&1 &
   local sim_pid=$! host_rc=0 sim_rc=0
   python3 "$chapter_dir/host/p3_secure_host.py" --cosim "$d/fw $d/cmd $d/rsp" "$@" > "$d/host.log" 2>&1 || host_rc=$?
   wait "$sim_pid" || sim_rc=$?

@@ -53,7 +53,7 @@ p3_sim_run() {
     local args=() a log="$out/xsim_run.log" rc=0
     for a in "$@"; do args+=(-testplusarg "${a#+}"); done
     (cd "$out" && xsim p3_snap -nolog -R "${args[@]}") > "$log" 2>&1 || rc=$?
-    grep -vE "^(INFO|Vivado Simulator|Copyright|Time resolution|source |#|run -all|exit|[[:space:]]*\*\*|[[:space:]]*$)" "$log" || true
+    grep -vE "^(INFO|Vivado Simulator|Copyright|Time resolution|source |#|run -all|run: Time|exit|[[:space:]]*\*\*|[[:space:]]*$)" "$log" || true
     # $fatal·컴파일 오류는 종료 코드가 0이어도 실패로 본다
     if [ $rc -ne 0 ] || grep -qE '^(Fatal|FATAL|ERROR)|\$fatal' "$log"; then return 1; fi
   else

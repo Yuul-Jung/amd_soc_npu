@@ -1,6 +1,6 @@
 Python 3.12.3
 gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
-Icarus Verilog version 12.0 (stable) ()
+Vivado Simulator v2024.2.0
 SECURE_REFERENCE_SELFTEST_PASS aes_kat=2 ctr_kat=1 sha_kat=2 hmac_kat=2 cross=cryptography_not_installed model_a=18496ca4 model_b=b7491f99 test_key_fp=e7950043
 SECURE_HEADER_DONE test_key=1 key_fp=e7950043 model_a=18496ca4
 CRYPTO_RTL_VECTORS aes=204 sha_msgs=50 sha_blocks=136
@@ -15,8 +15,6 @@ RTL_MUTANT sha_chain_iv KILLED
 RTL_MUTANT sha_k_index KILLED
 RTL_MUTANT sha_sigma1_rot KILLED
 RTL_MUTATION_SUMMARY killed=6 total=6
-part03/mini_npu/rtl/npu_dsp_mac_lane.v:2: warning: timescale for npu_dsp_mac_lane inherited from another file.
-part03/ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
 C_SECURE_APP_EXIT responses=34
 SECURE_HOST_SUMMARY target=rtl_cosim checks=35/35 key_fp=e7950043 test_key=1 proc_rc=0
 SECURE_HOST_PASS

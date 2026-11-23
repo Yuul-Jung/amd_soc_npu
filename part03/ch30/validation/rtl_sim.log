@@ -1,6 +1,6 @@
 Python 3.12.3
 gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
-Icarus Verilog version 12.0 (stable) ()
+Vivado Simulator v2024.2.0
 MOTOR_REFERENCE_SELFTEST_PASS
 MOTOR_UNIT_VECTORS n=125968 ena_on=10357 invariant_violations=0
 SENSOR_HEADER_DONE model_id=18496ca4 w=[-110, -127, -63, -66, -117, -92]...
@@ -14,8 +14,6 @@ RTL_MUTANT no_ramp KILLED
 RTL_MUTANT no_reset_latch KILLED
 RTL_MUTANT watchdog_stuck KILLED
 RTL_MUTATION_SUMMARY killed=7 total=7
-part03/mini_npu/rtl/npu_dsp_mac_lane.v:2: warning: timescale for npu_dsp_mac_lane inherited from another file.
-part03/ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
 BOOT PASS :: P3_MOTOR READY model=18496ca4 model_ok=1 bias_rc=0
 
 MOTOR_HOST_SUMMARY target=rtl_cosim checks=62/62 proc_rc=0

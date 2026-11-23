@@ -11,15 +11,16 @@ part03=$(cd -- "$chapter_dir/.." && pwd)
 build_dir=$(mktemp -d "${TMPDIR:-/tmp}/p3-30.XXXXXXXX")
 trap 'rm -rf "$build_dir"' EXIT
 export PYTHONDONTWRITEBYTECODE=1
+source "$chapter_dir/../common/scripts/p3_sim.sh"   # Vivado 있으면 xsim, 없으면 iverilog (SIM=로 고정)
 python3 --version
 gcc --version | sed -n '1p'
-iverilog -V 2>&1 | sed -n '1p'
+p3_sim_version
 python3 "$chapter_dir/reference/motor_reference.py" --selftest --unit-vectors "$build_dir/unit.txt"
 python3 "$part03/ch29/reference/sensor_reference.py" --header "$build_dir/sensor_model.h"
 
 unit_run() {   # $1 = RTL 소스
-  iverilog -g2012 -Wall -s tb_p3_motor_safety -o "$build_dir/unit" "$1" "$chapter_dir/tb/tb_p3_motor_safety.sv"
-  vvp -n "$build_dir/unit" +VEC="$build_dir/unit.txt" | grep -v "finish called"
+  p3_sim_build "$build_dir/unit" tb_p3_motor_safety -- "$1" "$chapter_dir/tb/tb_p3_motor_safety.sv"
+  p3_sim_run "$build_dir/unit" +VEC="$build_dir/unit.txt" | grep -v "finish called"
 }
 unit_run "$chapter_dir/rtl/p3_motor_safety.v" | tee "$build_dir/unit.log"
 grep -q RTL_SIM_PASS "$build_dir/unit.log"
@@ -52,7 +53,7 @@ echo "RTL_MUTATION_SUMMARY killed=$rk total=$rt"
 [[ $rk -eq $rt ]]
 
 # 3) PC 시뮬레이션
-iverilog -g2012 -Wall -s tb_p3_motor_bridge -o "$build_dir/sim" -I"$part03/ch20/tb" \
+p3_sim_build "$build_dir/sim" tb_p3_motor_bridge -- -I"$part03/ch20/tb" \
   "$part03/ch02/rtl/dsp_multiplier.v" "$part03/mini_npu/rtl/npu_dsp_mac_lane.v" \
   "$part03/ch04/rtl/bram_sync_buffer.v" "$part03/ch14/rtl/p3_group10_core.v" \
   "$part03/ch17/rtl/p3_tile784_10.v" "$part03/ch20/rtl/p3_npu_axi_lite.v" \
@@ -67,7 +68,7 @@ run_cosim() {   # $1 = 펌웨어 소스, $2 = 이름, 나머지 = 호스트 인�
     "$part03/ch22/sw/npu_driver.c" "$part03/ch29/sw/sensor_app.c" "$app" \
     "$part03/ch22/host/npu_io_cosim.c" "$part03/ch29/host/sensor_io_host.c" "$chapter_dir/host/motor_cosim_main.c"
   mkfifo "$d/cmd" "$d/rsp"
-  vvp "$build_dir/sim" +CMD="$d/cmd" +RSP="$d/rsp" > "$d/sim.log" 2>&1 &
+  p3_sim_run "$build_dir/sim" +CMD="$d/cmd" +RSP="$d/rsp" > "$d/sim.log" 2>&1 &
   local sim_pid=$! host_rc=0 sim_rc=0
   python3 "$chapter_dir/host/p3_motor_host.py" --cosim "$d/fw $d/cmd $d/rsp" "$@" > "$d/host.log" 2>&1 || host_rc=$?
   wait "$sim_pid" || sim_rc=$?

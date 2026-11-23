@@ -1,6 +1,6 @@
 Python 3.12.3
 gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
-Icarus Verilog version 12.0 (stable) ()
+Vivado Simulator v2024.2.0
 SENSOR_REFERENCE_SELFTEST_PASS model_id=18496ca4 frame_bytes=65
 EVAL train n=3000 float_acc=95.93% int8_acc=95.90% float_int8_agree=2999/3000 int8_confusion(label→pred)=[[1000, 0, 0], [59, 892, 49], [0, 15, 985]]
 EVAL test n=1500 float_acc=95.67% int8_acc=95.67% float_int8_agree=1500/1500 int8_confusion(label→pred)=[[500, 0, 0], [27, 444, 29], [0, 9, 491]]
@@ -13,8 +13,6 @@ RTL_MUTANT hold_min KILLED
 RTL_MUTANT no_latch KILLED
 RTL_MUTANT reset_normal KILLED
 RTL_MUTATION_SUMMARY killed=4 total=4
-part03/mini_npu/rtl/npu_dsp_mac_lane.v:2: warning: timescale for npu_dsp_mac_lane inherited from another file.
-part03/ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
 BOOT PASS :: P3_SENSOR READY model=18496ca4 model_ok=1 feat=6 classes=3 bias_rc=0 ['DISP fnd=000b3000 led=8008']
 
 SENSOR_HOST_SUMMARY target=rtl_cosim checks=109/109 unsolicited_link_timeout=0 dataset=60 golden_label_acc=57/60 (95.0%) device_label_acc=57/60 (95.0%) proc_rc=0

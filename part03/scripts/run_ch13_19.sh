@@ -1,11 +1,9 @@
 #!/usr/bin/env bash
-# (추가) 13~19장 신규 RTL 회귀. 구현된 장만 실행하고, 실행 스크립트가 없는 장은 NOT_IMPLEMENTED로 표시한다.
-# (변경) 20장 AXI4-Lite NPU IP, 22장 C 드라이버 협동 시뮬레이션을 회귀에 포함한다(파일 이름은 기존 호출 경로 보존).
-# 21장은 Vivado BD·Bitstream 빌드 장(ch21/scripts/build_soc.sh)이라 RTL 회귀에 넣지 않는다.
-# 23~25장(SoC xsim·Vivado 분석)도 도구 실행 장이라 제외, 26장 합성곱 RTL은 포함한다.
-# (변경) 28장 숫자 인식 시스템의 PC 검증(FND RTL·펌웨어↔NPU RTL 협동 시뮬레이션·변이)을 포함한다.
-# (변경) 29장 센서 감시(경보 정책 RTL·펌웨어↔NPU RTL 협동 시뮬레이션·변이)를 포함한다.
-# (변경) 30장 모터 안전 코어·31장 보안 모델 적재(암호 RTL·협동 시뮬레이션·변이)를 포함한다.
+# 제3부 RTL 회귀: 3-1~3-4·4-2~4-4·5-1(AXI4-Lite NPU IP)·5-3(C 드라이버 PC 시뮬레이션)·6-2(합성곱 RTL)와
+# 6-1·6-3·6-4·6-5의 PC 검증(장치 RTL·펌웨어↔NPU RTL PC 시뮬레이션·변이)을 차례로 돌린다.
+# 실행 스크립트가 없는 장은 NOT_IMPLEMENTED로 표시한다. 파일 이름은 기존 호출 경로를 지키려고 그대로 둔다.
+# 5-2(BD·비트스트림), 5-4~5-6(SoC xsim·Vivado 분석)은 도구 실행 장이라 넣지 않는다.
+# 시뮬레이터는 각 장 run_sim.sh가 고른다(common/scripts/p3_sim.sh: Vivado 있으면 xsim, 없으면 iverilog).
 set -euo pipefail
 part03="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 status=0
