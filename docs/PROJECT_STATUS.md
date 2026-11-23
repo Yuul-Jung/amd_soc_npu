@@ -111,25 +111,25 @@
 | 장 전체 | XSIM_RTL_PASS | ✅ | Vivado Simulator v2024.2.0 · Icarus와 같은 TB·판정 줄 · 2026-11-23 · p03/validation/xsim_rtl_20261123.log |
 | 장 전체 | BOARD_PASS | ⏳ | ⚠ 미실시 · 실물 보드 확인 대기 |
 | 3-1 8×8 입력 프레임 | HOST_MODEL_PASS | ✅ | PYTHON_FRAME64_SELF_TEST_PASS items=2664 frames=36 short=2 long=3 seed=1313 |
-| 3-1 8×8 입력 프레임 | RTL_SIM_PASS | ✅ | RTL_SIM_PASS FRAME64 frames=36 short=2 long=3 · Icarus Verilog 12.0 · 날짜 미기록 |
+| 3-1 8×8 입력 프레임 | RTL_SIM_PASS | ✅ | RTL_SIM_PASS FRAME64 frames=36 short=2 long=3 · 도구 버전 미기록 · 날짜 미기록 |
 | 3-1 8×8 입력 프레임 | SYNTH_TIMING_PASS | ✅ | 장 Top STAGE 1 배선 후 WNS 2.863 ns · WHS 0.042 ns (구 장 단독 OOC 판정 없음) · 2026-11-23 |
 | 3-1 8×8 입력 프레임 | BOARD_PASS | ⏳ | ⚠ 미실시 · 현재 실물 보드 확인 불가 |
 | 3-1 8×8 입력 프레임 | 장 Top STAGE=1 시뮬레이션 | ✅ | 응답 바이트 단위 대조 |
 | 3-1 8×8 입력 프레임 | 장 Top STAGE=1 합성·타이밍 | ✅ | 통과 · WNS=2.863 WHS=0.042 DRC_ERRORS=0 LUT=504 FF=317 DSP48E1=0 RAMB18=0 |
 | 3-2 4PE 3그룹 10분류 코어 | HOST_MODEL_PASS | ✅ | PYTHON_GROUP10_SELF_TEST_PASS cases=41 groups=4+4+2 seed=1414 |
-| 3-2 4PE 3그룹 10분류 코어 | RTL_SIM_PASS | ✅ | RTL_SIM_PASS GROUP10 cases=41 start_to_done_cycles=206 error… · Icarus Verilog 12.0 · 날짜 미기록 |
+| 3-2 4PE 3그룹 10분류 코어 | RTL_SIM_PASS | ✅ | RTL_SIM_PASS GROUP10 cases=41 start_to_done_cycles=206 error… · 도구 버전 미기록 · 날짜 미기록 |
 | 3-2 4PE 3그룹 10분류 코어 | SYNTH_TIMING_PASS | ✅ | 장 Top STAGE 2 배선 후 WNS 1.084 ns · WHS 0.014 ns (구 장 단독 OOC 판정 없음) · 2026-11-23 |
 | 3-2 4PE 3그룹 10분류 코어 | BOARD_PASS | ⏳ | ⚠ 미실시 · 현재 실물 보드 확인 불가 |
 | 3-2 4PE 3그룹 10분류 코어 | 장 Top STAGE=2 시뮬레이션 | ✅ | 응답 바이트 단위 대조 |
 | 3-2 4PE 3그룹 10분류 코어 | 장 Top STAGE=2 합성·타이밍 | ✅ | 통과 · WNS=1.084 WHS=0.014 DRC_ERRORS=0 LUT=1704 FF=1752 DSP48E1=4 RAMB18=4 |
 | 3-3 64→10·64→8·8→10 Dense | HOST_MODEL_PASS | ✅ | PYTHON_DENSE_SELF_TEST_PASS shape=64x10 ops=5238 frames=20 |
-| 3-3 64→10·64→8·8→10 Dense | RTL_SIM_PASS | ✅ | RTL_SIM_PASS DENSE 64x10 frames=20 w_writes=5127 b_writes=91… 외 2건 · Icarus Verilog 12.0 · 날짜 미기록 |
+| 3-3 64→10·64→8·8→10 Dense | RTL_SIM_PASS | ✅ | RTL_SIM_PASS DENSE 64x10 frames=20 w_writes=5127 b_writes=91… 외 2건 · 도구 버전 미기록 · 날짜 미기록 |
 | 3-3 64→10·64→8·8→10 Dense | SYNTH_TIMING_PASS | ✅ | 장 Top STAGE 3 배선 후 WNS 0.755 ns · WHS 0.036 ns (구 장 단독 OOC 판정 없음) · 2026-11-23 |
 | 3-3 64→10·64→8·8→10 Dense | BOARD_PASS | ⏳ | ⚠ 미실시 · 현재 실물 보드 확인 불가 |
 | 3-3 64→10·64→8·8→10 Dense | 장 Top STAGE=3 시뮬레이션 | ✅ | 응답 바이트 단위 대조 |
 | 3-3 64→10·64→8·8→10 Dense | 장 Top STAGE=3 합성·타이밍 | ✅ | 통과 · WNS=0.755 WHS=0.036 DRC_ERRORS=0 LUT=2797 FF=2849 DSP48E1=12 RAMB18=12 |
 | 3-4 MLP 64→8→10 | HOST_MODEL_PASS | ✅ | PYTHON_MLP_SELF_TEST_PASS ops=4933 frames=27 seed=1616 |
-| 3-4 MLP 64→8→10 | RTL_SIM_PASS | ✅ | RTL_SIM_PASS MLP64_8_10 frames=27 start_to_done_cycles=180 e… · Icarus Verilog 12.0 · 날짜 미기록 |
+| 3-4 MLP 64→8→10 | RTL_SIM_PASS | ✅ | RTL_SIM_PASS MLP64_8_10 frames=27 start_to_done_cycles=180 e… · 도구 버전 미기록 · 날짜 미기록 |
 | 3-4 MLP 64→8→10 | SYNTH_TIMING_PASS | ✅ | 장 Top STAGE 4 배선 후 WNS 0.547 ns · WHS 0.032 ns (구 장 단독 OOC 판정 없음) · 2026-11-23 |
 | 3-4 MLP 64→8→10 | BOARD_PASS | ⏳ | ⚠ 미실시 · 현재 실물 보드 확인 불가 |
 | 3-4 MLP 64→8→10 | 장 Top STAGE=4 시뮬레이션 | ✅ | 응답 바이트 단위 대조 |
@@ -152,19 +152,19 @@
 | 4-1 INT8·INT16 정밀도 비교 | 장 Top STAGE=1 시뮬레이션 | ✅ | 응답 바이트 단위 대조 |
 | 4-1 INT8·INT16 정밀도 비교 | 장 Top STAGE=1 합성·타이밍 | ✅ | 통과 · WNS=0.583 WHS=0.024 DRC_ERRORS=0 LUT=814 FF=390 DSP48E1=0 RAMB18=0 |
 | 4-2 784 입력 13타일 누산 (INT8) | HOST_MODEL_PASS | ✅ | PYTHON_TILE784_SELF_TEST_PASS suite=full cases=26 tiles=13 last_len=16 acc_w=41 bias_w=40 … |
-| 4-2 784 입력 13타일 누산 (INT8) | RTL_SIM_PASS | ✅ | RTL_SIM_PASS TILE784 cases=26 tiles=13 tile_go_to_accept_cyc… 외 2건 · Icarus Verilog 12.0 · 날짜 미기록 |
+| 4-2 784 입력 13타일 누산 (INT8) | RTL_SIM_PASS | ✅ | RTL_SIM_PASS TILE784 cases=26 tiles=13 tile_go_to_accept_cyc… 외 2건 · 도구 버전 미기록 · 날짜 미기록 |
 | 4-2 784 입력 13타일 누산 (INT8) | SYNTH_TIMING_PASS | ✅ | OOC 배선 후 WNS +0.712 ns (구 19장 OOC 기록) · <code>part03/ch19/validation/synth_ooc_summary.md</code> |
 | 4-2 784 입력 13타일 누산 (INT8) | BOARD_PASS | ⏳ | ⚠ 미실시 · 현재 실물 보드 확인 불가 |
 | 4-2 784 입력 13타일 누산 (INT8) | 장 Top STAGE=2 시뮬레이션 | ✅ | 응답 바이트 단위 대조 |
 | 4-2 784 입력 13타일 누산 (INT8) | 장 Top STAGE=2 합성·타이밍 | ✅ | 통과 · WNS=0.423 WHS=0.035 DRC_ERRORS=0 LUT=3966 FF=2790 DSP48E1=4 RAMB18=4 |
 | 4-3 INT8·INT16 MNIST 정밀도 | HOST_MODEL_PASS | ✅ | PYTHON_TILE784_SELF_TEST_PASS suite=full cases=26 tiles=13 last_len=16 acc_w=41 bias_w=40 … |
-| 4-3 INT8·INT16 MNIST 정밀도 | RTL_SIM_PASS | ✅ | RTL_SIM_PASS TILE784 cases=26 tiles=13 tile_go_to_accept_cyc… 외 4건 · Icarus Verilog 12.0 · 날짜 미기록 |
+| 4-3 INT8·INT16 MNIST 정밀도 | RTL_SIM_PASS | ✅ | RTL_SIM_PASS TILE784 cases=26 tiles=13 tile_go_to_accept_cyc… 외 4건 · 도구 버전 미기록 · 날짜 미기록 |
 | 4-3 INT8·INT16 MNIST 정밀도 | SYNTH_TIMING_PASS | ✅ | OOC 배선 후 WNS +0.625 ns (구 19장 OOC 기록) · <code>part03/ch19/validation/synth_ooc_summary.md</code> |
 | 4-3 INT8·INT16 MNIST 정밀도 | BOARD_PASS | ⏳ | ⚠ 미실시 · 현재 실물 보드 확인 불가 |
 | 4-3 INT8·INT16 MNIST 정밀도 | 장 Top STAGE=3 시뮬레이션 | ✅ | 응답 바이트 단위 대조 |
 | 4-3 INT8·INT16 MNIST 정밀도 | 장 Top STAGE=3 합성·타이밍 | ✅ | 통과 · WNS=0.201 WHS=0.036 DRC_ERRORS=0 LUT=6488 FF=4638 DSP48E1=8 RAMB18=9 |
 | 4-4 PE 병렬도·메모리 구조 | HOST_MODEL_PASS | ✅ | PYTHON_ARCH_SELF_TEST_PASS samples=4 tile_runs=52 cycles PE1=700 PE4=206 PE8=138 load_w=64… |
-| 4-4 PE 병렬도·메모리 구조 | RTL_SIM_PASS | ✅ | RTL_SIM_PASS PE_SCALE tile_runs=52 PE1=70x10 PE4=206 PE8=138… · Icarus Verilog 12.0 · 날짜 미기록 |
+| 4-4 PE 병렬도·메모리 구조 | RTL_SIM_PASS | ✅ | RTL_SIM_PASS PE_SCALE tile_runs=52 PE1=70x10 PE4=206 PE8=138… · 도구 버전 미기록 · 날짜 미기록 |
 | 4-4 PE 병렬도·메모리 구조 | SYNTH_TIMING_PASS | ✅ | OOC 배선 후 5구성 WNS 최소 +0.901 ns (OOC) · <code>part03/ch19/validation/synth_ooc_summary.md</code> |
 | 4-4 PE 병렬도·메모리 구조 | BOARD_PASS | ⏳ | ⚠ 미실시 · 현재 실물 보드 확인 불가 |
 | 4-4 PE 병렬도·메모리 구조 | 장 Top STAGE=4 시뮬레이션 | ✅ | 응답 바이트 단위 대조 |
@@ -178,7 +178,7 @@
 | 장 전체 | SYNTH_TIMING_PASS | ✅ | WNS +0.374 ns · WHS +0.034 ns (21장 SoC 배선 후, 안 A) · part03/ch21/validation/soc_summary.md |
 | 장 전체 | BOARD_PASS | ⏳ | 미실시 · 보드 점검표 B1~B7 대기 |
 | 5-1 AXI4-Lite NPU IP | HOST_MODEL_PASS | — | 해당 없음 (Python 기준 모델 없음) |
-| 5-1 AXI4-Lite NPU IP | RTL_SIM_PASS | ✅ | RTL_SIM_PASS AXI_NPU inferences=7 axi_writes=67451 axi_reads… · Icarus Verilog 12.0 · 2026-11-18 |
+| 5-1 AXI4-Lite NPU IP | RTL_SIM_PASS | ✅ | RTL_SIM_PASS AXI_NPU inferences=7 axi_writes=67451 axi_reads… · 도구 버전 미기록 · 2026-11-18 |
 | 5-1 AXI4-Lite NPU IP | SYNTH_TIMING_PASS | ✅ | OOC 배선 후 WNS +0.223 ns (OOC) · part03/ch20/validation/synth_ooc_summary.md |
 | 5-1 AXI4-Lite NPU IP | BOARD_PASS | ⏳ | ⚠ 미실시 · 현재 실물 보드 확인 불가 |
 | 5-2 MicroBlaze V SoC 연결 | HOST_MODEL_PASS | — | 해당 없음 (Python 기준 모델 없음) |
@@ -225,7 +225,7 @@
 | 6-1 손글씨 숫자 인식 (공통) | BOARD_PASS | ⏳ | ⚠ 미실시 · 현재 실물 보드 확인 불가 |
 | 6-1 손글씨 숫자 인식 (공통) | 보드 점검표 | ⏳ | B9·B10·B11·B12·B13·B13a 미실시 |
 | 6-2 3×3 합성곱 (선택) | HOST_MODEL_PASS | ✅ | PYTHON_CONV_SELF_TEST_PASS frames=26 out=6x6 macs_per_frame=324 first_spec=-6 seed=2626 |
-| 6-2 3×3 합성곱 (선택) | RTL_SIM_PASS | ✅ | RTL_SIM_PASS CONV3X3 frames=26 outputs_per_frame=36 latency=… · Icarus Verilog 12.0 · 2026-11-18 |
+| 6-2 3×3 합성곱 (선택) | RTL_SIM_PASS | ✅ | RTL_SIM_PASS CONV3X3 frames=26 outputs_per_frame=36 latency=… · 도구 버전 미기록 · 2026-11-18 |
 | 6-2 3×3 합성곱 (선택) | SYNTH_TIMING_PASS | ✅ | OOC 배선 후 WNS +4.647 ns (OOC) · part03/ch26/validation/synth_ooc_summary.md |
 | 6-2 3×3 합성곱 (선택) | BOARD_PASS | ⏳ | ⚠ 미실시 · 현재 실물 보드 확인 불가 |
 | 6-3 센서 상태 감시 | HOST_MODEL_PASS | ✅ | SENSOR_REFERENCE_SELFTEST_PASS model_id=18496ca4 frame_bytes=65 |

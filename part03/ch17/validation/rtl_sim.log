@@ -1,26 +1,20 @@
 Python 3.12.3
-Icarus Verilog version 12.0 (stable) ()
+Vivado Simulator v2024.2.0
 == config full acc_w=41 bias_w=40
 PYTHON_TILE784_SELF_TEST_PASS suite=full cases=26 tiles=13 last_len=16 acc_w=41 bias_w=40 overflow_cases=0 seed=1717
 WIDTH_PLAN INT8: tile=22 acc=25 score(+bias24)=26 | INT16: tile=38 acc=41 score(+bias40)=42
-part03/mini_npu/rtl/npu_dsp_mac_lane.v:2: warning: timescale for npu_dsp_mac_lane inherited from another file.
-part03/ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
 RTL_SIM_PASS TILE784 cases=26 tiles=13 tile_go_to_accept_cycles=207 acc_w=41 bias_w=40 score_w=42 errors_checked=14
-part03/ch17/tb/tb_p3_tile784_10.sv:368: $finish called at 3180920000 (1ps)
+$finish called at time : 3180920 ns : File "part03/ch17/tb/tb_p3_tile784_10.sv" Line 368
 PYTHON_RTL_COMPARE_PASS cases=26 tile_partials=3380 scores=10 class=1 overflow=1 bit_exact=1
 == config w25 acc_w=25 bias_w=24
 PYTHON_TILE784_SELF_TEST_PASS suite=width cases=4 tiles=13 last_len=16 acc_w=25 bias_w=24 overflow_cases=0 seed=1717
 WIDTH_PLAN INT8: tile=22 acc=25 score(+bias24)=26 | INT16: tile=38 acc=41 score(+bias40)=42
-part03/mini_npu/rtl/npu_dsp_mac_lane.v:2: warning: timescale for npu_dsp_mac_lane inherited from another file.
-part03/ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
 RTL_SIM_PASS TILE784 cases=4 tiles=13 tile_go_to_accept_cycles=207 acc_w=25 bias_w=24 score_w=26 errors_checked=0
-part03/ch17/tb/tb_p3_tile784_10.sv:368: $finish called at 457770000 (1ps)
+$finish called at time : 457770 ns : File "part03/ch17/tb/tb_p3_tile784_10.sv" Line 368
 PYTHON_RTL_COMPARE_PASS cases=4 tile_partials=520 scores=10 class=1 overflow=1 bit_exact=1
 == config w24 acc_w=24 bias_w=24
 PYTHON_TILE784_SELF_TEST_PASS suite=width cases=4 tiles=13 last_len=16 acc_w=24 bias_w=24 overflow_cases=2 seed=1717
 WIDTH_PLAN INT8: tile=22 acc=25 score(+bias24)=26 | INT16: tile=38 acc=41 score(+bias40)=42
-part03/mini_npu/rtl/npu_dsp_mac_lane.v:2: warning: timescale for npu_dsp_mac_lane inherited from another file.
-part03/ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
 RTL_SIM_PASS TILE784 cases=4 tiles=13 tile_go_to_accept_cycles=207 acc_w=24 bias_w=24 score_w=25 errors_checked=0
-part03/ch17/tb/tb_p3_tile784_10.sv:368: $finish called at 457770000 (1ps)
+$finish called at time : 457770 ns : File "part03/ch17/tb/tb_p3_tile784_10.sv" Line 368
 PYTHON_RTL_COMPARE_PASS cases=4 tile_partials=520 scores=10 class=1 overflow=1 bit_exact=1

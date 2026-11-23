@@ -54,7 +54,9 @@
 - 13~20·26장 `run_sim.sh` 9개를 이 함수로 바꿨다. **9개 장 모두 xsim·iverilog 양쪽 PASS, PASS 줄(사이클 수·cases·errors_checked 포함) diff 0**. xsim 11~60 s(18장이 가장 김), iverilog 0~18 s.
 - 참고: 13장 TB는 무작위 valid 간격이라 `$finish` 시각이 다르다(xsim 131600 ns, iverilog 91940 ns, `$urandom` 수열 차이). actual 파일은 비트 단위로 같다.
 - C 펌웨어와 함께 도는 22·28~31장(PC 시뮬레이션: FIFO + vvp 프로세스)은 iverilog 그대로. xsim 방식은 시험 전 — 정해지면 회신한다.
-- Vivado 환경 `LEVEL=sim run_all`(13~20·26장이 xsim으로 돎)은 실행 중 — 결과는 다음 회신.
+- Vivado 환경 `LEVEL=sim run_all`: `host_integer_reference` PASS, `rtl_ch13_26` PASS — 13~20·26장 `validation/rtl_sim.log`의 도구 줄이 `Vivado Simulator v2024.2.0`(VS Code 판 b23bbbb). 22·28~31장은 iverilog.
+- `p3_sim_version`이 저장소 루트에 `xvlog.log`·`xvlog.pb`를 남기던 것을 고쳤다(임시 폴더에서 `xvlog --version`). `tools/sim/sim_top.sh`의 `sim_tool_version`도 같은 파일을 남긴다 — 지금은 `.gitignore`가 막지만, 같은 방식으로 고쳐도 된다.
+- `ch27/validation/run_all_summary.md`(LEVEL=full 표 유지)의 '이미 안 A로 실행한 기록' → '이미 지금 주소맵으로 실행한 기록'.
 
 ## 5. 지시 17 회신
 
