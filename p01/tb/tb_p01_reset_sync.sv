@@ -1,6 +1,5 @@
 // 리셋 동기화기 단위 시험: resetn은 clk 상승 에지에서만 바뀌고(비동기 변화 없음), btnC를 클록과 무관한 시점에
 // 눌러도 2~3클록 뒤 걸리고 2~3클록 뒤 풀린다. p01_reset_sync와 npu_reset_controller를 같은 자극으로 본다.
-//   iverilog -g2012 -s tb_p01_reset_sync -o /tmp/rs.vvp p01/rtl/p01_reset_sync.v mini_npu/rtl/npu_reset_controller.v p01/tb/tb_p01_reset_sync.sv && vvp /tmp/rs.vvp
 `timescale 1ns/1ps
 module tb_p01_reset_sync;
     reg clk=0, btnC=0;

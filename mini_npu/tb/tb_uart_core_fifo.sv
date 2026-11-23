@@ -1,4 +1,4 @@
-// (추가) uart_core 16바이트 RX/TX FIFO 적대적 경계 시험.
+// uart_core 16바이트 RX/TX FIFO 적대적 경계 시험.
 // Empty/Full, 동시 Push/Pop, Ready/Valid, Reset 초기화, 연속 수신 손실, Overrun, Framing, 전송 중단.
 // 실제 직렬 비트파형으로 RX를 구동하고 TX 핀을 독립 uart_rx로 복조해 순서·값을 비교한다.
 `timescale 1ns/1ps

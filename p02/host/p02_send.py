@@ -3,12 +3,12 @@
 
   python3 p02/host/p02_send.py --dry X 0 3            # 보낼 바이트만 출력 (보드 없이)
   python3 p02/host/p02_send.py /dev/ttyUSB1 D 4       # X·W0 내적
-  python3 p02/host/p02_send.py COM3 2                 # (sw2 올림) 11장 고정 그룹 2 추론
+  python3 p02/host/p02_send.py COM3 2                 # (sw2 올림) 2-7 고정 그룹 2 추론
   (pip install pyserial 필요. 115200 8N1)
 
-명령 (p02/rtl/p02_console.v, 11장 uart_npu_command_controller.v와 같은 형식):
+명령 (p02/rtl/p02_console.v, 2-7 uart_npu_command_controller.v와 같은 형식):
   S | X addr v | W n addr v | x addr | w n addr | Q v32 | D len | P len | B n v40 | L len | N len
-  11장 (sw2 = 1): S | X | W | B | R len | 0 1 2 3
+  2-7 (sw2 = 1): S | X | W | B | R len | 0 1 2 3
 """
 import struct
 import sys

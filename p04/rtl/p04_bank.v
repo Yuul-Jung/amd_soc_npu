@@ -1,9 +1,9 @@
 // 4장 784 가속기 묶음: 서브젝트 모듈을 STAGE만큼 쌓는다. 서브젝트 모듈 파일은 고치지 않는다.
-//   4-1 (STAGE>=1) precision_compare: 같은 32비트 값을 INT8·INT16으로 (구 06장, 안에 05장 양자화기 2개)
-//   4-2 (STAGE>=2) p3_tile784_10 INT8: 784 = 64×12 + 16, 13타일 외부 누산 (구 17장, 안에 3-2 코어)
+//   4-1 (STAGE>=1) precision_compare: 같은 32비트 값을 INT8·INT16으로 (안에 2-2 양자화기 2개)
+//   4-2 (STAGE>=2) p3_tile784_10 INT8: 784 = 64×12 + 16, 13타일 외부 누산 (안에 3-2 코어)
 //                  x 타일은 3-1 p3_frame64_buffer
-//   4-3 (STAGE>=3) p3_tile784_10 INT16 (구 18장 파라미터). x 타일은 2-1 bram_sync_buffer 16×64
-//   4-4 (STAGE>=4) 1PE·4PE·8PE: 3-2 p3_group10_core를 #(64,1)·#(64,10)·#(64,6)+#(64,4)로 (구 19장),
+//   4-3 (STAGE>=3) p3_tile784_10 INT16 (DATA_W=16). x 타일은 2-1 bram_sync_buffer 16×64
+//   4-4 (STAGE>=4) 1PE·4PE·8PE: 3-2 p3_group10_core를 #(64,1)·#(64,10)·#(64,6)+#(64,4)로,
 //                  시작부터 끝까지 클록 수를 센다. Bias 없이 한 타일(64입력 → 10출력)만.
 // 엔진 번호 p: 0 = INT8, 1 = INT16. PE 구성 g: 1, 4, 8.
 `timescale 1ns/1ps
@@ -146,7 +146,7 @@ module p04_bank #(
     wire        pe_rd;
     wire [5:0]  pe_addr;
     generate if (STAGE >= 4) begin : g_pe
-        // class → PE8 코어: A = class 0~3·8~9 (로컬 0~5), B = class 4~7 (로컬 0~3)  (19장 TB와 같은 배치)
+        // class → PE8 코어: A = class 0~3·8~9 (로컬 0~5), B = class 4~7 (로컬 0~3)  (4-4 TB와 같은 배치)
         wire       to_b    = (class_i >= 4'd4) && (class_i <= 4'd7);
         wire [3:0] a_local = (class_i >= 4'd8) ? class_i - 4'd4 : class_i;
         wire [3:0] b_local = class_i - 4'd4;
@@ -181,7 +181,7 @@ module p04_bank #(
             .w_wr_en_i(pe_wr_i && g_i == 4'd8 && to_b), .b_wr_en_i(1'b0), .wr_class_i(b_local),
             .wr_addr_i(addr_i), .w_data_i(w_i[7:0]), .b_data_i(24'sd0), .load_ready_o(), .busy_o(),
             .done_o(dn[3]), .error_o(er[3]), .class_o(), .scores_o(sc8b));
-        // PE8의 두 코어는 같은 주소를 읽는다 (출력 고정 스케줄, 19장). B가 먼저 끝나면 A 주소만 남는다
+        // PE8의 두 코어는 같은 주소를 읽는다 (출력 고정 스케줄, 4-4). B가 먼저 끝나면 A 주소만 남는다
         assign pe_rd   = |rd;
         assign pe_addr = rd[0] ? ad[0] : rd[1] ? ad[1] : rd[2] ? ad[2] : ad[3];
 
@@ -198,7 +198,7 @@ module p04_bank #(
                     if (st == 4'd0) begin pe_err_o <= 1'b1; pe_done_o <= 1'b1; end   // g가 1·4·8이 아님
                     else begin running <= st; finished <= 4'd0; pe_cycles_o <= 16'd0; end
                 end else if (running != 4'd0) begin
-                    // 19장 정의: start 샘플 에지 → done 관측 에지. 시작 다음 클록부터 1씩 세면 done 클록 값과 같다
+                    // 4-4 정의: start 샘플 에지 → done 관측 에지. 시작 다음 클록부터 1씩 세면 done 클록 값과 같다
                     pe_cycles_o <= pe_cycles_o + 16'd1;
                     if (|(er & running)) begin
                         running <= 4'd0; pe_err_o <= 1'b1; pe_done_o <= 1'b1;

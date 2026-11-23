@@ -1,7 +1,7 @@
 // 2장 보드 Top: 4뉴런 NPU 보드. 인스턴스와 배선만 둔다 (기능은 하위 모듈).
 //   2-1~2-6: 디버그 콘솔로 BRAM → 양자화 → 내적 → 4PE → Dense → Core를 UART 명령 하나씩 확인
-//   2-7: sw[2] = 1이면 11장 명령 해석기가 UART를 맡고 누적 npu_core로 추론 ("Ck:…")
-//   2-8: sw[3] = 1이면 12장 npu_engine4로 추론, LED·7세그먼트에 클래스 표시
+//   2-7: sw[2] = 1이면 명령 해석기가 UART를 맡고 누적 npu_core로 추론 ("Ck:…")
+//   2-8: sw[3] = 1이면 npu_engine4로 추론, LED·7세그먼트에 클래스 표시
 // STAGE = 끝낸 서브젝트 수 (1~8). 서브젝트마다 그 단계 비트스트림으로 보드에서 확인한다.
 `timescale 1ns/1ps
 `default_nettype none

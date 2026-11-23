@@ -1,8 +1,8 @@
 // 1장 MAC 묶음: 1-2·1-3·1-4 서브젝트의 세 코어에 같은 입력을 넣고, sw로 고른 코어의 결과만 내보낸다.
 // STAGE = 지금까지 끝낸 서브젝트 수 (1~4). 아직 만들지 않은 코어는 넣지 않고, 그 sw 값은 앞 코어로 대신한다.
-//   sel 0 = 1-2 mac_core (01장)            지연 1클록
-//   sel 1 = 1-3 dsp_multiplier (02장) + 누산 지연 2클록 (곱 레지스터 1 + 누산 레지스터 1)
-//   sel 2·3 = 1-4 mac_pipeline_core (03장) 지연 2클록
+//   sel 0 = 1-2  mac_core                  지연 1클록
+//   sel 1 = 1-3 dsp_multiplier + 누산 지연 2클록 (곱 레지스터 1 + 누산 레지스터 1)
+//   sel 2·3 = 1-4 mac_pipeline_core 지연 2클록
 // 세 코어가 같은 입력을 늘 함께 받으므로 누산값은 항상 같다. sw를 바꿔도 값은 그대로이고 지연만 달라진다.
 `timescale 1ns/1ps
 `default_nettype none
@@ -37,7 +37,7 @@ module p01_mac_bank #(
     end
     assign sel_o = sel_sync;
 
-    // 1-2: 01장 mac_core
+    // 1-2: mac_core
     wire signed [ACC_WIDTH-1:0] acc_mac;
     wire                        valid_mac;
     generate if (STAGE >= 2) begin : g_mac
@@ -49,7 +49,7 @@ module p01_mac_bank #(
         assign valid_mac = 1'b0;
     end endgenerate
 
-    // 1-3: 02장 dsp_multiplier + 누산 레지스터
+    // 1-3: dsp_multiplier + 누산 레지스터
     wire signed [ACC_WIDTH-1:0] acc_dsp;
     wire                        valid_dsp;
     generate if (STAGE >= 3) begin : g_dsp
@@ -79,7 +79,7 @@ module p01_mac_bank #(
         assign valid_dsp = valid_mac;
     end endgenerate
 
-    // 1-4: 03장 mac_pipeline_core
+    // 1-4: mac_pipeline_core
     wire signed [ACC_WIDTH-1:0] acc_pipe;
     wire                        valid_pipe;
     generate if (STAGE >= 4) begin : g_pipe

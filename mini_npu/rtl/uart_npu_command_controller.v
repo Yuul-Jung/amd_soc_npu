@@ -1,5 +1,5 @@
-// (추가) UART 명령·모델 적재·추론 결과 직렬화 Controller.
-// 단일 문자 '0'~'3'은 2원소 고정 표본. 11장 바이너리 명령은 아래 README 참조.
+// UART 명령·모델 적재·추론 결과 직렬화 Controller.
+// 단일 문자 '0'~'3'은 2원소 고정 표본. 2-7 바이너리 명령은 아래 README 참조.
 // 요청/응답은 stop-and-wait: ACK 또는 결과 LF까지 다음 명령 송신 금지.
 module uart_npu_command_controller(
     input wire clk,resetn,
@@ -40,7 +40,7 @@ module uart_npu_command_controller(
     assign npu_start_o=(state==RUN);
     assign npu_length_o=run_length;
 
-    // (추가) 필드 형식 거부. 주소 0~63, 뉴런 0~3, 길이 1~64.
+    // 필드 형식 거부. 주소 0~63, 뉴런 0~3, 길이 1~64.
     wire accepted_fields =
         (opcode=="X" && payload[0]<64) ||
         (opcode=="W" && payload[0]<4 && payload[1]<64) ||

@@ -1,4 +1,4 @@
-// 2장 UART 주인 선택 (2-7부터): sw[2] = 0 디버그 콘솔, 1 = 11장 명령 해석기.
+// 2장 UART 주인 선택 (2-7부터): sw[2] = 0 디버그 콘솔, 1 = 명령 해석기.
 // STAGE < 7이면 콘솔만 있으므로 그대로 잇는다. 스위치는 명령을 주고받지 않을 때 바꾼다.
 `timescale 1ns/1ps
 `default_nettype none
@@ -8,7 +8,7 @@ module p02_uart_switch #(
     input  wire       clk,
     input  wire       resetn,
     input  wire       sw_i,               // 보드 스위치 (비동기)
-    output wire       owner_engine_o,     // 1 = 11장 명령 해석기
+    output wire       owner_engine_o,     // 1 = 명령 해석기
     // uart_core 쪽
     input  wire [7:0] rx_data_i,
     input  wire       rx_valid_i,
@@ -22,7 +22,7 @@ module p02_uart_switch #(
     input  wire [7:0] c_tx_data_i,
     input  wire       c_tx_valid_i,
     output wire       c_tx_ready_o,
-    // 11장 명령 해석기
+    // 명령 해석기
     output wire       e_rx_valid_o,
     input  wire       e_rx_ready_i,
     input  wire [7:0] e_tx_data_i,

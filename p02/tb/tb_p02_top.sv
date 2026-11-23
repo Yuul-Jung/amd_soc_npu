@@ -1,5 +1,5 @@
 // 2장 보드 Top 시험: UART 핀으로 명령을 보내고 TX 핀을 복조해 기준 모델(p02_cases_sN.txt)과 바이트 단위로 대조한다.
-// sw 값은 보드 sw[3:2] (sw[2] = UART 주인, sw[3] = 12장 엔진).
+// sw 값은 보드 sw[3:2] (sw[2] = UART 주인, sw[3] = 통합 엔진).
 // 시뮬레이션 시간을 줄이려고 BAUD 6.25 Mbps(CPB 16), REFRESH_BITS 6으로 돌린다. 보드 Top 기본값은 115200 bps.
 `timescale 1ns/1ps
 module tb_p02_top;
@@ -18,7 +18,7 @@ module tb_p02_top;
         .clk(clk), .btnC(btnC), .uart_rxd(rxd), .sw(sw), .uart_txd(txd),
         .led(led), .seg(seg), .an(an), .dp(dp));
 
-    // TX 핀 복조 (00장 uart_rx 그대로)
+    // TX 핀 복조 (1-1 uart_rx 그대로)
     wire [7:0] got;
     wire got_valid, fe, ov;
     reg mon_resetn = 0;

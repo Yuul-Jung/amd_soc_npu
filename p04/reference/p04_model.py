@@ -4,10 +4,10 @@
 명령 순서를 정하고 보드가 돌려줄 응답을 계산해 p04/tb/p04_cases_s{STAGE}.txt (STAGE 1~4)와
 표시용 설명 p04/tb/p04_case_labels_s{STAGE}.txt를 쓴다.
 계산은 서브젝트 기준 모델 함수를 그대로 쓴다:
-  4-1 구06장: 05장 quantize (INT8 SHIFT 8, INT16 SHIFT 4)
-  4-2·4-3 VS Code 판 구17·18장: quantize_model · quantize_x · model(13타일 외부 누산)
-  4-4 VS Code 판 구19장: config_cycles (1PE·4PE·8PE 클록)
-시연 그림: 18장 고정 표본 파일의 시험 #92 (숫자 9, 18장 PC 평가에서 INT8 → 4, INT16 → 9).
+  4-1: 2-2 quantize (INT8 SHIFT 8, INT16 SHIFT 4)
+  4-2·4-3: quantize_model · quantize_x · model(13타일 외부 누산)
+  4-4: config_cycles (1PE·4PE·8PE 클록)
+시연 그림: 4-3 고정 표본 파일의 시험 #92 (숫자 9, 4-3 PC 평가에서 INT8 → 4, INT16 → 9).
 
   python3 p04/reference/p04_model.py
 """
@@ -19,11 +19,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "ch05" / "reference"))
-from fixed_reference import quantize                                         # noqa: E402  (구05장)
+from fixed_reference import quantize                                         # noqa: E402  (2-2)
 from part03.host_tools.p3_integer_reference import dot_signed                # noqa: E402
-from part03.ch17.reference.tile784_reference import model, tile_ranges       # noqa: E402  (구17장)
-from part03.ch18.reference.precision_reference import quantize_model, quantize_x  # noqa: E402  (구18장)
-from part03.ch19.reference.arch_reference import config_cycles               # noqa: E402  (구19장)
+from part03.ch17.reference.tile784_reference import model, tile_ranges       # noqa: E402  (4-2)
+from part03.ch18.reference.precision_reference import quantize_model, quantize_x  # noqa: E402  (4-3)
+from part03.ch19.reference.arch_reference import config_cycles               # noqa: E402  (4-4)
 
 CASES_OUT = ROOT / "p04" / "tb" / "p04_cases_s%d.txt"
 LABELS_OUT = ROOT / "p04" / "tb" / "p04_case_labels_s%d.txt"
@@ -50,7 +50,7 @@ def sample(idx):
 
 
 class Engine:
-    """p3_tile784_10 한 개의 바깥 동작 (17장 상태 표 중 이 장에서 쓰는 부분)."""
+    """p3_tile784_10 한 개의 바깥 동작 (4-2 상태 표 중 이 장에서 쓰는 부분)."""
 
     def __init__(self, bits):
         self.bits = bits
@@ -145,7 +145,7 @@ class Board:
         if t >= 13:
             return "ERR" + CRLF
         if e.state != "LOAD":
-            return "E1" + CRLF                                  # 17장 ERR_STATE
+            return "E1" + CRLF                                  # 4-2 ERR_STATE
         assert t == e.next and e.frame is not None
         s, n = tile_ranges()[t]
         for cl in range(10):
