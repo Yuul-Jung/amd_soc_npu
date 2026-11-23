@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""28장 PC 호스트: 손글씨 숫자 이미지 → 784 INT8 전처리 → UART 프레임 → 보드(또는 협동 시뮬레이션) 결과 → CSV.
+"""PC 호스트: 손글씨 숫자 이미지 → 784 INT8 전처리 → UART 프레임 → 보드(또는 PC 시뮬레이션) 결과 → CSV.
 
 전송 경로(같은 규약, reference/digit_reference.py 머리말):
   --port /dev/ttyUSBx   실제 Basys3(USB-UART 115200 8N1, pyserial)             → target=fpga
-  --cosim "<명령>"       PC용으로 빌드한 같은 펌웨어 + Icarus NPU RTL(표준 입출력) → target=rtl_cosim
+  --cosim "<명령>"       PC용으로 빌드한 같은 펌웨어 + NPU RTL(표준 입출력) → target=rtl_cosim
 입력:  --samples(기본: reference/digit_samples.txt), --mnist-dir D --indices 0,1,..., --images a.png ...(28×28)
 CSV:   target,img_id,source,index,label,golden_class,cpu_class,dev_class,scores_match,display_ok,rc,category
   category: OK / MODEL_MISCLASS(골든 = 장치, 하지만 정답과 다름: 모델 한계) / HW_MISMATCH(장치 ≠ 골든)
@@ -29,7 +29,7 @@ from part03.ch28.reference.digit_reference import (  # noqa: E402
 
 
 class ProcTransport:
-    """협동 시뮬레이션: 펌웨어 프로세스의 표준 입출력."""
+    """PC 시뮬레이션: 펌웨어 프로세스의 표준 입출력."""
 
     def __init__(self, cmd):
         import selectors

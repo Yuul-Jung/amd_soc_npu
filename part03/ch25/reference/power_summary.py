@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-"""25장: Vivado report_power 결과(vectorless·CPU 구간 SAIF·NPU 구간 SAIF)로 전력·추론당 에너지 표를 만든다.
+"""Vivado report_power 결과(vectorless·CPU 구간 SAIF·NPU 구간 SAIF)로 전력·추론당 에너지 표를 만든다.
 
-추론 시간은 23장 SoC RTL 시뮬레이션 측정 클록(100 MHz)을 쓴다. 모든 값은 Vivado 추정치이며 보드 측정이 아니다.
+추론 시간은 5-4 SoC RTL 시뮬레이션 측정 클록(100 MHz)을 쓴다. 모든 값은 Vivado 추정치이며 보드 측정이 아니다.
 """
 import argparse
 import re
 from pathlib import Path
 
 CLK_NS = 10.0
-CYCLES = {"cpu": 1_816_547, "npu": 1_080_161}          # 23장 validation/soc_bench_sim.log
+CYCLES = {"cpu": 1_816_547, "npu": 1_080_161}          # 5-4 validation/soc_bench_sim.log
 CELLS = ("p3_npu_0", "microblaze_riscv_0", "axi_smc", "microblaze_riscv_0_local_memory")
 
 

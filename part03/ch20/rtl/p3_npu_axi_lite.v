@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
-// (추가) 20장: 17장 Tile Controller(784입력·10분류 NPU)를 AXI4-Lite 제어·상태 레지스터로 감싼 Slave.
-// 데이터 경로(14장 코어·17장 컨트롤러)는 그대로 두고 버스 어댑터만 추가한다. x 타일은 04장 bram_sync_buffer.
+// 4-2 Tile Controller(784입력·10분류 NPU)를 AXI4-Lite 제어·상태 레지스터로 감싼 Slave.
+// 데이터 경로(3-2 코어·4-2 컨트롤러)는 그대로 두고 버스 어댑터만 추가한다. x 타일은 2-1 bram_sync_buffer.
 //
 // 레지스터(32비트, 오프셋): 0x00 CTRL  0x04 STATUS  0x08 LENGTH  0x0C CLASS  0x10 X_INDEX  0x14 X_DATA
 //   0x18 W_CLASS  0x1C W_INDEX  0x20 W_DATA  0x24 BIAS_LO  0x28 BIAS_HI  0x2C SCORE_SEL
@@ -9,9 +9,9 @@
 //   프레임 잠금 중 X_DATA)는 SLVERR이며 아무 효과도 없다. NPU 동작 오류는 STATUS.ERROR·ERR_CODE로 알린다.
 // AW와 W는 따로 도착할 수 있다: 각각 1개씩 보관했다가 둘 다 있으면 실행하고 B 응답을 BREADY까지 유지한다.
 module p3_npu_axi_lite #(
-    parameter integer DATA_W = 8,      // x·W signed 폭 (17장 기본 INT8)
-    parameter integer CORE_ACC_W = 24, // 14장 코어 lane 누산 폭
-    parameter integer PART_W = 25      // 14장 코어 점수 폭
+    parameter integer DATA_W = 8,      // x·W signed 폭 (4-2 기본 INT8)
+    parameter integer CORE_ACC_W = 24, // 3-2 코어 lane 누산 폭
+    parameter integer PART_W = 25      // 3-2 코어 점수 폭
 )(
     input wire s_axi_aclk,
     input wire s_axi_aresetn,
@@ -42,7 +42,7 @@ module p3_npu_axi_lite #(
                      R_XIDX = 4'h4, R_XDATA = 4'h5, R_WCLASS = 4'h6, R_WIDX = 4'h7,
                      R_WDATA = 4'h8, R_BLO = 4'h9, R_BHI = 4'hA, R_SSEL = 4'hB,
                      R_SLO = 4'hC, R_SHI = 4'hD, R_IRQEN = 4'hE;
-    // ERR_CODE: 1~6 = 17장 컨트롤러 코드, 아래는 이 어댑터가 검출하는 코드
+    // ERR_CODE: 1~6 = 4-2 컨트롤러 코드, 아래는 이 어댑터가 검출하는 코드
     localparam [3:0] ERR_NO_FRAME = 4'd4, ERR_LENGTH = 4'd8, ERR_W_MISSING = 4'd9;
     wire clk = s_axi_aclk;
     wire resetn = s_axi_aresetn;

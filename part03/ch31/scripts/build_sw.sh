@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# (추가) 31장: 28장 SoC(Bitstream·XSA 그대로) 위의 보안 모델 적재 펌웨어 ELF. 하드웨어 변경 없음.
-# (변경) 안 A(2026-11-19): 하드웨어는 21장 SoC(동결 주소맵·표준 7세그먼트 IP)의 Bitstream·XSA를 그대로 쓴다(28장 BD 폐지).
+# 6-1 SoC(Bitstream·XSA 그대로) 위의 보안 모델 적재 펌웨어 ELF. 하드웨어 변경 없음.
+# 하드웨어는 5-2 SoC(동결 주소맵·표준 7세그먼트 IP)의 Bitstream·XSA를 그대로 쓴다(6-1 전용 BD 없음).
 #   키: P3_KEY_FILE(저장소 밖, 16진 96자 = 암호화 16바이트 ‖ MAC 32바이트)이 있으면 그 키, 없으면 TEST 키.
 #   키가 든 헤더는 build/(저장소 제외)에만 생기고, 출력에는 키 지문만 남는다.
 set -euo pipefail

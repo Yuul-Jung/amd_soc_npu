@@ -1,4 +1,4 @@
-# (추가) 24장: 20장 AXI4-Lite NPU IP 클록 주기 스윕 구성.
+# 5-1 AXI4-Lite NPU IP 클록 주기 스윕 구성.
 set clk_period $::env(P3_CLK_PERIOD)
 set clk_in_synth 1
 set clk_port s_axi_aclk

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# (추가) 23장: CPU·NPU 벤치마크 ELF 빌드(보드용·시뮬레이션용)와 SoC 전체 행동 시뮬레이션(xsim).
-#   필요: 21장 build_soc.sh 결과(ch21/build), VIVADO_SETTINGS·VITIS_SETTINGS
+# CPU·NPU 벤치마크 ELF 빌드(보드용·시뮬레이션용)와 SoC 전체 행동 시뮬레이션(xsim).
+#   필요: 5-2 build_soc.sh 결과(ch21/build), VIVADO_SETTINGS·VITIS_SETTINGS
 #   결과: validation/soc_bench_sim.log. 보드 실측은 build/bench_board ELF로 사용자와 함께 한다.
 set -euo pipefail
 chapter_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)

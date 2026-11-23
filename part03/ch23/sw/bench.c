@@ -1,6 +1,6 @@
-/* (추가) 23장: 같은 MicroBlaze V SoC에서 CPU 정수 추론과 NPU 추론의 클록 수를 AXI Timer로 잰다.
+/* 같은 MicroBlaze V SoC에서 CPU 정수 추론과 NPU 추론의 클록 수를 AXI Timer로 잰다.
  * 측정 구간
- *   CPU      : cpu_infer() 784×10 MAC + Bias + argmax (22장 드라이버와 같은 C, 소프트웨어 곱셈)
+ *   CPU      : cpu_infer() 784×10 MAC + Bias + argmax (5-3 드라이버와 같은 C, 소프트웨어 곱셈)
  *   NPU_BIAS : npu_set_bias() (모델 적재 1회분, 추론마다 반복하지 않아도 됨)
  *   NPU      : npu_infer() 타일 13개의 W·X 레지스터 쓰기 + TILE_GO + 폴링 + 점수 읽기(종단간)
  * 결과는 GPIO 데이터 레지스터에 순서대로 쓴다(시뮬레이션 TB가 AXI 쓰기를 기록). 보드용은 UART로도 출력.

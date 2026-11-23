@@ -1,5 +1,5 @@
-/* (추가) 31장: 교육용 암호 구현. S-box 표는 reference/secure_reference.py(SBOX 계산)에서 생성했다.
- * 정답 확인: NIST FIPS 197·SP 800-38A·FIPS 180-4 예제, RFC 4231 HMAC — host/crypto_selftest.c와 협동 시뮬레이션.
+/* 교육용 암호 구현. S-box 표는 reference/secure_reference.py(SBOX 계산)에서 생성했다.
+ * 정답 확인: NIST FIPS 197·SP 800-38A·FIPS 180-4 예제, RFC 4231 HMAC — host/crypto_selftest.c와 PC 시뮬레이션.
  */
 #include "p3_crypto.h"
 

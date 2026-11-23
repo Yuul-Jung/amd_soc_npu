@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""29장 PC 호스트: 가상 센서 창(합성 데이터·고장 주입) → UART 프레임 → 보드(또는 협동 시뮬레이션) → 응답 판정·CSV.
+"""PC 호스트: 가상 센서 창(합성 데이터·고장 주입) → UART 프레임 → 보드(또는 PC 시뮬레이션) → 응답 판정·CSV.
 
 전송 경로(같은 규약, reference/sensor_reference.py 머리말):
-  --port /dev/ttyUSBx   실제 Basys3(28장 Bitstream + 29장 ELF)                  → target=fpga
-  --cosim "<명령>"       PC 빌드 펌웨어 + Icarus NPU RTL(표준 입출력)              → target=rtl_cosim
+  --port /dev/ttyUSBx   실제 Basys3(6-1 Bitstream + 6-3 ELF)                  → target=fpga
+  --cosim "<명령>"       PC 빌드 펌웨어 + NPU RTL(표준 입출력)              → target=rtl_cosim
 시험 묶음(기본 모두):
   scenario  정책 전이(부팅 UNKNOWN → 3회 연속 하향, 즉시 상향, FAULT 래치·ACK)와 센서 고장 주입
             (결측·지연·범위 밖·고착 → NPU 없이 UNKNOWN/FAULT)

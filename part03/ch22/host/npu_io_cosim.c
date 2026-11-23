@@ -1,4 +1,4 @@
-/* (추가) 22장: PC 협동 시뮬레이션용 레지스터 접근. 명령을 FIFO로 Icarus 브리지 TB에 보내고 응답을 기다린다. */
+/* PC 시뮬레이션용 레지스터 접근. 명령을 FIFO로 RTL 브리지 TB에 보내고 응답을 기다린다. */
 #include <stdio.h>
 #include <stdlib.h>
 #include "npu_driver.h"

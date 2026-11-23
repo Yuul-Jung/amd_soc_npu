@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
-// (추가) 16장: 64→8→10 정수 MLP. 14장 코어를 두 계층으로 재사용한다.
-//   1층: p3_group10_core #(64, 8)  x = 13장 프레임 버퍼(외부 읽기 포트)
+// 64→8→10 정수 MLP. 3-2 코어를 두 계층으로 재사용한다.
+//   1층: p3_group10_core #(64, 8)  x = 3-1 프레임 버퍼(외부 읽기 포트)
 //   재양자화: p3_relu_requant × 8  hidden = sat_int8(round_shift_away(max(0, s1), shift))
 //   2층: p3_group10_core #(8, 10)  x = 내부 은닉 레지스터(1클록 지연 읽기)
 // 가중치·Bias 쓰기는 wr_layer_i(0=1층, 1=2층)로 선택하며, MLP 동작 중에는 두 계층 모두 쓰기를 막는다.
@@ -72,7 +72,7 @@ module p3_mlp_64_8_10(
         end
     endgenerate
 
-    // 2층 x 읽기: 13장 버퍼와 같은 1클록 지연 계약
+    // 2층 x 읽기: 3-1 버퍼와 같은 1클록 지연 계약
     always @(posedge clk)
         if (h_rd_en)
             hid_rd_data <= hidden[h_rd_addr[2:0]];

@@ -1,5 +1,5 @@
-/* (추가) 30장: NPU 추천 → 독립 모터 안전 코어. 29장 센서 감시(guard·특징·NPU·경보 정책)를 그대로 재사용하고
- * (29장 sensor_app.c를 수정 없이 링크), 정책 상태를 방향·속도 추천으로 바꿔 명령 워드로만 쓴다.
+/* NPU 추천 → 독립 모터 안전 코어. 6-3 센서 감시(guard·특징·NPU·경보 정책)를 그대로 재사용하고
+ * (6-3 sensor_app.c를 수정 없이 링크), 정책 상태를 방향·속도 추천으로 바꿔 명령 워드로만 쓴다.
  * CPU는 IN1/IN2/ENA를 직접 구동하지 않는다. E-Stop·고장·과열·워치독·트립·리밋은 RTL 코어가 AI 결과와 무관하게 우선한다.
  * 명령을 쓸 때마다 kick 비트를 토글한다(워치독 갱신). 센서 프레임이 멈추면 kick도 멈추고 코어가 정지·트립한다.
  * 트립 해제('C')는 운전자 명령이며 STOP 명령을 먼저 쓴 뒤 다음 쓰기에서 clear 비트를 토글한다.
@@ -109,7 +109,7 @@ static void sensor_frame(npu_t *npu, int junk)
         s.v[i] = (uint16_t)(p[2] | (p[3] << 8));
         s.d[i] = (uint16_t)(p[4] | (p[5] << 8));
     }
-    sensor_guard(&s, &fmask, &umask);                 /* 29장: 규칙 먼저 */
+    sensor_guard(&s, &fmask, &umask);                 /* 6-3: 규칙 먼저 */
     if (fmask || umask) {
         policy_cand(&pol, fmask ? ST_FAULT : ST_UNKNOWN);
         command_from_policy();
@@ -140,7 +140,7 @@ static void sensor_frame(npu_t *npu, int junk)
     report("FRAME", seq, "OK", ncls, -1, junk);
 }
 
-/* 'J' 시험 주입(PC 협동 시뮬레이션 전용): op 1 = 입력 비트 {lim_r, lim_f, otemp, fault, estop}, op 2 = N클록 진행 */
+/* 'J' 시험 주입(PC 시뮬레이션 전용): op 1 = 입력 비트 {lim_r, lim_f, otemp, fault, estop}, op 2 = N클록 진행 */
 static void inject(int junk)
 {
     int op = rx_buf[0];
@@ -229,7 +229,7 @@ static int handle(npu_t *npu)
         command_from_policy();
         report("DIR", -1, "-", -1, -1, junk);
         break;
-    case 'A':                                          /* 29장 경보 래치 ACK(모터 트립 해제가 아니다) */
+    case 'A':                                          /* 6-3 경보 래치 ACK(모터 트립 해제가 아니다) */
         c = policy_ack(&pol);
         report("ACK", -1, "-", -1, c, junk);
         break;
@@ -258,7 +258,7 @@ int motor_app_run(uintptr_t npu_base, uintptr_t motor_base, uintptr_t inject_bas
     uint32_t mcrc = sensor_model_crc32();
     mbase = motor_base;
     ibase = inject_base;
-    policy_reset(&pol);                                /* 29장: 부팅 UNKNOWN → 추천 STOP */
+    policy_reset(&pol);                                /* 6-3: 부팅 UNKNOWN → 추천 STOP */
     motor_recommend(pol.state, op_dir, &rec_dir, &rec_duty);
     npu_io_write(mbase + MOTOR_REG_CMD, MOTOR_CMD(rec_dir, rec_duty, kick, clr));   /* kick 토글 없음: 명령 아님 */
     npu_init(&npu, npu_base);

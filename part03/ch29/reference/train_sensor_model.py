@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""29장: 센서 특징 8개 → 3상태(NORMAL·WARNING·FAULT) Float32 선형 분류기 학습(PC 전용, PyTorch 필요).
+"""센서 특징 8개 → 3상태(NORMAL·WARNING·FAULT) Float32 선형 분류기 학습(PC 전용, PyTorch 필요).
 
 데이터: sensor_reference.dataset(TRAIN) — 교육용 합성 데이터(고정 seed), 실제 설비 라벨이 아니다.
-입력: x = feature / 127 (특징은 0..127 정수, zero-point 0 → 18장 quantize_model 그대로 사용).
+입력: x = feature / 127 (특징은 0..127 정수, zero-point 0 → 4-3 quantize_model 그대로 사용).
 결과: 같은 폴더 sensor_model_f32.json. 정수 평가는 sensor_reference.py --eval(표준 라이브러리).
 실행: <torch venv>/bin/python part03/ch29/reference/train_sensor_model.py
 """

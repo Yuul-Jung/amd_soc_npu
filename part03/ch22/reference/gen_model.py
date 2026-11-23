@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""22장: 18장 INT8 양자화 모델과 MNIST 표본 4개로 C 헤더(model_data.h)를 만든다(빌드 산출물, 저장소 미포함).
+"""4-3 INT8 양자화 모델과 MNIST 표본 4개로 C 헤더(model_data.h)를 만든다(빌드 산출물, 저장소 미포함).
 
-기대 점수·Class는 17장 기준모델 model()로 계산해 헤더에 넣는다(C 응용이 NPU·CPU 결과와 비교).
+기대 점수·Class는 4-2 기준모델 model()로 계산해 헤더에 넣는다(C 응용이 NPU·CPU 결과와 비교).
 """
 import argparse
 import json

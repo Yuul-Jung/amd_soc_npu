@@ -1,5 +1,5 @@
-// (추가) 15장 정수 Dense 계층 자동 판정 테스트벤치(64→10 분류기, 64→8, 8→10).
-// 14장 p3_group10_core를 IN_LEN/OUT_N 파라미터로 재사용하고, x는 13장 p3_frame64_buffer에서 읽는다.
+// 정수 Dense 계층 자동 판정 테스트벤치(64→10 분류기, 64→8, 8→10).
+// 3-2 p3_group10_core를 IN_LEN/OUT_N 파라미터로 재사용하고, x는 3-1 p3_frame64_buffer에서 읽는다.
 // 명령 파일(W/B/F)을 순서대로 실행해 모델을 유지·부분 갱신하며 프레임마다 점수·Class를 기록한다.
 `timescale 1ns/1ps
 module tb_p3_dense_layer;
@@ -79,7 +79,7 @@ module tb_p3_dense_layer;
                     rc = $fscanf(f_ops, "%d", v);
                     xbuf[k] = v;
                 end
-                // 13장 스트림 계약으로 64바이트 전송
+                // 3-1 스트림 계약으로 64바이트 전송
                 for (k = 0; k < 64; k = k + 1) begin
                     @(negedge clk);
                     s_data = xbuf[k]; s_valid = 1; s_last = (k == 63);

@@ -1,5 +1,5 @@
 `timescale 1ns/1ps
-// (추가) 16장: 은닉층 출력 재양자화 = sat_int8(round_shift_away(max(0, score), shift)).
+// 은닉층 출력 재양자화 = sat_int8(round_shift_away(max(0, score), shift)).
 // ReLU 이후 값은 0 이상이므로 절반 반올림은 (v + 2^(shift-1)) >> shift 와 같다(shift=0이면 그대로).
 // 조합 회로. 입력 signed 25비트 점수, 출력 signed INT8(0..127).
 module p3_relu_requant(

@@ -1,4 +1,4 @@
-// (추가) 28장: 숫자 인식 SoC 전체 행동 시뮬레이션(xsim). 보드용 digit_app.elf를 그대로 LMB에 연결해 실행한다.
+// 숫자 인식 SoC 전체 행동 시뮬레이션(xsim). 보드용 digit_app.elf를 그대로 LMB에 연결해 실행한다.
 // TB가 PC 역할: USB-UART RsRx로 115200 8N1 프레임을 비트 단위로 보내고, RsTx를 복호해 줄 단위로 기록한다.
 // 응답 뒤 LED 핀과 FND 핀(an/seg/dp)을 스캔 두 주기 동안 관찰해 기록한다. 판정은 Python(soc_sim_check.py)이 한다.
 //   +FRAME=<한 줄에 1바이트 16진> +OUT=<기록 파일>
@@ -12,7 +12,7 @@ module tb_soc28_uart;
     wire [6:0] seg;
     wire [3:0] an;
     always #5 clk = ~clk;   // Basys3 W5 100 MHz
-    // (변경) 안 A: 21장 SoC Top(표준 7세그먼트 IP, BTN GPIO). 버튼은 누르지 않는다.
+    // 5-2 SoC Top(표준 7세그먼트 IP, BTN GPIO). 버튼은 누르지 않는다.
     basys3_soc21_top dut(.clk(clk), .btnC(btnC), .btn(4'b0000), .sw(sw), .led(led), .RsRx(rx), .RsTx(tx),
                          .seg(seg), .dp(dp), .an(an));
 

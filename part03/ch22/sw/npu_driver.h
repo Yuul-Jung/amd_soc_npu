@@ -1,7 +1,7 @@
-/* (추가) 22장: 20장 AXI4-Lite NPU 제어 IP(p3_npu_axi_lite) C 드라이버.
+/* 5-1 AXI4-Lite NPU 제어 IP(p3_npu_axi_lite) C 드라이버.
  * 레지스터 접근은 npu_io_read/npu_io_write 두 함수로만 한다.
  *   Vitis(MicroBlaze V): Xil_In32/Xil_Out32 (npu_io_xil.c)
- *   PC 협동 시뮬레이션: FIFO로 Icarus RTL에 전달 (host/npu_io_cosim.c)
+ *   PC 시뮬레이션: FIFO로 RTL에 전달 (host/npu_io_cosim.c)
  * 베이스 주소는 xparameters.h(Vivado Address Editor 값)에서 받는다. 드라이버에 고정하지 않는다.
  */
 #ifndef NPU_DRIVER_H
@@ -14,7 +14,7 @@
 #define NPU_TILE    64
 #define NPU_N_TILE  13
 
-/* 레지스터 오프셋 (20장 docs/README.md 레지스터 맵) */
+/* 레지스터 오프셋 (5-1 docs/README.md 레지스터 맵) */
 #define NPU_CTRL      0x00u
 #define NPU_STATUS    0x04u
 #define NPU_LENGTH    0x08u
@@ -68,7 +68,7 @@ void npu_irq_enable(npu_t *npu, int enable);
 void npu_clear_done(npu_t *npu);
 uint32_t npu_last_status(const npu_t *npu);
 
-/* 같은 정수 연산의 CPU 기준 구현(23장 CPU·NPU 비교에도 사용) */
+/* 같은 정수 연산의 CPU 기준 구현(5-4 CPU·NPU 비교에도 사용) */
 int cpu_infer(const int8_t x[NPU_N_IN], const int8_t w[NPU_N_CLASS][NPU_N_IN],
               const int64_t bias[NPU_N_CLASS], int64_t scores[NPU_N_CLASS]);
 

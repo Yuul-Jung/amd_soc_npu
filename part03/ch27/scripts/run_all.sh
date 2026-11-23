@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# (추가) 27장: 제3부 13~26장 결과를 한 번에 재현하는 실행기. 단계마다 PASS/FAIL/NOT_RUN을 표로 남긴다.
-#   LEVEL=sim  (기본) RTL·Python·C 협동 시뮬레이션만 (약 10분)
+# 제3부 3-1~6-2 결과를 한 번에 재현하는 실행기. 단계마다 PASS/FAIL/NOT_RUN을 표로 남긴다.
+#   LEVEL=sim  (기본) RTL·Python·C PC 시뮬레이션만 (약 10분)
 #   LEVEL=pc   + MNIST 전체 평가 (MNIST_DIR 필요)
 #   LEVEL=fpga + Vivado OOC·SoC Bitstream·Vitis ELF (VIVADO_SETTINGS·VITIS_SETTINGS·SOC11_DIR 필요, 1시간 이상)
-#   LEVEL=full + SoC 전체 xsim(23장)·전력(25장) (수 시간)
+#   LEVEL=full + SoC 전체 xsim(5-4)·전력(5-6) (수 시간)
 # 실물(Basys3)은 이 실행기가 하지 않는다 — docs/BOARD_CHECKLIST.md를 사용자와 함께 진행.
 set -uo pipefail
 part03=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd)
@@ -37,7 +37,7 @@ step package_ip_ch20 fpga bash "$part03/ch20/scripts/package_ip.sh"
 step soc_build_ch21 fpga bash "$part03/ch21/scripts/build_soc.sh"
 step vitis_ch22 fpga bash "$part03/ch22/scripts/build_vitis.sh"
 step synth_ch26 fpga bash "$part03/ch26/scripts/run_synth.sh"
-step sw_build_ch28 fpga bash "$part03/ch28/scripts/build_sw.sh"   # (변경) 안 A: 21장 XSA로 ELF만
+step sw_build_ch28 fpga bash "$part03/ch28/scripts/build_sw.sh"   # 5-2 XSA로 ELF만
 step synth_ch29 fpga bash "$part03/ch29/scripts/run_synth.sh"
 step sw_build_ch29 fpga bash "$part03/ch29/scripts/build_sw.sh"
 step synth_ch30 fpga bash "$part03/ch30/scripts/run_synth.sh"

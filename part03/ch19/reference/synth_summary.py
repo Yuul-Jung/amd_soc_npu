@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""19장: Vivado OOC 합성·배선 보고서(utilization·timing_summary)를 요약표로 만든다(표준 라이브러리).
+"""Vivado OOC 합성·배선 보고서(utilization·timing_summary)를 요약표로 만든다(표준 라이브러리).
 
 원본 보고서에는 호스트 이름·경로가 있어 저장소에 넣지 않고, 수치와 임계 경로 끝점만 기록한다.
 """

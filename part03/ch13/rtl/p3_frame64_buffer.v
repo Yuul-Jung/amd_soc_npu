@@ -1,5 +1,5 @@
 `timescale 1ns/1ps
-// (추가) 13장: 8×8(64원소) signed INT8 입력 프레임 수신 버퍼.
+// 8×8(64원소) signed INT8 입력 프레임 수신 버퍼.
 // 바이트 스트림(valid/ready/last)을 행 우선 순서(addr=row*8+col)로 저장한다.
 // 정확히 64번째 바이트에 last가 있어야 유효 프레임. 짧은/긴 프레임은 버리고 오류 펄스를 낸다.
 // 유효 프레임은 frame_ack_i까지 유지되며, 그동안 s_ready_o=0(Busy)으로 다음 입력을 막는다.

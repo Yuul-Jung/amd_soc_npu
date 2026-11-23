@@ -1,4 +1,4 @@
-// (추가) 31장: AES-128 코어 시험. FIPS 197 부록 C.1·B, SP 800-38A F.5.1 CTR 키스트림 블록, 무작위 200개(Python 정본)
+// AES-128 코어 시험. FIPS 197 부록 C.1·B, SP 800-38A F.5.1 CTR 키스트림 블록, 무작위 200개(Python 정본)
 `timescale 1ns/1ps
 module tb_p3_aes128;
     reg clk = 0, rst = 1, start = 0;

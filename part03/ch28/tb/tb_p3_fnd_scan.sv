@@ -1,4 +1,4 @@
-// (추가) 28장: FND 스캔 시험. Python(digit_reference.fnd_segments)이 만든 (워드, 자리) → (an, seg, dp) 기대값과
+// FND 스캔 시험. Python(digit_reference.fnd_segments)이 만든 (워드, 자리) → (an, seg, dp) 기대값과
 // 핀 값을 비교한다. 각 자리 구간 한가운데에서 표본을 잡고, 자리 순서 0→1→2→3 반복과 Reset 출력(모두 꺼짐)도 확인한다.
 `timescale 1ns/1ps
 module tb_p3_fnd_scan;

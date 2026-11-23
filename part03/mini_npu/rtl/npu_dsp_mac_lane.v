@@ -1,4 +1,4 @@
-// (추가) 02장 등록 DSP 곱을 다음 에지에 누산한다. 곱을 다시 수행하지 않는다.
+// 1-3 등록 DSP 곱을 다음 에지에 누산한다. 곱을 다시 수행하지 않는다.
 module npu_dsp_mac_lane #(
     parameter integer DATA_WIDTH=16,
     parameter integer ACC_WIDTH=40

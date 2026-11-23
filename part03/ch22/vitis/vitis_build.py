@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""(추가) 22장: 21장 XSA로 MicroBlaze V standalone 플랫폼과 응용(ELF)을 빌드한다(Vitis 2024.2 Python API).
+"""5-2 XSA로 MicroBlaze V standalone 플랫폼과 응용(ELF)을 빌드한다(Vitis 2024.2 Python API).
 
-(변경) 23장: 응용 이름과 소스 파일 목록을 인자로 받는다. 같은 workspace의 플랫폼은 한 번만 만든다.
-(변경) 28장: 플랫폼 이름을 환경 변수 P3_PLAT_NAME으로 바꿀 수 있다(기본 soc21_npu_plat, 22·23장 동작 그대로).
+5-4: 응용 이름과 소스 파일 목록을 인자로 받는다. 같은 workspace의 플랫폼은 한 번만 만든다.
+6-1: 플랫폼 이름을 환경 변수 P3_PLAT_NAME으로 바꿀 수 있다(기본 soc21_npu_plat, 5-3·5-4 동작 그대로).
 사용: vitis -s vitis_build.py <workspace> <xsa> <app 이름> <소스 파일...>
 """
 import os

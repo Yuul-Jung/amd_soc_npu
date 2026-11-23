@@ -1,6 +1,6 @@
-// (추가) 23장: 21장 SoC 전체(MicroBlaze V + NPU) 행동 시뮬레이션. 벤치마크 ELF를 LMB에 연결해 실행하고,
-// 프로그램이 GPIO 데이터 레지스터에 쓰는 값(AXI 쓰기)을 기록한다. 사용자 Top basys3_soc11_top 그대로 사용.
-// (변경) 안 A: 21장 Top이 basys3_soc21_top(btn·seg·dp·an 추가)으로 바뀌어 그 Top을 쓴다. 버튼은 누르지 않는다.
+// 5-2 SoC 전체(MicroBlaze V + NPU) 행동 시뮬레이션. 벤치마크 ELF를 LMB에 연결해 실행하고,
+// 프로그램이 GPIO 데이터 레지스터에 쓰는 값(AXI 쓰기)을 기록한다. 사용자 Top은
+// 5-2 basys3_soc21_top(btn·seg·dp·an 포함)이다. 버튼은 누르지 않는다.
 `timescale 1ns/1ps
 module tb_soc_bench;
     reg clk = 0, btnC = 1, rx = 1;

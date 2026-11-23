@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""24장: 클록 주기 스윕 결과(배선 후 timing·utilization)를 표로 만든다. 19장 synth_summary의 파서를 재사용한다."""
+"""클록 주기 스윕 결과(배선 후 timing·utilization)를 표로 만든다. 4-4 synth_summary의 파서를 재사용한다."""
 import argparse
 import re
 import sys
