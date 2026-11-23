@@ -178,7 +178,7 @@ details.full>summary{cursor:pointer;font-weight:600}
         <li>STAGE 값 = 끝낸 서브젝트 수: 1-1만 끝냈으면 1, 1-4까지 끝냈으면 4. 아직 없는 모듈은 들어가지 않으므로 빌드가 됩니다.</li>
       </ol>
       <div class="codeblock">
-        <div class="codebar"><span>p01/rtl/p01_reset_sync.v · verilog · 원본 · RTL_SIM 통과 2026-11-22</span></div>
+        <div class="codebar"><span>p01/rtl/p01_reset_sync.v · verilog · 원본 · RTL_SIM 통과 2026-11-23</span></div>
         <pre tabindex="0"><code class="language-verilog">// 장 Top 공용 리셋: btnC(Active-High)를 2단 동기화해 동기 resetn을 만든다 (12장 npu_reset_controller와 같은 동작).
 // (변경 2026-11-22) 비동기 assert 제거 — 비동기 clear되는 플립플롭 출력이 RAMB18 제어 핀으로 들어가면
 // 버튼을 누르는 순간 BRAM 내용이 깨질 수 있다 (Vivado DRC REQP-1840). 모든 플립플롭이 clk에만 반응한다.
@@ -200,7 +200,7 @@ endmodule
 `default_nettype wire</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>p01/rtl/p01_calc_controller.v · verilog · 원본 · RTL_SIM 통과 2026-11-22</span></div>
+        <div class="codebar"><span>p01/rtl/p01_calc_controller.v · verilog · 원본 · RTL_SIM 통과 2026-11-23</span></div>
         <pre tabindex="0"><code class="language-verilog">// 1장 UART 계산기 명령 해석기. 11장과 같은 형식: 1바이트 명령 + 바이너리 페이로드(빅엔디언), stop-and-wait.
 //
 //   명령   페이로드                     응답
@@ -344,7 +344,7 @@ endmodule
 `default_nettype wire</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>p01/rtl/p01_mac_bank.v · verilog · 원본 · RTL_SIM 통과 2026-11-22</span></div>
+        <div class="codebar"><span>p01/rtl/p01_mac_bank.v · verilog · 원본 · RTL_SIM 통과 2026-11-23</span></div>
         <pre tabindex="0"><code class="language-verilog">// 1장 MAC 묶음: 1-2·1-3·1-4 서브젝트의 세 코어에 같은 입력을 넣고, sw로 고른 코어의 결과만 내보낸다.
 // STAGE = 지금까지 끝낸 서브젝트 수 (1~4). 아직 만들지 않은 코어는 넣지 않고, 그 sw 값은 앞 코어로 대신한다.
 //   sel 0 = 1-2 mac_core (01장)            지연 1클록
@@ -454,7 +454,7 @@ endmodule
 `default_nettype wire</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>p01/rtl/p01_hex4_display.v · verilog · 원본 · RTL_SIM 통과 2026-11-22</span></div>
+        <div class="codebar"><span>p01/rtl/p01_hex4_display.v · verilog · 원본 · RTL_SIM 통과 2026-11-23</span></div>
         <pre tabindex="0"><code class="language-verilog">// 1장 7세그먼트: 16비트 값을 16진수 4자리로 띄운다 (보드 seg·an·dp는 active-low, seg = {g,f,e,d,c,b,a}).
 // 자리 전환은 100 MHz / 2^(REFRESH_BITS-2) 마다 (기본 18 → 약 1.5 kHz, 네 자리 한 바퀴 약 381 Hz).
 // 5장 SoC의 표준 SEG7 IP(ip_seg7)와 같은 표시 규칙이다.
@@ -499,7 +499,7 @@ endmodule
 `default_nettype wire</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>p01/rtl/basys3_p01_top.v · verilog · 원본 · RTL_SIM 통과 2026-11-22</span></div>
+        <div class="codebar"><span>p01/rtl/basys3_p01_top.v · verilog · 원본 · RTL_SIM 통과 2026-11-23</span></div>
         <pre tabindex="0"><code class="language-verilog">// 1장 보드 Top: UART 계산기. 인스턴스와 배선만 둔다 (기능은 하위 모듈).
 //   1-1 에코 → 1-2 MAC 누산 → 1-3 DSP 곱 → 1-4 파이프라인. sw[1:0]으로 1-2·1-3·1-4 코어를 고른다.
 //   led[15:0] = 누산값 아래 16비트, 7세그먼트 = 같은 값 16진수 4자리.
@@ -676,7 +676,7 @@ close $fh
 if {!$all_ok} { error "P01_IMPL_TIMING_FAILED" }</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>p01/host/p01_send.py · python · 원본 · RTL_SIM 통과 2026-11-22</span></div>
+        <div class="codebar"><span>p01/host/p01_send.py · python · 원본 · RTL_SIM 통과 2026-11-23</span></div>
         <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
 """1장 UART 계산기 PC 쪽 도구: 명령을 바이트로 바꿔 보내고 응답 한 줄을 받아 출력한다.
 
@@ -734,7 +734,7 @@ if __name__ == "__main__":
         <thead><tr><th>순서</th><th>sw[1:0]</th><th>PC 명령 (<code>p01_send.py</code>)</th><th>보드 응답 (UART)</th></tr></thead>
         <tbody><tr><td>1</td><td class="nw"><code>00</code></td><td class="nw"><code>Z</code></td><td class="nw"><code>Z</code></td></tr><tr><td>2</td><td class="nw"><code>00</code></td><td class="nw"><code>5</code></td><td class="nw"><code>5</code></td></tr><tr><td>3</td><td class="nw"><code>00</code></td><td class="nw"><code>S</code></td><td class="nw"><code>I\r\n</code></td></tr><tr><td>4</td><td class="nw"><code>00</code></td><td class="nw"><code>M</code></td><td class="nw"><code>M</code></td></tr></tbody>
       </table></div>
-      <p>끝난 뒤 LED: <code>0x0000</code> (누산값 아래 16비트, 7세그먼트도 같은 값 16진수 4자리). 응답 출처: 장 Top 시뮬레이션 STAGE=1 (<code>p01/validation/rtl_sim_20261122.log</code>, 바이트 단위 대조).</p>
+      <p>끝난 뒤 LED: <code>0x0000</code> (누산값 아래 16비트, 7세그먼트도 같은 값 16진수 4자리). 응답 출처: 장 Top 시뮬레이션 STAGE=1 (<code>p01/validation/rtl_sim_20261123.log</code>, 바이트 단위 대조).</p>
       <h3>추가 코드 (구 00장 그대로)</h3>
       <p>※ <code>uart_echo_controller.v</code>·<code>basys3_uart_echo_top.v</code>는 구 00장 단독 실습용이라 1장 Top 빌드에는 넣지 않습니다.</p>
       <div class="codeblock">
@@ -1028,7 +1028,7 @@ endmodule</code></pre>
         <thead><tr><th>순서</th><th>sw[1:0]</th><th>PC 명령 (<code>p01_send.py</code>)</th><th>보드 응답 (UART)</th></tr></thead>
         <tbody><tr><td>1</td><td class="nw"><code>00</code></td><td class="nw"><code>C</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>2</td><td class="nw"><code>00</code></td><td class="nw"><code>M 3 4</code></td><td class="nw"><code>A:000000000C L:1\r\n</code></td></tr><tr><td>3</td><td class="nw"><code>00</code></td><td class="nw"><code>M 3 4</code></td><td class="nw"><code>A:0000000018 L:1\r\n</code></td></tr></tbody>
       </table></div>
-      <p>끝난 뒤 LED: <code>0x0018</code> (누산값 아래 16비트, 7세그먼트도 같은 값 16진수 4자리). 응답 출처: 장 Top 시뮬레이션 STAGE=2 (<code>p01/validation/rtl_sim_20261122.log</code>, 바이트 단위 대조).</p>
+      <p>끝난 뒤 LED: <code>0x0018</code> (누산값 아래 16비트, 7세그먼트도 같은 값 16진수 4자리). 응답 출처: 장 Top 시뮬레이션 STAGE=2 (<code>p01/validation/rtl_sim_20261123.log</code>, 바이트 단위 대조).</p>
       <h3>추가 코드 (구 01장 그대로)</h3>
 
       <div class="codeblock">
@@ -1329,7 +1329,7 @@ if __name__ == "__main__":
         <thead><tr><th>순서</th><th>sw[1:0]</th><th>PC 명령 (<code>p01_send.py</code>)</th><th>보드 응답 (UART)</th></tr></thead>
         <tbody><tr><td>1</td><td class="nw"><code>00</code></td><td class="nw"><code>C</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>2</td><td class="nw"><code>01</code></td><td class="nw"><code>M 3 4</code></td><td class="nw"><code>A:000000000C L:2\r\n</code></td></tr><tr><td>3</td><td class="nw"><code>00</code></td><td class="nw"><code>M 3 4</code></td><td class="nw"><code>A:0000000018 L:1\r\n</code></td></tr><tr><td>4</td><td class="nw"><code>01</code></td><td class="nw"><code>M -2 5</code></td><td class="nw"><code>A:000000000E L:2\r\n</code></td></tr></tbody>
       </table></div>
-      <p>끝난 뒤 LED: <code>0x000E</code> (누산값 아래 16비트, 7세그먼트도 같은 값 16진수 4자리). 응답 출처: 장 Top 시뮬레이션 STAGE=3 (<code>p01/validation/rtl_sim_20261122.log</code>, 바이트 단위 대조).</p>
+      <p>끝난 뒤 LED: <code>0x000E</code> (누산값 아래 16비트, 7세그먼트도 같은 값 16진수 4자리). 응답 출처: 장 Top 시뮬레이션 STAGE=3 (<code>p01/validation/rtl_sim_20261123.log</code>, 바이트 단위 대조).</p>
       <h3>추가 코드 (구 02장 그대로)</h3>
 
       <div class="codeblock">
@@ -1634,7 +1634,7 @@ if __name__ == "__main__":
         <thead><tr><th>순서</th><th>sw[1:0]</th><th>PC 명령 (<code>p01_send.py</code>)</th><th>보드 응답 (UART)</th></tr></thead>
         <tbody><tr><td>1</td><td class="nw"><code>00</code></td><td class="nw"><code>C</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>2</td><td class="nw"><code>10</code></td><td class="nw"><code>M -32768 32767</code></td><td class="nw"><code>A:FFC0008000 L:2\r\n</code></td></tr><tr><td>3</td><td class="nw"><code>10</code></td><td class="nw"><code>M 100 -7</code></td><td class="nw"><code>A:FFC0007D44 L:2\r\n</code></td></tr><tr><td>4</td><td class="nw"><code>00</code></td><td class="nw"><code>M 32767 32767</code></td><td class="nw"><code>A:FFFFFF7D45 L:1\r\n</code></td></tr></tbody>
       </table></div>
-      <p>끝난 뒤 LED: <code>0x7D45</code> (누산값 아래 16비트, 7세그먼트도 같은 값 16진수 4자리). 응답 출처: 장 Top 시뮬레이션 STAGE=4 (<code>p01/validation/rtl_sim_20261122.log</code>, 바이트 단위 대조).</p>
+      <p>끝난 뒤 LED: <code>0x7D45</code> (누산값 아래 16비트, 7세그먼트도 같은 값 16진수 4자리). 응답 출처: 장 Top 시뮬레이션 STAGE=4 (<code>p01/validation/rtl_sim_20261123.log</code>, 바이트 단위 대조).</p>
       <h3>추가 코드 (구 03장 그대로)</h3>
 
       <div class="codeblock">
@@ -1996,7 +1996,7 @@ if __name__ == "__main__":
 
       <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 장 Top 시뮬레이션 (STAGE 1~4)</span></div>
         <pre tabindex="0"><code>bash p01/scripts/run_sim.sh</code></pre></div>
-      <div class="codeblock"><div class="codebar"><span>기대 출력 (Icarus Verilog 12.0 · 2026-11-22 · 출처 p01/validation/rtl_sim_20261122.log)</span></div>
+      <div class="codeblock"><div class="codebar"><span>기대 출력 (Icarus Verilog 12.0 · 2026-11-23 · 출처 p01/validation/rtl_sim_20261123.log)</span></div>
         <pre tabindex="0"><code>PYTHON_P01_SELF_TEST_PASS
 PYTHON_P01_VECTORS stage=1 cases=4 final_led=0x0000
 PYTHON_P01_VECTORS stage=2 cases=6 final_led=0x0018
@@ -2015,7 +2015,7 @@ SYNTH_TIMING_PASS p01 basys3_p01_top STAGE=3 WNS=3.569 WHS=0.036 DRC_ERRORS=0 LU
 SYNTH_TIMING_PASS p01 basys3_p01_top STAGE=4 WNS=3.830 WHS=0.060 DRC_ERRORS=0 LUT=428 FF=290 DSP48E1=3</code></pre></div>
       <details class="full"><summary>장 Top 테스트벤치·기준 모델 (전체 코드)</summary>
       <div class="codeblock">
-        <div class="codebar"><span>p01/tb/tb_p01_top.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-22</span></div>
+        <div class="codebar"><span>p01/tb/tb_p01_top.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-23</span></div>
         <pre tabindex="0"><code class="language-systemverilog">// 1장 보드 Top 시험: UART 핀으로 명령을 보내고 TX 핀을 복조해 기준 모델(p01_cases.txt)과 바이트 단위로 대조한다.
 // 시뮬레이션 시간을 줄이려고 BAUD 6.25 Mbps(CPB 16), REFRESH_BITS 6으로 돌린다. 보드 Top 기본값은 115200 bps.
 `timescale 1ns/1ps
@@ -2118,7 +2118,7 @@ module tb_p01_top;
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>p01/reference/p01_model.py · python · 원본 · RTL_SIM 통과 2026-11-22</span></div>
+        <div class="codebar"><span>p01/reference/p01_model.py · python · 원본 · RTL_SIM 통과 2026-11-23</span></div>
         <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
 """1장 UART 계산기 기준 모델.
 
@@ -2261,11 +2261,15 @@ if __name__ == "__main__":
         </div>
         <div class="gate pass">
           <b>RTL_SIM_PASS</b>
-          <span>장 Top STAGE 1~4 · Icarus Verilog 12.0 · 2026-11-22</span>
+          <span>장 Top STAGE 1~4 · Icarus Verilog 12.0 · 2026-11-23</span>
         </div>
         <div class="gate pass">
           <b>SYNTH_TIMING_PASS</b>
           <span>STAGE 1~4 비트스트림 · 2026-11-23</span>
+        </div>
+        <div class="gate todo">
+          <b>XSIM_RTL_PASS</b>
+          <span>⚠ 미검증 · Vivado 시뮬레이터(xsim) 실행 대기 — 현재 근거는 Icarus Verilog</span>
         </div>
         <div class="gate todo">
           <b>BOARD_PASS</b>

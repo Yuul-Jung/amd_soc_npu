@@ -306,7 +306,7 @@ details.full>summary{cursor:pointer;font-weight:600}
         <li>STAGE 값 = 끝낸 서브젝트 수: 2-1만 끝냈으면 1, 2-8까지 끝냈으면 8. 아직 없는 모듈은 들어가지 않으므로 빌드가 됩니다.</li>
       </ol>
       <div class="codeblock">
-        <div class="codebar"><span>p02/rtl/p02_console.v · verilog · 원본 · RTL_SIM 통과 2026-11-22</span></div>
+        <div class="codebar"><span>p02/rtl/p02_console.v · verilog · 원본 · RTL_SIM 통과 2026-11-23</span></div>
         <pre tabindex="0"><code class="language-verilog">// 2장 디버그 콘솔: 서브젝트 모듈을 UART 명령 하나씩으로 확인한다. 11장 명령과 같은 형식
 // (1바이트 명령 + 바이너리 페이로드, 빅엔디언, stop-and-wait). X·W·B·S는 11장과 바이트까지 같다.
 //
@@ -508,7 +508,7 @@ endmodule
 `default_nettype wire</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>p02/rtl/p02_bank.v · verilog · 원본 · RTL_SIM 통과 2026-11-22</span></div>
+        <div class="codebar"><span>p02/rtl/p02_bank.v · verilog · 원본 · RTL_SIM 통과 2026-11-23</span></div>
         <pre tabindex="0"><code class="language-verilog">// 2장 NPU 묶음: 서브젝트 모듈을 STAGE(끝낸 서브젝트 수)만큼 실제로 쌓는다.
 //   2-1 (STAGE&gt;=1) bram_sync_buffer 5개: X[64], W0~W3[64] (구 04장)       → 명령 x·w 되읽기
 //   2-2 (STAGE&gt;=2) fixed_quantizer 32→8비트, SHIFT 8 (구 05장)             → 명령 Q
@@ -765,7 +765,7 @@ endmodule
 `default_nettype wire</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>p02/rtl/p02_uart_switch.v · verilog · 원본 · RTL_SIM 통과 2026-11-22</span></div>
+        <div class="codebar"><span>p02/rtl/p02_uart_switch.v · verilog · 원본 · RTL_SIM 통과 2026-11-23</span></div>
         <pre tabindex="0"><code class="language-verilog">// 2장 UART 주인 선택 (2-7부터): sw[2] = 0 디버그 콘솔, 1 = 11장 명령 해석기.
 // STAGE &lt; 7이면 콘솔만 있으므로 그대로 잇는다. 스위치는 명령을 주고받지 않을 때 바꾼다.
 `timescale 1ns/1ps
@@ -816,7 +816,7 @@ endmodule
 `default_nettype wire</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>p02/rtl/p02_npu_path.v · verilog · 원본 · RTL_SIM 통과 2026-11-22</span></div>
+        <div class="codebar"><span>p02/rtl/p02_npu_path.v · verilog · 원본 · RTL_SIM 통과 2026-11-23</span></div>
         <pre tabindex="0"><code class="language-verilog">// 2장 NPU 경로 (2-7부터): 11장 명령 해석기 + 엔진 선택.
 //   2-7 (STAGE 7): 엔진 = 누적 npu_core (p02_bank 엔진 포트). 점수는 Dense 결과(ReLU·16비트)를 41비트로 늘린 값.
 //   2-8 (STAGE 8): 12장 npu_engine4를 더한다. sw[3] = 0 누적 core, 1 = 12장 엔진(원시 점수, ReLU 없음).
@@ -947,7 +947,7 @@ endmodule
 `default_nettype wire</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>p02/rtl/p02_view.v · verilog · 원본 · RTL_SIM 통과 2026-11-22</span></div>
+        <div class="codebar"><span>p02/rtl/p02_view.v · verilog · 원본 · RTL_SIM 통과 2026-11-23</span></div>
         <pre tabindex="0"><code class="language-verilog">// 2장 LED·7세그먼트.
 //   STAGE 1~7: 콘솔 마지막 결과 아래 16비트 → LED 16개 + 7세그먼트 16진수 4자리 (1장 p01_hex4_display)
 //   STAGE 8  : 12장 npu_display_controller → LED[3:0] 클래스 원-핫, [13] busy, [14] 끝남, [15] 오류, 7세그먼트 클래스
@@ -987,7 +987,7 @@ endmodule
 `default_nettype wire</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>p02/rtl/basys3_p02_top.v · verilog · 원본 · RTL_SIM 통과 2026-11-22</span></div>
+        <div class="codebar"><span>p02/rtl/basys3_p02_top.v · verilog · 원본 · RTL_SIM 통과 2026-11-23</span></div>
         <pre tabindex="0"><code class="language-verilog">// 2장 보드 Top: 4뉴런 NPU 보드. 인스턴스와 배선만 둔다 (기능은 하위 모듈).
 //   2-1~2-6: 디버그 콘솔로 BRAM → 양자화 → 내적 → 4PE → Dense → Core를 UART 명령 하나씩 확인
 //   2-7: sw[2] = 1이면 11장 명령 해석기가 UART를 맡고 누적 npu_core로 추론 ("Ck:…")
@@ -1215,7 +1215,7 @@ close $fh
 if {!$all_ok} { error "P02_IMPL_TIMING_FAILED" }</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>p02/host/p02_send.py · python · 원본 · RTL_SIM 통과 2026-11-22</span></div>
+        <div class="codebar"><span>p02/host/p02_send.py · python · 원본 · RTL_SIM 통과 2026-11-23</span></div>
         <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
 """2장 4뉴런 NPU 보드 PC 쪽 도구: 명령을 바이트로 바꿔 보내고 응답 한 줄을 받아 출력한다.
 
@@ -1286,7 +1286,7 @@ if __name__ == "__main__":
         <thead><tr><th>순서</th><th>sw[3:2]</th><th>PC 명령 (<code>p02_send.py</code>)</th><th>보드 응답 (UART)</th></tr></thead>
         <tbody><tr><td>1</td><td class="nw"><code>00</code></td><td class="nw"><code>S</code></td><td class="nw"><code>I\r\n</code></td></tr><tr><td>2</td><td class="nw"><code>00</code></td><td class="nw"><code>X 0 3</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>3</td><td class="nw"><code>00</code></td><td class="nw"><code>X 1 -2</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>4</td><td class="nw"><code>00</code></td><td class="nw"><code>x 0</code></td><td class="nw"><code>X:0003\r\n</code></td></tr><tr><td>5</td><td class="nw"><code>00</code></td><td class="nw"><code>x 1</code></td><td class="nw"><code>X:FFFE\r\n</code></td></tr><tr><td>6</td><td class="nw"><code>00</code></td><td class="nw"><code>W 0 0 5</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>7</td><td class="nw"><code>00</code></td><td class="nw"><code>w 0 0</code></td><td class="nw"><code>W:0005\r\n</code></td></tr><tr><td>8</td><td class="nw"><code>00</code></td><td class="nw"><code>x 64</code></td><td class="nw"><code>ERR\r\n</code></td></tr><tr><td>9</td><td class="nw"><code>00</code></td><td class="nw"><code>Q</code></td><td class="nw"><code>?\r\n</code></td></tr></tbody>
       </table></div>
-      <p>끝난 뒤 LED: <code>0x0005</code> (콘솔 마지막 결과 아래 16비트, 7세그먼트도 같은 값 16진수 4자리). 응답 출처: 장 Top 시뮬레이션 STAGE=1 (<code>p02/validation/rtl_sim_20261122.log</code>, 바이트 단위 대조).</p>
+      <p>끝난 뒤 LED: <code>0x0005</code> (콘솔 마지막 결과 아래 16비트, 7세그먼트도 같은 값 16진수 4자리). 응답 출처: 장 Top 시뮬레이션 STAGE=1 (<code>p02/validation/rtl_sim_20261123.log</code>, 바이트 단위 대조).</p>
       <h3>추가 코드 (구 04장 그대로)</h3>
 
       <div class="codeblock">
@@ -1522,7 +1522,7 @@ if __name__ == '__main__':
         <thead><tr><th>순서</th><th>sw[3:2]</th><th>PC 명령 (<code>p02_send.py</code>)</th><th>보드 응답 (UART)</th></tr></thead>
         <tbody><tr><td>1</td><td class="nw"><code>00</code></td><td class="nw"><code>Q 768</code></td><td class="nw"><code>Q:03 O:0\r\n</code></td></tr><tr><td>2</td><td class="nw"><code>00</code></td><td class="nw"><code>Q 384</code></td><td class="nw"><code>Q:02 O:0\r\n</code></td></tr><tr><td>3</td><td class="nw"><code>00</code></td><td class="nw"><code>Q -384</code></td><td class="nw"><code>Q:FE O:0\r\n</code></td></tr><tr><td>4</td><td class="nw"><code>00</code></td><td class="nw"><code>Q 65536</code></td><td class="nw"><code>Q:7F O:1\r\n</code></td></tr><tr><td>5</td><td class="nw"><code>00</code></td><td class="nw"><code>Q -65536</code></td><td class="nw"><code>Q:80 O:1\r\n</code></td></tr></tbody>
       </table></div>
-      <p>끝난 뒤 LED: <code>0xFF80</code> (콘솔 마지막 결과 아래 16비트, 7세그먼트도 같은 값 16진수 4자리). 응답 출처: 장 Top 시뮬레이션 STAGE=2 (<code>p02/validation/rtl_sim_20261122.log</code>, 바이트 단위 대조).</p>
+      <p>끝난 뒤 LED: <code>0xFF80</code> (콘솔 마지막 결과 아래 16비트, 7세그먼트도 같은 값 16진수 4자리). 응답 출처: 장 Top 시뮬레이션 STAGE=2 (<code>p02/validation/rtl_sim_20261123.log</code>, 바이트 단위 대조).</p>
       <h3>추가 코드 (구 05장 그대로)</h3>
 
       <div class="codeblock">
@@ -1728,7 +1728,7 @@ if __name__=='__main__':
         <thead><tr><th>순서</th><th>sw[3:2]</th><th>PC 명령 (<code>p02_send.py</code>)</th><th>보드 응답 (UART)</th></tr></thead>
         <tbody><tr><td>1</td><td class="nw"><code>00</code></td><td class="nw"><code>X 0 1</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>2</td><td class="nw"><code>00</code></td><td class="nw"><code>X 1 2</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>3</td><td class="nw"><code>00</code></td><td class="nw"><code>X 2 3</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>4</td><td class="nw"><code>00</code></td><td class="nw"><code>X 3 4</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>5</td><td class="nw"><code>00</code></td><td class="nw"><code>W 0 0 5</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>6</td><td class="nw"><code>00</code></td><td class="nw"><code>W 0 1 6</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>7</td><td class="nw"><code>00</code></td><td class="nw"><code>W 0 2 7</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>8</td><td class="nw"><code>00</code></td><td class="nw"><code>W 0 3 8</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>9</td><td class="nw"><code>00</code></td><td class="nw"><code>D 4</code></td><td class="nw"><code>D:0000000046\r\n</code></td></tr><tr><td>10</td><td class="nw"><code>00</code></td><td class="nw"><code>W 0 3 -8</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>11</td><td class="nw"><code>00</code></td><td class="nw"><code>D 4</code></td><td class="nw"><code>D:0000000006\r\n</code></td></tr><tr><td>12</td><td class="nw"><code>00</code></td><td class="nw"><code>D 0</code></td><td class="nw"><code>ERR\r\n</code></td></tr></tbody>
       </table></div>
-      <p>끝난 뒤 LED: <code>0x0006</code> (콘솔 마지막 결과 아래 16비트, 7세그먼트도 같은 값 16진수 4자리). 응답 출처: 장 Top 시뮬레이션 STAGE=3 (<code>p02/validation/rtl_sim_20261122.log</code>, 바이트 단위 대조).</p>
+      <p>끝난 뒤 LED: <code>0x0006</code> (콘솔 마지막 결과 아래 16비트, 7세그먼트도 같은 값 16진수 4자리). 응답 출처: 장 Top 시뮬레이션 STAGE=3 (<code>p02/validation/rtl_sim_20261123.log</code>, 바이트 단위 대조).</p>
       <h3>추가 코드 (구 07장 그대로)</h3>
 
       <div class="codeblock">
@@ -1922,7 +1922,7 @@ if __name__=='__main__':
         <thead><tr><th>순서</th><th>sw[3:2]</th><th>PC 명령 (<code>p02_send.py</code>)</th><th>보드 응답 (UART)</th></tr></thead>
         <tbody><tr><td>1</td><td class="nw"><code>00</code></td><td class="nw"><code>W 1 0 1</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>2</td><td class="nw"><code>00</code></td><td class="nw"><code>W 1 1 1</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>3</td><td class="nw"><code>00</code></td><td class="nw"><code>W 1 2 1</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>4</td><td class="nw"><code>00</code></td><td class="nw"><code>W 1 3 1</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>5</td><td class="nw"><code>00</code></td><td class="nw"><code>W 2 0 -1</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>6</td><td class="nw"><code>00</code></td><td class="nw"><code>W 2 1 -1</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>7</td><td class="nw"><code>00</code></td><td class="nw"><code>W 2 2 -1</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>8</td><td class="nw"><code>00</code></td><td class="nw"><code>W 2 3 -1</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>9</td><td class="nw"><code>00</code></td><td class="nw"><code>W 3 0 0</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>10</td><td class="nw"><code>00</code></td><td class="nw"><code>W 3 1 0</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>11</td><td class="nw"><code>00</code></td><td class="nw"><code>W 3 2 0</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>12</td><td class="nw"><code>00</code></td><td class="nw"><code>W 3 3 2</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>13</td><td class="nw"><code>00</code></td><td class="nw"><code>P 4</code></td><td class="nw"><code>P:0000000006,000000000A,FFFFFFFFF6,0000000008\r\n</code></td></tr></tbody>
       </table></div>
-      <p>끝난 뒤 LED: <code>0x0006</code> (콘솔 마지막 결과 아래 16비트, 7세그먼트도 같은 값 16진수 4자리). 응답 출처: 장 Top 시뮬레이션 STAGE=4 (<code>p02/validation/rtl_sim_20261122.log</code>, 바이트 단위 대조).</p>
+      <p>끝난 뒤 LED: <code>0x0006</code> (콘솔 마지막 결과 아래 16비트, 7세그먼트도 같은 값 16진수 4자리). 응답 출처: 장 Top 시뮬레이션 STAGE=4 (<code>p02/validation/rtl_sim_20261123.log</code>, 바이트 단위 대조).</p>
       <h3>추가 코드 (구 08장 그대로)</h3>
 
       <div class="codeblock">
@@ -2118,7 +2118,7 @@ if __name__=='__main__':
         <thead><tr><th>순서</th><th>sw[3:2]</th><th>PC 명령 (<code>p02_send.py</code>)</th><th>보드 응답 (UART)</th></tr></thead>
         <tbody><tr><td>1</td><td class="nw"><code>00</code></td><td class="nw"><code>B 0 0</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>2</td><td class="nw"><code>00</code></td><td class="nw"><code>B 1 -20</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>3</td><td class="nw"><code>00</code></td><td class="nw"><code>B 2 100</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>4</td><td class="nw"><code>00</code></td><td class="nw"><code>B 3 65536</code></td><td class="nw"><code>OK\r\n</code></td></tr><tr><td>5</td><td class="nw"><code>00</code></td><td class="nw"><code>L 4</code></td><td class="nw"><code>L:0006,0000,005A,7FFF O:8\r\n</code></td></tr></tbody>
       </table></div>
-      <p>끝난 뒤 LED: <code>0x0006</code> (콘솔 마지막 결과 아래 16비트, 7세그먼트도 같은 값 16진수 4자리). 응답 출처: 장 Top 시뮬레이션 STAGE=5 (<code>p02/validation/rtl_sim_20261122.log</code>, 바이트 단위 대조).</p>
+      <p>끝난 뒤 LED: <code>0x0006</code> (콘솔 마지막 결과 아래 16비트, 7세그먼트도 같은 값 16진수 4자리). 응답 출처: 장 Top 시뮬레이션 STAGE=5 (<code>p02/validation/rtl_sim_20261123.log</code>, 바이트 단위 대조).</p>
       <h3>추가 코드 (구 09장 그대로)</h3>
 
       <div class="codeblock">
@@ -2319,7 +2319,7 @@ if __name__=='__main__':
         <thead><tr><th>순서</th><th>sw[3:2]</th><th>PC 명령 (<code>p02_send.py</code>)</th><th>보드 응답 (UART)</th></tr></thead>
         <tbody><tr><td>1</td><td class="nw"><code>00</code></td><td class="nw"><code>N 4</code></td><td class="nw"><code>N:0006,0000,005A,7FFF O:8\r\n</code></td></tr><tr><td>2</td><td class="nw"><code>00</code></td><td class="nw"><code>N 2</code></td><td class="nw"><code>N:0011,0000,0061,7FFF O:8\r\n</code></td></tr></tbody>
       </table></div>
-      <p>끝난 뒤 LED: <code>0x0011</code> (콘솔 마지막 결과 아래 16비트, 7세그먼트도 같은 값 16진수 4자리). 응답 출처: 장 Top 시뮬레이션 STAGE=6 (<code>p02/validation/rtl_sim_20261122.log</code>, 바이트 단위 대조).</p>
+      <p>끝난 뒤 LED: <code>0x0011</code> (콘솔 마지막 결과 아래 16비트, 7세그먼트도 같은 값 16진수 4자리). 응답 출처: 장 Top 시뮬레이션 STAGE=6 (<code>p02/validation/rtl_sim_20261123.log</code>, 바이트 단위 대조).</p>
       <h3>추가 코드 (구 10장 그대로)</h3>
 
       <div class="codeblock">
@@ -2563,7 +2563,7 @@ if __name__=='__main__':
         <thead><tr><th>순서</th><th>sw[3:2]</th><th>PC 명령 (<code>p02_send.py</code>)</th><th>보드 응답 (UART)</th></tr></thead>
         <tbody><tr><td>1</td><td class="nw"><code>01</code></td><td class="nw"><code>S</code></td><td class="nw"><code>I\r\n</code></td></tr><tr><td>2</td><td class="nw"><code>01</code></td><td class="nw"><code>0</code></td><td class="nw"><code>C0:00000000002,00000000000,00000000000,00000000000\r\n</code></td></tr><tr><td>3</td><td class="nw"><code>01</code></td><td class="nw"><code>1</code></td><td class="nw"><code>C1:00000000000,00000000002,00000000000,00000000000\r\n</code></td></tr><tr><td>4</td><td class="nw"><code>01</code></td><td class="nw"><code>2</code></td><td class="nw"><code>C2:00000000000,00000000000,00000000002,00000000000\r\n</code></td></tr><tr><td>5</td><td class="nw"><code>01</code></td><td class="nw"><code>3</code></td><td class="nw"><code>C3:00000000000,00000000000,00000000000,00000000002\r\n</code></td></tr><tr><td>6</td><td class="nw"><code>00</code></td><td class="nw"><code>x 0</code></td><td class="nw"><code>X:FFFF\r\n</code></td></tr></tbody>
       </table></div>
-      <p>끝난 뒤 LED: <code>0xFFFF</code> (콘솔 마지막 결과 아래 16비트, 7세그먼트도 같은 값 16진수 4자리). 응답 출처: 장 Top 시뮬레이션 STAGE=7 (<code>p02/validation/rtl_sim_20261122.log</code>, 바이트 단위 대조).</p>
+      <p>끝난 뒤 LED: <code>0xFFFF</code> (콘솔 마지막 결과 아래 16비트, 7세그먼트도 같은 값 16진수 4자리). 응답 출처: 장 Top 시뮬레이션 STAGE=7 (<code>p02/validation/rtl_sim_20261123.log</code>, 바이트 단위 대조).</p>
       <h3>추가 코드 (구 11장 그대로)</h3>
 
       <div class="codeblock">
@@ -2992,7 +2992,7 @@ if __name__ == "__main__":
         <thead><tr><th>순서</th><th>sw[3:2]</th><th>PC 명령 (<code>p02_send.py</code>)</th><th>보드 응답 (UART)</th></tr></thead>
         <tbody><tr><td>1</td><td class="nw"><code>01</code></td><td class="nw"><code>2</code></td><td class="nw"><code>C2:00000000000,00000000000,00000000002,00000000000\r\n</code></td></tr><tr><td>2</td><td class="nw"><code>11</code></td><td class="nw"><code>2</code></td><td class="nw"><code>C2:00000000000,FFFFFFFFFFE,00000000002,00000000000\r\n</code></td></tr><tr><td>3</td><td class="nw"><code>11</code></td><td class="nw"><code>1</code></td><td class="nw"><code>C1:00000000000,00000000002,FFFFFFFFFFE,00000000000\r\n</code></td></tr></tbody>
       </table></div>
-      <p>끝난 뒤 LED: <code>0x4002</code> (LED[3:0] 클래스 원-핫, LED14 끝남, LED15 오류, 7세그먼트 오른쪽 자리에 클래스). 응답 출처: 장 Top 시뮬레이션 STAGE=8 (<code>p02/validation/rtl_sim_20261122.log</code>, 바이트 단위 대조).</p>
+      <p>끝난 뒤 LED: <code>0x4002</code> (LED[3:0] 클래스 원-핫, LED14 끝남, LED15 오류, 7세그먼트 오른쪽 자리에 클래스). 응답 출처: 장 Top 시뮬레이션 STAGE=8 (<code>p02/validation/rtl_sim_20261123.log</code>, 바이트 단위 대조).</p>
       <h3>추가 코드 (구 12장 그대로)</h3>
       <p>※ <code>npu_reset_controller.v</code>·<code>basys3_npu_top.v</code>는 구 12장 단독 실습용이라 2장 Top 빌드에는 넣지 않습니다.</p>
       <div class="codeblock">
@@ -4094,7 +4094,7 @@ endmodule</code></pre>
 
       <div class="codeblock"><div class="codebar"><span>Ubuntu Terminal · 장 Top 시뮬레이션 (STAGE 1~4)</span></div>
         <pre tabindex="0"><code>bash p02/scripts/run_sim.sh</code></pre></div>
-      <div class="codeblock"><div class="codebar"><span>기대 출력 (Icarus Verilog 12.0 · 2026-11-22 · 출처 p02/validation/rtl_sim_20261122.log)</span></div>
+      <div class="codeblock"><div class="codebar"><span>기대 출력 (Icarus Verilog 12.0 · 2026-11-23 · 출처 p02/validation/rtl_sim_20261123.log)</span></div>
         <pre tabindex="0"><code>PYTHON_P02_SELF_TEST_PASS
 PYTHON_P02_VECTORS stage=1 cases=9 final_led=0x0005
 PYTHON_P02_VECTORS stage=2 cases=13 final_led=0xFF80
@@ -4125,7 +4125,7 @@ SYNTH_TIMING_PASS p02 basys3_p02_top STAGE=7 WNS=0.875 WHS=0.012 DRC_ERRORS=0 LU
 SYNTH_TIMING_PASS p02 basys3_p02_top STAGE=8 WNS=0.642 WHS=0.019 DRC_ERRORS=0 LUT=4351 FF=4395 DSP48E1=17 RAMB18=15</code></pre></div>
       <details class="full"><summary>장 Top 테스트벤치·기준 모델 (전체 코드)</summary>
       <div class="codeblock">
-        <div class="codebar"><span>p02/tb/tb_p02_top.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-22</span></div>
+        <div class="codebar"><span>p02/tb/tb_p02_top.sv · systemverilog · 원본 · RTL_SIM 통과 2026-11-23</span></div>
         <pre tabindex="0"><code class="language-systemverilog">// 2장 보드 Top 시험: UART 핀으로 명령을 보내고 TX 핀을 복조해 기준 모델(p02_cases_sN.txt)과 바이트 단위로 대조한다.
 // sw 값은 보드 sw[3:2] (sw[2] = UART 주인, sw[3] = 12장 엔진).
 // 시뮬레이션 시간을 줄이려고 BAUD 6.25 Mbps(CPB 16), REFRESH_BITS 6으로 돌린다. 보드 Top 기본값은 115200 bps.
@@ -4229,7 +4229,7 @@ module tb_p02_top;
 endmodule</code></pre>
       </div>
       <div class="codeblock">
-        <div class="codebar"><span>p02/reference/p02_model.py · python · 원본 · RTL_SIM 통과 2026-11-22</span></div>
+        <div class="codebar"><span>p02/reference/p02_model.py · python · 원본 · RTL_SIM 통과 2026-11-23</span></div>
         <pre tabindex="0"><code class="language-python">#!/usr/bin/env python3
 """2장 4뉴런 NPU 보드 기준 모델.
 
@@ -4505,11 +4505,15 @@ if __name__ == "__main__":
         </div>
         <div class="gate pass">
           <b>RTL_SIM_PASS</b>
-          <span>장 Top STAGE 1~8 · Icarus Verilog 12.0 · 2026-11-22</span>
+          <span>장 Top STAGE 1~8 · Icarus Verilog 12.0 · 2026-11-23</span>
         </div>
         <div class="gate pass">
           <b>SYNTH_TIMING_PASS</b>
           <span>STAGE 1~8 비트스트림 · 2026-11-23</span>
+        </div>
+        <div class="gate todo">
+          <b>XSIM_RTL_PASS</b>
+          <span>⚠ 미검증 · Vivado 시뮬레이터(xsim) 실행 대기 — 현재 근거는 Icarus Verilog</span>
         </div>
         <div class="gate todo">
           <b>BOARD_PASS</b>
