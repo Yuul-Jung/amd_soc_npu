@@ -27,7 +27,9 @@ if [ "$(sim_kind)" = xsim ]; then log="p04/validation/xsim_rtl_$(date -u +%Y%m%d
   done
 } 2>&1 | sed "s|$root|<repo>|g" > "$build/out.log" || true
 want=$(echo $stages | wc -w)
-if [ "$(grep -c '^P04_TOP_RTL_SIM_PASS' "$build/out.log")" = "$want" ] && ! grep -qiE 'FATAL|_FAIL|^ERROR' "$build/out.log"; then
+if [ "$(grep -c '^P04_TOP_RTL_SIM_PASS' "$build/out.log")" = "$want" ] \
+   && grep -q '^PYTHON_P04_SELF_TEST_PASS' "$build/out.log" \
+   && ! grep -qiE 'FATAL|_FAIL|^ERROR|Traceback' "$build/out.log"; then   # 기준 모델이 죽었거나 자기 시험을 못 냈으면 실패
   echo "RTL_SIM_PASS stages=$want" >> "$build/out.log"
 else
   echo "RTL_SIM_FAIL" >> "$build/out.log"

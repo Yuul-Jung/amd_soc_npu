@@ -13,7 +13,7 @@
 | 장 전체 | HOST_MODEL_PASS | ✅ | PYTHON_P01_SELF_TEST_PASS |
 | 장 전체 | RTL_SIM_PASS | ✅ | 장 Top STAGE 1~4 · Icarus Verilog 12.0 · 2026-11-23 |
 | 장 전체 | SYNTH_TIMING_PASS | ✅ | STAGE 1~4 비트스트림 · 2026-11-23 |
-| 장 전체 | XSIM_RTL_PASS | ⏳ | ⚠ 미검증 · Vivado 시뮬레이터(xsim) 실행 대기 — 현재 근거는 Icarus Verilog |
+| 장 전체 | XSIM_RTL_PASS | ✅ | Vivado Simulator v2024.2.0 · Icarus와 같은 TB·판정 줄 · 2026-11-23 · p01/validation/xsim_rtl_20261123.log |
 | 장 전체 | BOARD_PASS | ⏳ | ⚠ 미실시 · 실물 보드 확인 대기 |
 | 1-1 UART 에코 | HOST_MODEL_PASS | — | 해당 없음 (Python 기준 모델 없음) |
 | 1-1 UART 에코 | RTL_SIM_PASS | ✅ | UART_ECHO_RTL_SIM_PASS decoded=2 · Icarus Verilog 12.0 · 2026-11-18 |
@@ -48,7 +48,7 @@
 | 장 전체 | HOST_MODEL_PASS | ✅ | PYTHON_P02_SELF_TEST_PASS |
 | 장 전체 | RTL_SIM_PASS | ✅ | 장 Top STAGE 1~8 · Icarus Verilog 12.0 · 2026-11-23 |
 | 장 전체 | SYNTH_TIMING_PASS | ✅ | STAGE 1~8 비트스트림 · 2026-11-23 |
-| 장 전체 | XSIM_RTL_PASS | ⏳ | ⚠ 미검증 · Vivado 시뮬레이터(xsim) 실행 대기 — 현재 근거는 Icarus Verilog |
+| 장 전체 | XSIM_RTL_PASS | ✅ | Vivado Simulator v2024.2.0 · Icarus와 같은 TB·판정 줄 · 2026-11-23 · p02/validation/xsim_rtl_20261123.log |
 | 장 전체 | BOARD_PASS | ⏳ | ⚠ 미실시 · 실물 보드 확인 대기 |
 | 2-1 BRAM 동기 버퍼 | HOST_MODEL_PASS | ✅ | PYTHON_SELF_TEST_PASS reset_retention,collision,uninitialized |
 | 2-1 BRAM 동기 버퍼 | RTL_SIM_PASS | ✅ | RTL_SIM_PASS BRAM W=16 A=8 cycles=1016 외 1건 · 도구 버전 미기록 · 2026-11-18 |
@@ -108,7 +108,7 @@
 | 장 전체 | HOST_MODEL_PASS | ✅ | PYTHON_P03_SELF_TEST_PASS |
 | 장 전체 | RTL_SIM_PASS | ✅ | 장 Top STAGE 1~4 · Icarus Verilog 12.0 · 2026-11-23 |
 | 장 전체 | SYNTH_TIMING_PASS | ✅ | STAGE 1~4 비트스트림 · 2026-11-23 |
-| 장 전체 | XSIM_RTL_PASS | ⏳ | ⚠ 미검증 · Vivado 시뮬레이터(xsim) 실행 대기 — 현재 근거는 Icarus Verilog |
+| 장 전체 | XSIM_RTL_PASS | ✅ | Vivado Simulator v2024.2.0 · Icarus와 같은 TB·판정 줄 · 2026-11-23 · p03/validation/xsim_rtl_20261123.log |
 | 장 전체 | BOARD_PASS | ⏳ | ⚠ 미실시 · 실물 보드 확인 대기 |
 | 3-1 8×8 입력 프레임 | HOST_MODEL_PASS | ✅ | PYTHON_FRAME64_SELF_TEST_PASS items=2664 frames=36 short=2 long=3 seed=1313 |
 | 3-1 8×8 입력 프레임 | RTL_SIM_PASS | ✅ | RTL_SIM_PASS FRAME64 frames=36 short=2 long=3 · Icarus Verilog 12.0 · 날짜 미기록 |
@@ -143,7 +143,7 @@
 | 장 전체 | HOST_MODEL_PASS | ✅ | PYTHON_P04_SELF_TEST_PASS |
 | 장 전체 | RTL_SIM_PASS | ✅ | 장 Top STAGE 1~4 · Icarus Verilog 12.0 · 2026-11-23 |
 | 장 전체 | SYNTH_TIMING_PASS | ✅ | STAGE 1~4 비트스트림 · 2026-11-23 |
-| 장 전체 | XSIM_RTL_PASS | ⏳ | ⚠ 미검증 · Vivado 시뮬레이터(xsim) 실행 대기 — 현재 근거는 Icarus Verilog |
+| 장 전체 | XSIM_RTL_PASS | ✅ | Vivado Simulator v2024.2.0 · Icarus와 같은 TB·판정 줄 · 2026-11-23 · p04/validation/xsim_rtl_20261123.log |
 | 장 전체 | BOARD_PASS | ⏳ | ⚠ 미실시 · 실물 보드 확인 대기 |
 | 4-1 INT8·INT16 정밀도 비교 | HOST_MODEL_PASS | ✅ | PYTHON_FIXED_SELF_TEST_PASS |
 | 4-1 INT8·INT16 정밀도 비교 | RTL_SIM_PASS | ✅ | RTL_SIM_PASS PRECISION cycles=2020 · 도구 버전 미기록 · 2026-11-18 |
