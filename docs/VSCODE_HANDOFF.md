@@ -11,7 +11,7 @@
 
 ## 2. 지금 할 일 (2026-11-23 갱신)
 
-00~12장 Vivado 게이트, 13~31장 VS Code 판(`part03/`) 빌드, 안 A 재빌드는 끝났다. 현재 지시는 **[docs/plan/VSCODE_DIRECTIVE_A.md](plan/VSCODE_DIRECTIVE_A.md)의 가장 큰 번호 항목**을 따른다 (지금은 17: part03 주석·점검표 문구 정리, part03 시뮬레이션의 Vivado 시뮬레이터 전환).
+00~12장 Vivado 게이트, 13~31장 VS Code 판(`part03/`) 빌드, 안 A 재빌드는 끝났다. 현재 지시는 **[docs/plan/VSCODE_DIRECTIVE_A.md](plan/VSCODE_DIRECTIVE_A.md)의 가장 큰 번호 항목**을 따른다 (지금은 18: xsim 자동 선택 확인 회신, 문자열에 남은 옛 장 번호 정리).
 
 증거 파일 이름은 바꾸지 않는다. 생성기가 아래 이름으로 찾고, 같은 종류가 여러 개면 날짜가 가장 늦은 파일을 쓴다. 로그에는 개인 경로를 넣지 않는다(`<repo>`로 치환).
 
