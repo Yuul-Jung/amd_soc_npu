@@ -317,6 +317,9 @@ def sim_tool(lines):
         m = re.search(r"Icarus Verilog version ([\d.]+)", ln)
         if m:
             return f"Icarus Verilog {m.group(1)}"
+        m = re.search(r"Vivado Simulator v([\d.]+)", ln)
+        if m:
+            return f"Vivado Simulator {m.group(1)}"
     return "도구 버전 미기록"
 
 
