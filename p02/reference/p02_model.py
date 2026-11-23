@@ -115,7 +115,7 @@ class Board:
                 self.err = True
                 return "ERR" + CRLF
             scores = [wrap(dot(xs, r, 40) + b, 41) for r, b in zip(ws, self.bias)]
-        else:                                    # 누적 npu_core: Dense 결과(ReLU, 16비트)를 41비트로
+        else:                                    # 2-6 npu_core: Dense 결과(ReLU, 16비트)를 41비트로
             scores, _ = dense(xs, ws, self.bias, 16, 40, 0)
         cls = 0
         for i in range(1, 4):
@@ -218,7 +218,7 @@ def self_test():
     assert b.console(Q(65536)) == "Q:7F O:1\r\n"               # 포화
     b.console(X(0, 1)); b.console(W(0, 0, -3))
     assert b.console(cmd("D", 1)) == "D:FFFFFFFFFD\r\n"
-    # 고정 그룹 1: X = (+1, -1). 원시 점수 0, 2, -2, 0 → 2-8 엔진은 그대로, 누적 core는 ReLU로 -2 → 0
+    # 고정 그룹 1: X = (+1, -1). 원시 점수 0, 2, -2, 0 → 2-8 엔진은 그대로, 2-6 core는 ReLU로 -2 → 0
     assert b.engine(cmd("1"), True) == "C1:00000000000,00000000002,FFFFFFFFFFE,00000000000\r\n"
     assert b.engine(cmd("1"), False) == "C1:00000000000,00000000002,00000000000,00000000000\r\n"
     assert Board(1).console(cmd("Q")) == "?\r\n"

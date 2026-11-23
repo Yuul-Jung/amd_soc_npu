@@ -1,4 +1,4 @@
-// (추가) UART 실핀 비트파형 8N1 입력 및 TX 재복조 자동 판정.
+// UART 실핀 비트파형 8N1 입력 및 TX 재복조 자동 판정.
 `timescale 1ns/1ps
 module tb_uart_echo;
     localparam integer CPB=868;

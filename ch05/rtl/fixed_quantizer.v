@@ -9,7 +9,7 @@ module fixed_quantizer #(
 );
     wire signed [63:0] wide, rounded, scaled, lower, upper;
     wire ov;
-    // (변경) 입력이 초기 0에서 변하지 않아도 조합 계산을 시작하는 연속 할당이다.
+    // 입력이 초기 0에서 변하지 않아도 조합 계산을 시작하는 연속 할당이다.
     assign wide = $signed(x_i);
     assign lower = -(64'sd1 <<< (OUT_WIDTH-1));
     assign upper = (64'sd1 <<< (OUT_WIDTH-1))-1;
