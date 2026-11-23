@@ -12,7 +12,9 @@ p3_sim_kind() {
 }
 
 p3_sim_version() {
-  if [ "$(p3_sim_kind)" = xsim ]; then xvlog --version 2>&1 | sed -n 1p; else iverilog -V 2>&1 | sed -n 1p; fi
+  # xvlog는 현재 폴더에 xvlog.log·xvlog.pb를 남기므로 임시 폴더에서 버전만 읽는다
+  if [ "$(p3_sim_kind)" = xsim ]; then (d=$(mktemp -d) && cd "$d" && xvlog --version 2>&1 | sed -n 1p; rm -rf "$d")
+  else iverilog -V 2>&1 | sed -n 1p; fi
 }
 
 p3_sim_build() {

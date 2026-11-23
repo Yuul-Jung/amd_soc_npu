@@ -1,42 +1,32 @@
 Python 3.12.3
-Icarus Verilog version 12.0 (stable) ()
+Vivado Simulator v2024.2.0
 8bcbb3f4ad5b1adb2069bdeda9433534b962636ab8f245364874502684e6ab8e  part03/ch18/reference/mnist_linear_f32.json
 22081731a231f976eb0f2dd5f7292f228164bc613f8645b8a509db9c19c8e5c2  part03/ch18/reference/mnist_rtl_samples.txt
 == config i16_full data_w=16 acc_w=41 bias_w=40
 PYTHON_TILE784_SELF_TEST_PASS suite=full cases=26 tiles=13 last_len=16 acc_w=41 bias_w=40 overflow_cases=0 seed=1717 data_w=16
 WIDTH_PLAN INT8: tile=22 acc=25 score(+bias24)=26 | INT16: tile=38 acc=41 score(+bias40)=42
-part03/mini_npu/rtl/npu_dsp_mac_lane.v:2: warning: timescale for npu_dsp_mac_lane inherited from another file.
-part03/ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
 RTL_SIM_PASS TILE784 cases=26 tiles=13 tile_go_to_accept_cycles=207 acc_w=41 bias_w=40 score_w=42 errors_checked=14 data_w=16 part_w=39
-part03/ch17/tb/tb_p3_tile784_10.sv:368: $finish called at 3184530000 (1ps)
+$finish called at time : 3184530 ns : File "part03/ch17/tb/tb_p3_tile784_10.sv" Line 368
 PYTHON_RTL_COMPARE_PASS cases=26 tile_partials=3380 scores=10 class=1 overflow=1 bit_exact=1
 == config i16_w41 data_w=16 acc_w=41 bias_w=40
 PYTHON_TILE784_SELF_TEST_PASS suite=width cases=4 tiles=13 last_len=16 acc_w=41 bias_w=40 overflow_cases=0 seed=1717 data_w=16
 WIDTH_PLAN INT8: tile=22 acc=25 score(+bias24)=26 | INT16: tile=38 acc=41 score(+bias40)=42
-part03/mini_npu/rtl/npu_dsp_mac_lane.v:2: warning: timescale for npu_dsp_mac_lane inherited from another file.
-part03/ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
 RTL_SIM_PASS TILE784 cases=4 tiles=13 tile_go_to_accept_cycles=207 acc_w=41 bias_w=40 score_w=42 errors_checked=0 data_w=16 part_w=39
-part03/ch17/tb/tb_p3_tile784_10.sv:368: $finish called at 458290000 (1ps)
+$finish called at time : 458290 ns : File "part03/ch17/tb/tb_p3_tile784_10.sv" Line 368
 PYTHON_RTL_COMPARE_PASS cases=4 tile_partials=520 scores=10 class=1 overflow=1 bit_exact=1
 == config i16_w40 data_w=16 acc_w=40 bias_w=40
 PYTHON_TILE784_SELF_TEST_PASS suite=width cases=4 tiles=13 last_len=16 acc_w=40 bias_w=40 overflow_cases=2 seed=1717 data_w=16
 WIDTH_PLAN INT8: tile=22 acc=25 score(+bias24)=26 | INT16: tile=38 acc=41 score(+bias40)=42
-part03/mini_npu/rtl/npu_dsp_mac_lane.v:2: warning: timescale for npu_dsp_mac_lane inherited from another file.
-part03/ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
 RTL_SIM_PASS TILE784 cases=4 tiles=13 tile_go_to_accept_cycles=207 acc_w=40 bias_w=40 score_w=41 errors_checked=0 data_w=16 part_w=39
-part03/ch17/tb/tb_p3_tile784_10.sv:368: $finish called at 458290000 (1ps)
+$finish called at time : 458290 ns : File "part03/ch17/tb/tb_p3_tile784_10.sv" Line 368
 PYTHON_RTL_COMPARE_PASS cases=4 tile_partials=520 scores=10 class=1 overflow=1 bit_exact=1
 == config mnist8 data_w=8 acc_w=41 bias_w=40
 PYTHON_PRECISION_VECTORS_PASS data_w=8 samples=16 class_differs_from_float=4 acc_w=41 bias_w=40 seed=1818
-part03/mini_npu/rtl/npu_dsp_mac_lane.v:2: warning: timescale for npu_dsp_mac_lane inherited from another file.
-part03/ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
 RTL_SIM_PASS TILE784 cases=16 tiles=13 tile_go_to_accept_cycles=207 acc_w=41 bias_w=40 score_w=42 errors_checked=0
-part03/ch17/tb/tb_p3_tile784_10.sv:368: $finish called at 1830930000 (1ps)
+$finish called at time : 1830930 ns : File "part03/ch17/tb/tb_p3_tile784_10.sv" Line 368
 PYTHON_RTL_COMPARE_PASS cases=16 tile_partials=2080 scores=10 class=1 overflow=1 bit_exact=1
 == config mnist16 data_w=16 acc_w=41 bias_w=40
 PYTHON_PRECISION_VECTORS_PASS data_w=16 samples=16 class_differs_from_float=0 acc_w=41 bias_w=40 seed=1818
-part03/mini_npu/rtl/npu_dsp_mac_lane.v:2: warning: timescale for npu_dsp_mac_lane inherited from another file.
-part03/ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
 RTL_SIM_PASS TILE784 cases=16 tiles=13 tile_go_to_accept_cycles=207 acc_w=41 bias_w=40 score_w=42 errors_checked=0 data_w=16 part_w=39
-part03/ch17/tb/tb_p3_tile784_10.sv:368: $finish called at 1833010000 (1ps)
+$finish called at time : 1833010 ns : File "part03/ch17/tb/tb_p3_tile784_10.sv" Line 368
 PYTHON_RTL_COMPARE_PASS cases=16 tile_partials=2080 scores=10 class=1 overflow=1 bit_exact=1
