@@ -1,4 +1,4 @@
-# p02 RTL simulation 2026-11-23T02:35Z
+# p02 RTL simulation 2026-11-23T03:18Z
 # tool: Vivado Simulator v2024.2.0
 PYTHON_P02_SELF_TEST_PASS
 PYTHON_P02_VECTORS stage=1 cases=9 final_led=0x0005
@@ -68,7 +68,7 @@ PYTHON_P02_VECTORS stage=8 cases=54 final_led=0x4002
   **** SW Build 5239630 on Fri Nov 08 22:34:34 MST 2024
   **** IP Build 5239520 on Sun Nov 10 16:12:51 MST 2024
   **** SharedData Build 5239561 on Fri Nov 08 14:39:27 MST 2024
-  **** Start of session at: Mon Nov 23 11:35:27 2026
+  **** Start of session at: Mon Nov 23 12:18:28 2026
     ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
     ** Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 
@@ -90,7 +90,7 @@ $finish called at time : 115085 ns : File "<repo>/p02/tb/tb_p02_top.sv" Line 70
   **** SW Build 5239630 on Fri Nov 08 22:34:34 MST 2024
   **** IP Build 5239520 on Sun Nov 10 16:12:51 MST 2024
   **** SharedData Build 5239561 on Fri Nov 08 14:39:27 MST 2024
-  **** Start of session at: Mon Nov 23 11:35:38 2026
+  **** Start of session at: Mon Nov 23 12:18:34 2026
     ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
     ** Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 
@@ -116,7 +116,7 @@ $finish called at time : 229725 ns : File "<repo>/p02/tb/tb_p02_top.sv" Line 70
   **** SW Build 5239630 on Fri Nov 08 22:34:34 MST 2024
   **** IP Build 5239520 on Sun Nov 10 16:12:51 MST 2024
   **** SharedData Build 5239561 on Fri Nov 08 14:39:27 MST 2024
-  **** Start of session at: Mon Nov 23 11:35:49 2026
+  **** Start of session at: Mon Nov 23 12:18:40 2026
     ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
     ** Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 
@@ -154,7 +154,7 @@ $finish called at time : 417425 ns : File "<repo>/p02/tb/tb_p02_top.sv" Line 70
   **** SW Build 5239630 on Fri Nov 08 22:34:34 MST 2024
   **** IP Build 5239520 on Sun Nov 10 16:12:51 MST 2024
   **** SharedData Build 5239561 on Fri Nov 08 14:39:27 MST 2024
-  **** Start of session at: Mon Nov 23 11:36:00 2026
+  **** Start of session at: Mon Nov 23 12:18:47 2026
     ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
     ** Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 
@@ -205,7 +205,7 @@ $finish called at time : 671045 ns : File "<repo>/p02/tb/tb_p02_top.sv" Line 70
   **** SW Build 5239630 on Fri Nov 08 22:34:34 MST 2024
   **** IP Build 5239520 on Sun Nov 10 16:12:51 MST 2024
   **** SharedData Build 5239561 on Fri Nov 08 14:39:27 MST 2024
-  **** Start of session at: Mon Nov 23 11:36:11 2026
+  **** Start of session at: Mon Nov 23 12:18:53 2026
     ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
     ** Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 
@@ -261,7 +261,7 @@ $finish called at time : 789045 ns : File "<repo>/p02/tb/tb_p02_top.sv" Line 70
   **** SW Build 5239630 on Fri Nov 08 22:34:34 MST 2024
   **** IP Build 5239520 on Sun Nov 10 16:12:51 MST 2024
   **** SharedData Build 5239561 on Fri Nov 08 14:39:27 MST 2024
-  **** Start of session at: Mon Nov 23 11:36:22 2026
+  **** Start of session at: Mon Nov 23 12:19:00 2026
     ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
     ** Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 
@@ -319,7 +319,7 @@ $finish called at time : 882885 ns : File "<repo>/p02/tb/tb_p02_top.sv" Line 70
   **** SW Build 5239630 on Fri Nov 08 22:34:34 MST 2024
   **** IP Build 5239520 on Sun Nov 10 16:12:51 MST 2024
   **** SharedData Build 5239561 on Fri Nov 08 14:39:27 MST 2024
-  **** Start of session at: Mon Nov 23 11:36:35 2026
+  **** Start of session at: Mon Nov 23 12:19:07 2026
     ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
     ** Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 
@@ -383,7 +383,7 @@ $finish called at time : 1248065 ns : File "<repo>/p02/tb/tb_p02_top.sv" Line 70
   **** SW Build 5239630 on Fri Nov 08 22:34:34 MST 2024
   **** IP Build 5239520 on Sun Nov 10 16:12:51 MST 2024
   **** SharedData Build 5239561 on Fri Nov 08 14:39:27 MST 2024
-  **** Start of session at: Mon Nov 23 11:36:48 2026
+  **** Start of session at: Mon Nov 23 12:19:15 2026
     ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
     ** Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 

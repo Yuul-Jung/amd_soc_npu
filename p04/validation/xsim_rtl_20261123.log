@@ -1,4 +1,4 @@
-# p04 RTL simulation 2026-11-23T02:37Z
+# p04 RTL simulation 2026-11-23T03:19Z
 # tool: Vivado Simulator v2024.2.0
 PYTHON_P04_SELF_TEST_PASS
 PYTHON_P04_VECTORS stage=1 cases=7 tx_bytes=28 final_led=0x0000
@@ -25,7 +25,7 @@ PYTHON_P04_DEMO sample=#92 label=9 pc_pred_float=9 int8=4 int16=9
   **** SW Build 5239630 on Fri Nov 08 22:34:34 MST 2024
   **** IP Build 5239520 on Sun Nov 10 16:12:51 MST 2024
   **** SharedData Build 5239561 on Fri Nov 08 14:39:27 MST 2024
-  **** Start of session at: Mon Nov 23 11:37:58 2026
+  **** Start of session at: Mon Nov 23 12:19:54 2026
     ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
     ** Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 
@@ -45,7 +45,7 @@ $finish called at time : 92725 ns : File "<repo>/p04/tb/tb_p04_top.sv" Line 70
   **** SW Build 5239630 on Fri Nov 08 22:34:34 MST 2024
   **** IP Build 5239520 on Sun Nov 10 16:12:51 MST 2024
   **** SharedData Build 5239561 on Fri Nov 08 14:39:27 MST 2024
-  **** Start of session at: Mon Nov 23 11:38:10 2026
+  **** Start of session at: Mon Nov 23 12:20:01 2026
     ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
     ** Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 
@@ -232,7 +232,7 @@ $finish called at time : 8358885 ns : File "<repo>/p04/tb/tb_p04_top.sv" Line 70
   **** SW Build 5239630 on Fri Nov 08 22:34:34 MST 2024
   **** IP Build 5239520 on Sun Nov 10 16:12:51 MST 2024
   **** SharedData Build 5239561 on Fri Nov 08 14:39:27 MST 2024
-  **** Start of session at: Mon Nov 23 11:38:24 2026
+  **** Start of session at: Mon Nov 23 12:20:09 2026
     ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
     ** Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 
@@ -586,7 +586,7 @@ $finish called at time : 23646905 ns : File "<repo>/p04/tb/tb_p04_top.sv" Line 7
   **** SW Build 5239630 on Fri Nov 08 22:34:34 MST 2024
   **** IP Build 5239520 on Sun Nov 10 16:12:51 MST 2024
   **** SharedData Build 5239561 on Fri Nov 08 14:39:27 MST 2024
-  **** Start of session at: Mon Nov 23 11:38:40 2026
+  **** Start of session at: Mon Nov 23 12:20:19 2026
     ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
     ** Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 
@@ -978,5 +978,4 @@ P04_CASE_PASS stage=4 4-4 sw=0 rx="K1:0046 0001C53\r\n"
 P04_BOARD_TOP_LED_PASS stage=4 led=0x8200
 P04_TOP_RTL_SIM_PASS stage=4 cases=384 bytes=2135
 $finish called at time : 25771675 ns : File "<repo>/p04/tb/tb_p04_top.sv" Line 70
-run: Time (s): cpu = 00:00:00.05 ; elapsed = 00:00:05 . Memory (MB): peak = 1267.129 ; gain = 0.000 ; free physical = 14666 ; free virtual = 28746
 RTL_SIM_PASS stages=4
