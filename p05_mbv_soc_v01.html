@@ -68,10 +68,9 @@ details.full>summary{cursor:pointer;font-weight:600}
   <nav class="toc" id="course-nav" aria-label="전체 장과 절 탐색"></nav>
   <main class="content" id="main-content">
     <section class="section" id="s00">
-      <h2><span class="num">00</span> 장 목표·진행 위치</h2>
+      <h2><span class="num">00</span> 장 목표</h2>
       <p><b>장 시연 (보드):</b> 비트스트림 하나에 MicroBlaze V와 NPU가 함께 들어갑니다. C 드라이버가 그림 4장을 NPU로 분류해 UART·LED·7세그먼트에 띄웁니다. 같은 추론이 CPU만으로는 1,816,547클록, NPU로는 1,080,161클록 걸립니다.</p>
       <p>2일 과정, 서브젝트 7개입니다. 비트스트림은 5-2에서 한 번만 만들고, 그다음 서브젝트부터는 프로그램(ELF)만 바꿔 보드에서 확인합니다.</p>
-      <ol class="road" aria-label="전체 장에서 지금 위치"><li class=""><a href="p01_uart_calc_v01.html"><b>1장</b>UART 계산기</a></li><li class=""><a href="p02_npu4_board_v01.html"><b>2장</b>4뉴런 NPU 보드</a></li><li class=""><a href="p03_mnist8x8_v01.html"><b>3장</b>8×8 MNIST (CPU 없음)</a></li><li class=""><a href="p04_tile784_v01.html"><b>4장</b>784 가속기 설계 공간</a></li><li class="now" aria-current="step"><b>5장</b>MicroBlaze V SoC</li><li class=""><a href="p06_npu_apps_v01.html"><b>6장</b>응용 확장</a></li><li class="plan"><b>7장</b>종합과제</li></ol>
       <ol class="steps" aria-label="이 장의 서브젝트와 순서"><li><span class="code">5-1</span><span><a href="#s5_1">AXI4-Lite NPU IP</a><br>AXI 버스로 레지스터 15개를 읽고 써서 784 추론을 실행합니다. 추론 7번의 결과가 Python 기준과 비트 단위로 같고, 없는 주소를 건드리면 오류 응답(SLVERR)이 돌아오는 것을 시뮬레이션으로 봅니다.</span><span class="st">1일 오전</span></li><li><span class="code">5-2</span><span><a href="#s5_2">MicroBlaze V SoC 연결</a><br>비트스트림을 내려받으면 DONE LED가 켜집니다. XSDB에서 <code>mrd 0x4006FFF0</code>을 읽으면 7세그먼트 IP의 ID <code>53454737</code>이 나오고, 버튼을 누른 채 <code>mrd 0x40010000</code>을 읽으면 U·D·L·R이 <code>8</code>·<code>4</code>·<code>2</code>·<code>1</code>로 보입니다.</span><span class="st">1일 오전</span></li><li><span class="code">5-3</span><span><a href="#s5_3">C 드라이버와 표시</a><br><code>npu_app.elf</code>를 실행하면 그림 4장을 NPU로 분류하고, CPU로 계산한 값과 점수까지 같은지 비교합니다(<code>scores_match=1</code>). 끝나면 7세그먼트에 <code>03 4</code>, LED4가 켜집니다.</span><span class="st">1일 오후</span></li><li><span class="code">5-4</span><span><a href="#s5_4">CPU·NPU 추론 시간</a><br><code>bench_board.elf</code>를 실행하면 같은 그림을 CPU 정수 계산으로 1,816,547클록, NPU로 1,080,161클록(Bias 적재 3,076 포함)에 처리합니다. 1.68배 차이이고, 리셋 뒤 다시 실행해도 같은 값입니다.</span><span class="st">1일 오후</span></li><li><span class="code">5-5</span><span><a href="#s5_5">자원·타이밍 스윕</a><br>클록 주기를 10 → 8 → 7 → 6 ns로 줄여 가며 배선해 봅니다. AXI NPU IP는 10 ns에서 되고 8 ns에서 안 되므로 최고 주파수는 약 105 MHz, 4PE INT8 코어는 약 146 MHz입니다.</span><span class="st">2일 오전</span></li><li><span class="code">5-6</span><span><a href="#s5_6">전력·추론당 에너지</a><br>Vivado 전력 추정으로 추론 한 번에 드는 에너지를 비교합니다. CPU 4.596 mJ, NPU 2.765 mJ로 1.66배 차이입니다.</span><span class="st">2일 오전</span></li><li><span class="code">5-7</span><span><a href="#s5_7">시스템 통합</a><br><code>run_all.sh</code> 한 번으로 이 장의 시뮬레이션을 모두 다시 돌리고, 보드 확인 절차를 처음부터 끝까지 한 자리에서 실행합니다. 이것이 장 시연입니다.</span><span class="st">2일 오후</span></li><li class="demo"><span class="code">시연</span><span><a href="#demo">장 시연</a><br>비트스트림 하나에 MicroBlaze V와 NPU가 함께 들어갑니다. C 드라이버가 그림 4장을 NPU로 분류해 UART·LED·7세그먼트에 띄웁니다. 같은 추론이 CPU만으로는 1,816,547클록, NPU로는 1,080,161클록 걸립니다.</span><span class="st">장 끝</span></li></ol>
     </section>
     <section class="section" id="s01">
@@ -2687,7 +2686,7 @@ cat "$summary"
 </div>
 <script>
 window.COURSE={
- "title": "Basys3 소형 NPU 실습 (프로젝트판)",
+ "title": "Basys3 소형 NPU 실습",
  "chapters": [
   {
    "id": "p01",

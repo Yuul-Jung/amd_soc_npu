@@ -125,7 +125,7 @@
     - 정정: 장 Top 전 STAGE 빌드는 인자 없이 `vivado -mode batch -nojournal -source pNN/vivado/build_pNN.tcl` **한 번** (STAGE마다 따로 돌리면 증거 파일이 덮어써진다). 지시 13 ①의 반복문은 틀렸다.
     - 다음 재빌드가 필요해지면 15번으로 적는다.
 
-15. **(2026-11-23 11:00, Vivado 시뮬레이터로 RTL 시뮬레이션 확인 — 지금 실행할 것은 이 항목이다)**
+15. **(2026-11-23 11:00, Vivado 시뮬레이터로 RTL 시뮬레이션 확인 — 실행 명령은 16번 1로 바뀌었다)**
 
     **배경**: 실습하는 사람은 Vivado에서 시뮬레이션한다. 지금 RTL 시뮬레이션 근거는 Icarus Verilog뿐이라 같은 과정을 두 번 거치게 된다. 같은 TB·사례 파일·판정 줄을 Vivado 시뮬레이터(xsim)로 돌려 증거를 남기고, 통과하면 장 페이지의 실행 명령을 xsim 기준으로 바꾼다. Icarus는 GitHub CI(Vivado 없음)용 자동 검사로 남긴다.
 
@@ -142,6 +142,18 @@
     **xsim에서 컴파일·실행이 안 되면**: TB·RTL은 고치지 말고 보고한다 — 파일·줄·xvlog/xelab 메시지(VRFC 번호)를 `part03/ch27/docs/VSCODE_TO_WEB_YYYYMMDD.md`에. 웹이 고쳐 다시 지시한다 (12장 TB의 VRFC 10-3380과 같은 종류가 더 있을 수 있다).
 
     **2단계 (1단계 통과 뒤, 따로 지시)**: 00~12장 서브젝트 단독 TB, `part03/` VS Code 판 TB(이쪽은 VS Code 담당이므로 `run_sim.sh`에 같은 `SIM=xsim` 분기를 직접 넣는다 — `tools/sim/sim_top.sh`를 써도 된다). C 협동 시뮬레이션(22·28~31장)은 방식이 달라 마지막에 검토.
+
+16. **(2026-11-23 12:30, 사용자 지시: 학습안내서에는 지금의 과정만 — 15번과 함께 실행)**
+
+    **바뀐 것 (웹, main)**: 장 페이지에서 검증 표시·옛 장 번호·진행 위치 막대·Icarus 표기를 모두 뺐다. 옛 장 안내서 `chNN_*.html` 32개는 삭제했고 INDEX는 1~6장만 안내한다. 1~4장 `run_sim.sh`는 **Vivado가 있으면 Vivado 시뮬레이터(xsim), 없으면 iverilog**를 스스로 고르고, 숫자 인자를 주면 그 STAGE만 돈다 (`bash p01/scripts/run_sim.sh 2`). 장 페이지의 시뮬레이션 절은 이 명령과 기대 출력을 싣는다.
+
+    **VS Code 할 일**
+    1. (15번 대체) Vivado 환경에서 `for p in p01 p02 p03 p04; do bash $p/scripts/run_sim.sh; done` → 자동으로 xsim이 선택된다(`# tool:` 줄로 확인). `pNN/validation/xsim_rtl_YYYYMMDD.log` 네 개를 커밋한다. 한 STAGE만 도는 `bash p02/scripts/run_sim.sh 3`도 xsim에서 되는지 확인한다. **xsim 분기는 웹에서 한 번도 실행하지 못했다** — 옵션·출력 거르기가 틀리면 `tools/sim/sim_top.sh`의 xsim 분기는 고쳐도 된다. TB·RTL 오류면 고치지 말고 파일·줄·메시지를 회신한다. 합격 기준은 15번과 같다(사례 줄이 iverilog 로그와 같음).
+    2. `part03/` 소스 주석 정리 (VS Code 담당 파일이라 웹은 손대지 않았다): 장 페이지에 그대로 실리는 `.v`·`.sv`·`.c`·`.h`·`.py`·`.tcl`·`.xdc`·`.sh`의 주석에서 ① `(추가)`·`(변경)`·`(변경) 안 A`·날짜 꼬리표 ② '이전에는/기존에는' 같은 이력 서술 ③ 옛 장 번호(`20장`·`22장`…) — 서브젝트 번호(5-1…6-5)나 모듈 이름으로 ④ `Icarus`·`iverilog`·`협동 시뮬레이션` 도구 이름을 뺀다. **주석만** 바꾸고 코드·문자열·출력 형식은 건드리지 않는다. 바꾼 뒤 `LEVEL=sim bash part03/ch27/scripts/run_all.sh` PASS를 확인하고 커밋한다 (비트스트림 재빌드는 필요 없다 — 주석만 바뀜을 `git diff -w --stat`와 함께 회신).
+    3. `part03/ch27/docs/BOARD_CHECKLIST.md`의 절차·기대 결과 칸에서 `21장 비트스트림`·`(22장 협동 시뮬레이션과 같은 줄)` 같은 옛 장 번호·출처 꼬리표를 뺀다 (지금은 웹 생성기가 표시할 때 걸러 낸다 — `tools/guide/build_projects.py`의 `CK_SUBS`).
+    4. 2단계: `part03/chNN/scripts/run_sim.sh`(13~20·26장 등 RTL 단독)도 Vivado가 있으면 xsim으로 돌게 한다 (`source tools/sim/sim_top.sh`의 `sim_kind` 사용 가능). C 펌웨어와 함께 도는 22·28~31장은 방식이 정해지면 회신한다.
+
+    **회신**: `part03/ch27/docs/VSCODE_TO_WEB_YYYYMMDD.md`에 xsim 결과(통과/오류 메시지), 주석 정리한 파일 수, run_all 결과.
 
 ## 5. 웹 Claude가 그동안 하는 것
 
