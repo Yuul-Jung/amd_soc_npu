@@ -5,7 +5,7 @@ set -euo pipefail
 chapter_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 part03=$(cd -- "$chapter_dir/.." && pwd)
 xsa=${XSA:-$part03/ch21/build/out/soc21_npu.xsa}
-if [[ ! -f "$xsa" ]]; then echo "NOT_RUN VITIS_BUILD: XSA 없음 (21장 build_soc.sh 먼저)"; exit 2; fi
+if [[ ! -f "$xsa" ]]; then echo "NOT_RUN VITIS_BUILD: XSA 없음 (5-2 build_soc.sh 먼저)"; exit 2; fi
 if ! command -v vitis >/dev/null 2>&1; then
   if [[ -n "${VITIS_SETTINGS:-}" ]]; then
     # shellcheck disable=SC1090

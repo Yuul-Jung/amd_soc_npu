@@ -9,7 +9,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from part03.ch19.reference.synth_summary import timing, util  # noqa: E402
 
 NAMES = {"pe4_int8": "PE4 INT8 코어", "pe4_int16": "PE4 INT16 코어",
-         "tile784_int8": "17장 Tile INT8", "axi_npu_int8": "20장 AXI NPU IP"}
+         "tile784_int8": "4-2 Tile INT8", "axi_npu_int8": "5-1 AXI NPU IP"}
 
 
 def main():
@@ -26,7 +26,7 @@ def main():
             u = (d / "rpt" / f"{key}_route_utilization.rpt").read_text()
             res.setdefault(key, {})[period] = (float(wns), tns, fail, src, dst, util(u, "Slice LUTs"),
                                               util(u, "Slice Registers"))
-    lines = ["# 24장 클록 주기 스윕 — OOC 합성·배치·배선 (Vivado 실제 실행)", "",
+    lines = ["# 5-5 클록 주기 스윕 — OOC 합성·배치·배선 (Vivado 실제 실행)", "",
              "> 합성 단계부터 목표 주기로 제약. Fmax(추정) = 1000 / (주기 − WNS) MHz, 통과한 가장 짧은 주기 기준.",
              "> OOC는 칩 I/O를 포함하지 않는다. 실물 동작 주파수가 아니다.", "",
              "| 구성 | 주기(ns) | WNS(ns) | TNS(ns) | 실패 끝점 | LUT | FF | 임계 경로 |",

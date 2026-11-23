@@ -288,7 +288,7 @@ class Firmware:
 def write_header(out):
     qm = load_qmodel()
     mid = model_id(qm)
-    lines = ["/* 자동 생성: part03/ch29/reference/sensor_reference.py (센서 6특징 → 3상태, 20장 IP 10×784 형태) */",
+    lines = ["/* 자동 생성: part03/ch29/reference/sensor_reference.py (센서 6특징 → 3상태, 5-1 IP 10×784 형태) */",
              "#ifndef SENSOR_MODEL_H", "#define SENSOR_MODEL_H", "#include <stdint.h>",
              f"#define SENSOR_MODEL_ID 0x{mid:08x}u",
              "static const int8_t model_w[10][784] = {"]

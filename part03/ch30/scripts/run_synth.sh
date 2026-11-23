@@ -16,5 +16,5 @@ echo "Vivado $version"
 grep -E "^Synthesis finished|^ERROR|^CRITICAL WARNING" "$build_dir/vivado.log" || true
 python3 "$part03/ch19/reference/synth_summary.py" --rpt "$build_dir/rpt" \
   --out "$chapter_dir/validation/synth_ooc_summary.md" --version "$version" \
-  --title "30장 모터 안전 코어 Vivado OOC 합성·배선 (실제 실행)" \
+  --title "6-4 모터 안전 코어 Vivado OOC 합성·배선 (실제 실행)" \
   --config motor_safety "MOTOR_SAFETY" "p3_motor_safety (20 kHz PWM, DEAD 100 ms, WD 500 ms)"

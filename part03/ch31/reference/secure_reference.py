@@ -249,7 +249,7 @@ def write_header(out, key_file=None):
              f"#define SECURE_TEST_KEY {test}", f"#define SECURE_KEY_FP 0x{key_fp(keys):08x}u",
              "static const uint8_t enc_key[16] = {" + ",".join(f"0x{b:02x}" for b in keys[0]) + "};",
              "static const uint8_t mac_key[32] = {" + ",".join(f"0x{b:02x}" for b in keys[1]) + "};",
-             "/* 부팅 모델 A(29장 모델과 같음) */",
+             "/* 부팅 모델 A(6-3 모델과 같음) */",
              f"#define MODEL_A_ID 0x{s29.model_id(qa):08x}u",
              "static const uint8_t model_a_blob[54] = {" + ",".join(str(b) for b in blob(qa)) + "};",
              "#endif", ""]

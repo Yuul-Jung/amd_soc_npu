@@ -9,12 +9,12 @@ from pathlib import Path
 
 CONFIGS = [
     ("pe1_int8", "PE1 INT8", "p3_group10_core #(64,1)"),
-    ("pe4_int8", "PE4 INT8", "p3_group10_core #(64,10) — 14장 기본"),
+    ("pe4_int8", "PE4 INT8", "p3_group10_core #(64,10) — 3-2 기본"),
     ("pe8a_int8", "PE8 코어 A INT8", "p3_group10_core #(64,6)"),
     ("pe8b_int8", "PE8 코어 B INT8", "p3_group10_core #(64,4)"),
     ("pe4_int16", "PE4 INT16", "p3_group10_core DATA_W 16·ACC_W 38"),
-    ("tile784_int8", "17장 Tile INT8", "p3_tile784_10 기본"),
-    ("tile784_int16", "18장 Tile INT16", "p3_tile784_10 DATA_W 16"),
+    ("tile784_int8", "4-2 Tile INT8", "p3_tile784_10 기본"),
+    ("tile784_int16", "4-3 Tile INT16", "p3_tile784_10 DATA_W 16"),
 ]
 
 
@@ -40,8 +40,8 @@ def main():
     p.add_argument("--out", type=Path, required=True)
     p.add_argument("--version", default="?")
     p.add_argument("--config", nargs=3, action="append", metavar=("KEY", "NAME", "RTL"),
-                   help="(20장~) 요약할 구성. 없으면 19장 기본 7개")
-    p.add_argument("--title", default="19장 Vivado OOC 합성 요약 (실제 실행)")
+                   help="요약할 구성. 없으면 4-4 기본 7개")
+    p.add_argument("--title", default="4-4 Vivado OOC 합성 요약 (실제 실행)")
     a = p.parse_args()
     configs = [tuple(c) for c in a.config] if a.config else CONFIGS
     rows, paths, routed, n_fail, n_route_fail = [], [], [], 0, 0
@@ -69,7 +69,7 @@ def main():
         "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|", *rows, "",
         *([] if a.config else [
             "- PE8 = 코어 A + 코어 B (각각 따로 합성한 값의 합으로 읽는다. 공유 x 포트 배선은 포함되지 않음).",
-            "- BRAM Tile 0.5 = RAMB18 1개. 14장 코어의 lane별 가중치 bank가 RAMB18로 추론되었다."]), "",
+            "- BRAM Tile 0.5 = RAMB18 1개. 3-2 코어의 lane별 가중치 bank가 RAMB18로 추론되었다."]), "",
         "## 임계 경로 (합성 추정)", "",
         "| 구성 | 시작 | 끝 | Data Path(ns) | Logic Levels |", "|---|---|---|---:|---:|", *paths, "",
     ]

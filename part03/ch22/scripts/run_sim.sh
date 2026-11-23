@@ -6,20 +6,21 @@ part03=$(cd -- "$chapter_dir/.." && pwd)
 build_dir=$(mktemp -d "${TMPDIR:-/tmp}/p3-22.XXXXXXXX")
 trap 'rm -rf "$build_dir"' EXIT
 export PYTHONDONTWRITEBYTECODE=1
+source "$chapter_dir/../common/scripts/p3_sim.sh"   # Vivado 있으면 xsim, 없으면 iverilog (SIM=로 고정)
 python3 --version
 gcc --version | sed -n '1p'
-iverilog -V 2>&1 | sed -n '1p'
+p3_sim_version
 python3 "$chapter_dir/reference/gen_model.py" --out "$build_dir/model_data.h"
 gcc -std=c99 -O2 -Wall -Wextra -Werror -DNPU_HOST_SIM -I"$chapter_dir/sw" -I"$build_dir" -o "$build_dir/cosim" \
   "$chapter_dir/sw/npu_driver.c" "$chapter_dir/sw/app.c" \
   "$chapter_dir/host/npu_io_cosim.c" "$chapter_dir/host/cosim_main.c"
-iverilog -g2012 -Wall -s tb_p3_npu_bridge -o "$build_dir/sim" -I"$part03/ch20/tb" \
+p3_sim_build "$build_dir/sim" tb_p3_npu_bridge -- -I"$part03/ch20/tb" \
   "$part03/ch02/rtl/dsp_multiplier.v" "$part03/mini_npu/rtl/npu_dsp_mac_lane.v" \
   "$part03/ch04/rtl/bram_sync_buffer.v" "$part03/ch14/rtl/p3_group10_core.v" \
   "$part03/ch17/rtl/p3_tile784_10.v" "$part03/ch20/rtl/p3_npu_axi_lite.v" \
   "$chapter_dir/tb/tb_p3_npu_bridge.sv"
 mkfifo "$build_dir/cmd" "$build_dir/rsp"
-vvp "$build_dir/sim" +CMD="$build_dir/cmd" +RSP="$build_dir/rsp" > "$build_dir/sim.log" 2>&1 &
+p3_sim_run "$build_dir/sim" +CMD="$build_dir/cmd" +RSP="$build_dir/rsp" > "$build_dir/sim.log" 2>&1 &
 sim_pid=$!
 host_rc=0
 "$build_dir/cosim" "$build_dir/cmd" "$build_dir/rsp" || host_rc=$?

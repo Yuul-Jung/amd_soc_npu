@@ -11,18 +11,19 @@ part03=$(cd -- "$chapter_dir/.." && pwd)
 build_dir=$(mktemp -d "${TMPDIR:-/tmp}/p3-28.XXXXXXXX")
 trap 'rm -rf "$build_dir"' EXIT
 export PYTHONDONTWRITEBYTECODE=1
+source "$chapter_dir/../common/scripts/p3_sim.sh"   # Vivado 있으면 xsim, 없으면 iverilog (SIM=로 고정)
 python3 --version
 gcc --version | sed -n '1p'
-iverilog -V 2>&1 | sed -n '1p'
+p3_sim_version
 ref="$chapter_dir/reference/digit_reference.py"
 python3 "$ref" --selftest --header "$build_dir/digit_model.h" --fnd-vectors "$build_dir/fnd_vectors.txt"
 
 # 2) FND 스캔
-iverilog -g2012 -Wall -s tb_p3_fnd_scan -o "$build_dir/fnd" "$chapter_dir/rtl/p3_fnd_scan.v" "$chapter_dir/tb/tb_p3_fnd_scan.sv"
-vvp -n "$build_dir/fnd" +VEC="$build_dir/fnd_vectors.txt" | grep -v "finish called"
+p3_sim_build "$build_dir/fnd" tb_p3_fnd_scan -- "$chapter_dir/rtl/p3_fnd_scan.v" "$chapter_dir/tb/tb_p3_fnd_scan.sv"
+p3_sim_run "$build_dir/fnd" +VEC="$build_dir/fnd_vectors.txt" | grep -v "finish called"
 
 # 3) PC 시뮬레이션
-iverilog -g2012 -Wall -s tb_p3_npu_bridge -o "$build_dir/sim" -I"$part03/ch20/tb" \
+p3_sim_build "$build_dir/sim" tb_p3_npu_bridge -- -I"$part03/ch20/tb" \
   "$part03/ch02/rtl/dsp_multiplier.v" "$part03/mini_npu/rtl/npu_dsp_mac_lane.v" \
   "$part03/ch04/rtl/bram_sync_buffer.v" "$part03/ch14/rtl/p3_group10_core.v" \
   "$part03/ch17/rtl/p3_tile784_10.v" "$part03/ch20/rtl/p3_npu_axi_lite.v" \
@@ -39,7 +40,7 @@ run_cosim() {
     "$part03/ch22/sw/npu_driver.c" "$app" \
     "$part03/ch22/host/npu_io_cosim.c" "$chapter_dir/host/digit_io_host.c" "$chapter_dir/host/digit_cosim_main.c"
   mkfifo "$d/cmd" "$d/rsp"
-  vvp "$build_dir/sim" +CMD="$d/cmd" +RSP="$d/rsp" > "$d/sim.log" 2>&1 &
+  p3_sim_run "$build_dir/sim" +CMD="$d/cmd" +RSP="$d/rsp" > "$d/sim.log" 2>&1 &
   local sim_pid=$! host_rc=0 sim_rc=0
   python3 "$chapter_dir/host/p3_digit_host.py" --cosim "$d/fw $d/cmd $d/rsp" "$@" > "$d/host.log" 2>&1 || host_rc=$?
   wait "$sim_pid" || sim_rc=$?

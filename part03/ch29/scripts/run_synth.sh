@@ -16,5 +16,5 @@ echo "Vivado $version"
 grep -E "^Synthesis finished|^ERROR|^CRITICAL WARNING" "$build_dir/vivado.log" || true
 python3 "$part03/ch19/reference/synth_summary.py" --rpt "$build_dir/rpt" \
   --out "$chapter_dir/validation/synth_ooc_summary.md" --version "$version" \
-  --title "29장 경보 정책 RTL Vivado OOC 합성·배선 (실제 실행)" \
+  --title "6-3 경보 정책 RTL Vivado OOC 합성·배선 (실제 실행)" \
   --config alarm_policy "ALARM_POLICY" "p3_alarm_policy (CLEAR_N=3)"

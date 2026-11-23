@@ -16,6 +16,6 @@ echo "Vivado $version"
 grep -E "^Synthesis finished|^ERROR|^CRITICAL WARNING" "$build_dir/vivado.log" || true
 python3 "$part03/ch19/reference/synth_summary.py" --rpt "$build_dir/rpt" \
   --out "$chapter_dir/validation/synth_ooc_summary.md" --version "$version" \
-  --title "31장 AES-128·SHA-256 코어 Vivado OOC 합성·배선 (실제 실행)" \
+  --title "6-5 AES-128·SHA-256 코어 Vivado OOC 합성·배선 (실제 실행)" \
   --config aes128 "AES128" "p3_aes128_enc (1 라운드/클록, 11클록/블록)" \
   --config sha256 "SHA256" "p3_sha256_core (1 라운드/클록, 66클록/블록)"

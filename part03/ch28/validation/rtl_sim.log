@@ -1,12 +1,10 @@
 Python 3.12.3
 gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
-Icarus Verilog version 12.0 (stable) ()
+Vivado Simulator v2024.2.0
 DIGIT_REFERENCE_SELFTEST_PASS model_id=f16c4f12 frame_bytes=795
 DIGIT_HEADER_DONE model_id=f16c4f12
 FND_VECTORS words=9 rows=36
 RTL_SIM_PASS FND_SCAN vectors=36 digit_changes=9
-part03/mini_npu/rtl/npu_dsp_mac_lane.v:2: warning: timescale for npu_dsp_mac_lane inherited from another file.
-part03/ch02/rtl/dsp_multiplier.v:1: ...: The inherited timescale is here.
 C_CRC16_CHECK value=29b1 expect=29b1
 C_DIGIT_APP_EXIT frames=34
 MODEL_ID host=f16c4f12 device=f16c4f12 model_ok=1

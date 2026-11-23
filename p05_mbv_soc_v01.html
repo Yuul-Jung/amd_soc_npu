@@ -1694,7 +1694,7 @@ static inline p3_seg7_regs_t p3_seg7_from_fnd_word(uint32_t w)
 #include "xparameters.h"
 #include "xil_io.h"
 #if defined(XPAR_AXI_INTC_0_NUM_INTR_INPUTS) &amp;&amp; (XPAR_AXI_INTC_0_NUM_INTR_INPUTS != 16)
-#error "안 A: axi_intc_0 입력은 16개여야 한다 (NPU = In12)"
+#error "axi_intc_0 입력은 16개여야 한다 (NPU = In12)"
 #endif
 #define P3_SEG7_BASE XPAR_IP06_SEG7_BASEADDR
 static inline void p3_seg7_write(p3_seg7_regs_t r)
@@ -1923,7 +1923,7 @@ def main():
     qm = quantize_model(json.loads(MODEL.read_text()), 8)
     rows = [list(map(int, l.split())) for l in SAMPLES.read_text().splitlines() if not l.startswith("#")]
     picked = rows[:2] + [r for r in rows if r[3] != r[2]][:1] + [r for r in rows if r[2] != r[1]][:1]
-    lines = ["/* 자동 생성: part03/ch22/reference/gen_model.py (18장 INT8 모델, MNIST t10k 표본) */",
+    lines = ["/* 자동 생성: part03/ch22/reference/gen_model.py (4-3 INT8 모델, MNIST t10k 표본) */",
              "#ifndef MODEL_DATA_H", "#define MODEL_DATA_H", "#include &lt;stdint.h&gt;",
              f"#define MODEL_N_SAMPLES {len(picked)}",
              "static const int8_t model_w[10][784] = {"]
@@ -2079,7 +2079,7 @@ chapter_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." &amp;&amp; pwd)
 part03=$(cd -- "$chapter_dir/.." &amp;&amp; pwd)
 src_proj="$part03/ch21/build/soc21_npu"
 xsa="$part03/ch21/build/out/soc21_npu.xsa"
-if [[ ! -f "$xsa" || ! -d "$src_proj" ]]; then echo "NOT_RUN SOC_BENCH: 21장 build_soc.sh 먼저"; exit 2; fi
+if [[ ! -f "$xsa" || ! -d "$src_proj" ]]; then echo "NOT_RUN SOC_BENCH: 5-2 build_soc.sh 먼저"; exit 2; fi
 # shellcheck disable=SC1090
 [[ -n "${VIVADO_SETTINGS:-}" ]] &amp;&amp; source "$VIVADO_SETTINGS"
 # shellcheck disable=SC1090
@@ -2210,7 +2210,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from part03.ch19.reference.synth_summary import timing, util  # noqa: E402
 
 NAMES = {"pe4_int8": "PE4 INT8 코어", "pe4_int16": "PE4 INT16 코어",
-         "tile784_int8": "17장 Tile INT8", "axi_npu_int8": "20장 AXI NPU IP"}
+         "tile784_int8": "4-2 Tile INT8", "axi_npu_int8": "5-1 AXI NPU IP"}
 
 
 def main():
@@ -2227,7 +2227,7 @@ def main():
             u = (d / "rpt" / f"{key}_route_utilization.rpt").read_text()
             res.setdefault(key, {})[period] = (float(wns), tns, fail, src, dst, util(u, "Slice LUTs"),
                                               util(u, "Slice Registers"))
-    lines = ["# 24장 클록 주기 스윕 — OOC 합성·배치·배선 (Vivado 실제 실행)", "",
+    lines = ["# 5-5 클록 주기 스윕 — OOC 합성·배치·배선 (Vivado 실제 실행)", "",
              "&gt; 합성 단계부터 목표 주기로 제약. Fmax(추정) = 1000 / (주기 − WNS) MHz, 통과한 가장 짧은 주기 기준.",
              "&gt; OOC는 칩 I/O를 포함하지 않는다. 실물 동작 주파수가 아니다.", "",
              "| 구성 | 주기(ns) | WNS(ns) | TNS(ns) | 실패 끝점 | LUT | FF | 임계 경로 |",
@@ -2404,11 +2404,11 @@ def main():
         if mode in CYCLES:
             sec = CYCLES[mode] * CLK_NS * 1e-9
             energy.append((mode, sec, tot, dyn))
-    lines = ["# 25장 SoC 전력·추론당 에너지 추정 (Vivado 2024.2 report_power, 실제 실행)", "",
-             "&gt; 21장 배선 완료 설계. SAIF는 23장과 같은 SoC 행동 시뮬레이션의 구간별 토글률. **추정치이며 보드 전력 측정이 아니다.**",
+    lines = ["# 5-6 SoC 전력·추론당 에너지 추정 (Vivado 2024.2 report_power, 실제 실행)", "",
+             "&gt; 5-2 배선 완료 설계. SAIF는 5-4와 같은 SoC 행동 시뮬레이션의 구간별 토글률. **추정치이며 보드 전력 측정이 아니다.**",
              "", "| 활동률 | 전체(W) | 동적(W) | 정적(W) | p3_npu_0(W) | microblaze_riscv_0(W) | 신뢰도 |",
              "|---|---:|---:|---:|---:|---:|---|", *rows, "",
-             "| 추론 경로 | 시간(23장, 100 MHz) | 전체 전력(W) | 추론당 에너지(mJ) | 동적만(mJ) |",
+             "| 추론 경로 | 시간(5-4, 100 MHz) | 전체 전력(W) | 추론당 에너지(mJ) | 동적만(mJ) |",
              "|---|---:|---:|---:|---:|"]
     for mode, sec, tot, dyn in energy:
         lines.append(f"| {'CPU 정수 추론' if mode == 'cpu' else 'NPU 종단간'} | {sec * 1e3:.3f} ms | {tot:.3f} | "
@@ -2441,7 +2441,7 @@ chapter_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." &amp;&amp; pwd)
 part03=$(cd -- "$chapter_dir/.." &amp;&amp; pwd)
 p21="$part03/ch21/build/soc21_npu/soc11_user_top.xpr"
 p23="$part03/ch23/build/soc23_sim"
-[[ -f "$p21" &amp;&amp; -d "$p23" ]] || { echo "NOT_RUN POWER: 21장·23장 build 먼저"; exit 2; }
+[[ -f "$p21" &amp;&amp; -d "$p23" ]] || { echo "NOT_RUN POWER: 5-2·5-4 build 먼저"; exit 2; }
 # shellcheck disable=SC1090
 [[ -n "${VIVADO_SETTINGS:-}" ]] &amp;&amp; source "$VIVADO_SETTINGS"
 command -v vivado &gt;/dev/null || { echo "NOT_RUN POWER: vivado 없음"; exit 2; }
@@ -2533,7 +2533,7 @@ step soc_sim_ch23 full bash "$part03/ch23/scripts/run_soc_bench.sh"
 step power_ch25 full bash "$part03/ch25/scripts/run_power.sh"
 step soc_sim_ch28 full bash "$part03/ch28/scripts/run_soc_sim.sh"
 {
-  echo "# 27장 run_all 결과 (LEVEL=$level, $(date -u +%Y-%m-%dT%H:%MZ), commit $(git -C "$part03" rev-parse --short HEAD))"
+  echo "# 5-7 run_all 결과 (LEVEL=$level, $(date -u +%Y-%m-%dT%H:%MZ), commit $(git -C "$part03" rev-parse --short HEAD))"
   echo; echo "| 단계 | 결과 |"; echo "|---|---|"; printf '%s\n' "${rows[@]}"
   echo; echo "실물 Basys3 검증은 포함하지 않는다(docs/BOARD_CHECKLIST.md)."
 } &gt; "$summary"

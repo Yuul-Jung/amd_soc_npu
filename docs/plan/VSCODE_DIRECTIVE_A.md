@@ -178,7 +178,7 @@
     2. 장 페이지 코드 상자에 남은 옛 장 번호·`안 A`는 이제 **문자열 안**에만 있다 (`.sh` 18, `.py` 10, `.tcl` 4, `.h` 1 — 예: `echo "NOT_RUN SOC_BENCH: 21장 build_soc.sh 먼저"`, `check … "21장 안 A SoC…"`, `#error "안 A: …"`, `"# 24장 클록 주기 스윕 …"`). 비트스트림·ELF·기록 파일의 SHA가 바뀌지 않는 것만 서브젝트 번호로 바꾼다. 재빌드가 필요한 것은 그대로 두고 목록만 회신한다.
     3. 회신은 `part03/ch27/docs/VSCODE_TO_WEB_YYYYMMDD.md`.
 
-19. **(2026-11-23 18:00, PR #11 `vscode/xsim-stage1` 60b0b3f 반영 — 지금 실행할 것은 이 항목이다. 18번은 이것으로 대체)**
+19. **(2026-11-23 18:00, PR #11 `vscode/xsim-stage1` 60b0b3f 반영 — 완료. 18번은 이것으로 대체)**
 
     **받은 것**: 17-1 확인(자동 xsim 선택, `run_sim.sh 3` → `RTL_SIM_PASS stages=1`, 가짜 python 판정 시험), 13~20·26장 xsim 기록(`validation/rtl_sim.log` 도구 줄 `Vivado Simulator v2024.2.0`), `p3_sim_version` 수정, `run_all_summary.md` 문구. PR #11을 작업 브랜치에 병합해 main에 올렸다.
     **반영한 것**: ① 검증 현황 생성기가 `Vivado Simulator vX` 도구 줄을 읽는다 ② `tools/sim/sim_top.sh`의 `sim_tool_version`도 임시 폴더에서 버전을 읽는다(제안 반영) ③ 5-7 코드 목록에서 점검표 원문 제외.
@@ -187,6 +187,16 @@
     1. **(우선, 사용자 방침: 시뮬레이션은 Vivado로)** C 펌웨어와 함께 도는 PC 시뮬레이션(22·28·29·30·31장 `run_sim.sh`)을 Vivado 시뮬레이터에서도 돌게 한다. 방식은 VS Code가 정한다 — 후보: 지금의 FIFO 연결을 xsim에서 그대로(이름 있는 파이프를 `$fopen`으로 여는 것이 xsim에서 되는지 먼저 시험), 안 되면 xsim DPI-C(`xsc`)로 C 쪽을 같은 프로세스에 묶는 방식. 합격 기준은 지금과 같다: 같은 TB·같은 C 소스·같은 Python 판정, PASS 줄이 iverilog 결과와 diff 0. 선택 규칙도 같다(`SIM=` → `xvlog` 있으면 xsim → iverilog). Vivado가 없는 CI는 iverilog로 계속 돈다. 어느 방식도 안 되면 막힌 지점과 메시지를 회신한다.
     2. 문자열에 남은 옛 장 번호·`안 A`는 **바꿔도 된다** (회신 16-2의 질문에 대한 답). 조건: 비트스트림·ELF를 다시 빌드하지 않고, 커밋된 SHA 기록과 어긋나지 않을 것. `#error` 문구, `soc30_bd.tcl` check 메시지, `run_all.sh`·각 스크립트의 `echo` 문구, `gen_model.py` 등이 만드는 헤더 주석이 대상이다. 생성 헤더가 저장소에 커밋돼 있으면 함께 다시 만들고, ELF SHA가 그대로인지(주석만 바뀌므로 같아야 한다) 다음 빌드 때 확인할 항목으로 적어 둔다. 지금 확인할 수 없으면 그 파일은 두고 목록만 회신한다.
     3. 회신은 `part03/ch27/docs/VSCODE_TO_WEB_YYYYMMDD.md`, `vscode/…` 브랜치 → main PR.
+
+20. **(2026-11-23 23:50, PR #14 `vscode/directive19` 95c7d92 반영 — 지금 급히 할 일은 없다. 19번 완료)**
+
+    **받은 것**: 19-1(22·28~31장 PC 시뮬레이션이 FIFO 그대로 Vivado 시뮬레이터에서 PASS, iverilog와 출력 diff 0), 19-2(문자열 속 옛 장 번호·`안 A` 43곳).
+    **웹에서 확인한 것**: iverilog로 22·28·29·30·31장 `run_sim.sh` 5개 PASS(변이 시험 포함), 생성기 `--check` 둘 다 UP_TO_DATE, 5·6장 페이지 본문에 옛 장 번호·`안 A`·도구 이름 0건. xsim 실행과 "재빌드 없음·SHA 영향 없음"은 VS Code 기록을 따른다.
+
+    **VS Code에 남은 것** (다음에 Vitis·Vivado를 돌릴 때)
+    1. `digit_app`·`sensor_app`·`secure_app` ELF sha256이 `build_sw.log` 값과 같은지 확인(헤더 주석만 바뀌었으므로 같아야 한다). 다르면 회신.
+    2. 문구만 바꾸고 실행하지 않은 스크립트(`run_synth.sh` 5개, `build_soc.sh`·`build_sw.sh`·`build_vitis.sh`, `run_soc_bench.sh`·`run_power.sh`·`run_soc_sim.sh`)는 다음 실행 때 그대로 도는지 본다.
+    3. 보드 점검(B1~B26)은 사용자와 함께.
 
 ## 5. 웹 Claude가 그동안 하는 것
 
