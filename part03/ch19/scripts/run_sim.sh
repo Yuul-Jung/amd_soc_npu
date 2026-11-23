@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# (추가) 19장: 14장 코어로 만든 PE1·PE4·PE8 구성의 부분합·사이클 RTL 측정과 Python 모델 비교.
-# 학습된 18장 MNIST 모델(INT8)과 고정 표본 4개 × 13타일 = 52개 타일 작업. 데이터셋 불필요.
+# 3-2 코어로 만든 PE1·PE4·PE8 구성의 부분합·사이클 RTL 측정과 Python 모델 비교.
+# 학습된 4-3 MNIST 모델(INT8)과 고정 표본 4개 × 13타일 = 52개 타일 작업. 데이터셋 불필요.
 set -euo pipefail
 chapter_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 part03=$(cd -- "$chapter_dir/.." && pwd)

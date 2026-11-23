@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# (추가) 20장: AXI4-Lite NPU IP 패키징(Vivado ipx). 출력 IP 폴더는 빌드 산출물(기본: 임시 폴더, IP_OUT로 지정).
+# AXI4-Lite NPU IP 패키징(Vivado ipx). 출력 IP 폴더는 빌드 산출물(기본: 임시 폴더, IP_OUT로 지정).
 # 인터페이스(s_axi AXI4-Lite, clock, reset, interrupt)와 주소 블록을 확인해 validation/package_ip.log에 남긴다.
 set -euo pipefail
 chapter_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)

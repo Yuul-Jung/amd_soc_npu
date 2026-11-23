@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# (추가) 18장: INT8·INT16 정밀도 RTL 시뮬레이션. 17장 Tile Controller·TB를 DATA_W 파라미터로 재사용한다.
+# INT8·INT16 정밀도 RTL 시뮬레이션. 4-2 Tile Controller·TB를 DATA_W 파라미터로 재사용한다.
 #   i16_full : INT16 무작위·극값·마지막 타일·Bias·오류 주입·Reset·취소 (외부 누산 41 / Bias 40)
 #   i16_w41  : INT16 극값, 외부 누산 41비트 → overflow 없음
 #   i16_w40  : INT16 극값, 외부 누산 40비트 → overflow 검출과 순환값 일치

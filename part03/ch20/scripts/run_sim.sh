@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# (추가) 20장: AXI4-Lite NPU 제어 IP RTL 시뮬레이션(BFM)과 Python 비트 단위 비교.
+# AXI4-Lite NPU 제어 IP RTL 시뮬레이션(BFM)과 Python 비트 단위 비교.
 set -euo pipefail
 chapter_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 part03=$(cd -- "$chapter_dir/.." && pwd)

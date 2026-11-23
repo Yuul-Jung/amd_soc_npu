@@ -1,4 +1,4 @@
-/* (추가) 30장: MicroBlaze V main. NPU·모터 GPIO 주소는 Vivado Address Editor 값(xparameters.h, 30장 XSA). (변경) 안 A: 모터 GPIO = axi_gpio_motor 0x4007_0000. */
+/* MicroBlaze V main. NPU·모터 GPIO 주소는 Vivado Address Editor 값(xparameters.h, 6-4 XSA). 모터 GPIO = axi_gpio_motor 0x4007_0000. */
 #include "xparameters.h"
 #include "motor_app.h"
 

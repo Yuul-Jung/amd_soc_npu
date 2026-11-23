@@ -1,13 +1,13 @@
 `timescale 1ns/1ps
-// (추가) 14장: 4PE를 3그룹(4+4+2)으로 재사용하는 64입력·10분류 정수 Dense 코어.
+// 4PE를 3그룹(4+4+2)으로 재사용하는 64입력·10분류 정수 Dense 코어.
 // class = 4*group + lane. group 2의 lane 2·3은 무효이므로 valid를 막아 누산하지 않고 점수에도 쓰지 않는다.
-// x는 13장 p3_frame64_buffer 읽기 포트(1클록 지연)에서 읽는다.
+// x는 3-1 p3_frame64_buffer 읽기 포트(1클록 지연)에서 읽는다.
 // 가중치는 lane별 bank(bank l = class l, l+4, l+8)에 저장해 매 클록 4개를 병렬로 읽는다.
 // score[c] = sum_i x[i]*W[c][i] + bias[c] (signed 25비트, 정수 기준모델 linear_64x10과 동일)
 // class_o = 최대 점수 class, 동점이면 낮은 번호(argmax_lowest)
-// (변경) 15장 Dense 계층 재사용을 위해 입력 길이·출력 수를 파라미터로 둔다. 기본값 64→10이 14장 동작이다.
-// (변경) 18장 정밀도 비교를 위해 데이터·누산·Bias·점수 폭을 파라미터로 둔다.
-//   기본값 DATA_W 8 / ACC_W 24 / BIAS_W 24 / SCORE_W 25가 14장 INT8 동작이다.
+// 3-3 Dense 계층 재사용을 위해 입력 길이·출력 수를 파라미터로 둔다. 기본값 64→10이 3-2 동작이다.
+// 4-3 정밀도 비교를 위해 데이터·누산·Bias·점수 폭을 파라미터로 둔다.
+//   기본값 DATA_W 8 / ACC_W 24 / BIAS_W 24 / SCORE_W 25가 3-2 INT8 동작이다.
 //   INT16 예: DATA_W 16 / ACC_W 38(64항 최악 2^36) / SCORE_W ≥ max(ACC_W, BIAS_W) + 1.
 module p3_group10_core #(
     parameter integer IN_LEN = 64,
@@ -52,14 +52,14 @@ module p3_group10_core #(
     reg signed [DATA_W-1:0] w_q0, w_q1, w_q2, w_q3;
     reg signed [BIAS_W-1:0] bias [0:OUT_N-1];
     reg signed [SCORE_W-1:0] score_q [0:OUT_N-1];
-    // (변경) 마지막 그룹 번호: 출력 수를 4개 차선으로 나눈 그룹 수 - 1
+    // 마지막 그룹 번호: 출력 수를 4개 차선으로 나눈 그룹 수 - 1
     localparam [1:0] LAST_GROUP = (OUT_N - 1) / 4;
 
     assign load_ready_o = resetn && !busy_o;
     assign x_rd_en_o = (state == RUN);
     assign x_rd_addr_o = idx_q;
 
-    // (변경) class = 4*group + lane < OUT_N 인 차선만 유효(10분류: group 2는 lane 0·1만)
+    // class = 4*group + lane < OUT_N 인 차선만 유효(10분류: group 2는 lane 0·1만)
     wire [3:0] lane_en = {({group_q, 2'd3} < OUT_N), ({group_q, 2'd2} < OUT_N),
                           ({group_q, 2'd1} < OUT_N), ({group_q, 2'd0} < OUT_N)};
     wire lane_clear = (state == CLEAR);
@@ -101,10 +101,10 @@ module p3_group10_core #(
         end
     end
 
-    // (변경) 19장 타이밍 결함 수정: 10개 점수를 한 클록에 직렬 비교(9단)하던 argmax를 누적형으로 바꾼다.
+    // argmax는 누적형이다. 10개 점수를 한 클록에 직렬 비교(9단)하면 100 MHz를 넘기므로 나눈다.
     //   CAPT에서 lane 쌍(0·1, 2·3)의 승자를 레지스터에 저장하고(1단), 다음 CLEAR에서 두 승자와
     //   누적 최대값(best_s_q)을 비교해 합친다(2단). 마지막 그룹은 FINISH에서 합친다.
-    //   class_o·done 시점과 동점 규칙(낮은 번호)은 그대로.
+    //   동점이면 낮은 번호가 이긴다.
     integer k;
     reg have_best_q;
     reg [3:0] best_c_q;

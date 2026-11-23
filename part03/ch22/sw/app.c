@@ -1,5 +1,5 @@
-/* (추가) 22장: NPU 추론 응용. MicroBlaze V(main.c)와 PC 협동 시뮬레이션(host/cosim_main.c)이 같은 코드를 쓴다.
- * 표본마다 NPU 추론과 CPU 정수 추론을 실행해 10개 점수·Class를 서로, 그리고 18장 평가 기대값과 비교한다.
+/* NPU 추론 응용. MicroBlaze V(main.c)와 PC 시뮬레이션(host/cosim_main.c)이 같은 코드를 쓴다.
+ * 표본마다 NPU 추론과 CPU 정수 추론을 실행해 10개 점수·Class를 서로, 그리고 4-3 평가 기대값과 비교한다.
  */
 #include "app.h"
 #include "npu_driver.h"
@@ -28,7 +28,7 @@ int app_run(uintptr_t npu_base)
             failures++;
         APP_PRINTF("SAMPLE %d index=%d label=%d npu_class=%d cpu_class=%d expect=%d scores_match=%d rc=%d\r\n",
                    s, sample_index[s], sample_label[s], ncls, ccls, sample_class[s], same, rc);
-        app_show(s, ncls);   /* (변경) 안 A: LED·7세그먼트 표시 */
+        app_show(s, ncls);   /* LED·7세그먼트 표시 */
         npu_clear_done(&npu);
     }
     APP_PRINTF("NPU_APP_DONE samples=%d failures=%d\r\n", MODEL_N_SAMPLES, failures);

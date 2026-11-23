@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# (추가) 29장: 센서 융합 상태 감시 PC 검증.
+# 센서 융합 상태 감시 PC 검증.
 #   1) 기준모델 자체 시험 + 합성 데이터 정확도(float·INT8, 훈련·시험셋)
 #   2) 경보 정책 RTL(p3_alarm_policy) = Python 정책, 클록 단위 벡터 + RTL 변이 4종
-#   3) 종단간 협동 시뮬레이션: Python 호스트(가상 센서·고장 주입) → 표준 입출력 → 보드와 같은 C 펌웨어
-#      → 22장 FIFO 브리지 → 20장 AXI NPU RTL(Icarus). 시나리오 + 시험셋 60창 + 오류 시험
+#   3) 종단간 PC 시뮬레이션: Python 호스트(가상 센서·고장 주입) → 표준 입출력 → 보드와 같은 C 펌웨어
+#      → 5-3 FIFO 브리지 → 5-1 AXI NPU RTL. 시나리오 + 시험셋 60창 + 오류 시험
 #   4) 펌웨어 변이 12종이 모두 호스트 판정에서 FAIL이어야 한다
 #   결과: validation/rtl_cosim.csv, validation/rtl_cosim_uart.log (+ 표준 출력 → validation/rtl_sim.log)
 set -euo pipefail
@@ -48,7 +48,7 @@ done
 echo "RTL_MUTATION_SUMMARY killed=$rk total=$rt"
 [[ $rk -eq $rt ]]
 
-# 3) 협동 시뮬레이션
+# 3) PC 시뮬레이션
 iverilog -g2012 -Wall -s tb_p3_npu_bridge -o "$build_dir/sim" -I"$part03/ch20/tb" \
   "$part03/ch02/rtl/dsp_multiplier.v" "$part03/mini_npu/rtl/npu_dsp_mac_lane.v" \
   "$part03/ch04/rtl/bram_sync_buffer.v" "$part03/ch14/rtl/p3_group10_core.v" \

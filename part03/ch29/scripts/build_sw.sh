@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# (추가) 29장: 28장 SoC(Bitstream·XSA 그대로) 위에서 도는 센서 감시 펌웨어 ELF를 만든다. 하드웨어 변경 없음.
-# (변경) 안 A(2026-11-19): 하드웨어는 21장 SoC(동결 주소맵·표준 7세그먼트 IP)의 Bitstream·XSA를 그대로 쓴다(28장 BD 폐지).
-#   필요: 21장 build_soc.sh 결과(ch21/build/out/soc21_npu.xsa, basys3_soc21_top.bit) — 읽기만 한다.
+# 5-2 SoC(Bitstream·XSA 그대로) 위에서 도는 센서 감시 펌웨어 ELF를 만든다. 하드웨어 변경 없음.
+# 하드웨어는 5-2 SoC(동결 주소맵·표준 7세그먼트 IP)의 Bitstream·XSA를 그대로 쓴다(6-1 전용 BD 없음).
+#   필요: 5-2 build_soc.sh 결과(ch21/build/out/soc21_npu.xsa, basys3_soc21_top.bit) — 읽기만 한다.
 #   결과(build/, 저장소 제외): ws/sensor_app ELF.
-# (변경) 31장: 스택 1 KB → 4 KB(part03/common/sw/p3_stack_4k.c, -O0 최대 호출 깊이 약 960 B 측정)와 ELF 메모리 검사.  요약은 validation/build_sw.log 로 남긴다.
+# 스택 4 KB(part03/common/sw/p3_stack_4k.c, -O0 최대 호출 깊이 약 960 B 측정)와 ELF 메모리 검사.  요약은 validation/build_sw.log 로 남긴다.
 set -euo pipefail
 chapter_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 part03=$(cd -- "$chapter_dir/.." && pwd)

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# (추가) 13장: 8×8 INT8 프레임 버퍼 RTL 시뮬레이션 + Python 기준모델 비트 단위 비교.
+# 8×8 INT8 프레임 버퍼 RTL 시뮬레이션 + Python 기준모델 비트 단위 비교.
 set -euo pipefail
 chapter_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 build_dir=$(mktemp -d "${TMPDIR:-/tmp}/p3-13.XXXXXXXX")

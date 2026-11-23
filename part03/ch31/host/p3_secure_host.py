@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""31장 PC 호스트: 보안 모델 적재(Encrypt-then-MAC) + 공격·고장 시험 + 적재 전후 추론 확인 → CSV.
+"""PC 호스트: 보안 모델 적재(Encrypt-then-MAC) + 공격·고장 시험 + 적재 전후 추론 확인 → CSV.
 
-  --cosim "<명령>"  PC 빌드 펌웨어 + Icarus NPU RTL      --port <포트>  Basys3(28장 Bitstream + 31장 ELF)
+  --cosim "<명령>"  PC 빌드 펌웨어 + NPU RTL      --port <포트>  Basys3(6-1 Bitstream + 6-5 ELF)
   --key-file F     보드용 키(저장소 밖, 16진 96자). 없으면 TEST 키(펌웨어도 TEST 키로 빌드됐어야 한다)
 시험: 모델 A로 추론 → 모델 B 보안 적재(COMMIT) → B로 추론(점수 = B 골든) → 거부·전송 오류 시험 17종(각각 활성 모델 B 유지)
       → 인증 실패가 시퀀스를 소비하지 않음 → A 재적재(seq 6) → A로 추론.

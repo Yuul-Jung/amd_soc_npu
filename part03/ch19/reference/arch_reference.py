@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-"""19장: PE 병렬도(1·4·8PE)·BRAM 공급 포트·메모리 구조 비교 기준모델(표준 라이브러리).
+"""PE 병렬도(1·4·8PE)·BRAM 공급 포트·메모리 구조 비교 기준모델(표준 라이브러리).
 
 작업량은 PE 수와 무관하게 64입력×10출력 = 640 MAC(타일 1개), 784입력이면 13타일.
-구성은 모두 14장 p3_group10_core(변경 없음)로 만든다.
+구성은 모두 3-2 p3_group10_core(변경 없음)로 만든다.
   PE1 = 코어 OUT_N=1 (lane 0만 유효) 10회 반복, class마다 가중치 재적재
   PE4 = 코어 OUT_N=10 (4+4+2 그룹)
   PE8 = 코어 OUT_N=6 (class 0~3, 8~9) + 코어 OUT_N=4 (class 4~7) 동시 실행, x 읽기 포트 1개 공유
         → 그룹 0에서 8 lane, 그룹 1에서 2 lane = 8PE 출력 고정(output-stationary) 스케줄
 사이클 정의: start를 샘플한 에지 → done을 관측한 에지 = groups·(IN + 4) + 2
-  (그룹당 CLEAR 1 + RUN IN + DRAIN 2 + CAPT 1, 시작·FINISH 2) — 14장 코어 상태기계에서 유도.
+  (그룹당 CLEAR 1 + RUN IN + DRAIN 2 + CAPT 1, 시작·FINISH 2) — 3-2 코어 상태기계에서 유도.
 """
 import argparse
 import json
@@ -73,8 +73,8 @@ def selftest():
     assert [issue_lower_bound(macs, p) for p in (1, 4, 8)] == [640, 160, 80]
     assert [schedule_issue(IN_LEN, N_CLASS, p) for p in (1, 4, 8)] == [640, 192, 128]
     cc = config_cycles()
-    assert cc["PE4"] == 206                       # 14장 측정값과 같은 식
-    assert core_cycles(8, 3) == 38 and core_cycles(64, 2) == 138   # 16장 2층·1층 측정값
+    assert cc["PE4"] == 206                       # 3-2 측정값과 같은 식
+    assert core_cycles(8, 3) == 38 and core_cycles(64, 2) == 138   # 3-4 2층·1층 측정값
     assert cc["PE8"] == core_cycles(IN_LEN, groups(N_CLASS, 8))     # 두 코어 = 8PE 스케줄
     assert stall_issue(IN_LEN, N_CLASS, 8, 8) == 128 and stall_issue(IN_LEN, N_CLASS, 8, 2) == 320
     assert stall_issue(IN_LEN, N_CLASS, 4, 4) == 192 and stall_issue(IN_LEN, N_CLASS, 1, 1) == 640
@@ -129,7 +129,7 @@ def compare(out, actual, n_samples):
                 break
         print(f"lines expected={len(exp)} got={len(got)}")
         raise SystemExit("PYTHON_RTL_COMPARE_FAIL")
-    # RTL 타일 부분합(PE4 줄)을 13타일 합 + Bias → 18장 INT8 평가의 Class와 같아야 한다
+    # RTL 타일 부분합(PE4 줄)을 13타일 합 + Bias → 4-3 INT8 평가의 Class와 같아야 한다
     qm, samples, runs = load_runs(n_samples)
     sums = [[0] * N_CLASS for _ in samples]
     for line in got:

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# (추가) 16장: 64→8→10 정수 MLP RTL 시뮬레이션과 Python mlp_64_8_10 비트 단위 비교.
+# 64→8→10 정수 MLP RTL 시뮬레이션과 Python mlp_64_8_10 비트 단위 비교.
 set -euo pipefail
 chapter_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 part03=$(cd -- "$chapter_dir/.." && pwd)

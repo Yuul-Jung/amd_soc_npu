@@ -1,5 +1,5 @@
-/* (추가) 30장: PC 협동 시뮬레이션 main. NPU(0x00)·모터 GPIO(0x100)·시험 주입(0x200) 접근은 22장 npu_io_cosim.c가
- * FIFO로 Icarus 브리지(tb_p3_motor_bridge)에 전달한다. UART는 표준 입출력(29장 sensor_io_host.c).
+/* PC 시뮬레이션 main. NPU(0x00)·모터 GPIO(0x100)·시험 주입(0x200) 접근은 5-3 npu_io_cosim.c가
+ * FIFO로 RTL 브리지(tb_p3_motor_bridge)에 전달한다. UART는 표준 입출력(6-3 sensor_io_host.c).
  */
 #include <stdio.h>
 #include "motor_app.h"

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# (추가) 26장: 8×8·3×3 합성곱 RTL 시뮬레이션과 Python 비트 단위 비교.
+# 8×8·3×3 합성곱 RTL 시뮬레이션과 Python 비트 단위 비교.
 set -euo pipefail
 chapter_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 part03=$(cd -- "$chapter_dir/.." && pwd)

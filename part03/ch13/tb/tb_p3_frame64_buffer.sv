@@ -1,4 +1,4 @@
-// (추가) 13장 p3_frame64_buffer 자동 판정 테스트벤치.
+// p3_frame64_buffer 자동 판정 테스트벤치.
 // Python이 만든 스트림(D 데이터/R Reset/Q FULL 중 Reset)을 무작위 valid 간격으로 넣고,
 // 유효 프레임을 1클록 지연 읽기 포트로 64개 모두 읽어 actual 파일에 기록한다(Python이 비트 단위 비교).
 // 매 클록 Ready/Valid·Busy·읽기 지연 규칙을 검사한다.

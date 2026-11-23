@@ -1,9 +1,9 @@
-# (추가) 30장: SoC 복제본에 모터 안전 경로를 더하고 Bitstream·XSA까지 만든다.
-# (변경) 안 A(2026-11-20): 출발점을 28장 SoC에서 21장 동결 주소맵 SoC(ch21/build/soc21_npu)로 바꾼다.
-#   21장 주소·인터럽트는 바꾸지 않고, 빈 칸 0x4007_0000(64 KB)에 모터 GPIO(axi_gpio_motor, 듀얼:
+# SoC 복제본에 모터 안전 경로를 더하고 Bitstream·XSA까지 만든다.
+# 출발점은 5-2 동결 주소맵 SoC(ch21/build/soc21_npu)다.
+#   5-2 주소·인터럽트는 바꾸지 않고, 빈 칸 0x4007_0000(64 KB)에 모터 GPIO(axi_gpio_motor, 듀얼:
 #   채널 1 출력 = 명령 워드, 채널 2 입력 = 상태 워드)만 더한다. 모터 경로는 인터럽트를 쓰지 않는다(In4 예약 그대로 0).
 #   p3_motor_safety_bd(BD 모듈 참조, GPIO와 같은 클록·peripheral_aresetn) → 외부 포트(비상정지·고장·과열·리밋 입력,
-#   IN1·IN2·ENA·트립 출력). 사용자 Top: basys3_soc30_top(핀 연결만). 21장 결과물은 build_soc.sh가 cp -a로 복제한다.
+#   IN1·IN2·ENA·트립 출력). 사용자 Top: basys3_soc30_top(핀 연결만). 5-2 결과물은 build_soc.sh가 cp -a로 복제한다.
 # 사용: vivado -mode batch -source soc30_bd.tcl -tclargs <복제 xpr> <ch30 폴더> <출력 폴더> <jobs>
 set xpr [lindex $argv 0]
 set ch [file normalize [lindex $argv 1]]
@@ -73,7 +73,7 @@ foreach a $rows {
 check {$overlap == 0} "data address segments do not overlap"
 set gseg [get_bd_addr_segs -of_objects [get_bd_addr_spaces /microblaze_riscv_0/Data] -filter {NAME =~ "*axi_gpio_motor*"}]
 check {[get_property OFFSET $gseg] == $gpio_base} "motor GPIO base $gpio_base"
-# (변경) 안 A 주소맵 대조: 21장 8줄 + 모터 1줄이 셀 이름 → 베이스·범위로 한 줄씩 같아야 한다
+# 주소맵 대조: 5-2 8줄 + 모터 1줄이 셀 이름 → 베이스·범위로 한 줄씩 같아야 한다
 proc data_seg {cell} {
   return [get_bd_addr_segs -of_objects [get_bd_addr_spaces /microblaze_riscv_0/Data] -filter "NAME =~ *_${cell}_*"]
 }
@@ -92,7 +92,7 @@ foreach {cell base rng} $map_a {
 if {[llength $segs] != [expr {[llength $map_a] / 3}]} { puts "ADDR_MAP_A extra segments: [llength $segs]"; set addr_ok 0 }
 puts [expr {$addr_ok ? "ADDR_MAP_A_PASS" : "ADDR_MAP_A_FAIL"}]
 check {$addr_ok} "address map A (21장 8줄 + 모터 1줄)"
-# (변경) 안 A 인터럽트 대조: 21장과 같아야 한다(모터는 인터럽트 없음, In4 = 0)
+# 인터럽트 대조: 5-2와 같아야 한다(모터는 인터럽트 없음, In4 = 0)
 set irq_map_a {0 axi_timer_0/interrupt 1 axi_uartlite_0/interrupt 3 axi_gpio_btn/ip2intc_irpt 12 p3_npu_0/irq_o}
 set irq_ok 1
 for {set i 0} {$i < 16} {incr i} {

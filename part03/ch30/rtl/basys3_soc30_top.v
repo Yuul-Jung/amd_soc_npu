@@ -1,10 +1,10 @@
-// (추가) 30장 사용자 Top: 보드 핀 연결만 한다(판단 로직 없음, MBV_SOC §4).
-// (변경) 안 A(2026-11-20): 21장 동결 주소맵 SoC 복제본 BD(MicroBlaze V + NPU + BTN GPIO + 표준 7세그먼트 IP)에
+// 사용자 Top: 보드 핀 연결만 한다(판단 로직 없음, MBV_SOC §4).
+// 5-2 동결 주소맵 SoC 복제본 BD(MicroBlaze V + NPU + BTN GPIO + 표준 7세그먼트 IP)에
 //   모터 GPIO(axi_gpio_motor, 0x4007_0000) + 모터 안전 코어를 더한 Wrapper. 7세그먼트는 BD 안 ip06_seg7이 구동한다.
 // LED9..12는 코어 출력을 직접 보여 준다(CPU와 무관): LED12 ENA(PWM 밝기), LED11 IN1(FWD), LED10 IN2(REV), LED9 트립.
 //   나머지 LED는 CPU(AXI GPIO 0).
 // Pmod JB: JB1 A14 → IN1, JB2 A16 → IN2, JB3 B15 → ENA(제2부 07장과 같은 핀), JB4 B16 ← 비상정지 루프(PULLDOWN).
-// 버튼: btn[3] = btnU는 21장처럼 axi_gpio_btn으로 가고, 같은 핀을 비상정지 버튼(estop_btn)에도 연결한다.
+// 버튼: btn[3] = btnU는 5-2처럼 axi_gpio_btn으로 가고, 같은 핀을 비상정지 버튼(estop_btn)에도 연결한다.
 // 스위치(시험 주입용, CPU도 읽음): sw[14] 정방향 리밋, sw[13] 역방향 리밋, sw[12] 고장, sw[11] 과열.
 module basys3_soc30_top (
     input  wire        clk,    // Basys3 W5: 외부 100 MHz

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# (추가) 30장: 모터 안전 코어 Vivado OOC 합성·배치·배선(19장 synth_ooc.tcl 재사용) → validation/synth_ooc_summary.md
+# 모터 안전 코어 Vivado OOC 합성·배치·배선(4-4 synth_ooc.tcl 재사용) → validation/synth_ooc_summary.md
 set -euo pipefail
 chapter_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 part03=$(cd -- "$chapter_dir/.." && pwd)

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# (추가) 18장: MNIST t10k 전체로 Float·INT8·INT16 정확도·혼동행렬·클래스 일치 평가(PC, 표준 라이브러리).
+# MNIST t10k 전체로 Float·INT8·INT16 정확도·혼동행렬·클래스 일치 평가(PC, 표준 라이브러리).
 # 사용: MNIST_DIR=<idx 파일 4개가 있는 MNIST raw 폴더> bash part03/ch18/scripts/run_eval.sh
 # 결과: ch18/validation/precision_report.md, ch18/reference/mnist_rtl_samples.txt 갱신, pc_eval.log
 # 모델 재학습(선택, PyTorch 필요): python ch18/reference/train_mnist_linear.py --mnist-dir "$MNIST_DIR"

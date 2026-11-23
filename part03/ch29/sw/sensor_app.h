@@ -1,4 +1,4 @@
-/* (추가) 29장: 센서 융합 상태 감시 응용. 규약·규칙의 정본은 reference/sensor_reference.py 머리말. */
+/* 센서 융합 상태 감시 응용. 규약·규칙의 정본은 reference/sensor_reference.py 머리말. */
 #ifndef SENSOR_APP_H
 #define SENSOR_APP_H
 #include <stdint.h>

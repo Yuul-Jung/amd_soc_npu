@@ -1,4 +1,4 @@
-// (추가) 30장: BD 모듈 참조용 모터 안전 코어 래퍼. AXI GPIO 2와 같은 클록·peripheral_aresetn을 쓴다.
+// BD 모듈 참조용 모터 안전 코어 래퍼. AXI GPIO 2와 같은 클록·peripheral_aresetn을 쓴다.
 //   cmd_i ← GPIO 2 채널 1(명령 워드), status_o → GPIO 2 채널 2(상태 워드). CPU는 이 두 레지스터로만 닿는다.
 //   외부 입력은 2단 동기화한다(비동기 버튼·스위치·외부 회로). 비상정지는 두 경로의 OR:
 //     estop_ok_i: 외부 NC 비상정지 루프(닫힘 = 1). XDC PULLDOWN → 끊김·미연결이면 0 → 정지(fail-safe)

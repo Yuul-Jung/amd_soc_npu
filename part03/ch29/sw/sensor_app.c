@@ -1,7 +1,7 @@
-/* (추가) 29장: 센서 융합 상태 감시(교육용). UART 센서 창 → 규칙 검사(guard) → 특징 6개 → 20장 NPU(0번 타일)
+/* 센서 융합 상태 감시(교육용). UART 센서 창 → 규칙 검사(guard) → 특징 6개 → 5-1 NPU(0번 타일)
  * → 3상태 후보 → 경보 정책(부팅 UNKNOWN, 상향 즉시·하향 3회 연속, FAULT는 ACK까지 래치) → UART·LED·FND.
  * 입력 실패(결측·지연·범위·고착·링크)는 NPU보다 먼저 규칙으로 판정하고, 그때 NPU는 실행하지 않는다.
- * LED15(경보)는 표시·기록용이다. 실제 위험 장치의 정지·인터록에 쓰지 않는다(30장: 독립 보호 로직이 우선).
+ * LED15(경보)는 표시·기록용이다. 실제 위험 장치의 정지·인터록에 쓰지 않는다(6-4: 독립 보호 로직이 우선).
  * 같은 입력으로 CPU 정수 추론도 실행해 NPU 점수와 비교한다(불일치 = UNKNOWN).
  */
 #include "app.h"
@@ -143,7 +143,7 @@ static uint32_t crc32_byte(uint32_t crc, uint8_t v)
     return crc;
 }
 
-/* zlib.crc32(w[10][784] ‖ b[10] int64 LE) — ROM 모델 = Python 모델 확인(28장과 같은 규칙) */
+/* zlib.crc32(w[10][784] ‖ b[10] int64 LE) — ROM 모델 = Python 모델 확인(6-1과 같은 규칙) */
 uint32_t sensor_model_crc32(void)
 {
     uint32_t crc = 0xFFFFFFFFu;

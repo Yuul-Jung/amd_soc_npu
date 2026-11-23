@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# (추가) 30장: NPU 추천 + 독립 모터 안전 코어 PC 검증.
+# NPU 추천 + 독립 모터 안전 코어 PC 검증.
 #   1) 기준모델 자체 시험 + 코어 클록 벡터(지정 + 무작위 운전, Python에서 안전 불변식 확인)
 #   2) p3_motor_safety RTL = Python(클록마다 IN1·IN2·ENA·상태 32비트), RTL 변이 7종
-#   3) 종단간 협동 시뮬레이션: 호스트(가상 센서·주입) → C 펌웨어(29장 guard·정책 재사용) → NPU RTL + 모터 코어 RTL,
+#   3) 종단간 PC 시뮬레이션: 호스트(가상 센서·주입) → C 펌웨어(6-3 guard·정책 재사용) → NPU RTL + 모터 코어 RTL,
 #      브리지 TB가 모든 클록에서 핀 안전 불변식을 센다
 #   4) 펌웨어 변이 6종이 모두 FAIL이어야 한다
 set -euo pipefail
@@ -51,7 +51,7 @@ done
 echo "RTL_MUTATION_SUMMARY killed=$rk total=$rt"
 [[ $rk -eq $rt ]]
 
-# 3) 협동 시뮬레이션
+# 3) PC 시뮬레이션
 iverilog -g2012 -Wall -s tb_p3_motor_bridge -o "$build_dir/sim" -I"$part03/ch20/tb" \
   "$part03/ch02/rtl/dsp_multiplier.v" "$part03/mini_npu/rtl/npu_dsp_mac_lane.v" \
   "$part03/ch04/rtl/bram_sync_buffer.v" "$part03/ch14/rtl/p3_group10_core.v" \

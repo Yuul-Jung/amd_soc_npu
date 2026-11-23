@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# (추가) 15장: 14장 코어 재사용 정수 Dense 계층 64→10(분류기)·64→8·8→10 RTL 시뮬레이션과 Python 비교.
+# 3-2 코어 재사용 정수 Dense 계층 64→10(분류기)·64→8·8→10 RTL 시뮬레이션과 Python 비교.
 set -euo pipefail
 chapter_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 part03=$(cd -- "$chapter_dir/.." && pwd)

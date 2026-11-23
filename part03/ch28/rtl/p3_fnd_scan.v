@@ -1,5 +1,5 @@
 `timescale 1ns/1ps
-// (추가) 28장: Basys3 4자리 FND(7-세그먼트) 시분할 구동. 표시 내용은 MicroBlaze V가 AXI GPIO 1로 쓴 32비트 워드다.
+// Basys3 4자리 FND(7-세그먼트) 시분할 구동. 표시 내용은 MicroBlaze V가 AXI GPIO 1로 쓴 32비트 워드다.
 //   word_i[15:0]  자리별 16진 nibble(자리 0 = 가장 오른쪽 an[0])
 //   word_i[19:16] 자리 켜짐(0이면 그 자리 꺼짐: an·seg 모두 High)
 //   word_i[23:20] 소수점(dp) 켜짐

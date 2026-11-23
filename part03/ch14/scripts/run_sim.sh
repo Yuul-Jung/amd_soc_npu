@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# (추가) 14장: 13장 프레임 버퍼 + 4PE 3그룹 10분류 코어 RTL 시뮬레이션과 Python 비트 단위 비교.
+# 3-1 프레임 버퍼 + 4PE 3그룹 10분류 코어 RTL 시뮬레이션과 Python 비트 단위 비교.
 set -euo pipefail
 chapter_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 part03=$(cd -- "$chapter_dir/.." && pwd)

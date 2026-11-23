@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# (추가) 31장: 보안 모델 적재 PC 검증.
+# 보안 모델 적재 PC 검증.
 #   1) Python 기준모델: AES-128·CTR·SHA-256·HMAC 알려진 정답(NIST/RFC), cryptography 교차 확인(있으면), 거부 규칙
 #   2) C 암호 구현 알려진 정답(host/crypto_selftest.c)
 #   3) AES-128·SHA-256 RTL = 정답·무작위 벡터, RTL 변이 6종
-#   4) 종단간 협동 시뮬레이션(호스트 → C 펌웨어 → NPU RTL): 모델 B 보안 적재·추론, 거부·전송 오류 시험, 모델 A 재적재
+#   4) 종단간 PC 시뮬레이션(호스트 → C 펌웨어 → NPU RTL): 모델 B 보안 적재·추론, 거부·전송 오류 시험, 모델 A 재적재
 #   5) 펌웨어 변이 7종이 모두 FAIL이어야 한다
 #   키: 저장소의 TEST 키만 쓴다. 로그에는 키 지문만 남는다.
 set -euo pipefail
@@ -60,7 +60,7 @@ done
 echo "RTL_MUTATION_SUMMARY killed=$rk total=$rt"
 [[ $rk -eq $rt ]]
 
-# 4) 협동 시뮬레이션
+# 4) PC 시뮬레이션
 iverilog -g2012 -Wall -s tb_p3_npu_bridge -o "$build_dir/sim" -I"$part03/ch20/tb" \
   "$part03/ch02/rtl/dsp_multiplier.v" "$part03/mini_npu/rtl/npu_dsp_mac_lane.v" \
   "$part03/ch04/rtl/bram_sync_buffer.v" "$part03/ch14/rtl/p3_group10_core.v" \

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""15장: 정수 Dense 계층(64→10, 64→8, 8→10) 기준모델·시험 명령 생성·RTL 결과 비교.
+"""정수 Dense 계층(64→10, 64→8, 8→10) 기준모델·시험 명령 생성·RTL 결과 비교.
 
 점수 = dot_signed(x, W[c]) + bias[c], Class = argmax_lowest (host_tools 규칙 그대로).
 64→10은 linear_64x10 결과와 동일함을 함께 확인한다.
@@ -112,7 +112,7 @@ def generate(out, n_in, n_out):
             elif op[0] == "B":
                 f.write(f"B {op[1]} 0 {op[2]}\n")
             else:
-                padded = op[1] + [0] * (64 - n_in)  # 13장 프레임은 항상 64원소
+                padded = op[1] + [0] * (64 - n_in)  # 3-1 프레임은 항상 64원소
                 f.write("F 0 0 0 " + " ".join(map(str, padded)) + "\n")
         f.write("E 0 0 0\n")
     with (out / "expected.txt").open("w") as f:

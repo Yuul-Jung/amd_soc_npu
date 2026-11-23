@@ -1,5 +1,5 @@
-/* (추가) 28장: MicroBlaze V 플랫폼 경계. AXI UART Lite(stdin/stdout과 같은 장치) 폴링 수신,
- * AXI GPIO 0 채널 1 = LED[15:0], 표시 워드 → 표준 7세그먼트 IP(ip06_seg7). (변경) 안 A: 21장 SoC로 옮기며 AXI GPIO 1·p3_fnd_scan을 대체.
+/* MicroBlaze V 플랫폼 경계. AXI UART Lite(stdin/stdout과 같은 장치) 폴링 수신,
+ * AXI GPIO 0 채널 1 = LED[15:0], 표시 워드 → 표준 7세그먼트 IP(ip06_seg7). AXI GPIO 1·p3_fnd_scan은 쓰지 않는다.
  */
 #include "xparameters.h"
 #include "xil_io.h"
@@ -25,7 +25,7 @@ int dio_getc(int wait_forever)
 
 void dio_display(uint32_t fnd_word, uint32_t led)
 {
-    p3_seg7_write(p3_seg7_from_fnd_word(fnd_word));   /* (변경) 안 A: 표준 7세그먼트 IP */
+    p3_seg7_write(p3_seg7_from_fnd_word(fnd_word));   /* 표준 7세그먼트 IP */
     Xil_Out32(LED_GPIO, led);
 }
 

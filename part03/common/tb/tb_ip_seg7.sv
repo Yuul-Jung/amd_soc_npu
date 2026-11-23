@@ -1,4 +1,4 @@
-// (추가) 안 A 2단계: 표준 7세그먼트 IP(ip_seg7) 레지스터 시험. 웹 인계본을 고치지 않고 그대로 검증한다.
+// 2단계: 표준 7세그먼트 IP(ip_seg7) 레지스터 시험.
 // 확인: ID 0xFFF0 = "SEG7", VER, VALUE·MODE·RAW·DP 쓰기/읽기, 바이트 쓰기(wstrb), 없는 주소 0, 핀 구동(16진수·RAW·끔).
 `timescale 1ns/1ps
 module tb_ip_seg7;

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# (추가) 17장: 14장 코어 + 784입력 13타일 Tile Controller RTL 시뮬레이션과 Python 비트 단위 비교.
+# 3-2 코어 + 784입력 13타일 Tile Controller RTL 시뮬레이션과 Python 비트 단위 비교.
 #   full : 외부 누산 41비트·Bias 40비트(INT16 계약 폭), 전체 시험·오류 주입
 #   w25  : 외부 누산 25비트(INT8 최소 안전 폭) → 극값에서도 overflow 없음
 #   w24  : 외부 누산 24비트(1비트 부족) → 극값에서 overflow 검출과 순환값 일치

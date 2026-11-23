@@ -1,4 +1,4 @@
-// (추가) 31장: SHA-256 압축 코어 시험. FIPS 180-4 예제("abc", 448비트), RFC 4231 HMAC 1·2의 내부·외부 해시 메시지,
+// SHA-256 압축 코어 시험. FIPS 180-4 예제("abc", 448비트), RFC 4231 HMAC 1·2의 내부·외부 해시 메시지,
 //   빈 메시지·경계 길이·무작위 메시지(Python이 패딩한 블록). 메시지마다 init → next … 순서로 넣고 최종 digest 대조.
 `timescale 1ns/1ps
 module tb_p3_sha256;
