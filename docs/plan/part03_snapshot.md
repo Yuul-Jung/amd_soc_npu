@@ -12,6 +12,7 @@
 | 2026-11-19 | `ddaaf66` | `part03/ch26` · `ch28`~`ch31` 전체 | 6장 서브젝트 6-1~6-5 |
 | 2026-11-20 | `e9e0425` | `part03/ch25` · `ch27` · `ch28` · `ch30` 변경분 (25장 안 A 전력, 27장 보고서·run_all fpga·점검표 B23b, 28장 안 A SoC xsim, 30장 안 A 재빌드) | 5-6 · 6-1 · 6-4 ⚠ 해제 |
 | 2026-11-23 | `fe7b0df` | `part03/ch13`~`ch31` · `common` · `host_tools` · `mini_npu` 변경분 157개 (주석·docstring 정리, `common/scripts/p3_sim.sh` 추가와 13~20·26장 `run_sim.sh`, 점검표 문구) | 3~6장 코드 상자·보드 확인 표 |
+| 2026-11-23 | `60b0b3f` | `part03/ch13`~`ch20`·`ch26`·`ch31` `validation/rtl_sim.log`(xsim 기록), `ch27` 회신·`run_all_summary.md`, `common/scripts/p3_sim.sh` (PR #11 병합) | 검증 현황 도구 줄 |
 
 규칙
 - 웹 쪽은 이 파일들을 고치지 않는다. 고칠 일이 생기면 VS Code 판에서 고치고 다시 가져온다.

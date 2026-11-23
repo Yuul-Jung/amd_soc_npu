@@ -6,7 +6,8 @@ sim_kind() {
   if [ -n "${SIM:-}" ]; then echo "$SIM"; elif command -v xvlog >/dev/null 2>&1; then echo xsim; else echo iverilog; fi
 }
 sim_tool_version() {
-  if [ "$(sim_kind)" = xsim ]; then xvlog --version 2>&1 | sed -n 1p; else iverilog -V 2>&1 | sed -n 1p; fi
+  # xvlog는 현재 폴더에 xvlog.log·xvlog.pb를 남기므로 임시 폴더에서 실행한다
+  if [ "$(sim_kind)" = xsim ]; then (d=$(mktemp -d) && cd "$d" && xvlog --version 2>&1 | sed -n 1p; rm -rf "$d"); else iverilog -V 2>&1 | sed -n 1p; fi
 }
 sim_top() {
   local top="$1" stage="$2" build="$3"; shift 3
