@@ -104,17 +104,30 @@
   // 3. 본문 끝 이전/다음 장 링크 (처음·마지막 장은 전체 목차로)
   const idx = pageNames.findIndex((ch) => ch.id === current);
   const links = document.getElementById("chapter-links");
-  if (links && idx >= 0) {
-    const prev = pageNames[idx - 1],
-      next = pageNames[idx + 1];
-    const add = (ch, label) => {
+  if (links) {
+    const add = (href, label) => {
       let a = document.createElement("a");
-      a.href = ch?.file || "index.html";
-      a.textContent = label + (ch ? " · " + ch.title : " · 전체 목차");
+      a.href = href;
+      a.textContent = label;
       links.append(a);
     };
-    add(prev, "← 이전");
-    add(next, "다음 →");
+    if (idx >= 0) {
+      // 일반 장 페이지: 이전/다음
+      const prev = pageNames[idx - 1], next = pageNames[idx + 1];
+      // 이전 버튼
+      add(prev ? prev.file : "index.html", "← 이전" + (prev ? " · " + prev.title : " · 전체 목차"));
+      // 다음 버튼: 마지막 장이면 next_course_url(다음 과정) 또는 index.html(현재 목차)
+      if (next) {
+        add(next.file, "다음 → · " + next.title);
+      } else if (data.next_course_url) {
+        add(data.next_course_url, "다음 → · " + (data.next_course_label || "다음 과정"));
+      } else {
+        add("index.html", "다음 → · 전체 목차");
+      }
+    } else if (data.next_part_url) {
+      // INDEX 페이지: 하위 과정의 첫 번째 장으로 이동
+      add(data.next_part_url, "다음 → · " + (data.next_part_label || "첫 번째 장"));
+    }
   }
 
   // 4. 모바일 서랍 메뉴: 버튼·덮개 클릭, 링크 선택, Escape 키로 닫기
