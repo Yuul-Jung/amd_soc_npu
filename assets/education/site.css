@@ -187,6 +187,19 @@ pre code {
 .course-nav-header span:last-child {
   white-space: nowrap;
 }
+.toc .course-nav-parent {
+  color: var(--ink-2);
+  background: #f7f6fb;
+  border-left-color: var(--line);
+  padding: 7px 10px;
+  margin-bottom: 4px;
+  font-weight: 600;
+  font-size: 0.78rem;
+}
+.toc .course-nav-parent:hover {
+  color: var(--accent);
+  background: #efedf9;
+}
 .toc .course-nav-home {
   color: var(--accent);
   background: var(--soft);

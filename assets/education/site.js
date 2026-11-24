@@ -25,6 +25,11 @@
   const header = el("div", "course-nav-header");
   header.append(el("span", "", data.short_title || data.title), el("span", "", mainCount + " CHAPTERS"));
   nav.append(header);
+  if (data.parent_url) {
+    const parent = el("a", "course-nav-parent", "↑  " + (data.parent_label || "상위 학습 안내서"));
+    parent.href = data.parent_url;
+    nav.append(parent);
+  }
   const home = el("a", "course-nav-home", "⌂  " + (data.home_label || "전체 학습 안내서"));
   home.href = "index.html";
   if (!current || !pageNames.some((ch) => ch.id === current)) home.setAttribute("aria-current", "page");
